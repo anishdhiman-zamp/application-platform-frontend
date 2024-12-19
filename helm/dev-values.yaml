@@ -1,0 +1,85 @@
+global:
+  service:
+    name: platform-dash-dev
+
+projectName: zamp  # required
+default:
+  annotations:
+    all:
+      app.kv.io/env: dev
+  labels:
+    all:
+      service-name: platform-dashboard-svc
+  resources:
+    request:
+      cpu: 100m
+      memory: 200Mi
+    limit:
+      cpu: 150m
+      memory: 250Mi
+  replicaCount: 1
+  image:
+    repository: 
+    tag: 
+    imagePullPolicy: Always
+  signoz:
+    enabled: false
+  configMaps:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: false
+  externalSecrets:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: true
+      secrets:
+      - data:  
+          - fileName: ".env"
+            mountPath: "/home/node/app/.env"
+            secretKey: zamp-dev-sg-platform-dashboard-env
+        refreshInterval: 1h
+        secretStoreName: gcp-secret-manager
+        secretName: env
+deployment:
+  - name: "svc"
+    service:
+      type: ClusterIP
+      ports:
+      - port: 3000
+        name: api
+    serviceAccount:
+        create: false
+    terminationGracePeriodSeconds: 30
+    containers:
+      - name: "svc"
+        port: 3000
+        # healthcheck: 
+        #   enabled: true
+        #   livenessProbe: 
+        #     path : "/api/health-check"
+        #     initialDelaySeconds : 40
+        #     periodSeconds: 30
+        #   readinessProbe: 
+        #     path : "/api/health-check"
+        #     initialDelaySeconds : 30
+        #     periodSeconds : 30
+        command:
+        - npm
+        args:
+        - run
+        - start
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 10
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
