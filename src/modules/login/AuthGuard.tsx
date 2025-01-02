@@ -23,7 +23,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
   useEffect(() => {
     if (session && isSuccess) {
       dispatch(setUser(session));
-      const defaultWorkspace = session.workspaces?.[0];
+      const defaultWorkspace = session?.organization_id;
 
       dispatch(setWorkspace(defaultWorkspace));
     }
@@ -63,7 +63,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
   if (
     session &&
     ENVIRONMENT === 'staging' &&
-    ALLOWED_EMAIL_DOMAINS.every((eachDomain: string) => !session?.email?.endsWith(eachDomain))
+    ALLOWED_EMAIL_DOMAINS.every((eachDomain: string) => !session?.user_email?.endsWith(eachDomain))
   ) {
     return <NotAuthorized />;
   }
