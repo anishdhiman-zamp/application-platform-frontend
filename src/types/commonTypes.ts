@@ -17,5 +17,14 @@ export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
     getLayout?: (page: ReactElement) => ReactNode;
 };
 
-
+export interface OptionsType {
+    label?: React.ReactNode;
+    value: string | number;
+    id?: string;
+    spriteIcon?: string;
+    icon?: React.ReactNode;
+    isDisabled?: boolean;
+    metadata?: MapAny;
+    options?: OptionsType[];
+}
 

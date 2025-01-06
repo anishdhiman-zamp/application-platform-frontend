@@ -3,6 +3,7 @@ export enum SIZE {
     SMALL = 'small',
     MEDIUM = 'medium',
     LARGE = 'large',
+    XLARGE = 'xlarge',
 }
 
 export enum BUTTON_TYPE {

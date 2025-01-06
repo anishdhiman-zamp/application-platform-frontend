@@ -14,11 +14,11 @@ export interface SupporterInfoProps {
 const TYPE_PROP = {
   [SUPPORT_INFO_TYPES.GUIDE]: {
     iconByType: null,
-    textClassByType: 'f-12-300 tw-text-GRAY_600',
+    textClassByType: 'f-12-300 text-GRAY_600',
   },
   [SUPPORT_INFO_TYPES.ERROR]: {
     iconByType: null,
-    textClassByType: 'f-12-300 tw-text-RED_PRIMARY',
+    textClassByType: 'f-12-300 text-RED_PRIMARY',
   },
   [SUPPORT_INFO_TYPES.CUSTOM]: {
     iconByType: null,
@@ -32,7 +32,7 @@ export const SupporterInfo: FC<SupporterInfoProps> = ({
   type = SUPPORT_INFO_TYPES.GUIDE,
   icon = null,
   text = null,
-  className = 'tw-flex tw-items-center',
+  className = 'flex items-center',
   textClass = null,
 }) => {
   const { iconByType, textClassByType } = TYPE_PROP[type] || {};
@@ -42,7 +42,7 @@ export const SupporterInfo: FC<SupporterInfoProps> = ({
   return icon?.id || text ? (
     <div className={`${className} ${typeTextClass}`}>
       {typeIcon?.id && (
-        <div className={typeIcon.className ?? 'tw-mr-2 tw-w-3 tw-h-3'}>
+        <div className={typeIcon.className ?? 'mr-2 w-3 h-3'}>
           <SvgSpriteLoader color={icon?.color} {...typeIcon} id={icon?.id ?? typeIcon?.id ?? ''} />
         </div>
       )}

@@ -26,7 +26,13 @@ body {
   --GRAY_700: #8f8f8f;
   --GRAY_800: #7d7d7d;
   --GRAY_900: #666666;
+  --GRAY_950: #383838;
   --GRAY_1000: #171717;
+
+  --BG_GRAY_2: #fafafa;
+  --BG_GRAY_2: #fbfbfb;
+
+  --BORDER_GRAY_400: #ebebeb;
 
   --BLUE_100: #eaf3ff;
   --BLUE_200: #dfebff;

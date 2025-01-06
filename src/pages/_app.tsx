@@ -13,6 +13,8 @@ import { Loader } from 'components/common/loader/Loader';
 import { AG_GRID_KEY } from 'components/common/organisms/agGridTable/agGridTable.constants';
 import 'styles/fonts.css';
 import 'styles/globals.css';
+import 'styles/react-datepicker.css';
+import 'styles/react-dates.css';
 
 const inter = Inter({ subsets: ['latin'] });
 

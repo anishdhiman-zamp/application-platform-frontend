@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useGetErrorDetailsQuery, useInitiateLoginFlowQuery } from 'apis/auth';
 import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
-import { BUTTON_TYPE } from 'constants/common.constants';
 import { GOOGLE_ICON, ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { LoginFlow } from 'types/api/auth.types';
-import Button from 'components/common/button/Button';
+import { SIZE_TYPES } from 'types/common/components';
+import { BUTTON_TYPES } from 'types/components/button.type';
+import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input/Input';
 
 const LOGIN_ERROR_TEXT = 'Unable to login, please try again.';
@@ -173,12 +174,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
         />
         <Button
           id='login'
-          type='submit'
           className='w-fit'
           disabled={formDisabled}
-          licon={{
+          size={SIZE_TYPES.LARGE}
+          iconProps={{
             id: 'arrow-right',
-            category: ICON_SPRITE_TYPES.ARROWS,
+            iconCategory: ICON_SPRITE_TYPES.ARROWS,
           }}
           isLoading={loading}
         >
@@ -187,7 +188,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
       </form>
       <Button
         id='google-login'
-        variant={BUTTON_TYPE.ICON}
+        type={BUTTON_TYPES.TEXT_NAV}
         disabled={formDisabled}
         onClick={handleGoogleClick}
         isLoading={loading}

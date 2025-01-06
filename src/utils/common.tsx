@@ -1,6 +1,9 @@
 import { MouseEventHandler } from "react";
 import clsx, { ClassValue } from 'clsx';
+import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from "constants/date.constants";
+import { format, startOfYear } from "date-fns";
 import { twMerge } from 'tailwind-merge';
+import { DateFilterValueType } from "components/filter/DateRangeFilter";
 
 declare type MapAny = Record<string, any>;
 
@@ -58,3 +61,32 @@ export function doDebounce<T extends (...args: any[]) => any>(func: T, wait: num
     }
   };
 }
+
+
+export const getStartOfYear = (year: number) => {
+  return startOfYear(new Date(year, 0, 1)); // January 1st of the specified year
+};
+
+export const isUserInUS = function () {
+  const userLocale = navigator.language;
+
+  return userLocale.endsWith('-US');
+};
+
+export const getDateRangeTitle = (dateRangeFilter: DateFilterValueType, showSingleDate?: boolean): string => {
+  const start = dateRangeFilter?.start_date;
+  const end = dateRangeFilter?.end_date;
+
+  if (dateRangeFilter?.date_category === DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE && start && end) {
+    if (showSingleDate && start?.toDateString() === end?.toDateString()) {
+      return format(start, 'dd MMM yyyy');
+    }
+
+    return `${format(start, 'dd MMM yyyy')} - ${format(end, 'dd MMM yyyy')}`;
+  }
+
+  const dateRangeCategory =
+    DATE_FILTER_OPTIONS.find((category) => category.value === dateRangeFilter?.date_category) ?? DATE_FILTER_OPTIONS[0];
+
+  return `Date range - ${dateRangeCategory?.label}`;
+};

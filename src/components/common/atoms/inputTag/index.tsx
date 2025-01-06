@@ -19,11 +19,11 @@ const InputTag: FC<InputTagProps> = ({
   style = {},
   autocomplete = 'off',
   inputTagBorderClassName = '',
-  inputTagWrapperClassName = 'tw-w-full',
-  inputClassName = `placeholder:tw-tracking-[0.03em] tw-w-full tw-box-border tw-text-GRAY_700 placeholder:tw-text-GRAY_500 placeholder:tw-font-light focus:tw-outline-0 `,
+  inputTagWrapperClassName = 'w-full',
+  inputClassName = `placeholder:tracking-[0.03em] w-full box-border text-GRAY_700 placeholder:text-GRAY_500 placeholder:font-light focus:outline-0 `,
   inputRoundedClassName = '',
-  inputSizeClassName = 'tw-p-6',
-  errorClass = '!tw-border-b-ERROR_500',
+  inputSizeClassName = 'p-6',
+  errorClass = '!border-b-ERROR_500',
   onChange = defaultFn,
   onKeyPress = defaultFn,
   onKeyDown = defaultFn,
@@ -46,22 +46,22 @@ const InputTag: FC<InputTagProps> = ({
   customTags = null,
   inputPillsWrapperClasses = '',
 }) => {
-  let readOnlyInputClasses = ' read-only:tw-text-GRAY_700 read-only:tw-bg-GRAY_100 read-only:tw-pointer-events-none';
+  let readOnlyInputClasses = ' read-only:text-GRAY_700 read-only:bg-GRAY_100 read-only:pointer-events-none';
   let disabledInputClasses =
-    ' disabled:tw-text-GRAY_500 disabled:tw-cursor-not-allowed disabled:tw-placeholder-GRAY_400 disabled:tw-bg-GRAY_100';
+    ' disabled:text-GRAY_500 disabled:cursor-not-allowed disabled:placeholder-GRAY_400 disabled:bg-GRAY_100';
 
   if (overrideInputBgClassName) {
-    readOnlyInputClasses += ' disabled:tw-bg-BASE_PRIMARY';
-    disabledInputClasses += ' read-only:tw-bg-BASE_PRIMARY';
+    readOnlyInputClasses += ' disabled:bg-BASE_PRIMARY';
+    disabledInputClasses += ' read-only:bg-BASE_PRIMARY';
   }
 
   let borderClasses = `${noBorders
     ? ''
-    : `${error ? '' : 'read-only:!tw-border-b-DIVIDER_SAIL_2 focus:!tw-border-b-GRAY_700'
-    } disabled:!tw-border-b-DIVIDER_SAIL_2 tw-border tw-border-b-GRAY_400 tw-border-DIVIDER_SAIL_2`
+    : `${error ? '' : 'read-only:!border-b-DIVIDER_SAIL_2 focus:!border-b-GRAY_700'
+    } disabled:!border-b-DIVIDER_SAIL_2 border border-b-GRAY_400 border-DIVIDER_SAIL_2`
     }`;
 
-  borderClasses += !readOnly && !error && !noBorders ? ' hover:!tw-border-b-GRAY_700' : '';
+  borderClasses += !readOnly && !error && !noBorders ? ' hover:!border-b-GRAY_700' : '';
 
   const inputStateClassName = `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${inputSizeClassName} ${error ? errorClass : ''
     } ${readOnlyInputClasses} ${disabledInputClasses} `;
@@ -92,22 +92,22 @@ const InputTag: FC<InputTagProps> = ({
   };
 
   return (
-    <div className={`tw-flex ${inputTagWrapperClasses}`}>
+    <div className={`flex ${inputTagWrapperClasses}`}>
       {isMulti ? (
         <div
-          className={`tw-flex tw-p-1 tw-bg-white tw-gap-1 tw-flex-wrap tw-w-inherit tw-overflow-y-auto  ${inputPillsWrapperClasses}`}
+          className={`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto  ${inputPillsWrapperClasses}`}
         >
           {tags.map((tag, index) => (
             <div
               key={index}
               onClick={stopPropagationAction}
-              className='tw-whitespace-nowrap tw-w-auto tw-p-2 f-12-400 tw-flex tw-items-center tw-justify-between tw-bg-BLUE_50 tw-gap-2'
+              className='whitespace-nowrap w-auto p-2 f-12-400 flex items-center justify-between bg-BLUE_50 gap-2'
             >
               {tag}
               <SvgSpriteLoader
                 id='x-close'
                 onClick={() => onDeleteTag(index)}
-                className='tw-cursor-pointer'
+                className='cursor-pointer'
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 height={18}
                 width={18}

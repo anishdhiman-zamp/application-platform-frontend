@@ -9,12 +9,12 @@ import { SupporterInfo } from 'components/common/molecules/SupporterInfo';
 const Input: FC<InputProps> = ({
   labelProps = {},
   supporterInfoProps = {},
-  inputWrapperClassName = 'tw-w-full ',
-  className = 'tw-w-full',
+  inputWrapperClassName = 'w-full ',
+  className = 'w-full',
   label = '',
   description = '',
   labelClassName = '',
-  labelOverrideClassName = 'f-13-300 tw-text-GRAY_500 tw-mb-1.5 tw-select-none',
+  labelOverrideClassName = 'f-13-300 text-GRAY_500 mb-1.5 select-none',
   ...rest
 }) => (
   <div className={className}>

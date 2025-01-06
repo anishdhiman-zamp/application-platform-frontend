@@ -13,9 +13,9 @@ export interface LabelProps {
 export const Label: FC<LabelProps> = ({
   title = null,
   description = null,
-  wrapperClassName = 'tw-w-full',
-  titleClassName = 'f-14-500 tw-text-GRAY_700 tw-mb-[4px]',
-  descriptionClassName = 'f-12-300 tw-text-GRAY_600',
+  wrapperClassName = 'w-full',
+  titleClassName = 'f-14-500 text-GRAY_700 mb-[4px]',
+  descriptionClassName = 'f-12-300 text-GRAY_600',
 }) =>
   title || descriptionClassName ? (
     <div className={wrapperClassName}>

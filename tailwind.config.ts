@@ -22,7 +22,12 @@ module.exports = {
         GRAY_700: 'var(--GRAY_700)',
         GRAY_800: 'var(--GRAY_800)',
         GRAY_900: 'var(--GRAY_900)',
+        GRAY_950: 'var(--GRAY_950)',
         GRAY_1000: 'var(--GRAY_1000)',
+
+        BG_GRAY_1: 'var(--BG_GRAY_1)',
+        BG_GRAY_2: 'var(--BG_GRAY_2)',
+        BORDER_GRAY_400: 'var(--BORDER_GRAY_400)',
 
         BLUE_100: 'var(--BLUE_100)',
         BLUE_200: 'var(--BLUE_200)',

@@ -16,6 +16,8 @@ export const SIZE_CLASSNAMES = {
     'w-8 h-8 border-[4px] border-transparent border-t-[4px] border-r-[4px] border-l-[4px] border-t-blue-500 border-r-blue-500 border-l-blue-500 rounded-full',
   [SIZE.LARGE]:
     'w-12 h-12 border-[5px] border-transparent border-t-[5px] border-r-[5px] border-l-[5px] border-t-blue-500 border-r-blue-500 border-l-blue-500 rounded-full',
+  [SIZE.XLARGE]:
+    'w-12 h-12 border-[5px] border-transparent border-t-[5px] border-r-[5px] border-l-[5px] border-t-blue-500 border-r-blue-500 border-l-blue-500 rounded-full',
 };
 
 export const Loader: React.FC<LoaderProps> = ({ className = '', size = SIZE.MEDIUM }) => {

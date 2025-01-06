@@ -1,10 +1,15 @@
 import React, { ReactElement } from 'react';
+import { AgCharts } from 'ag-charts-react';
+import { barGraph } from 'constants/chartmockData';
 import DashboardLayout from 'components/layouts/dashboard-layout';
+import 'ag-charts-enterprise';
+
 
 const Payments = () => {
   return (
-    <div className='border border-GRAY_400 text-center flex justify-center items-center bg-white h-full rounded-tl-md'>
+    <div className='border border-GRAY_400 text-center bg-white h-full rounded-tl-md'>
       <div className='f-40-800 text-GRAY_1000'>Payments</div>
+      <AgCharts options={barGraph} />
     </div>
   );
 };
