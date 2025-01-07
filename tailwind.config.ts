@@ -51,7 +51,6 @@ module.exports = {
         GREEN_900: 'var(--GREEN_900)',
         GREEN_1000: 'var(--GREEN_1000)',
 
-
         ORANGE_100: 'var(--ORANGE_100)',
         ORANGE_200: 'var(--ORANGE_200)',
         ORANGE_300: 'var(--ORANGE_300)',
@@ -207,7 +206,9 @@ module.exports = {
       fontFamily: {
         outfit: 'Outfit',
       },
-      zIndex: {},
+      zIndex: {
+        1000: 1000,
+      },
       animation: {
         opacity: 'opacity 0.3s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',
