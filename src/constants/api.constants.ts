@@ -1,4 +1,3 @@
-export const API_DOMAIN = process.env.NEXT_PUBLIC_API_DOMAIN;
 export const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION;
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
@@ -20,6 +19,19 @@ export enum APITags {
 export const API_TAGS = Object.values(APITags);
 
 
+const getApiDomain = (environment: string="") => {
+    switch (environment) {
+        case 'production':
+            return 'https://api.zamp.ai';
+        case 'staging':
+            return 'https://api-stg.zamp.ai';
+        case 'development':
+            return 'https://api-dev.zamp.ai';
+        default:
+            return 'http://localhost:8080';
+    }
+}
+
 
 export const ERROR_TOKENS = {
     INVALID_TOKEN: 'INVALID_TOKEN',
@@ -35,3 +47,5 @@ export const ERROR_TOKENS = {
 };
 
 export const SESSION_EXPIRY_TOKENS = [ERROR_TOKENS.INVALID_TOKEN, ERROR_TOKENS.MISSING_TOKEN];
+
+export const API_DOMAIN = getApiDomain(ENVIRONMENT);
