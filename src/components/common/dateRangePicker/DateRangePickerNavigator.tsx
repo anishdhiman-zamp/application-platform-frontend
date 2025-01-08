@@ -19,7 +19,7 @@ export const DateRangePickerNavigator = (
     <div className=' flex justify-between'>
       <div className=' flex w-fit border border-DIVIDER_SAIL_2'>
         <select
-          className='f-12-400 appearance-none px-2 py-1 bg-BG_BACKDROP focus:outline-none border border-r-DIVIDER_SAIL_2 border-y-0 border-l-0 outline-none cursor-pointer'
+          className='f-12-400 appearance-none px-2 py-1 bg-BG_GRAY_2 focus:outline-none border border-r-DIVIDER_SAIL_2 border-y-0 border-l-0 outline-none cursor-pointer'
           value={currentMonth}
           onChange={(e) => changeShownDate(e.target.value, 'setMonth')}
         >
@@ -31,7 +31,7 @@ export const DateRangePickerNavigator = (
         </select>
 
         <select
-          className='f-12-400 appearance-none bg-BG_BACKDROP focus:outline-none px-2 py-1 border-none  outline-none cursor-pointer'
+          className='f-12-400 appearance-none bg-BG_GRAY_2 focus:outline-none px-2 py-1 border-none  outline-none cursor-pointer'
           value={currFocusedDate?.getFullYear()}
           onChange={(e) => changeShownDate(e.target.value, 'setYear')}
         >

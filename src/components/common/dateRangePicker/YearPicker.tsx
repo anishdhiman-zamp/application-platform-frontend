@@ -35,7 +35,7 @@ export const YearPicker: React.FC<YearPickerProps> = ({
 
     if (!yearList) return;
 
-    const selectedYear = yearList.querySelector('.border-BLUE_500');
+    const selectedYear = yearList.querySelector('.border-BLUE_700');
 
     if (!selectedYear) return;
 
@@ -125,13 +125,13 @@ export const YearPicker: React.FC<YearPickerProps> = ({
           <div
             key={index}
             className={` ${isSelected(year)
-              ? 'bg-BLUE_500 text-white border-DIVIDER_SAIL_2'
+              ? 'bg-BLUE_700 text-white border-DIVIDER_SAIL_2'
               : shouldHighlightCell(year)
                 ? 'bg-BLUE_50 '
                 : isPartiallySelected(year)
-                  ? 'border-BLUE_500'
-                  : 'hover:border-BLUE_500 bg-BG_BACKDROP border-DIVIDER_SAIL_2'
-              }  cursor-pointer mb-2.5 f-12-400 w-[calc(50%-8px)] flex items-center justify-center py-[4.5px]  rounded-sm border `}
+                  ? 'border-BLUE_700'
+                  : 'hover:border-BLUE_700 bg-BG_GRAY_2 border-GRAY_400'
+              }  cursor-pointer mb-2.5 f-12-500 w-[calc(50%-8px)] flex items-center justify-center py-[4.5px]  rounded-sm border `}
             onClick={() => onSelectValue({ year })}
             onMouseEnter={() => onMouseEnter(year)}
           >

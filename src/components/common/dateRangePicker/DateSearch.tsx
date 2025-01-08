@@ -59,7 +59,7 @@ export const DateSearch: React.FC<DateSearchProps> = ({
       inputRef={inputRef}
       className='w-full'
       size={SIZE_TYPES.XSMALL}
-      inputTagWrapperClassName={`  !rounded-md !overflow-hidden   border ${focusedInput === id ? '!border-BLUE_500 hover:!border-BLUE_500' : '!border-DIVIDER_SAIL_2'
+      inputTagWrapperClassName={`  !rounded-md !overflow-hidden   border ${focusedInput === id ? '!border-BLUE_700 hover:!border-BLUE_700' : '!border-DIVIDER_SAIL_2'
         }`}
       id={`date-search-${id}`}
       inputFieldWrapperClassName=' w-full relative !placeholder-GRAY_500 f-11-300'
@@ -74,7 +74,7 @@ export const DateSearch: React.FC<DateSearchProps> = ({
         className: `absolute bottom-6 ${value.length ? '' : 'hidden'}`,
         width: 14,
         height: 14,
-        color: COLORS.DIVIDER_SAIL_4,
+        color: COLORS.GRAY_400,
         onClick: onClear,
       }}
     />

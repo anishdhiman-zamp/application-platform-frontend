@@ -160,20 +160,20 @@ export const MonthOrQuarterPicker: React.FC<MonthOrQuarterPickerProps> = ({
       {yearsList.map((year, index) => {
         return (
           <div className=' flex flex-col items-start' key={index}>
-            <div className='f-12-400 mb-2'>{year}</div>
+            <div className='f-12-500 mb-2 text-GRAY_1000'>{year}</div>
             <div className=' flex flex-wrap gap-2 mb-4'>
               {config.map((config, index) => {
                 return (
                   <div
                     key={index}
                     className={` ${isSelected(year, config?.value)
-                      ? 'bg-BLUE_500 text-white border-DIVIDER_SAIL_3'
+                      ? 'bg-BLUE_700 text-white border-GRAY_400'
                       : shouldHighlightCell(year, config)
                         ? 'bg-BLUE_50 '
                         : isPartiallySelected(year, config?.value)
-                          ? 'border-BLUE_500 selected-year'
-                          : 'hover:border-BLUE_500 hover:selected-year bg-BG_BACKDROP'
-                      }  cursor-pointer f-12-400 w-13.5 flex items-center justify-center py-[4.5px]  rounded-sm border `}
+                          ? 'border-BLUE_700 selected-year'
+                          : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
+                      }  cursor-pointer f-12-500 w-13.5 flex items-center justify-center py-[4.5px]  rounded-sm border `}
                     onClick={() => onSelectValue({ year, config: config })}
                     onMouseEnter={() => onMouseEnter(year, config)}
                   >

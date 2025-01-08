@@ -43,9 +43,9 @@ export const DateRangePickerWrapper: React.FC<DateRangePickerWrapperProps> = ({
 
     return (
       <div
-        className={`w-full h-full flex justify-center items-center rounded-full  ${isStart ? 'bg-BLUE_500 !text-white' : ''
-          } ${isEnd ? 'bg-BLUE_500 !text-white' : ''}
-            ${isSearchValue ? 'border-BLUE_500 border is-searched' : ''}
+        className={`w-full h-full flex justify-center items-center rounded-full  ${isStart ? 'bg-BLUE_700 !text-white' : ''
+          } ${isEnd ? 'bg-BLUE_700 !text-white' : ''}
+            ${isSearchValue ? 'border-BLUE_700 border is-searched' : ''}
             ${!isStart && !isEnd && !isSearchValue && isToday ? 'border border-DIVIDER_SAIL_2' : ''}
             ${isNotInCurrentMonth || (disableFutureDate && isFutureDate) ? ' text-GRAY_500' : 'text-black'}`}
       >

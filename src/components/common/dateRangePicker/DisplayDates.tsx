@@ -73,7 +73,7 @@ export const DisplayDates: React.FC<DisplayDatesProps> = ({
         onClick={() => setFocusedInput(DateRangeKeys.START_DATE)}
       >
         <div className='flex justify-between w-full'>
-          <div className='f-11-300 mb-1.5 text-GRAY_500'>{isSingle ? 'Enter date' : 'From'} </div>
+          <div className='f-12-400 mb-1.5 text-GRAY_500'>{isSingle ? 'Enter date' : 'From'} </div>
           {shouldShowInfo ? (
             <div className='f-11-300 mb-1.5 text-GRAY_500'>{`Try: Next month, Q4 or ${placeholderDate}`}</div>
           ) : null}
@@ -93,8 +93,7 @@ export const DisplayDates: React.FC<DisplayDatesProps> = ({
 
       {!isSingle && (
         <div className='flex flex-col  items-start' onClick={() => setFocusedInput(DateRangeKeys.END_DATE)}>
-          <div className='f-11-300 mb-1.5 text-GRAY_500'>To</div>
-
+          <div className='f-12-400 mb-1.5 text-GRAY_500'>To</div>
           <DateSearch
             value={endDateSearchValue}
             onChange={(e) => handleSearchChange(e?.target?.value, DateRangeKeys.END_DATE)}

@@ -29,7 +29,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
 
   return (
     <div
-      className={`bg-white relative z-1 shadow-menuList rounded border border-DIVIDER_GRAY ${className}`}
+      className={`bg-white relative z-1 shadow-menuList rounded border border-GRAY_400 ${className}`}
       data-testid={`menu-wrapper-${id}`}
     >
       <div
@@ -40,7 +40,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
       </div>
       {!!onReset && (
         <div
-          className={`flex py-3 pl-4 border-t border-DIVIDER_GRAY ${resetClassName}`}
+          className={`flex py-3 pl-4 border-t border-GRAY_400 ${resetClassName}`}
           onClick={handleReset}
           data-testid={`menu-wrapper-reset-${id}`}
         >

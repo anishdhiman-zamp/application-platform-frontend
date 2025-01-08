@@ -328,11 +328,11 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
     <div className='h-full'>
       <div className='flex  overflow-hidden h-full'>
         <div
-          className=' flex-1 border-DIVIDER_GRAY shadow-dateContainer w-full'
+          className='flex-1 shadow-dateContainer w-full'
           data-testid={`date-range-menu-custom-${id}`}
         >
           {!isSingle && (
-            <div className='border-b border-DIVIDER_SAIL_3 mx-3 pt-3 flex w-auto justify-between '>
+            <div className='border-b border-GRAY_400 mx-3 pt-3 flex w-auto justify-between '>
               <div className=''>
                 <Tabs
                   customSelectedIndex={dateRangeTabs?.findIndex((tab) => tab.value === currentTab)}
