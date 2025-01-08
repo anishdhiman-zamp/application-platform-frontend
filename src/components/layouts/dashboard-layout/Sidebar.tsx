@@ -1,14 +1,19 @@
 import React from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from "apis/auth";
-import { ICON_SPRITE_TYPES, ZAMP_ICON } from "constants/icons";
+import { PAGES_ITEMS } from 'constants/dummyData';
+import { ICON_SPRITE_TYPES } from "constants/icons";
 import { ROUTES_PATH, SIDEBAR_ITEMS } from "constants/routeConfig";
-import Image from "next/image";
 import { useRouter } from "next/router";
+import { cn } from 'utils/common';
+import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
-import WorkspaceSwitcher from 'components/layouts/dashboard-layout/components/WorkspaceSwitcher';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const Sidebar = () => {
+interface SidebarProps {
+  isSidebarOpen: boolean;
+}
+
+const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
   const router = useRouter();
   const pathname = router.pathname;
   const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
@@ -23,37 +28,34 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-60 relative">
-      <div className="p-4 h-12 flex items-center justify-between text-GRAY_700">
-        <Image
-          width={20}
-          height={16}
-          alt='zamp logo'
-          className='w-5 align-middle cursor-pointer'
-          src={ZAMP_ICON}
-          priority={true}
-        />
-        <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.LAYOUT} id='flex-align-right' />
-      </div>
-      <div className='px-2 border-b border-GRAY_400 pb-4'>
-        {SIDEBAR_ITEMS.map((item) => (
-          <SidebarTab
-            key={item.label}
-            name={item.label}
-            path={item.path}
-            iconId={item.iconId}
-            iconCategory={item.iconCategory}
-            isSelected={pathname === item?.path}
-          />
-        ))}
-      </div>
-      <WorkspaceSwitcher />
-      <div className="border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer"
-        onClick={handleLogout}>
-        <div className="flex items-center gap-2.5 text-GRAY_900" >
-          <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
-          <div className="f-13-500">
-            Logout
+    <div className={cn('relative transition-all duration-300', isSidebarOpen ? 'w-60' : 'w-0')}>
+      <div className='w-60'>
+        <div className='px-2 border-b border-GRAY_400 pb-4'>
+          {SIDEBAR_ITEMS.map((item) => (
+            <SidebarTab
+              key={item.label}
+              name={item.label}
+              path={item.path}
+              iconId={item.iconId}
+              iconCategory={item.iconCategory}
+              isSelected={pathname === item?.path}
+            />
+          ))}
+        </div>
+        {/* <WorkspaceSwitcher /> */}
+        <div className='px-1 py-2.5'>
+          <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
+          {PAGES_ITEMS.map((item) => (
+            <PageNavTab key={item.label} label={item.label} />
+          ))}
+        </div>
+        <div className="border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer"
+          onClick={handleLogout}>
+          <div className="flex items-center gap-2.5 text-GRAY_900" >
+            <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
+            <div className="f-13-500">
+              Logout
+            </div>
           </div>
         </div>
       </div>

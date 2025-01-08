@@ -1,4 +1,4 @@
-import React, { Children, cloneElement, FC, isValidElement, ReactNode, useEffect, useRef } from 'react';
+import React, { Children, cloneElement, FC, isValidElement, ReactNode, useEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
@@ -18,6 +18,7 @@ type DashboardLayoutProps = {
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, contentWrapperClassName = '' }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const previousRoute = useRef<string>('');
@@ -53,15 +54,17 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
 
   return (
     <Provider store={store}>
-      <div className={`w-full min-w-[768px] flex relative h-screen bg-BACKGROUND_GRAY_1`}>
-        <Sidebar />
-        <div
-          ref={containerRef}
-          className={`flex flex-col flex-grow relative h-screen overflow-y-scroll overflow-x-hidden ${containerStyle}`}
-        >
-          <Topbar />
-          <div className={`w-full relative mx-auto border border-GRAY_400 bg-white h-full rounded-tl-md ${contentWrapperClassName}`}>
-            {renderChildrenWithProps(children)}
+      <div className='bg-BACKGROUND_GRAY_1'>
+        <Topbar isSidebarOpen={isSidebarOpen} onSidebarToggle={() => setIsSidebarOpen((prev) => !prev)} />
+        <div className={`w-full min-w-[768px] flex relative h-[calc(100vh-48px)]`}>
+          <Sidebar isSidebarOpen={isSidebarOpen} />
+          <div
+            ref={containerRef}
+            className={`flex flex-col flex-grow relative h-screen ${containerStyle}`}
+          >
+            <div className={`w-full relative mx-auto border border-GRAY_400 bg-white h-full rounded-tl-md ${contentWrapperClassName}`}>
+              {renderChildrenWithProps(children)}
+            </div>
           </div>
         </div>
       </div>

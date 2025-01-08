@@ -7,7 +7,7 @@ import 'ag-charts-enterprise';
 
 const Payments = () => {
   return (
-    <div className='border border-GRAY_400 text-center bg-white h-full rounded-tl-md'>
+    <div className='text-center bg-white h-full rounded-tl-md'>
       <div className='f-40-800 text-GRAY_1000'>Payments</div>
       <AgCharts options={barGraph} />
     </div>

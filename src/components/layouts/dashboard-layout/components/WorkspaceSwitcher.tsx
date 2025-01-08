@@ -29,7 +29,7 @@ const WorkspaceSwitcher = () => {
 
   return (
     <div className='px-2' ref={ref}>
-      <div className='relative'>
+      <div className='relative hidden'>
         <div
           className=' flex items-center gap-1 px-2 py-2.5 f-13-500 select-none cursor-pointer'
           onClick={() => setIsWorkspacePopoverOpen((prev) => !prev)}
