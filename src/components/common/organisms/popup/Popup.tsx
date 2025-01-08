@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { defaultFnType } from 'types/commonTypes';
 import { stopPropagationAction } from 'utils/common';
 
@@ -15,9 +15,8 @@ const Popup: FC<PopupProps> = ({ isOpen = false, children, className = '', onClo
 
   return (
     <div
-      className={`bg-GRAY_70 transition-all duration-300 ease-in fixed w-screen h-screen z-1000 top-0 left-0 ${
-        isOpen ? 'opacity-1' : 'hidden opacity-0'
-      }`}
+      className={`bg-GRAY_70 transition-all duration-300 ease-in fixed w-screen h-screen z-1000 top-0 left-0 ${isOpen ? 'opacity-1' : 'hidden opacity-0'
+        }`}
       role='presentation'
       onClick={() => {
         if (closeOnClickOutside) onClose?.();
@@ -25,9 +24,8 @@ const Popup: FC<PopupProps> = ({ isOpen = false, children, className = '', onClo
     >
       <div className='w-full h-full flex items-center justify-center'>
         <div
-          className={`transition-all duration-300 ease-in px-5 py-5 rounded-xl block ${className} ${
-            isOpen ? ' translate-y-0 opacity-1' : 'translate-y-[50px] opacity-0'
-          }`}
+          className={`transition-all duration-300 ease-in px-5 py-5 rounded-xl block ${className} ${isOpen ? ' translate-y-0 opacity-1' : 'translate-y-[50px] opacity-0'
+            }`}
           role='presentation'
           onClick={stopPropagationAction}
         >

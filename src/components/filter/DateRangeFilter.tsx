@@ -2,10 +2,6 @@ import React, { FC } from 'react';
 import { DATE_FILTER_CATEGORIES, DATE_RANGE_TYPES, dateFilterValueType } from 'constants/date.constants';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import DateRangePicker from 'components/common/dateRangePicker';
-import 'styles/react-dates.css';
-import 'styles/react-datepicker.css';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
 
 export type DateFilterValueType = {
   start_date: Date | null;
@@ -52,7 +48,7 @@ const DateRangeFilter: FC<{
             date_category: category as DATE_FILTER_CATEGORIES,
             start_date: value?.start || null,
             end_date: value?.end || null,
-          } ?? []
+          }
         );
       }
     };

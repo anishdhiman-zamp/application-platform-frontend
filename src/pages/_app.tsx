@@ -15,6 +15,8 @@ import 'styles/fonts.css';
 import 'styles/globals.css';
 import 'styles/react-datepicker.css';
 import 'styles/react-dates.css';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
