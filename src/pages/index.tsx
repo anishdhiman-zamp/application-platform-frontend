@@ -2,7 +2,7 @@ import React, { ReactElement, useState } from 'react';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { dummyColumns, dummyData } from 'modules/data/data.constants';
 import DateRangeFilterWithControl from 'components/common/dateRangePicker/DateRangeFilterWithControl';
-import AgGridTable from 'components/common/organisms/agGridTable/AgGridTable';
+import Table from 'components/common/table';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
@@ -21,7 +21,7 @@ const Home = () => {
   };
 
   return (
-    <div className=''>
+    <div className='h-full'>
       <div className='flex items-center justify-end px-5'>
         <DateRangeFilterWithControl
           onChange={onDateSelect}
@@ -32,8 +32,7 @@ const Home = () => {
           disableFutureDate
         />
       </div>
-
-      <AgGridTable columnDefs={dummyColumns} data={dummyData} />
+      <Table rows={dummyData} columns={dummyColumns} />
     </div>
   );
 };

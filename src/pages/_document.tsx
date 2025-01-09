@@ -5,7 +5,7 @@ export default function Document() {
   return (
     <Html lang='en'>
       <Head>
-        <meta
+        {/* <meta
           httpEquiv='Content-Security-Policy'
           content="
               default-src 'self';
@@ -13,7 +13,7 @@ export default function Document() {
               font-src 'self' data:;
               connect-src 'self' http://localhost:8080;
             "
-        />
+        /> */}
       </Head>
       <body className='antialiased'>
         <Main />
