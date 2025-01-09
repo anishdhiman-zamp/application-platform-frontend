@@ -5,9 +5,9 @@ import DateRangeFilterWithControl from 'components/common/dateRangePicker/DateRa
 import Table from 'components/common/table';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 import DashboardLayout from 'components/layouts/dashboard-layout';
+import { columnDefs, getDummyRows } from 'constants/dummyData';
 
 const Home = () => {
-
   const dateRangeOptions = DATE_FILTER_OPTIONS.filter((option) => option.value !== DATE_FILTER_CATEGORIES.ALL_TIME);
 
   const [date, setDate] = useState<DateFilterValueType>({
@@ -32,7 +32,7 @@ const Home = () => {
           disableFutureDate
         />
       </div>
-      <Table rows={dummyData} columns={dummyColumns} />
+      <Table columns={columnDefs} getRows={getDummyRows} />
     </div>
   );
 };
