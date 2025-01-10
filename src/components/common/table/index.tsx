@@ -3,12 +3,12 @@ import {
   ClientSideRowModelModule,
   ColDef,
   DateFilterModule,
+  IServerSideGetRowsParams,
   ModuleRegistry,
   NumberFilterModule,
   TextFilterModule,
   Theme,
   ValidationModule,
-  IServerSideGetRowsParams,
 } from 'ag-grid-community';
 import {
   ColumnMenuModule,
@@ -19,7 +19,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
-import { myTheme } from './constants';
+import { myTheme } from 'components/common/table/constants';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,

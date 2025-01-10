@@ -1,0 +1,2 @@
+cd services/dashboard && npm run lint-staged
+

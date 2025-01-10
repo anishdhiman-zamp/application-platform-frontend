@@ -1,11 +1,10 @@
 import React, { ReactElement, useState } from 'react';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
-import { dummyColumns, dummyData } from 'modules/data/data.constants';
+import { columnDefs, getDummyRows } from 'constants/dummyData';
 import DateRangeFilterWithControl from 'components/common/dateRangePicker/DateRangeFilterWithControl';
 import Table from 'components/common/table';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 import DashboardLayout from 'components/layouts/dashboard-layout';
-import { columnDefs, getDummyRows } from 'constants/dummyData';
 
 const Home = () => {
   const dateRangeOptions = DATE_FILTER_OPTIONS.filter((option) => option.value !== DATE_FILTER_CATEGORIES.ALL_TIME);
