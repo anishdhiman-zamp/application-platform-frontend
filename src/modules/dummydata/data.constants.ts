@@ -2,7 +2,7 @@
 export const dummyColumns = [
     { field: 'name', filter: 'agTextColumnFilter', flex: 1 },
     {
-        field: 'age', filter: 'agTextColumnFilter', flex: 1,
+        field: 'age', filter: 'agNumberColumnFilter', flex: 1,
         // filterParams: {
         //     filterOptions: ['contains', 'equals', 'startsWith'], // Specify allowed options
         // }
@@ -10,11 +10,12 @@ export const dummyColumns = [
     {
         field: 'country',
         type: 'amount',
-        filterParams: {
-            values: ["USA", "Canada",], // Dynamic values from external JSON
-            filterOptions: ['contains', 'equals', 'startsWith'], // Specify allowed options from frontend
-            width: '400px',
-        },
+        filter: 'agMultiColumnFilter',
+        // filterParams: {
+        //     values: ["USA", "Canada",], // Dynamic values from external JSON
+        //     filterOptions: ['contains', 'equals', 'startsWith'], // Specify allowed options from frontend
+        //     width: '400px',
+        // },
         flex: 1
     },
     {

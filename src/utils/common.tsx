@@ -90,3 +90,19 @@ export const getDateRangeTitle = (dateRangeFilter: DateFilterValueType, showSing
 
   return `Date range - ${dateRangeCategory?.label}`;
 };
+
+/**
+ * Inject the dynamic parameters in the url from a parameter object
+ * @param url
+ * @param params
+ * @returns
+ */
+export const formRequestUrlWithParams = (url: string, params: MapAny) => {
+  let formattedUrl = url;
+
+  Object.keys(params).forEach((key) => {
+    formattedUrl = formattedUrl.replace(`{{${key}}}`, params[key]);
+  });
+
+  return formattedUrl;
+};

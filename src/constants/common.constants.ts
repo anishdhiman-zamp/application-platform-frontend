@@ -25,3 +25,8 @@ export enum POSITION {
 
 export const ALLOWED_EMAIL_DOMAINS = ['zamp.ai', 'zamp.finance'];
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'production';
+
+export enum STORAGE_TYPES {
+    SESSION = 'session',
+    LOCAL = 'local',
+}
