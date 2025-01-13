@@ -1,8 +1,8 @@
 import React from 'react';
 import { CustomCellRendererProps } from 'ag-grid-react';
-import SkeletonElement from 'components/common/atoms/skeletons/SkeletonElement';
-import { WorkspaceDisplayColumns } from 'components/common/organisms/agGridTable/agGrid.types';
-import { ColumnDef } from 'components/common/organisms/agGridTable/AgGridTable';
+import { WorkspaceDisplayColumns } from 'components/common/agGridTable/agGrid.types';
+import { ColumnDef } from 'components/common/agGridTable/AgGridTable';
+import SkeletonElement from 'components/common/skeletons/SkeletonElement';
 
 export const getColumnDefs = (columnList: WorkspaceDisplayColumns[]) => {
   const formattedColumns: ColumnDef[] = columnList?.map((column) => ({

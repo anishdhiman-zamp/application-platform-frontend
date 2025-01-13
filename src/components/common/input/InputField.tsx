@@ -2,7 +2,7 @@ import React, { FC, memo } from 'react';
 import { SIZE_TYPES } from 'types/common/components';
 import { InputFieldProps } from 'types/common/components/input/input.types';
 import { defaultFn } from 'types/commonTypes';
-import InputTag from 'components/common/atoms/inputTag';
+import InputTag from 'components/common/input/InputTag';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const sizeClassName = {

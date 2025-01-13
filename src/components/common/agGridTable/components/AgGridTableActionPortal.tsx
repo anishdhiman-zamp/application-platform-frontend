@@ -4,8 +4,8 @@ import { useOnClickOutside } from 'hooks';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import { defaultFn, defaultFnType } from 'types/commonTypes';
 import { checkIsObjectEmpty } from 'utils/common';
-import { DataAlign } from 'components/common/organisms/agGridTable/agGrid.types';
-import { COLUMN_HEADER_HEIGHT } from 'components/common/organisms/agGridTable/agGridTable.constants';
+import { DataAlign } from 'components/common/agGridTable/agGrid.types';
+import { COLUMN_HEADER_HEIGHT } from 'components/common/agGridTable/agGridTable.constants';
 
 interface AgGridTableActionPortalProps {
   parentEl: HTMLDivElement | null;

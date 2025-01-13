@@ -9,7 +9,7 @@ import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
-import Input from 'components/common/input/Input';
+import Input from 'components/common/input';
 
 const LOGIN_ERROR_TEXT = 'Unable to login, please try again.';
 

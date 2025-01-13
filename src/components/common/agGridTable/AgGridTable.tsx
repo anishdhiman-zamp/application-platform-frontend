@@ -8,11 +8,11 @@ import {
   AG_GRID_LAST_CELL_STYLE,
   COLUMN_HEADER_HEIGHT,
   ROW_HEIGHT,
-} from 'components/common/organisms/agGridTable/agGridTable.constants';
-import AgGridTableHeader from 'components/common/organisms/agGridTable/components/AgGridTableHeader';
-import { AgGridTableHeaderActionProps } from 'components/common/organisms/agGridTable/components/AgGridTableHeaderAction';
-import AgGridTooltipComponent from 'components/common/organisms/agGridTable/components/AgGridTooltipComponent';
-import SpreadsheetGrid from 'components/common/organisms/agGridTable/SpreadsheetGrid';
+} from 'components/common/agGridTable/agGridTable.constants';
+import AgGridTableHeader from 'components/common/agGridTable/components/AgGridTableHeader';
+import { AgGridTableHeaderActionProps } from 'components/common/agGridTable/components/AgGridTableHeaderAction';
+import AgGridTooltipComponent from 'components/common/agGridTable/components/AgGridTooltipComponent';
+import SpreadsheetGrid from 'components/common/agGridTable/SpreadsheetGrid';
 
 export interface ColumnDef extends ColDef {
   textWrap?: boolean;

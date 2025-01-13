@@ -1,7 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
 import { MapAny } from 'types/commonTypes';
-import { DataAlign } from 'components/common/organisms/agGridTable/agGrid.types';
-import AgGridTableActionPortal from 'components/common/organisms/agGridTable/components/AgGridTableActionPortal';
+import { DataAlign } from 'components/common/agGridTable/agGrid.types';
+import AgGridTableActionPortal from 'components/common/agGridTable/components/AgGridTableActionPortal';
 import SvgSpriteLoader, { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export interface AgGridTableHeaderActionProps {

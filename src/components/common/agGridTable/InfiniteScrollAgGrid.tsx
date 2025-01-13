@@ -1,9 +1,9 @@
 import React, { FC, RefObject, useMemo } from 'react';
 import { GridApi, IDatasource, IGetRowsParams } from 'ag-grid-community';
 import { MapAny } from 'types/commonTypes';
-import { WorkspaceDisplayColumns } from 'components/common/organisms/agGridTable/agGrid.types';
-import AgGridTable from 'components/common/organisms/agGridTable/AgGridTable';
-import { getColumnDefs } from 'components/common/organisms/agGridTable/agGridTable.utils';
+import { WorkspaceDisplayColumns } from 'components/common/agGridTable/agGrid.types';
+import AgGridTable from 'components/common/agGridTable/AgGridTable';
+import { getColumnDefs } from 'components/common/agGridTable/agGridTable.utils';
 
 interface InfiniteScrollAgGridProps {
   columns: WorkspaceDisplayColumns[];

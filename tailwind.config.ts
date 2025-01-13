@@ -284,5 +284,5 @@ module.exports = {
   variants: {
     textColor: ['group-hover'],
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [import('@tailwindcss/typography')],
 };

@@ -6,7 +6,7 @@ import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { getPlacehoderDate } from 'components/common/dateRangePicker/dateRangePicker.utils';
-import Input from 'components/common/organisms/input';
+import Input from 'components/common/input';
 
 interface DateSearchProps {
   value: string;
@@ -59,8 +59,9 @@ export const DateSearch: React.FC<DateSearchProps> = ({
       inputRef={inputRef}
       className='w-full'
       size={SIZE_TYPES.XSMALL}
-      inputTagWrapperClassName={`  !rounded-md !overflow-hidden   border ${focusedInput === id ? '!border-BLUE_700 hover:!border-BLUE_700' : '!border-DIVIDER_SAIL_2'
-        }`}
+      inputTagWrapperClassName={`  !rounded-md !overflow-hidden   border ${
+        focusedInput === id ? '!border-BLUE_700 hover:!border-BLUE_700' : '!border-DIVIDER_SAIL_2'
+      }`}
       id={`date-search-${id}`}
       inputFieldWrapperClassName=' w-full relative !placeholder-GRAY_500 f-11-300'
       placeholder={placeholder}

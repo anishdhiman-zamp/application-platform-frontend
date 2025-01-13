@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { SKELETON_ELEMENT_SHAPES } from 'components/common/atoms/skeletons/skeletons.types';
+import { SKELETON_ELEMENT_SHAPES } from 'components/common/skeletons/skeletons.types';
 
 interface SkeletonElementProps {
   elementCount?: number;

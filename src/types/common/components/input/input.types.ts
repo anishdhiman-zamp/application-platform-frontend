@@ -1,8 +1,8 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType, EventCallbackType, } from 'types/commonTypes';
-import { LabelProps } from 'components/common/molecules/Label';
-import { SupporterInfoProps } from 'components/common/molecules/SupporterInfo';
+import { defaultFnType, EventCallbackType } from 'types/commonTypes';
+import { LabelProps } from 'components/common/Label';
+import { SupporterInfoProps } from 'components/common/SupporterInfo';
 import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export enum SUPPORT_INFO_TYPES {
@@ -75,6 +75,6 @@ export interface InputProps extends InputTagProps, InputFieldProps {
   placeholder?: string;
   labelClassName?: string;
   labelOverrideClassName?: string;
+  required?: boolean;
+  testId?: string;
 }
-
-

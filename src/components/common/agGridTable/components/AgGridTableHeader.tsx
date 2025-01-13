@@ -1,6 +1,6 @@
 import React, { FC, memo } from 'react';
 import { MapAny } from 'types/commonTypes';
-import HeaderAction from 'components/common/organisms/agGridTable/components/AgGridTableHeaderAction';
+import HeaderAction from 'components/common/agGridTable/components/AgGridTableHeaderAction';
 
 const AgGridTableHeader: FC<MapAny> = (props: any) => {
   const { columnDefs, columnHeaderMap, headerWrapperClassName, headerClassName } = props;
