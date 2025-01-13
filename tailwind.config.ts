@@ -286,5 +286,6 @@ module.exports = {
   variants: {
     textColor: ['group-hover'],
   },
-  plugins: [import('@tailwindcss/typography')],
+  // eslint-disable-next-line import/no-unresolved
+  plugins: [import('@tailwindcss/typography')], 
 };
