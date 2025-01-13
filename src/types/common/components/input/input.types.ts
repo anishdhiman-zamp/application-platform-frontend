@@ -1,7 +1,6 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, EventCallbackType } from 'types/commonTypes';
-import { LabelProps } from 'components/common/Label';
 import { SupporterInfoProps } from 'components/common/SupporterInfo';
 import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
@@ -65,7 +64,6 @@ export interface InputFieldProps extends InputTagProps {
 }
 
 export interface InputProps extends InputTagProps, InputFieldProps {
-  labelProps?: LabelProps;
   supporterInfoProps?: SupporterInfoProps;
   showSupporterInfo?: boolean;
   inputWrapperClassName?: string;

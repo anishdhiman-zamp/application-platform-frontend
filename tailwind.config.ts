@@ -197,6 +197,8 @@ module.exports = {
       },
       boxShadow: {
         overlay: '1px 2px 10px rgba(197, 220, 255, 0.54)',
+        inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
+        inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_700)',
       },
       borderRadius: {
         2.5: '10px',

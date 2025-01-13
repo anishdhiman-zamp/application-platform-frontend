@@ -20,10 +20,10 @@ const InputTag: FC<InputTagProps> = ({
   autocomplete = 'off',
   inputTagBorderClassName = '',
   inputTagWrapperClassName = 'w-full',
-  inputClassName = `placeholder:tracking-[0.03em] w-full box-border text-GRAY_1000 placeholder:text-GRAY_500 placeholder:font-light focus:outline-0 `,
-  inputRoundedClassName = '',
+  inputClassName = `placeholder:tracking-[0.03em] w-full box-border border border-BORDER_GRAY_400 rounded-md text-GRAY_1000 placeholder:text-GRAY_500 placeholder:font-light outline-none focus:shadow-inputOutlineShadow focus:border-GRAY_600`,
+  inputRoundedClassName = 'rounded-md',
   inputSizeClassName = 'p-6',
-  errorClass = '!border-b-ERROR_500',
+  errorClass = '!border-RED_700 !focus:shadow-inputErrorOutlineShadow',
   onChange = defaultFn,
   onKeyPress = defaultFn,
   onKeyDown = defaultFn,
@@ -48,26 +48,30 @@ const InputTag: FC<InputTagProps> = ({
 }) => {
   let readOnlyInputClasses = ' read-only:text-GRAY_700 read-only:bg-GRAY_100 read-only:pointer-events-none';
   let disabledInputClasses =
-    ' disabled:text-GRAY_500 disabled:cursor-not-allowed disabled:placeholder-GRAY_400 disabled:bg-GRAY_100';
+    ' disabled:text-GRAY_700 disabled:placeholder:text-GRAY_700 disabled:cursor-not-allowed disabled:placeholder-GRAY_400 disabled:bg-GRAY_100';
 
   if (overrideInputBgClassName) {
     readOnlyInputClasses += ' disabled:bg-BASE_PRIMARY';
     disabledInputClasses += ' read-only:bg-BASE_PRIMARY';
   }
 
-  let borderClasses = `${noBorders
-    ? ''
-    : `${error ? '' : 'read-only:!border-b-DIVIDER_SAIL_2 focus:!border-b-GRAY_700'
-    } disabled:!border-b-DIVIDER_SAIL_2 border border-b-GRAY_400 border-DIVIDER_SAIL_2`
-    }`;
+  let borderClasses = `${
+    noBorders
+      ? ''
+      : `${
+          error ? '' : 'read-only:!border-b-DIVIDER_SAIL_2 focus:!border-b-GRAY_700'
+        } disabled:!border-b-DIVIDER_SAIL_2`
+  }`;
 
   borderClasses += !readOnly && !error && !noBorders ? ' hover:!border-b-GRAY_700' : '';
 
-  const inputStateClassName = `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${inputSizeClassName} ${error ? errorClass : ''
-    } ${readOnlyInputClasses} ${disabledInputClasses} `;
+  const inputStateClassName = `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${inputSizeClassName} ${
+    error ? errorClass : ''
+  } ${readOnlyInputClasses} ${disabledInputClasses} `;
 
-  const inputTagWrapperClasses = `${inputTagBorderClassName ? inputTagBorderClassName : borderClasses
-    } ${inputRoundedClassName} ${inputTagWrapperClassName} ${error ? errorClass : ''}`;
+  const inputTagWrapperClasses = `${
+    inputTagBorderClassName ? inputTagBorderClassName : borderClasses
+  } ${inputRoundedClassName} ${inputTagWrapperClassName} ${error ? errorClass : ''}`;
 
   const handleEvent = (inputValue: HTMLInputTypeAttribute) => {
     eventCallback?.('INPUT_CHANGE', {
@@ -94,9 +98,7 @@ const InputTag: FC<InputTagProps> = ({
   return (
     <div className={`flex ${inputTagWrapperClasses}`}>
       {isMulti ? (
-        <div
-          className={`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto  ${inputPillsWrapperClasses}`}
-        >
+        <div className={`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto  ${inputPillsWrapperClasses}`}>
           {tags.map((tag, index) => (
             <div
               key={index}
