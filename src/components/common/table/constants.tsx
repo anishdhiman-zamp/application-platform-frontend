@@ -12,3 +12,24 @@ export const myTheme = themeQuartz.withParams({
   headerColumnBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
   headerBackgroundColor: '#FFF',
 });
+
+export const dataTableTheme = themeQuartz.withParams({
+  fontFamily: { googleFont: 'Inter' },
+  wrapperBorderRadius: 0,
+  wrapperBorder: { width: 0 },
+  headerFontSize: 11,
+  headerFontWeight: 400,
+  headerTextColor: '#8F8F8F',
+  headerHeight: 36,
+  headerRowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
+  headerColumnBorder: { width: 0 },
+  headerColumnResizeHandleWidth: 0,
+  headerBackgroundColor: '#FFFFFF',
+  rowHeight: 60,
+  rowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
+  rowHoverColor: '#FBFBFB',
+  columnBorder: { width: 0 },
+  cellHorizontalPadding: 24,
+});
+
+export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: '' };
