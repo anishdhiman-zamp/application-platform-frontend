@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { ReactNode, useMemo, useRef } from 'react';
 import {
   ClientSideRowModelModule,
   ColDef,
@@ -44,6 +44,16 @@ interface TableProps {
   gridStyle?: MapAny;
   getRows?: (params: IServerSideGetRowsParams) => void;
 }
+
+export type TableColumnType = {
+  field: string;
+  filter?: string | boolean | ((props: any) => ReactNode);
+  filterParams?: {
+    values: string[];
+    filterOptions: string[] | null;
+  };
+  flex: number;
+};
 
 const Table: React.FC<TableProps> = ({
   rows = [],

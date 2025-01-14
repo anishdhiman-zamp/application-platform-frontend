@@ -106,3 +106,10 @@ export const formRequestUrlWithParams = (url: string, params: MapAny) => {
 
   return formattedUrl;
 };
+
+
+export function camelCaseToNormalText(camelCaseStr: string) {
+  return camelCaseStr
+    .replace(/([A-Z])/g, ' $1') // Insert a space before uppercase letters
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
+}

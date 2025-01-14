@@ -199,6 +199,7 @@ module.exports = {
         overlay: '1px 2px 10px rgba(197, 220, 255, 0.54)',
         inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
         inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_700)',
+        tableFilterMenu: '1px 2px 10px 0px #A6A6A61A'
       },
       borderRadius: {
         2.5: '10px',
@@ -287,5 +288,5 @@ module.exports = {
     textColor: ['group-hover'],
   },
   // eslint-disable-next-line import/no-unresolved
-  plugins: [import('@tailwindcss/typography')], 
+  plugins: [import('@tailwindcss/typography')],
 };

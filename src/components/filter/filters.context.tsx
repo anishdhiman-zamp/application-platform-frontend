@@ -115,6 +115,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return { ...state, periodicity: action?.payload?.periodicity };
       case filtersContextActions.SET_SELECTED_FILTERS: {
         const selectedFilters = {
+          ...state?.selectedFilters,
           ...action?.payload?.selectedFilters,
         };
 

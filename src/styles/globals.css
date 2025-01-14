@@ -48,3 +48,10 @@
 .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
   background: #93937b;
 }
+
+.ag-menu{
+ border-width: 0px; 
+ box-shadow: none;
+ overflow-y: visible;
+ overflow-x: visible;
+}

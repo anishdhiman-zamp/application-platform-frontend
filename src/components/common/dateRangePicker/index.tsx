@@ -77,7 +77,6 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   const [focusedRange, setFocusedRange] = useState<RangeFocus>([0, 0]);
 
   const onSetFocusedRange = (range: RangeFocus) => {
-    console.log('range', range);
     setFocusedRange(range);
   };
 
@@ -154,7 +153,7 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   return (
     <MenuWrapper
       id={`${id}_DATE_RANGE_FILTER`}
-      childrenWrapperClassName={`!overflow-visible !max-h-125 !w-[277px] ${isSingle ? '!h-[390px]' : '!h-[490px]'
+      childrenWrapperClassName={`!overflow-visible !max-h-125 !w-[277px] ${isSingle ? '!h-[390px]' : '!h-[466px]'
         }`}
     >
       <DateRangeMenu

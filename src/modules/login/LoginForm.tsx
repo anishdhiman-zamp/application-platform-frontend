@@ -28,8 +28,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const router = useRouter();
   const errorId = router.query.error?.toString() ?? '';
 
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isEmailLogin, setIsEmailLogin] = useState<boolean>(false);
 
   const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
 
@@ -40,6 +41,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const [password, setPassword] = useState<string>('');
 
   const handleGoogleClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
+    setIsEmailLogin(false);
     e?.preventDefault?.();
     if (loginFlow) {
       setLoading(true);
@@ -71,6 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const handlePasswordSubmit = (
     e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
+    setIsEmailLogin(true);
     e?.preventDefault?.();
     if (loginFlow) {
       setLoading(true);
@@ -181,7 +184,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
             id: 'arrow-right',
             iconCategory: ICON_SPRITE_TYPES.ARROWS,
           }}
-          isLoading={loading}
+          isLoading={isEmailLogin ? loading : false}
         >
           Login
         </Button>
@@ -191,7 +194,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
         type={BUTTON_TYPES.TEXT_NAV}
         disabled={formDisabled}
         onClick={handleGoogleClick}
-        isLoading={loading}
+        isLoading={isEmailLogin ? false : loading}
       >
         <Image src={GOOGLE_ICON} width={32} height={32} alt='Zamp' />
       </Button>
