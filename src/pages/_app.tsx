@@ -13,6 +13,7 @@ import { AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants
 import { Loader } from 'components/common/loader/Loader';
 import 'styles/fonts.css';
 import 'styles/globals.css';
+import 'styles/colors.css';
 import 'styles/react-datepicker.css';
 import 'styles/react-dates.css';
 import 'react-date-range/dist/styles.css';
