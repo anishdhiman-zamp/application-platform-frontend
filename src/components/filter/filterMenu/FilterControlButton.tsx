@@ -1,11 +1,9 @@
 import React, { FC, PropsWithChildren } from 'react';
-import { SIZE } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { cn } from 'utils/common';
 import { Loader } from 'components/common/loader/Loader';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
 
 interface FilterControlButtonProps extends PropsWithChildren {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
@@ -27,8 +25,9 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   onClick,
   tooltipText = '',
   tooltipPosition = TooltipPositions.BOTTOM,
-  icon = 'filter-lines',
+  icon = 'plus',
   iconCategory = ICON_SPRITE_TYPES.GENERAL,
+  iconColor,
   buttonRef,
   children,
   isSelected = false,
@@ -57,7 +56,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     >
       <button
         className={cn(
-          'border border-DIVIDER_SAIL_2 rounded-lg px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
+          'border mb-3 border-DIVIDER_SAIL_2 rounded-lg px-2 py-1.5 h-fit w-fit outline-none flex items-center',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4'
@@ -68,10 +67,10 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
         disabled={disabled}
       >
         {isLoading ? (
-          <Loader size={SIZE.XSMALL} className='m-auto' />
+          <Loader className='m-auto' />
         ) : (
           <>
-            <SvgSpriteLoader id={icon} iconCategory={iconCategory} width={14} height={14} />
+            <SvgSpriteLoader id={icon} iconCategory={iconCategory} width={14} height={14} color={iconColor} />
             {!!children && (
               <span
                 className={`f-13-400 ${typeof children === 'string' ? 'ml-1.5' : ''} ${childrenWrapperClassName}`}

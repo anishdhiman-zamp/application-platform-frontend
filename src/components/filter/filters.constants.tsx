@@ -38,6 +38,22 @@ export enum FILTER_KEYS {
     DATE_RANGE = 'date_range',
 }
 
+export enum RANGE_FILTER_VALUES {
+    IS_EQUAL_TO = 'is_equal_to',
+    IS_NOT_EQUAL_TO = 'is_not_equal_to',
+    IN_BETWEEN = 'in_between',
+    IS_GREATER_THAN = 'is_greater_than',
+    IS_LESS_THAN = 'is_less_than',
+}
+
+export const AMOUNT_RANGE_TYPE_SYMBOL_MAP = {
+    [RANGE_FILTER_VALUES.IS_EQUAL_TO]: '=',
+    [RANGE_FILTER_VALUES.IS_GREATER_THAN]: '>',
+    [RANGE_FILTER_VALUES.IS_LESS_THAN]: '<',
+    [RANGE_FILTER_VALUES.IN_BETWEEN]: 'in between',
+};
+
+
 export const AG_GRID_FILTER_TYPES = {
     // [FILTER_TYPES.SEARCH]: 'agTextColumnFilter',
     [FILTER_TYPES.SEARCH]: SearchFilterMenuItem,

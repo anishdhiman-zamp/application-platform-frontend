@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { PERSISTENT_FILTER_ID, usePersistFilters } from 'hooks/usePersistFilters';
 import { MapAny } from 'types/commonTypes';
-import { FilterEntityMenuType } from 'components/filter/filter.types';
+import { FilterConfigType, FilterEntityMenuType } from 'components/filter/filter.types';
 import { FILTER_PERIODICITIES } from 'components/filter/filters.constants';
 
 enum filtersContextActions {
@@ -24,7 +24,7 @@ enum filtersContextActions {
 
 interface InitialStateType {
   filters: MapAny;
-  filtersConfig?: MapAny | null;
+  filtersConfig?: FilterConfigType[] | null;
   selectedFilters: MapAny; // Powers the filters to be sent to the api calls
   selectedFiltersInUI: MapAny; // Powers the filters to be displayed in the UI - We need this as we need to show the filters in the UI even if their value is empty
   selectedEntity?: FilterEntityMenuType;

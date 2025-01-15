@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
-import { DatasetDataResponseType, DatasetFilterConfigResponseType } from 'types/api/dataset.types';
+import { DatasetDataRequestType, DatasetDataResponseType, DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -12,8 +12,8 @@ const Dataset = baseApi.injectEndpoints({
             transformResponse: ({ data }) => data,
 
         }),
-        getDatasetData: builder.query<DatasetDataResponseType, MapAny>({
-            query: (payload) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, payload) }),
+        getDatasetData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
+            query: ({ datasetId, queryConfig }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId, }), params: { queryConfig } }),
             transformResponse: ({ data }) => data,
         }),
     }),

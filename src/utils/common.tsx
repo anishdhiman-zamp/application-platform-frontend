@@ -107,9 +107,18 @@ export const formRequestUrlWithParams = (url: string, params: MapAny) => {
   return formattedUrl;
 };
 
+export function isCamelCase(str: string) {
+  // Regular expression to match camelCase
+  const camelCaseRegex = /^[a-z]+([A-Z][a-z]*)*$/;
+
+  return camelCaseRegex.test(str);
+}
 
 export function camelCaseToNormalText(camelCaseStr: string) {
-  return camelCaseStr
-    .replace(/([A-Z])/g, ' $1') // Insert a space before uppercase letters
-    .replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
+  const isCamelCaseString = isCamelCase(camelCaseStr);
+
+  if (!isCamelCaseString) return camelCaseStr;
+
+  return camelCaseStr?.replace(/([A-Z])/g, ' $1') // Insert a space before uppercase letters
+    ?.replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
 }

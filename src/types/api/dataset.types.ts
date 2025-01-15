@@ -12,3 +12,8 @@ export type DatasetDataResponseType = {
     rows: MapAny[];
     columns: MapAny[];
 }
+
+export type DatasetDataRequestType = {
+    datasetId: string;
+    queryConfig?: string;
+}

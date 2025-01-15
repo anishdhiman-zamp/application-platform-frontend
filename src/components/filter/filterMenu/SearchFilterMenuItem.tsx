@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
@@ -9,7 +9,13 @@ import { AMOUNT_RANGE_FILTER_OPTIONS } from 'components/filter/filters.constants
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const SearchFilterMenuItem = ({ column }: { column: any }) => {
+interface SearchFilterMenuItemProps {
+    column: { colId: string };
+    values: string[];
+    className?: string;
+}
+
+const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className }) => {
     const ref = useRef(null);
     const columnId = column?.colId;
     const { state: { selectedFilters }, dispatch } = useFiltersContextStore();
@@ -49,7 +55,7 @@ const SearchFilterMenuItem = ({ column }: { column: any }) => {
     useOnClickOutside(ref, () => setIsOpen(false));
 
     return (
-        <div className='px-2.5 py-2 w-[218px] border border-GRAY_400 rounded-md bg-white shadow-[1px_2px_10px_0px_#A6A6A61A]'>
+        <div className={`px-2.5 py-2 w-[218px] border border-GRAY_400 rounded-md bg-white shadow-tableFilterMenu ${className}`}>
             <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 mb-2'>
                 <div className='f-11-400 text-GRAY_700  whitespace-nowrap text-ellipsis overflow-hidden'>{camelCaseToNormalText(columnId)}</div>
                 <div className='flex items-center gap-[2px] cursor-pointer relative select-none grow' onClick={() => setIsOpen(!isOpen)}>

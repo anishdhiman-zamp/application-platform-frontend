@@ -1,31 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useGetDatasetDataQuery, useGetDatasetFilterConfigQuery } from 'apis/dataset';
-import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
-import DateRangeFilterWithControl from 'components/common/dateRangePicker/DateRangeFilterWithControl';
-import Table, { TableColumnType } from 'components/common/table';
-import { DateFilterValueType } from 'components/filter/DateRangeFilter';
-import { FILTER_TYPES } from 'components/filter/filter.types';
+import Table from 'components/common/table';
+import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
-import { withFiltersContext } from 'components/filter/filters.context';
+import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
 
 const DataHome = () => {
+  const { dispatch, state: { filtersConfig } } = useFiltersContextStore();
 
-  const { data: filterConfig } = useGetDatasetFilterConfigQuery({ datasetId: 'b21fe5bf_8f4c_4b12_ba5d_20c2d8de8968' });
-  const { data: datasetData } = useGetDatasetDataQuery({ datasetId: 'b21fe5bf_8f4c_4b12_ba5d_20c2d8de8968' });
-  const [columns, setColumns] = useState<TableColumnType[]>([]);
-  const dateRangeOptions = DATE_FILTER_OPTIONS.filter((option) => option.value !== DATE_FILTER_CATEGORIES.ALL_TIME);
-
-  const [date, setDate] = useState<DateFilterValueType>({
-    date_category: DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE,
-    start_date: new Date(),
-    end_date: new Date(),
-  });
-
-  const onDateSelect = (value: DateFilterValueType) => {
-    setDate(value);
-  };
+  const { data: filterConfig } = useGetDatasetFilterConfigQuery({ datasetId: '10d8e092-ea1c-4e20-a1b4-a364201f9c99' });
+  const { data: datasetData } = useGetDatasetDataQuery({ datasetId: '10d8e092-ea1c-4e20-a1b4-a364201f9c99', queryConfig: JSON.stringify({ "filters": null, "aggregations": [], "groupBy": [], "orderBy": [], "getTotalRecords": true, "pagination": { "page": 1, "pageSize": 100 } }) });
+  const [columns, setColumns] = useState<any[]>([]);
 
   useEffect(() => {
     if (filterConfig?.length) {
@@ -33,33 +20,38 @@ const DataHome = () => {
         field: column.column,
         filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
         filterParams: {
-          values: column.options,
-          filterOptions: column.type === FILTER_TYPES.AMOUNT_RANGE ? ['equals', 'notEqual', 'lessThan', 'lessThanOrEqual', 'greaterThan', 'greaterThanOrEqual', 'inRange'] : null
+          values: column.options
         },
         flex: 1
       }));
 
       if (columns.length > 0) {
         setColumns(columns);
+        dispatch({
+          type: filtersContextActions.SET_FILTERS_CONFIG,
+          payload: {
+            filtersConfig: filterConfig.map((column) => ({ key: column.column, label: column.column, values: column.options, type: column.type }))
+          }
+        });
       }
     }
   }, [filterConfig]);
 
+
+
+
   return (
     <div className='h-full'>
-      <div className='flex items-center justify-end px-5'>
-        <DateRangeFilterWithControl
-          onChange={onDateSelect}
-          value={date}
-          disabled={false}
-          className='tw-mr-6'
-          customRangeOptions={dateRangeOptions}
-          disableFutureDate
+      <div className='flex items-center py-3'>
+        <FiltersWrapper
+          label='Filter'
+          allowActions={true}
+          filterConfig={filtersConfig ?? []}
         />
       </div>
-
-
-      <Table rows={datasetData?.rows ?? []} columns={columns} />
+      <div className='z-10 w-full h-full' >
+        <Table rows={datasetData?.rows ?? []} columns={columns} />
+      </div>
     </div>
   );;
 };

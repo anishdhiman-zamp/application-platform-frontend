@@ -1,13 +1,15 @@
 import { ReactNode } from "react";
+import { MapAny } from "types/commonTypes";
+
+
+export type FilterValueTypes = string | null | Array<MapAny> | MapAny;
 
 
 export enum FILTER_TYPES {
     SEARCH = 'search',
     MULTI_SELECT = 'multi-select',
     DATE_RANGE = 'date-range',
-    NUMBER_RANGE = 'number-range',
     AMOUNT_RANGE = 'amount-range',
-    ACCOUNT_TYPES = 'account-types',
 }
 
 export interface FilterMenuType {
@@ -20,6 +22,13 @@ export interface FilterMenuType {
     is_greater_than?: number;
     is_less_than?: number;
 }
+
+export enum FILTER_LABEL_TYPES {
+    LABEL = 'LABEL',
+    COUNT = 'COUNT',
+}
+
+export interface FilterConfigType { key: string, label: string, values: string[], type: string }
 
 export interface FilterEntityMenuType extends FilterMenuType {
     id: string;
