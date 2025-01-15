@@ -5,12 +5,13 @@ export const API_ENDPOINTS = {
     AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
     DATASET_FILTER_CONFIG_GET: `datasets/{{datasetId}}/filter-config`,
     DATASET_DATA_GET: `datasets/{{datasetId}}/data`,
-
-}
-
-export const enum REQUEST_TYPES {
+    DATASET_DRILLDOWN_GET: `datasets/{{datasetId}}/drill-down/row/{{rowId}}`,
+    DATASET_LISTING_GET: `datasets/listing`,
+  };
+  
+  export const enum REQUEST_TYPES {
     POST = 'POST',
     PUT = 'PUT',
     PATCH = 'PATCH',
     DELETE = 'DELETE',
-}
+  }

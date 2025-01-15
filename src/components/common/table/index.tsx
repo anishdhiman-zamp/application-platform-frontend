@@ -1,26 +1,32 @@
-import React, { ReactNode, useMemo, useRef } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import {
+  CellStyleModule,
   ClientSideRowModelModule,
   ColDef,
+  CustomFilterModule,
   DateFilterModule,
-  IServerSideGetRowsParams,
+  IServerSideDatasource,
   ModuleRegistry,
   NumberFilterModule,
+  RowClickedEvent,
   TextFilterModule,
   Theme,
   ValidationModule,
 } from 'ag-grid-community';
 import {
+  AdvancedFilterModule,
   ColumnMenuModule,
+  ColumnsToolPanelModule,
   ContextMenuModule,
+  FiltersToolPanelModule,
   MultiFilterModule,
   ServerSideRowModelModule,
   SetFilterModule,
+  SideBarModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
-import { myTheme } from 'components/common/table/constants';
-import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
+import { myIcons, myTheme, PAGE_SIZE, sideBarConfig } from 'components/common/table/constants';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -32,17 +38,35 @@ ModuleRegistry.registerModules([
   NumberFilterModule,
   DateFilterModule,
   ServerSideRowModelModule,
+  SideBarModule,
+  FiltersToolPanelModule,
+  ColumnsToolPanelModule,
+  CellStyleModule,
+  ClientSideRowModelModule,
+  ColumnMenuModule,
+  ContextMenuModule,
+  MultiFilterModule,
+  SetFilterModule,
+  TextFilterModule,
+  NumberFilterModule,
+  DateFilterModule,
+  ServerSideRowModelModule,
+  AdvancedFilterModule,
+  CustomFilterModule,
   ValidationModule /* Development Only */,
 ]);
 
 interface TableProps {
+  tableRef?: React.RefObject<AgGridReact>;
   rows?: MapAny[];
   columns: MapAny[];
-  columnConfig?: MapAny;
-  customTheme?: Theme;
+  columnConfig?: ColDef;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
-  getRows?: (params: IServerSideGetRowsParams) => void;
+  serverSideDatasource?: IServerSideDatasource;
+  customTheme?: Theme;
+  onRowClicked?: (event: RowClickedEvent) => void;
+  hideSideBar?: boolean;
 }
 
 export type TableColumnType = {
@@ -56,24 +80,17 @@ export type TableColumnType = {
 };
 
 const Table: React.FC<TableProps> = ({
+  tableRef,
   rows = [],
   columns,
   columnConfig,
-  customTheme,
   containerStyle = { width: '100%', height: '100%' },
   gridStyle = { height: '100%', width: '100%' },
-  getRows,
+  serverSideDatasource,
+  customTheme,
+  onRowClicked,
+  hideSideBar = false,
 }) => {
-  const tableRef = useRef<AgGridReact>(null);
-  const { dispatch } = useFiltersContextStore();
-
-  // Function to get applied filters
-  const getAppliedFilters = () => {
-    const filterModel = tableRef?.current?.api?.getFilterModel();
-
-    dispatch({ type: filtersContextActions.SET_SELECTED_FILTERS, payload: { selectedFilters: filterModel } });
-  };
-
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       flex: 1,
@@ -88,6 +105,12 @@ const Table: React.FC<TableProps> = ({
     };
   }, [columnConfig]);
 
+  const icons = useMemo<MapAny>(() => {
+    return myIcons;
+  }, []);
+
+  const sideBar = useMemo(() => (hideSideBar ? null : sideBarConfig), [hideSideBar]);
+
   const theme = useMemo<Theme | 'legacy'>(() => {
     return customTheme ?? myTheme;
   }, [customTheme]);
@@ -97,13 +120,15 @@ const Table: React.FC<TableProps> = ({
       <div style={gridStyle}>
         <AgGridReact
           ref={tableRef}
-          onFilterChanged={getAppliedFilters}
           columnDefs={columns}
           defaultColDef={defaultColDef}
           theme={theme}
-          {...(getRows
-            ? { rowModelType: 'serverSide', serverSideDatasource: { getRows: getRows } }
-            : { rowData: rows })}
+          sideBar={sideBar}
+          icons={icons}
+          cacheBlockSize={PAGE_SIZE}
+          maxConcurrentDatasourceRequests={1}
+          onRowClicked={onRowClicked}
+          {...(serverSideDatasource ? { rowModelType: 'serverSide', serverSideDatasource } : { rowData: rows })}
         />
       </div>
     </div>

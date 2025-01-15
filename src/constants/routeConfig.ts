@@ -7,6 +7,8 @@ export const ROUTES_PATH = {
     DATA: '/',
     PAYMENTS: '/payments',
     SETTINGS: '/settings',
+    DRILLDOWN: '/drilldown/:datasetId/:rowId',
+    DATASET: '/dataset/:datasetId',
 }
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

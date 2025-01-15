@@ -44,6 +44,33 @@
   background: #93937b;
 }
 
+.ag-cell-wrapper {
+  &:where(.ag-row-group) {
+    align-items: center;
+  }
+}
+
+.ag-filter-active {
+  color: #2546f5;
+  position: relative;
+  outline: none;
+  background-color: #fff;
+  --ag-icon-button-hover-color: none;
+}
+
+.ag-filter-active {
+  :where(.ag-icon-filter) {
+    clip-path: none;
+  }
+}
+
+.ag-filter-active {
+  &:after {
+    content: '';
+    height: 0px;
+    width: 0;
+  }
+}
 /* Handle on hover */
 .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
   background: #93937b;

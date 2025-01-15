@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
-import Listing from 'modules/data';
+import DatasetById from 'modules/data/Dataset';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
-const Home = () => {
-  return <Listing />;
+const Dataset = () => {
+  return <DatasetById />;
 };
 
-Home.getLayout = function getLayout(page: ReactElement) {
+Dataset.getLayout = function getLayout(page: ReactElement) {
   return (
     <div>
       <DashboardLayout>{page}</DashboardLayout>
@@ -14,4 +14,4 @@ Home.getLayout = function getLayout(page: ReactElement) {
   );
 };
 
-export default Home;
+export default Dataset;
