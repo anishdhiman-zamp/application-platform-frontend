@@ -1,6 +1,6 @@
 import React from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from "apis/auth";
-import { PAGES_ITEMS } from 'constants/dummyData';
+import { useGetPagesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from "constants/icons";
 import { ROUTES_PATH, SIDEBAR_ITEMS } from "constants/routeConfig";
 import { useRouter } from "next/router";
@@ -18,6 +18,8 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
   const pathname = router.pathname;
   const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
   const [logOut] = useLazyLogoutQuery();
+
+  const { data: pages } = useGetPagesQuery();
 
   const handleLogout = async () => {
     logOut(initiateLogoutFlow?.logout_url ?? '').then(() => {
@@ -42,14 +44,13 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
             />
           ))}
         </div>
-        {/* <WorkspaceSwitcher /> */}
         <div className='px-1 py-2.5'>
           <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
-          {PAGES_ITEMS.map((item) => (
-            <PageNavTab key={item.label} label={item.label} />
+          {pages?.map((item) => (
+            <PageNavTab key={item.page_id} label={item.name} pageId={item.page_id} />
           ))}
         </div>
-        <div className="border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer"
+        <div className="border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px]"
           onClick={handleLogout}>
           <div className="flex items-center gap-2.5 text-GRAY_900" >
             <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />

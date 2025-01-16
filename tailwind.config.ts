@@ -201,6 +201,7 @@ module.exports = {
         inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
         inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_700)',
         tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
+        pageBottomBar: '0px -4px 0px 0px #00000005',
       },
       borderRadius: {
         2.5: '10px',

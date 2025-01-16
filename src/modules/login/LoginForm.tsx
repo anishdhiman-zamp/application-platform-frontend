@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
@@ -25,6 +26,7 @@ const commonFetchConfig = {
 };
 
 const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
+  const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const router = useRouter();
   const errorId = router.query.error?.toString() ?? '';
 
@@ -37,8 +39,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const { data: initiatedLoginFlow, isLoading } = useInitiateLoginFlowQuery();
   const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>(cachedUserEmail.email ?? '');
+  const [password, setPassword] = useState<string>(cachedUserEmail.password ?? '');
 
   const handleGoogleClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
     setIsEmailLogin(false);
@@ -107,6 +109,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
         return response
           .json()
           .then((responseJson) => {
+            setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER, JSON.stringify({ email, password }));
+
             if (response.status < 300) {
               window.location.reload();
 
@@ -130,6 +134,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
       setLoginFlow(initiatedLoginFlow);
     }
   }, [initiatedLoginFlow]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      router.push('/payments');
+    }
+  }, []);
 
   const formDisabled = loading || isLoading || !loginFlow;
 

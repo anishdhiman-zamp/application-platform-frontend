@@ -62,7 +62,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
             ref={containerRef}
             className={`flex flex-col flex-grow relative h-screen ${containerStyle}`}
           >
-            <div className={`w-full relative mx-auto border border-GRAY_400 bg-white h-full rounded-tl-md ${contentWrapperClassName}`}>
+            <div className={`w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)] rounded-tl-md ${contentWrapperClassName}`}>
               {renderChildrenWithProps(children)}
             </div>
           </div>

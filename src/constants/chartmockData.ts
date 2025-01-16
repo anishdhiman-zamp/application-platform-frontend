@@ -35,7 +35,7 @@ export const chartData = [
     },
 ];
 
-export const chartDataJson ={
+export const chartDataJson = {
     title: {
         text: "Apple's Revenue by Product Category",
     },
@@ -111,4 +111,7 @@ export const barGraph: AgChartOptions = {
             stacked: true,
         },
     ],
+    legend: {
+        position: "top",
+    },
 };

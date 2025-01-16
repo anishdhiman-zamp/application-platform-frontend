@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { PAGES_ITEMS, WORKSPACE_ITEMS } from 'constants/dummyData';
+import { WORKSPACE_ITEMS } from 'constants/dummyData';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
-import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
+// import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import WorkspaceTab from 'components/layouts/dashboard-layout/components/WorkspaceTab';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -58,9 +58,9 @@ const WorkspaceSwitcher = () => {
       </div>
       <div className='px-1 py-2.5'>
         <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
-        {PAGES_ITEMS.map((item) => (
+        {/* {PAGES_ITEMS.map((item) => (
           <PageNavTab key={item.label} label={item.label} />
-        ))}
+        ))} */}
       </div>
     </div>
   );
