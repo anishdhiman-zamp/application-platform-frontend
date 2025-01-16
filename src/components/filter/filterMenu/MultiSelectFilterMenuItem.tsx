@@ -65,6 +65,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column,
         <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>
+
         <div className='flex justify-end text-GRAY_700 cursor-pointer'>
           <SvgSpriteLoader
             id='refresh-ccw-01'

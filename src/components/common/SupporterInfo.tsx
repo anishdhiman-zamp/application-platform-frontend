@@ -27,7 +27,6 @@ const TYPE_PROP = {
   },
 };
 
-
 export const SupporterInfo: FC<SupporterInfoProps> = ({
   type = SUPPORT_INFO_TYPES.GUIDE,
   icon = null,
