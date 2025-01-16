@@ -10,13 +10,8 @@ import {
   OrderType,
   RequestType,
 } from 'types/components/table.type';
-import {
-  AggregationFunctionMap,
-  ArrayFilters,
-  LogicalOperatorMap,
-  OperatorMap,
-  PAGE_SIZE,
-} from 'components/common/table/constants';
+import { AggregationFunctionMap, ArrayFilters, LogicalOperatorMap, PAGE_SIZE } from 'components/common/table/constants';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType[] => {
@@ -33,18 +28,59 @@ const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType
   }));
 };
 
-const parseCondition = (condition: MapAny): FilterType => {
+const getConditionValues = (condition: MapAny): MapAny | null => {
+  switch (condition.filterType) {
+    case FILTER_TYPES.AMOUNT_RANGE:
+      if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
+        if (condition.filterTo !== '' && condition.filter !== '')
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: [Number(condition.filter), Number(condition.filterTo)],
+          };
+        else return null;
+      } else if (condition.filter !== '') {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: Number(condition.filter),
+        };
+      } else return null;
+    case FILTER_TYPES.MULTI_SELECT:
+      if (condition.values.length) {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: condition.values,
+        };
+      } else return null;
+    case FILTER_TYPES.DATE_RANGE:
+      if (condition.dateFrom && condition.dateTo) {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: [condition.dateFrom, condition.dateTo],
+        };
+      } else return null;
+    case FILTER_TYPES.SEARCH:
+      return {
+        column: condition.colId,
+        operator: condition.type,
+        value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
+      };
+    default:
+      return null;
+  }
+};
+
+const parseCondition = (condition: MapAny): FilterType | null => {
   if (condition.conditions) {
     return {
       logicalOperator: LogicalOperatorMap[condition.type] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: condition.conditions.map((cond: MapAny) => parseCondition(cond)),
     };
   } else {
-    return {
-      column: condition.colId,
-      operator: OperatorMap[condition.type] || CONDITION_OPERATOR_TYPE.EQUAL,
-      value: ArrayFilters.includes(OperatorMap[condition.type]) ? [condition.values] : condition.values,
-    };
+    return getConditionValues(condition);
   }
 };
 
@@ -54,25 +90,32 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   } else if (input.filterType === 'join') {
     return {
       logicalOperator: LogicalOperatorMap[input.type] || LogicalOperatorType.OperatorLogicalAnd,
-      conditions: input.conditions.map((condition: MapAny) => parseCondition(condition)),
+      conditions: input.conditions
+        .map((condition: MapAny) => parseCondition(condition))
+        .filter((condition: MapAny) => condition !== null),
     };
   } else if (input.conditions) {
     return {
       logicalOperator: LogicalOperatorMap[input.operator] || LogicalOperatorType.OperatorLogicalAnd,
-      conditions: input.conditions.map((condition: MapAny) => parseCondition(condition)),
+      conditions: input.conditions
+        .map((condition: MapAny) => parseCondition(condition))
+        .filter((condition: MapAny) => condition !== null),
     };
   } else {
     const keys = Object.keys(input);
 
     if (keys.length) {
-      return {
-        logicalOperator: LogicalOperatorType.OperatorLogicalAnd,
-        conditions: keys.map((key) => ({
-          column: key,
-          operator: OperatorMap[input[key].type] || CONDITION_OPERATOR_TYPE.EQUAL,
-          value: ArrayFilters.includes(OperatorMap[input[key].type]) ? [input[key].values] : input[key].values,
-        })),
-      };
+      const formattedConditions = keys.map((key) => ({ colId: key, ...input?.[key] }));
+      const conditions = formattedConditions
+        .map(parseCondition)
+        .filter((condition: MapAny | null) => condition !== null);
+
+      if (conditions.length) {
+        return {
+          logicalOperator: LogicalOperatorType.OperatorLogicalAnd,
+          conditions,
+        };
+      } else return null;
     }
 
     return null;

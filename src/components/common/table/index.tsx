@@ -20,13 +20,14 @@ import {
   ContextMenuModule,
   FiltersToolPanelModule,
   MultiFilterModule,
+  RowGroupingPanelModule,
   ServerSideRowModelModule,
   SetFilterModule,
   SideBarModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
-import { myIcons, myTheme, PAGE_SIZE, sideBarConfig } from 'components/common/table/constants';
+import { AggregationFunctionMap, myIcons, myTheme, PAGE_SIZE, sideBarConfig } from 'components/common/table/constants';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -53,6 +54,7 @@ ModuleRegistry.registerModules([
   ServerSideRowModelModule,
   AdvancedFilterModule,
   CustomFilterModule,
+  RowGroupingPanelModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -101,6 +103,7 @@ const Table: React.FC<TableProps> = ({
       floatingFilter: false,
       headerClass: 'f-12-600 text-GRAY_1000',
       cellClass: 'f-11-400 text-GRAY_1000 content-center !px-2 py-1',
+      allowedAggFuncs: Object.keys(AggregationFunctionMap),
       ...columnConfig,
     };
   }, [columnConfig]);
@@ -125,10 +128,13 @@ const Table: React.FC<TableProps> = ({
           theme={theme}
           sideBar={sideBar}
           icons={icons}
-          cacheBlockSize={PAGE_SIZE}
-          maxConcurrentDatasourceRequests={1}
           onRowClicked={onRowClicked}
-          {...(serverSideDatasource ? { rowModelType: 'serverSide', serverSideDatasource } : { rowData: rows })}
+          maxConcurrentDatasourceRequests={10}
+          blockLoadDebounceMillis={100}
+          {...(columnConfig?.enableRowGroup ? { rowGroupPanelShow: 'always' } : {})}
+          {...(serverSideDatasource
+            ? { rowModelType: 'serverSide', serverSideDatasource, cacheBlockSize: PAGE_SIZE }
+            : { rowData: rows })}
         />
       </div>
     </div>

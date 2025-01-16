@@ -1,5 +1,5 @@
 import { themeQuartz } from 'ag-grid-community';
-import { AggregationFunctionType , LogicalOperatorType } from 'types/components/table.type';
+import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const myTheme = themeQuartz.withParams({
@@ -16,6 +16,14 @@ export const myTheme = themeQuartz.withParams({
   wrapperBorderRadius: 0,
   iconSize: 12,
   rowHoverColor: '#FBFBFB',
+  checkboxBorderRadius: 2,
+  checkboxCheckedBackgroundColor: '#171717',
+  checkboxCheckedBorderColor: '#A8A8A8',
+  checkboxCheckedShapeColor: '#FBFBFE',
+  checkboxUncheckedBackgroundColor: '#FBFBFE',
+  checkboxUncheckedBorderColor: '#EBEBEB',
+  sideBarBackgroundColor: '#FFFFFF',
+  headerColumnResizeHandleColor: '#FFFFFF',
 });
 
 export const myIcons = {
@@ -103,4 +111,5 @@ export const ArrayFilters = [
   CONDITION_OPERATOR_TYPE.NOT_CONTAINS,
   CONDITION_OPERATOR_TYPE.IN_BETWEEN,
   CONDITION_OPERATOR_TYPE.ARRAY_CONTAINS,
+  CONDITION_OPERATOR_TYPE.CONTAINS,
 ];

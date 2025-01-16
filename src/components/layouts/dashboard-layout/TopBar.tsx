@@ -49,7 +49,7 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
           />
         </div>
       </div>
-      <div>Topbar</div>
+      {/* <div>Topbar</div> */}
       <Input
         placeholder='Search'
         value={search}
@@ -59,10 +59,10 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
           setSearch(e.target.value);
         }}
       />
-      <div className='flex items-center gap-2 f-13-500'>
+      {/* <div className='flex items-center gap-2 f-13-500'>
         Share
         <SvgSpriteLoader id='dots-vertical' iconCategory={ICON_SPRITE_TYPES.GENERAL} height={16} width={16} />
-      </div>
+      </div> */}
     </div>
   );
 };

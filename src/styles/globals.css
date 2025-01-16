@@ -82,3 +82,13 @@
  overflow-y: visible;
  overflow-x: visible;
 }
+
+.ag-checkbox-input-wrapper {
+ height: 14px;
+ width: 14px;
+}
+
+.ag-column-select-column-label {
+  font-size: 12px;
+  font-weight: 400;
+}
