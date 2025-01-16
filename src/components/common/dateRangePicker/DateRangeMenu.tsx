@@ -12,7 +12,7 @@ import {
 } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { format } from 'date-fns';
-import { EventCallbackType, MenuItem } from 'types/common/components';
+import { EventCallbackType, MenuItem, TAB_TYPES } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { searchDateRange } from 'components/common/dateRangePicker/dateRangePicker.utils';
 import { DateUnitTabDisplay } from 'components/common/dateRangePicker/DateUnitTabDisplay';
@@ -63,16 +63,16 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
 
   const dateRangeTabs = customTabValues?.length
     ? DATE_RANGE_TABS?.filter((tab) => {
-      return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
-    })
+        return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
+      })
     : DATE_RANGE_TABS;
   const [currentTab, setCurrentTab] = useState<string>(dateRangeTabs?.[0].value);
 
   const [startDateDisplay, setStartDateDisplay] = useState<string>(
-    range?.startDate ? format(range?.startDate, dateFormat) : ''
+    range?.startDate ? format(range?.startDate, dateFormat) : '',
   );
   const [endDateDisplay, setEndDateDisplay] = useState<string>(
-    range?.endDate ? format(range?.endDate, dateFormat) : ''
+    range?.endDate ? format(range?.endDate, dateFormat) : '',
   );
 
   useEffect(() => {
@@ -123,7 +123,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
       setCurrentValueEnd(null);
       setFocusedInput(DateRangeKeys.END_DATE);
       setStartDateDisplay(
-        value?.selection?.startDate ? format(value.selection.startDate as Date, DATE_FORMATS.ddMMMyyyy) : ''
+        value?.selection?.startDate ? format(value.selection.startDate as Date, DATE_FORMATS.ddMMMyyyy) : '',
       );
       setEndDateDisplay('');
     } else {
@@ -141,10 +141,10 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
       });
       setFocusedInput(DateRangeKeys.START_DATE);
       setStartDateDisplay(
-        value?.selection?.startDate ? format(value.selection.startDate as Date, DATE_FORMATS.ddMMMyyyy) : ''
+        value?.selection?.startDate ? format(value.selection.startDate as Date, DATE_FORMATS.ddMMMyyyy) : '',
       );
       setEndDateDisplay(
-        value?.selection?.endDate ? format(value?.selection?.endDate as Date, DATE_FORMATS.ddMMMyyyy) : ''
+        value?.selection?.endDate ? format(value?.selection?.endDate as Date, DATE_FORMATS.ddMMMyyyy) : '',
       );
     }
   };
@@ -213,7 +213,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
       newRange.endDate = getValidDate(disableFutureDate && endDateUpdate > today ? today : endDateUpdate);
 
       setStartDateDisplay(
-        format(disableFutureDate && update > today ? today : (update as Date), DATE_FORMATS.ddMMMyyyy)
+        format(disableFutureDate && update > today ? today : (update as Date), DATE_FORMATS.ddMMMyyyy),
       );
       setEndDateDisplay('');
     } else {
@@ -327,10 +327,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
   return (
     <div className='h-full'>
       <div className='flex  overflow-hidden h-full'>
-        <div
-          className='flex-1 shadow-dateContainer w-full'
-          data-testid={`date-range-menu-custom-${id}`}
-        >
+        <div className='flex-1 shadow-dateContainer w-full' data-testid={`date-range-menu-custom-${id}`}>
           {!isSingle && (
             <div className='border-b border-GRAY_400 mx-3 pt-3 flex w-auto justify-between '>
               <div className=''>
@@ -341,7 +338,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   wrapperStyle='border-white !w-auto'
                   tabItemWrapperStyle='!w-auto'
                   id='ACCOUNTS_TABS'
-                  tabItemGapClassName='mr-3'
+                  type={TAB_TYPES.FILLED}
                 />
               </div>
 
@@ -350,10 +347,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
               </div>
             </div>
           )}
-          <div
-            className={`items-start flex flex-col p-3  ${isSingle ? 'h-full' : 'h-[calc(100%-38.5px)]'
-              }`}
-          >
+          <div className={`items-start flex flex-col p-3  ${isSingle ? 'h-full' : 'h-[calc(100%-38.5px)]'}`}>
             {/* ----- Display value of startDate and endDate -------- */}
             <DisplayDates
               startDate={startDateDisplay}

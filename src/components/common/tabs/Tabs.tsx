@@ -1,17 +1,14 @@
 import React, { ElementType, FC, useEffect, useRef, useState } from 'react';
-import { MenuItem } from 'types/common/components';
+import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
+import { TAB_STYLES } from 'components/common/tabs/tabs.constants';
 
 export interface TabsProps {
   list: Array<MenuItem>;
   customSelectedIndex?: number;
   onSelect?: (item?: MenuItem) => void;
   TabItemComponent?: ElementType | null;
-  tabItemClassName?: string;
-  tabItemSelectedClassName?: string;
-  tabItemDefaultClassName?: string;
   tabItemWrapperClassName?: string;
-  tabItemGapClassName?: string;
   scrollWrapperClassName?: string;
   wrapperClassName?: string;
   indicatorClassName?: string;
@@ -26,6 +23,7 @@ export interface TabsProps {
   selectedTabIndicatorStyle?: string;
   id: string;
   disabled?: boolean;
+  type: TAB_TYPES;
 }
 
 export const Tabs: FC<TabsProps> = ({
@@ -35,23 +33,16 @@ export const Tabs: FC<TabsProps> = ({
   TabItemComponent = null,
   scrollWrapperClassName = 'pb-[0.5px]',
   wrapperClassName = '',
-  tabItemWrapperClassName = 'relative flex justify-center items-center w-full',
-  tabItemClassName = 'mb-2',
-  tabItemSelectedClassName = 'f-13-500 text-GRAY_1000',
-  tabItemDefaultClassName = 'f-13-400 text-GRAY_700',
-  tabItemGapClassName = 'mr-8',
-  indicatorClassName = 'absolute bottom-[-1.5px] border-[1.5px] transition-all',
-  selectedTabIndicatorClassName = 'border-GRAY_1000 !border-b-2 w-full',
+  tabItemWrapperClassName = 'relative flex justify-center items-center w-fit',
   scrollWrapperStyle = '',
   wrapperStyle = '',
   tabItemWrapperStyle = '',
   tabItemStyle = '',
   tabItemSelectedStyle = '',
   tabItemDefaultStyle = '',
-  indicatorStyle = '',
-  selectedTabIndicatorStyle = '',
   id = '',
   disabled,
+  type = TAB_TYPES.FILLED,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number>(customSelectedIndex);
   const firstLoad = useRef(true);
@@ -72,59 +63,61 @@ export const Tabs: FC<TabsProps> = ({
   }, [customSelectedIndex]);
 
   const TabItem = TabItemComponent ?? null;
+  const hasMultipleItems = list?.length > 1;
+  const { tabItemSelectedClassName, tabItemDefaultClassName, tabItemGapClassName, tabItemClassName } = TAB_STYLES[type];
 
   return (
-    <div
-      className={`overflow-hidden no-scrollbar select-none ${scrollWrapperClassName} ${scrollWrapperStyle}`}
-    >
-      <div className={`flex w-full ${wrapperClassName} ${wrapperStyle}`}>
-        {list?.map((tabItem, index) => {
-          const selected = index === selectedIndex;
-          const last = index === list.length - 1;
+    <>
+      {hasMultipleItems && (
+        <div className={`overflow-hidden no-scrollbar select-none ${scrollWrapperClassName} ${scrollWrapperStyle}`}>
+          <div className={`flex w-full ${wrapperClassName} ${wrapperStyle}`}>
+            {list?.map((tabItem, index) => {
+              const selected = index === selectedIndex;
+              const last = index === list.length - 1;
 
-          return (
-            !tabItem.isHidden && (
-              <div
-                role='presentation'
-                key={index}
-                onClick={() => handleSelect(index)}
-                className={`cursor-pointer ${!last ? tabItemGapClassName : ''
-                  } ${tabItemWrapperClassName} ${tabItemWrapperStyle}`}
-                data-testid={`TAB_ITEM_${tabItem.label}`}
-              >
-                {TabItem ? (
-                  <TabItem
-                    data={tabItem}
-                    selected={selected}
-                    className={`${tabItemClassName} ${tabItemStyle}`}
-                    selectedClassName={`${tabItemSelectedClassName} ${tabItemSelectedStyle}`}
-                    defaultClassName={`${tabItemDefaultClassName} ${tabItemDefaultStyle}`}
-                    index={index}
-                  />
-                ) : (
+              return (
+                !tabItem.isHidden && (
                   <div
-                    className={`flex gap-1 items-center ${tabItemClassName} ${tabItemStyle} ${selected
-                      ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
-                      : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
-                      }`}
+                    role='presentation'
+                    key={index}
+                    onClick={() => handleSelect(index)}
+                    className={`cursor-pointer ${
+                      !last ? tabItemGapClassName : ''
+                    } ${tabItemWrapperClassName} ${tabItemWrapperStyle}`}
+                    data-testid={`TAB_ITEM_${tabItem.label}`}
                   >
-                    {tabItem?.label}
-                    {!!tabItem?.metadata?.count && (
-                      <div className='f-12-300 border border-BORDER_7 text-GRAY_600 px-1 bg-white h-4 !leading-3.5'>
-                        {tabItem?.metadata?.count}
+                    {TabItem ? (
+                      <TabItem
+                        data={tabItem}
+                        selected={selected}
+                        className={`${tabItemClassName} ${tabItemStyle}`}
+                        selectedClassName={`${tabItemSelectedClassName} ${tabItemSelectedStyle}`}
+                        defaultClassName={`${tabItemDefaultClassName} ${tabItemDefaultStyle}`}
+                        index={index}
+                      />
+                    ) : (
+                      <div
+                        className={`flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
+                          selected
+                            ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
+                            : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
+                        }`}
+                      >
+                        {tabItem?.label}
+                        {!!tabItem?.metadata?.count && (
+                          <div className='f-12-300 border border-BORDER_7 text-GRAY_600 px-1 bg-white h-4 !leading-3.5'>
+                            {tabItem?.metadata?.count}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-                <div
-                  className={`${indicatorClassName} ${indicatorStyle} ${selected ? `${selectedTabIndicatorClassName} ${selectedTabIndicatorStyle}` : 'opacity-0 w-0'
-                    }`}
-                ></div>
-              </div>
-            )
-          );
-        })}
-      </div>
-    </div>
+                )
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

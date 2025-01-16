@@ -1,4 +1,3 @@
-import { ReactElement } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
@@ -17,12 +16,6 @@ export enum POSITION_TYPES {
   TOP = 'TOP',
 }
 
-export interface TextProps {
-  textClass?: string;
-  children: string | ReactElement;
-  id?: string;
-}
-
 export type EventCallbackType = (id: string, payload: MapAny) => void;
 
 export interface MenuItem {
@@ -38,4 +31,9 @@ export interface MenuItem {
   iconProps?: SvgSpriteLoaderProps;
   metadata?: MapAny;
   description?: string;
+}
+
+export enum TAB_TYPES {
+  FILLED = 'FILLED',
+  OUTLINE = 'OUTLINE',
 }

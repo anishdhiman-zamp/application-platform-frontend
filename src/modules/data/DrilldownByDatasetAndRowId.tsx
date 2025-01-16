@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useGetDatasetDrilldownQuery } from 'apis/dataset';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import { MenuItem } from 'types/common/components';
+import { MenuItem, TAB_TYPES } from 'types/common/components';
 import Table from 'components/common/table';
 import { Tabs } from 'components/common/tabs/Tabs';
 
@@ -52,6 +52,7 @@ const DrilldownByDatasetAndRowId = () => {
           id='drilldown-tabs'
           onSelect={handleTabSelect}
           customSelectedIndex={currentTabIndex >= 0 ? currentTabIndex : 0}
+          type={TAB_TYPES.OUTLINE}
         />
       )}
       <Table rows={rows} columns={columns} />
