@@ -14,7 +14,7 @@ const PageNavTab = ({ label, pageId }: PageNavTabProps) => {
 
   return (
     <div className='flex items-center gap-3 text-GRAY_900 px-1 py-2.5 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none'
-      onClick={() => router.push(ROUTES_PATH.PAGE + pageId)}>
+      onClick={() => router.push(`${ROUTES_PATH.PAGE}/${pageId}`)}>
       <Image
         width={16}
         height={16}
