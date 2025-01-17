@@ -41,7 +41,7 @@ export type DatasetDrilldownResponseType = {
     }[]
 }
 
-export type DatasetListingResponseType = {
+export type DatasetType = {
     id: string;
     title: string;
     description: string;
@@ -51,3 +51,13 @@ export type DatasetListingResponseType = {
     organization_id: string;
     metadata: MapAny;
 };
+
+export type DatasetListingResponseType = {
+    datasets: DatasetType[];
+    total_count: number;
+}
+
+export type DatasetListingRequestType = {
+    page: number;
+    pageSize: number;
+}

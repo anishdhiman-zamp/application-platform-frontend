@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
-import { DatasetDataRequestType, DatasetDataResponseType, DatasetDrilldownRequestType, DatasetDrilldownResponseType, DatasetFilterConfigResponseType, DatasetListingResponseType } from 'types/api/dataset.types';
+import { DatasetDataRequestType, DatasetDataResponseType, DatasetDrilldownRequestType, DatasetDrilldownResponseType, DatasetFilterConfigResponseType, DatasetListingRequestType, DatasetListingResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -21,10 +21,10 @@ const Dataset = baseApi.injectEndpoints({
         { url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DRILLDOWN_GET, { datasetId, rowId }) }
       ),
     }),
-    getDatasetListing: builder.query<DatasetListingResponseType[], void>({
+    getDatasetListing: builder.query<DatasetListingResponseType, DatasetListingRequestType>({
       query: () => ({ url: API_ENDPOINTS.DATASET_LISTING_GET }),
     }),
   }),
 });
 
-export const { useGetDatasetFilterConfigQuery, useGetDatasetDataQuery, useLazyGetDatasetDataQuery, useGetDatasetDrilldownQuery, useGetDatasetListingQuery } = Dataset;
+export const { useGetDatasetFilterConfigQuery, useGetDatasetDataQuery, useLazyGetDatasetDataQuery, useGetDatasetDrilldownQuery, useLazyGetDatasetListingQuery } = Dataset;

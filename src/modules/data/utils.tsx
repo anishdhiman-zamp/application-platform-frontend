@@ -1,5 +1,5 @@
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
-import { DatasetListingResponseType } from 'types/api/dataset.types';
+import { DatasetType } from 'types/api/dataset.types';
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
@@ -27,7 +27,7 @@ export const findTimeDifference = (updated_at: string): string => {
   return `${differenceInMonthsString} months ago`;
 };
 
-export const formatData = (data: DatasetListingResponseType[]): DatasetListingResponseType[] => {
+export const formatData = (data: DatasetType[]): DatasetType[] => {
   return data.map((item) => ({
     ...item,
     updated_at: findTimeDifference(item.updated_at),
