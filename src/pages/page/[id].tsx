@@ -1,9 +1,11 @@
 import React, { ReactElement, useMemo } from 'react';
 import { useGetPageDetailsQuery, useGetSheetDetailsQuery, } from 'apis/pages';
+import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
 import WidgetsWrapper from 'modules/widgets/WidgetsWrapper';
 import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 import 'ag-charts-enterprise';
@@ -12,9 +14,8 @@ const Page = () => {
     const router = useRouter();
     const { id } = router.query;
     const { data: pageDetails } = useGetPageDetailsQuery(id as string, { skip: !id });
-    const currentSheetId = router.asPath.split('#')[1] ?? pageDetails?.sheets?.[0]?.sheet_id;
+    const currentSheetId = useMemo(() => getSheetIdFromPath(router.asPath, id as string) ?? pageDetails?.sheets?.[0]?.sheet_id, [pageDetails, router.asPath]);
     const { data: sheetDetails } = useGetSheetDetailsQuery({ pageId: id as string, sheetId: currentSheetId as string }, { skip: !id || !currentSheetId, refetchOnMountOrArgChange: false });
-
 
     const tabs = useMemo(
         () =>
@@ -28,11 +29,12 @@ const Page = () => {
     const handleTabSelect = (selected?: MenuItem) => {
         if (!selected?.value) return;
         router.push(`#${selected?.value}`);
+        setToLocalStorage(LOCAL_STORAGE_KEYS.DATA_SHEET_ID, JSON.stringify({ [id as string]: selected?.value }));
     };
 
     return (
-        <div className='relative bg-white h-full rounded-tl-md py-12 px-8'>
-            <div className='f-24-500 text-GRAY_950 mb-6'>{pageDetails?.name}</div>
+        <div className='relative bg-white h-full rounded-tl-md py-6 px-8'>
+            <div className='f-24-450 text-GRAY_950 mb-5.5'>{sheetDetails?.name}</div>
             <div className='grid grid-cols-2 gap-5'>
                 {sheetDetails &&
                     sheetDetails?.widget_instances?.map((widget) => (

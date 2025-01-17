@@ -1,3 +1,5 @@
+import { WIDGET_TYPES } from "modules/widgets/widgets.constant";
+
 export type PageResponseType = {
     page_id: string;
     name: string;
@@ -36,6 +38,7 @@ export interface WidgetInstanceType {
     data_mappings: DataMappings;
     created_at: string;
     updated_at: string;
+    widget_type: WIDGET_TYPES;
 }
 
 export interface DataMappings {

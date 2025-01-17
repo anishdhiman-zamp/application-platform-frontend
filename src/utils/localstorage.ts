@@ -3,6 +3,7 @@ export enum LOCAL_STORAGE_KEYS {
   XZAMP_USER = 'TMS_XZAMP_USER',
   XZAMP_WORKSPACE_ID = 'XZAMP_WORKSPACE_ID',
   DATE_PLACEHOLDER_SEEN = 'DATE_PLACEHOLDER_SEEN',
+  DATA_SHEET_ID = 'DATA_SHEET_ID',
 }
 
 export const getFromLocalStorage = (key: string) => {

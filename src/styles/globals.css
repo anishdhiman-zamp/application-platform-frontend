@@ -1,4 +1,8 @@
 
+:root {
+  font-family: "Inter Variable";
+}
+
 * > ::-webkit-scrollbar {
     width: 12px;
     border-radius: 100%;
@@ -100,3 +104,13 @@
   line-height: 0.875rem;
   align-content: center;
 }
+
+.ag-charts-proxy-legend-toolbar{
+  width: 100%;
+  left: 0;
+  display: flex !important;
+  justify-content: start !important;
+  align-items: start !important;
+}
+
+

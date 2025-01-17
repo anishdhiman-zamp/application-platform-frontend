@@ -39,13 +39,15 @@ export type WidgetDataRowType = {
 }
 
 export type WidgetDataType = {
-    "result": {
-        "status": "success",
-        "error": null,
-        "rowcount": number,
-        "columns": WidgetColumnType[],
-        "data": WidgetDataRowType[]
-    }[]
+    "status": string,
+    "error": MapAny,
+    "rowcount": number,
+    "columns": WidgetColumnType[],
+    "data": WidgetDataRowType[]
+}
+
+export type WidgetDataResponseType = {
+    "result": WidgetDataType[]
 }
 
 export type WidgetDataRequestType = {
