@@ -1,9 +1,9 @@
-import { MouseEventHandler } from "react";
+import { MouseEventHandler } from 'react';
 import clsx, { ClassValue } from 'clsx';
-import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from "constants/date.constants";
-import { format, startOfYear } from "date-fns";
+import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
+import { format, startOfYear } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
-import { DateFilterValueType } from "components/filter/DateRangeFilter";
+import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 
 declare type MapAny = Record<string, any>;
 
@@ -62,7 +62,6 @@ export function doDebounce<T extends (...args: any[]) => any>(func: T, wait: num
   };
 }
 
-
 export const getStartOfYear = (year: number) => {
   return startOfYear(new Date(year, 0, 1)); // January 1st of the specified year
 };
@@ -119,6 +118,15 @@ export function camelCaseToNormalText(camelCaseStr: string) {
 
   if (!isCamelCaseString) return camelCaseStr;
 
-  return camelCaseStr?.replace(/([A-Z])/g, ' $1') // Insert a space before uppercase letters
+  return camelCaseStr
+    ?.replace(/([A-Z])/g, ' $1') // Insert a space before uppercase letters
     ?.replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
 }
+
+/**
+ * Format the number to a comma separated number
+ * @param num 1000000
+ * @returns 1,000,000
+ */
+export const getCommaSeparatedNumber = (num?: number) =>
+  num ? num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0;

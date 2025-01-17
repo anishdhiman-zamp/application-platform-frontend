@@ -1,4 +1,4 @@
-import { themeQuartz } from 'ag-grid-community';
+import { CellSelectionOptions, themeQuartz } from 'ag-grid-community';
 import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -81,7 +81,7 @@ export const dataTableTheme = themeQuartz.withParams({
   cellHorizontalPadding: 24,
 });
 
-export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: '' };
+export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: 'cursor-pointer' };
 
 export const OperatorMap: Record<string, CONDITION_OPERATOR_TYPE> = {
   contains: CONDITION_OPERATOR_TYPE.CONTAINS,
@@ -113,3 +113,9 @@ export const ArrayFilters = [
   CONDITION_OPERATOR_TYPE.ARRAY_CONTAINS,
   CONDITION_OPERATOR_TYPE.CONTAINS,
 ];
+
+export const cellSelectionConfig: CellSelectionOptions<any> = {
+  handle: {
+    mode: 'range',
+  },
+};

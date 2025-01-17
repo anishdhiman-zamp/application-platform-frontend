@@ -18,7 +18,7 @@ const DataTable: FC<DataTableProps> = ({ columns = [], rows = [], onRowClicked }
       columnConfig={DATA_TABLE_CONFIG}
       customTheme={dataTableTheme}
       onRowClicked={onRowClicked}
-      hideSideBar
+      suppressCellFocus
     />
   );
 };

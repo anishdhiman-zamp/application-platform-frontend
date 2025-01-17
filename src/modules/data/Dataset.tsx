@@ -6,7 +6,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
-import Table from 'components/common/table';
+import DatasetTable from 'components/common/table/DatasetTable';
 import { getEncodedRequest } from 'components/common/table/utils';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
@@ -17,6 +17,7 @@ const DatasetById = () => {
 
   const { data: filterConfig } = useGetDatasetFilterConfigQuery({ datasetId: id });
   const [columns, setColumns] = useState<ColDef[]>([]);
+  const [totalRows, setTotalRows] = useState<number>(0);
 
   const [getDatasetData, { data }] = useLazyGetDatasetDataQuery();
 
@@ -62,6 +63,9 @@ const DatasetById = () => {
         })
           .unwrap()
           .then((data) => {
+            if (parameters.request.startRow === 0) {
+              setTotalRows(data.totalCount);
+            }
             parameters.success({
               rowData: data.rows,
               ...(parameters.request.startRow === 0 ? { rowCount: data.totalCount } : {}),
@@ -93,11 +97,12 @@ const DatasetById = () => {
         <FiltersWrapper label='Filter' allowActions={true} filterConfig={filtersConfig ?? []} />
       </div>
       <div className='z-10 w-full h-full'>
-        <Table
+        <DatasetTable
           tableRef={tableRef}
           columns={columns}
           serverSideDatasource={serverSideDatasource}
           columnConfig={{ enableRowGroup: true, enableValue: true }}
+          totalRows={totalRows}
           {...(data?.config?.isDrilldownEnabled ? { onRowClicked } : {})}
         />
       </div>

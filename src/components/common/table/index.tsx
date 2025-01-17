@@ -15,6 +15,7 @@ import {
 } from 'ag-grid-community';
 import {
   AdvancedFilterModule,
+  CellSelectionModule,
   ColumnMenuModule,
   ColumnsToolPanelModule,
   ContextMenuModule,
@@ -24,10 +25,19 @@ import {
   ServerSideRowModelModule,
   SetFilterModule,
   SideBarModule,
+  StatusBarModule,
 } from 'ag-grid-enterprise';
-import { AgGridReact } from 'ag-grid-react';
+import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
-import { AggregationFunctionMap, myIcons, myTheme, PAGE_SIZE, sideBarConfig } from 'components/common/table/constants';
+import {
+  AggregationFunctionMap,
+  cellSelectionConfig,
+  myIcons,
+  myTheme,
+  PAGE_SIZE,
+  sideBarConfig,
+} from 'components/common/table/constants';
+import TotalRowsStatusBar from 'components/common/table/TotalRowsStatusBar';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -55,6 +65,8 @@ ModuleRegistry.registerModules([
   AdvancedFilterModule,
   CustomFilterModule,
   RowGroupingPanelModule,
+  StatusBarModule,
+  CellSelectionModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -68,7 +80,11 @@ interface TableProps {
   serverSideDatasource?: IServerSideDatasource;
   customTheme?: Theme;
   onRowClicked?: (event: RowClickedEvent) => void;
-  hideSideBar?: boolean;
+  showSideBar?: boolean;
+  showStatusBar?: boolean;
+  totalRows?: number;
+  enableCellSelection?: boolean;
+  suppressCellFocus?: boolean;
 }
 
 export type TableColumnType = {
@@ -87,11 +103,15 @@ const Table: React.FC<TableProps> = ({
   columns,
   columnConfig,
   containerStyle = { width: '100%', height: '100%' },
-  gridStyle = { height: '100%', width: '100%' },
+  gridStyle = { height: 'calc(100vh - 100px)', width: '100%' },
   serverSideDatasource,
   customTheme,
   onRowClicked,
-  hideSideBar = false,
+  showSideBar = false,
+  showStatusBar = false,
+  totalRows,
+  enableCellSelection = false,
+  suppressCellFocus = false,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -102,7 +122,7 @@ const Table: React.FC<TableProps> = ({
       suppressHeaderContextMenu: true,
       floatingFilter: false,
       headerClass: 'f-12-600 text-GRAY_1000',
-      cellClass: 'f-11-400 text-GRAY_1000 content-center !px-2 py-1',
+      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onRowClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       ...columnConfig,
     };
@@ -112,11 +132,24 @@ const Table: React.FC<TableProps> = ({
     return myIcons;
   }, []);
 
-  const sideBar = useMemo(() => (hideSideBar ? null : sideBarConfig), [hideSideBar]);
+  const sideBar = useMemo(() => (showSideBar ? sideBarConfig : null), [showSideBar]);
 
   const theme = useMemo<Theme | 'legacy'>(() => {
     return customTheme ?? myTheme;
   }, [customTheme]);
+
+  const statusBar = useMemo(() => {
+    return showStatusBar
+      ? {
+          statusPanels: [
+            { statusPanel: (props: CustomStatusPanelProps) => <TotalRowsStatusBar {...props} totalRows={totalRows} /> },
+            { statusPanel: 'agAggregationComponent' },
+          ],
+        }
+      : undefined;
+  }, [totalRows, showStatusBar]);
+
+  const cellSelection = useMemo(() => (enableCellSelection ? cellSelectionConfig : undefined), [enableCellSelection]);
 
   return (
     <div style={containerStyle}>
@@ -129,11 +162,18 @@ const Table: React.FC<TableProps> = ({
           sideBar={sideBar}
           icons={icons}
           onRowClicked={onRowClicked}
-          maxConcurrentDatasourceRequests={10}
-          blockLoadDebounceMillis={100}
+          statusBar={statusBar}
+          cellSelection={cellSelection}
+          suppressCellFocus={suppressCellFocus}
           {...(columnConfig?.enableRowGroup ? { rowGroupPanelShow: 'always' } : {})}
           {...(serverSideDatasource
-            ? { rowModelType: 'serverSide', serverSideDatasource, cacheBlockSize: PAGE_SIZE }
+            ? {
+                rowModelType: 'serverSide',
+                serverSideDatasource,
+                cacheBlockSize: PAGE_SIZE,
+                maxConcurrentDatasourceRequests: 10,
+                blockLoadDebounceMillis: 100,
+              }
             : { rowData: rows })}
         />
       </div>
