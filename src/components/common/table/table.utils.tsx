@@ -10,7 +10,12 @@ import {
   OrderType,
   RequestType,
 } from 'types/components/table.type';
-import { AggregationFunctionMap, ArrayFilters, LogicalOperatorMap, PAGE_SIZE } from 'components/common/table/constants';
+import {
+  AggregationFunctionMap,
+  ArrayFilters,
+  LogicalOperatorMap,
+  PAGE_SIZE,
+} from 'components/common/table/table.constants';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 

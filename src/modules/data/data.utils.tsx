@@ -1,5 +1,9 @@
+import { ColDef } from 'ag-grid-community';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
-import { DatasetType } from 'types/api/dataset.types';
+import { CustomColumnsMapping } from 'modules/data/data.constants';
+import { DatasetFilterConfigResponseType, DatasetType } from 'types/api/dataset.types';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
@@ -32,4 +36,27 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
     ...item,
     updated_at: findTimeDifference(item.updated_at),
   }));
+};
+
+export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): ColDef[] => {
+  const columns: ColDef[] = [];
+
+  filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
+    const formattedColumn: ColDef = {
+      field: column.column,
+      filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
+      filterParams: {
+        values: column.options,
+      },
+      flex: 1,
+      hide: column.metadata?.is_hidden,
+      cellRendererParams: column.metadata,
+    };
+
+    formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
+
+    columns.push(formattedColumn);
+  });
+
+  return columns;
 };

@@ -3,13 +3,12 @@ import { ColDef, IServerSideDatasource, IServerSideGetRowsParams, RowClickedEven
 import { AgGridReact } from 'ag-grid-react';
 import { useGetDatasetFilterConfigQuery, useLazyGetDatasetDataQuery } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { formatColumns } from 'modules/data/data.utils';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import DatasetTable from 'components/common/table/DatasetTable';
-import { getEncodedRequest } from 'components/common/table/utils';
+import { getEncodedRequest } from 'components/common/table/table.utils';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
-import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
 const DatasetById = () => {
@@ -28,14 +27,7 @@ const DatasetById = () => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = filterConfig?.map((column: DatasetFilterConfigResponseType) => ({
-        field: column.column,
-        filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
-        filterParams: {
-          values: column.options,
-        },
-        flex: 1,
-      }));
+      const columns = formatColumns(filterConfig);
 
       if (columns.length > 0) {
         setColumns(columns);

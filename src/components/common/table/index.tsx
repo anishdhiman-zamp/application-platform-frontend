@@ -36,7 +36,7 @@ import {
   myTheme,
   PAGE_SIZE,
   sideBarConfig,
-} from 'components/common/table/constants';
+} from 'components/common/table/table.constants';
 import TotalRowsStatusBar from 'components/common/table/TotalRowsStatusBar';
 
 ModuleRegistry.registerModules([

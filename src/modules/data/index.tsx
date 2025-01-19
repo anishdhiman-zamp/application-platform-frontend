@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import { IServerSideDatasource, IServerSideGetRowsParams, RowClickedEvent } from 'ag-grid-community';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { formatData } from 'modules/data/utils';
-import { LISTING_COLUMNS } from 'modules/dummydata/data.constants';
+import { LISTING_COLUMNS } from 'modules/data/data.constants';
+import { formatData } from 'modules/data/data.utils';
 import { useRouter } from 'next/router';
-import { PAGE_SIZE } from 'components/common/table/constants';
 import DataTable from 'components/common/table/DataTable';
+import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 const Listing = () => {
   const [getDatasetListing] = useLazyGetDatasetListingQuery();

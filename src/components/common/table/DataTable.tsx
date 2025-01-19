@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { IServerSideDatasource, RowClickedEvent } from 'ag-grid-community';
 import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
-import { DATA_TABLE_CONFIG, dataTableTheme } from 'components/common/table/constants';
+import { DATA_TABLE_CONFIG, dataTableTheme } from 'components/common/table/table.constants';
 
 interface DataTableProps {
   columns: MapAny[];

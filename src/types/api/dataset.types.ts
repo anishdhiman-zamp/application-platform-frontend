@@ -1,10 +1,17 @@
 import { MapAny } from "types/commonTypes";
+import { CUSTOM_COLUMNS_TYPE } from "components/common/table/table.types";
 import { FILTER_TYPES } from "components/filter/filter.types";
 
 export type DatasetFilterConfigResponseType = {
     column: string;
     type: FILTER_TYPES;
     options: string[];
+    metadata?: {
+        is_hidden?: boolean;
+        custom_type?: CUSTOM_COLUMNS_TYPE;
+        format?: string;
+        currency_column_prefix?: string;
+    }
 }
 
 
