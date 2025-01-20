@@ -33,17 +33,19 @@ const Page = () => {
     };
 
     return (
-        <div className='relative bg-white h-full rounded-tl-md py-6 px-8'>
-            <div className='f-24-450 text-GRAY_950 mb-5.5'>{sheetDetails?.name}</div>
-            <div className='grid grid-cols-2 gap-5'>
-                {sheetDetails &&
-                    sheetDetails?.widget_instances?.map((widget) => (
-                        <div key={widget?.widget_instance_id}>
-                            <WidgetsWrapper key={widget?.widget_instance_id} widgetDetails={widget} />
-                        </div>
-                    ))}
+        <div className='relative bg-white h-full rounded-tl-md py-6 px-8 overflow-y-auto pb-16'>
+            <div>
+                <div className='f-24-450 text-GRAY_950 mb-5.5'>{sheetDetails?.name}</div>
+                <div className='grid grid-cols-2 gap-5'>
+                    {sheetDetails &&
+                        sheetDetails?.widget_instances?.map((widget) => (
+                            <div key={widget?.widget_instance_id}>
+                                <WidgetsWrapper key={widget?.widget_instance_id} widgetDetails={widget} />
+                            </div>
+                        ))}
+                </div>
             </div>
-            <div className='flex items-center absolute bottom-0 right-0 border-t border-border-GRAY_400 h-14 w-full bg-white shadow-pageBottomBar px-16 gap-3'>
+            <div className='flex items-center fixed bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] w-[calc(100%-240px)] bg-white shadow-pageBottomBar px-16 gap-3'>
                 {
                     tabs?.map((tab) => (
                         <Button

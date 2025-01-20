@@ -3,17 +3,19 @@ import { NOTEBOOK_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { cn } from 'utils/common';
 
 interface PageNavTabProps {
   label: string;
   pageId: string;
+  isSelected?: boolean;
 }
 
-const PageNavTab = ({ label, pageId }: PageNavTabProps) => {
+const PageNavTab = ({ label, pageId, isSelected }: PageNavTabProps) => {
   const router = useRouter();
 
   return (
-    <div className='flex items-center gap-3 text-GRAY_900 px-1 py-2.5 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none'
+    <div className={cn('flex items-center gap-3 text-GRAY_900 px-1 py-2.5 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none', isSelected ? 'bg-GRAY_100' : '')}
       onClick={() => router.push(`${ROUTES_PATH.PAGE}/${pageId}`)}>
       <Image
         width={16}
