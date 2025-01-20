@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
 
-  PAGES_GET: `pages/`,
+  PAGES_GET: `pages`,
   PAGES_SHEETS_GET: `pages/{{pageId}}`,
   PAGES_SHEETS_SHEET_GET: `pages/{{pageId}}/sheets/{{sheetId}}`,
 };
