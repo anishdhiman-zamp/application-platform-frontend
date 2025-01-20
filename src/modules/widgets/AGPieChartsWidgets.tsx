@@ -1,10 +1,10 @@
 import React, { FC, useMemo, } from "react";
-import { AgChartOptions, } from 'ag-charts-community';
+import { AgChartOptions, AgPolarSeriesOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from "apis/widgets";
 import { COLORS } from "constants/colors";
-import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG, WIDGET_TYPES } from 'modules/widgets/widgets.constant';
-import { getChartConfig, transformData } from 'modules/widgets/widgets.utils';
+import { AG_CHART_LEGEND_CONFIG, WIDGET_TYPES } from 'modules/widgets/widgets.constant';
+import { getPieChartConfig, transformData } from 'modules/widgets/widgets.utils';
 import { WidgetInstanceType } from "types/api/pagesApi.types";
 import ProgressBar from "components/common/RingProgress";
 
@@ -13,11 +13,11 @@ interface WidgetsWrapperProps {
     widgetType: WIDGET_TYPES;
 }
 
-const AGChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, widgetType }) => {
+const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     const { data: widgetData, isLoading } = useGetWidgetDataQuery({ widgetId: widgetDetails.widget_instance_id }, { refetchOnMountOrArgChange: false })
 
     const chartConfig = useMemo(() => {
-        return getChartConfig(widgetDetails, widgetType)
+        return getPieChartConfig(widgetDetails)
     }, [widgetDetails])
 
     const transformedData = useMemo(() => {
@@ -25,10 +25,10 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, widgetType })
     }, [widgetData])
 
     const options: AgChartOptions = {
-        series: chartConfig?.series,
+        series: chartConfig?.series as AgPolarSeriesOptions[],
         data: transformedData[0] ?? [],
+
         legend: AG_CHART_LEGEND_CONFIG,
-        axes: AG_CHART_AXES,
         animation: {
             enabled: true,
         },
@@ -49,8 +49,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, widgetType })
                 />
             </div>}
             <AgCharts options={options} />
-        </div >
+        </div>
     )
 }
 
-export default AGChartsWidgets;
+export default AGPieChartsWidgets;

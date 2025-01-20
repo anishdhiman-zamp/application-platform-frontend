@@ -1,5 +1,6 @@
 import React, { FC, } from "react";
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
+import AGPieChartsWidgets from 'modules/widgets/AGPieChartsWidgets';
 import { WIDGET_TYPES } from 'modules/widgets/widgets.constant';
 import { WidgetInstanceType } from "types/api/pagesApi.types";
 
@@ -14,8 +15,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     switch (widget_type) {
         case WIDGET_TYPES.BAR_CHART:
         case WIDGET_TYPES.LINE_CHART:
-        case WIDGET_TYPES.PIE_CHART:
             return <AGChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} />;
+        case WIDGET_TYPES.PIE_CHART:
+            return <AGPieChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} />;
         default:
             return null;
     }
