@@ -1,32 +1,12 @@
-import React, { ElementType, FC, useEffect, useRef, useState } from 'react';
-import { MenuItem, TAB_TYPES } from 'types/common/components';
+import React, { FC, useEffect, useRef, useState } from 'react';
+import { TAB_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { TAB_STYLES } from 'components/common/tabs/tabs.constants';
+import { TabsPropsType } from 'components/common/tabs/tabs.types';
 
-export interface TabsProps {
-  list: Array<MenuItem>;
-  customSelectedIndex?: number;
-  onSelect?: (item?: MenuItem) => void;
-  TabItemComponent?: ElementType | null;
-  tabItemWrapperClassName?: string;
-  scrollWrapperClassName?: string;
-  wrapperClassName?: string;
-  indicatorClassName?: string;
-  selectedTabIndicatorClassName?: string;
-  scrollWrapperStyle?: string;
-  wrapperStyle?: string;
-  tabItemWrapperStyle?: string;
-  tabItemStyle?: string;
-  tabItemSelectedStyle?: string;
-  tabItemDefaultStyle?: string;
-  indicatorStyle?: string;
-  selectedTabIndicatorStyle?: string;
-  id: string;
-  disabled?: boolean;
-  type: TAB_TYPES;
-}
 
-export const Tabs: FC<TabsProps> = ({
+export const Tabs: FC<TabsPropsType> = ({
   list = [],
   customSelectedIndex = 0,
   onSelect = defaultFn,
@@ -97,11 +77,11 @@ export const Tabs: FC<TabsProps> = ({
                       />
                     ) : (
                       <div
-                        className={`flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
+                        className={cn(`flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
                           selected
                             ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
                             : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
-                        }`}
+                        }`)}
                       >
                         {tabItem?.label}
                         {!!tabItem?.metadata?.count && (

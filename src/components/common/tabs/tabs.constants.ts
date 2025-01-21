@@ -13,4 +13,10 @@ export const TAB_STYLES = {
     tabItemGapClassName: 'mr-1.5',
     tabItemClassName: 'py-2 px-3 rounded-lg',
   },
+  [TAB_TYPES.UNDERLINE]: {
+    tabItemSelectedClassName: 'text-GRAY_1000 border-b-2 border-GRAY_1000',
+    tabItemDefaultClassName: 'text-GRAY_700 border-b-2 border-transparent',
+    tabItemGapClassName: 'mr-5',
+    tabItemClassName: 'py-1.5 px-1 rounded-none',
+  },
 };

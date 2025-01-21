@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import InviteMembersPopup from 'modules/people/InviteMembersPopup';
-import { SIZE_TYPES } from 'types/common/components';
+import { PEOPLE_TABS_LIST } from 'modules/people/people.constants';
+import { SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
+import { Tabs } from 'components/common/tabs/Tabs';
 
 const PeopleHeader = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -39,6 +41,9 @@ const PeopleHeader = () => {
           Invite members
         </Button>
         <InviteMembersPopup isOpen={isInviteMembersPopupOpen} onClose={handleCloseInviteMembersPopup} />
+      </div>
+      <div className='mt-4'>
+        <Tabs list={PEOPLE_TABS_LIST} id='' type={TAB_TYPES.UNDERLINE} />
       </div>
     </>
   );
