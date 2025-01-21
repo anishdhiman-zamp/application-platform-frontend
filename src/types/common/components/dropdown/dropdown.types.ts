@@ -75,6 +75,11 @@ export type DropdownProps = {
   onReset?: defaultFnType;
   size?: SIZE_TYPES;
   menuPortalTarget?: HTMLElement | null;
+  customClass?: {
+    focus?: string;
+    border?: string;
+    fontSize?: string;
+  }
 };
 
 export interface DropdownCustomClassNames {

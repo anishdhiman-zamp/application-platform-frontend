@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import InviteMembersPopup from 'modules/people/InviteMembersPopup';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
@@ -8,6 +9,14 @@ import Input from 'components/common/input';
 const PeopleHeader = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
+  const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
+  
+  const handleOpenInviteMembersPopup = () => {
+    setIsInviteMembersPopupOpen(true);
+  };
+  const handleCloseInviteMembersPopup = () => {
+    setIsInviteMembersPopupOpen(false);
+  };
 
   return (
     <>
@@ -26,9 +35,10 @@ const PeopleHeader = () => {
           }}
           size={SIZE_TYPES.SMALL}
         />
-        <Button type={BUTTON_TYPES.PRIMARY} id='' size={SIZE_TYPES.SMALL} onClick={() => {}}>
+        <Button type={BUTTON_TYPES.PRIMARY} id='' size={SIZE_TYPES.SMALL} onClick={handleOpenInviteMembersPopup}>
           Invite members
         </Button>
+        <InviteMembersPopup isOpen={isInviteMembersPopupOpen} onClose={handleCloseInviteMembersPopup} />
       </div>
     </>
   );

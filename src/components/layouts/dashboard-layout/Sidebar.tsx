@@ -13,7 +13,6 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
   const router = useRouter();
   const pathname = router.pathname;
-  const pageId = router.query.id as string ?? '';
   const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
   const [logOut] = useLazyLogoutQuery();
   const { data: pages } = useGetPagesQuery();
@@ -45,9 +44,7 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
         </div>
         <div className='px-1 py-2.5'>
           <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
-          {pages?.map((item) => (
-            <PageNavTab key={item?.page_id} isSelected={pageId === item?.page_id} label={item?.name} pageId={item?.page_id} />
-          ))}
+          {pages?.map((item) => <PageNavTab key={item?.page_id} label={item?.name} pageId={item?.page_id} />)}
         </div>
         <div
           className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px]'

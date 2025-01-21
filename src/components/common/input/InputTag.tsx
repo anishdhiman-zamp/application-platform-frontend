@@ -3,7 +3,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { InputTagProps } from 'types/common/components/input/input.types';
 import { defaultFn } from 'types/commonTypes';
-import { debounce, stopPropagationAction } from 'utils/common';
+import { cn, debounce, stopPropagationAction } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const InputTag: FC<InputTagProps> = ({
@@ -20,9 +20,12 @@ const InputTag: FC<InputTagProps> = ({
   autocomplete = 'off',
   inputTagBorderClassName = '',
   inputTagWrapperClassName = 'w-full',
-  inputClassName = `placeholder:tracking-[0.03em] w-full box-border border border-BORDER_GRAY_400 rounded-md text-GRAY_1000 placeholder:text-GRAY_700 placeholder:font-normal outline-none focus:shadow-inputOutlineShadow focus:border-GRAY_600`,
+  inputClassName = 'placeholder:tracking-[0.03em] w-full box-border rounded-md text-GRAY_1000 placeholder:text-GRAY_700 placeholder:font-normal outline-none',
+  focusClassNames = 'border border-BORDER_GRAY_400 focus:shadow-inputOutlineShadow focus:border-GRAY_600',
+  cursorClassname = 'cursor-text',
   inputRoundedClassName = 'rounded-md',
   inputSizeClassName = 'p-6',
+  customPaddingClassName,
   errorClass = '!border-RED_700 !focus:shadow-inputErrorOutlineShadow',
   onChange = defaultFn,
   onKeyPress = defaultFn,
@@ -55,23 +58,30 @@ const InputTag: FC<InputTagProps> = ({
     disabledInputClasses += ' read-only:bg-BASE_PRIMARY';
   }
 
-  let borderClasses = `${
-    noBorders
-      ? ''
-      : `${
-          error ? '' : 'read-only:!border-b-DIVIDER_SAIL_2 focus:!border-b-GRAY_700'
-        } disabled:!border-b-DIVIDER_SAIL_2`
-  }`;
+  let borderClasses = cn(
+    `${
+      noBorders
+        ? ''
+        : `${
+            error ? '' : 'read-only:!border-b-DIVIDER_SAIL_2 focus:!border-b-GRAY_700'
+          } disabled:!border-b-DIVIDER_SAIL_2`
+    }`,
+  );
 
   borderClasses += !readOnly && !error && !noBorders ? ' hover:!border-b-GRAY_700' : '';
 
-  const inputStateClassName = `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${inputSizeClassName} ${
-    error ? errorClass : ''
-  } ${readOnlyInputClasses} ${disabledInputClasses} `;
+  inputSizeClassName = customPaddingClassName ? customPaddingClassName : inputSizeClassName;
+  const inputStateClassName = cn(
+    `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${focusClassNames} ${cursorClassname} ${inputSizeClassName} ${
+      error ? errorClass : ''
+    } ${readOnlyInputClasses} ${disabledInputClasses} `,
+  );
 
-  const inputTagWrapperClasses = `${
-    inputTagBorderClassName ? inputTagBorderClassName : borderClasses
-  } ${inputRoundedClassName} ${inputTagWrapperClassName} ${error ? errorClass : ''}`;
+  const inputTagWrapperClasses = cn(
+    `${
+      inputTagBorderClassName ? inputTagBorderClassName : borderClasses
+    } ${inputRoundedClassName} ${inputTagWrapperClassName} ${error ? errorClass : ''}`,
+  );
 
   const handleEvent = (inputValue: HTMLInputTypeAttribute) => {
     eventCallback?.('INPUT_CHANGE', {
@@ -96,9 +106,9 @@ const InputTag: FC<InputTagProps> = ({
   };
 
   return (
-    <div className={`flex ${inputTagWrapperClasses}`}>
+    <div className={cn(`flex ${inputTagWrapperClasses}`)}>
       {isMulti ? (
-        <div className={`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto  ${inputPillsWrapperClasses}`}>
+        <div className={cn(`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto ${inputPillsWrapperClasses}`)}>
           {tags.map((tag, index) => (
             <div
               key={index}

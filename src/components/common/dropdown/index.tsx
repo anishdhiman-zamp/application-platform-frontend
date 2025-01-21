@@ -80,6 +80,7 @@ export const Dropdown: FC<DropdownProps> = ({
   onReset,
   size = SIZE_TYPES.MEDIUM,
   menuPortalTarget,
+  customClass,
 }) => {
   const valueRef = useRef(value);
 
@@ -263,6 +264,7 @@ export const Dropdown: FC<DropdownProps> = ({
           getValue={getValue}
           MultiValue={MultiValue}
           eventCallback={eventCallback}
+          customClass={customClass}
         />
       </div>
       {showSupporterInfo && <SupporterInfo {...supporterInfoProps} />}

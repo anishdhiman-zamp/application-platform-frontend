@@ -205,6 +205,7 @@ module.exports = {
       },
       borderRadius: {
         2.5: '10px',
+        3.5: '14px',
       },
       backgroundImage: {},
       screens: {

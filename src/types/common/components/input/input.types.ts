@@ -48,6 +48,9 @@ export interface InputTagProps {
   customTags?: ReactNode;
   onEnterKey?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
   inputPillsWrapperClasses?: string;
+  focusClassNames?: string;
+  cursorClassname?: string;
+  customPaddingClassName?: string;
 }
 
 export interface InputFieldProps extends InputTagProps {

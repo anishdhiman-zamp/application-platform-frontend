@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { CustomReactSelectPropsType } from 'types/common/components/dropdown/dropdown.types';
+import { cn } from 'utils/common';
 import { CustomDropdownIndicator } from 'components/common/dropdown/CustomDropdownIndicator';
 import { CustomMultivalueRemove } from 'components/common/dropdown/CustomMultivalueRemove';
 import { DROPDOWN_SIZE_STYLES } from 'components/common/dropdown/dropdown.constants';
@@ -43,6 +44,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
   addSelectAllInOptions,
   getValue,
   MultiValue,
+  customClass,
 }) => {
   return (
     <Select
@@ -127,10 +129,20 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
             ...styles,
             backgroundColor,
             borderWidth: '1px',
-            borderColor: error ? errorColor : data?.isFocused ? COLORS.GRAY_600 : COLORS.GRAY_400,
-            boxShadow: data?.isFocused ? '0px 0px 0px 3px var(--GRAY_400)' : 'none',
+            borderColor: customClass?.border
+              ? customClass?.border
+              : error
+                ? errorColor
+                : data?.isFocused
+                  ? COLORS.GRAY_600
+                  : COLORS.GRAY_400,
+            boxShadow: customClass?.focus
+              ? customClass?.focus
+              : data?.isFocused
+                ? '0px 0px 0px 3px var(--GRAY_400)'
+                : 'none',
             ':hover': {
-              borderColor: COLORS.GRAY_600,
+              borderColor: customClass?.border ? customClass?.border : COLORS.GRAY_600,
             },
             ':active': {},
             ...DROPDOWN_SIZE_STYLES[size].customStyles.control,
@@ -212,10 +224,12 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
       }}
       classNames={{
         placeholder: () =>
-          `${customClassNames?.placeholder ?? DROPDOWN_SIZE_STYLES[size].customClassNames.placeholder}`,
-        menu: () => `${customClassNames?.menu ?? `tw-bg-white tw-border-[0.5px] tw-border-DIVIDER_GRAY`}`,
+          cn(
+            `${customClass?.fontSize ? customClass?.fontSize : (customClassNames?.placeholder ?? DROPDOWN_SIZE_STYLES[size].customClassNames.placeholder)}`,
+          ),
+        menu: () => cn(`${customClassNames?.menu ?? `tw-bg-white tw-border-[0.5px] tw-border-DIVIDER_GRAY`}`),
         noOptionsMessage: () =>
-          `${customClassNames?.noOptionsMessage ?? `tw-h-16 tw-flex tw-items-center tw-justify-center`}`,
+          cn(`${customClassNames?.noOptionsMessage ?? `tw-h-16 tw-flex tw-items-center tw-justify-center`}`),
       }}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
