@@ -1,33 +1,31 @@
-import React from 'react';
-import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from "apis/auth";
+import React, { FC } from 'react';
+import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { useGetPagesQuery } from 'apis/pages';
-import { ICON_SPRITE_TYPES } from "constants/icons";
-import { ROUTES_PATH, SIDEBAR_ITEMS } from "constants/routeConfig";
-import { useRouter } from "next/router";
+import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ROUTES_PATH, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { useRouter } from 'next/router';
+import { SidebarProps } from 'types/common/sidebar';
 import { cn } from 'utils/common';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-interface SidebarProps {
-  isSidebarOpen: boolean;
-}
-
-const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
+const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
   const router = useRouter();
   const pathname = router.pathname;
   const pageId = router.query.id as string ?? '';
   const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
   const [logOut] = useLazyLogoutQuery();
-
   const { data: pages } = useGetPagesQuery();
 
   const handleLogout = async () => {
-    logOut(initiateLogoutFlow?.logout_url ?? '').then(() => {
-      router.push(ROUTES_PATH.LOGIN)
-    }).catch(() => {
-      refetchLogoutFlow();
-    });
+    logOut(initiateLogoutFlow?.logout_url ?? '')
+      .then(() => {
+        router.push(ROUTES_PATH.LOGIN);
+      })
+      .catch(() => {
+        refetchLogoutFlow();
+      });
   };
 
   return (
@@ -51,13 +49,13 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
             <PageNavTab key={item?.page_id} isSelected={pageId === item?.page_id} label={item?.name} pageId={item?.page_id} />
           ))}
         </div>
-        <div className="border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px]"
-          onClick={handleLogout}>
-          <div className="flex items-center gap-2.5 text-GRAY_900" >
+        <div
+          className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px]'
+          onClick={handleLogout}
+        >
+          <div className='flex items-center gap-2.5 text-GRAY_900'>
             <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
-            <div className="f-13-500">
-              Logout
-            </div>
+            <div className='f-13-500'>Logout</div>
           </div>
         </div>
       </div>

@@ -5,4 +5,5 @@ export interface NavigationItemSchema {
     iconId: string;
     iconCategory: ICON_SPRITE_TYPES;
     path: string;
+    children?: NavigationItemSchema[];
 }

@@ -26,3 +26,13 @@ export interface OptionsType {
   metadata?: MapAny;
   options?: OptionsType[];
 }
+
+export type DashboardLayoutProps = {
+  pageType?: string;
+  children: React.ReactNode;
+  containerStyle?: string;
+  contentWrapperClassName?: string;
+};
+export type ChildrenLayoutPropsType = {
+  children: React.ReactNode;
+};

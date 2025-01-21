@@ -4,16 +4,9 @@ import { useAppDispatch } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
 import { store } from 'store';
 import { setUserInfo } from 'store/slices/user';
-import { CommonPageLayoutProps } from 'types/commonTypes';
+import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
 import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
 import Topbar from 'components/layouts/dashboard-layout/TopBar';
-
-type DashboardLayoutProps = {
-  pageType?: string;
-  children: React.ReactNode;
-  containerStyle?: string;
-  contentWrapperClassName?: string;
-};
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, contentWrapperClassName = '' }) => {
   const router = useRouter();
