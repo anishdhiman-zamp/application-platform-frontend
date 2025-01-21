@@ -1,6 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { MapAny } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 import FilterControl from 'components/filter/filterMenu/FilterDropdownControl';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
@@ -13,6 +14,7 @@ interface FilterDropdownProps {
   props?: MapAny;
   controlClassName?: string;
   allowClear?: boolean;
+  allowActions: boolean;
 }
 
 const FilterDropdown: FC<FilterDropdownProps> = ({
@@ -23,8 +25,9 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   props = {},
   controlClassName = '',
   allowClear = true,
+  allowActions = true
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected);
+  const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
   const controlRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +45,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
 
   return (
     <div key={index} className='relative w-fit'>
-      <div ref={controlRef} className=''>
+      <div ref={controlRef}>
         <FilterControl
           filterConfig={filter}
           key={index}
@@ -50,12 +53,12 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           onClick={onClick}
           onClear={onRemoveFilter}
           controlClassName={controlClassName}
+          allowClear={allowClear}
         />
       </div>
       <div
         ref={menuRef}
-        className={`absolute top-7 w-fit shadow-dropdown transition-all duration-500 ${isOpen ? '' : 'max-h-0 overflow-hidden border-0'
-          }`}
+        className={cn(`absolute top-7 w-fit shadow-dropdown transition-all duration-500 ${isOpen ? '' : 'max-h-0 overflow-hidden border-0'}`, controlClassName)}
       >
         <FilterDropdownMenu
           forView='filters'

@@ -1,7 +1,7 @@
-import React, { ChangeEvent, FC, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
-import { camelCaseToNormalText } from 'utils/common';
+import { camelCaseToNormalText, debounce } from 'utils/common';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -42,13 +42,20 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column,
     });
   };
 
+  const handleSetValues = useCallback(
+    debounce((updatedValues: string[]) => {
+      setFilter(updatedValues);
+    }, 800),
+    []
+  );
+
   const onChange = (value: string) => {
     const updatedValues = selectedValues?.includes(value)
       ? selectedValues.filter((item) => item !== value)
       : [...selectedValues, value];
 
     setSelectedValues(updatedValues);
-    setFilter(updatedValues);
+    handleSetValues(updatedValues);
   };
 
   const onReset = () => {
@@ -87,7 +94,9 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column,
               <div key={item}>
                 <div className='flex items-center gap-2 justify-between py-1 px-2.5'>
                   <div className='f-12-400 text-GRAY_1000'>{item}</div>
-                  <CheckBox checked={selectedValues?.includes(item)} onPress={() => onChange(item)} id='checkbox-1' />
+                  <div className='min-w-[14px]'>
+                    <CheckBox checked={selectedValues?.includes(item)} onPress={() => onChange(item)} id='checkbox-1' />
+                  </div>
                 </div>
               </div>
             ))}

@@ -12,7 +12,7 @@ const Widgets = baseApi.injectEndpoints({
 
         }),
         getWidgetData: builder.query<WidgetDataResponseType, WidgetDataRequestType>({
-            query: ({ widgetId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DATA_GET, { widgetId, }) }),
+            query: ({ widgetId, filters }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DATA_GET, { widgetId }), params: { filters } }),
         }),
     }),
 });

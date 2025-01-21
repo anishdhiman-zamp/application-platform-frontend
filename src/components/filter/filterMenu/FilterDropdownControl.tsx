@@ -10,6 +10,7 @@ interface FilterDropdownControlProps {
   onClear?: ((filterKey: string) => void) | null;
   controlClassName?: string;
   isMenuDropdownOpen?: boolean;
+  allowClear?: boolean;
 }
 
 const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
@@ -19,12 +20,15 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   controlClassName = '',
   onClear,
   isMenuDropdownOpen,
+  allowClear
 }) => {
 
   const handleRemoveFilter = (e: React.MouseEvent) => {
-    e.stopPropagation();
 
-    onClear?.(filterConfig.key);
+    if (allowClear) {
+      e.stopPropagation();
+      onClear?.(filterConfig.key);
+    }
   };
 
 
@@ -40,19 +44,21 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
       >
         <div className='mr-3 f-12-400 text-GRAY_900'>{filterConfig?.label}</div>
         <div className='relative w-4 h-4 group' onClick={handleRemoveFilter}>
-          <SvgSpriteLoader
-            id='x-close'
-            iconCategory={ICON_SPRITE_TYPES.GENERAL}
-            width={16}
-            height={16}
-            className='absolute top-0 right-0 opacity-0 group-hover:opacity-100'
-          />
+          {allowClear && (
+            <SvgSpriteLoader
+              id='x-close'
+              iconCategory={ICON_SPRITE_TYPES.GENERAL}
+              width={16}
+              height={16}
+              className='absolute top-0 right-0 opacity-0 group-hover:opacity-100'
+            />
+          )}
           <SvgSpriteLoader
             id='chevron-down'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}
             width={16}
             height={16}
-            className='absolute top-0 right-0 opacity-100 group-hover:opacity-0'
+            className={`${allowClear ? 'absolute top-0 right-0 opacity-100 group-hover:opacity-0' : ''}`}
           />
         </div>
       </div>

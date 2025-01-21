@@ -52,4 +52,5 @@ export type WidgetDataResponseType = {
 
 export type WidgetDataRequestType = {
     widgetId: string;
+    filters: string;
 }

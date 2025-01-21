@@ -1,6 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { POSITION_TYPES } from 'types/common/components';
+import { cn } from 'utils/common';
 import { TooltipPositions } from 'components/common/tooltip';
 import { FilterConfigType } from 'components/filter/filter.types';
 import FilterControlButton from 'components/filter/FilterControlButton';
@@ -24,13 +25,14 @@ const FiltersMenu: FC<FiltersMenuProps> = ({
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLDivElement>(null);
 
   useOnClickOutside(
     menuRef,
     () => {
       setIsOpen(false);
     },
-    [menuRef]
+    [controlRef]
   );
 
   const toggleMenu = () => {
@@ -57,34 +59,38 @@ const FiltersMenu: FC<FiltersMenuProps> = ({
 
   return (
     <div className='relative'>
-      <FilterControlButton
-        onClick={toggleMenu}
-        tooltipPosition={TooltipPositions.TOP}
-        tooltipText={tooltipText}
-        id='add-filters'
-      >
-        {label}
-      </FilterControlButton>
-
-      <div ref={menuRef} className='absolute top-10'>
-        <div
-          id='TRANSACTION_FILTERS'
-          className={` px-2.5 z-1000 shadow-tableFilterMenu border transition-all duration-100 bg-white  ${isOpen ? 'max-h-[500px] overflow-auto' : 'max-h-0 overflow-hidden border-0'
-            } ${getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : ''}`}
+      <div ref={controlRef}>
+        <FilterControlButton
+          onClick={toggleMenu}
+          tooltipPosition={TooltipPositions.TOP}
+          tooltipText={tooltipText}
+          id='add-filters'
         >
-          <div className=' text-GRAY_500 f-13-500 px-4 py-2'>Filter by</div>
-          {filtersConfig?.map((filter, index) => (
-            <div
-              key={index}
-              data-testid={`filter-menu-item-${filter?.key}`}
-              className={` flex px-4 py-3 items-center rounded hover:bg-GRAY_70 w-full ${checkIfFilterIsSelected(filter?.key) ? ' cursor-default opacity-30' : 'cursor-pointer'
-                }`}
-              onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddfilter(filter?.key)}
-            >
-              <div className='f-12-400 text-GRAY_1000'>{filter.key}</div>
-            </div>
-          ))}
-        </div>
+          {label}
+        </FilterControlButton>
+      </div>
+      <div
+        ref={menuRef}
+        className={cn(
+          `absolute top-10 left-0 px-2.5 z-1000 shadow-tableFilterMenu border transition-all duration-100 bg-white`,
+          isOpen ? 'max-h-[500px] overflow-auto' : 'max-h-0 overflow-hidden border-0',
+          getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : ''
+        )}
+      >
+        <div className=' text-GRAY_500 f-13-500 px-4 py-2'>Filter by</div>
+        {filtersConfig?.map((filter, index) => (
+          <div
+            key={index}
+            data-testid={`filter-menu-item-${filter?.key}`}
+            className={cn(
+              ` flex px-4 py-3 items-center rounded hover:bg-GRAY_70 w-full`,
+              checkIfFilterIsSelected(filter?.key) ? ' cursor-default opacity-30' : 'cursor-pointer'
+            )}
+            onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddfilter(filter?.key)}
+          >
+            <div className='f-12-400 text-GRAY_1000'>{filter.key}</div>
+          </div>
+        ))}
       </div>
     </div>
   );

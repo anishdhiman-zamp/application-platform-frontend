@@ -1,6 +1,6 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { useOnClickOutside } from 'hooks';
+import { debounce, useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
@@ -56,9 +56,16 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     setFilter(selectedOption?.value as string, isStart ? value : startValue, isStart ? endValue : value);
   };
 
+  const handleSetValues = useCallback(
+    debounce((operator: string, startValue: string, endValue: string) => {
+      setFilter(operator, startValue, endValue);
+    }, 800),
+    []
+  );
+
   const onOperatorChange = (option: OptionsType) => {
     setSelectedOption(option);
-    setFilter(option?.value as string, startValue, endValue);
+    handleSetValues(option?.value as string, startValue, endValue);
   };
 
   const onClear = () => {

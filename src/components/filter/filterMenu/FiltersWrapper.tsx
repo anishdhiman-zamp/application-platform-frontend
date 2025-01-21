@@ -107,7 +107,6 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
     };
 
     const onAddEmptyFilter = (filterKey: string) => {
-        console.log('filterKey', filterKey);
         dispatch({
             type: filtersContextActions.ADD_EMPTY_STATE_FILTER,
             payload: { filterKey },
@@ -142,6 +141,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
                     index={index}
                     filter={filter}
                     onRemoveFilter={allowActions ? onRemoveFilter : null}
+                    allowActions={allowActions}
                     isFilterSelected={selectedFilters[filter?.key]}
                     controlClassName={controlClassName}
                     allowClear={allowClear}

@@ -1,9 +1,9 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
-import { camelCaseToNormalText } from 'utils/common';
+import { camelCaseToNormalText, debounce } from 'utils/common';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
@@ -42,6 +42,13 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
     });
   };
 
+  const handleSetValues = useCallback(
+    debounce((operator: string, searchValue: string) => {
+      setFilter(operator, searchValue);
+    }, 800),
+    []
+  );
+
   const onChange = (value: string) => {
     setSearchValue(value);
     setFilter(selectedOption?.value as string, value);
@@ -49,7 +56,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
 
   const onOperatorChange = (option: OptionsType) => {
     setSelectedOption(option);
-    setFilter(option?.value as string, searchValue);
+    handleSetValues(option?.value as string, searchValue);
   };
 
   const onClear = () => {

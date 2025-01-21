@@ -33,7 +33,7 @@ const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType
   }));
 };
 
-const getConditionValues = (condition: MapAny): MapAny | null => {
+export const getConditionValues = (condition: MapAny): MapAny | null => {
   switch (condition.filterType) {
     case FILTER_TYPES.AMOUNT_RANGE:
       if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
@@ -197,7 +197,7 @@ const formatRequest = (request: IServerSideGetRowsRequest): RequestType => {
   };
 };
 
-const encodeRequest = (request: RequestType): string => {
+export const encodeRequest = (request: RequestType): string => {
   const jsonString = JSON.stringify(request);
 
   return jsonString;

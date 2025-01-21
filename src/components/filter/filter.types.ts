@@ -28,7 +28,17 @@ export enum FILTER_LABEL_TYPES {
     COUNT = 'COUNT',
 }
 
-export interface FilterConfigType { key: string, label: string, values: string[], type: string }
+export interface FilterConfigType {
+    key: string,
+    label: string,
+    values: string[],
+    type: string,
+    widgetsInScope: string[],
+    targets: {
+        dataset_id: string,
+        column: string
+    }[]
+}
 
 export interface FilterEntityMenuType extends FilterMenuType {
     id: string;

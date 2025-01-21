@@ -1,4 +1,6 @@
-import { WIDGET_TYPES } from "modules/widgets/widgets.constant";
+import { WIDGET_TYPES, WidgetDataValueType } from "modules/widgets/widgets.constant";
+import { FILTER_TYPES } from "components/filter/filter.types";
+import { CONDITION_OPERATOR_TYPE } from "components/filter/filters.constants";
 
 export type PageResponseType = {
     page_id: string;
@@ -73,6 +75,32 @@ export interface SheetDetailsResponseType {
 }
 
 export type SheetDetailsRequestType = {
-    pageId: string;
     sheetId: string;
+    pageId?: string;
 }
+
+export type SheetFilterConfigResponseType = {
+    native_filter_config: SheetFilterType[];
+}
+
+export type SheetFilterType = {
+    name: string; // Name of the filter
+    filter_type: FILTER_TYPES; // Type of filter
+    data_type: WidgetDataValueType; // Data type of the filter
+    widgets_in_scope: string[]; // List of widgets affected by this filter
+    targets: Target[]; // List of dataset targets for this filter
+    default_value?: DefaultValue | string[]; // Default value for the filter
+    options?: string[]; // Options for multi-select filters (if applicable)
+}
+
+interface Target {
+    dataset_id: string; // Unique identifier for the dataset
+    column: string; // Column name in the dataset
+}
+
+interface DefaultValue {
+    operator: CONDITION_OPERATOR_TYPE; // Operator for range-based filters
+    from: number | string; // Start value or single value
+    to?: number | string; // End value (if applicable)
+}
+

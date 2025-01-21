@@ -11,10 +11,11 @@ import ProgressBar from "components/common/RingProgress";
 interface WidgetsWrapperProps {
     widgetDetails: WidgetInstanceType;
     widgetType: WIDGET_TYPES;
+    currentPageFilters: string;
 }
 
-const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
-    const { data: widgetData, isLoading } = useGetWidgetDataQuery({ widgetId: widgetDetails.widget_instance_id }, { refetchOnMountOrArgChange: false })
+const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, currentPageFilters }) => {
+    const { data: widgetData, isLoading } = useGetWidgetDataQuery({ widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters }, { refetchOnMountOrArgChange: false })
 
     const chartConfig = useMemo(() => {
         return getPieChartConfig(widgetDetails)
