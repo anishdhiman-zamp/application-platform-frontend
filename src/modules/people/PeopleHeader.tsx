@@ -35,7 +35,7 @@ const PeopleHeader = () => {
           }}
           size={SIZE_TYPES.SMALL}
         />
-        <Button type={BUTTON_TYPES.PRIMARY} id='' size={SIZE_TYPES.SMALL} onClick={handleOpenInviteMembersPopup}>
+        <Button type={BUTTON_TYPES.PRIMARY} id='invite-user-btn' size={SIZE_TYPES.SMALL} onClick={handleOpenInviteMembersPopup}>
           Invite members
         </Button>
         <InviteMembersPopup isOpen={isInviteMembersPopupOpen} onClose={handleCloseInviteMembersPopup} />

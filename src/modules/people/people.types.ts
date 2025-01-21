@@ -9,3 +9,10 @@ export type RoleOption = {
   label: string;
   value: CustomRole;
 };
+
+export type RemoveFromTeamPopupPropsType = {
+  name: string;
+  isOpen: boolean;
+  onClose?: () => void;
+};
+

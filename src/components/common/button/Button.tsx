@@ -32,6 +32,14 @@ const BUTTON_STATE_STYLES = {
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed !text-GRAY_500 !hover:no-underline',
     [BUTTON_STATE_TYPES.LOADING]: '',
   },
+  [BUTTON_TYPES.DANGER]: {
+    [BUTTON_STATE_TYPES.COMMON]: '',
+    [BUTTON_STATE_TYPES.DEFAULT]: 'bg-RED_700 text-white',
+    [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-RED_600 hover:text-white',
+    [BUTTON_STATE_TYPES.PRESSED]: 'active:bg-RED_600 active:text-white',
+    [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-RED_100 disabled:text-white',
+    [BUTTON_STATE_TYPES.LOADING]: 'bg-RED_500 !cursor-not-allowed',
+  },
 };
 
 const ICON_SIZE_BY_TYPE = {

@@ -6,6 +6,7 @@ export enum BUTTON_TYPES {
     PRIMARY = 'PRIMARY',
     SECONDARY = 'SECONDARY',
     TEXT_NAV = 'TEXT_NAV',
+    DANGER = 'DANGER',
 }
 
 export enum ICON_POSITION_TYPES {
