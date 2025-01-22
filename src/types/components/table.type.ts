@@ -17,28 +17,34 @@ export enum OrderType {
     AggregationFunctionMax = 'MAX',
     AggregationFunctionCount = 'COUNT',
   }
-  
+
+  export type ColumnConfig = {
+    column: string;
+    datatype: string;
+    alias: string;
+  }
+
   export type FilterType = {
     logicalOperator?: LogicalOperatorType;
-    column?: string;
+    column?: ColumnConfig;
     operator?: CONDITION_OPERATOR_TYPE;
     value?: any;
     conditions?: FilterType[];
   };
   
   export type AggregationType = {
-    column: string;
+    column: ColumnConfig;
     alias: string;
     function: AggregationFunctionType;
   };
   
   export type GroupByType = {
-    column: string;
+    column: ColumnConfig;
     alias: string;
   };
   
   export type OrderByType = {
-    column: string;
+    column: ColumnConfig;
     order: OrderType;
   };
   
@@ -57,6 +63,5 @@ export enum OrderType {
     aggregations: AggregationType[];
     groupBy: GroupByType[];
     orderBy: OrderByType[];
-    getTotalRecords: boolean;
     pagination: PaginationType;
   };

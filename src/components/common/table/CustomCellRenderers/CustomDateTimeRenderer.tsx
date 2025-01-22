@@ -1,10 +1,14 @@
 import React from 'react';
 import { ICellRendererParams } from 'ag-grid-community';
-import { format } from 'date-fns';
+import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
+import { format, isValid } from 'date-fns';
 
 const CustomDateTimeRenderer = (props: ICellRendererParams) => {
   const { colDef, value } = props;
-  const formattedValue = format(new Date(value), colDef?.cellRendererParams?.format);
+  const dateFormat = colDef?.cellRendererParams?.format;
+  const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
+  const date = new Date(value);
+  const formattedValue = isValid(date) ? format(date, validDateFormat) : value;
 
   return <div>{formattedValue}</div>;
 };

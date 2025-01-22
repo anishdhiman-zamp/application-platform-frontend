@@ -14,7 +14,10 @@ export const DATE_FORMATS = {
   ddMMMyyyy: 'dd MMM yyyy',
   YYYYMMDD_HHMMSS: 'yyyy-MM-dd HH:mm:ss',
   HHMM: 'HH:mm',
+  MMddyyyy: 'MM/dd/yyyy',
 };
+
+export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);
 
 export const MONTHS_FULL = [
   'January',

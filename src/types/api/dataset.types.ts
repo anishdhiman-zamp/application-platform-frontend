@@ -6,6 +6,7 @@ export type DatasetFilterConfigResponseType = {
     column: string;
     type: FILTER_TYPES;
     options: string[];
+    datatype: string;
     metadata?: {
         is_hidden?: boolean;
         custom_type?: CUSTOM_COLUMNS_TYPE;

@@ -38,8 +38,11 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
-export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): ColDef[] => {
+export const formatColumns = (
+  filterConfig: DatasetFilterConfigResponseType[],
+): { columns: ColDef[]; columnDataTypeMapping: Record<string, string> } => {
   const columns: ColDef[] = [];
+  const columnDataTypeMapping: Record<string, string> = {};
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
     const formattedColumn: ColDef = {
@@ -56,7 +59,8 @@ export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
 
     columns.push(formattedColumn);
+    columnDataTypeMapping[column.column] = column.datatype;
   });
 
-  return columns;
+  return { columns, columnDataTypeMapping };
 };

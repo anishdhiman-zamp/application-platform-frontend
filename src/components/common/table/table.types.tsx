@@ -1,5 +1,5 @@
 export enum CUSTOM_COLUMNS_TYPE {
   AMOUNT = 'amount',
-  DATE_TIME = 'datetime',
-  TAG = 'tag',
+  DATE_TIME = 'date_time',
+  TAG = 'tags',
 }

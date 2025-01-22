@@ -5,8 +5,9 @@ import { WidgetDataType } from 'types/api/widgets.types';
 import { MapAny } from "types/commonTypes";
 import { LogicalOperatorType } from 'types/components/table.type';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { getConditionValues } from 'components/common/table/table.utils';
-import { FilterConfigType } from 'components/filter/filter.types';
+import { ArrayFilters } from 'components/common/table/table.constants';
+import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 /**
  * Formats the data array based on the types specified in the columns array.
@@ -102,6 +103,51 @@ export const getPieChartConfig = (widgetDetails: WidgetInstanceType) => {
 export const getSheetIdFromPath = (path: string, pageid: string) => {
     return path.split('#')[1] ?? JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) ?? '{}')[pageid]
 }
+
+export const getConditionValues = (condition: MapAny): MapAny | null => {
+  switch (condition.filterType) {
+    case FILTER_TYPES.AMOUNT_RANGE:
+        if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
+          if (condition.filterTo !== '' && condition.filter !== '')
+            return {
+              column: condition.colId,
+              operator: condition.type,
+              value: [Number(condition.filter), Number(condition.filterTo)],
+            };
+          else return null;
+        } else if (condition.filter !== '') {
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: Number(condition.filter),
+          };
+        } else return null;
+    case FILTER_TYPES.MULTI_SELECT:
+        if (condition.values.length) {
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: condition.values,
+          };
+        } else return null;
+    case FILTER_TYPES.DATE_RANGE:
+        if (condition.dateFrom && condition.dateTo) {
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: [condition.dateFrom, condition.dateTo],
+          };
+        } else return null;
+    case FILTER_TYPES.SEARCH:
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
+        };
+    default:
+        return null;
+    }
+};
 
 export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selectedFilters: MapAny) => {
     const datasetFilters: MapAny = {}

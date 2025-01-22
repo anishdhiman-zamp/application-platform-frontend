@@ -19,7 +19,10 @@ import {
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
-const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType[] => {
+const getFiltersFromGroupKeys = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): FilterType[] => {
   const { groupKeys, rowGroupCols } = request;
 
   if (!groupKeys.length || !rowGroupCols.length) {
@@ -27,26 +30,38 @@ const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType
   }
 
   return groupKeys?.map((key, index) => ({
-    column: rowGroupCols?.[index]?.id,
+    column: {
+      column: rowGroupCols?.[index]?.id,
+      datatype: columnDataTypeMapping[rowGroupCols?.[index]?.id],
+      alias: rowGroupCols?.[index]?.id,
+    },
     operator: CONDITION_OPERATOR_TYPE.EQUAL,
     value: key,
   }));
 };
 
-export const getConditionValues = (condition: MapAny): MapAny | null => {
+const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<string, string>): FilterType | null => {
   switch (condition.filterType) {
     case FILTER_TYPES.AMOUNT_RANGE:
       if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
         if (condition.filterTo !== '' && condition.filter !== '')
           return {
-            column: condition.colId,
+            column: {
+              column: condition.colId,
+              datatype: columnDataTypeMapping[condition.colId],
+              alias: condition.colId,
+            },
             operator: condition.type,
             value: [Number(condition.filter), Number(condition.filterTo)],
           };
         else return null;
       } else if (condition.filter !== '') {
         return {
-          column: condition.colId,
+          column: {
+            column: condition.colId,
+            datatype: columnDataTypeMapping[condition.colId],
+            alias: condition.colId,
+          },
           operator: condition.type,
           value: Number(condition.filter),
         };
@@ -54,7 +69,11 @@ export const getConditionValues = (condition: MapAny): MapAny | null => {
     case FILTER_TYPES.MULTI_SELECT:
       if (condition.values.length) {
         return {
-          column: condition.colId,
+          column: {
+            column: condition.colId,
+            datatype: columnDataTypeMapping[condition.colId],
+            alias: condition.colId,
+          },
           operator: condition.type,
           value: condition.values,
         };
@@ -62,14 +81,22 @@ export const getConditionValues = (condition: MapAny): MapAny | null => {
     case FILTER_TYPES.DATE_RANGE:
       if (condition.dateFrom && condition.dateTo) {
         return {
-          column: condition.colId,
+          column: {
+            column: condition.colId,
+            datatype: columnDataTypeMapping[condition.colId],
+            alias: condition.colId,
+          },
           operator: condition.type,
           value: [condition.dateFrom, condition.dateTo],
         };
       } else return null;
     case FILTER_TYPES.SEARCH:
       return {
-        column: condition.colId,
+        column: {
+          column: condition.colId,
+          datatype: columnDataTypeMapping[condition.colId],
+          alias: condition.colId,
+        },
         operator: condition.type,
         value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
       };
@@ -78,32 +105,35 @@ export const getConditionValues = (condition: MapAny): MapAny | null => {
   }
 };
 
-const parseCondition = (condition: MapAny): FilterType | null => {
+const parseCondition = (condition: MapAny, columnDataTypeMapping: Record<string, string>): FilterType | null => {
   if (condition.conditions) {
     return {
       logicalOperator: LogicalOperatorMap[condition.type] || LogicalOperatorType.OperatorLogicalAnd,
-      conditions: condition.conditions.map((cond: MapAny) => parseCondition(cond)),
+      conditions: condition.conditions.map((cond: MapAny) => parseCondition(cond, columnDataTypeMapping)),
     };
   } else {
-    return getConditionValues(condition);
+    return getConditionValues(condition, columnDataTypeMapping);
   }
 };
 
-const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
+const convertToFilterModel = (
+  input: MapAny | null,
+  columnDataTypeMapping: Record<string, string>,
+): FilterModelType | null => {
   if (!input) {
     return null;
   } else if (input.filterType === 'join') {
     return {
       logicalOperator: LogicalOperatorMap[input.type] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: input.conditions
-        .map((condition: MapAny) => parseCondition(condition))
+        .map((condition: MapAny) => parseCondition(condition, columnDataTypeMapping))
         .filter((condition: MapAny) => condition !== null),
     };
   } else if (input.conditions) {
     return {
       logicalOperator: LogicalOperatorMap[input.operator] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: input.conditions
-        .map((condition: MapAny) => parseCondition(condition))
+        .map((condition: MapAny) => parseCondition(condition, columnDataTypeMapping))
         .filter((condition: MapAny) => condition !== null),
     };
   } else {
@@ -112,7 +142,7 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
     if (keys.length) {
       const formattedConditions = keys.map((key) => ({ colId: key, ...input?.[key] }));
       const conditions = formattedConditions
-        .map(parseCondition)
+        .map((condition: MapAny) => parseCondition(condition, columnDataTypeMapping))
         .filter((condition: MapAny | null) => condition !== null);
 
       if (conditions.length) {
@@ -127,9 +157,12 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   }
 };
 
-const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsRequest): FilterModelType | null => {
-  const filtersFromGroup = getFiltersFromGroupKeys(request);
-  const filtersFromFilterModel = convertToFilterModel(request.filterModel);
+const getFilterModelFromGroupAndFilterModel = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): FilterModelType | null => {
+  const filtersFromGroup = getFiltersFromGroupKeys(request, columnDataTypeMapping);
+  const filtersFromFilterModel = convertToFilterModel(request.filterModel, columnDataTypeMapping);
 
   if (filtersFromGroup.length) {
     return {
@@ -141,15 +174,21 @@ const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsReques
   return filtersFromFilterModel;
 };
 
-const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] => {
+const getGroupByColumns = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): GroupByType[] => {
   const { rowGroupCols, groupKeys } = request;
-
   const rowGroupsToBeUsed = groupKeys.length ? rowGroupCols.slice(groupKeys.length) : rowGroupCols;
 
   if (rowGroupsToBeUsed.length) {
     return [
       {
-        column: rowGroupsToBeUsed[0]?.id,
+        column: {
+          column: rowGroupsToBeUsed[0]?.id,
+          datatype: columnDataTypeMapping[rowGroupsToBeUsed[0]?.id],
+          alias: rowGroupsToBeUsed[0]?.displayName,
+        },
         alias: rowGroupsToBeUsed[0]?.displayName,
       },
     ];
@@ -158,7 +197,10 @@ const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] =>
   return [];
 };
 
-const getAggregations = (request: IServerSideGetRowsRequest): AggregationType[] => {
+const getAggregations = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): AggregationType[] => {
   const { valueCols, rowGroupCols, groupKeys } = request;
 
   if (rowGroupCols.length === groupKeys.length) {
@@ -166,30 +208,43 @@ const getAggregations = (request: IServerSideGetRowsRequest): AggregationType[] 
   }
 
   return valueCols.map((item) => ({
-    column: item.id,
+    column: {
+      column: item.id,
+      datatype: columnDataTypeMapping[item.id],
+      alias: item.id,
+    },
     alias: item.id,
     function: AggregationFunctionMap[item?.aggFunc ?? 'sum'],
   }));
 };
 
-const getOrderByColumns = (request: IServerSideGetRowsRequest): OrderByType[] => {
+const getOrderByColumns = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): OrderByType[] => {
   const { sortModel } = request;
 
   return sortModel.map((item) => ({
-    column: item.colId,
+    column: {
+      column: item.colId,
+      datatype: columnDataTypeMapping[item.colId],
+      alias: item.colId,
+    },
     order: item.sort as OrderType,
   }));
 };
 
-const formatRequest = (request: IServerSideGetRowsRequest): RequestType => {
+const formatRequest = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): RequestType => {
   const { endRow } = request;
 
   return {
-    filters: getFilterModelFromGroupAndFilterModel(request),
-    aggregations: getAggregations(request),
-    groupBy: getGroupByColumns(request),
-    orderBy: getOrderByColumns(request),
-    getTotalRecords: true,
+    filters: getFilterModelFromGroupAndFilterModel(request, columnDataTypeMapping),
+    aggregations: getAggregations(request, columnDataTypeMapping),
+    groupBy: getGroupByColumns(request, columnDataTypeMapping),
+    orderBy: getOrderByColumns(request, columnDataTypeMapping),
     pagination: {
       page: endRow ? Math.ceil(endRow / PAGE_SIZE) : 1,
       pageSize: PAGE_SIZE,
@@ -203,8 +258,11 @@ export const encodeRequest = (request: RequestType): string => {
   return jsonString;
 };
 
-export const getEncodedRequest = (request: IServerSideGetRowsRequest): string => {
-  const formattedRequest = formatRequest(request);
+export const getEncodedRequest = (
+  request: IServerSideGetRowsRequest,
+  columnDataTypeMapping: Record<string, string>,
+): string => {
+  const formattedRequest = formatRequest(request, columnDataTypeMapping);
   const encodedRequest = encodeRequest(formattedRequest);
 
   return encodedRequest;

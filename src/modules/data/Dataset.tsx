@@ -16,6 +16,7 @@ const DatasetById = () => {
 
   const { data: filterConfig } = useGetDatasetFilterConfigQuery({ datasetId: id });
   const [columns, setColumns] = useState<ColDef[]>([]);
+  const [columnDataTypeMapping, setColumnDataTypeMapping] = useState<Record<string, string>>({});
   const [totalRows, setTotalRows] = useState<number>(0);
 
   const [getDatasetData, { data }] = useLazyGetDatasetDataQuery();
@@ -27,10 +28,11 @@ const DatasetById = () => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig);
+      const { columns, columnDataTypeMapping } = formatColumns(filterConfig);
 
       if (columns.length > 0) {
         setColumns(columns);
+        setColumnDataTypeMapping(columnDataTypeMapping);
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
           payload: {
@@ -51,7 +53,7 @@ const DatasetById = () => {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         getDatasetData({
           datasetId: id as string,
-          queryConfig: getEncodedRequest(parameters.request),
+          queryConfig: getEncodedRequest(parameters.request, columnDataTypeMapping),
         })
           .unwrap()
           .then((data) => {
