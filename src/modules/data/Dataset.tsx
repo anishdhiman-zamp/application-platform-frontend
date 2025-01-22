@@ -70,7 +70,7 @@ const DatasetById = () => {
           });
       },
     };
-  }, [getDatasetData]);
+  }, [getDatasetData, columnDataTypeMapping]);
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);

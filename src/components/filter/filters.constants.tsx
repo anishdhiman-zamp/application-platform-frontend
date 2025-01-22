@@ -3,6 +3,7 @@ import AmountRangeFilterMenuItem from 'components/filter/filterMenu/AmountRangeF
 import DateRangeFilterMenuItem from 'components/filter/filterMenu/DateRangeFilterMenuItem';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import SearchFilterMenuItem from 'components/filter/filterMenu/SearchFilterMenuItem';
+import TagsSelectFilterMenuItem from 'components/filter/filterMenu/TagsSelectFilterMenuItem';
 
 export enum CONDITION_OPERATOR_TYPE {
   IN = 'in',
@@ -53,6 +54,7 @@ export const AG_GRID_FILTER_TYPES = {
   [FILTER_TYPES.DATE_RANGE]: DateRangeFilterMenuItem,
   [FILTER_TYPES.AMOUNT_RANGE]: AmountRangeFilterMenuItem,
   [FILTER_TYPES.MULTI_SELECT]: MultiSelectFilterMenuItem,
+  [FILTER_TYPES.TAGS]: TagsSelectFilterMenuItem,
 };
 
 export const AG_GRID_FILTER_OPERATORS = {

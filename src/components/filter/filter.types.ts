@@ -10,6 +10,7 @@ export enum FILTER_TYPES {
     MULTI_SELECT = 'multi-select',
     DATE_RANGE = 'date-range',
     AMOUNT_RANGE = 'amount-range',
+    TAGS = 'tags',
 }
 
 export interface FilterMenuType {

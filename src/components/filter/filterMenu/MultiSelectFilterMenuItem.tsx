@@ -13,9 +13,15 @@ interface MultiSelectFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
+  LabelComponent?: (item: string) => React.ReactNode;
 }
 
-const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column, values, className }) => {
+const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
+  column,
+  values,
+  className,
+  LabelComponent,
+}) => {
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
@@ -46,7 +52,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column,
     debounce((updatedValues: string[]) => {
       setFilter(updatedValues);
     }, 800),
-    []
+    [],
   );
 
   const onChange = (value: string) => {
@@ -93,7 +99,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({ column,
             .map((item) => (
               <div key={item}>
                 <div className='flex items-center gap-2 justify-between py-1 px-2.5'>
-                  <div className='f-12-400 text-GRAY_1000'>{item}</div>
+                  {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
                   <div className='min-w-[14px]'>
                     <CheckBox checked={selectedValues?.includes(item)} onPress={() => onChange(item)} id='checkbox-1' />
                   </div>

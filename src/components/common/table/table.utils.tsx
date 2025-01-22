@@ -249,6 +249,7 @@ const formatRequest = (
       page: endRow ? Math.ceil(endRow / PAGE_SIZE) : 1,
       pageSize: PAGE_SIZE,
     },
+    getTotalRecords: true,
   };
 };
 

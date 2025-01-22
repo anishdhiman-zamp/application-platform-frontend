@@ -64,4 +64,5 @@ export enum OrderType {
     groupBy: GroupByType[];
     orderBy: OrderByType[];
     pagination: PaginationType;
+    getTotalRecords: boolean;
   };

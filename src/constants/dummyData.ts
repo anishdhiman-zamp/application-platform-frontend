@@ -1,5 +1,3 @@
-import { ColDef, IServerSideGetRowsParams } from "ag-grid-community";
-
 export const PAGES_ITEMS = [
   {
     label: 'Daily Liquidity Summary',
@@ -35,84 +33,6 @@ export const WORKSPACE_ITEMS = [
     color: '#BF0000',
   },
 ];
-
-export const columnDefs: ColDef[] = [
-  { field: 'country' },
-  { field: 'year' },
-  { field: 'sport' },
-  { field: 'total' },
-  { field: 'athlete' },
-  { field: 'age' },
-  { field: 'date' },
-  { field: 'gold' },
-  { field: 'silver' },
-  { field: 'bronze' },
-  { field: 'total' },
-];
-
-export interface IOlympicData {
-  athlete: string;
-  age: number;
-  country: string;
-  year: number;
-  date: string;
-  sport: string;
-  gold: number;
-  silver: number;
-  bronze: number;
-  total: number;
-}
-
-export const getDummyRows = (params: IServerSideGetRowsParams) => {
-  fetch('https://www.ag-grid.com/example-assets/olympic-winners.json')
-    .then((resp) => resp.json())
-    .then((data: IOlympicData[]) => {
-      const { sortModel, rowGroupCols, groupKeys } = params.request;
-
-      if (sortModel.length > 0) {
-        sortModel.forEach((sort) => {
-          data.sort((a, b) => {
-            if (sort.sort === 'asc') {
-              return `${a?.[sort.colId as keyof IOlympicData]}`.localeCompare(
-                `${b?.[sort.colId as keyof IOlympicData]}`,
-              );
-            } else {
-              return `${b?.[sort.colId as keyof IOlympicData]}`.localeCompare(
-                `${a?.[sort.colId as keyof IOlympicData]}`,
-              );
-            }
-          });
-        });
-      }
-      let columnValues: string[] = [];
-      const column = rowGroupCols[0];
-
-      if (rowGroupCols.length > 0) {
-        if (groupKeys.length > 0) {
-          const groupData = data.filter((item) => item[column.field as keyof IOlympicData] === groupKeys[0]);
-
-          params.success({
-            rowData: groupData.slice(params.request.startRow, params.request.endRow),
-            rowCount: groupData.length,
-          });
-        } else {
-          columnValues = Array.from(new Set(data.map((item) => `${item[column.field as keyof IOlympicData]}`)));
-          params.success({
-            rowData: columnValues
-              .slice(params.request.startRow, params.request.endRow)
-              .map((value) => ({ [`${column.field}`]: value })),
-            rowCount: columnValues.length,
-          });
-        }
-      } else {
-        params.success({
-          rowData: data.slice(params.request.startRow, params.request.endRow),
-          rowCount: data.length,
-        });
-      }
-    });
-};
-
 
 export const barGraphInstance = {
   "instance_id": "currency_volume_analysis",
