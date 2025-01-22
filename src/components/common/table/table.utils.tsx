@@ -1,4 +1,4 @@
-import { IServerSideGetRowsRequest } from 'ag-grid-community';
+import { IServerSideGetRowsRequest, themeQuartz } from 'ag-grid-community';
 import { MapAny } from 'types/commonTypes';
 import {
   AggregationType,
@@ -209,3 +209,5 @@ export const getEncodedRequest = (request: IServerSideGetRowsRequest): string =>
 
   return encodedRequest;
 };
+
+export const getDataTableTheme = (params: MapAny) => themeQuartz.withParams(params);

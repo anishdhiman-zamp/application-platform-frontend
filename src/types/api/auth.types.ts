@@ -64,16 +64,20 @@ export type Workspace = {
   description: string;
 };
 
+export type Organization = {
+  organization_id: string;
+};
+
 export type Session = {
   user_id: string;
   email: string;
   workspaces: Workspace[];
   organization_id: Workspace;
   user_email: string;
+  orgs: Organization[];
 };
-
 
 export type loginPayloadType = {
   url: string;
-  body: string
+  body: string;
 };

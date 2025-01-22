@@ -136,3 +136,16 @@ export const capitalizeFirstLetter = (str: string) => {
 
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+export const getColorValue = () => Math.floor(Math.random() * 64) + 80;
+
+export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()}, ${getColorValue()}`;
+
+export const getFirstLetters = (str: string) =>
+  str
+    ?.split(' ')
+    .map((word, index) => {
+      if (index > 1 || !word.length) return null;
+      else return word[0].toUpperCase();
+    })
+    .join('');

@@ -62,7 +62,7 @@ export const sideBarConfig = {
   ],
 };
 
-export const dataTableTheme = themeQuartz.withParams({
+export const DATA_TABLE_THEME_PARAMS = {
   fontFamily: { googleFont: 'Inter' },
   wrapperBorderRadius: 0,
   wrapperBorder: { width: 0 },
@@ -79,7 +79,7 @@ export const dataTableTheme = themeQuartz.withParams({
   rowHoverColor: '#FBFBFB',
   columnBorder: { width: 0 },
   cellHorizontalPadding: 24,
-});
+};
 
 export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: 'cursor-pointer' };
 

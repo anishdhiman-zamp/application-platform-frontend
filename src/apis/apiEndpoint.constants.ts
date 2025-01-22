@@ -1,4 +1,5 @@
 export const API_ENDPOINTS = {
+  AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences`,
   AUTH_INITIATE_LOGIN_FLOW_GET: `auth/relay/self-service/login/browser`,
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   USER_WHOAMI_GET: 'auth/whoami',
