@@ -22,7 +22,6 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   isMenuDropdownOpen,
   allowClear
 }) => {
-
   const handleRemoveFilter = (e: React.MouseEvent) => {
 
     if (allowClear) {
@@ -31,7 +30,6 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
     }
   };
 
-
   return (
     <div
       data-testid={`filter-control-${filterConfig?.key}`}
@@ -39,27 +37,29 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
       onClick={onClick}
     >
       <div
-        className={`select-none rounded h-[26px] flex border hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 px-3 py-1.5 bg-white items-center w-fit ${isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : ''
+        className={`select-none rounded h-[26px] flex items-center gap-1.5 border hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 px-1.5 py-1.5 w-fit bg-white ${isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : ''
           } ${controlClassName}`}
       >
-        <div className='mr-3 f-12-400 text-GRAY_900'>{filterConfig?.label}</div>
-        <div className='relative w-4 h-4 group' onClick={handleRemoveFilter}>
-          {allowClear && (
+        <div className='f-12-400 text-GRAY_900'>{filterConfig?.label}sad</div>
+        <div className='f-12-500 text-GRAY_1000'>{filterConfig?.title}</div>
+        <div onClick={handleRemoveFilter}>
+          {!allowClear ? (
             <SvgSpriteLoader
               id='x-close'
               iconCategory={ICON_SPRITE_TYPES.GENERAL}
+              width={12}
+              height={12}
+              className='text-GRAY_700 mt-0.5'
+            />
+          ) : (
+            <SvgSpriteLoader
+              id='chevron-down'
+              iconCategory={ICON_SPRITE_TYPES.ARROWS}
               width={16}
               height={16}
-              className='absolute top-0 right-0 opacity-0 group-hover:opacity-100'
+              className='text-GRAY_700'
             />
           )}
-          <SvgSpriteLoader
-            id='chevron-down'
-            iconCategory={ICON_SPRITE_TYPES.ARROWS}
-            width={16}
-            height={16}
-            className={`${allowClear ? 'absolute top-0 right-0 opacity-100 group-hover:opacity-0' : ''}`}
-          />
         </div>
       </div>
     </div>

@@ -63,8 +63,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
 
   const dateRangeTabs = customTabValues?.length
     ? DATE_RANGE_TABS?.filter((tab) => {
-        return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
-      })
+      return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
+    })
     : DATE_RANGE_TABS;
   const [currentTab, setCurrentTab] = useState<string>(dateRangeTabs?.[0].value);
 
@@ -338,7 +338,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   wrapperStyle='border-white !w-auto'
                   tabItemWrapperStyle='!w-auto'
                   id='ACCOUNTS_TABS'
-                  type={TAB_TYPES.FILLED}
+                  scrollWrapperClassName='pb-0'
+                  type={TAB_TYPES.UNDERLINE}
                 />
               </div>
 

@@ -59,7 +59,6 @@ export const AG_CHART_AXES: AgCartesianAxisOptions[] = [
 
 export const AG_CHART_LEGEND_CONFIG = {
     enabled: true,
-    position: 'top' as const,
     item: {
         marker: {
             size: 8,

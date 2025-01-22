@@ -57,7 +57,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     >
       <button
         className={cn(
-          'border border-DIVIDER_SAIL_2 rounded-lg px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
+          'border border-DIVIDER_SAIL_2 rounded px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4'
@@ -71,10 +71,10 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           <Loader size={SIZE.XSMALL} className='m-auto' />
         ) : (
           <>
-            <SvgSpriteLoader id={icon} iconCategory={iconCategory} width={14} height={14} />
+            <SvgSpriteLoader id={icon} iconCategory={iconCategory} width={12} height={12} />
             {!!children && (
               <span
-                className={`f-13-400 ${typeof children === 'string' ? 'ml-1.5' : ''} ${childrenWrapperClassName}`}
+                className={`f-12-500 ${typeof children === 'string' ? 'ml-1' : ''} ${childrenWrapperClassName}`}
               >
                 {children}
               </span>

@@ -30,6 +30,7 @@ export enum FILTER_LABEL_TYPES {
 
 export interface FilterConfigType {
     key: string,
+    title?: string,
     label: string,
     values: string[],
     type: string,

@@ -1,7 +1,8 @@
+import { DATE_FORMATS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
-import { AMOUNT_RANGE_TYPE_SYMBOL_MAP, FILTER_KEYS, RANGE_FILTER_VALUES } from 'components/filter/filters.constants';
+import { AMOUNT_RANGE_TYPE_SYMBOL_MAP, CONDITION_OPERATOR_TYPE, FILTER_KEYS, } from 'components/filter/filters.constants';
 
 export const getFilterValueForKey = (
     key: FILTER_KEYS,
@@ -10,17 +11,15 @@ export const getFilterValueForKey = (
 ) => {
     const config = filterConfig.find((filter) => filter.key === key);
 
+
     switch (config?.type) {
 
         case FILTER_TYPES.AMOUNT_RANGE: {
-            const amountRangeFilters = selectedFilters?.[key];
-
-            const amountRangeFilter = amountRangeFilters?.[0];
-
-            const isInBetween = amountRangeFilter?.type === RANGE_FILTER_VALUES.IN_BETWEEN;
+            const amountRangeFilter = selectedFilters?.[key];
+            const isInBetween = amountRangeFilter?.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN;
             const rangeValue = isInBetween
-                ? `${amountRangeFilter?.is_greater_than} & ${amountRangeFilter?.is_less_than}`
-                : amountRangeFilter?.[amountRangeFilter?.type];
+                ? `${amountRangeFilter?.filter} & ${amountRangeFilter?.filterTo}`
+                : amountRangeFilter?.filter;
 
             const title = `${AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
                 } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
@@ -32,18 +31,12 @@ export const getFilterValueForKey = (
         }
 
         case FILTER_TYPES.MULTI_SELECT: {
-            const values = selectedFilters[key];
+            const selectedFilter = selectedFilters[key];
             let title = '';
 
-            if (config?.type === FILTER_TYPES.MULTI_SELECT) {
-                const total = selectedFilters[key]?.length;
+            title = selectedFilter?.values?.join(', ');
 
-                title = `${total} ${config?.label} `;
-            } else {
-                title = values?.map((v: MapAny) => v?.label).join(', ');
-            }
-
-            if (!values?.length) {
+            if (!selectedFilter?.values?.length) {
                 title = '';
             }
 
@@ -59,9 +52,9 @@ export const getFilterValueForKey = (
                 const current = selectedFilters[key];
                 let title = '';
 
-                if (current?.start_date && current?.end_date) {
-                    const startDate = format(current?.start_date, 'yyyy-MMM-dd');
-                    const endDate = format(current?.end_date, 'yyyy-MMM-dd');
+                if (current?.dateTo && current?.dateFrom) {
+                    const startDate = format(new Date(current?.dateFrom), DATE_FORMATS.yyyy_MM_dd);
+                    const endDate = format(new Date(current?.dateTo), DATE_FORMATS.yyyy_MM_dd);
 
                     title = `${startDate} - ${endDate}`;
                 }
@@ -77,11 +70,10 @@ export const getFilterValueForKey = (
         }
 
         case FILTER_TYPES.SEARCH: {
-            const total = selectedFilters[key]?.length;
+            const filter = selectedFilters[key];
+            let title = filter.filter;
 
-            let title = selectedFilters[key];
-
-            if (!total) {
+            if (!filter) {
                 title = '';
             }
 

@@ -89,7 +89,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
                 (filter) => (selectedFilters[filter.key] !== null || currentPageFilters.includes(filter.key))
             )
         );
-    }, [selectedFiltersInUI]);
+    }, [selectedFiltersInUI, selectedFilters]);
 
     useEffect(() => {
         onSetFiltersList();
