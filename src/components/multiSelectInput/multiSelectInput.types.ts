@@ -6,6 +6,7 @@ export type ArrayListOption = {
 export type MultiSelectInputPropsType = {
   inputArrayList: ArrayListOption[];
   setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
+  setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>;
   containerRef: React.RefObject<HTMLDivElement>;
   inputRef: React.RefObject<HTMLInputElement>;
   search: string;
@@ -14,6 +15,5 @@ export type MultiSelectInputPropsType = {
   showValidationError: boolean;
   validationErrorText: string;
   isOpen: boolean;
-  setShowValidationError: (value: boolean) => void;
   placeholderText: string;
 };

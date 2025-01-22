@@ -40,7 +40,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
         setInputArrayList((prevEmails: ArrayListOption[]) => [...prevEmails, { value: value, valid: isValid }]);
         setSearch('');
-        setShowValidationError(!isValid);
+        setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
       }
     },
     [search],

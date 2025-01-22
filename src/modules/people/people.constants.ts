@@ -24,6 +24,26 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   },
 ];
 
+export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
+  {
+    headerName: 'Name',
+    field: 'user',
+    valueFormatter: ({ value }: MapAny) => value.name,
+    cellRenderer: TeamMembersName,
+  },
+  {
+    headerName: 'Email',
+    field: 'user',
+    valueFormatter: ({ value }: MapAny) => value.email,
+    cellRenderer: TeamMembersEmail,
+  },
+  {
+    headerName: 'Invited as a',
+    field: 'privilege',
+    cellRenderer: TeamMembersRole,
+  },
+];
+
 export const TEAM_MEMBERS_LISTING_TABLE_THEME = {
   rowHeight: 44,
   rowHoverColor: 'transparent',
