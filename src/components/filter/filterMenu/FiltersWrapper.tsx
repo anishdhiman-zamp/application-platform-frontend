@@ -85,9 +85,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
         onSetTotalSelectedFilters?.(list.length);
 
         setFiltersList(
-            list.filter(
-                (filter) => (selectedFilters[filter.key] !== null || currentPageFilters.includes(filter.key))
-            )
+            list
         );
     }, [selectedFiltersInUI, selectedFilters]);
 
@@ -114,7 +112,6 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
     };
 
     const onRemoveFilter = (filterKey: string) => {
-
         dispatch({
             type: filtersContextActions.REMOVE_FILTER,
             payload: { filterKey },
@@ -131,7 +128,6 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
         },
         [confirmationPopupControlRef]
     );
-
 
     return (
         <div id={`${persistId}_FILTERS_CONTAINER`} className={`flex items-center flex-wrap gap-2 z-50 ${className}`}>

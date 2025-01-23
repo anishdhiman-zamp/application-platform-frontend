@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -25,7 +25,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   props = {},
   controlClassName = '',
   allowClear = true,
-  allowActions = true
+  allowActions = true,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
   const controlRef = useRef<HTMLDivElement>(null);
@@ -38,6 +38,16 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
     },
     [controlRef]
   );
+
+  const getMenuPlacement = useMemo(() => {
+    if (menuRef.current) {
+      const { left } = menuRef.current.getBoundingClientRect();
+
+      return left + 300 > window.innerWidth;
+    }
+
+    return false;
+  }, [menuRef, isOpen]);
 
   const onClick = () => {
     setIsOpen((prev) => !prev);
@@ -58,7 +68,12 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
       </div>
       <div
         ref={menuRef}
-        className={cn(`absolute top-7 w-fit shadow-dropdown transition-all duration-500 ${isOpen ? '' : 'max-h-0 overflow-hidden border-0'}`, controlClassName)}
+        className={
+          cn(
+            `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50`,
+            controlClassName,
+            getMenuPlacement ? 'right-0' : 'left-0',
+            isOpen ? '' : 'max-h-0 overflow-hidden border-0')}
       >
         <FilterDropdownMenu
           forView='filters'

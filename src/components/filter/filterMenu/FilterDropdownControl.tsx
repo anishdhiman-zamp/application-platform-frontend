@@ -40,10 +40,10 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
         className={`select-none rounded h-[26px] flex items-center gap-1.5 border hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 px-1.5 py-1.5 w-fit bg-white ${isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : ''
           } ${controlClassName}`}
       >
-        <div className='f-12-400 text-GRAY_900'>{filterConfig?.label}sad</div>
+        <div className='f-12-400 text-GRAY_900'>{filterConfig?.label}</div>
         <div className='f-12-500 text-GRAY_1000'>{filterConfig?.title}</div>
         <div onClick={handleRemoveFilter}>
-          {!allowClear ? (
+          {allowClear ? (
             <SvgSpriteLoader
               id='x-close'
               iconCategory={ICON_SPRITE_TYPES.GENERAL}

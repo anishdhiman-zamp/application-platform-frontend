@@ -6,7 +6,7 @@ import { OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText, debounce } from 'utils/common';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
+import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -23,20 +23,22 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
+  const currentOperatorValue = selectedFilters[columnId]?.type
+  const currentOperator = SEARCH_FILTER_OPTIONS.find((option) => option.value === currentOperatorValue)
   const [searchValue, setSearchValue] = useState(selectedFilters[columnId]?.filter || '');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<OptionsType>(MULTI_SELECT_FILTER_OPTIONS[0]);
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? SEARCH_FILTER_OPTIONS[0]);
 
   const setFilter = (operator: string, searchValue: string) => {
     dispatch({
       type: filtersContextActions.SET_SELECTED_FILTERS,
       payload: {
         selectedFilters: {
-          [columnId]: {
+          [columnId]: searchValue ? {
             filterType: FILTER_TYPES.SEARCH,
             type: operator,
             filter: searchValue,
-          },
+          } : {},
         },
       },
     });
@@ -51,17 +53,17 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
 
   const onChange = (value: string) => {
     setSearchValue(value);
-    setFilter(selectedOption?.value as string, value);
+    handleSetValues(selectedOperator?.value as string, value);
   };
 
   const onOperatorChange = (option: OptionsType) => {
-    setSelectedOption(option);
+    setSelectedOperator(option);
     handleSetValues(option?.value as string, searchValue);
   };
 
   const onClear = () => {
     setSearchValue('');
-    setFilter(selectedOption?.value as string, '');
+    setFilter(selectedOperator?.value as string, '');
   };
 
   useOnClickOutside(ref, () => setIsOpen(false));
@@ -79,7 +81,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
-            {selectedOption?.label || 'is equal to'}
+            {selectedOperator?.label || 'is equal to'}
           </div>
           <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
           {isOpen && (
@@ -87,7 +89,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
               ref={ref}
               className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
             >
-              {MULTI_SELECT_FILTER_OPTIONS.map((option) => (
+              {SEARCH_FILTER_OPTIONS.map((option) => (
                 <div
                   className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
                   key={option.value}

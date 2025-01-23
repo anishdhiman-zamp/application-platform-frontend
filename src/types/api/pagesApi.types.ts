@@ -89,7 +89,7 @@ export type SheetFilterType = {
     data_type: WidgetDataValueType; // Data type of the filter
     widgets_in_scope: string[]; // List of widgets affected by this filter
     targets: Target[]; // List of dataset targets for this filter
-    default_value?: DefaultValue | string[]; // Default value for the filter
+    default_value?: FilterDefaultValueType; // Default value for the filter
     options?: string[]; // Options for multi-select filters (if applicable)
 }
 
@@ -98,8 +98,9 @@ interface Target {
     column: string; // Column name in the dataset
 }
 
-interface DefaultValue {
+export interface FilterDefaultValueType {
     operator: CONDITION_OPERATOR_TYPE; // Operator for range-based filters
+    values: string[];
     from: number | string; // Start value or single value
     to?: number | string; // End value (if applicable)
 }

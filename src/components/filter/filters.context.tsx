@@ -31,8 +31,7 @@ interface InitialStateType {
   search?: string;
   selectedFiltersChangeCount: number;
   persistId: PERSISTENT_FILTER_ID | null;
-  isInitialised?: boolean;
-  isTransactionsFetching?: boolean;
+  isFilterInitialized?: boolean;
   periodicity?: FILTER_PERIODICITIES;
   currentPageFilters: string[];
 }
@@ -49,8 +48,7 @@ const initialState: InitialStateType = {
   selectedFiltersChangeCount: 0,
   search: '',
   persistId: null,
-  isInitialised: false,
-  isTransactionsFetching: false,
+  isFilterInitialized: false,
   selectedFiltersInUI: {},
   currentPageFilters: [],
 };
@@ -88,16 +86,16 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case filtersContextActions.SET_PERSIST_ID:
         return { ...state, persistId: action?.payload?.persistId };
       case filtersContextActions.SET_INITIALISED:
-        return { ...state, isInitialised: true };
+        return { ...state, isFilterInitialized: true };
       case filtersContextActions.RESET_INITIALISED:
-        return { ...state, isInitialised: false };
+        return { ...state, isFilterInitialized: false };
       case filtersContextActions.INITIALIZE_DEFAULT_FILTERS:
         return {
           ...state,
-          selectedFilters: { ...action?.payload?.selectedFilters },
-          selectedFiltersInUI: { ...action?.payload?.selectedFilters },
+          selectedFilters: { ...state?.selectedFilters, ...action?.payload?.selectedFilters },
+          selectedFiltersInUI: { ...state?.selectedFiltersInUI, ...action?.payload?.selectedFilters },
           currentPageFilters: Object.keys(action?.payload?.selectedFilters),
-          isInitialised: true,
+          isFilterInitialized: true,
         };
       case filtersContextActions.GET_FILTERS_FROM_LOCAL_STORAGE: {
         const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId);
@@ -105,7 +103,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
         // removeAccountsFilterObject(selectedFilters);
 
-        return { ...state, selectedFilters, selectedFiltersInUI: { ...selectedFilters }, isInitialised: true };
+        return { ...state, selectedFilters, selectedFiltersInUI: { ...selectedFilters }, isFilterInitialized: true };
       }
       case filtersContextActions.SET_FILTERS:
         return { ...state, filters: { ...state?.filters, ...action?.payload?.filters } };

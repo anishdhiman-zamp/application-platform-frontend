@@ -8,10 +8,15 @@ import {
   FILTER_KEYS,
 } from 'components/filter/filters.constants';
 
-export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfigType[], selectedFilters: MapAny) => {
+export const getFilterValueForKey = (
+  key: FILTER_KEYS,
+  filterConfig: FilterConfigType[],
+  selectedFilters: MapAny
+) => {
   const config = filterConfig.find((filter) => filter.key === key);
 
   switch (config?.type) {
+
     case FILTER_TYPES.AMOUNT_RANGE: {
       const amountRangeFilter = selectedFilters?.[key];
       const isInBetween = amountRangeFilter?.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN;
@@ -19,9 +24,8 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         ? `${amountRangeFilter?.filter} & ${amountRangeFilter?.filterTo}`
         : amountRangeFilter?.filter;
 
-      const title = `${
-        AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
-      } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
+      const title = `${AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
+        } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
 
       return {
         ...config,
@@ -52,8 +56,8 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         let title = '';
 
         if (current?.dateTo && current?.dateFrom) {
-          const startDate = format(new Date(current?.dateFrom), DATE_FORMATS.yyyy_MM_dd);
-          const endDate = format(new Date(current?.dateTo), DATE_FORMATS.yyyy_MM_dd);
+          const startDate = format(new Date(current?.dateFrom), DATE_FORMATS.dd_MMM_yyyy);
+          const endDate = format(new Date(current?.dateTo), DATE_FORMATS.dd_MMM_yyyy);
 
           title = `${startDate} - ${endDate}`;
         }
@@ -70,7 +74,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
     case FILTER_TYPES.SEARCH: {
       const filter = selectedFilters[key];
-      let title = filter.filter;
+      let title = filter?.filter;
 
       if (!filter) {
         title = '';
@@ -81,6 +85,8 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         title,
       };
     }
+
+
 
     default: {
       if (!Array.isArray(selectedFilters[key])) {
@@ -115,6 +121,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
   return config;
 };
+
 
 export const getTagLabel = (tag: string) => {
   return tag.split('.').pop();

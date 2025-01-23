@@ -72,7 +72,7 @@ const FiltersMenu: FC<FiltersMenuProps> = ({
       <div
         ref={menuRef}
         className={cn(
-          `absolute top-10 left-0 px-2.5 z-1000 shadow-tableFilterMenu border transition-all duration-100 bg-white`,
+          `absolute top-full left-0 mt-1 px-2.5 z-1000 shadow-tableFilterMenu border transition-all duration-100 bg-white rounded-md`,
           isOpen ? 'max-h-[500px] overflow-auto' : 'max-h-0 overflow-hidden border-0',
           getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : ''
         )}

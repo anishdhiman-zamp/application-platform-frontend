@@ -23,37 +23,30 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
+  const currentOperator = AMOUNT_RANGE_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)
   const [startValue, setStartValue] = useState(selectedFilters[columnId]?.filter || '');
   const [endValue, setEndValue] = useState(selectedFilters[columnId]?.filterTo || '');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<OptionsType>(AMOUNT_RANGE_FILTER_OPTIONS[0]);
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? AMOUNT_RANGE_FILTER_OPTIONS[0]);
 
   const setFilter = (operator: string, startValue: string, endValue: string) => {
     const condition =
       operator === CONDITION_OPERATOR_TYPE.IN_BETWEEN ? endValue !== '' && startValue !== '' : startValue !== '';
 
-    if (condition) {
-      dispatch({
-        type: filtersContextActions.SET_SELECTED_FILTERS,
-        payload: {
-          selectedFilters: {
-            [columnId]: {
-              filterType: FILTER_TYPES.AMOUNT_RANGE,
-              type: operator,
-              filter: startValue,
-              filterTo: endValue,
-            },
-          },
+    dispatch({
+      type: filtersContextActions.SET_SELECTED_FILTERS,
+      payload: {
+        selectedFilters: {
+          [columnId]: condition ? {
+            filterType: FILTER_TYPES.AMOUNT_RANGE,
+            type: operator,
+            filter: startValue,
+            filterTo: endValue,
+          }
+            : {},
         },
-      });
-    }
-  };
-
-  const onChange = (isStart: boolean, value: string) => {
-    if (isStart) setStartValue(value);
-    else setEndValue(value);
-
-    setFilter(selectedOption?.value as string, isStart ? value : startValue, isStart ? endValue : value);
+      },
+    });
   };
 
   const handleSetValues = useCallback(
@@ -63,25 +56,32 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     []
   );
 
+  const onChange = (isStart: boolean, value: string) => {
+    if (isStart) setStartValue(value);
+    else setEndValue(value);
+
+    handleSetValues(selectedOperator?.value as string, isStart ? value : startValue, isStart ? endValue : value);
+  };
+
   const onOperatorChange = (option: OptionsType) => {
-    setSelectedOption(option);
+    setSelectedOperator(option);
     handleSetValues(option?.value as string, startValue, endValue);
   };
 
   const onClear = () => {
     setStartValue('');
     setEndValue('');
-    setFilter(selectedOption?.value as string, '', '');
+    setFilter(selectedOperator?.value as string, '', '');
   };
 
   useOnClickOutside(ref, () => setIsOpen(false));
 
   return (
     <div
-      className={`px-2.5 py-2 w-[218px] border border-GRAY_400 rounded-md bg-white shadow-tableFilterMenu ${className}`}
+      className={`px-2.5 py-2 w-[250px] border border-GRAY_400 rounded-md bg-white shadow-tableFilterMenu ${className}`}
     >
       <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 mb-2'>
-        <div className='f-11-400 text-GRAY_700  whitespace-nowrap text-ellipsis overflow-hidden'>
+        <div className='f-11-400 text-GRAY_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>
         <div
@@ -89,13 +89,13 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
-            {selectedOption?.label || 'is equal to'}
+            {selectedOperator?.label || 'is equal to'}
           </div>
           <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
           {isOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu1px 2px 10px 0px #A6A6A61A] rounded-md'
+              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div
@@ -126,10 +126,10 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
           placeholder='type a value...'
           onChange={(e) => onChange(true, e.target.value)}
         />
-        {selectedOption?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
+        {selectedOperator?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
           <span className='f-11-400 text-GRAY_700 select-none'>and</span>
         )}
-        {selectedOption?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
+        {selectedOperator?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
           <Input
             size={SIZE_TYPES.XSMALL}
             value={endValue}

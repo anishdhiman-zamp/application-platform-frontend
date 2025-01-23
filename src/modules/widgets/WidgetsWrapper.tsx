@@ -12,7 +12,7 @@ interface WidgetsWrapperProps {
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     const { widget_type } = widgetDetails
-    const { state: { selectedFilters, filtersConfig } } = useFiltersContextStore()
+    const { state: { selectedFilters, filtersConfig, isFilterInitialized } } = useFiltersContextStore()
     const currentPageFiltersConfig = useMemo(() => {
         return filtersConfig?.filter((filter) => filter?.widgetsInScope?.includes(widgetDetails?.widget_instance_id))
     }, [filtersConfig, widgetDetails])
@@ -26,9 +26,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     switch (widget_type) {
         case WIDGET_TYPES.BAR_CHART:
         case WIDGET_TYPES.LINE_CHART:
-            return <AGChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} currentPageFilters={currentPageFilters} />;
+            return <AGChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} currentPageFilters={currentPageFilters} isFilterInitialized={isFilterInitialized} />;
         case WIDGET_TYPES.PIE_CHART:
-            return <AGPieChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} currentPageFilters={currentPageFilters} />;
+            return <AGPieChartsWidgets widgetDetails={widgetDetails} widgetType={widget_type} currentPageFilters={currentPageFilters} isFilterInitialized={isFilterInitialized} />;
         default:
             return null;
     }

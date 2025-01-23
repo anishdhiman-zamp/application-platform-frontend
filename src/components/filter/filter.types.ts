@@ -35,6 +35,7 @@ export interface FilterConfigType {
     label: string,
     values: string[],
     type: string,
+    datatype: string,
     widgetsInScope: string[],
     targets: {
         dataset_id: string,

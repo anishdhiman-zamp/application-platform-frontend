@@ -87,7 +87,7 @@ export const AMOUNT_RANGE_FILTER_OPTIONS = [
   { label: 'is between', value: CONDITION_OPERATOR_TYPE.IN_BETWEEN },
 ];
 
-export const MULTI_SELECT_FILTER_OPTIONS = [
+export const SEARCH_FILTER_OPTIONS = [
   { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
   { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
   { label: 'equals', value: CONDITION_OPERATOR_TYPE.EQUAL },

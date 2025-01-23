@@ -12,10 +12,11 @@ interface WidgetsWrapperProps {
     widgetDetails: WidgetInstanceType;
     widgetType: WIDGET_TYPES;
     currentPageFilters: string;
+    isFilterInitialized?: boolean;
 }
 
-const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, currentPageFilters }) => {
-    const { data: widgetData, isLoading } = useGetWidgetDataQuery({ widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters }, { refetchOnMountOrArgChange: false })
+const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, currentPageFilters, isFilterInitialized }) => {
+    const { data: widgetData, isLoading } = useGetWidgetDataQuery({ widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters }, { refetchOnMountOrArgChange: true, skip: !isFilterInitialized })
 
     const chartConfig = useMemo(() => {
         return getPieChartConfig(widgetDetails)

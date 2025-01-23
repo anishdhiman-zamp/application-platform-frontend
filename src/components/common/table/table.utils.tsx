@@ -40,13 +40,13 @@ const getFiltersFromGroupKeys = (
   }));
 };
 
-const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<string, string>): FilterType | null => {
+export const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<string, string>, columnKeyName = 'column'): FilterType | null => {
   switch (condition.filterType) {
     case FILTER_TYPES.AMOUNT_RANGE:
       if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
         if (condition.filterTo !== '' && condition.filter !== '')
           return {
-            column: {
+            [columnKeyName]: {
               column: condition.colId,
               datatype: columnDataTypeMapping[condition.colId],
               alias: condition.colId,
@@ -57,7 +57,7 @@ const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<str
         else return null;
       } else if (condition.filter !== '') {
         return {
-          column: {
+          [columnKeyName]: {
             column: condition.colId,
             datatype: columnDataTypeMapping[condition.colId],
             alias: condition.colId,
@@ -69,7 +69,7 @@ const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<str
     case FILTER_TYPES.MULTI_SELECT:
       if (condition.values.length) {
         return {
-          column: {
+          [columnKeyName]: {
             column: condition.colId,
             datatype: columnDataTypeMapping[condition.colId],
             alias: condition.colId,
@@ -81,7 +81,7 @@ const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<str
     case FILTER_TYPES.DATE_RANGE:
       if (condition.dateFrom && condition.dateTo) {
         return {
-          column: {
+          [columnKeyName]: {
             column: condition.colId,
             datatype: columnDataTypeMapping[condition.colId],
             alias: condition.colId,
@@ -92,7 +92,7 @@ const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<str
       } else return null;
     case FILTER_TYPES.SEARCH:
       return {
-        column: {
+        [columnKeyName]: {
           column: condition.colId,
           datatype: columnDataTypeMapping[condition.colId],
           alias: condition.colId,
