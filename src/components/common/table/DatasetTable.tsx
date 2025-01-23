@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { ColDef, IServerSideDatasource, RowClickedEvent } from 'ag-grid-community';
+import { CellEditRequestEvent, ColDef, IServerSideDatasource, RowClickedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
@@ -12,6 +12,7 @@ interface DatasetTableProps {
   totalRows?: number;
   onRowClicked?: (event: RowClickedEvent) => void;
   rows?: MapAny[];
+  onCellEditRequest?: (event: CellEditRequestEvent) => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -22,6 +23,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   totalRows,
   serverSideDatasource,
   columnConfig,
+  onCellEditRequest,
 }) => {
   return (
     <Table
@@ -32,6 +34,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
       onRowClicked={onRowClicked}
       totalRows={totalRows}
       serverSideDatasource={serverSideDatasource}
+      onCellEditRequest={onCellEditRequest}
       showSideBar
       showStatusBar
       enableCellSelection

@@ -12,6 +12,7 @@ export type DatasetFilterConfigResponseType = {
         custom_type?: CUSTOM_COLUMNS_TYPE;
         format?: string;
         currency_column_prefix?: string;
+        is_editable?:boolean;
     }
 }
 

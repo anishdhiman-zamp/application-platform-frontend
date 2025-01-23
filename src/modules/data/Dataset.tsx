@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ColDef, IServerSideDatasource, IServerSideGetRowsParams, RowClickedEvent } from 'ag-grid-community';
+import {
+  CellEditRequestEvent,
+  ColDef,
+  IServerSideDatasource,
+  IServerSideGetRowsParams,
+  RowClickedEvent,
+} from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useGetDatasetFilterConfigQuery, useLazyGetDatasetDataQuery } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -85,6 +91,14 @@ const DatasetById = () => {
     );
   };
 
+  // TODO: Integrate with update API
+  const onCellEditRequest = (event: CellEditRequestEvent) => {
+    const { colDef, newValue, oldValue, data } = event;
+    const { field } = colDef;
+
+    console.log({ field, newValue, oldValue, data });
+  };
+
   return (
     <div className='h-full'>
       <div className='flex items-center py-3'>
@@ -97,6 +111,7 @@ const DatasetById = () => {
           serverSideDatasource={serverSideDatasource}
           columnConfig={{ enableRowGroup: true, enableValue: true }}
           totalRows={totalRows}
+          onCellEditRequest={onCellEditRequest}
           {...(data?.config?.isDrilldownEnabled ? { onRowClicked } : {})}
         />
       </div>

@@ -1,14 +1,18 @@
 import React, { ReactNode, useMemo } from 'react';
 import {
+  CellEditRequestEvent,
   CellStyleModule,
   ClientSideRowModelModule,
   ColDef,
+  CustomEditorModule,
   CustomFilterModule,
   DateFilterModule,
   IServerSideDatasource,
   ModuleRegistry,
+  NumberEditorModule,
   NumberFilterModule,
   RowClickedEvent,
+  TextEditorModule,
   TextFilterModule,
   Theme,
   ValidationModule,
@@ -21,6 +25,7 @@ import {
   ContextMenuModule,
   FiltersToolPanelModule,
   MultiFilterModule,
+  RichSelectModule,
   RowGroupingPanelModule,
   ServerSideRowModelModule,
   SetFilterModule,
@@ -67,6 +72,10 @@ ModuleRegistry.registerModules([
   RowGroupingPanelModule,
   StatusBarModule,
   CellSelectionModule,
+  TextEditorModule,
+  CustomEditorModule,
+  RichSelectModule,
+  NumberEditorModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -85,6 +94,7 @@ interface TableProps {
   totalRows?: number;
   enableCellSelection?: boolean;
   suppressCellFocus?: boolean;
+  onCellEditRequest?: (event: CellEditRequestEvent) => void;
 }
 
 export type TableColumnType = {
@@ -112,6 +122,7 @@ const Table: React.FC<TableProps> = ({
   totalRows,
   enableCellSelection = false,
   suppressCellFocus = false,
+  onCellEditRequest,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -165,6 +176,8 @@ const Table: React.FC<TableProps> = ({
           statusBar={statusBar}
           cellSelection={cellSelection}
           suppressCellFocus={suppressCellFocus}
+          readOnlyEdit
+          onCellEditRequest={onCellEditRequest}
           {...(columnConfig?.enableRowGroup ? { rowGroupPanelShow: 'always' } : {})}
           {...(serverSideDatasource
             ? {

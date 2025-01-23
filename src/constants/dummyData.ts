@@ -1,3 +1,7 @@
+import { DatasetFilterConfigResponseType } from "types/api/dataset.types";
+import { CUSTOM_COLUMNS_TYPE } from "components/common/table/table.types";
+import { FILTER_TYPES } from "components/filter/filter.types";
+
 export const PAGES_ITEMS = [
   {
     label: 'Daily Liquidity Summary',
@@ -100,3 +104,86 @@ export const barGraphData = {
     ]
   }]
 }
+
+export const columns: DatasetFilterConfigResponseType[] = [
+  {
+    column: 'Tags',
+    datatype: 'STRING',
+    type: FILTER_TYPES.MULTI_SELECT,
+    options: ['Tag1.Tag2.Tag3', 'Tag2.Tag3.Tag4.Tag5', 'Tag3.Tag4'],
+    metadata: {
+      custom_type: CUSTOM_COLUMNS_TYPE  .TAG,
+      is_editable: true,
+    },
+  },
+  {
+    column: 'Date',
+    datatype: 'DATE',
+    type: FILTER_TYPES.DATE_RANGE,
+    metadata: {
+      custom_type: CUSTOM_COLUMNS_TYPE.DATE_TIME,
+      is_editable: true,
+      format: 'dd-MM-yyyy',
+    },
+    options: [],
+  },
+  {
+    column: 'Amount',
+    datatype: 'NUMBER',
+    type: FILTER_TYPES.AMOUNT_RANGE,
+    metadata: {
+      custom_type: CUSTOM_COLUMNS_TYPE.AMOUNT,
+      is_editable: true,
+      currency_column_prefix: 'Currency',
+    },
+    options: [],
+  },
+  {
+    column: 'Status',
+    datatype: 'STRING',
+    type: FILTER_TYPES.MULTI_SELECT,
+    options: ['success', 'failed', 'pending'],
+    metadata: {
+      is_editable: true,
+    },
+  },
+  {
+    column: 'Description',
+    datatype: 'STRING',
+    type: FILTER_TYPES.SEARCH,
+    metadata: {
+      is_editable: true,
+    },
+    options: [],
+  },
+  {
+    column: 'Currency',
+    datatype: 'STRING',
+    type: FILTER_TYPES.MULTI_SELECT,
+    options: ['USD', 'EUR', 'GBP', 'JPY', 'SGD'],
+    metadata: {
+      is_editable: true,
+    },
+  }
+]
+
+export const rows = [
+  {
+    Tags: 'Tag1',
+    Date: '2024-06-27T15:55:49.007799Z',
+    Amount: 1000,
+    Status: 'success',
+    Description: 'Description1',
+    Currency: 'USD',
+  },
+  {
+    Tags: 'Tag2',
+    Date: '2024-06-27T15:55:49.007799Z',
+    Amount: 2000,
+    Status: 'failed',
+    Description: 'Description2',
+    Currency: 'EUR',
+  },
+]
+
+export const tagsList = ['Tag1.Tag2.Tag3', 'Tag2.Tag3.Tag4.Tag5', 'Tag3.Tag4'];

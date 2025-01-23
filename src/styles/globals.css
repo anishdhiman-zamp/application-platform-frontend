@@ -114,3 +114,19 @@
 }
 
 
+:where(.ag-cell-editor) .ag-wrapper {
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.ag-rich-select-field-input {
+  :where(.ag-input-field-input) {
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+  }
+}
+
+.ag-input-field-input:where(:not([type=checkbox],[type=radio])) {
+  padding-left: 8px;
+  padding-right: 8px;
+}

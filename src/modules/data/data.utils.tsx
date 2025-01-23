@@ -2,7 +2,10 @@ import { ColDef } from 'ag-grid-community';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
 import { DatasetFilterConfigResponseType, DatasetType } from 'types/api/dataset.types';
+import CustomTagEditorCellRenderer from 'components/common/table/CustomCellEditorCellRenderers/CustomTagEditorCellRenderer';
+import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
 
 export const findTimeDifference = (updated_at: string): string => {
@@ -45,7 +48,7 @@ export const formatColumns = (
   const columnDataTypeMapping: Record<string, string> = {};
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
-    const formattedColumn: ColDef = {
+    let formattedColumn: ColDef = {
       field: column.column,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       filterParams: {
@@ -54,13 +57,57 @@ export const formatColumns = (
       flex: 1,
       hide: column.metadata?.is_hidden,
       cellRendererParams: column.metadata,
+      editable: column.metadata?.is_editable,
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
+    formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     columns.push(formattedColumn);
     columnDataTypeMapping[column.column] = column.datatype;
   });
 
   return { columns, columnDataTypeMapping };
+};
+
+export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {
+  if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
+    return {
+      cellEditor: 'agRichSelectCellEditor',
+      cellEditorParams: {
+        values: column.options,
+        allowTyping: true,
+        filterList: true,
+        cellHeight: 50,
+        cellRenderer: CustomTagEditorCellRenderer,
+      },
+    };
+  }
+
+  switch (column.type) {
+    case FILTER_TYPES.MULTI_SELECT:
+      return {
+        cellEditor: 'agRichSelectCellEditor',
+        cellEditorParams: {
+          values: column.options,
+          allowTyping: true,
+          filterList: true,
+          highlightMatch: true,
+          searchType: 'match',
+          cellHeight: 32,
+        },
+      };
+    case FILTER_TYPES.SEARCH:
+      return {
+        cellEditor: 'agTextCellEditor',
+      };
+    case FILTER_TYPES.AMOUNT_RANGE:
+      return {
+        cellEditor: 'agNumberCellEditor',
+      };
+    case FILTER_TYPES.DATE_RANGE:
+      return {
+        cellEditor: CustomDateTimeEditor,
+      };
+  }
 };
