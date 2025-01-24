@@ -5,6 +5,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
+import { toast } from 'components/common/toast/Toast';
 
 const PeopleHeader = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -13,6 +14,7 @@ const PeopleHeader = () => {
 
   const handleOpenInviteMembersPopup = () => {
     setIsInviteMembersPopupOpen(true);
+    toast.success('Invite members popup opened');
   };
   const handleCloseInviteMembersPopup = () => {
     setIsInviteMembersPopupOpen(false);

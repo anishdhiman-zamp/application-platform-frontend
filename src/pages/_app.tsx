@@ -1,5 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
+import { ToastContainer } from 'react-toastify';
 import { LicenseManager } from 'ag-grid-enterprise';
 import { SIZE } from 'constants/common.constants';
 import { FAVICON } from 'constants/icons';
@@ -18,6 +19,7 @@ import 'styles/react-datepicker.css';
 import 'styles/react-dates.css';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Configure the Inter font
 const inter = Inter({
@@ -55,6 +57,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           }
           loginRoute='/login'
         >
+          <ToastContainer />
           <div className={`${inter.className} h-screen light-mode`}>{getComponent()}</div>
         </AuthGuard>
       </Provider>
