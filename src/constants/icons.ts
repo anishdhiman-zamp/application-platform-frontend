@@ -7,6 +7,7 @@ export const FAVICON = IMAGE_PREFIX + '/icons/favicon.png';
 export const NOTEBOOK_ICON = IMAGE_PREFIX + '/icons/notebook.svg';
 export const ZAMP_ICON_BLACK = IMAGE_PREFIX + '/icons/zamp-icon-black.svg';
 export const GOOGLE_ICON = IMAGE_PREFIX + '/icons/google.svg';
+export const DRAG_ICON = IMAGE_PREFIX + '/icons/drag-icon.svg';
 
 export enum ICON_SPRITE_TYPES {
     ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

@@ -1,5 +1,8 @@
 import { CellSelectionOptions, themeQuartz } from 'ag-grid-community';
+import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
+import { DisplayOptionItemProps } from 'components/common/table/DisplayOptions/DisplayOptionItem';
+import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const myTheme = themeQuartz.withParams({
@@ -119,3 +122,18 @@ export const cellSelectionConfig: CellSelectionOptions<any> = {
     mode: 'range',
   },
 };
+
+export const DisplayOptionsList: DisplayOptionItemProps[] = [
+  {
+    id: DISPLAY_OPTIONS.COLUMNS,
+    label: 'Columns',
+    iconId: 'columns-03',
+    iconCategory: ICON_SPRITE_TYPES.LAYOUT,
+  },
+  {
+    id: DISPLAY_OPTIONS.GROUP_BY,
+    label: 'Group By',
+    iconId: 'left-indent-02',
+    iconCategory: ICON_SPRITE_TYPES.EDITOR,
+  },
+];

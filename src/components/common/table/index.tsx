@@ -4,6 +4,8 @@ import {
   CellStyleModule,
   ClientSideRowModelModule,
   ColDef,
+  ColumnApiModule,
+  ColumnVisibleEvent,
   CustomEditorModule,
   CustomFilterModule,
   DateFilterModule,
@@ -72,6 +74,7 @@ ModuleRegistry.registerModules([
   RowGroupingPanelModule,
   StatusBarModule,
   CellSelectionModule,
+  ColumnApiModule,
   TextEditorModule,
   CustomEditorModule,
   RichSelectModule,
@@ -94,6 +97,7 @@ interface TableProps {
   totalRows?: number;
   enableCellSelection?: boolean;
   suppressCellFocus?: boolean;
+  onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
 }
 
@@ -122,6 +126,7 @@ const Table: React.FC<TableProps> = ({
   totalRows,
   enableCellSelection = false,
   suppressCellFocus = false,
+  onColumnVisible,
   onCellEditRequest,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
@@ -176,6 +181,7 @@ const Table: React.FC<TableProps> = ({
           statusBar={statusBar}
           cellSelection={cellSelection}
           suppressCellFocus={suppressCellFocus}
+          onColumnVisible={onColumnVisible}
           readOnlyEdit
           onCellEditRequest={onCellEditRequest}
           {...(columnConfig?.enableRowGroup ? { rowGroupPanelShow: 'always' } : {})}

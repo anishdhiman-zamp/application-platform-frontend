@@ -13,6 +13,7 @@ import { formatColumns } from 'modules/data/data.utils';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import DatasetTable from 'components/common/table/DatasetTable';
+import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -23,6 +24,7 @@ const DatasetById = () => {
   const { data: filterConfig } = useGetDatasetFilterConfigQuery({ datasetId: id });
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
+  const [refetchColumnList, setRefetchColumnList] = useState<number>(0);
 
   const [getDatasetData, { data }] = useLazyGetDatasetDataQuery();
 
@@ -89,6 +91,10 @@ const DatasetById = () => {
     );
   };
 
+  const handleColumnVisible = () => {
+    setRefetchColumnList((prev) => prev + 1);
+  };
+
   // TODO: Integrate with update API
   const onCellEditRequest = (event: CellEditRequestEvent) => {
     const { colDef, newValue, oldValue, data } = event;
@@ -99,8 +105,11 @@ const DatasetById = () => {
 
   return (
     <div className='h-full'>
-      <div className='flex items-center py-3'>
-        <FiltersWrapper label='Filter' allowActions={true} filterConfig={filtersConfig ?? []} />
+      <div className='flex items-center justify-between pr-4'>
+        <div className='flex items-center py-3'>
+          <FiltersWrapper label='Filter' allowActions={true} filterConfig={filtersConfig ?? []} />
+        </div>
+        <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
       </div>
       <div className='z-10 w-full h-full'>
         <DatasetTable
@@ -109,6 +118,7 @@ const DatasetById = () => {
           serverSideDatasource={serverSideDatasource}
           columnConfig={{ enableRowGroup: true, enableValue: true }}
           totalRows={totalRows}
+          onColumnVisible={handleColumnVisible}
           onCellEditRequest={onCellEditRequest}
           {...(data?.config?.isDrilldownEnabled ? { onRowClicked } : {})}
         />
