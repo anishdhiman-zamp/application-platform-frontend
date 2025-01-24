@@ -18,33 +18,27 @@ export enum OrderType {
     AggregationFunctionCount = 'COUNT',
   }
 
-  export type ColumnConfig = {
-    column: string;
-    datatype: string;
-    alias: string;
-  }
-
   export type FilterType = {
     logicalOperator?: LogicalOperatorType;
-    column?: ColumnConfig;
+    column?: string;
     operator?: CONDITION_OPERATOR_TYPE;
     value?: any;
     conditions?: FilterType[];
   };
   
   export type AggregationType = {
-    column: ColumnConfig;
+    column: string;
     alias: string;
     function: AggregationFunctionType;
   };
   
   export type GroupByType = {
-    column: ColumnConfig;
+    column: string;
     alias: string;
   };
   
   export type OrderByType = {
-    column: ColumnConfig;
+    column: string;
     order: OrderType;
   };
   

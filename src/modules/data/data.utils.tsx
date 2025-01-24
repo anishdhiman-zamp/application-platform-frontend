@@ -41,11 +41,8 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
-export const formatColumns = (
-  filterConfig: DatasetFilterConfigResponseType[],
-): { columns: ColDef[]; columnDataTypeMapping: Record<string, string> } => {
+export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): ColDef[] => {
   const columns: ColDef[] = [];
-  const columnDataTypeMapping: Record<string, string> = {};
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
     let formattedColumn: ColDef = {
@@ -64,10 +61,9 @@ export const formatColumns = (
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     columns.push(formattedColumn);
-    columnDataTypeMapping[column.column] = column.datatype;
   });
 
-  return { columns, columnDataTypeMapping };
+  return columns;
 };
 
 export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {

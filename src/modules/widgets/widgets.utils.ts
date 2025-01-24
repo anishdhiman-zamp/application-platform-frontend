@@ -6,7 +6,6 @@ import { MapAny } from "types/commonTypes";
 import { LogicalOperatorType } from 'types/components/table.type';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { ArrayFilters } from 'components/common/table/table.constants';
-import { getConditionValues } from 'components/common/table/table.utils';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -105,50 +104,70 @@ export const getSheetIdFromPath = (path: string, pageid: string) => {
     return path.split('#')[1] ?? JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) ?? '{}')[pageid]
 }
 
-export const getConditionValues1 = (condition: MapAny): MapAny | null => {
+const getConditionValues = (condition: MapAny, columnDataTypeMapping: Record<string, string>, columnKeyName = 'column'): MapAny | null => {
     switch (condition.filterType) {
-        case FILTER_TYPES.AMOUNT_RANGE:
-            if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
-                if (condition.filterTo !== '' && condition.filter !== '')
-                    return {
-                        column: condition.colId,
-                        operator: condition.type,
-                        value: [Number(condition.filter), Number(condition.filterTo)],
-                    };
-                else return null;
-            } else if (condition.filter !== '') {
-                return {
-                    column: condition.colId,
-                    operator: condition.type,
-                    value: Number(condition.filter),
-                };
-            } else return null;
-        case FILTER_TYPES.MULTI_SELECT:
-            if (condition.values.length) {
-                return {
-                    column: condition.colId,
-                    operator: condition.type,
-                    value: condition.values,
-                };
-            } else return null;
-        case FILTER_TYPES.DATE_RANGE:
-            if (condition.dateFrom && condition.dateTo) {
-                return {
-                    column: condition.colId,
-                    operator: condition.type,
-                    value: [condition.dateFrom, condition.dateTo],
-                };
-            } else return null;
-        case FILTER_TYPES.SEARCH:
+      case FILTER_TYPES.AMOUNT_RANGE:
+        if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
+          if (condition.filterTo !== '' && condition.filter !== '')
             return {
+              [columnKeyName]: {
                 column: condition.colId,
-                operator: condition.type,
-                value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
+                datatype: columnDataTypeMapping[condition.colId],
+                alias: condition.colId,
+              },
+              operator: condition.type,
+              value: [Number(condition.filter), Number(condition.filterTo)],
             };
-        default:
-            return null;
+          else return null;
+        } else if (condition.filter !== '') {
+          return {
+            [columnKeyName]: {
+              column: condition.colId,
+              datatype: columnDataTypeMapping[condition.colId],
+              alias: condition.colId,
+            },
+            operator: condition.type,
+            value: Number(condition.filter),
+          };
+        } else return null;
+      case FILTER_TYPES.MULTI_SELECT:
+        if (condition.values.length) {
+          return {
+            [columnKeyName]: {
+              column: condition.colId,
+              datatype: columnDataTypeMapping[condition.colId],
+              alias: condition.colId,
+            },
+            operator: condition.type,
+            value: condition.values,
+          };
+        } else return null;
+      case FILTER_TYPES.DATE_RANGE:
+        if (condition.dateFrom && condition.dateTo) {
+          return {
+            [columnKeyName]: {
+              column: condition.colId,
+              datatype: columnDataTypeMapping[condition.colId],
+              alias: condition.colId,
+            },
+            operator: condition.type,
+            value: [condition.dateFrom, condition.dateTo],
+          };
+        } else return null;
+      case FILTER_TYPES.SEARCH:
+        return {
+          [columnKeyName]: {
+            column: condition.colId,
+            datatype: columnDataTypeMapping[condition.colId],
+            alias: condition.colId,
+          },
+          operator: condition.type,
+          value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
+        };
+      default:
+        return null;
     }
-};
+  };
 
 export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selectedFilters: MapAny) => {
     const datasetFilters: MapAny = {}
