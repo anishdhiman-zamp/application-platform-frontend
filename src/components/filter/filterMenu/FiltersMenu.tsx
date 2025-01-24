@@ -1,10 +1,10 @@
 import React, { FC, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { POSITION_TYPES } from 'types/common/components';
-import { cn } from 'utils/common';
 import { TooltipPositions } from 'components/common/tooltip';
 import { FilterConfigType } from 'components/filter/filter.types';
 import FilterControlButton from 'components/filter/FilterControlButton';
+import SelectFilterMenuItem from 'components/filter/filterMenu/SelectFilterMenuItem';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 
 interface FiltersMenuProps {
@@ -55,8 +55,6 @@ const FiltersMenu: FC<FiltersMenuProps> = ({
     toggleMenu();
   };
 
-  const checkIfFilterIsSelected = (filterKey: string) => currentPageFilters?.includes(filterKey);
-
   return (
     <div className='relative'>
       <div ref={controlRef}>
@@ -69,29 +67,14 @@ const FiltersMenu: FC<FiltersMenuProps> = ({
           {label}
         </FilterControlButton>
       </div>
-      <div
-        ref={menuRef}
-        className={cn(
-          `absolute top-full left-0 mt-1 px-2.5 z-1000 shadow-tableFilterMenu border transition-all duration-100 bg-white rounded-md`,
-          isOpen ? 'max-h-[500px] overflow-auto' : 'max-h-0 overflow-hidden border-0',
-          getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : ''
-        )}
-      >
-        <div className=' text-GRAY_500 f-13-500 px-4 py-2'>Filter by</div>
-        {filtersConfig?.map((filter, index) => (
-          <div
-            key={index}
-            data-testid={`filter-menu-item-${filter?.key}`}
-            className={cn(
-              ` flex px-4 py-3 items-center rounded hover:bg-GRAY_70 w-full`,
-              checkIfFilterIsSelected(filter?.key) ? ' cursor-default opacity-30' : 'cursor-pointer'
-            )}
-            onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddfilter(filter?.key)}
-          >
-            <div className='f-12-400 text-GRAY_1000'>{filter.key}</div>
-          </div>
-        ))}
-      </div>
+      <SelectFilterMenuItem
+        menuRef={menuRef}
+        isOpen={isOpen}
+        getMenuPlacement={getMenuPlacement}
+        filtersConfig={filtersConfig ?? []}
+        onAddFilter={onAddfilter}
+        currentPageFilters={currentPageFilters ?? []}
+      />
     </div>
   );
 };

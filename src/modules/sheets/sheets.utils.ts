@@ -1,12 +1,59 @@
-import { SheetFilterType } from "types/api/pagesApi.types";
+import { FilterDefaultValueType, SheetFilterType } from "types/api/pagesApi.types";
+import { MapAny } from "types/commonTypes";
+import { FILTER_TYPES } from "components/filter/filter.types";
 
 export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
     return {
         key: filter?.targets[0]?.column,
         label: filter?.name,
         values: filter?.options,
+        datatype: filter?.data_type,
         type: filter?.filter_type,
         targets: filter?.targets,
         widgetsInScope: filter?.widgets_in_scope,
     }
+}
+
+const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTER_TYPES) => {
+    switch (filterType) {
+        case FILTER_TYPES.SEARCH:
+            return {
+                filterType: filterType,
+                type: filter.operator,
+                filter: filter.values[0]
+            }
+        case FILTER_TYPES.AMOUNT_RANGE:
+            return {
+                filterType: filterType,
+                type: filter.operator,
+                filter: filter.from,
+                filterTo: filter.to
+            }
+        case FILTER_TYPES.DATE_RANGE:
+            return {
+                filterType: filterType,
+                dateFrom: filter.from,
+                dateTo: filter.to,
+                type: filter.operator
+            }
+        case FILTER_TYPES.MULTI_SELECT:
+            return {
+                filterType: filterType,
+                type: filter.operator,
+                values: filter.values
+            }
+    }
+}
+
+export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
+    const defaultFilters: MapAny = {}
+
+    filters.forEach((filter) => {
+        if (filter?.default_value) {
+            defaultFilters[filter.targets[0]?.column] = getFilterDefaultValue(filter?.default_value, filter.filter_type)
+        }
+    })
+
+    return defaultFilters
+
 }
