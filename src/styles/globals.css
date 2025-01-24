@@ -17,7 +17,7 @@
   /* Handle */
   * > ::-webkit-scrollbar-thumb {
     background: #e2e2da;
-    border-radius: 0px;
+    border-radius: 12px;
     overflow: hidden;
   }
   
@@ -28,7 +28,7 @@
 
 /* Handle */
 .custom-scroll-bar-common::-webkit-scrollbar-thumb {
-  border-radius: 0px;
+  border-radius: 12px;
   outline: none;
   overflow: hidden;
 }

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IServerSideDatasource, IServerSideGetRowsParams, RowClickedEvent } from 'ag-grid-community';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { formatData } from 'modules/data/data.utils';
 import { useRouter } from 'next/router';
@@ -9,10 +10,10 @@ import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 const Listing = () => {
+  const router = useRouter();
   const [getDatasetListing] = useLazyGetDatasetListingQuery();
   const columns = useMemo(() => LISTING_COLUMNS, []);
-
-  const router = useRouter();
+  const [isShareDatasetPopupOpen, setIsShareDatasetPopupOpen] = useState<boolean>(false);
 
   const onRowClicked = (event: RowClickedEvent) => {
     router.push(ROUTES_PATH.DATASET.replace(':datasetId', event?.data?.id));
@@ -39,7 +40,16 @@ const Listing = () => {
     };
   }, [getDatasetListing]);
 
-  return <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />;
+  const handleCloseShareDatasetPopup = () => {
+    setIsShareDatasetPopupOpen(false);
+  };
+
+  return (
+    <>
+      <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
+      <ShareDatasetPopup isOpen={isShareDatasetPopupOpen} onClose={handleCloseShareDatasetPopup} />
+    </>
+  );
 };
 
 export default Listing;

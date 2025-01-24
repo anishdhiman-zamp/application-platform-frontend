@@ -1,8 +1,8 @@
 import React, { FC, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { CUSTOM_ROLE_SELECT_DATA } from 'modules/people/people.constants';
-import { InviteMembersPopupPropsType, RoleOption } from 'modules/people/people.types';
+import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/people/people.constants';
+import { InviteMembersPopupPropsType, TeamMembersPrivilegeType } from 'modules/people/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
@@ -13,12 +13,12 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const selectedRoleRef = useRef<RoleOption>(CUSTOM_ROLE_SELECT_DATA[0]);
+  const selectedRoleRef = useRef<TeamMembersPrivilegeType>(TEAM_MEMBERS_PRIVILEGES_LIST[0]);
   const [inputArrayList, setInputArrayList] = useState<ArrayListOption[]>([]);
   const [search, setSearch] = useState<string>('');
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const validationErrorText = 'Email address incorrect';
-  const placeholderText = inputArrayList.length > 0 ? '' : 'Share with people and teams';
+  const placeholderText = 'Share with people and teams';
 
   const handleCloseInviteMembersPopup = () => {
     onClose?.();
@@ -41,20 +41,23 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
       closeOnClickOutside={false}
     >
       <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white'>
-        <MultiSelectInput
-          inputArrayList={inputArrayList}
-          setInputArrayList={setInputArrayList}
-          containerRef={containerRef}
-          inputRef={inputRef}
-          search={search}
-          setSearch={setSearch}
-          selectedRoleRef={selectedRoleRef}
-          showValidationError={showValidationError}
-          validationErrorText={validationErrorText}
-          isOpen={isOpen}
-          setShowValidationError={setShowValidationError}
-          placeholderText={placeholderText}
-        />
+        <div className='px-4 py-6'>
+          <MultiSelectInput
+            inputArrayList={inputArrayList}
+            setInputArrayList={setInputArrayList}
+            containerRef={containerRef}
+            inputRef={inputRef}
+            search={search}
+            setSearch={setSearch}
+            selectedRoleRef={selectedRoleRef}
+            showValidationError={showValidationError}
+            validationErrorText={validationErrorText}
+            isOpen={isOpen}
+            setShowValidationError={setShowValidationError}
+            placeholderText={placeholderText}
+            roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
+          />
+        </div>
         <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full'>
           <Button type={BUTTON_TYPES.PRIMARY} id='send-user-invite-btn' size={SIZE_TYPES.MEDIUM}>
             Send invite

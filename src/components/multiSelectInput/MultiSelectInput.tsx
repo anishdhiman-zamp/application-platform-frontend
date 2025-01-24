@@ -1,7 +1,6 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { CUSTOM_ROLE_SELECT_DATA } from 'modules/people/people.constants';
 import { validateEmail } from 'modules/people/people.utils';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
@@ -22,15 +21,23 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   isOpen,
   setShowValidationError,
   placeholderText,
+  dropdownOptions,
+  roleOptions,
 }) => {
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+  const dropdownOptionsRef = useRef<HTMLDivElement>(null);
+  const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
+
+  const handleSetInputFocus = () => {
+    setIsInputFocused(true);
+  };
 
   useEffect(() => {
     if (isOpen) {
       setIsInputFocused(true);
       inputRef.current?.focus();
     }
-  }, [isOpen]);
+  }, [isOpen, inputRef]);
 
   const handleClickKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -43,38 +50,41 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
       }
     },
-    [search],
+    [search, setInputArrayList, setSearch, setShowValidationError],
   );
 
-  const handleRemoveEmail = useCallback((index: number) => {
-    setInputArrayList((prevEmails: ArrayListOption[]) => {
-      const updatedEmails = prevEmails.filter((_, i) => i !== index);
+  const handleRemoveEmail = useCallback(
+    (index: number) => {
+      setInputArrayList((prev) => {
+        const updatedEmails = prev.filter((_, i) => i !== index);
 
-      setShowValidationError(updatedEmails.some((email) => !email.valid));
+        setShowValidationError(updatedEmails.some((email) => !email.valid));
 
-      return updatedEmails;
-    });
+        return updatedEmails;
+      });
+      inputRef.current?.focus();
+    },
+    [setInputArrayList, setShowValidationError, inputRef],
+  );
 
-    inputRef.current?.focus();
-  }, []);
-
-  const handleClickOutsideContainerRef = (
-    event: MouseEvent,
-    containerRef: React.RefObject<HTMLDivElement>,
-    setIsInputFocused: React.Dispatch<React.SetStateAction<boolean>>,
-  ) => {
-    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-      setIsInputFocused(false);
-    }
-  };
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        containerRef.current?.contains(event.target as Node) ||
+        dropdownOptionsRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
+      setTimeout(() => setIsInputFocused(false), 0);
+    },
+    [containerRef, dropdownOptionsRef],
+  );
 
   useEffect(() => {
-    const listener = (event: MouseEvent) => handleClickOutsideContainerRef(event, containerRef, setIsInputFocused);
+    document.addEventListener('mousedown', handleClickOutside);
 
-    document.addEventListener('mousedown', listener);
-
-    return () => document.removeEventListener('mousedown', listener);
-  }, []);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [handleClickOutside]);
 
   useEffect(() => {
     if (isInputFocused) {
@@ -84,22 +94,42 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
   }, [isInputFocused]);
 
+  const filteredDropdownOptions = useMemo(() => {
+    if (!search.trim()) {
+      return dropdownOptions ?? [];
+    }
+
+    return dropdownOptions?.filter((option) => option?.value.toLowerCase().includes(search.toLowerCase()));
+  }, [dropdownOptions, search]);
+
+  const openDropdownOptions =
+    dropdownOptions && isInputFocused && search.trim().length > 0 && (filteredDropdownOptions?.length ?? 0) > 0;
+  const handleSelectDropdownOption = useCallback(
+    (option: { value: string; color?: string }) => {
+      setInputArrayList((prev) => [...prev, { value: option.value, valid: true, color: option?.color }]);
+      setSearch('');
+      inputRef.current?.focus();
+      setIsInputFocused(true);
+    },
+    [setInputArrayList, setSearch, inputRef],
+  );
+
   return (
-    <div className='flex flex-col items-center p-5'>
+    <div className='flex flex-col items-center'>
       <div
         className={cn(
-          `flex justify-between items-start w-full mt-5 rounded-md gap-1.5 border ${isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400'}`,
+          `flex justify-between items-start w-full rounded-md gap-1.5 border ${isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400'}`,
         )}
       >
-        <div
-          className='flex flex-wrap gap-1.5 py-3 pl-3 w-full'
-          ref={containerRef}
-          onClick={() => setIsInputFocused(true)}
-        >
+        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full' ref={containerRef} onClick={handleSetInputFocus}>
           {inputArrayList.map((item, index) => (
             <div
               key={index}
-              className={`flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit border ${item.valid ? 'bg-GRAY_50 border-GRAY_400' : `bg-RED_100 border-RED_200`}`}
+              className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit'
+              style={{
+                backgroundColor: item.valid ? (item?.color ? item.color : COLORS.GRAY_50) : COLORS.RED_100,
+                border: `1px solid ${item.valid ? (item?.color ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
+              }}
             >
               <span className='f-12-500 text-GRAY_1000'>{item.value}</span>
               <SvgSpriteLoader
@@ -113,7 +143,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             </div>
           ))}
           <Input
-            placeholder={placeholderText}
+            placeholder={inputPlaceholderText}
             type='email'
             inputRef={inputRef}
             value={search}
@@ -126,29 +156,57 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             inputFontClassName='f-12-500 py-0 !rounded-none'
           />
         </div>
-
-        <div className='w-[130px]'>
-          <Dropdown
-            options={CUSTOM_ROLE_SELECT_DATA}
-            id=''
-            eventCallback={() => {}}
-            onChange={(selectedOption) => {
-              selectedRoleRef.current = selectedOption;
-              inputRef.current?.focus();
-              setIsInputFocused(true);
-            }}
-            value={selectedRoleRef.current}
-            placeholder='Member'
-            isSearchable={false}
-            customClass={{
-              focus: 'none',
-              border: 'transparent',
-              fontSize: 'f-12-400',
-            }}
-          />
-        </div>
+        {roleOptions && (
+          <div className='w-[130px]'>
+            <Dropdown
+              options={roleOptions}
+              id=''
+              eventCallback={() => {}}
+              onChange={(selectedOption) => {
+                selectedRoleRef.current = selectedOption;
+                inputRef.current?.focus();
+                setIsInputFocused(true);
+              }}
+              value={selectedRoleRef.current}
+              placeholder='Member'
+              isSearchable={false}
+              customClass={{
+                focus: 'none',
+                border: 'transparent',
+                fontSize: 'f-12-400',
+              }}
+            />
+          </div>
+        )}
       </div>
-      {showValidationError && (
+      {openDropdownOptions && (
+        <div className='w-full relative'>
+          <div
+            ref={dropdownOptionsRef}
+            onClick={(e) => e.stopPropagation()}
+            className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
+          >
+            <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
+            <div className='w-full max-h-[200px] overflow-y-scroll'>
+              {filteredDropdownOptions?.map((option, index) => (
+                <div
+                  key={index}
+                  className='w-full py-1.5 hover:bg-GRAY_50 px-1.5 rounded-md'
+                  onClick={() => handleSelectDropdownOption(option)}
+                >
+                  <span
+                    className='f-12-400 text-GRAY_1000 w-full px-1.5 py-0.5 rounded'
+                    style={{ backgroundColor: option?.color }}
+                  >
+                    {option?.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {validationErrorText && showValidationError && (
         <span className='f-11-400 text-RED_700 mt-2 w-full flex text-start'>{validationErrorText}</span>
       )}
     </div>

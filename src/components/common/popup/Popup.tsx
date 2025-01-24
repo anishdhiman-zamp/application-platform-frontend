@@ -1,23 +1,7 @@
 import React, { FC } from 'react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { defaultFnType } from 'types/commonTypes';
 import { cn, stopPropagationAction } from 'utils/common';
+import { PopupProps } from 'components/common/popup/popup.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
-type PopupProps = {
-  title?: string;
-  titleClassName?: string;
-  popupWrapperClassName?: string;
-  showIcon?: boolean;
-  iconCategory?: ICON_SPRITE_TYPES;
-  iconId: string;
-  iconColor?: string;
-  isOpen: boolean;
-  children: any;
-  className?: string;
-  onClose?: defaultFnType;
-  closeOnClickOutside?: boolean;
-};
 
 const Popup: FC<PopupProps> = ({
   title,
@@ -32,13 +16,15 @@ const Popup: FC<PopupProps> = ({
   className = '',
   onClose,
   closeOnClickOutside = true,
+  isOverlay = true,
+  wrapperClassName,
 }) => {
   if (!isOpen) return null;
 
   return (
     <div
       className={cn(
-        `bg-GRAY_70 transition-all duration-300 ease-in fixed w-screen h-screen z-1000 top-0 left-0 ${
+        `transition-all duration-300 ease-in fixed w-screen h-screen z-1000 top-0 left-0 ${isOverlay ? 'bg-GRAY_70 ' : ''} ${
           isOpen ? 'opacity-1' : 'hidden opacity-0'
         }`,
       )}
@@ -47,7 +33,7 @@ const Popup: FC<PopupProps> = ({
         if (closeOnClickOutside) onClose?.();
       }}
     >
-      <div className='w-full h-full flex items-center justify-center'>
+      <div className={cn('w-full h-full flex items-center justify-center', wrapperClassName)}>
         <div
           className={cn(
             `transition-all duration-300 ease-in px-5 py-5 rounded-xl block ${className} ${
@@ -57,15 +43,15 @@ const Popup: FC<PopupProps> = ({
           role='presentation'
           onClick={stopPropagationAction}
         >
-            <div className={cn(`flex w-full justify-between items-center px-5 pt-5 pb-0 ${popupWrapperClassName}`)}>
-              {title && <span className={titleClassName}>{title}</span>}
-              {showIcon && (
-                <div className='p-1 cursor-pointer' onClick={onClose}>
-                  <SvgSpriteLoader id={iconId} iconCategory={iconCategory} width={16} height={16} color={iconColor} />
-                </div>
-              )}
-            </div>
-            {children}
+          <div className={cn('flex w-full justify-between items-center px-5 pt-5 pb-0', popupWrapperClassName)}>
+            {title && <span className={titleClassName}>{title}</span>}
+            {showIcon && (
+              <div className='p-1 cursor-pointer' onClick={onClose}>
+                <SvgSpriteLoader id={iconId} iconCategory={iconCategory} width={16} height={16} color={iconColor} />
+              </div>
+            )}
+          </div>
+          {children}
         </div>
       </div>
     </div>
