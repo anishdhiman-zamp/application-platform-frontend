@@ -46,10 +46,17 @@ export interface WidgetInstanceType {
 export interface DataMappings {
   version: string;
   datasets: { id: string }[];
-  mappings: MappingsType;
+  mappings: MappingsType[];
 }
 
 export interface MappingsType {
+  dataset_id: string;
+  fields: {
+    x_axis?: AxisMappingType[];
+    y_axis?: AxisMappingType[];
+    slices?: AxisMappingType[];
+    values?: AxisMappingType[];
+  };
   x_axis?: AxisMappingType;
   y_axis?: AxisMappingType;
   slices?: AxisMappingType;

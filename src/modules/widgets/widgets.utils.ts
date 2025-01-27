@@ -1,13 +1,12 @@
-import { AgBarSeriesOptions, AgCartesianSeriesOptions } from 'ag-charts-community';
+import { AgCartesianSeriesOptions } from 'ag-charts-community';
 import { AG_CHART_TYPES, WIDGET_TYPES, WidgetDataValueType, WidgetTypes } from 'modules/widgets/widgets.constant';
-import { WidgetInstanceType } from 'types/api/pagesApi.types';
+import { MappingsType, WidgetInstanceType } from 'types/api/pagesApi.types';
 import { WidgetDataType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { ArrayFilters } from 'components/common/table/table.constants';
-import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+import { getConditionValues } from 'components/common/table/table.utils';
+import { FilterConfigType } from 'components/filter/filter.types';
 
 /**
  * Formats the data array based on the types specified in the columns array.
@@ -51,30 +50,29 @@ export function transformData(responses: WidgetDataType[]) {
 }
 
 export const getChartConfig = (widgetDetails: WidgetInstanceType, widgetType: WIDGET_TYPES) => {
-  const mappings = widgetDetails?.data_mappings?.mappings;
-  const xAxis = mappings?.x_axis?.column || '';
+  const mappings: MappingsType = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
+  const xAxis = mappings.fields.x_axis?.[0]?.column || '';
+  const yAxis = mappings.fields.y_axis || [];
   const title = widgetDetails.title;
   const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
 
-  const series: AgCartesianSeriesOptions[] = [
-    {
-      type: chartType,
-      xKey: xAxis,
-      yKey: `${mappings?.y_axis?.aggregation}_${mappings?.y_axis?.column}`,
-      yName: mappings?.y_axis?.column || '',
-      stacked: true,
-      fill: '#8562BE',
-      label: {
-        enabled: true,
-        fontSize: 10,
-        formatter: (params: any) => {
-          if (Number(params.datum[params.yKey]) / 1000000 > 0.5)
-            return (Number(params.datum[params.yKey]) / 1000000).toFixed(1).toString();
-          else return '';
-        },
+  const series = yAxis.map((yAxis) => ({
+    type: chartType as 'bar' | 'line' | 'area',
+    xKey: xAxis,
+    yKey: `${yAxis?.aggregation}_${yAxis?.column}`,
+    yName: yAxis?.column || '',
+    stacked: true,
+    fill: '#8562BE',
+    label: {
+      enabled: true,
+      fontSize: 10,
+      formatter: (params: any) => {
+        if (Number(params.datum[params.yKey]) / 1000000 > 0.5)
+          return (Number(params.datum[params.yKey]) / 1000000).toFixed(1).toString();
+        else return '';
       },
     },
-  ] as AgBarSeriesOptions<any>[];
+  })) as AgCartesianSeriesOptions[];
 
   return {
     series,
@@ -89,10 +87,10 @@ export const getPieChartConfig = (widgetDetails: WidgetInstanceType) => {
   const slices = [
     {
       type: AG_CHART_TYPES[WidgetTypes.PIE_CHART],
-      legendItemKey: mappings?.slices?.column,
-      angleKey: mappings?.values?.aggregation
-        ? `${mappings?.values?.aggregation}_${mappings?.values?.column}`
-        : mappings?.values?.column,
+      legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
+      angleKey: mappings?.[0]?.fields?.values?.[0]?.aggregation
+        ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
+        : mappings?.[0]?.fields?.values?.[0]?.column,
     },
   ];
 
@@ -106,86 +104,13 @@ export const getSheetIdFromPath = (path: string, pageid: string) => {
   return path.split('#')[1] ?? JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) ?? '{}')[pageid];
 };
 
-const getConditionValues = (
-  condition: MapAny,
-  columnDataTypeMapping: Record<string, string>,
-  columnKeyName = 'column',
-): MapAny | null => {
-  switch (condition.filterType) {
-    case FILTER_TYPES.AMOUNT_RANGE:
-      if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
-        if (condition.filterTo !== '' && condition.filter !== '')
-          return {
-            [columnKeyName]: {
-              column: condition.colId,
-              datatype: columnDataTypeMapping[condition.colId],
-              alias: condition.colId,
-            },
-            operator: condition.type,
-            value: [Number(condition.filter), Number(condition.filterTo)],
-          };
-        else return null;
-      } else if (condition.filter !== '') {
-        return {
-          [columnKeyName]: {
-            column: condition.colId,
-            datatype: columnDataTypeMapping[condition.colId],
-            alias: condition.colId,
-          },
-          operator: condition.type,
-          value: Number(condition.filter),
-        };
-      } else return null;
-    case FILTER_TYPES.MULTI_SELECT:
-      if (condition.values.length) {
-        return {
-          [columnKeyName]: {
-            column: condition.colId,
-            datatype: columnDataTypeMapping[condition.colId],
-            alias: condition.colId,
-          },
-          operator: condition.type,
-          value: condition.values,
-        };
-      } else return null;
-    case FILTER_TYPES.DATE_RANGE:
-      if (condition.dateFrom && condition.dateTo) {
-        return {
-          [columnKeyName]: {
-            column: condition.colId,
-            datatype: columnDataTypeMapping[condition.colId],
-            alias: condition.colId,
-          },
-          operator: condition.type,
-          value: [condition.dateFrom, condition.dateTo],
-        };
-      } else return null;
-    case FILTER_TYPES.SEARCH:
-      return {
-        [columnKeyName]: {
-          column: condition.colId,
-          datatype: columnDataTypeMapping[condition.colId],
-          alias: condition.colId,
-        },
-        operator: condition.type,
-        value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
-      };
-    default:
-      return null;
-  }
-};
-
 export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selectedFilters: MapAny) => {
   const datasetFilters: MapAny = {};
 
   filtersConfig?.forEach((filter) => {
     if (selectedFilters[filter?.key]) {
       filter.targets.forEach((target) => {
-        const conditionValues = getConditionValues(
-          { ...selectedFilters[filter?.key], colId: target.column },
-          { [filter?.key]: filter.datatype },
-          'column_config',
-        );
+        const conditionValues = getConditionValues({ ...selectedFilters[filter?.key], colId: target.column });
 
         datasetFilters[target.dataset_id] = datasetFilters[target.dataset_id]
           ? [...datasetFilters[target.dataset_id], conditionValues]

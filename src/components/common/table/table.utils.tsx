@@ -33,7 +33,7 @@ const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType
   }));
 };
 
-const getConditionValues = (condition: MapAny): FilterType | null => {
+export const getConditionValues = (condition: MapAny): FilterType | null => {
   switch (condition.filterType) {
     case FILTER_TYPES.AMOUNT_RANGE:
       if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
