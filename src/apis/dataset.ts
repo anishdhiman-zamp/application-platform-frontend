@@ -1,6 +1,14 @@
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
-import { DatasetDataRequestType, DatasetDataResponseType, DatasetDrilldownRequestType, DatasetDrilldownResponseType, DatasetFilterConfigResponseType, DatasetListingRequestType, DatasetListingResponseType } from 'types/api/dataset.types';
+import {
+  DatasetDataRequestType,
+  DatasetDataResponseType,
+  DatasetDrilldownRequestType,
+  DatasetDrilldownResponseType,
+  DatasetFilterConfigResponseType,
+  DatasetListingRequestType,
+  DatasetListingResponseType,
+} from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -11,15 +19,16 @@ const Dataset = baseApi.injectEndpoints({
       transformResponse: ({ data }) => data,
     }),
     getDatasetData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
-      query: ({ datasetId, queryConfig }) => (
-        { url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId }), params: { queryConfig } }
-      ),
+      query: ({ datasetId, queryConfig }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId }),
+        params: { queryConfig },
+      }),
       transformResponse: ({ data }) => data,
     }),
     getDatasetDrilldown: builder.query<DatasetDrilldownResponseType, DatasetDrilldownRequestType>({
-      query: ({ datasetId, rowId }) => (
-        { url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DRILLDOWN_GET, { datasetId, rowId }) }
-      ),
+      query: ({ datasetId, rowId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DRILLDOWN_GET, { datasetId, rowId }),
+      }),
     }),
     getDatasetListing: builder.query<DatasetListingResponseType, DatasetListingRequestType>({
       query: () => ({ url: API_ENDPOINTS.DATASET_LISTING_GET }),
@@ -27,4 +36,10 @@ const Dataset = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetDatasetFilterConfigQuery, useGetDatasetDataQuery, useLazyGetDatasetDataQuery, useGetDatasetDrilldownQuery, useLazyGetDatasetListingQuery } = Dataset;
+export const {
+  useGetDatasetFilterConfigQuery,
+  useGetDatasetDataQuery,
+  useLazyGetDatasetDataQuery,
+  useGetDatasetDrilldownQuery,
+  useLazyGetDatasetListingQuery,
+} = Dataset;

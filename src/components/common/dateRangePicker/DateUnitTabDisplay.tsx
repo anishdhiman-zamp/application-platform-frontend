@@ -1,11 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { RangeFocus } from 'react-date-range';
-import {
-  DATE_RANGE_TYPES,
-  DateRangeKeys,
-  DateRangeValue,
-  RangeType,
-} from 'constants/date.constants';
+import { DATE_RANGE_TYPES, DateRangeKeys, DateRangeValue, RangeType } from 'constants/date.constants';
 import { DateRangePickerWrapper } from 'components/common/dateRangePicker/DateRangePickerWrapper';
 import { MonthOrQuarterPicker } from 'components/common/dateRangePicker/MonthOrQuarterPicker';
 import { YearPicker } from 'components/common/dateRangePicker/YearPicker';

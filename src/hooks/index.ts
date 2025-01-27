@@ -40,9 +40,8 @@ const useGetCountdown = (time: number, callback?: defaultFnType) => {
     if (time) resetCountdown();
 
     return () => {
-      stopTimer()
+      stopTimer();
     };
-
   }, [time]);
 
   return {
@@ -54,7 +53,6 @@ const useGetCountdown = (time: number, callback?: defaultFnType) => {
     resetCountdown,
   };
 };
-
 
 function useOnClickOutside(ref: any, handler: (event?: MouseEvent) => void, ignoreRefs?: any[]) {
   useEffect(() => {

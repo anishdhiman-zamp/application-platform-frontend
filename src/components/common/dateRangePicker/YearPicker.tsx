@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
-import {
-  DATE_RANGE_TYPES,
-  DateRangeKeys,
-  DateRangeValue,
-} from 'constants/date.constants';
+import { DATE_RANGE_TYPES, DateRangeKeys, DateRangeValue } from 'constants/date.constants';
 import { MapAny } from 'types/commonTypes';
 import { getStartOfYear } from 'utils/common';
 import { getYearList } from 'components/common/dateRangePicker/dateRangePicker.utils';
@@ -124,14 +120,15 @@ export const YearPicker: React.FC<YearPickerProps> = ({
         return (
           <div
             key={index}
-            className={` ${isSelected(year)
-              ? 'bg-BLUE_700 text-white border-DIVIDER_SAIL_2'
-              : shouldHighlightCell(year)
-                ? 'bg-BLUE_50 '
-                : isPartiallySelected(year)
-                  ? 'border-BLUE_700'
-                  : 'hover:border-BLUE_700 bg-BG_GRAY_2 border-GRAY_400'
-              }  cursor-pointer mb-2.5 f-12-500 w-[calc(50%-8px)] flex items-center justify-center py-[4.5px]  rounded-sm border `}
+            className={` ${
+              isSelected(year)
+                ? 'bg-BLUE_700 text-white border-DIVIDER_SAIL_2'
+                : shouldHighlightCell(year)
+                  ? 'bg-BLUE_50 '
+                  : isPartiallySelected(year)
+                    ? 'border-BLUE_700'
+                    : 'hover:border-BLUE_700 bg-BG_GRAY_2 border-GRAY_400'
+            }  cursor-pointer mb-2.5 f-12-500 w-[calc(50%-8px)] flex items-center justify-center py-[4.5px]  rounded-sm border `}
             onClick={() => onSelectValue({ year })}
             onMouseEnter={() => onMouseEnter(year)}
           >

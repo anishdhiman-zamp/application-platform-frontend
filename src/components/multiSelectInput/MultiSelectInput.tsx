@@ -45,7 +45,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         const value = search.trim();
         const isValid = validateEmail(value);
 
-        setInputArrayList((prevEmails: ArrayListOption[]) => [...prevEmails, { value: value, valid: isValid, role: selectedRoleRef?.current?.value }]);
+        setInputArrayList((prevEmails: ArrayListOption[]) => [
+          ...prevEmails,
+          { value: value, valid: isValid, role: selectedRoleRef?.current?.value },
+        ]);
         setSearch('');
         setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
       }

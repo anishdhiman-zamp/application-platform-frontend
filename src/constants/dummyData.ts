@@ -1,6 +1,6 @@
-import { DatasetFilterConfigResponseType } from "types/api/dataset.types";
-import { CUSTOM_COLUMNS_TYPE } from "components/common/table/table.types";
-import { FILTER_TYPES } from "components/filter/filter.types";
+import { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 
 export const PAGES_ITEMS = [
   {
@@ -14,7 +14,8 @@ export const PAGES_ITEMS = [
   {
     label: 'Bank Account Balances',
     iconId: 'notebook',
-  }, {
+  },
+  {
     label: 'Cash Positioning',
     iconId: 'notebook',
   },
@@ -39,71 +40,75 @@ export const WORKSPACE_ITEMS = [
 ];
 
 export const barGraphInstance = {
-  "instance_id": "currency_volume_analysis",
-  "widget_id": 1,
-  "type": "bar",
-  "title": "Transaction Volume by Currency",
-  "data_mappings": {
-    "datasets": [{
-      "id": "CashOpsBankTransactions",
-    }],
-    "mappings": {
-      "x_axis": {
-        "field": "CurrencyCode",
+  instance_id: 'currency_volume_analysis',
+  widget_id: 1,
+  type: 'bar',
+  title: 'Transaction Volume by Currency',
+  data_mappings: {
+    datasets: [
+      {
+        id: 'CashOpsBankTransactions',
       },
-      "y_axis": {
-        "field": "IntegerAmount",
-        "aggregation": "sum",
-      }
+    ],
+    mappings: {
+      x_axis: {
+        field: 'CurrencyCode',
+      },
+      y_axis: {
+        field: 'IntegerAmount',
+        aggregation: 'sum',
+      },
     },
   },
-  "visual_config": {}
-}
+  visual_config: {},
+};
 
 export const barGraphData = {
-  "result": [{
-    "status": "success",
-    "error": null,
-    "rowcount": 5,
-    "columns": [
-      {
-        "column_name": "CurrencyCode",
-        "column_type": "STRING"
-      },
-      {
-        "column_name": "SUM(IntegerAmount)",
-        "column_type": "NUMBER"
-      }
-    ],
-    "data": [
-      {
-        "CurrencyCode": "USD",
-        "IntegerAmount": 1543437.00,
-        "IntegerAmountV2": 1543437.00
-      },
-      {
-        "CurrencyCode": "EUR",
-        "IntegerAmount": 756909.00,
-        "IntegerAmountV2": 756909.00
-      },
-      {
-        "CurrencyCode": "GBP",
-        "IntegerAmount": 432224.00,
-        "IntegerAmountV2": 432224.00
-      },
-      {
-        "CurrencyCode": "JPY",
-        "IntegerAmount": 234567.00,
-        "IntegerAmountV2": 234567.00
-      },
-      {
-        "CurrencyCode": "SGD",
-        "IntegerAmount": 123456.00,
-        "IntegerAmountV2": 123456.00
-      }
-    ]
-  }]
-}
+  result: [
+    {
+      status: 'success',
+      error: null,
+      rowcount: 5,
+      columns: [
+        {
+          column_name: 'CurrencyCode',
+          column_type: 'STRING',
+        },
+        {
+          column_name: 'SUM(IntegerAmount)',
+          column_type: 'NUMBER',
+        },
+      ],
+      data: [
+        {
+          CurrencyCode: 'USD',
+          IntegerAmount: 1543437.0,
+          IntegerAmountV2: 1543437.0,
+        },
+        {
+          CurrencyCode: 'EUR',
+          IntegerAmount: 756909.0,
+          IntegerAmountV2: 756909.0,
+        },
+        {
+          CurrencyCode: 'GBP',
+          IntegerAmount: 432224.0,
+          IntegerAmountV2: 432224.0,
+        },
+        {
+          CurrencyCode: 'JPY',
+          IntegerAmount: 234567.0,
+          IntegerAmountV2: 234567.0,
+        },
+        {
+          CurrencyCode: 'SGD',
+          IntegerAmount: 123456.0,
+          IntegerAmountV2: 123456.0,
+        },
+      ],
+    },
+  ],
+};
 
 export const columns: DatasetFilterConfigResponseType[] = [
   {
@@ -112,7 +117,7 @@ export const columns: DatasetFilterConfigResponseType[] = [
     type: FILTER_TYPES.MULTI_SELECT,
     options: ['Tag1.Tag2.Tag3', 'Tag2.Tag3.Tag4.Tag5', 'Tag3.Tag4'],
     metadata: {
-      custom_type: CUSTOM_COLUMNS_TYPE  .TAG,
+      custom_type: CUSTOM_COLUMNS_TYPE.TAG,
       is_editable: true,
     },
   },
@@ -164,8 +169,8 @@ export const columns: DatasetFilterConfigResponseType[] = [
     metadata: {
       is_editable: true,
     },
-  }
-]
+  },
+];
 
 export const rows = [
   {
@@ -184,6 +189,6 @@ export const rows = [
     Description: 'Description2',
     Currency: 'EUR',
   },
-]
+];
 
 export const tagsList = ['Tag1.Tag2.Tag3', 'Tag2.Tag3.Tag4.Tag5', 'Tag3.Tag4'];

@@ -55,7 +55,7 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   disableFutureDate,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<DATE_FILTER_CATEGORIES>(
-    defaultValue?.category ? (defaultValue?.category as DATE_FILTER_CATEGORIES) : DATE_FILTER_CATEGORIES.ALL_TIME
+    defaultValue?.category ? (defaultValue?.category as DATE_FILTER_CATEGORIES) : DATE_FILTER_CATEGORIES.ALL_TIME,
   );
 
   const [range, setRange] = useState<RangeType>({
@@ -153,8 +153,7 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   return (
     <MenuWrapper
       id={`${id}_DATE_RANGE_FILTER`}
-      childrenWrapperClassName={`!overflow-visible !max-h-125 !w-[277px] ${isSingle ? '!h-[390px]' : '!h-[466px]'
-        }`}
+      childrenWrapperClassName={`!overflow-visible !max-h-125 !w-[277px] ${isSingle ? '!h-[390px]' : '!h-[466px]'}`}
     >
       <DateRangeMenu
         onDateChange={handleDateChange}

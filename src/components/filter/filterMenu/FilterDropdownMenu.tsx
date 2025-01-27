@@ -23,12 +23,10 @@ interface FilterDropdownMenuProps {
   operatorOptions?: OptionsType[];
 }
 
-const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
-  filterKey,
-  filterType,
-  filterComponentProps = {},
-}) => {
-  const { state: { filtersConfig } } = useFiltersContextStore();
+const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({ filterKey, filterType, filterComponentProps = {} }) => {
+  const {
+    state: { filtersConfig },
+  } = useFiltersContextStore();
 
   const values = filtersConfig?.find((filter) => filter?.key === filterKey)?.values || [];
 

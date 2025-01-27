@@ -6,7 +6,6 @@ import { Loader } from 'components/common/loader/Loader';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-
 interface FilterControlButtonProps extends PropsWithChildren {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   tooltipText?: string;
@@ -60,7 +59,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           'border border-GRAY_400 rounded px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
-          disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4'
+          disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',
         )}
         onClick={onButtonClick}
         ref={buttonRef}
@@ -73,9 +72,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           <>
             <SvgSpriteLoader id={icon} iconCategory={iconCategory} width={12} height={12} />
             {!!children && (
-              <span
-                className={`f-12-500 ${typeof children === 'string' ? 'ml-1' : ''} ${childrenWrapperClassName}`}
-              >
+              <span className={`f-12-500 ${typeof children === 'string' ? 'ml-1' : ''} ${childrenWrapperClassName}`}>
                 {children}
               </span>
             )}

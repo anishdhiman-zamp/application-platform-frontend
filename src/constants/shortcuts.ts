@@ -79,7 +79,6 @@ export const FUNCTION_KEYS_ICON = {
   OPTION: '⌥',
 };
 
-
 export const SHORTCUTS_TABS = [
   {
     label: 'Data',

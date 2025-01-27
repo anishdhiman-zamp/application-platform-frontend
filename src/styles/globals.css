@@ -1,27 +1,26 @@
-
 :root {
-  font-family: "Inter Variable";
+  font-family: 'Inter Variable';
 }
 
 * > ::-webkit-scrollbar {
-    width: 12px;
-    border-radius: 100%;
-    overflow: hidden;
-  }
-  
-  /* Track */
-  * > ::-webkit-scrollbar-track {
-    background: #fff0;
-  }
-  
-  /* Handle */
-  * > ::-webkit-scrollbar-thumb {
-    background: #e2e2da;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  /* Handle on hover */
+  width: 12px;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+/* Track */
+* > ::-webkit-scrollbar-track {
+  background: #fff0;
+}
+
+/* Handle */
+* > ::-webkit-scrollbar-thumb {
+  background: #e2e2da;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Handle on hover */
 * > ::-webkit-scrollbar-thumb:hover {
   background: #93937b;
 }
@@ -80,16 +79,16 @@
   background: #93937b;
 }
 
-.ag-menu{
- border-width: 0px; 
- box-shadow: none;
- overflow-y: visible;
- overflow-x: visible;
+.ag-menu {
+  border-width: 0px;
+  box-shadow: none;
+  overflow-y: visible;
+  overflow-x: visible;
 }
 
 .ag-checkbox-input-wrapper {
- height: 14px;
- width: 14px;
+  height: 14px;
+  width: 14px;
 }
 
 .ag-column-select-column-label {
@@ -105,14 +104,13 @@
   align-content: center;
 }
 
-.ag-charts-proxy-legend-toolbar{
+.ag-charts-proxy-legend-toolbar {
   width: 100%;
   left: 0;
   display: flex !important;
   justify-content: start !important;
   align-items: start !important;
 }
-
 
 :where(.ag-cell-editor) .ag-wrapper {
   margin-left: -8px;
@@ -121,12 +119,12 @@
 
 .ag-rich-select-field-input {
   :where(.ag-input-field-input) {
-      padding-left: 8px !important;
-      padding-right: 8px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 }
 
-.ag-input-field-input:where(:not([type=checkbox],[type=radio])) {
+.ag-input-field-input:where(:not([type='checkbox'], [type='radio'])) {
   padding-left: 8px;
   padding-right: 8px;
 }

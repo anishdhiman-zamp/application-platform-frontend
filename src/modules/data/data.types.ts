@@ -16,4 +16,4 @@ export type ShareDatasetPopupPropsType = {
 export type DatasetAccessPrivilegesType = {
   label: string;
   value: DATASET_ACCESS_PRIVILEGES;
-}
+};

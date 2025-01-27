@@ -5,7 +5,7 @@ const People = () => {
   return (
     <div className='bg-white h-full p-10'>
       <div className='f-20-600 text-GRAY_1000'>Settings</div>
-      </div>
+    </div>
   );
 };
 

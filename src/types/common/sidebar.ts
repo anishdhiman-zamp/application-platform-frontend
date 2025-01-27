@@ -1,4 +1,3 @@
 export type SidebarProps = {
-    isSidebarOpen: boolean;
-  }
-  
+  isSidebarOpen: boolean;
+};

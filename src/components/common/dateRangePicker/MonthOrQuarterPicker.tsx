@@ -166,14 +166,15 @@ export const MonthOrQuarterPicker: React.FC<MonthOrQuarterPickerProps> = ({
                 return (
                   <div
                     key={index}
-                    className={` ${isSelected(year, config?.value)
-                      ? 'bg-BLUE_700 text-white border-GRAY_400'
-                      : shouldHighlightCell(year, config)
-                        ? 'bg-BLUE_50 '
-                        : isPartiallySelected(year, config?.value)
-                          ? 'border-BLUE_700 selected-year'
-                          : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
-                      }  cursor-pointer f-12-500 w-13.5 flex items-center justify-center py-[4.5px]  rounded-sm border `}
+                    className={` ${
+                      isSelected(year, config?.value)
+                        ? 'bg-BLUE_700 text-white border-GRAY_400'
+                        : shouldHighlightCell(year, config)
+                          ? 'bg-BLUE_50 '
+                          : isPartiallySelected(year, config?.value)
+                            ? 'border-BLUE_700 selected-year'
+                            : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
+                    }  cursor-pointer f-12-500 w-13.5 flex items-center justify-center py-[4.5px]  rounded-sm border `}
                     onClick={() => onSelectValue({ year, config: config })}
                     onMouseEnter={() => onMouseEnter(year, config)}
                   >

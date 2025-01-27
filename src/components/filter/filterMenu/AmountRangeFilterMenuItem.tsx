@@ -23,11 +23,15 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
-  const currentOperator = AMOUNT_RANGE_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)
+  const currentOperator = AMOUNT_RANGE_FILTER_OPTIONS.find(
+    (option) => option.value === selectedFilters[columnId]?.type,
+  );
   const [startValue, setStartValue] = useState(selectedFilters[columnId]?.filter || '');
   const [endValue, setEndValue] = useState(selectedFilters[columnId]?.filterTo || '');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? AMOUNT_RANGE_FILTER_OPTIONS[0]);
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(
+    currentOperator ?? AMOUNT_RANGE_FILTER_OPTIONS[0],
+  );
 
   const setFilter = (operator: string, startValue: string, endValue: string) => {
     const condition =
@@ -37,12 +41,13 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
       type: filtersContextActions.SET_SELECTED_FILTERS,
       payload: {
         selectedFilters: {
-          [columnId]: condition ? {
-            filterType: FILTER_TYPES.AMOUNT_RANGE,
-            type: operator,
-            filter: startValue,
-            filterTo: endValue,
-          }
+          [columnId]: condition
+            ? {
+                filterType: FILTER_TYPES.AMOUNT_RANGE,
+                type: operator,
+                filter: startValue,
+                filterTo: endValue,
+              }
             : {},
         },
       },
@@ -53,7 +58,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     debounce((operator: string, startValue: string, endValue: string) => {
       setFilter(operator, startValue, endValue);
     }, 800),
-    []
+    [],
   );
 
   const onChange = (isStart: boolean, value: string) => {

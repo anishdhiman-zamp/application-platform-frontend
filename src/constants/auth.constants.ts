@@ -1,7 +1,7 @@
 export enum LOGIN_METHODS {
-    PASSWORD = 'password',
+  PASSWORD = 'password',
 }
 
 export enum LOGIN_PROVIDERS {
-    GOOGLE = 'google',
+  GOOGLE = 'google',
 }

@@ -13,176 +13,165 @@ import { FILTER_KEYS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface FiltersContainerProps {
-    onClearAllFilters?: defaultFnType;
-    onClearRules?: defaultFnType;
-    onOpenAdvancedSearch?: defaultFnType;
-    persistId?: string;
-    onSetTotalSelectedFilters?: (val: number) => void;
-    filterConfig: FilterConfigType[];
-    className?: string;
-    allowActions?: boolean;
-    controlClassName?: string;
-    allowClear?: boolean;
-    label?: string;
-    showResetFilters?: boolean;
+  onClearAllFilters?: defaultFnType;
+  onClearRules?: defaultFnType;
+  onOpenAdvancedSearch?: defaultFnType;
+  persistId?: string;
+  onSetTotalSelectedFilters?: (val: number) => void;
+  filterConfig: FilterConfigType[];
+  className?: string;
+  allowActions?: boolean;
+  controlClassName?: string;
+  allowClear?: boolean;
+  label?: string;
+  showResetFilters?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
-    onClearAllFilters = defaultFn,
-    persistId,
-    onSetTotalSelectedFilters,
-    filterConfig,
-    className = 'px-6',
-    allowActions = true,
-    controlClassName = '',
-    allowClear = true,
-    label = 'Add Filters',
+  onClearAllFilters = defaultFn,
+  persistId,
+  onSetTotalSelectedFilters,
+  filterConfig,
+  className = 'px-6',
+  allowActions = true,
+  controlClassName = '',
+  allowClear = true,
+  label = 'Add Filters',
 }) => {
-    const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
-    const {
-        dispatch,
-        state: { selectedFilters, selectedFiltersInUI, currentPageFilters },
-    } = useFiltersContextStore();
+  const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
+  const {
+    dispatch,
+    state: { selectedFilters, selectedFiltersInUI, currentPageFilters },
+  } = useFiltersContextStore();
 
-    const [filtersList, setFiltersList] = useState<FilterConfigType[]>([]);
+  const [filtersList, setFiltersList] = useState<FilterConfigType[]>([]);
 
-    const onAddFilterToFiltersList = (filterKey: string, list: FilterConfigType[], value: FilterConfigType) => {
-        const filterItemIndex = list.findIndex((item: FilterConfigType) => item?.key === filterKey);
+  const onAddFilterToFiltersList = (filterKey: string, list: FilterConfigType[], value: FilterConfigType) => {
+    const filterItemIndex = list.findIndex((item: FilterConfigType) => item?.key === filterKey);
 
-        if (filterItemIndex === -1) {
-            list.push(value);
+    if (filterItemIndex === -1) {
+      list.push(value);
 
-            return;
-        }
+      return;
+    }
 
-        list[filterItemIndex] = value;
-    };
+    list[filterItemIndex] = value;
+  };
 
-    const onRemoveFiltersWithoutKeys = (list: FilterConfigType[], selectedFiltersInUI: MapAny) => {
-        const keys = Object.keys(selectedFiltersInUI);
+  const onRemoveFiltersWithoutKeys = (list: FilterConfigType[], selectedFiltersInUI: MapAny) => {
+    const keys = Object.keys(selectedFiltersInUI);
 
-        for (let i = list.length - 1; i >= 0; i--) {
-            const filter = list[i];
+    for (let i = list.length - 1; i >= 0; i--) {
+      const filter = list[i];
 
-            if (!keys?.includes(filter?.key)) {
-                list?.splice(i, 1);
-            }
-        }
-    };
+      if (!keys?.includes(filter?.key)) {
+        list?.splice(i, 1);
+      }
+    }
+  };
 
-    const onSetFiltersList = useCallback(() => {
-        const list = [...filtersList];
+  const onSetFiltersList = useCallback(() => {
+    const list = [...filtersList];
 
-        const selectedFilters = selectedFiltersInUI;
+    const selectedFilters = selectedFiltersInUI;
 
-        for (const key in selectedFilters) {
-            const value: any = getFilterValueForKey(key as FILTER_KEYS, filterConfig, selectedFilters);
+    for (const key in selectedFilters) {
+      const value: any = getFilterValueForKey(key as FILTER_KEYS, filterConfig, selectedFilters);
 
-            onAddFilterToFiltersList(key, list, value);
-        }
+      onAddFilterToFiltersList(key, list, value);
+    }
 
-        onRemoveFiltersWithoutKeys(list, selectedFiltersInUI);
-        onSetTotalSelectedFilters?.(list.length);
+    onRemoveFiltersWithoutKeys(list, selectedFiltersInUI);
+    onSetTotalSelectedFilters?.(list.length);
 
-        setFiltersList(
-            list
-        );
-    }, [selectedFiltersInUI, selectedFilters]);
+    setFiltersList(list);
+  }, [selectedFiltersInUI, selectedFilters]);
 
-    useEffect(() => {
-        onSetFiltersList();
-    }, [selectedFiltersInUI]);
+  useEffect(() => {
+    onSetFiltersList();
+  }, [selectedFiltersInUI]);
 
-    const handleResetFilters = () => {
-        setShouldShowConfirmationPopup(false);
+  const handleResetFilters = () => {
+    setShouldShowConfirmationPopup(false);
 
-        dispatch({
-            type: filtersContextActions.RESET_ALL_FILTERS,
-            payload: { shouldClearDate: false },
-        });
+    dispatch({
+      type: filtersContextActions.RESET_ALL_FILTERS,
+      payload: { shouldClearDate: false },
+    });
 
-        onClearAllFilters?.();
-    };
+    onClearAllFilters?.();
+  };
 
-    const onAddEmptyFilter = (filterKey: string) => {
-        dispatch({
-            type: filtersContextActions.ADD_EMPTY_STATE_FILTER,
-            payload: { filterKey },
-        });
-    };
+  const onAddEmptyFilter = (filterKey: string) => {
+    dispatch({
+      type: filtersContextActions.ADD_EMPTY_STATE_FILTER,
+      payload: { filterKey },
+    });
+  };
 
-    const onRemoveFilter = (filterKey: string) => {
-        dispatch({
-            type: filtersContextActions.REMOVE_FILTER,
-            payload: { filterKey },
-        });
-    };
+  const onRemoveFilter = (filterKey: string) => {
+    dispatch({
+      type: filtersContextActions.REMOVE_FILTER,
+      payload: { filterKey },
+    });
+  };
 
-    const confirmationPopupRef = useRef<HTMLDivElement>(null);
-    const confirmationPopupControlRef = useRef<HTMLButtonElement>(null);
+  const confirmationPopupRef = useRef<HTMLDivElement>(null);
+  const confirmationPopupControlRef = useRef<HTMLButtonElement>(null);
 
-    useOnClickOutside(
-        confirmationPopupRef,
-        () => {
-            setShouldShowConfirmationPopup(false);
-        },
-        [confirmationPopupControlRef]
-    );
+  useOnClickOutside(confirmationPopupRef, () => {
+    setShouldShowConfirmationPopup(false);
+  }, [confirmationPopupControlRef]);
 
-    return (
-        <div id={`${persistId}_FILTERS_CONTAINER`} className={`flex items-center flex-wrap gap-2 z-50 ${className}`}>
-            {filtersList.map((filter, index) => (
-                <FilterDropdown
-                    key={index}
-                    index={index}
-                    filter={filter}
-                    onRemoveFilter={allowActions ? onRemoveFilter : null}
-                    allowActions={allowActions}
-                    isFilterSelected={selectedFilters[filter?.key]}
-                    controlClassName={controlClassName}
-                    allowClear={allowClear}
+  return (
+    <div id={`${persistId}_FILTERS_CONTAINER`} className={`flex items-center flex-wrap gap-2 z-50 ${className}`}>
+      {filtersList.map((filter, index) => (
+        <FilterDropdown
+          key={index}
+          index={index}
+          filter={filter}
+          onRemoveFilter={allowActions ? onRemoveFilter : null}
+          allowActions={allowActions}
+          isFilterSelected={selectedFilters[filter?.key]}
+          controlClassName={controlClassName}
+          allowClear={allowClear}
+        />
+      ))}
+
+      {allowActions && !filtersList?.length && <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} />}
+
+      {allowActions && filtersList?.length > 0 ? (
+        <>
+          <FiltersMenu
+            tooltipText='Add Filters'
+            currentPageFilters={currentPageFilters}
+            onAddFilter={onAddEmptyFilter}
+          />
+
+          <div className='relative'>
+            <FilterControlButton
+              tooltipText='Remove all filters'
+              tooltipPosition={TooltipPositions.TOP}
+              onClick={() => setShouldShowConfirmationPopup(!shouldShowConfirmationPopup)}
+              buttonRef={confirmationPopupControlRef}
+              icon='x-close'
+              iconCategory={ICON_SPRITE_TYPES.GENERAL}
+              id='clear-all-filters'
+            >
+              {shouldShowConfirmationPopup ? (
+                <ClearFiltersConfirmationPopup
+                  containerRef={confirmationPopupRef}
+                  onClick={handleResetFilters}
+                  onCancel={() => setShouldShowConfirmationPopup(false)}
+                  className='absolute left-0 z-9999'
                 />
-            ))}
-
-            {allowActions && !filtersList?.length && (
-                <FiltersMenu
-                    label={label}
-                    onAddFilter={onAddEmptyFilter}
-                />
-            )}
-
-            {allowActions && filtersList?.length > 0 ? (
-                <>
-                    <FiltersMenu
-                        tooltipText='Add Filters'
-                        currentPageFilters={currentPageFilters}
-                        onAddFilter={onAddEmptyFilter}
-                    />
-
-                    <div className='relative'>
-                        <FilterControlButton
-                            tooltipText='Remove all filters'
-                            tooltipPosition={TooltipPositions.TOP}
-                            onClick={() => setShouldShowConfirmationPopup(!shouldShowConfirmationPopup)}
-                            buttonRef={confirmationPopupControlRef}
-                            icon='x-close'
-                            iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                            id='clear-all-filters'
-                        >
-                            {shouldShowConfirmationPopup ? (
-                                <ClearFiltersConfirmationPopup
-                                    containerRef={confirmationPopupRef}
-                                    onClick={handleResetFilters}
-                                    onCancel={() => setShouldShowConfirmationPopup(false)}
-                                    className='absolute left-0 z-9999'
-                                />
-                            ) : null}
-                        </FilterControlButton>
-                    </div>
-                </>
-            ) : null}
-        </div>
-    );
+              ) : null}
+            </FilterControlButton>
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
 };
 
 export default FiltersContainer;

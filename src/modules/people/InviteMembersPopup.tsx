@@ -1,7 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
-import {
-  usePostInviteAudiencesByOrganisationIdMutation,
-} from 'apis/people';
+import { usePostInviteAudiencesByOrganisationIdMutation } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';

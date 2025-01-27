@@ -8,15 +8,10 @@ import {
   FILTER_KEYS,
 } from 'components/filter/filters.constants';
 
-export const getFilterValueForKey = (
-  key: FILTER_KEYS,
-  filterConfig: FilterConfigType[],
-  selectedFilters: MapAny
-) => {
+export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfigType[], selectedFilters: MapAny) => {
   const config = filterConfig.find((filter) => filter.key === key);
 
   switch (config?.type) {
-
     case FILTER_TYPES.AMOUNT_RANGE: {
       const amountRangeFilter = selectedFilters?.[key];
       const isInBetween = amountRangeFilter?.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN;
@@ -24,8 +19,9 @@ export const getFilterValueForKey = (
         ? `${amountRangeFilter?.filter} & ${amountRangeFilter?.filterTo}`
         : amountRangeFilter?.filter;
 
-      const title = `${AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
-        } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
+      const title = `${
+        AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
+      } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
 
       return {
         ...config,
@@ -86,8 +82,6 @@ export const getFilterValueForKey = (
       };
     }
 
-
-
     default: {
       if (!Array.isArray(selectedFilters[key])) {
         const total = selectedFilters[key]?.length;
@@ -121,7 +115,6 @@ export const getFilterValueForKey = (
 
   return config;
 };
-
 
 export const getTagLabel = (tag: string) => {
   return tag.split('.').pop();

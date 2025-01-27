@@ -15,8 +15,13 @@ const PageNavTab = ({ label, pageId, isSelected }: PageNavTabProps) => {
   const router = useRouter();
 
   return (
-    <div className={cn('flex items-center gap-3 text-GRAY_900 px-1 py-2.5 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none', isSelected ? 'bg-GRAY_100' : '')}
-      onClick={() => router.push(`${ROUTES_PATH.PAGE}/${pageId}`)}>
+    <div
+      className={cn(
+        'flex items-center gap-3 text-GRAY_900 px-1 py-2.5 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none',
+        isSelected ? 'bg-GRAY_100' : '',
+      )}
+      onClick={() => router.push(`${ROUTES_PATH.PAGE}/${pageId}`)}
+    >
       <Image
         width={16}
         height={16}

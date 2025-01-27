@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Label } from 'components/common/Label';
-import { getTagLabel , getTagParents } from 'components/filter/filter.utils';
+import { getTagLabel, getTagParents } from 'components/filter/filter.utils';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 
 interface TagsProps {

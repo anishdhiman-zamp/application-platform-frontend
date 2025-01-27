@@ -79,7 +79,7 @@ export type DropdownProps = {
     focus?: string;
     border?: string;
     fontSize?: string;
-  }
+  };
 };
 
 export interface DropdownCustomClassNames {

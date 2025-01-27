@@ -212,7 +212,7 @@ function parseRelativeDatePhrase(phrase: string): {
     const monthIndex = MonthsConfig.findIndex(
       (month) =>
         month.label.toLowerCase() === monthMatch[1].toLowerCase() ||
-        month?.short?.toLowerCase() === monthMatch[1].toLowerCase()
+        month?.short?.toLowerCase() === monthMatch[1].toLowerCase(),
     );
     let year: number | null = null;
 
@@ -266,7 +266,7 @@ function parseRelativeDatePhrase(phrase: string): {
     const today = new Date();
     let currentDayIndex = today.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
     const targetDayIndex = DaysConfig.findIndex(
-      (day) => day.short.toLowerCase() === targetDay || day.label.toLowerCase() === targetDay
+      (day) => day.short.toLowerCase() === targetDay || day.label.toLowerCase() === targetDay,
     );
 
     let finalOffset = 0; // Start with 0 offset

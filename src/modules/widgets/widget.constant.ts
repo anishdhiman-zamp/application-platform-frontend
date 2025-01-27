@@ -1,6 +1,6 @@
 export enum WIDGET_TYPE {
-    BAR_CHART = 'bar_chart',
-    LINE_CHART = 'line_chart',
-    PIE_CHART = 'pie_chart',
-    TABLE = 'table',
+  BAR_CHART = 'bar_chart',
+  LINE_CHART = 'line_chart',
+  PIE_CHART = 'pie_chart',
+  TABLE = 'table',
 }

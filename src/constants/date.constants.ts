@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { OptionsType } from "types/commonTypes";
+import { OptionsType } from 'types/commonTypes';
 
 export const MONTH_NAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -49,10 +49,9 @@ export const getUtcDate = (data: string | number) => {
     inputDate.getUTCDate(),
     inputDate.getUTCHours(),
     inputDate.getUTCMinutes(),
-    inputDate.getUTCSeconds()
+    inputDate.getUTCSeconds(),
   );
 };
-
 
 export enum DATE_FILTER_CATEGORIES {
   ALL_TIME = 'ALL_TIME',

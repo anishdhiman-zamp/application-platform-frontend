@@ -139,8 +139,9 @@ export const Button: React.FC<ButtonProps> = ({
 
   const iconSize = ICON_SIZE_BY_TYPE[size as keyof typeof SIZE_TYPES];
 
-  const textSizeClass = `${textSizeOverrideClassName ? textSizeOverrideClassName : textClassDefaultBySize} ${iconProps ? (iconPosition === ICON_POSITION_TYPES.RIGHT ? textClassWithRightIcons : textClassWithLeftIcons) : ''
-    }`;
+  const textSizeClass = `${textSizeOverrideClassName ? textSizeOverrideClassName : textClassDefaultBySize} ${
+    iconProps ? (iconPosition === ICON_POSITION_TYPES.RIGHT ? textClassWithRightIcons : textClassWithLeftIcons) : ''
+  }`;
 
   const handleButtonClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
     if (!isLoading && !disabled) {
@@ -167,7 +168,7 @@ export const Button: React.FC<ButtonProps> = ({
         BUTTON_STATE_STYLES[type as BUTTON_TYPES]?.[BUTTON_STATE_TYPES.HOVER],
         BUTTON_STATE_STYLES[type as BUTTON_TYPES]?.[BUTTON_STATE_TYPES.PRESSED],
         BUTTON_STATE_STYLES[type as BUTTON_TYPES]?.[BUTTON_STATE_TYPES.DISABLED],
-        isLoading ? BUTTON_STATE_STYLES[type]?.[BUTTON_STATE_TYPES.LOADING] : ''
+        isLoading ? BUTTON_STATE_STYLES[type]?.[BUTTON_STATE_TYPES.LOADING] : '',
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

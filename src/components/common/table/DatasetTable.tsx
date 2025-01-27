@@ -1,5 +1,11 @@
 import React, { FC } from 'react';
-import { CellEditRequestEvent, ColDef, ColumnVisibleEvent, IServerSideDatasource, RowClickedEvent } from 'ag-grid-community';
+import {
+  CellEditRequestEvent,
+  ColDef,
+  ColumnVisibleEvent,
+  IServerSideDatasource,
+  RowClickedEvent,
+} from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';

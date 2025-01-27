@@ -31,13 +31,9 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   const controlRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(
-    menuRef,
-    () => {
-      setIsOpen(false);
-    },
-    [controlRef]
-  );
+  useOnClickOutside(menuRef, () => {
+    setIsOpen(false);
+  }, [controlRef]);
 
   const getMenuPlacement = useMemo(() => {
     if (menuRef.current) {
@@ -68,12 +64,12 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
       </div>
       <div
         ref={menuRef}
-        className={
-          cn(
-            `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50`,
-            controlClassName,
-            getMenuPlacement ? 'right-0' : 'left-0',
-            isOpen ? '' : 'max-h-0 overflow-hidden border-0')}
+        className={cn(
+          `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50`,
+          controlClassName,
+          getMenuPlacement ? 'right-0' : 'left-0',
+          isOpen ? '' : 'max-h-0 overflow-hidden border-0',
+        )}
       >
         <FilterDropdownMenu
           forView='filters'

@@ -49,8 +49,6 @@ const SvgSpriteLoader: React.FC<SvgSpriteLoaderProps> = ({
   </div>
 );
 
-
-
 // Export with memoization
 const MemoizedSvgSpriteLoader = memo(SvgSpriteLoader);
 

@@ -5,7 +5,6 @@ import { cn } from 'utils/common';
 import { TAB_STYLES } from 'components/common/tabs/tabs.constants';
 import { TabsPropsType } from 'components/common/tabs/tabs.types';
 
-
 export const Tabs: FC<TabsPropsType> = ({
   list = [],
   customSelectedIndex = 0,
@@ -77,11 +76,13 @@ export const Tabs: FC<TabsPropsType> = ({
                       />
                     ) : (
                       <div
-                        className={cn(`flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
-                          selected
-                            ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
-                            : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
-                        }`)}
+                        className={cn(
+                          `flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
+                            selected
+                              ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
+                              : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
+                          }`,
+                        )}
                       >
                         {tabItem?.label}
                         {!!tabItem?.metadata?.count && (

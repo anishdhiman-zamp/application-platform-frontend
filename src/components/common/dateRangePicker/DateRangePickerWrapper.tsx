@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { DateRangePicker, RangeFocus } from 'react-date-range';
-import {
-  DATE_RANGE_TYPES,
-  DateRangeValue,
-  RangeType,
-} from 'constants/date.constants';
+import { DATE_RANGE_TYPES, DateRangeValue, RangeType } from 'constants/date.constants';
 import { DateRangePickerNavigator } from 'components/common/dateRangePicker/DateRangePickerNavigator';
 
 interface DateRangePickerWrapperProps {
@@ -43,8 +39,9 @@ export const DateRangePickerWrapper: React.FC<DateRangePickerWrapperProps> = ({
 
     return (
       <div
-        className={`w-full h-full flex justify-center items-center rounded-full  ${isStart ? 'bg-BLUE_700 !text-white' : ''
-          } ${isEnd ? 'bg-BLUE_700 !text-white' : ''}
+        className={`w-full h-full flex justify-center items-center rounded-full  ${
+          isStart ? 'bg-BLUE_700 !text-white' : ''
+        } ${isEnd ? 'bg-BLUE_700 !text-white' : ''}
             ${isSearchValue ? 'border-BLUE_700 border is-searched' : ''}
             ${!isStart && !isEnd && !isSearchValue && isToday ? 'border border-DIVIDER_SAIL_2' : ''}
             ${isNotInCurrentMonth || (disableFutureDate && isFutureDate) ? ' text-GRAY_500' : 'text-black'}`}
@@ -63,10 +60,7 @@ export const DateRangePickerWrapper: React.FC<DateRangePickerWrapperProps> = ({
   }, [searchValue, dateRangePickerRef?.current]);
 
   return (
-    <div
-      className={disabled ? 'pointer-events-none' : ''}
-      data-testid={`date-range-menu-custom-picker-wrapper-${id}`}
-    >
+    <div className={disabled ? 'pointer-events-none' : ''} data-testid={`date-range-menu-custom-picker-wrapper-${id}`}>
       <DateRangePicker
         ref={dateRangePickerRef}
         ranges={[range]}

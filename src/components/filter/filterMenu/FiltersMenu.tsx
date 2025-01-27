@@ -15,25 +15,18 @@ interface FiltersMenuProps {
   currentPageFilters?: string[];
 }
 
-const FiltersMenu: FC<FiltersMenuProps> = ({
-  onAddFilter,
-  label,
-  tooltipText,
-  currentPageFilters,
-}) => {
-  const { state: { filtersConfig } } = useFiltersContextStore();
+const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, currentPageFilters }) => {
+  const {
+    state: { filtersConfig },
+  } = useFiltersContextStore();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const controlRef = useRef<HTMLDivElement>(null);
 
-  useOnClickOutside(
-    menuRef,
-    () => {
-      setIsOpen(false);
-    },
-    [controlRef]
-  );
+  useOnClickOutside(menuRef, () => {
+    setIsOpen(false);
+  }, [controlRef]);
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);

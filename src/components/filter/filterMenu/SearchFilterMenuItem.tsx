@@ -23,8 +23,8 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
-  const currentOperatorValue = selectedFilters[columnId]?.type
-  const currentOperator = SEARCH_FILTER_OPTIONS.find((option) => option.value === currentOperatorValue)
+  const currentOperatorValue = selectedFilters[columnId]?.type;
+  const currentOperator = SEARCH_FILTER_OPTIONS.find((option) => option.value === currentOperatorValue);
   const [searchValue, setSearchValue] = useState(selectedFilters[columnId]?.filter || '');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? SEARCH_FILTER_OPTIONS[0]);
@@ -34,11 +34,13 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
       type: filtersContextActions.SET_SELECTED_FILTERS,
       payload: {
         selectedFilters: {
-          [columnId]: searchValue ? {
-            filterType: FILTER_TYPES.SEARCH,
-            type: operator,
-            filter: searchValue,
-          } : {},
+          [columnId]: searchValue
+            ? {
+                filterType: FILTER_TYPES.SEARCH,
+                type: operator,
+                filter: searchValue,
+              }
+            : {},
         },
       },
     });
@@ -48,7 +50,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
     debounce((operator: string, searchValue: string) => {
       setFilter(operator, searchValue);
     }, 800),
-    []
+    [],
   );
 
   const onChange = (value: string) => {

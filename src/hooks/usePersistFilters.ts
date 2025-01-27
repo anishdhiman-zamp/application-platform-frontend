@@ -47,9 +47,11 @@ export const usePersistFilters = (storageType: STORAGE_TYPES = STORAGE_TYPES.SES
         selectedFilters?.[dateKey]?.end_date
       ) {
         selectedFilters[dateKey].start_date = new Date(
-          value[user?.user_id][dateKey].start_date || value[user?.user_id][dateKey].start
+          value[user?.user_id][dateKey].start_date || value[user?.user_id][dateKey].start,
         );
-        selectedFilters[dateKey].end_date = new Date(value[user?.user_id][dateKey].end_date || value[user?.user_id][dateKey].end);
+        selectedFilters[dateKey].end_date = new Date(
+          value[user?.user_id][dateKey].end_date || value[user?.user_id][dateKey].end,
+        );
       }
 
       return selectedFilters ?? {};

@@ -8,7 +8,7 @@ const Teams = baseApi.injectEndpoints({
       query: () => ({ url: API_ENDPOINTS.AUTH_INITIATE_LOGIN_FLOW_GET }),
     }),
     login: builder.mutation<string, loginPayloadType>({
-      query: ({ url, body }) => ({ url, method: REQUEST_TYPES.POST, body: body, headers: {}, credentials: 'include', }),
+      query: ({ url, body }) => ({ url, method: REQUEST_TYPES.POST, body: body, headers: {}, credentials: 'include' }),
     }),
     initiateLogoutFlow: builder.query<LogoutFlow, void>({
       query: () => ({ url: API_ENDPOINTS.AUTH_INITIATE_LOGOUT_FLOW_GET }),
@@ -25,4 +25,11 @@ const Teams = baseApi.injectEndpoints({
   }),
 });
 
-export const { useInitiateLoginFlowQuery, useLazyLogoutQuery, useLoginMutation, useInitiateLogoutFlowQuery, useGetErrorDetailsQuery, useWhoAmIQuery } = Teams;
+export const {
+  useInitiateLoginFlowQuery,
+  useLazyLogoutQuery,
+  useLoginMutation,
+  useInitiateLogoutFlowQuery,
+  useGetErrorDetailsQuery,
+  useWhoAmIQuery,
+} = Teams;

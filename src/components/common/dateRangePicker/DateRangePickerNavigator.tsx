@@ -8,8 +8,8 @@ export const DateRangePickerNavigator = (
   currFocusedDate: Date,
   changeShownDate: (
     value: string | number | Date,
-    mode?: 'set' | 'setYear' | 'setMonth' | 'monthOffset' | undefined
-  ) => void
+    mode?: 'set' | 'setYear' | 'setMonth' | 'monthOffset' | undefined,
+  ) => void,
 ) => {
   const currentMonth = MonthsConfig[currFocusedDate.getMonth()].value;
 

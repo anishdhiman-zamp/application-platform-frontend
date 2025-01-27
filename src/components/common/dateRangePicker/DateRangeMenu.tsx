@@ -63,8 +63,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
 
   const dateRangeTabs = customTabValues?.length
     ? DATE_RANGE_TABS?.filter((tab) => {
-      return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
-    })
+        return customTabValues?.includes(tab?.value as DATE_RANGE_TYPES);
+      })
     : DATE_RANGE_TABS;
   const [currentTab, setCurrentTab] = useState<string>(dateRangeTabs?.[0].value);
 

@@ -2,7 +2,11 @@ import React, { FC, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { DATASET_ACCESS_PRIVILEGES_LIST, TEAM_OPTIONS_LIST } from 'modules/data/data.constants';
-import { DatasetAccessPrivilegesType, ShareDatasetPopupPropsType, UserAccessToDataSetType } from 'modules/data/data.types';
+import {
+  DatasetAccessPrivilegesType,
+  ShareDatasetPopupPropsType,
+  UserAccessToDataSetType,
+} from 'modules/data/data.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import Avatar from 'components/common/avatar';

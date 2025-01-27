@@ -1,5 +1,8 @@
 import { FC } from 'react';
-import { INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS, TEAM_MEMBERS_LISTING_TABLE_THEME } from 'modules/people/people.constants';
+import {
+  INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS,
+  TEAM_MEMBERS_LISTING_TABLE_THEME,
+} from 'modules/people/people.constants';
 import { InvitedMembersListingPropsType } from 'modules/people/people.types';
 import DataTable from 'components/common/table/DataTable';
 

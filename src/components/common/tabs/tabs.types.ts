@@ -1,5 +1,5 @@
-import { ElementType } from "react";
-import { MenuItem, TAB_TYPES } from "types/common/components";
+import { ElementType } from 'react';
+import { MenuItem, TAB_TYPES } from 'types/common/components';
 
 export type TabsPropsType = {
   list: Array<MenuItem>;
@@ -22,4 +22,4 @@ export type TabsPropsType = {
   indicatorStyle?: string;
   selectedTabIndicatorStyle?: string;
   disabled?: boolean;
-}
+};
