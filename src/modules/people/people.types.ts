@@ -1,4 +1,5 @@
 import { TEAM_MEMBERS_PRIVILEGES } from 'modules/people/people.constants';
+import { InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 
 export type InviteMembersPopupPropsType = {
   isOpen: boolean;
@@ -16,3 +17,18 @@ export type RemoveFromTeamPopupPropsType = {
   onClose?: () => void;
 };
 
+export type InvitedMembersEmailPropsType = {
+  value: string;
+};
+
+export type InvitedMembersListingPropsType = {
+  data: InvitedAudiencesByOrganisationIdResponse[];
+};
+
+export type InvitedMembersNamePropsType = {
+  value: string;
+};
+
+export type TeamMembersRolePropsType = {
+  value: string;
+};

@@ -45,12 +45,12 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         const value = search.trim();
         const isValid = validateEmail(value);
 
-        setInputArrayList((prevEmails: ArrayListOption[]) => [...prevEmails, { value: value, valid: isValid }]);
+        setInputArrayList((prevEmails: ArrayListOption[]) => [...prevEmails, { value: value, valid: isValid, role: selectedRoleRef?.current?.value }]);
         setSearch('');
         setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
       }
     },
-    [search, setInputArrayList, setSearch, setShowValidationError],
+    [search, setInputArrayList, setSearch, setShowValidationError, selectedRoleRef],
   );
 
   const handleRemoveEmail = useCallback(
@@ -111,7 +111,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       inputRef.current?.focus();
       setIsInputFocused(true);
     },
-    [setInputArrayList, setSearch, inputRef],
+    [setInputArrayList, setSearch, inputRef, selectedRoleRef],
   );
 
   return (

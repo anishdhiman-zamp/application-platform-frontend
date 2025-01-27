@@ -1,6 +1,7 @@
 export type ArrayListOption = {
   value: string;
   valid: boolean;
+  role?: string;
   color?: string;
 };
 

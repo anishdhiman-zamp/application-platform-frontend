@@ -8,3 +8,16 @@ export type AudiencesByOrganisationIdResponse = {
   user: Session;
   privilege: string;
 };
+
+export type InvitedAudiencesByOrganisationIdResponse = {
+  name: string;
+  email: string;
+  privilege: string;
+};
+
+export type PostAudiencesInviteData = {
+  invitations: {
+    email: string;
+    role: string;
+  }[];
+};
