@@ -1,5 +1,4 @@
 import { AgCartesianAxisOptions } from 'ag-charts-community';
-import { COLORS } from 'constants/colors';
 
 export enum WIDGET_TYPES {
   BAR_CHART = 'bar_chart',
@@ -48,6 +47,10 @@ export const AG_CHART_AXES: AgCartesianAxisOptions[] = [
   {
     type: 'category' as const,
     position: 'bottom',
+    tick: {
+      size: 10, // Changed from length to size
+      width: 0.75,
+    },
   },
   {
     type: 'number' as const,
@@ -58,16 +61,14 @@ export const AG_CHART_AXES: AgCartesianAxisOptions[] = [
 export const AG_CHART_LEGEND_CONFIG = {
   enabled: true,
   item: {
+    showSeriesStroke: false,
     marker: {
       size: 8,
       shape: 'square' as const,
       strokeWidth: 0,
     },
     label: {
-      fontSize: 12,
-      fontWeight: 450,
-      fontFamily: 'Inter',
-      color: COLORS.GRAY_900,
+      padding: 20,
     },
   },
 };

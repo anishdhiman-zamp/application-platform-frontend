@@ -1,6 +1,6 @@
-import { AgCartesianSeriesOptions } from 'ag-charts-community';
+import { CHART_PALETTE, COLORS } from 'constants/colors';
 import { AG_CHART_TYPES, WIDGET_TYPES, WidgetDataValueType, WidgetTypes } from 'modules/widgets/widgets.constant';
-import { MappingsType, WidgetInstanceType } from 'types/api/pagesApi.types';
+import { WidgetInstanceType } from 'types/api/pagesApi.types';
 import { WidgetDataType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
@@ -49,38 +49,75 @@ export function transformData(responses: WidgetDataType[]) {
   });
 }
 
-export const getChartConfig = (widgetDetails: WidgetInstanceType, widgetType: WIDGET_TYPES) => {
-  const mappings: MappingsType = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
-  const xAxis = mappings.fields.x_axis?.[0]?.column || '';
-  const yAxis = mappings.fields.y_axis || [];
+export const getChartConfigV2 = (
+  widgetDetails: WidgetInstanceType,
+  widgetType: WIDGET_TYPES,
+  onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
+) => {
+  const mappings = widgetDetails?.data_mappings?.mappings;
+  const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
+  const yAxis = mappings?.[0]?.fields?.y_axis ?? [];
   const title = widgetDetails.title;
   const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
 
-  const series = yAxis.map((yAxis) => ({
-    type: chartType as 'bar' | 'line' | 'area',
-    xKey: xAxis,
-    yKey: `${yAxis?.aggregation}_${yAxis?.column}`,
-    yName: yAxis?.column || '',
-    stacked: true,
-    fill: '#8562BE',
-    label: {
-      enabled: true,
-      fontSize: 10,
-      formatter: (params: any) => {
-        if (Number(params.datum[params.yKey]) / 1000000 > 0.5)
-          return (Number(params.datum[params.yKey]) / 1000000).toFixed(1).toString();
-        else return '';
-      },
+  const label = {
+    enabled: true,
+    fontSize: 11,
+    fontWeight: 450,
+    color: COLORS.GRAY_950,
+    placement: 'outside-end',
+    padding: 6,
+    formatter: (params: any) => {
+      if (Number(params.datum[params.yKey]) / 1000000 > 0.5)
+        return (Number(params.datum[params.yKey]) / 1000000).toFixed(1).toString();
+      else return '';
     },
-  })) as AgCartesianSeriesOptions[];
-
-  return {
-    series,
-    title,
   };
+
+  switch (widgetType) {
+    case WIDGET_TYPES.BAR_CHART: {
+      return {
+        title,
+        series: yAxis.map((axis) => ({
+          type: chartType,
+          xKey: xAxis,
+          yKey: `${axis?.aggregation}_${axis?.column}`,
+          yName: axis?.column || '',
+          stacked: true,
+          fill: CHART_PALETTE.palette.fills[0],
+          listeners: {
+            nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
+          },
+          label,
+        })),
+      };
+    }
+    case WIDGET_TYPES.LINE_CHART: {
+      return {
+        title,
+        series: yAxis.map((axis) => ({
+          type: chartType,
+          xKey: xAxis,
+          yKey: `${axis?.aggregation}_${axis?.column}`,
+          yName: axis?.column || '',
+          stacked: true,
+          fill: CHART_PALETTE.palette.fills[0],
+          listeners: {
+            nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
+          },
+          label,
+        })),
+      };
+    }
+    default:
+      break;
+  }
 };
 
-export const getPieChartConfig = (widgetDetails: WidgetInstanceType) => {
+export const getPieChartConfig = (
+  widgetDetails: WidgetInstanceType,
+  onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
+) => {
   const mappings = widgetDetails?.data_mappings?.mappings;
   const title = widgetDetails.title;
 
@@ -91,6 +128,9 @@ export const getPieChartConfig = (widgetDetails: WidgetInstanceType) => {
       angleKey: mappings?.[0]?.fields?.values?.[0]?.aggregation
         ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
         : mappings?.[0]?.fields?.values?.[0]?.column,
+      listeners: {
+        nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
+      },
     },
   ];
 

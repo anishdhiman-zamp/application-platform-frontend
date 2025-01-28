@@ -149,3 +149,11 @@ export const getFirstLetters = (str: string) =>
       else return word[0].toUpperCase();
     })
     .join('');
+
+export function isValidDate(dateString: string) {
+  // Try to parse the string into a Date object
+  const date = new Date(dateString);
+
+  // Check if the date is invalid or not
+  return !isNaN(date.getTime());
+}

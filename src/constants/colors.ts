@@ -13,6 +13,7 @@ export const COLORS = {
   GRAY_600: '#A8A8A8',
   GRAY_700: '#8F8F8F',
   GRAY_900: '#666666',
+  GRAY_950: '#383838',
   GRAY_1000: '#171717',
   GREEN_PRIMARY: '#0A8458',
   RED_100: '#FFE6E6',
@@ -33,4 +34,12 @@ export const COLORS = {
   VIOLET_100: '#E3E5FB',
 
   TOAST_SHADOW: '#A6A6A62E',
+};
+
+
+export const CHART_PALETTE = {
+  palette: {
+    fills: ['#4F7980', '#5683D2', '#C0A2EE', '#66B06A', '#DEB1B9', '#694162', '#B2C8EB', '#E8E8E8'],
+    strokes: ['gray'],
+  },
 };

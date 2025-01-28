@@ -3,9 +3,10 @@ import { AgChartOptions, AgPolarSeriesOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { COLORS } from 'constants/colors';
-import { AG_CHART_LEGEND_CONFIG, WIDGET_TYPES } from 'modules/widgets/widgets.constant';
+import { WIDGET_TYPES } from 'modules/widgets/widgets.constant';
 import { getPieChartConfig, transformData } from 'modules/widgets/widgets.utils';
 import { WidgetInstanceType } from 'types/api/pagesApi.types';
+import { MapAny } from 'types/commonTypes';
 import ProgressBar from 'components/common/RingProgress';
 
 interface WidgetsWrapperProps {
@@ -13,17 +14,23 @@ interface WidgetsWrapperProps {
   widgetType: WIDGET_TYPES;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
+  onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
 }
 
-const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, currentPageFilters, isFilterInitialized }) => {
+const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({
+  widgetDetails,
+  currentPageFilters,
+  isFilterInitialized,
+  onNodeClick,
+}) => {
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     { widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 
   const chartConfig = useMemo(() => {
-    return getPieChartConfig(widgetDetails);
-  }, [widgetDetails]);
+    return getPieChartConfig(widgetDetails, onNodeClick);
+  }, [widgetDetails, onNodeClick]);
 
   const transformedData = useMemo(() => {
     return widgetData?.result ? transformData(widgetData?.result) : [];
@@ -33,7 +40,7 @@ const AGPieChartsWidgets: FC<WidgetsWrapperProps> = ({ widgetDetails, currentPag
     series: chartConfig?.series as AgPolarSeriesOptions[],
     data: transformedData[0] ?? [],
 
-    legend: AG_CHART_LEGEND_CONFIG,
+    // legend: AG_CHART_LEGEND_CONFIG,
     animation: {
       enabled: true,
     },

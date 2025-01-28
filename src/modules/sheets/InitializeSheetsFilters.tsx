@@ -33,9 +33,13 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: {
-              selectedFilters: defaultFilterValues,
+              selectedFilters: defaultFilterValues ?? {},
             },
           });
+
+        dispatch({
+          type: filtersContextActions.SET_INITIALISED,
+        });
 
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
@@ -43,7 +47,7 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
             filtersConfig: filters,
           },
         });
-
+      } else {
         dispatch({
           type: filtersContextActions.SET_INITIALISED,
         });

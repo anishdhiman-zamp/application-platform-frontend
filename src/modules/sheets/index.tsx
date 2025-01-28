@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { COLORS } from 'constants/colors';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
+import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widget.constant';
 import WidgetsWrapper from 'modules/widgets/WidgetsWrapper';
 import ProgressBar from 'components/common/RingProgress';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+import 'react-grid-layout/css/styles.css'; // Include default styles
+import 'react-resizable/css/styles.css'; // Include resizable styles
 
 interface SheetsProps {
   pageId: string;
   sheetId: string;
 }
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
+
 
 const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   const {
@@ -20,6 +27,17 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
     { pageId: pageId as string, sheetId: sheetId as string },
     { skip: !pageId || !sheetId, refetchOnMountOrArgChange: false },
   );
+
+  const sheetLayout = useMemo(() => {
+    return Object.keys(sheetDetails?.sheet_config?.sheet_layout ?? {}).map((key) => {
+      return {
+        i: key,
+        ...sheetDetails?.sheet_config?.sheet_layout[key],
+      };
+    });
+
+  }, [sheetDetails?.sheet_config?.sheet_layout]);
+
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
@@ -48,14 +66,27 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
             filterConfig={filtersConfig ?? []}
           />
         </div>
-        <div className='grid grid-cols-2 gap-5'>
-          {sheetDetails &&
-            sheetDetails?.widget_instances?.map((widget) => (
-              <div key={widget?.widget_instance_id}>
-                <WidgetsWrapper key={widget?.widget_instance_id} widgetDetails={widget} />
+
+        {sheetDetails && (
+          <ResponsiveGridLayout
+            className='layout'
+            layout={sheetLayout}
+            cols={{ lg: 16, md: 16, sm: 16, xs: 12, xxs: 12 }}
+            breakpoints={SCREEN_BREAKPOINTS}
+            rowHeight={ROW_HEIGHT}
+            width={1200} // Adjust grid width as per container
+            margin={WIDGETS_LAYOUT_MARGIN}
+            isResizable={false}
+            isDraggable={false}
+            useCSSTransforms={false}
+          >
+            {sheetDetails.widget_instances?.map((widget, idx) => (
+              <div key={`widget-${idx}`} data-grid={sheetLayout[idx]} className='bg-white'>
+                <WidgetsWrapper widgetDetails={widget} />
               </div>
             ))}
-        </div>
+          </ResponsiveGridLayout>
+        )}
       </div>
     </InitializeSheetsFilters>
   );

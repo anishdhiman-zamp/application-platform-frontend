@@ -18,7 +18,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { LogicalOperatorType } from 'types/components/table.type';
@@ -31,7 +31,7 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 const DatasetById = () => {
   const { id } = useParams();
-
+  const filters = useSearchParams().get('filters');
   const { data: filterConfig, refetch: refetchFilterConfig } = useGetDatasetFilterConfigQuery({ datasetId: id });
   const [updateDatasetData] = useUpdateDatasetDataMutation();
   const [getActionStatus] = useLazyGetActionStatusQuery();
@@ -72,9 +72,14 @@ const DatasetById = () => {
             })),
           },
         });
+        if (filters)
+          dispatch({
+            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+            payload: { selectedFilters: JSON.parse(filters) ?? {} },
+          });
       }
     }
-  }, [filterConfig, actionStatus, isPolling]);
+  }, [filterConfig, actionStatus, isPolling,filters]);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {

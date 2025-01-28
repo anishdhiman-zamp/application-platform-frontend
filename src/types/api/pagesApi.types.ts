@@ -52,15 +52,11 @@ export interface DataMappings {
 export interface MappingsType {
   dataset_id: string;
   fields: {
-    x_axis?: AxisMappingType[];
-    y_axis?: AxisMappingType[];
+    x_axis: AxisMappingType[];
+    y_axis: AxisMappingType[];
     slices?: AxisMappingType[];
     values?: AxisMappingType[];
   };
-  x_axis?: AxisMappingType;
-  y_axis?: AxisMappingType;
-  slices?: AxisMappingType;
-  values?: AxisMappingType;
 }
 
 export interface AxisMappingType {
@@ -75,10 +71,22 @@ export interface SheetDetailsResponseType {
   name: string;
   description: string;
   widget_instances: WidgetInstanceType[];
+  sheet_config: SheetConfigType;
   created_at: string;
   updated_at: string;
   fractional_index: number;
   page_id: string;
+}
+
+export interface SheetConfigType {
+  version: string;
+  sheet_layout: Record<string, {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  }
+  >;
 }
 
 export type SheetDetailsRequestType = {
