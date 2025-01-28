@@ -7,6 +7,8 @@ export type AudiencesByOrganisationIdRequest = {
 export type AudiencesByOrganisationIdResponse = {
   user: Session;
   privilege: string;
+  resource_audience_type: string;
+  resource_audience_id: string;
 };
 
 export type InvitedAudiencesByOrganisationIdResponse = {

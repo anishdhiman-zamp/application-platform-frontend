@@ -1,38 +1,59 @@
 import React, { FC, useRef, useState } from 'react';
+import { useGetAudiencesByDatasetIdQuery, usePostShareDatasetToAudiencesByDatasetIdMutation } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { DATASET_ACCESS_PRIVILEGES_LIST, TEAM_OPTIONS_LIST } from 'modules/data/data.constants';
+import DatasetAccesToAudiences from 'modules/data/components/DatasetAccesToAudiences';
+import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import {
   DatasetAccessPrivilegesType,
   ShareDatasetPopupPropsType,
-  UserAccessToDataSetType,
 } from 'modules/data/data.types';
+import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import Avatar from 'components/common/avatar';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
+import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose, datasetId }) => {
   const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
   const [inputArrayList, setInputArrayList] = useState<ArrayListOption[]>([]);
   const [search, setSearch] = useState<string>('');
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
-  const validationErrorText = 'Please select correct team or people';
+  const validationErrorText = 'Please select correct team or people within your organization';
   const placeholderText = 'Share with people and teams';
-  const userAccessToDatasetList: UserAccessToDataSetType = [];
   const isDatasetSharable = !showValidationError && inputArrayList.length > 0;
 
-  const handleCloseInviteMembersPopup = () => {
+  const { data: audiencesData } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
+  const userAccessToDatasetList = audiencesData ?? [];
+  const [postInviteAudiences] = usePostShareDatasetToAudiencesByDatasetIdMutation();
+
+  const handleCloseDatasetPopup = () => {
     onClose?.();
     setShowValidationError(false);
     setInputArrayList([]);
     setSearch('');
+  };
+
+  const AudiencesDatasetShareData: AudiencesDatasetShareData = {
+    audiences: inputArrayList.map((item) => ({
+      audience_type: item?.resource_audience_type ?? '',
+      audience_id: item?.resource_audience_id ?? '',
+      role: item?.role ?? '',
+    })),
+  };
+
+  const handleShareDatasetPopup = async () => {
+    try {
+      await postInviteAudiences({ datasetId, body: AudiencesDatasetShareData }).unwrap();
+      toast.success('Dataset shared successfully');
+      handleCloseDatasetPopup();
+    } catch {
+      toast.error('Failed to share Dataset');
+    }
   };
 
   return (
@@ -45,20 +66,19 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose }) 
         iconCategory={ICON_SPRITE_TYPES.GENERAL}
         iconId='x-close'
         iconColor={COLORS.TEXT_PRIMARY}
-        onClose={handleCloseInviteMembersPopup}
-        popupWrapperClassName='bg-white border-l border-t border-r border-GRAY_400 rounded-t-3.5 py-5 px-4'
+        onClose={handleCloseDatasetPopup}
+        popupWrapperClassName='bg-white border border-b-0 border-GRAY_400 rounded-t-3.5 py-5 px-4'
         closeOnClickOutside={false}
         isOverlay={false}
         wrapperClassName='justify-end items-start'
         className='py-10 px-4'
       >
-        <div className='flex flex-col rounded-b-3.5 w-[400px] bg-white border-l border-b border-r border-GRAY_400'>
+        <div className='flex flex-col rounded-b-3.5 w-[400px] bg-white border border-t-0 border-GRAY_400'>
           <div className='pt-0 px-5 pb-5'>
             <MultiSelectInput
               inputArrayList={inputArrayList}
               setInputArrayList={setInputArrayList}
-              containerRef={containerRef}
-              inputRef={inputRef}
+              checkAudiencePresentInOrg={true}
               search={search}
               setSearch={setSearch}
               selectedRoleRef={selectedRoleRef}
@@ -67,7 +87,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose }) 
               isOpen={isOpen}
               setShowValidationError={setShowValidationError}
               placeholderText={placeholderText}
-              dropdownOptions={TEAM_OPTIONS_LIST}
+              dropdownOptions={[]}
               roleOptions={DATASET_ACCESS_PRIVILEGES_LIST}
             />
           </div>
@@ -87,6 +107,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose }) 
               id='send-user-invite-btn'
               size={SIZE_TYPES.SMALL}
               disabled={!isDatasetSharable}
+              onClick={handleShareDatasetPopup}
             >
               Share
             </Button>
@@ -96,21 +117,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose }) 
           <div className='bg-white mt-2 rounded-3.5 p-2 border border-GRAY_400'>
             <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
             <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
-              {userAccessToDatasetList?.map((item, index) => (
-                <div key={index} className='f-12-400 py-3 px-2 bg-white flex justify-between items-start'>
-                  <div className='flex items-start justify-start gap-x-1 w-[120px]'>
-                    <div className='w-fit'>
-                      <Avatar
-                        name={item?.user?.name}
-                        backgroundColor={COLORS.GRAY_1000}
-                        className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
-                      />
-                    </div>
-                    <span>{item?.user?.name}</span>
-                  </div>
-                  <span className='flex items-start justify-start w-[90px]'>{item?.dataset}</span>
-                  <span className='flex items-start justify-start w-[90px]'>{item?.previlege}</span>
-                </div>
+              {userAccessToDatasetList?.map((audience, index) => (
+                <DatasetAccesToAudiences key={index} {...audience} />
               ))}
             </div>
           </div>

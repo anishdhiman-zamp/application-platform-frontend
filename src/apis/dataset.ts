@@ -1,6 +1,9 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import {
+  AudiencesByDatasetIdRequestType,
+  AudiencesByDatasetIdResponseType,
+  AudiencesDatasetShareData,
   DatasetActionStatusRequestType,
   DatasetActionStatusResponseType,
   DatasetDataRequestType,
@@ -50,6 +53,18 @@ const Dataset = baseApi.injectEndpoints({
         params,
       }),
     }),
+    getAudiencesByDatasetId: builder.query<AudiencesByDatasetIdResponseType[], AudiencesByDatasetIdRequestType>({
+      query: ({ datasetId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_DATASET_ID_GET, { datasetId }),
+      }),
+    }),
+    postShareDatasetToAudiencesByDatasetId: builder.mutation<void, {datasetId: string, body: AudiencesDatasetShareData}>({
+      query: ({ datasetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_DATASET_TO_AUDIENCES_BY_DATASET_ID_POST, { datasetId }),
+        method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    })
   }),
 });
 
@@ -62,4 +77,6 @@ export const {
   useUpdateDatasetDataMutation,
   useLazyGetActionStatusQuery,
   useGetActionStatusQuery,
+  useGetAudiencesByDatasetIdQuery,
+  usePostShareDatasetToAudiencesByDatasetIdMutation,
 } = Dataset;

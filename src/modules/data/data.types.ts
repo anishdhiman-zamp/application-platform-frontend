@@ -1,16 +1,18 @@
-import { DATASET_ACCESS_PRIVILEGES } from 'modules/data/data.constants';
+export enum DATASET_ACCESS_PRIVILEGES {
+  VIEWER = 'viewer',
+  ADMIN = 'admin',
+}
 
 export type UserAccessToDataSetType = {
-  user: {
-    name: string;
-  };
-  previlege: string;
-  dataset: string;
+  name: string;
+  privilege: string;
+  resource_type: string;
 }[];
 
 export type ShareDatasetPopupPropsType = {
   isOpen: boolean;
   onClose: () => void;
+  datasetId: string;
 };
 
 export type DatasetAccessPrivilegesType = {
@@ -23,3 +25,9 @@ export enum DATASET_ACTION_STATUS {
   SUCCESSFUL = 'SUCCESSFUL',
   FAILED = 'FAILED',
 }
+
+export type DatasetAccesToAudiencesPropsType = {
+  name?: string;
+  resource_type: string;
+  privilege?: string;
+};

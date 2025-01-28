@@ -1,5 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
-import { usePostInviteAudiencesByOrganisationIdMutation } from 'apis/people';
+import {
+  usePostInviteAudiencesByOrganisationIdMutation,
+} from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
@@ -16,8 +18,6 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const selectedRoleRef = useRef<TeamMembersPrivilegeType>(TEAM_MEMBERS_PRIVILEGES_LIST[0]);
   const [inputArrayList, setInputArrayList] = useState<ArrayListOption[]>([]);
   const [search, setSearch] = useState<string>('');
@@ -64,16 +64,14 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
       iconId='x-close'
       iconColor={COLORS.TEXT_PRIMARY}
       onClose={handleCloseInviteMembersPopup}
-      popupWrapperClassName='bg-white rounded-t-3.5'
+      popupWrapperClassName='bg-white rounded-t-3.5 border border-b-0 border-GRAY_400'
       closeOnClickOutside={false}
     >
-      <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white'>
+      <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white border border-t-0 border-GRAY_400'>
         <div className='px-4 py-6'>
           <MultiSelectInput
             inputArrayList={inputArrayList}
             setInputArrayList={setInputArrayList}
-            containerRef={containerRef}
-            inputRef={inputRef}
             search={search}
             setSearch={setSearch}
             selectedRoleRef={selectedRoleRef}

@@ -1,7 +1,10 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useAppSelector } from 'hooks/toolkit';
 import { validateEmail } from 'modules/people/people.utils';
+import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
@@ -11,8 +14,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   inputArrayList,
   setInputArrayList,
-  containerRef,
-  inputRef,
+  checkAudiencePresentInOrg,
   search,
   setSearch,
   selectedRoleRef,
@@ -24,9 +26,18 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   dropdownOptions,
   roleOptions,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
   const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
+
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId || !checkAudiencePresentInOrg },
+  );
 
   const handleSetInputFocus = () => {
     setIsInputFocused(true);
@@ -43,17 +54,45 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && search.trim()) {
         const value = search.trim();
-        const isValid = validateEmail(value);
+        let isValid = validateEmail(value);
+        let resource_audience_id = '';
+        let resource_audience_type = '';
+
+        if (checkAudiencePresentInOrg) {
+          const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
+
+          if (!audience) {
+            isValid = false;
+          } else {
+            resource_audience_type = audience?.resource_audience_type;
+            resource_audience_id = audience?.resource_audience_id;
+          }
+        }
 
         setInputArrayList((prevEmails: ArrayListOption[]) => [
           ...prevEmails,
-          { value: value, valid: isValid, role: selectedRoleRef?.current?.value },
+          {
+            value: value,
+            valid: isValid,
+            role: selectedRoleRef?.current?.value,
+            color: isValid ? COLORS.WHITE : COLORS.RED_100,
+            resource_audience_type,
+            resource_audience_id,
+          },
         ]);
         setSearch('');
         setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
       }
     },
-    [search, setInputArrayList, setSearch, setShowValidationError, selectedRoleRef],
+    [
+      search,
+      setInputArrayList,
+      setSearch,
+      setShowValidationError,
+      selectedRoleRef,
+      checkAudiencePresentInOrg,
+      teamMembersData,
+    ],
   );
 
   const handleRemoveEmail = useCallback(
@@ -97,19 +136,50 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
   }, [isInputFocused]);
 
-  const filteredDropdownOptions = useMemo(() => {
-    if (!search.trim()) {
-      return dropdownOptions ?? [];
-    }
+  useEffect(() => {
+    const debounceHandler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
 
-    return dropdownOptions?.filter((option) => option?.value.toLowerCase().includes(search.toLowerCase()));
-  }, [dropdownOptions, search]);
+    return () => {
+      if (debounceHandler) clearTimeout(debounceHandler);
+    };
+  }, [search]);
+
+  const combinedOptions = useMemo(() => {
+    const teamOptions =
+      teamMembersData?.map((member) => ({
+        value: member?.user?.email,
+        label: member?.user?.email,
+        color: COLORS.WHITE,
+        resource_audience_type: member?.resource_audience_type,
+        resource_audience_id: member?.resource_audience_id,
+      })) ?? [];
+
+    return [...(dropdownOptions ?? []), ...teamOptions];
+  }, [dropdownOptions, teamMembersData]);
+
+  const filteredDropdownOptions = useMemo(() => {
+    if (!debouncedSearch.trim()) return [];
+
+    return combinedOptions.filter((option) => option.value.toLowerCase().includes(debouncedSearch.toLowerCase()));
+  }, [combinedOptions, debouncedSearch]);
 
   const openDropdownOptions =
-    dropdownOptions && isInputFocused && search.trim().length > 0 && (filteredDropdownOptions?.length ?? 0) > 0;
+    isInputFocused && debouncedSearch.trim().length > 0 && (filteredDropdownOptions?.length ?? 0) > 0;
   const handleSelectDropdownOption = useCallback(
-    (option: { value: string; color?: string }) => {
-      setInputArrayList((prev) => [...prev, { value: option.value, valid: true, color: option?.color }]);
+    (option: { value: string; color?: string; resource_audience_type?: string; resource_audience_id?: string }) => {
+      setInputArrayList((prev) => [
+        ...prev,
+        {
+          value: option.value,
+          valid: true,
+          color: option?.color,
+          role: selectedRoleRef?.current?.value,
+          resource_audience_type: option?.resource_audience_type,
+          resource_audience_id: option?.resource_audience_id,
+        },
+      ]);
       setSearch('');
       inputRef.current?.focus();
       setIsInputFocused(true);
@@ -131,7 +201,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
               className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit'
               style={{
                 backgroundColor: item.valid ? (item?.color ? item.color : COLORS.GRAY_50) : COLORS.RED_100,
-                border: `1px solid ${item.valid ? (item?.color ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
+                border: `1px solid ${item.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
               }}
             >
               <span className='f-12-500 text-GRAY_1000'>{item.value}</span>
@@ -199,7 +269,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 >
                   <span
                     className='f-12-400 text-GRAY_1000 w-full px-1.5 py-0.5 rounded'
-                    style={{ backgroundColor: option?.color }}
+                    style={{
+                      backgroundColor: option?.color,
+                      border: `1px solid ${option?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400}`,
+                    }}
                   >
                     {option?.label}
                   </span>

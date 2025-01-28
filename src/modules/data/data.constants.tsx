@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
+import { DATASET_ACCESS_PRIVILEGES } from 'modules/data/data.types';
 import CustomAmountRenderer from 'components/common/table/CustomCellRenderers/CustomAmountRenderer';
 import CustomDateTimeRenderer from 'components/common/table/CustomCellRenderers/CustomDateTimeRenderer';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
@@ -62,18 +63,13 @@ export const TEAM_OPTIONS_LIST = [
   },
 ];
 
-export enum DATASET_ACCESS_PRIVILEGES {
-  SYSTEM_ADMIN = 'system_admin',
-  MEMBER = 'member',
-}
-
 export const DATASET_ACCESS_PRIVILEGES_LIST = [
   {
-    label: 'System Admin',
-    value: DATASET_ACCESS_PRIVILEGES.SYSTEM_ADMIN,
+    label: 'Viewer',
+    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
   },
   {
-    label: 'Member',
-    value: DATASET_ACCESS_PRIVILEGES.MEMBER,
+    label: 'Admin',
+    value: DATASET_ACCESS_PRIVILEGES.ADMIN,
   },
 ];

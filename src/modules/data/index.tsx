@@ -47,7 +47,7 @@ const Listing = () => {
   return (
     <>
       <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
-      <ShareDatasetPopup isOpen={isShareDatasetPopupOpen} onClose={handleCloseShareDatasetPopup} />
+      <ShareDatasetPopup isOpen={isShareDatasetPopupOpen} onClose={handleCloseShareDatasetPopup} datasetId='' />
     </>
   );
 };
