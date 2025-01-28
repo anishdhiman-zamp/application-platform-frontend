@@ -1,4 +1,6 @@
+import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { MapAny } from 'types/commonTypes';
+import { FilterModelType } from 'types/components/table.type';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 
@@ -68,4 +70,46 @@ export type DatasetListingResponseType = {
 export type DatasetListingRequestType = {
   page: number;
   pageSize: number;
+};
+
+export type DatasetUpdateRequestType = {
+  datasetId: string;
+  data: {
+    filters: FilterModelType;
+    update: {
+      column: string;
+      value: string;
+    };
+  };
+  saveAsRule?: boolean;
+  ruleTitle?: string;
+  ruleDescription?: string;
+};
+
+export type DatasetUpdateResponseType = {
+  action_id: string;
+  action_type: string;
+  dataset_id: string;
+  status: string;
+  config: MapAny;
+  action_by: string;
+  is_completed: boolean;
+};
+
+export type DatasetActionStatusRequestType = {
+  datasetId: string;
+  params: {
+    action_ids?: string[];
+    status?: DATASET_ACTION_STATUS;
+  };
+};
+
+export type DatasetActionStatusResponseType = {
+  action_id: string;
+  action_type: string;
+  dataset_id: string;
+  status: DATASET_ACTION_STATUS;
+  is_completed: boolean;
+  config: MapAny;
+  action_by: string;
 };

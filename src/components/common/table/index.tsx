@@ -1,5 +1,6 @@
 import React, { ReactNode, useMemo } from 'react';
 import {
+  CellDoubleClickedEvent,
   CellEditRequestEvent,
   CellStyleModule,
   ClientSideRowModelModule,
@@ -13,7 +14,6 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
-  RowClickedEvent,
   TextEditorModule,
   TextFilterModule,
   Theme,
@@ -91,7 +91,7 @@ interface TableProps {
   gridStyle?: MapAny;
   serverSideDatasource?: IServerSideDatasource;
   customTheme?: Theme;
-  onRowClicked?: (event: RowClickedEvent) => void;
+  onCellDoubleClicked?: (event: CellDoubleClickedEvent) => void;
   showSideBar?: boolean;
   showStatusBar?: boolean;
   totalRows?: number;
@@ -120,7 +120,7 @@ const Table: React.FC<TableProps> = ({
   gridStyle = { height: 'calc(100vh - 100px)', width: '100%' },
   serverSideDatasource,
   customTheme,
-  onRowClicked,
+  onCellDoubleClicked,
   showSideBar = false,
   showStatusBar = false,
   totalRows,
@@ -138,7 +138,7 @@ const Table: React.FC<TableProps> = ({
       suppressHeaderContextMenu: true,
       floatingFilter: false,
       headerClass: 'f-12-600 text-GRAY_1000',
-      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onRowClicked ? 'cursor-pointer' : ''}`,
+      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       ...columnConfig,
     };
@@ -177,14 +177,13 @@ const Table: React.FC<TableProps> = ({
           theme={theme}
           sideBar={sideBar}
           icons={icons}
-          onRowClicked={onRowClicked}
+          onCellDoubleClicked={onCellDoubleClicked}
           statusBar={statusBar}
           cellSelection={cellSelection}
           suppressCellFocus={suppressCellFocus}
           onColumnVisible={onColumnVisible}
           readOnlyEdit
           onCellEditRequest={onCellEditRequest}
-          {...(columnConfig?.enableRowGroup ? { rowGroupPanelShow: 'always' } : {})}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

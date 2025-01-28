@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
 import {
+  CellDoubleClickedEvent,
   CellEditRequestEvent,
   ColDef,
   ColumnVisibleEvent,
   IServerSideDatasource,
-  RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
@@ -16,7 +16,7 @@ interface DatasetTableProps {
   serverSideDatasource?: IServerSideDatasource;
   columnConfig?: ColDef;
   totalRows?: number;
-  onRowClicked?: (event: RowClickedEvent) => void;
+  onCellDoubleClicked?: (event: CellDoubleClickedEvent) => void;
   rows?: MapAny[];
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
@@ -25,7 +25,7 @@ interface DatasetTableProps {
 const DatasetTable: FC<DatasetTableProps> = ({
   columns,
   rows,
-  onRowClicked,
+  onCellDoubleClicked,
   tableRef,
   totalRows,
   serverSideDatasource,
@@ -39,11 +39,10 @@ const DatasetTable: FC<DatasetTableProps> = ({
       columns={columns}
       rows={rows}
       columnConfig={columnConfig}
-      onRowClicked={onRowClicked}
+      onCellDoubleClicked={onCellDoubleClicked}
       totalRows={totalRows}
       serverSideDatasource={serverSideDatasource}
       onCellEditRequest={onCellEditRequest}
-      showSideBar
       showStatusBar
       enableCellSelection
       onColumnVisible={onColumnVisible}

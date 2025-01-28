@@ -17,3 +17,9 @@ export type DatasetAccessPrivilegesType = {
   label: string;
   value: DATASET_ACCESS_PRIVILEGES;
 };
+
+export enum DATASET_ACTION_STATUS {
+  INITIATED = 'INITIATED',
+  SUCCESSFUL = 'SUCCESSFUL',
+  FAILED = 'FAILED',
+}

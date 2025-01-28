@@ -119,7 +119,7 @@ export const ArrayFilters = [
 
 export const cellSelectionConfig: CellSelectionOptions<any> = {
   handle: {
-    mode: 'range',
+    mode: 'fill',
   },
 };
 

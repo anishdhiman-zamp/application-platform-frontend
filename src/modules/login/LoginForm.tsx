@@ -147,7 +147,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
 
   return (
     <div className={`w-96 mx-auto mt-[30vh] items-center flex flex-col gap-10 ${className}`}>
-      <Image src={ZAMP_ICON_BLACK} width={48} height={48} alt='Zamp' />
+      <Image src={ZAMP_ICON_BLACK} width={48} height={38} alt='Zamp' priority />
 
       {userFacingError &&
         userFacingError.map((error, index) => (
@@ -157,7 +157,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
         ))}
       <form className='flex flex-col gap-3 w-full' onSubmit={handlePasswordSubmit}>
         <Input
-          testId='login-email'
+          id='login-email'
           label='Email'
           required
           placeholder='Enter your email'
@@ -172,7 +172,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
           disabled={formDisabled}
         />
         <Input
-          testId='login-password'
+          id='login-password'
           label='Password'
           required
           disabled={formDisabled}

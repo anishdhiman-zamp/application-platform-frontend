@@ -117,11 +117,11 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 };
 
 export const getTagLabel = (tag: string) => {
-  return tag.split('.').pop();
+  return tag?.split('.').pop() ?? '';
 };
 
 export const getTagParents = (tag: string) => {
-  const parents = tag.split('.').slice(0, -1);
+  const parents = tag?.split('.').slice(0, -1) ?? [];
 
   return parents.length ? parents.join(' / ') : null;
 };

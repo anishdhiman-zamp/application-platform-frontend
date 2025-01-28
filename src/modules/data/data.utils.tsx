@@ -41,7 +41,10 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
-export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): ColDef[] => {
+export const formatColumns = (
+  filterConfig: DatasetFilterConfigResponseType[],
+  isInitiatedAction: boolean,
+): ColDef[] => {
   const columns: ColDef[] = [];
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
@@ -54,7 +57,7 @@ export const formatColumns = (filterConfig: DatasetFilterConfigResponseType[]): 
       flex: 1,
       hide: column.metadata?.is_hidden,
       cellRendererParams: column.metadata,
-      editable: column.metadata?.is_editable,
+      editable: column.metadata?.is_editable && !isInitiatedAction,
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];

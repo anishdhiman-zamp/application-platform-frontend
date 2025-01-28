@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
   DATASET_DATA_GET: `datasets/{{datasetId}}/data`,
   DATASET_DRILLDOWN_GET: `datasets/{{datasetId}}/drill-down/row/{{rowId}}`,
   DATASET_LISTING_GET: `datasets/listing`,
+  DATASET_UPDATE_POST: `datasets/{{datasetId}}/update-data`,
+  DATASET_ACTION_STATUS_GET: `datasets/{{datasetId}}/actions`,
 
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -14,6 +15,7 @@ interface TopbarProps {
 
 const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   //    <div className={cn('relative transition-all duration-300', isSidebarOpen ? 'w-60' : 'w-0')}>
 
@@ -49,7 +51,16 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
           />
         </div>
       </div>
-      {/* <div>Topbar</div> */}
+      <div className='flex items-center gap-2 w-full pl-4'>
+        <SvgSpriteLoader
+          id='arrow-left'
+          iconCategory={ICON_SPRITE_TYPES.ARROWS}
+          height={16}
+          width={16}
+          onClick={router.back}
+          className='cursor-pointer'
+        />
+      </div>
       <Input
         placeholder='Search'
         value={search}
