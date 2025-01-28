@@ -150,6 +150,15 @@ export const getFirstLetters = (str: string) =>
     })
     .join('');
 
+export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const isValidEmail = (email: string) => {
+  return emailRegex.test(email);
+};
+
+export const getDomainFromEmail = (email: string) => {
+  return email.split('@')[1];
+};
 export function isValidDate(dateString: string) {
   // Try to parse the string into a Date object
   const date = new Date(dateString);

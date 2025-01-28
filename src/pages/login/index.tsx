@@ -1,10 +1,11 @@
 'use client';
 import React from 'react';
-import LoginForm from 'modules/login/LoginForm';
+import { LoginFormV2 } from 'modules/login/LoginFormV2';
+// import LoginForm from 'modules/login/LoginForm';
 import type { NextPage } from 'next';
 
 const Home: NextPage = () => {
-  return <LoginForm />;
+  return <LoginFormV2 />;
 };
 
 export default Home;

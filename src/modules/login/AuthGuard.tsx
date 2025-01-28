@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { setUser, setWorkspace } from 'store/slices/user';
+import MembershipRequested from 'components/MembershipRequested';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -58,6 +59,10 @@ export const AuthGuard: React.FC<Props> = (props) => {
     } else {
       return props.children;
     }
+  }
+
+  if (session?.orgs?.length === 0) {
+    return <MembershipRequested/>
   }
 
   if (

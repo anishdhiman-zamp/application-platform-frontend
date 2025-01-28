@@ -1,13 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useGetErrorDetailsQuery, useInitiateLoginFlowQuery } from 'apis/auth';
-import { LOGIN_METHODS, LOGIN_PROVIDERS } from 'constants/auth.constants';
-import { GOOGLE_ICON, ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
+import { useGetErrorDetailsQuery } from 'apis/auth';
+import { LOGIN_METHODS } from 'constants/auth.constants';
+import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
@@ -16,6 +15,8 @@ const LOGIN_ERROR_TEXT = 'Unable to login, please try again.';
 
 type LoginFormProps = {
   className?: string;
+  loginFlow: LoginFlow;
+  setLoginFlow: (loginFlow: LoginFlow) => void;
 };
 
 const commonFetchConfig = {
@@ -25,7 +26,7 @@ const commonFetchConfig = {
   },
 };
 
-const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const router = useRouter();
   const errorId = router.query.error?.toString() ?? '';
@@ -34,43 +35,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEmailLogin, setIsEmailLogin] = useState<boolean>(false);
 
-  const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
-
-  const { data: initiatedLoginFlow, isLoading } = useInitiateLoginFlowQuery();
   const { data: userFacingError } = useGetErrorDetailsQuery(errorId, { skip: !errorId });
 
   const [email, setEmail] = useState<string>(cachedUserEmail.email ?? '');
   const [password, setPassword] = useState<string>(cachedUserEmail.password ?? '');
-
-  const handleGoogleClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
-    setIsEmailLogin(false);
-    e?.preventDefault?.();
-    if (loginFlow) {
-      setLoading(true);
-      fetch(loginFlow.ui.action, {
-        ...commonFetchConfig,
-        method: loginFlow.ui.method,
-        credentials: 'include',
-        body: JSON.stringify({
-          provider: LOGIN_PROVIDERS.GOOGLE,
-        }),
-      })
-        .then((response) => {
-          return response.json().then((responseJson) => {
-            if (response.status === 422) {
-              if (responseJson.redirect_browser_to) {
-                window.location.href = responseJson.redirect_browser_to;
-              }
-            } else if (response.status == 400) {
-              setLoginFlow(responseJson);
-            }
-          });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  };
 
   const handlePasswordSubmit = (
     e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -130,12 +98,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
   };
 
   useEffect(() => {
-    if (initiatedLoginFlow) {
-      setLoginFlow(initiatedLoginFlow);
-    }
-  }, [initiatedLoginFlow]);
-
-  useEffect(() => {
     const token = localStorage.getItem('token');
 
     if (token) {
@@ -143,7 +105,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
     }
   }, []);
 
-  const formDisabled = loading || isLoading || !loginFlow;
+  const formDisabled = loading || !loginFlow;
 
   return (
     <div className={`w-96 mx-auto mt-[30vh] items-center flex flex-col gap-10 ${className}`}>
@@ -201,15 +163,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '' }) => {
           Login
         </Button>
       </form>
-      <Button
-        id='google-login'
-        type={BUTTON_TYPES.TEXT_NAV}
-        disabled={formDisabled}
-        onClick={handleGoogleClick}
-        isLoading={isEmailLogin ? false : loading}
-      >
-        <Image src={GOOGLE_ICON} width={32} height={32} alt='Zamp' />
-      </Button>
     </div>
   );
 };
