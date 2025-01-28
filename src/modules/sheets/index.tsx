@@ -18,7 +18,6 @@ interface SheetsProps {
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-
 const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   const {
     state: { filtersConfig },
@@ -35,9 +34,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
         ...sheetDetails?.sheet_config?.sheet_layout[key],
       };
     });
-
   }, [sheetDetails?.sheet_config?.sheet_layout]);
-
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>

@@ -32,7 +32,9 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 const DatasetById = () => {
   const { id } = useParams();
   const filters = useSearchParams().get('filters');
-  const { data: filterConfig, refetch: refetchFilterConfig } = useGetDatasetFilterConfigQuery({ datasetId: id });
+  const { data: filterConfig, refetch: refetchFilterConfig } = useGetDatasetFilterConfigQuery({
+    datasetId: id as string,
+  });
   const [updateDatasetData] = useUpdateDatasetDataMutation();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [columns, setColumns] = useState<ColDef[]>([]);
@@ -79,23 +81,23 @@ const DatasetById = () => {
           });
       }
     }
-  }, [filterConfig, actionStatus, isPolling,filters]);
+  }, [filterConfig, actionStatus, isPolling, filters]);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         getDatasetData({
           datasetId: id as string,
-          queryConfig: getEncodedRequest(parameters.request),
+          query_config: getEncodedRequest(parameters.request),
         })
           .unwrap()
           .then((data) => {
             if (parameters.request.startRow === 0) {
-              setTotalRows(data.totalCount);
+              setTotalRows(data.total_count);
             }
             parameters.success({
               rowData: data.rows,
-              ...(parameters.request.startRow === 0 ? { rowCount: data.totalCount } : {}),
+              ...(parameters.request.startRow === 0 ? { rowCount: data.total_count } : {}),
             });
           })
           .catch(() => {
@@ -135,7 +137,7 @@ const DatasetById = () => {
       datasetId: id as string,
       data: {
         filters: {
-          logicalOperator: LogicalOperatorType.OperatorLogicalAnd,
+          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
           conditions: [
             {
               column: '_zamp_id',
@@ -185,7 +187,7 @@ const DatasetById = () => {
           totalRows={totalRows}
           onColumnVisible={handleColumnVisible}
           onCellEditRequest={onCellEditRequest}
-          {...(data?.config?.isDrilldownEnabled ? { onCellDoubleClicked: onCellDoubleClicked } : {})}
+          {...(data?.config?.is_drilldown_enabled ? { onCellDoubleClicked: onCellDoubleClicked } : {})}
         />
       </div>
     </div>

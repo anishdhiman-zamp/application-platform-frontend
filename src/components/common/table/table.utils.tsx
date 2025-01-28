@@ -94,14 +94,14 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
     return null;
   } else if (input.filterType === 'join') {
     return {
-      logicalOperator: LogicalOperatorMap[input.type] || LogicalOperatorType.OperatorLogicalAnd,
+      logical_operator: LogicalOperatorMap[input.type] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: input.conditions
         .map((condition: MapAny) => parseCondition(condition))
         .filter((condition: MapAny) => condition !== null),
     };
   } else if (input.conditions) {
     return {
-      logicalOperator: LogicalOperatorMap[input.operator] || LogicalOperatorType.OperatorLogicalAnd,
+      logical_operator: LogicalOperatorMap[input.operator] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: input.conditions
         .map((condition: MapAny) => parseCondition(condition))
         .filter((condition: MapAny) => condition !== null),
@@ -117,7 +117,7 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
 
       if (conditions.length) {
         return {
-          logicalOperator: LogicalOperatorType.OperatorLogicalAnd,
+          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
           conditions,
         };
       } else return null;
@@ -133,7 +133,7 @@ const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsReques
 
   if (filtersFromGroup.length) {
     return {
-      logicalOperator: LogicalOperatorType.OperatorLogicalAnd,
+      logical_operator: LogicalOperatorType.OperatorLogicalAnd,
       conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
     };
   }
@@ -186,13 +186,13 @@ const formatRequest = (request: IServerSideGetRowsRequest): RequestType => {
   return {
     filters: getFilterModelFromGroupAndFilterModel(request),
     aggregations: getAggregations(request),
-    groupBy: getGroupByColumns(request),
-    orderBy: getOrderByColumns(request),
+    group_by: getGroupByColumns(request),
+    order_by: getOrderByColumns(request),
     pagination: {
       page: endRow ? Math.ceil(endRow / PAGE_SIZE) : 1,
-      pageSize: PAGE_SIZE,
+      page_size: PAGE_SIZE,
     },
-    getTotalRecords: true,
+    get_total_records: true,
   };
 };
 

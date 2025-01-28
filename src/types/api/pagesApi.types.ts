@@ -80,12 +80,14 @@ export interface SheetDetailsResponseType {
 
 export interface SheetConfigType {
   version: string;
-  sheet_layout: Record<string, {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  }
+  sheet_layout: Record<
+    string,
+    {
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
   >;
 }
 

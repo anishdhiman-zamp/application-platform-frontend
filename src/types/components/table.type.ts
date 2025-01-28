@@ -44,19 +44,19 @@ export type OrderByType = {
 
 export type PaginationType = {
   page: number;
-  pageSize: number;
+  page_size: number;
 };
 
 export type FilterModelType = {
-  logicalOperator?: LogicalOperatorType;
+  logical_operator?: LogicalOperatorType;
   conditions?: FilterType[];
 };
 
 export type RequestType = {
   filters: FilterModelType | null;
   aggregations: AggregationType[];
-  groupBy: GroupByType[];
-  orderBy: OrderByType[];
+  group_by: GroupByType[];
+  order_by: OrderByType[];
   pagination: PaginationType;
-  getTotalRecords: boolean;
+  get_total_records: boolean;
 };

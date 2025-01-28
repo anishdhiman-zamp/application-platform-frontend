@@ -54,20 +54,20 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     //TODO:Update logic for filter type
     const onClickFilter = isDate
       ? {
-        [xAxis]: {
-          dateFrom: clickedNode[xAxis],
-          dateTo: clickedNode[xAxis],
-          filterType: FILTER_TYPES.DATE_RANGE,
-          type: CONDITION_OPERATOR_TYPE.IN_BETWEEN,
-        },
-      }
+          [xAxis]: {
+            dateFrom: clickedNode[xAxis],
+            dateTo: clickedNode[xAxis],
+            filterType: FILTER_TYPES.DATE_RANGE,
+            type: CONDITION_OPERATOR_TYPE.IN_BETWEEN,
+          },
+        }
       : {
-        [xAxis]: {
-          filterType: FILTER_TYPES.MULTI_SELECT,
-          type: CONDITION_OPERATOR_TYPE.CONTAINS,
-          values: [clickedNode[xAxis]],
-        },
-      };
+          [xAxis]: {
+            filterType: FILTER_TYPES.MULTI_SELECT,
+            type: CONDITION_OPERATOR_TYPE.CONTAINS,
+            values: [clickedNode[xAxis]],
+          },
+        };
 
     router.push(
       `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...onClickFilter })}`,

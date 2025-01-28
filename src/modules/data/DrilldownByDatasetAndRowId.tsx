@@ -38,13 +38,13 @@ const DrilldownByDatasetAndRowId = () => {
 
   const columns = useMemo(
     () =>
-      data?.tabs[currentTabIndex].datasetData.columns?.map((column) => ({
+      data?.tabs[currentTabIndex].dataset_data.columns?.map((column) => ({
         field: column.name,
       })) ?? [],
     [data, currentTabIndex],
   );
 
-  const rows = useMemo(() => data?.tabs[currentTabIndex].datasetData.rows ?? [], [data, currentTabIndex]);
+  const rows = useMemo(() => data?.tabs[currentTabIndex].dataset_data.rows ?? [], [data, currentTabIndex]);
 
   return (
     <>

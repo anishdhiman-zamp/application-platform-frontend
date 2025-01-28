@@ -16,19 +16,20 @@ import {
   DatasetUpdateRequestType,
   DatasetUpdateResponseType,
 } from 'types/api/dataset.types';
-import { MapAny } from 'types/commonTypes';
 import { formRequestUrlWithParams } from 'utils/common';
 
 const Dataset = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], MapAny>({
-      query: (payload) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILTER_CONFIG_GET, payload) }),
+    getDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], { datasetId: string }>({
+      query: ({ datasetId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILTER_CONFIG_GET, { datasetId }),
+      }),
       transformResponse: ({ data }) => data,
     }),
     getDatasetData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
-      query: ({ datasetId, queryConfig }) => ({
+      query: ({ datasetId, query_config }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId }),
-        params: { queryConfig },
+        params: { query_config },
       }),
       transformResponse: ({ data }) => data,
     }),

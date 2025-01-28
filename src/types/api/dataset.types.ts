@@ -23,14 +23,14 @@ export type DatasetDataResponseType = {
   rows: MapAny[];
   columns: MapAny[];
   config: {
-    isDrilldownEnabled: boolean;
+    is_drilldown_enabled: boolean;
   };
-  totalCount: number;
+  total_count: number;
 };
 
 export type DatasetDataRequestType = {
   datasetId: string;
-  queryConfig?: string;
+  query_config?: string;
 };
 
 export type DatasetDrilldownRequestType = {
@@ -41,14 +41,7 @@ export type DatasetDrilldownRequestType = {
 export type DatasetDrilldownResponseType = {
   tabs: {
     dataset_id: string;
-    datasetData: {
-      rows: MapAny[];
-      columns: MapAny[];
-      totalCount: number;
-      config: {
-        isDrilldownEnabled: boolean;
-      };
-    };
+    dataset_data: DatasetDataResponseType;
   }[];
 };
 

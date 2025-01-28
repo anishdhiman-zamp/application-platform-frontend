@@ -5,7 +5,6 @@ export enum WIDGET_TYPE {
   TABLE = 'table',
 }
 
-
 export enum SCREEN_BREAKPOINTS_NAMES {
   SM = 'sm',
   MD = 'md',
