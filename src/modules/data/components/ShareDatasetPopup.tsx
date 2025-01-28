@@ -4,10 +4,7 @@ import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import DatasetAccesToAudiences from 'modules/data/components/DatasetAccesToAudiences';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
-import {
-  DatasetAccessPrivilegesType,
-  ShareDatasetPopupPropsType,
-} from 'modules/data/data.types';
+import { DatasetAccessPrivilegesType, ShareDatasetPopupPropsType } from 'modules/data/data.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -117,9 +114,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose, da
           <div className='bg-white mt-2 rounded-3.5 p-2 border border-GRAY_400'>
             <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
             <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
-              {userAccessToDatasetList?.map((audience, index) => (
-                <DatasetAccesToAudiences key={index} {...audience} />
-              ))}
+              {userAccessToDatasetList?.map((audience, index) => <DatasetAccesToAudiences key={index} {...audience} />)}
             </div>
           </div>
         )}

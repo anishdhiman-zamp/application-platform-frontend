@@ -1,9 +1,11 @@
-import { CHART_PALETTE, COLORS } from 'constants/colors';
+import { AgChartOptions } from 'ag-charts-community';
+import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
 import { AG_CHART_TYPES, WIDGET_TYPES, WidgetDataValueType, WidgetTypes } from 'modules/widgets/widgets.constant';
 import { WidgetInstanceType } from 'types/api/pagesApi.types';
 import { WidgetDataType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
+import { shuffleArray } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
@@ -49,16 +51,28 @@ export function transformData(responses: WidgetDataType[]) {
   });
 }
 
-export const getChartConfigV2 = (
+export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
   widgetType: WIDGET_TYPES,
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
+  baseOptions: AgChartOptions,
 ) => {
   const mappings = widgetDetails?.data_mappings?.mappings;
   const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
   const yAxis = mappings?.[0]?.fields?.y_axis ?? [];
-  const title = widgetDetails.title;
   const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
+  const navigatorConfig =
+    baseOptions?.data && baseOptions?.data?.length > 5
+      ? {
+          navigator: {
+            enabled: baseOptions?.data && baseOptions?.data?.length > 5,
+            height: 10,
+          },
+          initialState: {
+            zoom: { ratioX: { start: 0, end: 0.4 } },
+          },
+        }
+      : {};
 
   const label = {
     enabled: true,
@@ -77,14 +91,16 @@ export const getChartConfigV2 = (
   switch (widgetType) {
     case WIDGET_TYPES.BAR_CHART: {
       return {
-        title,
+        ...baseOptions,
+        ...navigatorConfig,
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
+          cornerRadius: 2,
           yKey: `${axis?.aggregation}_${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
-          fill: CHART_PALETTE.palette.fills[0],
+          fill: CHART_PALETTE_COLORS[0],
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
@@ -94,14 +110,18 @@ export const getChartConfigV2 = (
     }
     case WIDGET_TYPES.LINE_CHART: {
       return {
-        title,
+        ...baseOptions,
+        ...navigatorConfig,
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
           yKey: `${axis?.aggregation}_${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
-          fill: CHART_PALETTE.palette.fills[0],
+          stroke: CHART_PALETTE_COLORS[Math.floor(Math.random() * CHART_PALETTE_COLORS.length - 2)],
+          marker: {
+            enabled: false,
+          },
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
@@ -109,35 +129,27 @@ export const getChartConfigV2 = (
         })),
       };
     }
+    case WIDGET_TYPES.PIE_CHART: {
+      return {
+        ...baseOptions,
+        series: [
+          {
+            type: AG_CHART_TYPES[WidgetTypes.PIE_CHART],
+            legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
+            angleKey: mappings?.[0]?.fields?.values?.[0]?.aggregation
+              ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
+              : mappings?.[0]?.fields?.values?.[0]?.column,
+            fills: shuffleArray([...CHART_PALETTE_COLORS]),
+            listeners: {
+              nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
+            },
+          },
+        ],
+      };
+    }
     default:
       break;
   }
-};
-
-export const getPieChartConfig = (
-  widgetDetails: WidgetInstanceType,
-  onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
-) => {
-  const mappings = widgetDetails?.data_mappings?.mappings;
-  const title = widgetDetails.title;
-
-  const slices = [
-    {
-      type: AG_CHART_TYPES[WidgetTypes.PIE_CHART],
-      legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
-      angleKey: mappings?.[0]?.fields?.values?.[0]?.aggregation
-        ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
-        : mappings?.[0]?.fields?.values?.[0]?.column,
-      listeners: {
-        nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
-      },
-    },
-  ];
-
-  return {
-    series: slices,
-    title,
-  };
 };
 
 export const getSheetIdFromPath = (path: string, pageid: string) => {

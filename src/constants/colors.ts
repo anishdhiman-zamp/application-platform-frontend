@@ -36,9 +36,20 @@ export const COLORS = {
   TOAST_SHADOW: '#A6A6A62E',
 };
 
+export const CHART_PALETTE_COLORS = [
+  '#4F7980',
+  '#5683D2',
+  '#C0A2EE',
+  '#66B06A',
+  '#DEB1B9',
+  '#694162',
+  '#B2C8EB',
+  '#E8E8E8',
+];
+
 export const CHART_PALETTE = {
   palette: {
-    fills: ['#4F7980', '#5683D2', '#C0A2EE', '#66B06A', '#DEB1B9', '#694162', '#B2C8EB', '#E8E8E8'],
+    fills: CHART_PALETTE_COLORS,
     strokes: ['gray'],
   },
 };

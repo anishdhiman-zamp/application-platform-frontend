@@ -157,3 +157,18 @@ export function isValidDate(dateString: string) {
   // Check if the date is invalid or not
   return !isNaN(date.getTime());
 }
+
+/**
+ * Shuffle the array position of elements
+ * @param array
+ * @returns
+ */
+export function shuffleArray(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // Random index between 0 and i
+
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+
+  return array;
+}

@@ -108,7 +108,6 @@ export type DatasetActionStatusResponseType = {
   action_by: string;
 };
 
-
 export type AudiencesByDatasetIdRequestType = {
   datasetId: string;
 };

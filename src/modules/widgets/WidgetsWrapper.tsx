@@ -1,7 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
-import AGPieChartsWidgets from 'modules/widgets/AGPieChartsWidgets';
 import { WIDGET_TYPES } from 'modules/widgets/widgets.constant';
 import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
@@ -77,18 +76,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
   switch (widget_type) {
     case WIDGET_TYPES.BAR_CHART:
     case WIDGET_TYPES.LINE_CHART:
-      return (
-        <AGChartsWidgets
-          widgetDetails={widgetDetails}
-          widgetType={widget_type}
-          currentPageFilters={currentPageFilters}
-          isFilterInitialized={isFilterInitialized}
-          onNodeClick={onNodeClick}
-        />
-      );
     case WIDGET_TYPES.PIE_CHART:
       return (
-        <AGPieChartsWidgets
+        <AGChartsWidgets
           widgetDetails={widgetDetails}
           widgetType={widget_type}
           currentPageFilters={currentPageFilters}

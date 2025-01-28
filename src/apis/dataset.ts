@@ -59,13 +59,16 @@ const Dataset = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_DATASET_ID_GET, { datasetId }),
       }),
     }),
-    postShareDatasetToAudiencesByDatasetId: builder.mutation<void, {datasetId: string, body: AudiencesDatasetShareData}>({
+    postShareDatasetToAudiencesByDatasetId: builder.mutation<
+      void,
+      { datasetId: string; body: AudiencesDatasetShareData }
+    >({
       query: ({ datasetId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_DATASET_TO_AUDIENCES_BY_DATASET_ID_POST, { datasetId }),
         method: REQUEST_TYPES.POST,
         body: body,
       }),
-    })
+    }),
   }),
 });
 
