@@ -33,7 +33,7 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: {
-              selectedFilters: {},
+              selectedFilters: defaultFilterValues ?? {},
             },
           });
 

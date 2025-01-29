@@ -1,11 +1,18 @@
 import { AgChartOptions } from 'ag-charts-community';
 import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
-import { AG_CHART_TYPES, WIDGET_TYPES, WidgetDataValueType, WidgetTypes } from 'modules/widgets/widgets.constant';
+import {
+  AG_CHART_TYPES,
+  CHART_CATEGORY_AXES,
+  CHART_NUMBER_AXES,
+  DONUT_CHART_SERIES_CONFIG,
+  WIDGET_TYPES,
+  WidgetDataValueType,
+} from 'modules/widgets/widgets.constant';
 import { WidgetInstanceType } from 'types/api/pagesApi.types';
 import { WidgetDataType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
-import { shuffleArray } from 'utils/common';
+import { formatNumber } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
@@ -61,15 +68,15 @@ export const getChartOptions = (
   const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
   const yAxis = mappings?.[0]?.fields?.y_axis ?? [];
   const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
+
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
       ? {
-          navigator: {
-            enabled: baseOptions?.data && baseOptions?.data?.length > 5,
-            height: 10,
-          },
-          initialState: {
-            zoom: { ratioX: { start: 0, end: 0.4 } },
+          zoom: {
+            enabled: true,
+            buttons: {
+              enabled: false,
+            },
           },
         }
       : {};
@@ -82,8 +89,7 @@ export const getChartOptions = (
     placement: 'outside-end',
     padding: 6,
     formatter: (params: any) => {
-      if (Number(params.datum[params.yKey]) / 1000000 > 0.5)
-        return (Number(params.datum[params.yKey]) / 1000000).toFixed(1).toString();
+      if (Number(params.datum[params.yKey])) return formatNumber(Number(params.datum[params.yKey]), 1, true);
       else return '';
     },
   };
@@ -93,6 +99,7 @@ export const getChartOptions = (
       return {
         ...baseOptions,
         ...navigatorConfig,
+        axes: [{ ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 }, CHART_NUMBER_AXES],
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
@@ -130,19 +137,55 @@ export const getChartOptions = (
       };
     }
     case WIDGET_TYPES.PIE_CHART: {
+      const sliceKey = mappings?.[0]?.fields?.values?.[0]?.aggregation
+        ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
+        : mappings?.[0]?.fields?.values?.[0]?.column;
+      const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
+
       return {
         ...baseOptions,
         series: [
           {
-            type: AG_CHART_TYPES[WidgetTypes.PIE_CHART],
+            ...DONUT_CHART_SERIES_CONFIG,
             legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
-            angleKey: mappings?.[0]?.fields?.values?.[0]?.aggregation
-              ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
-              : mappings?.[0]?.fields?.values?.[0]?.column,
-            fills: shuffleArray([...CHART_PALETTE_COLORS]),
+            angleKey: sliceKey,
+            calloutLabelKey: sliceKey,
             listeners: {
               nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
             },
+            calloutLabel: {
+              formatter: (params: MapAny) => {
+                return formatNumber(params.datum[sliceKey ?? '']);
+              },
+              offset: 8,
+              enabled: true,
+              fontSize: 11,
+              fontWeight: 400,
+              fontFamily: 'Inter',
+              color: COLORS.GRAY_950,
+            },
+            calloutLine: {
+              length: 18,
+              strokeWidth: 2,
+              colors: [COLORS.GRAY_400],
+            },
+            innerLabels: [
+              {
+                text: formatNumber(totalNumber),
+                fontWeight: '900',
+                fontFamily: 'Inter',
+                pixelSize: 30,
+                fontSize: 20,
+                color: COLORS.GRAY_950,
+              },
+              {
+                text: `${mappings?.[0]?.fields?.values?.[0]?.column.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
+                fontWeight: '500',
+                fontFamily: 'Inter',
+                fontSize: 11,
+                color: COLORS.GRAY_700,
+              },
+            ],
           },
         ],
       };

@@ -181,3 +181,49 @@ export function shuffleArray(array: any[]) {
 
   return array;
 }
+
+/**
+ * Format the number to a short format
+ * @param number
+ * @returns string number with suffix
+ */
+export function formatNumber(
+  value = 0,
+  precision: number = 1,
+  allowSuffix: boolean = true,
+  getSuffix: boolean = false,
+): string {
+  const suffixes = [
+    { threshold: 1000000000, suffix: 'B', valueString: 'Billions' },
+    { threshold: 1000000, suffix: 'M', valueString: 'Millions' },
+    { threshold: 1000, suffix: 'K', valueString: 'Thousands' },
+  ];
+
+  if (getSuffix) {
+    for (const { threshold, valueString } of suffixes) {
+      if (value >= threshold) {
+        return valueString;
+      }
+    }
+  }
+
+  for (const { threshold, suffix } of suffixes) {
+    if (value >= threshold) {
+      return (value / threshold).toFixed(precision) + (allowSuffix ? suffix : '');
+    }
+  }
+
+  return value.toString();
+}
+
+/**
+ * Get all data values for the given keys
+ * @param data
+ * @param keys
+ * @returns return the max value from the data for the given keys
+ */
+export const getMaxValue = (data: MapAny[], keys: string[]) => {
+  const maxValue = Math.max(...data.flatMap((item) => keys.map((key) => item[key] || 0)));
+
+  return maxValue;
+};
