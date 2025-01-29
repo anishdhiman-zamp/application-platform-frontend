@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
 import { COLORS } from 'constants/colors';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
-import { DatasetAccesToAudiencesPropsType } from 'modules/data/data.types';
+import { PageAccessToAudiencesPropsType } from 'modules/page/pages.types';
 import Avatar from 'components/common/avatar';
 
-const DatasetAccesToAudiences: FC<DatasetAccesToAudiencesPropsType> = ({ name, resource_type, privilege }) => {
+const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({ name, resource_type, privilege }) => {
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
 
   return (
@@ -29,4 +29,4 @@ const DatasetAccesToAudiences: FC<DatasetAccesToAudiencesPropsType> = ({ name, r
   );
 };
 
-export default DatasetAccesToAudiences;
+export default PageAccessToAudiences;

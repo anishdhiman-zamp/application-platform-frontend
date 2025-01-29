@@ -1,6 +1,9 @@
-import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import {
+  AudiencesByPageIdRequest,
+  AudiencesByPageIdResponse,
+  AudiencesPageShareData,
   PageResponseType,
   SheetDetailsRequestType,
   SheetDetailsResponseType,
@@ -27,6 +30,16 @@ const Pages = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_FILTER_CONFIG_GET, { pageId, sheetId }),
       }),
     }),
+    getAudiencesByPageId: builder.query<AudiencesByPageIdResponse[], AudiencesByPageIdRequest>({
+      query: ({ pageId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_PAGE_ID_GET, { pageId }) }),
+    }),
+    postPagesToAudiencesByPageId: builder.mutation<void, { pageId: string; body: AudiencesPageShareData }>({
+      query: ({ pageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST, { pageId }),
+        method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    }),
   }),
 });
 
@@ -36,4 +49,6 @@ export const {
   useGetSheetDetailsQuery,
   useLazyGetSheetDetailsQuery,
   useGetSheetFilterConfigQuery,
+  useGetAudiencesByPageIdQuery,
+  usePostPagesToAudiencesByPageIdMutation,
 } = Pages;

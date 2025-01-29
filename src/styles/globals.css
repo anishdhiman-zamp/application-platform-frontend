@@ -1,3 +1,11 @@
+@tailwind components;
+
+@layer components {
+  .container-start-90 {
+    @apply flex items-start justify-start w-[90px];
+  }
+}
+
 :root {
   font-family: 'Inter Variable';
 }

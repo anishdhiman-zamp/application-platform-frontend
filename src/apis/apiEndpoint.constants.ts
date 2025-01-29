@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
   PAGES_SHEETS_GET: `pages/{{pageId}}`,
   PAGES_SHEETS_SHEET_GET: `pages/{{pageId}}/sheets/{{sheetId}}`,
   PAGES_SHEETS_FILTER_CONFIG_GET: `pages/{{pageId}}/sheets/{{sheetId}}/filters`,
+  AUDIENCES_BY_PAGE_ID_GET: `pages/{{pageId}}/audiences`,
+  SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST: `pages/{{pageId}}/audiences`,
 };
 
 export const enum REQUEST_TYPES {

@@ -53,6 +53,7 @@ export const TEAM_MEMBERS_LISTING_TABLE_THEME = {
 export enum TEAM_MEMBERS_PRIVILEGES {
   SYSTEM_ADMIN = 'system_admin',
   MEMBER = 'member',
+  REMOVE = 'remove',
 }
 
 export const TEAM_MEMBERS_PRIVILEGES_LIST = [

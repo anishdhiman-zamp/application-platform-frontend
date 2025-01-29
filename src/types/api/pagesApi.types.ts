@@ -121,3 +121,23 @@ export interface FilterDefaultValueType {
   from: number | string; // Start value or single value
   to?: number | string; // End value (if applicable)
 }
+
+export type AudiencesByPageIdRequest = {
+  pageId: string;
+};
+
+export type AudiencesByPageIdResponse = {
+  resource_audience_type: string;
+  resource_audience_id: string;
+  privilege: string;
+  resource_type: string;
+  resource_id: string;
+};
+
+export type AudiencesPageShareData = {
+  audiences: {
+    audience_type: string;
+    audience_id: string;
+    role: string;
+  }[];
+};
