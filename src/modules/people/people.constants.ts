@@ -4,13 +4,13 @@ import TeamMembersEmail from 'modules/people/components/teamMembers/TeamMembersE
 import TeamMembersName from 'modules/people/components/teamMembers/TeamMembersName';
 import TeamMembersRole from 'modules/people/components/teamMembers/TeamMembersRole';
 import { MapAny } from 'types/commonTypes';
-import { capitalizeFirstLetter } from 'utils/common';
+import { capitalizeFirstLetter, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 
 export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   {
     headerName: 'Name',
     field: 'user',
-    valueFormatter: ({ value }: MapAny) => value.name,
+    valueFormatter: ({ value }: MapAny) => value.name || convertEmailUsernameToName(getUserNameFromEmail(value.email)),
     cellRenderer: TeamMembersName,
   },
   {

@@ -152,13 +152,42 @@ export const getFirstLetters = (str: string) =>
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Check if the email is valid
+ * @param email string admin@zamp.ai
+ * @returns boolean true
+ */
 export const isValidEmail = (email: string) => {
   return emailRegex.test(email);
 };
 
+/**
+ * Get the domain from the email
+ * @param email string admin@zamp.ai
+ * @returns string zamp.ai
+ */
 export const getDomainFromEmail = (email: string) => {
   return email.split('@')[1];
 };
+
+/**
+ * Get the username from the email
+ * @param email string admin@zamp.ai
+ * @returns string admin
+ */
+export const getUserNameFromEmail = (email: string) => {
+  return email.split('@')[0];
+};
+
+/**
+ * Convert the email username to name
+ * @param emailUsername string admin.zamp
+ * @returns string Admin Zamp
+ */
+export const convertEmailUsernameToName = (emailUsername: string) => {
+  return emailUsername.split('.').map((name) => capitalizeFirstLetter(name)).join(' ');
+}
+
 export function isValidDate(dateString: string) {
   // Try to parse the string into a Date object
   const date = new Date(dateString);
