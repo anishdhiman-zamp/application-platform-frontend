@@ -86,6 +86,10 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ isOpen, onClose, da
               placeholderText={placeholderText}
               dropdownOptions={[]}
               roleOptions={DATASET_ACCESS_PRIVILEGES_LIST}
+              customDropdownMenuClass={{
+                width: '120px',
+                marginLeft: '-24px',
+              }}
             />
           </div>
           <div className='flex items-center justify-between w-full py-4 px-5 border-t border-GRAY_400'>

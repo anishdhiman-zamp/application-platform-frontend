@@ -31,9 +31,9 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 24,
     },
     menuOptionClasses: {
-      wrapperClass: 'tw-px-2 tw-h-16',
+      wrapperClass: 'px-2 h-16',
       labelOverrideClassName: 'f-16-400',
-      contentWrapper: 'tw-pl-2 tw-py-3 tw-w-full',
+      contentWrapper: 'pl-2 py-3 w-full',
     },
     customClassNames: {
       placeholder: 'f-16-300',
@@ -61,9 +61,9 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 24,
     },
     menuOptionClasses: {
-      wrapperClass: 'tw-px-1 tw-h-16',
+      wrapperClass: 'px-1 h-16',
       labelOverrideClassName: 'f-16-400',
-      contentWrapper: 'tw-pl-2 tw-py-3 tw-w-full',
+      contentWrapper: 'pl-2 py-3 w-full',
     },
     customClassNames: {
       placeholder: 'f-16-300',
@@ -75,6 +75,7 @@ export const DROPDOWN_SIZE_STYLES = {
         borderRadius: '6px',
         padding: '6px 12px',
         minHeight: '40px',
+        width: 'fit-content'
       },
       option: {
         fontSize: '13px',
@@ -97,12 +98,12 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 20,
     },
     menuOptionClasses: {
-      wrapperClass: 'tw-h-16',
+      wrapperClass: 'h-full',
       labelOverrideClassName: 'f-12-500',
-      contentWrapper: 'tw-pl-2 tw-py-3 tw-w-full',
+      contentWrapper: 'pl-2 py-3 w-full',
     },
     customClassNames: {
-      placeholder: 'f-13-300 tw-text-GRAY_700',
+      placeholder: 'f-13-300 text-GRAY_700',
     },
   },
   [SIZE_TYPES.SMALL]: {
@@ -127,9 +128,9 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 16,
     },
     menuOptionClasses: {
-      wrapperClass: 'tw-h-10 tw-overflow-clip',
+      wrapperClass: 'h-10 overflow-clip',
       labelOverrideClassName: 'f-16-400',
-      contentWrapper: '!tw-px-4 !tw-py-3 tw-w-full',
+      contentWrapper: '!px-4 !py-3 w-full',
     },
     customClassNames: {
       placeholder: 'f-16-300',
@@ -165,9 +166,9 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 12,
     },
     menuOptionClasses: {
-      wrapperClass: 'tw-h-[30px]',
+      wrapperClass: 'h-[30px]',
       labelOverrideClassName: 'f-12-300',
-      contentWrapper: '!tw-p-2 tw-w-full',
+      contentWrapper: '!p-2 w-full',
     },
     customClassNames: {
       placeholder: 'f-12-300',

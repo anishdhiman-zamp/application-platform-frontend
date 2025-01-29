@@ -79,7 +79,11 @@ export type DropdownProps = {
     focus?: string;
     border?: string;
     fontSize?: string;
-  };
+  }
+  customDropdownMenuClass?: {
+    marginLeft?: string;
+    width?: string;
+  }
 };
 
 export interface DropdownCustomClassNames {

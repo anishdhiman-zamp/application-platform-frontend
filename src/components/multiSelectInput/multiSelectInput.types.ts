@@ -21,4 +21,8 @@ export type MultiSelectInputPropsType = {
   placeholderText: string;
   dropdownOptions?: Array<{ label: string; value: string; color?: string }>;
   roleOptions?: Array<{ label: string; value: string }>;
+  customDropdownMenuClass?: {
+    width?: string;
+    marginLeft?: string;
+  }
 };

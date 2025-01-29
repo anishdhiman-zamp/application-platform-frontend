@@ -1,5 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
-import { usePostInviteAudiencesByOrganisationIdMutation } from 'apis/people';
+import {
+  usePostInviteAudiencesByOrganisationIdMutation,
+} from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
@@ -79,6 +81,11 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
             setShowValidationError={setShowValidationError}
             placeholderText={placeholderText}
             roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
+            customDropdownMenuClass={{
+              width: '120px',
+              marginLeft: '-20px',
+            }}
+            
           />
         </div>
         <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full'>

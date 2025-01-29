@@ -4,10 +4,10 @@ import { RADIO_STATE_TYPES, RADIO_TYPES, RadioProps } from 'types/common/compone
 import { defaultFn } from 'types/commonTypes';
 
 export const Radio: FC<RadioProps> = ({
-  wrapperClassName = 'tw-flex tw-items-center tw-justify-center tw-w-12 tw-h-12 tw-rounded-full tw-z-10',
-  radioClassName = 'tw-w-5 tw-h-5 tw-rounded-full tw-z-20',
-  radioSelectedClassName = 'tw-border-[7px]',
-  radioDefaultClassName = 'tw-border',
+  wrapperClassName = 'flex items-center justify-center w-12 h-12 rounded-full z-10',
+  radioClassName = 'w-5 h-5 rounded-full z-20',
+  radioSelectedClassName = 'border-[7px]',
+  radioDefaultClassName = 'border',
   wrapperStyle = '',
   radioStyle = '',
   radioSelectedStyle = '',

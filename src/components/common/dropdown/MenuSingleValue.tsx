@@ -13,9 +13,9 @@ const MenuSingleValue: FC<MenuSingleValuePropsType> = ({
   customClassNames,
 }) => {
   return (
-    <div className='tw-flex tw-items-center'>
+    <div className='flex items-center'>
       {spriteIcon && (
-        <div className='tw-w-6 tw-mr-4'>
+        <div className='w-6 mr-4'>
           <SvgSpriteLoader id={spriteIcon} />
         </div>
       )}

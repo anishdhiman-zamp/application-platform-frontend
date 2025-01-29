@@ -9,7 +9,7 @@ const ValueContainerContent: FC<ValueContainerContentProps> = ({
   tooltipBodyClassName,
 }) => {
   return (
-    <div className='tw-flex tw-justify-between tw-items-center tw-flex-1 tw-mr-2.5'>
+    <div className='flex justify-between items-center flex-1 mr-2.5'>
       <div>{labelProps.title}</div>
       {showCountOfSelected && <SelectedCountTooltip value={value} tooltipBodyClassName={tooltipBodyClassName} />}
     </div>

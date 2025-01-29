@@ -29,6 +29,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ isOpen, onClose, pageId }
   const userAccessToDatasetList = audiencesData ?? [];
   const [postInviteAudiences] = usePostPagesToAudiencesByPageIdMutation();
 
+  console.log('userAccessToDatasetList', userAccessToDatasetList);
+
   const handleCloseDatasetPopup = () => {
     onClose?.();
     setShowValidationError(false);
@@ -65,13 +67,13 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ isOpen, onClose, pageId }
         iconId='x-close'
         iconColor={COLORS.TEXT_PRIMARY}
         onClose={handleCloseDatasetPopup}
-        popupWrapperClassName='bg-white border border-b-0 border-GRAY_400 rounded-t-3.5 py-5 px-4'
+        popupWrapperClassName='bg-white border-l border-t border-r border-GRAY_400 rounded-t-3.5 py-5 px-4'
         closeOnClickOutside={false}
         isOverlay={false}
         wrapperClassName='justify-end items-start'
         className='py-10 px-4'
       >
-        <div className='flex flex-col rounded-b-3.5 w-[400px] bg-white border border-t-0 border-GRAY_400'>
+        <div className='flex flex-col rounded-b-3.5 w-[400px] bg-white border-l border-b border-r border-GRAY_400'>
           <div className='pt-0 px-5 pb-5'>
             <MultiSelectInput
               inputArrayList={inputArrayList}
@@ -87,6 +89,10 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ isOpen, onClose, pageId }
               placeholderText={placeholderText}
               dropdownOptions={[]}
               roleOptions={DATASET_ACCESS_PRIVILEGES_LIST}
+              customDropdownMenuClass={{
+                width: '120px',
+                marginLeft: '-24px',
+              }}
             />
           </div>
           <div className='flex items-center justify-between w-full py-4 px-5 border-t border-GRAY_400'>

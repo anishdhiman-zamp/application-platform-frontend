@@ -14,6 +14,7 @@ import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { DropdownProps, OptionsType } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn, MapAny } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import CustomReactSelect from 'components/common/dropdown/CustomReactSelect';
 import { ACTIONS, DROPDOWN_SIZE_STYLES, SELECT_ALL_OPTION } from 'components/common/dropdown/dropdown.constants';
 import MenuSingleValue from 'components/common/dropdown/MenuSingleValue';
@@ -27,9 +28,9 @@ export const Dropdown: FC<DropdownProps> = ({
   options = [],
   onChange,
   showLabel = false,
-  wrapperClass = 'tw-w-full',
+  wrapperClass = 'w-full',
   labelProps = {},
-  selectFieldWrapperClass = 'tw-w-full tw-my-3',
+  selectFieldWrapperClass = 'w-full',
   error = false,
   errorColor = COLORS.RED_SECONDARY,
   placeholder = '',
@@ -39,8 +40,8 @@ export const Dropdown: FC<DropdownProps> = ({
   isMulti = false,
   autoFocus = false,
   menuOptionClasses = {
-    wrapperClass: 'tw-flex tw-items-center tw-cursor-pointer',
-    containerClass: 'hover:tw-bg-BASE_SECONDARY',
+    wrapperClass: 'flex items-center cursor-pointer',
+    containerClass: 'hover:bg-BASE_SECONDARY',
     labelOverrideClassName: '',
   },
   spriteSelectedIcon,
@@ -81,6 +82,7 @@ export const Dropdown: FC<DropdownProps> = ({
   size = SIZE_TYPES.MEDIUM,
   menuPortalTarget,
   customClass,
+  customDropdownMenuClass,
 }) => {
   const valueRef = useRef(value);
 
@@ -173,7 +175,7 @@ export const Dropdown: FC<DropdownProps> = ({
   };
 
   const CustomOption = (props: OptionProps<OptionsType>) => {
-    const selectAllWrapperClass = `tw-p-2 tw-h-16 tw-flex tw-items-center tw-border-b tw-border-DIVIDER_GRAY`;
+    const selectAllWrapperClass = `p-2 h-16 flex items-center border-b border-DIVIDER_GRAY`;
     const { data, isSelected } = props;
 
     return (
@@ -181,18 +183,26 @@ export const Dropdown: FC<DropdownProps> = ({
         <MenuOption
           {...props}
           isMulti={isMulti}
-          contentWrapper={`${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.contentWrapper} ${menuOptionClasses.contentWrapper}`}
-          wrapperClass={`${data?.value === SELECT_ALL_OPTION.value ? selectAllWrapperClass : ''} ${
-            DROPDOWN_SIZE_STYLES[size].menuOptionClasses.wrapperClass
-          } ${menuOptionClasses.wrapperClass}`}
-          containerClass={`${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.wrapperClass} ${
-            menuOptionClasses.containerClass
-          } ${isSelected && 'hover:tw-bg-transparent'}`}
+          contentWrapper={cn(
+            `${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.contentWrapper} ${menuOptionClasses.contentWrapper}`,
+          )}
+          wrapperClass={cn(
+            `${data?.value === SELECT_ALL_OPTION.value ? selectAllWrapperClass : ''} ${
+              DROPDOWN_SIZE_STYLES[size].menuOptionClasses.wrapperClass
+            } ${menuOptionClasses.wrapperClass}`,
+          )}
+          containerClass={cn(
+            `${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.wrapperClass} ${
+              menuOptionClasses.containerClass
+            } ${isSelected && 'hover:bg-transparent'}`,
+          )}
           selectedIcon={selectedIcon}
           spriteSelectedIcon={spriteSelectedIcon}
           spriteSelectedIconColor={spriteSelectedIconColor}
           eventCallback={eventCallback}
-          labelOverrideClassName={`${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.labelOverrideClassName} ${menuOptionClasses.labelOverrideClassName}`}
+          labelOverrideClassName={cn(
+            `${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.labelOverrideClassName} ${menuOptionClasses.labelOverrideClassName}`,
+          )}
         />
       </components.Option>
     );
@@ -223,8 +233,8 @@ export const Dropdown: FC<DropdownProps> = ({
       {showLabel && <Label {...labelProps} />}
       <div
         data-testid={`dropdown-wrapper-${id}`}
-        className={`${selectFieldWrapperClass} ${disabled ? 'tw-cursor-not-allowed' : ''} ${
-          readOnly ? 'tw-pointer-events-none' : ''
+        className={`${selectFieldWrapperClass} ${disabled ? 'cursor-not-allowed' : ''} ${
+          readOnly ? 'pointer-events-none' : ''
         }`}
       >
         <CustomReactSelect
@@ -265,6 +275,7 @@ export const Dropdown: FC<DropdownProps> = ({
           MultiValue={MultiValue}
           eventCallback={eventCallback}
           customClass={customClass}
+          customDropdownMenuClass={customDropdownMenuClass}
         />
       </div>
       {showSupporterInfo && <SupporterInfo {...supporterInfoProps} />}

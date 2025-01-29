@@ -2,14 +2,15 @@ import React, { FC } from 'react';
 import { COLORS } from 'constants/colors';
 import { MenuOptionProps } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { CheckBox } from 'components/common/Checkbox';
 import { Radio } from 'components/common/Radio';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const leadingIconClassBySize = 'tw-w-6 tw-h-6';
-const leadingIconClass = 'tw-flex tw-justify-center tw-items-center tw-mr-4';
+const leadingIconClassBySize = 'w-6 h-6';
+const leadingIconClass = 'flex justify-center items-center mr-4';
 const leadingIconSizeClass = `${leadingIconClass} ${leadingIconClassBySize}`;
-const selectedIconClass = 'tw-ml-auto';
+const selectedIconClass = 'ml-auto';
 
 export const MenuOption: FC<MenuOptionProps> = ({
   innerProps = {},
@@ -19,14 +20,14 @@ export const MenuOption: FC<MenuOptionProps> = ({
   data,
   spriteSelectedIcon = '',
   selectedIcon = null,
-  containerClass = 'hover:tw-bg-BASE_SECONDARY first:tw-rounded-t-[10px] last:tw-rounded-b-[10px]',
-  contentWrapper = 'tw-pl-2 tw-py-3 tw-w-full',
-  wrapperClass = 'tw-p-2 tw-h-16 tw-flex tw-items-center',
+  containerClass = 'hover:bg-BASE_SECONDARY first:rounded-t-[10px] last:rounded-b-[10px]',
+  contentWrapper = 'pl-2 py-3 w-full',
+  wrapperClass = 'p-2 h-16 flex items-center',
   spriteSelectedIconColor = COLORS.GREEN_SECONDARY,
   onClick = defaultFn,
   labelOverrideClassName = 'f-16-400',
-  checkboxClassName = 'tw-pr-[33px] tw-pl-[15px] tw-h-12',
-  checkboxDisplayContainerClassName = 'tw-top-[15px] tw-left-[15px]',
+  checkboxClassName = 'pr-[33px] pl-[15px] h-12',
+  checkboxDisplayContainerClassName = 'top-[15px] left-[15px]',
   disabled = false,
   isRadio = false,
   radioWrapperStyle = '',
@@ -39,7 +40,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
     className={containerClass}
     data-testid={`menu-option-container-${innerProps.id}`}
   >
-    <div className={`${wrapperClass}`} data-testid={`menu-option-wrapper-${innerProps.id}`}>
+    <div className={wrapperClass} data-testid={`menu-option-wrapper-${innerProps.id}`}>
       {isMulti && (
         <CheckBox
           checked={isSelected}
@@ -62,17 +63,17 @@ export const MenuOption: FC<MenuOptionProps> = ({
         />
       )}
       <div
-        className={`${contentWrapper} ${isMulti ? '' : 'tw-pl-4 tw-py-4'} tw-flex tw-items-center`}
+        className={cn(`${contentWrapper} ${isMulti ? '' : 'py-1'} flex items-center`)}
         data-testid={`menu-option-content-${innerProps.id}`}
       >
         {data?.spriteIcon && (
           <div className={leadingIconSizeClass} data-testid={`menu-option-leading-icon-wrapper-${innerProps.id}`}>
-            <SvgSpriteLoader id={data.spriteIcon} />
+            <SvgSpriteLoader id={data.spriteIcon} height={15} width={15} />
           </div>
         )}
         {data?.icon ?? null}
         {typeof label === 'string' ? (
-          <span className={`tw-text-TEXT_PRIMARY ${labelOverrideClassName}`} id={`menu-option-${innerProps.id}`}>
+          <span className={cn('text-TEXT_PRIMARY', labelOverrideClassName)} id={`menu-option-${innerProps.id}`}>
             {label}
           </span>
         ) : (
@@ -81,7 +82,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
       </div>
       {!isMulti && spriteSelectedIcon && isSelected && (
         <div
-          className={`${leadingIconSizeClass} ${selectedIconClass}`}
+          className={cn(leadingIconSizeClass, selectedIconClass)}
           data-testid={`menu-option-selected-icon-wrapper-${innerProps.id}`}
         >
           <SvgSpriteLoader id={spriteSelectedIcon} color={spriteSelectedIconColor} />

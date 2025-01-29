@@ -45,6 +45,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
   getValue,
   MultiValue,
   customClass,
+  customDropdownMenuClass,
 }) => {
   return (
     <Select
@@ -74,9 +75,11 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
         }),
         option: (styles, { isSelected }) => ({
           ...styles,
-          paddingBottom: '8px',
-          paddingTop: '8px',
           borderRadius: '6px',
+          paddingTop: '4px',
+          paddingBottom: '4px',
+          paddingLeft: '0',
+          paddingRight: '0',
           backgroundColor: isSelected ? COLORS.GRAY_100 : 'white',
           color: isSelected ? COLORS.GRAY_1000 : COLORS.GRAY_900,
           ':active': {
@@ -101,7 +104,10 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           ...styles,
           boxShadow: '0px 4px 15px 0px rgba(166, 166, 166, 0.20);',
           border: '1px solid var(--GRAY_400)',
+          height: 'fit-content',
           cursor: 'pointer',
+          width: customDropdownMenuClass?.width ? customDropdownMenuClass?.width : '100%',
+          marginLeft: customDropdownMenuClass?.marginLeft ? customDropdownMenuClass?.marginLeft : '',
           ...DROPDOWN_SIZE_STYLES[size].customStyles.menu,
           ...customStyles?.menu,
         }),
@@ -129,6 +135,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
             ...styles,
             backgroundColor,
             borderWidth: '1px',
+            width: 'fit-content',
             borderColor: customClass?.border
               ? customClass?.border
               : error
@@ -227,9 +234,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           cn(
             `${customClass?.fontSize ? customClass?.fontSize : (customClassNames?.placeholder ?? DROPDOWN_SIZE_STYLES[size].customClassNames.placeholder)}`,
           ),
-        menu: () => cn(`${customClassNames?.menu ?? `tw-bg-white tw-border-[0.5px] tw-border-DIVIDER_GRAY`}`),
-        noOptionsMessage: () =>
-          cn(`${customClassNames?.noOptionsMessage ?? `tw-h-16 tw-flex tw-items-center tw-justify-center`}`),
+        menu: () => cn(`${customClassNames?.menu ?? 'bg-white border-[0.5px] border-DIVIDER_GRAY'}`),
+        noOptionsMessage: () => cn(customClassNames?.noOptionsMessage ?? 'h-16 flex items-center justify-center'),
       }}
       onChange={handleChange}
       onKeyDown={handleKeyDown}

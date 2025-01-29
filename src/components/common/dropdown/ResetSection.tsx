@@ -7,7 +7,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }) => {
   return (
     <div
-      className={`tw-flex tw-py-3 tw-pl-4 tw-border-t tw-border-DIVIDER_GRAY ${resetProps?.resetClassName}`}
+      className={`flex py-3 pl-4 border-t border-DIVIDER_GRAY ${resetProps?.resetClassName}`}
       onClick={onClickReset}
     >
       <SvgSpriteLoader
@@ -17,7 +17,7 @@ export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }
         width={14}
         color={COLORS.TEXT_PRIMARY}
       />
-      <div className={`tw-pl-2 f-12-400 tw-text-GRAY_700 ${resetProps?.resetTextClassName}`}>
+      <div className={`pl-2 f-12-400 text-GRAY_700 ${resetProps?.resetTextClassName}`}>
         {resetProps?.resetText}
       </div>
     </div>

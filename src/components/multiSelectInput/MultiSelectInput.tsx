@@ -25,6 +25,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   placeholderText,
   dropdownOptions,
   roleOptions,
+  customDropdownMenuClass,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -230,7 +231,9 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           />
         </div>
         {roleOptions && (
-          <div className='w-[130px]'>
+          <div 
+          className='flex min-w-max h-fit'
+          >
             <Dropdown
               options={roleOptions}
               id=''
@@ -240,6 +243,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 inputRef.current?.focus();
                 setIsInputFocused(true);
               }}
+              defaultValue={roleOptions[0]}
               value={selectedRoleRef.current}
               placeholder='Member'
               isSearchable={false}
@@ -248,6 +252,14 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 border: 'transparent',
                 fontSize: 'f-12-400',
               }}
+              customDropdownMenuClass={customDropdownMenuClass}
+              customClassNames={{
+                placeholder: 'f-12-300',
+              }}
+              menuOptionClasses={{
+                contentWrapper: 'py-2',
+              }}
+
             />
           </div>
         )}
