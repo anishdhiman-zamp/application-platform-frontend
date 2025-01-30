@@ -2,15 +2,23 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { NavigationItemSchema } from 'types/config';
 
 export const ROUTES_PATH = {
-  HOME: '/cash-summary',
+  HOME: '/',
   LOGIN: '/login',
-  DATA: '/',
+  DATA: '/datasets',
   PAYMENTS: '/payments',
   SETTINGS: '/settings',
   PEOPLE: '/people',
   DRILLDOWN: '/drilldown/:datasetId/:rowId',
-  DATASET: '/dataset/:datasetId',
-  PAGE: '/page/',
+  DATASET: '/datasets/:datasetId',
+  PAGES: '/pages/',
+};
+
+export const getPageRouteById = (pageId: string) => {
+  return `${ROUTES_PATH.PAGES}${pageId}`;
+};
+
+export const getDatasetRouteById = (datasetId: string) => {
+  return `${ROUTES_PATH.DATA}/${datasetId}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

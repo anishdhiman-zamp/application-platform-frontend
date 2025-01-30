@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CellDoubleClickedEvent, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById } from 'constants/routeConfig';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { formatData } from 'modules/data/data.utils';
@@ -16,7 +16,7 @@ const Listing = () => {
   const [isShareDatasetPopupOpen, setIsShareDatasetPopupOpen] = useState<boolean>(false);
 
   const onRowClicked = (event: CellDoubleClickedEvent) => {
-    router.push(ROUTES_PATH.DATASET.replace(':datasetId', event?.data?.id));
+    router.push(getDatasetRouteById(event?.data?.id));
   };
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {

@@ -1,5 +1,4 @@
 import InvitedMembersEmail from 'modules/people/components/invitedMembers/InvitedMembersEmail';
-import InvitedMembersName from 'modules/people/components/invitedMembers/InvitedMembersName';
 import TeamMembersEmail from 'modules/people/components/teamMembers/TeamMembersEmail';
 import TeamMembersName from 'modules/people/components/teamMembers/TeamMembersName';
 import TeamMembersRole from 'modules/people/components/teamMembers/TeamMembersRole';
@@ -27,11 +26,6 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
 ];
 
 export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
-  {
-    headerName: 'Name',
-    field: 'name',
-    cellRenderer: InvitedMembersName,
-  },
   {
     headerName: 'Email',
     field: 'email',

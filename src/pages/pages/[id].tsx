@@ -1,5 +1,6 @@
 import React, { ReactElement, useMemo } from 'react';
 import { useGetPageDetailsQuery } from 'apis/pages';
+import { persistLastVisitedPage,} from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
@@ -15,6 +16,12 @@ const Page = () => {
     () => getSheetIdFromPath(router.asPath, id as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
     [pageDetails, router.asPath],
   );
+
+  React.useEffect(() => {
+    if (pageDetails) {
+      persistLastVisitedPage(pageDetails.page_id);
+    }
+  }, [pageDetails]);
 
   const tabs = useMemo(
     () =>
