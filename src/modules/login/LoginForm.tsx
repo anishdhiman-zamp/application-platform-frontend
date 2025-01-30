@@ -10,7 +10,7 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToL
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
-export const LoginFormV2 = () => {
+export const LoginForm = () => {
   const [email, setEmail] = React.useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
 
   const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
@@ -151,10 +151,10 @@ export const LoginFormV2 = () => {
             </div>
             {error && (
               <div
-                className='mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative'
+                className='mt-2 mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative'
                 role='alert'
               >
-                <span className='block sm:inline'>{error}asd</span>
+                <span className='block sm:inline'>{error}</span>
               </div>
             )}
             <Button
