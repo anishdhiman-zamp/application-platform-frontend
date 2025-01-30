@@ -6,10 +6,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }) => {
   return (
-    <div
-      className={`flex py-3 pl-4 border-t border-DIVIDER_GRAY ${resetProps?.resetClassName}`}
-      onClick={onClickReset}
-    >
+    <div className={`flex py-3 pl-4 border-t border-DIVIDER_GRAY ${resetProps?.resetClassName}`} onClick={onClickReset}>
       <SvgSpriteLoader
         id='refresh-ccw-01'
         iconCategory={ICON_SPRITE_TYPES.ARROWS}
@@ -17,9 +14,7 @@ export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }
         width={14}
         color={COLORS.TEXT_PRIMARY}
       />
-      <div className={`pl-2 f-12-400 text-GRAY_700 ${resetProps?.resetTextClassName}`}>
-        {resetProps?.resetText}
-      </div>
+      <div className={`pl-2 f-12-400 text-GRAY_700 ${resetProps?.resetTextClassName}`}>{resetProps?.resetText}</div>
     </div>
   );
 };

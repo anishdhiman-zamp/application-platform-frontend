@@ -24,5 +24,5 @@ export type MultiSelectInputPropsType = {
   customDropdownMenuClass?: {
     width?: string;
     marginLeft?: string;
-  }
+  };
 };

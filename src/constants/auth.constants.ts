@@ -3,5 +3,5 @@ export enum LOGIN_METHODS {
 }
 
 export enum LOGIN_PROVIDERS {
-    GOOGLE = 'google-id',
+  GOOGLE = 'google-id',
 }

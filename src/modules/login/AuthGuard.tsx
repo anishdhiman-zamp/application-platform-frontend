@@ -62,7 +62,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
   }
 
   if (session?.orgs?.length === 0) {
-    return <MembershipRequested/>
+    return <MembershipRequested />;
   }
 
   if (

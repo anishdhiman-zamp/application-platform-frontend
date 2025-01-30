@@ -231,9 +231,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           />
         </div>
         {roleOptions && (
-          <div 
-          className='flex min-w-max h-fit'
-          >
+          <div className='flex min-w-max h-fit'>
             <Dropdown
               options={roleOptions}
               id=''
@@ -259,7 +257,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
               menuOptionClasses={{
                 contentWrapper: 'py-2',
               }}
-
             />
           </div>
         )}

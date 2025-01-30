@@ -125,3 +125,65 @@ export const getTagParents = (tag: string) => {
 
   return parents.length ? parents.join(' / ') : null;
 };
+
+const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1';
+const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
+
+export const getFilterStatementValues = (filter: MapAny): JSX.Element[] => {
+  const Statement: JSX.Element[] = [];
+
+  Object.keys(filter).forEach((key) => {
+    switch (filter[key].filterType) {
+      case FILTER_TYPES.SEARCH:
+        Statement.push(
+          <>
+            <span className={fieldValueClassName}>{key}</span>
+            <span className={fieldOperatorClassName}>{filter[key].type}</span>
+            <span className={fieldValueClassName}>{filter[key].filter}</span>
+          </>,
+        );
+        break;
+      case FILTER_TYPES.DATE_RANGE:
+        Statement.push(
+          <>
+            <span className={fieldValueClassName}>{key}</span>
+            <span className={fieldOperatorClassName}>{filter[key].type}</span>
+            {filter[key].dateFrom && (
+              <span className={fieldValueClassName}>{new Date(filter[key].dateFrom)?.toLocaleDateString()}</span>
+            )}
+            {filter[key].dateFrom && filter[key].dateTo && <span className={fieldOperatorClassName}>-</span>}
+            {filter[key].dateTo && (
+              <span className={fieldValueClassName}>{new Date(filter[key].dateTo)?.toLocaleDateString()}</span>
+            )}
+          </>,
+        );
+        break;
+      case FILTER_TYPES.MULTI_SELECT:
+        Statement.push(
+          <>
+            <span className={fieldValueClassName}>{key}</span>
+            <span className={fieldOperatorClassName}>{filter[key].type}</span>
+            <span className={fieldValueClassName}>{filter[key].values.join(', ')}</span>
+          </>,
+        );
+        break;
+      case FILTER_TYPES.AMOUNT_RANGE:
+        Statement.push(
+          <>
+            <span className={fieldValueClassName}>{key}</span>
+            <span className={fieldOperatorClassName}>{filter[key].type}</span>
+            <span className={fieldValueClassName}>{filter[key].filter}</span>
+            {filter[key].filterTo && (
+              <>
+                <span className={fieldOperatorClassName}>-</span>
+                <span className={fieldValueClassName}>{filter[key].filterTo}</span>
+              </>
+            )}
+          </>,
+        );
+        break;
+    }
+  });
+
+  return Statement;
+};

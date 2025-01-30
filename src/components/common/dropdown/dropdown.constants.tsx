@@ -75,7 +75,7 @@ export const DROPDOWN_SIZE_STYLES = {
         borderRadius: '6px',
         padding: '6px 12px',
         minHeight: '40px',
-        width: 'fit-content'
+        width: 'fit-content',
       },
       option: {
         fontSize: '13px',

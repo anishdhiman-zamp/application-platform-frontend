@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import ToggleSwitch from 'components/common/toggleSwitch';
+import { getFilterStatementValues } from 'components/filter/filter.utils';
+import { useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
+const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
 
 const AddTag = () => {
   const [isActive, setIsActive] = useState(false);
+
+  const {
+    state: { selectedFilters },
+  } = useFiltersContextStore();
+
+  const filterStatement = useMemo(() => getFilterStatementValues(selectedFilters), [selectedFilters]);
 
   return (
     <div className='w-[300px]'>
@@ -18,8 +27,14 @@ const AddTag = () => {
         </div>
         <div className='px-4'>
           <Input placeholder='Search Tag' />
-          <div className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5'>
-            bhdcj
+          <div className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-fit flex flex-wrap gap-y-2 items-center'>
+            <span className={fieldOperatorClassName}>If</span>
+            {filterStatement.map((value, index) => (
+              <Fragment key={index}>
+                {value}
+                {index !== filterStatement.length - 1 && <span className={fieldOperatorClassName}>and</span>}
+              </Fragment>
+            ))}
           </div>
           <div className='flex items-center gap-1.5 mb-1.5'>
             <ToggleSwitch id='add-tag-make-rule' onChange={setIsActive} checked={isActive} />
