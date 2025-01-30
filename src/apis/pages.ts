@@ -3,8 +3,10 @@ import baseApi from 'services/api';
 import {
   AudiencesByPageIdRequest,
   AudiencesByPageIdResponse,
-  AudiencesPageShareData,
+  DeleteAudienceFromPageAccessType,
   PageResponseType,
+  PatchChangeAudienceRoleInPageType,
+  PostPagesToAudiencesByPageIdType,
   SheetDetailsRequestType,
   SheetDetailsResponseType,
   SheetFilterConfigResponseType,
@@ -33,10 +35,24 @@ const Pages = baseApi.injectEndpoints({
     getAudiencesByPageId: builder.query<AudiencesByPageIdResponse[], AudiencesByPageIdRequest>({
       query: ({ pageId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_PAGE_ID_GET, { pageId }) }),
     }),
-    postPagesToAudiencesByPageId: builder.mutation<void, { pageId: string; body: AudiencesPageShareData }>({
+    postPagesToAudiencesByPageId: builder.mutation<void, PostPagesToAudiencesByPageIdType>({
       query: ({ pageId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST, { pageId }),
         method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    }),
+    patchChangeAudienceRoleInPage: builder.mutation<void, PatchChangeAudienceRoleInPageType>({
+      query: ({ pageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH, { pageId }),
+        method: REQUEST_TYPES.PATCH,
+        body: body,
+      }),
+    }),
+    deleteAudienceFromPageAccess: builder.mutation<void, DeleteAudienceFromPageAccessType>({
+      query: ({ pageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_AUDIENCE_FROM_PAGE_ACCESS, { pageId }),
+        method: REQUEST_TYPES.DELETE,
         body: body,
       }),
     }),
@@ -51,4 +67,6 @@ export const {
   useGetSheetFilterConfigQuery,
   useGetAudiencesByPageIdQuery,
   usePostPagesToAudiencesByPageIdMutation,
+  usePatchChangeAudienceRoleInPageMutation,
+  useDeleteAudienceFromPageAccessMutation,
 } = Pages;

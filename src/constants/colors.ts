@@ -20,6 +20,7 @@ export const COLORS = {
   RED_150: '#F2C8C8',
   RED_200: '#FFDADA',
   RED_250: '#F9DADA',
+  RED_700: '#FF1515',
   RED_PRIMARY: '#B12424',
   RED_SECONDARY: '#D64141',
   ORANGE_SECONDARY: '#EF7A2C',
@@ -34,6 +35,7 @@ export const COLORS = {
   VIOLET_100: '#E3E5FB',
 
   TOAST_SHADOW: '#A6A6A62E',
+  TRANSPARENT: '#00000000',
 };
 
 export const CHART_PALETTE_COLORS = [

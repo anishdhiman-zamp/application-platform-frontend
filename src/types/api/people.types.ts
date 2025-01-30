@@ -23,3 +23,10 @@ export type PostAudiencesInviteData = {
     role: string;
   }[];
 };
+
+export type PatchChangeAudienceRoleInOrganizationType = {
+  organizationId: string;
+  body: { user_id: string; role: string };
+};
+
+export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };

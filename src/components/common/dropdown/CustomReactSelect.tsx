@@ -45,7 +45,9 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
   getValue,
   MultiValue,
   customClass,
-  customDropdownMenuClass,
+  enableDelete,
+  isHoveredDropdown,
+  showSelectedIcon,
 }) => {
   return (
     <Select
@@ -62,11 +64,12 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
       hideSelectedOptions={false}
       components={{
         Option: CustomOption,
-        DropdownIndicator: CustomDropdownIndicator,
+        DropdownIndicator: (props) => <CustomDropdownIndicator {...props} isHoveredDropdown={isHoveredDropdown} />,
         MultiValueRemove: CustomMultivalueRemove,
         SingleValue: CustomSingleValue,
         ...(enableReset ? { MenuList } : {}),
         ...(showLabelInControl ? { ValueContainer } : showCountOfSelected ? { MultiValue } : {}),
+        ...(enableDelete ? { MenuList } : {}),
       }}
       styles={{
         container: (styles) => ({
@@ -79,8 +82,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           paddingTop: '4px',
           paddingBottom: '4px',
           paddingLeft: '0',
-          paddingRight: '0',
-          backgroundColor: isSelected ? COLORS.GRAY_100 : 'white',
+          paddingRight: '8px',
+          backgroundColor: isSelected ? (showSelectedIcon ? 'white' : COLORS.GRAY_100) : 'white',
           color: isSelected ? COLORS.GRAY_1000 : COLORS.GRAY_900,
           ':active': {
             backgroundColor: COLORS.GRAY_100,
@@ -106,8 +109,9 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           border: '1px solid var(--GRAY_400)',
           height: 'fit-content',
           cursor: 'pointer',
-          width: customDropdownMenuClass?.width ? customDropdownMenuClass?.width : '100%',
-          marginLeft: customDropdownMenuClass?.marginLeft ? customDropdownMenuClass?.marginLeft : '',
+          width: 'max-content',
+          position: 'absolute',
+          right: 0,
           ...DROPDOWN_SIZE_STYLES[size].customStyles.menu,
           ...customStyles?.menu,
         }),

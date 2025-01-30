@@ -1,6 +1,6 @@
 export enum DATASET_ACCESS_PRIVILEGES {
-  VIEWER = 'viewer',
   ADMIN = 'admin',
+  DATA_READER = 'data_reader',
 }
 
 export type UserAccessToDataSetType = {
@@ -10,8 +10,6 @@ export type UserAccessToDataSetType = {
 }[];
 
 export type ShareDatasetPopupPropsType = {
-  isOpen: boolean;
-  onClose: () => void;
   datasetId: string;
 };
 
@@ -26,8 +24,14 @@ export enum DATASET_ACTION_STATUS {
   FAILED = 'FAILED',
 }
 
-export type DatasetAccesToAudiencesPropsType = {
+export type DatasetAccessToAudiencesPropsType = {
   name?: string;
   resource_type: string;
   privilege?: string;
+  datasetId: string;
+  resource_audience_id: string;
+  user?: {
+    email: string;
+    name?: string;
+  };
 };

@@ -65,11 +65,24 @@ export const TEAM_OPTIONS_LIST = [
 
 export const DATASET_ACCESS_PRIVILEGES_LIST = [
   {
-    label: 'Viewer',
-    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
+    label: 'Admin',
+    value: DATASET_ACCESS_PRIVILEGES.ADMIN,
   },
+  {
+    label: 'Data Reader',
+    value: DATASET_ACCESS_PRIVILEGES.DATA_READER,
+  },
+];
+
+export const CHANGE_ACCESS_PRIVILEGES_LIST = [
   {
     label: 'Admin',
     value: DATASET_ACCESS_PRIVILEGES.ADMIN,
+    desc: 'Can manage and share dataset',
+  },
+  {
+    label: 'Data Reader',
+    value: DATASET_ACCESS_PRIVILEGES.DATA_READER,
+    desc: 'Can read data only',
   },
 ];

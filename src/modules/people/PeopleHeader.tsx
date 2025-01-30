@@ -35,6 +35,7 @@ const PeopleHeader = () => {
           }}
           size={SIZE_TYPES.SMALL}
         />
+
         <Button
           type={BUTTON_TYPES.PRIMARY}
           id='invite-user-btn'

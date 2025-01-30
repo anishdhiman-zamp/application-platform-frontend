@@ -11,6 +11,7 @@ import {
   ValueContainerProps,
 } from 'react-select';
 import { COLORS } from 'constants/colors';
+import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { DropdownProps, OptionsType } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn, MapAny } from 'types/commonTypes';
@@ -23,6 +24,7 @@ import ValueContainerContent from 'components/common/dropdown/ValueContainerCont
 import { Label } from 'components/common/Label';
 import { MenuOption } from 'components/common/MenuOption';
 import { SupporterInfo } from 'components/common/SupporterInfo';
+import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const Dropdown: FC<DropdownProps> = ({
   options = [],
@@ -82,7 +84,10 @@ export const Dropdown: FC<DropdownProps> = ({
   size = SIZE_TYPES.MEDIUM,
   menuPortalTarget,
   customClass,
-  customDropdownMenuClass,
+  enableDelete,
+  onClickDelete,
+  isHoveredDropdown,
+  showSelectedIcon,
 }) => {
   const valueRef = useRef(value);
 
@@ -182,6 +187,7 @@ export const Dropdown: FC<DropdownProps> = ({
       <components.Option {...props}>
         <MenuOption
           {...props}
+          showSelectedIcon={showSelectedIcon}
           isMulti={isMulti}
           contentWrapper={cn(
             `${DROPDOWN_SIZE_STYLES[size].menuOptionClasses.contentWrapper} ${menuOptionClasses.contentWrapper}`,
@@ -212,7 +218,21 @@ export const Dropdown: FC<DropdownProps> = ({
     return (
       <>
         <components.MenuList {...props} />
-        <ResetSection resetProps={resetProps} onClickReset={onClickReset} />
+        {enableReset && <ResetSection resetProps={resetProps} onClickReset={onClickReset} />}
+        {enableDelete && (
+          <div className='flex flex-col' onClick={onClickDelete}>
+            <span className='flex gap-1.5 items-center f-12-500 text-RED_700 py-2 px-2.5 border-t border-DIVIDER_GRAY'>
+              <SvgSpriteLoader
+                id='trash-04'
+                iconCategory={ICON_SPRITE_TYPES.GENERAL}
+                width={12}
+                height={12}
+                color={COLORS.RED_700}
+              />
+              Remove
+            </span>
+          </div>
+        )}
       </>
     );
   };
@@ -233,9 +253,12 @@ export const Dropdown: FC<DropdownProps> = ({
       {showLabel && <Label {...labelProps} />}
       <div
         data-testid={`dropdown-wrapper-${id}`}
-        className={`${selectFieldWrapperClass} ${disabled ? 'cursor-not-allowed' : ''} ${
-          readOnly ? 'pointer-events-none' : ''
-        }`}
+        className={cn(
+          'flex justify-end items-end',
+          selectFieldWrapperClass,
+          disabled ? 'cursor-not-allowed' : '',
+          readOnly ? 'pointer-events-none' : '',
+        )}
       >
         <CustomReactSelect
           enableSelectAll={enableSelectAll}
@@ -275,7 +298,9 @@ export const Dropdown: FC<DropdownProps> = ({
           MultiValue={MultiValue}
           eventCallback={eventCallback}
           customClass={customClass}
-          customDropdownMenuClass={customDropdownMenuClass}
+          enableDelete={enableDelete}
+          isHoveredDropdown={isHoveredDropdown}
+          showSelectedIcon={showSelectedIcon}
         />
       </div>
       {showSupporterInfo && <SupporterInfo {...supporterInfoProps} />}

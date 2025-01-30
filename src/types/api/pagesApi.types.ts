@@ -142,3 +142,7 @@ export type AudiencesPageShareData = {
     role: string;
   }[];
 };
+
+export type PostPagesToAudiencesByPageIdType = { pageId: string; body: AudiencesPageShareData };
+export type PatchChangeAudienceRoleInPageType = { pageId: string; body: { audience_id: string; role: string } };
+export type DeleteAudienceFromPageAccessType = { pageId: string; body: { audience_id: string } };

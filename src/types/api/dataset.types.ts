@@ -1,4 +1,3 @@
-import { Session } from 'inspector/promises';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
@@ -113,7 +112,10 @@ export type AudiencesByDatasetIdRequestType = {
 };
 
 export type AudiencesByDatasetIdResponseType = {
-  user: Session;
+  user: {
+    email: string;
+    name?: string;
+  };
   privilege: string;
   resource_audience_type: string;
   resource_audience_id: string;
@@ -127,3 +129,9 @@ export type AudiencesDatasetShareData = {
     role: string;
   }[];
 };
+
+export type PostShareDatasetToAudiencesByDatasetIdType = { datasetId: string; body: AudiencesDatasetShareData };
+
+export type PatchChangeAudienceRoleInDatasetType = { datasetId: string; body: { audience_id: string; role: string } };
+
+export type DeleteAudienceFromDatasetAccessType = { datasetId: string; body: { audience_id: string } };

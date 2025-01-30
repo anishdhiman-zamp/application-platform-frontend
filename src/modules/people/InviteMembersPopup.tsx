@@ -1,5 +1,8 @@
 import React, { FC, useRef, useState } from 'react';
-import { usePostInviteAudiencesByOrganisationIdMutation } from 'apis/people';
+import {
+  useGetInvitedAudiencesByOrganisationIdQuery,
+  usePostInviteAudiencesByOrganisationIdMutation,
+} from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
@@ -25,6 +28,10 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
   const isInvitable = !showValidationError && inputArrayList.length > 0;
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const [postInviteAudiences] = usePostInviteAudiencesByOrganisationIdMutation();
+  const { refetch: refetchAudiencesByOrganizationId } = useGetInvitedAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId },
+  );
 
   const handleCloseInviteMembersPopup = () => {
     onClose?.();
@@ -45,6 +52,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
   const handleInviteMembers = async () => {
     try {
       await postInviteAudiences({ organizationId, body: postAutdiencesInviteData }).unwrap();
+      refetchAudiencesByOrganizationId();
       toast.success('Invitation sent successfully');
       handleCloseInviteMembersPopup();
     } catch {
@@ -55,7 +63,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
   return (
     <Popup
       isOpen={isOpen}
-      showIcon={true}
+      showIcon
       title='Invite Members'
       titleClassName='f-16-600 text-GRAY_950'
       iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -68,6 +76,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
       <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white border border-t-0 border-GRAY_400'>
         <div className='px-4 py-6'>
           <MultiSelectInput
+            id='invite-members'
             inputArrayList={inputArrayList}
             setInputArrayList={setInputArrayList}
             search={search}

@@ -5,6 +5,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import { validateEmail } from 'modules/people/people.utils';
 import { RootState } from 'store';
+import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
@@ -12,6 +13,7 @@ import { ArrayListOption, MultiSelectInputPropsType } from 'components/multiSele
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
+  id,
   inputArrayList,
   setInputArrayList,
   checkAudiencePresentInOrg,
@@ -25,7 +27,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   placeholderText,
   dropdownOptions,
   roleOptions,
-  customDropdownMenuClass,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -234,8 +235,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           <div className='flex min-w-max h-fit'>
             <Dropdown
               options={roleOptions}
-              id=''
-              eventCallback={() => {}}
+              id={`${id}-multi-select-input-dropdown`}
+              eventCallback={defaultFn}
               onChange={(selectedOption) => {
                 selectedRoleRef.current = selectedOption;
                 inputRef.current?.focus();
@@ -250,7 +251,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 border: 'transparent',
                 fontSize: 'f-12-400',
               }}
-              customDropdownMenuClass={customDropdownMenuClass}
               customClassNames={{
                 placeholder: 'f-12-300',
               }}

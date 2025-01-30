@@ -1,4 +1,3 @@
-import { TEAM_MEMBERS_PRIVILEGES } from 'modules/people/people.constants';
 import { InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 
 export type InviteMembersPopupPropsType = {
@@ -12,9 +11,11 @@ export type TeamMembersPrivilegeType = {
 };
 
 export type RemoveFromTeamPopupPropsType = {
-  name: string;
+  name?: string;
   isOpen: boolean;
   onClose?: () => void;
+  onDelete?: () => void;
+  feature?: string;
 };
 
 export type InvitedMembersEmailPropsType = {
@@ -30,5 +31,16 @@ export type InvitedMembersNamePropsType = {
 };
 
 export type TeamMembersRolePropsType = {
-  value: string;
+  value: { user_id: string; privilege: string };
+};
+
+export enum TEAM_MEMBERS_PRIVILEGES {
+  SYSTEM_ADMIN = 'system_admin',
+  MEMBER = 'member',
+  REMOVE = 'remove',
+}
+
+export type TeamMemberAccessPrivilegesType = {
+  label: string;
+  value: TEAM_MEMBERS_PRIVILEGES;
 };

@@ -2,6 +2,7 @@ import React, { ComponentType, CSSProperties, ReactElement, ReactNode, RefCallba
 import {
   ActionMeta,
   CSSObjectWithLabel,
+  DropdownIndicatorProps,
   MenuListProps,
   MultiValue,
   MultiValueProps,
@@ -80,11 +81,15 @@ export type DropdownProps = {
     border?: string;
     fontSize?: string;
   };
-  customDropdownMenuClass?: {
-    marginLeft?: string;
-    width?: string;
-  };
+  enableDelete?: boolean;
+  onClickDelete?: defaultFnType;
+  isHoveredDropdown?: boolean;
+  showSelectedIcon?: boolean;
 };
+
+export interface CustomDropdownIndicatorProps extends DropdownIndicatorProps<OptionsType> {
+  isHoveredDropdown?: boolean;
+}
 
 export interface DropdownCustomClassNames {
   placeholder?: string;
@@ -131,6 +136,7 @@ export interface MenuOptionProps extends MenuOptionClassesProps {
   radioDefaultStyle?: string;
   radioSelectedStyle?: string;
   radioStyle?: string;
+  showSelectedIcon?: boolean;
 }
 
 export interface MenuOptionClassesProps {
@@ -149,6 +155,7 @@ export interface OptionsType {
   isDisabled?: boolean;
   metadata?: MapAny;
   options?: OptionsType[];
+  desc?: string;
 }
 
 export interface ChipProps {
@@ -197,6 +204,8 @@ export type CustomReactSelectPropsType = DropdownProps & {
   MenuList: ComponentType<MenuListProps<OptionsType>>;
   ValueContainer: ComponentType<ValueContainerProps<OptionsType>>;
   MultiValue: ComponentType<MultiValueProps<OptionsType>>;
+  enableDelete?: boolean;
+  isHoveredDropdown?: boolean;
 };
 
 export type ValueContainerContentProps = {

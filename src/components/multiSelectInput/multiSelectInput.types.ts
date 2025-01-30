@@ -8,6 +8,7 @@ export type ArrayListOption = {
 };
 
 export type MultiSelectInputPropsType = {
+  id: string;
   inputArrayList: ArrayListOption[];
   setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
   checkAudiencePresentInOrg?: boolean;

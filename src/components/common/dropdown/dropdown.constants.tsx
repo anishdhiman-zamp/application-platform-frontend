@@ -98,7 +98,7 @@ export const DROPDOWN_SIZE_STYLES = {
       height: 20,
     },
     menuOptionClasses: {
-      wrapperClass: 'h-full',
+      wrapperClass: 'h-full overflow-y-scroll',
       labelOverrideClassName: 'f-12-500',
       contentWrapper: 'pl-2 py-3 w-full',
     },

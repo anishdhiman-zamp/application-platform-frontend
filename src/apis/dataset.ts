@@ -3,7 +3,6 @@ import baseApi from 'services/api';
 import {
   AudiencesByDatasetIdRequestType,
   AudiencesByDatasetIdResponseType,
-  AudiencesDatasetShareData,
   DatasetActionStatusRequestType,
   DatasetActionStatusResponseType,
   DatasetDataRequestType,
@@ -15,6 +14,9 @@ import {
   DatasetListingResponseType,
   DatasetUpdateRequestType,
   DatasetUpdateResponseType,
+  DeleteAudienceFromDatasetAccessType,
+  PatchChangeAudienceRoleInDatasetType,
+  PostShareDatasetToAudiencesByDatasetIdType,
 } from 'types/api/dataset.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -59,13 +61,24 @@ const Dataset = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_DATASET_ID_GET, { datasetId }),
       }),
     }),
-    postShareDatasetToAudiencesByDatasetId: builder.mutation<
-      void,
-      { datasetId: string; body: AudiencesDatasetShareData }
-    >({
+    postShareDatasetToAudiencesByDatasetId: builder.mutation<void, PostShareDatasetToAudiencesByDatasetIdType>({
       query: ({ datasetId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_DATASET_TO_AUDIENCES_BY_DATASET_ID_POST, { datasetId }),
         method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    }),
+    patchChangeAudienceRoleInDataset: builder.mutation<void, PatchChangeAudienceRoleInDatasetType>({
+      query: ({ datasetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_DATASET_PATCH, { datasetId }),
+        method: REQUEST_TYPES.PATCH,
+        body: body,
+      }),
+    }),
+    deleteAudienceFromDatasetAccess: builder.mutation<void, DeleteAudienceFromDatasetAccessType>({
+      query: ({ datasetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_AUDIENCE_FROM_DATASET_ACCESS, { datasetId }),
+        method: REQUEST_TYPES.DELETE,
         body: body,
       }),
     }),
@@ -83,4 +96,6 @@ export const {
   useGetActionStatusQuery,
   useGetAudiencesByDatasetIdQuery,
   usePostShareDatasetToAudiencesByDatasetIdMutation,
+  usePatchChangeAudienceRoleInDatasetMutation,
+  useDeleteAudienceFromDatasetAccessMutation,
 } = Dataset;

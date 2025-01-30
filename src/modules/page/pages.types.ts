@@ -1,6 +1,4 @@
 export type SharePagePopupPropsType = {
-  isOpen: boolean;
-  onClose?: () => void;
   pageId: string;
 };
 
@@ -8,4 +6,20 @@ export type PageAccessToAudiencesPropsType = {
   name?: string;
   resource_type: string;
   privilege?: string;
+  pageId: string;
+  resource_audience_id: string;
+  user?: {
+    email: string;
+    name?: string;
+  };
+};
+
+export enum PAGE_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+
+export type PageAccessPrivilegesType = {
+  label: string;
+  value: PAGE_ACCESS_PRIVILEGES;
 };

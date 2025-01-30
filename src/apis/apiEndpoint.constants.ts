@@ -2,6 +2,8 @@ export const API_ENDPOINTS = {
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,
   AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_ORGANIZATION_PATCH: `organizations/{{organizationId}}/audiences`,
+  DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,
 
   AUTH_INITIATE_LOGIN_FLOW_GET: `auth/relay/self-service/login/browser`,
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
@@ -17,6 +19,8 @@ export const API_ENDPOINTS = {
   SHARE_DATASET_TO_AUDIENCES_BY_DATASET_ID_POST: `datasets/{{datasetId}}/audiences`,
   DATASET_UPDATE_POST: `datasets/{{datasetId}}/update-data`,
   DATASET_ACTION_STATUS_GET: `datasets/{{datasetId}}/actions`,
+  CHANGE_AUDIENCE_ROLE_IN_DATASET_PATCH: `datasets/{{datasetId}}/audiences`,
+  DELETE_AUDIENCE_FROM_DATASET_ACCESS: `datasets/{{datasetId}}/audiences`,
 
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
@@ -27,6 +31,8 @@ export const API_ENDPOINTS = {
   PAGES_SHEETS_FILTER_CONFIG_GET: `pages/{{pageId}}/sheets/{{sheetId}}/filters`,
   AUDIENCES_BY_PAGE_ID_GET: `pages/{{pageId}}/audiences`,
   SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST: `pages/{{pageId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
+  DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
 };
 
 export const enum REQUEST_TYPES {

@@ -2,6 +2,7 @@ import InvitedMembersEmail from 'modules/people/components/invitedMembers/Invite
 import TeamMembersEmail from 'modules/people/components/teamMembers/TeamMembersEmail';
 import TeamMembersName from 'modules/people/components/teamMembers/TeamMembersName';
 import TeamMembersRole from 'modules/people/components/teamMembers/TeamMembersRole';
+import { TEAM_MEMBERS_PRIVILEGES } from 'modules/people/people.types';
 import { MapAny } from 'types/commonTypes';
 import { capitalizeFirstLetter, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 
@@ -20,20 +21,32 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   },
   {
     headerName: 'Role',
-    field: 'privilege',
+    valueGetter: ({ data }: MapAny) => ({
+      user_id: data?.user?.user_id,
+      privilege: data?.privilege,
+    }),
     cellRenderer: TeamMembersRole,
   },
 ];
 
 export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   {
+    headerName: 'Name',
+    field: 'name',
+    // valueFormatter: ({ value }: MapAny) => value.name || convertEmailUsernameToName(getUserNameFromEmail(value.email)),
+    cellRenderer: TeamMembersName,
+  },
+  {
     headerName: 'Email',
     field: 'email',
     cellRenderer: InvitedMembersEmail,
   },
   {
-    headerName: 'Invited as a',
-    field: 'privilege',
+    headerName: 'Role',
+    valueGetter: ({ data }: MapAny) => ({
+      user_id: data?.user?.user_id,
+      privilege: data?.privilege,
+    }),
     cellRenderer: TeamMembersRole,
   },
 ];
@@ -43,12 +56,6 @@ export const TEAM_MEMBERS_LISTING_TABLE_THEME = {
   rowHoverColor: 'transparent',
   cellHorizontalPadding: 8,
 };
-
-export enum TEAM_MEMBERS_PRIVILEGES {
-  SYSTEM_ADMIN = 'system_admin',
-  MEMBER = 'member',
-  REMOVE = 'remove',
-}
 
 export const TEAM_MEMBERS_PRIVILEGES_LIST = [
   {

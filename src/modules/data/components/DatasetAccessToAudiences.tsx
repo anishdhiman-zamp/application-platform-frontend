@@ -1,54 +1,53 @@
 import React, { FC, useRef, useState } from 'react';
 import {
-  useDeleteAudienceFromPageAccessMutation,
-  useGetAudiencesByPageIdQuery,
-  usePatchChangeAudienceRoleInPageMutation,
-} from 'apis/pages';
+  useDeleteAudienceFromDatasetAccessMutation,
+  useGetAudiencesByDatasetIdQuery,
+  usePatchChangeAudienceRoleInDatasetMutation,
+} from 'apis/dataset';
 import { COLORS } from 'constants/colors';
-import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
-import { CHANGE_PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
-import { PageAccessPrivilegesType, PageAccessToAudiencesPropsType } from 'modules/page/pages.types';
+import { CHANGE_ACCESS_PRIVILEGES_LIST, DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
+import { DatasetAccessPrivilegesType, DatasetAccessToAudiencesPropsType } from 'modules/data/data.types';
 import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
 import { defaultFn } from 'types/commonTypes';
 import Avatar from 'components/common/avatar';
 import { Dropdown } from 'components/common/dropdown';
 import { toast } from 'components/common/toast/Toast';
 
-const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
+const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   resource_type,
   privilege,
-  pageId,
+  datasetId,
   resource_audience_id,
   user,
 }) => {
-  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
-  const selectedRoleRef = useRef<PageAccessPrivilegesType>(CHANGE_PAGE_ACCESS_PRIVILEGES_LIST[0]);
+  const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
 
-  const { refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId });
-  const [changeRole] = usePatchChangeAudienceRoleInPageMutation();
-  const [deleteAudience] = useDeleteAudienceFromPageAccessMutation();
+  const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
+  const [changeRole] = usePatchChangeAudienceRoleInDatasetMutation();
+  const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
 
-  const handleRoleChange = async (selectedOption: PageAccessPrivilegesType) => {
+  const handleRoleChange = async (selectedOption: DatasetAccessPrivilegesType) => {
     selectedRoleRef.current = selectedOption;
     const changedRole = selectedRoleRef.current.value;
 
     try {
       await changeRole({
-        pageId: pageId,
+        datasetId: datasetId,
         body: {
           audience_id: resource_audience_id,
           role: changedRole,
         },
       }).unwrap();
-      refetchAudiencesByPageId();
+      refetchAudiencesByDatasetId();
       toast.success('Role changed successfully');
     } catch {
       toast.error('Failed to change role');
     }
   };
 
+  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const handleOpenRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(true);
   };
@@ -59,13 +58,13 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   const handleDeleteAudience = async () => {
     try {
       await deleteAudience({
-        pageId: pageId,
+        datasetId: datasetId,
         body: {
           audience_id: resource_audience_id,
         },
       }).unwrap();
       handleCloseRemoveFromTeamPopup();
-      refetchAudiencesByPageId();
+      refetchAudiencesByDatasetId();
       toast.success('Audience deleted successfully');
     } catch {
       handleCloseRemoveFromTeamPopup();
@@ -94,13 +93,13 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
           {resource_type}
         </span>
         <span
-          className='flex items-end justify-end w-24 -mt-[12px]'
+          className='flex items-end justify-end w-[120px] -mt-[12px]'
           onMouseEnter={() => setIsHoveredDropdown(true)}
           onMouseLeave={() => setIsHoveredDropdown(false)}
         >
           <Dropdown
-            options={CHANGE_PAGE_ACCESS_PRIVILEGES_LIST}
-            id='page-access-to-audiences-dropdown'
+            options={CHANGE_ACCESS_PRIVILEGES_LIST}
+            id='dataset-access-to-audiences-dropdown'
             eventCallback={defaultFn}
             onChange={handleRoleChange}
             defaultValue={role}
@@ -129,10 +128,10 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
-        feature='remove-access-from-page'
+        feature='remove-access-from-dataset'
       />
     </>
   );
 };
 
-export default PageAccessToAudiences;
+export default DatasetAccessToAudiences;
