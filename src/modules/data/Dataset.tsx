@@ -59,7 +59,7 @@ const DatasetById = () => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, actionStatus.length > 0 || isPolling);
+      const columns = formatColumns(filterConfig, actionStatus?.length > 0 || isPolling);
 
       if (columns.length > 0) {
         setColumns(columns);

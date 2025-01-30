@@ -3,10 +3,10 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useRouter } from 'next/router';
 import { PageResponseType } from 'types/api/pagesApi.types';
-import { getFromLocalStorage, removeFromLocalStorage,setToLocalStorage } from 'utils/localstorage';
+import { getFromLocalStorage, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
 
 jest.mock('next/router', () => ({
-  useRouter: jest.fn()
+  useRouter: jest.fn(),
 }));
 
 jest.mock('utils/localstorage', () => ({
@@ -14,8 +14,8 @@ jest.mock('utils/localstorage', () => ({
   setToLocalStorage: jest.fn(),
   removeFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
-    LAST_VISITED_PAGE_ID: 'LAST_VISITED_PAGE_ID'
-  }
+    LAST_VISITED_PAGE_ID: 'LAST_VISITED_PAGE_ID',
+  },
 }));
 
 describe('usePersistedPageNavigation', () => {
@@ -24,24 +24,24 @@ describe('usePersistedPageNavigation', () => {
   });
 
   const samplePages: PageResponseType[] = [
-    { 
-      page_id: 'page1', 
-      name: 'Page 1', 
-      description: 'Page 1 description', 
-      created_at: new Date().toISOString(), 
-      updated_at: new Date().toISOString(), 
-      fractional_index: 0, 
-      organization_id: 'org1' 
+    {
+      page_id: 'page1',
+      name: 'Page 1',
+      description: 'Page 1 description',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      fractional_index: 0,
+      organization_id: 'org1',
     },
-    { 
-      page_id: 'page2', 
-      name: 'Page 2', 
-      description: 'Page 2 description', 
-      created_at: new Date().toISOString(), 
-      updated_at: new Date().toISOString(), 
-      fractional_index: 0, 
-      organization_id: 'org1' 
-    }
+    {
+      page_id: 'page2',
+      name: 'Page 2',
+      description: 'Page 2 description',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      fractional_index: 0,
+      organization_id: 'org1',
+    },
   ];
 
   const testCases = [
@@ -52,7 +52,7 @@ describe('usePersistedPageNavigation', () => {
       pages: samplePages,
       expectedPath: '/page/page1',
       expectedPushCalls: 1,
-      shouldRemoveFromStorage: false
+      shouldRemoveFromStorage: false,
     },
     {
       name: 'should clear last visited page and navigate to first page if last visited page not found',
@@ -61,7 +61,7 @@ describe('usePersistedPageNavigation', () => {
       pages: samplePages,
       expectedPath: '/page/page1',
       expectedPushCalls: 1,
-      shouldRemoveFromStorage: true
+      shouldRemoveFromStorage: true,
     },
     {
       name: 'should navigate to first page if no last visited page exists',
@@ -70,7 +70,7 @@ describe('usePersistedPageNavigation', () => {
       pages: samplePages,
       expectedPath: '/page/page1',
       expectedPushCalls: 1,
-      shouldRemoveFromStorage: true
+      shouldRemoveFromStorage: true,
     },
     {
       name: 'should not navigate if not on home page',
@@ -79,7 +79,7 @@ describe('usePersistedPageNavigation', () => {
       pages: samplePages,
       expectedPath: null,
       expectedPushCalls: 0,
-      shouldRemoveFromStorage: false
+      shouldRemoveFromStorage: false,
     },
     {
       name: 'should not navigate if first navigation already done',
@@ -88,8 +88,8 @@ describe('usePersistedPageNavigation', () => {
       pages: [samplePages[0]],
       expectedPath: '/page/page1',
       expectedPushCalls: 1,
-      shouldRemoveFromStorage: false
-    }
+      shouldRemoveFromStorage: false,
+    },
   ];
 
   test.each(testCases)(
@@ -99,7 +99,7 @@ describe('usePersistedPageNavigation', () => {
 
       (useRouter as jest.Mock).mockReturnValue({
         pathname,
-        push: pushFn
+        push: pushFn,
       });
 
       (getFromLocalStorage as jest.Mock).mockReturnValue(lastVisitedPageId);
@@ -107,7 +107,7 @@ describe('usePersistedPageNavigation', () => {
       const { result } = renderHook(() => usePersistedPageNavigation(pages));
 
       act(() => result.current.pushToMostRelevantPage());
-      
+
       // For the "already done" test case, call it twice
       if (expectedPushCalls === 1) {
         act(() => result.current.pushToMostRelevantPage());
@@ -120,7 +120,7 @@ describe('usePersistedPageNavigation', () => {
       if (shouldRemoveFromStorage) {
         expect(removeFromLocalStorage).toHaveBeenCalled();
       }
-    }
+    },
   );
 
   it('should persist last visited page', () => {

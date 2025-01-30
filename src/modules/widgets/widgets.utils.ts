@@ -75,13 +75,13 @@ export const getChartOptions = (
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
       ? {
-        zoom: {
-          enabled: true,
-          buttons: {
-            enabled: false,
+          zoom: {
+            enabled: true,
+            buttons: {
+              enabled: false,
+            },
           },
-        },
-      }
+        }
       : {};
 
   const label = {
@@ -102,10 +102,7 @@ export const getChartOptions = (
       return {
         ...baseOptions,
         ...navigatorConfig,
-        axes: [
-          CHART_NUMBER_AXES,
-          { ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 },
-        ],
+        axes: [CHART_NUMBER_AXES, { ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 }],
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
@@ -160,8 +157,8 @@ export const getChartOptions = (
               renderer: () => {
                 return {
                   heading: sliceKey,
-                }
-              }
+                };
+              },
             },
             listeners: {
               nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),

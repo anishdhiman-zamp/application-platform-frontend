@@ -1,6 +1,6 @@
 import React, { ReactElement, useMemo } from 'react';
 import { useGetPageDetailsQuery } from 'apis/pages';
-import { persistLastVisitedPage,} from 'hooks/useLastVisitedPage';
+import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';

@@ -6,14 +6,13 @@ import ProgressBar from 'components/common/RingProgress';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
 const Home = () => {
-
   const { data: pages, isLoading } = useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false
+    refetchOnMountOrArgChange: false,
   });
 
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
 
-  React.useEffect(() => { 
+  React.useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }
@@ -21,26 +20,21 @@ const Home = () => {
 
   return (
     <div className='flex justify-center items-center h-full'>
-      {
-        isLoading || (pages || []).length > 0 ? (
-          <ProgressBar
-            trackColor={COLORS.BLACK}
-            indicatorColor={COLORS.WHITE}
-            indicatorWidth={10}
-            trackWidth={5}
-            className='animate-spin'
-            size={100}
-            progress={30}
-          />
-        ) : (
-          <p>
-            No Pages Found
-          </p>
-        )
-      }
+      {isLoading || (pages || []).length > 0 ? (
+        <ProgressBar
+          trackColor={COLORS.BLACK}
+          indicatorColor={COLORS.WHITE}
+          indicatorWidth={10}
+          trackWidth={5}
+          className='animate-spin'
+          size={100}
+          progress={30}
+        />
+      ) : (
+        <p>No Pages Found</p>
+      )}
     </div>
-  )
-
+  );
 };
 
 Home.getLayout = function getLayout(page: ReactElement) {

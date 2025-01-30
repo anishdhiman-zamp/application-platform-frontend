@@ -3,7 +3,7 @@ import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { useGetPagesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { ROUTES_PATH, SIDEBAR_ITEMS } from 'constants/routeConfig';
-import { usePersistedPageNavigation} from 'hooks/useLastVisitedPage';
+import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useRouter } from 'next/router';
 import { SidebarProps } from 'types/common/sidebar';
 import { cn } from 'utils/common';
@@ -17,11 +17,11 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
   const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
   const [logOut] = useLazyLogoutQuery();
   const { data: pages } = useGetPagesQuery(undefined, {
-    refetchOnMountOrArgChange: false
+    refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }

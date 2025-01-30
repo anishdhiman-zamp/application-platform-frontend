@@ -185,8 +185,11 @@ export const getUserNameFromEmail = (email: string) => {
  * @returns string Admin Zamp
  */
 export const convertEmailUsernameToName = (emailUsername: string) => {
-  return emailUsername.split('.').map((name) => capitalizeFirstLetter(name)).join(' ');
-}
+  return emailUsername
+    .split('.')
+    .map((name) => capitalizeFirstLetter(name))
+    .join(' ');
+};
 
 export function isValidDate(dateString: string) {
   // Try to parse the string into a Date object

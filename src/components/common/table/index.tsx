@@ -14,6 +14,7 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  RowClickedEvent,
   TextEditorModule,
   TextFilterModule,
   Theme,
@@ -99,6 +100,7 @@ interface TableProps {
   suppressCellFocus?: boolean;
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
+  onRowClicked?: (event: RowClickedEvent) => void;
 }
 
 export type TableColumnType = {
@@ -128,6 +130,7 @@ const Table: React.FC<TableProps> = ({
   suppressCellFocus = false,
   onColumnVisible,
   onCellEditRequest,
+  onRowClicked,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -138,7 +141,7 @@ const Table: React.FC<TableProps> = ({
       suppressHeaderContextMenu: true,
       floatingFilter: false,
       headerClass: 'f-12-600 text-GRAY_1000',
-      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked ? 'cursor-pointer' : ''}`,
+      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       ...columnConfig,
     };
@@ -184,6 +187,7 @@ const Table: React.FC<TableProps> = ({
           onColumnVisible={onColumnVisible}
           readOnlyEdit
           onCellEditRequest={onCellEditRequest}
+          onRowClicked={onRowClicked}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',
