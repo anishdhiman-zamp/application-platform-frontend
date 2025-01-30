@@ -56,6 +56,7 @@ export interface MappingsType {
     y_axis: AxisMappingType[];
     slices?: AxisMappingType[];
     values?: AxisMappingType[];
+    primary_value: AxisMappingType[];
   };
 }
 

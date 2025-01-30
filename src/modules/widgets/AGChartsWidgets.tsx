@@ -37,10 +37,10 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   }, [widgetData]);
 
   const yAxisTitle = useMemo(() => {
-    if (widgetType === WIDGET_TYPES.BAR_CHART || widgetType === WIDGET_TYPES.LINE_CHART) return '';
+    if (widgetType !== WIDGET_TYPES.BAR_CHART && widgetType !== WIDGET_TYPES.LINE_CHART) return '';
 
-    const axis = widgetDetails?.data_mappings.mappings?.[0]?.fields?.y_axis?.[0];
-    const maxValue = getMaxValue(transformedData?.[0] ?? [], [axis?.aggregation + '_' + axis?.column]);
+    const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
+    const maxValue = getMaxValue(transformedData?.[0] ?? [], [axis?.column]);
 
     return `${axis?.column} (${axis?.aggregation}), in ${formatNumber(maxValue, 0, true, true)}`;
   }, [widgetDetails, transformedData]);
@@ -59,7 +59,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   return (
     <div className=' bg-white h-full border border-GRAY_400 rounded-xl px-6 py-4.5 overflow-hidden'>
-      <div className='f-18-450 text-GRAY_1000 mb-4'>{widgetDetails?.title}</div>
+      <div className='f-18-450 text-GRAY_1000 mb-10'>{widgetDetails?.title}</div>
       <div className='relative'>
         {isLoading && (
           <div className='absolute top-0 right-0 h-full w-full flex justify-center items-center z-100 bg-white'>
@@ -74,22 +74,20 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
             />
           </div>
         )}
-        {
-          (!isLoading && !transformedData?.[0]?.length) && (
-            <div className='absolute top-0 right-0 h-full w-full flex justify-center items-center z-100 bg-white'>
-              <div className='flex items-center flex-col gap-3'>
-                <SvgSpriteLoader
-                  id='coins-stacked-03'
-                  iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
-                  width={24}
-                  height={24}
-                  color={COLORS.GRAY_700}
-                />
-                <div className='text-GRAY_700 f-12-450'>No data available, try again with different filters</div>
-              </div>
+        {!isLoading && !transformedData?.[0]?.length && (
+          <div className='absolute top-0 right-0 h-full w-full flex justify-center items-center z-100 bg-white'>
+            <div className='flex items-center flex-col gap-3'>
+              <SvgSpriteLoader
+                id='coins-stacked-03'
+                iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
+                width={24}
+                height={24}
+                color={COLORS.GRAY_700}
+              />
+              <div className='text-GRAY_700 f-12-450'>No data available, try again with different filters</div>
             </div>
-          )
-        }
+          </div>
+        )}
         {chartOptions && (
           <div className='h-full w-full relative'>
             {(widgetType === WIDGET_TYPES.BAR_CHART || widgetType === WIDGET_TYPES.LINE_CHART) && (

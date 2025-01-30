@@ -1,6 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
+import KpiTag from 'modules/widgets/KpiTag';
 import { WIDGET_TYPES } from 'modules/widgets/widgets.constant';
 import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
@@ -86,6 +87,15 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           onNodeClick={onNodeClick}
         />
       );
+    case WIDGET_TYPES.KPI: {
+      return (
+        <KpiTag
+          widgetDetails={widgetDetails}
+          isFilterInitialized={isFilterInitialized}
+          currentPageFilters={currentPageFilters}
+        />
+      );
+    }
     default:
       return null;
   }

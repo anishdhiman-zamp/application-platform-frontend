@@ -128,8 +128,8 @@ export function camelCaseToNormalText(camelCaseStr: string) {
  * @param num 1000000
  * @returns 1,000,000
  */
-export const getCommaSeparatedNumber = (num?: number) =>
-  num ? num.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0;
+export const getCommaSeparatedNumber = (num?: number, precision = 0) =>
+  num ? num.toLocaleString('en-US', { maximumFractionDigits: precision, minimumFractionDigits: precision }) : 0;
 
 export const capitalizeFirstLetter = (str: string) => {
   if (!str) return '';
@@ -238,7 +238,7 @@ export function formatNumber(
 
   for (const { threshold, suffix } of suffixes) {
     if (value >= threshold) {
-      return (value / threshold).toFixed(precision) + (allowSuffix ? suffix : '');
+      return (value / threshold).toFixed(value % 10 === 0 ? 0 : precision) + (allowSuffix ? suffix : '');
     }
   }
 

@@ -39,6 +39,9 @@ export function transformData(responses: WidgetDataType[]) {
             case WidgetDataValueType.STRING:
               formattedRow[column_name] = String(value);
               break;
+            case WidgetDataValueType.DATE:
+              formattedRow[column_name] = new Date(value as string);
+              break;
             case WidgetDataValueType.DECIMAL:
             case WidgetDataValueType.NUMBER:
             case WidgetDataValueType.BIGINT:
@@ -72,17 +75,17 @@ export const getChartOptions = (
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
       ? {
-          zoom: {
-            enabled: true,
-            buttons: {
-              enabled: false,
-            },
+        zoom: {
+          enabled: true,
+          buttons: {
+            enabled: false,
           },
-        }
+        },
+      }
       : {};
 
   const label = {
-    enabled: true,
+    enabled: false,
     fontSize: 11,
     fontWeight: 450,
     color: COLORS.GRAY_950,
@@ -99,12 +102,15 @@ export const getChartOptions = (
       return {
         ...baseOptions,
         ...navigatorConfig,
-        axes: [{ ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 }, CHART_NUMBER_AXES],
+        axes: [
+          CHART_NUMBER_AXES,
+          { ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 },
+        ],
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
           cornerRadius: 2,
-          yKey: `${axis?.aggregation}_${axis?.column}`,
+          yKey: `${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
           fill: CHART_PALETTE_COLORS[0],
@@ -120,9 +126,10 @@ export const getChartOptions = (
         ...baseOptions,
         ...navigatorConfig,
         series: yAxis.map((axis) => ({
+          axis: [CHART_NUMBER_AXES, CHART_CATEGORY_AXES],
           type: chartType,
           xKey: xAxis,
-          yKey: `${axis?.aggregation}_${axis?.column}`,
+          yKey: `${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
           stroke: CHART_PALETTE_COLORS[Math.floor(Math.random() * CHART_PALETTE_COLORS.length - 2)],
@@ -137,9 +144,7 @@ export const getChartOptions = (
       };
     }
     case WIDGET_TYPES.PIE_CHART: {
-      const sliceKey = mappings?.[0]?.fields?.values?.[0]?.aggregation
-        ? `${mappings?.[0]?.fields?.values?.[0]?.aggregation}_${mappings?.[0]?.fields?.values?.[0]?.column}`
-        : mappings?.[0]?.fields?.values?.[0]?.column;
+      const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
 
       return {
@@ -150,6 +155,14 @@ export const getChartOptions = (
             legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
             angleKey: sliceKey,
             calloutLabelKey: sliceKey,
+            tooltip: {
+              showArrow: false,
+              renderer: () => {
+                return {
+                  heading: sliceKey,
+                }
+              }
+            },
             listeners: {
               nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
             },

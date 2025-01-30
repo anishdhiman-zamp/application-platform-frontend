@@ -1,6 +1,8 @@
-import { AgCartesianAxisOptions } from 'ag-charts-community';
+import { AgCartesianAxisOptions, time } from 'ag-charts-community';
 import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
-import { formatNumber } from 'utils/common';
+import { DATE_FORMATS } from 'constants/date.constants';
+import { format } from 'date-fns';
+import { formatNumber, isValidDate } from 'utils/common';
 
 export enum WIDGET_TYPES {
   BAR_CHART = 'bar_chart',
@@ -49,6 +51,17 @@ export const AG_CHART_TYPES = {
 export const CHART_CATEGORY_AXES: AgCartesianAxisOptions = {
   type: 'category' as const,
   position: 'bottom',
+  label: {
+    minSpacing: 20,
+    autoRotate: true,
+    formatter: function (params) {
+      if (isValidDate(params.value)) {
+        return format(new Date(params.value), DATE_FORMATS.ddMMMyyyy);
+      }
+
+      return params.value;
+    },
+  },
   tick: {
     size: 10, // Changed from length to size
     width: 0.75,
@@ -64,12 +77,30 @@ export const CHART_NUMBER_AXES: AgCartesianAxisOptions = {
   position: 'right',
   label: {
     formatter: ({ value }) => {
-      return formatNumber(value, 0, true);
+      return formatNumber(value, 1, false);
     },
   },
 };
 
-export const AG_CHART_AXES: AgCartesianAxisOptions[] = [CHART_CATEGORY_AXES, CHART_NUMBER_AXES];
+export const AG_CHART_TIME_AXES: AgCartesianAxisOptions = {
+  type: 'time',
+  nice: true,
+  position: 'bottom',
+  interval: { step: time.month },
+  label: {
+    format: '%d %b',
+  },
+  tick: {
+    size: 10, // Changed from length to size
+    width: 0.75,
+  },
+  line: {
+    width: 1,
+    stroke: COLORS.GRAY_400,
+  },
+};
+
+export const AG_CHART_AXES: AgCartesianAxisOptions[] = [CHART_CATEGORY_AXES, CHART_NUMBER_AXES, AG_CHART_TIME_AXES];
 
 export const AG_CHART_LEGEND_CONFIG = {
   enabled: true,
