@@ -78,6 +78,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
         }),
         option: (styles, { isSelected }) => ({
           ...styles,
+          fontFamily: 'Inter',
+          fontWeight: 500,
           borderRadius: '6px',
           paddingTop: '4px',
           paddingBottom: '4px',
@@ -105,6 +107,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
         }),
         menu: (styles) => ({
           ...styles,
+          fontFamily: 'Inter',
+          fontWeight: 500,
           boxShadow: '0px 4px 15px 0px rgba(166, 166, 166, 0.20);',
           border: '1px solid var(--GRAY_400)',
           height: 'fit-content',
@@ -138,6 +142,8 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           return {
             ...styles,
             backgroundColor,
+            fontFamily: 'Inter',
+            fontWeight: 500,
             borderWidth: '1px',
             width: 'fit-content',
             borderColor: customClass?.border

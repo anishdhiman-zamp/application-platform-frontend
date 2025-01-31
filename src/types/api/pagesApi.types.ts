@@ -134,6 +134,10 @@ export type AudiencesByPageIdResponse = {
   privilege: string;
   resource_type: string;
   resource_id: string;
+  user?: {
+    role?: string;
+    email?: string;
+  };
 };
 
 export type AudiencesPageShareData = {

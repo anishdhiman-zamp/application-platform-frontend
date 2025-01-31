@@ -1,10 +1,15 @@
 import React, { FC, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useGetAudiencesByDatasetIdQuery, usePostShareDatasetToAudiencesByDatasetIdMutation } from 'apis/dataset';
+import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useAppSelector } from 'hooks/toolkit';
 import DatasetAccessToAudiences from 'modules/data/components/DatasetAccessToAudiences';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, ShareDatasetPopupPropsType } from 'modules/data/data.types';
+import { validateEmail } from 'modules/people/people.utils';
+import { RootState } from 'store';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -15,18 +20,22 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
-  const [openShareDatasetPopup, setOpenShareDatasetPopup] = useState<boolean>(false);
   const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
-  const [inputArrayList, setInputArrayList] = useState<ArrayListOption[]>([]);
   const [search, setSearch] = useState<string>('');
+  const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
-  const validationErrorText = 'Please select correct team or people within your organization';
-  const placeholderText = 'Share with people and teams';
-  const isDatasetSharable = !showValidationError && inputArrayList.length > 0;
-  const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
-  const { data: audiencesData } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
-  const userAccessToDatasetList = audiencesData ?? [];
+  const [validationErrorText, setValidationErrorText] = useState<string>('');
+  const [openShareDatasetPopup, setOpenShareDatasetPopup] = useState<boolean>(false);
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+  const { data: getAudiencesAccessToDatasetData, refetch: refetchAudiencesByDatasetId } =
+    useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
   const [postInviteAudiences] = usePostShareDatasetToAudiencesByDatasetIdMutation();
+  const userAccessToDatasetList = getAudiencesAccessToDatasetData ?? [];
+  const placeholderText = 'Share with people and teams';
+  const checkIfUser = useSelector((state: RootState) => state?.user?.user)?.user_email;
+
+  const isDatasetSharable = !showValidationError && selectedItems.length > 0;
 
   const handleOpenShareDatasetPopup = () => {
     setOpenShareDatasetPopup(true);
@@ -35,12 +44,12 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const handleCloseShareDatasetPopup = () => {
     setOpenShareDatasetPopup(false);
     setShowValidationError(false);
-    setInputArrayList([]);
+    setSelectedItems([]);
     setSearch('');
   };
 
   const AudiencesDatasetShareData: AudiencesDatasetShareData = {
-    audiences: inputArrayList.map((item) => ({
+    audiences: selectedItems.map((item) => ({
       audience_type: item?.resource_audience_type ?? '',
       audience_id: item?.resource_audience_id ?? '',
       role: item?.role ?? '',
@@ -50,11 +59,94 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const handleShareDatasetPopup = async () => {
     try {
       await postInviteAudiences({ datasetId, body: AudiencesDatasetShareData }).unwrap();
+      setSelectedItems([]);
       refetchAudiencesByDatasetId();
       toast.success('Dataset shared successfully');
     } catch {
       toast.error('Failed to share Dataset');
     }
+  };
+
+  const customizedTeamMembersData = teamMembersData?.map((member) => ({
+    label: member?.user?.email,
+    value: member?.user?.email,
+  }));
+
+  const validateAndGetUserDetails = (value: string) => {
+    const isValid = validateEmail(value);
+    let resource_audience_id = '';
+    let resource_audience_type = '';
+
+    if (!isValid) {
+      return { isValid: false, message: 'Email address incorrect' };
+    }
+
+    const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
+
+    if (!audience) {
+      return { isValid: false, message: 'User is not present in the organization' };
+    }
+
+    const isAlreadyInvited = getAudiencesAccessToDatasetData?.some((item) => item?.user?.email === value);
+
+    if (isAlreadyInvited) {
+      return { isValid: false, message: 'User is already invited' };
+    }
+
+    if (value === checkIfUser) {
+      return { isValid: false, message: 'You cannot invite yourself' };
+    }
+
+    resource_audience_type = audience?.resource_audience_type ?? '';
+    resource_audience_id = audience?.resource_audience_id ?? '';
+
+    return { isValid: true, resource_audience_type, resource_audience_id };
+  };
+
+  const handleValidateAndAdd = (value: string) => {
+    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value);
+
+    if (!isValid) {
+      setValidationErrorText(message ?? '');
+      setShowValidationError(true);
+    } else {
+      setShowValidationError(false);
+    }
+
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        value,
+        valid: isValid,
+        role: selectedRoleRef?.current?.value,
+        color: isValid ? COLORS.WHITE : COLORS.RED_100,
+        resource_audience_type,
+        resource_audience_id,
+      },
+    ]);
+  };
+
+  const handleOptionSelection = (option: { value: string; label: string }) => {
+    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(option?.value);
+
+    if (!isValid) {
+      setShowValidationError(true);
+      setValidationErrorText(message ?? '');
+    } else {
+      setShowValidationError(false);
+    }
+
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        value: option.value,
+        valid: isValid,
+        color: isValid ? COLORS.WHITE : COLORS.RED_100,
+        role: selectedRoleRef?.current?.value,
+        resource_audience_type,
+        resource_audience_id,
+      },
+    ]);
   };
 
   return (
@@ -71,7 +163,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
       <div className='relative'>
         {openShareDatasetPopup && (
           <div className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
-            <div className='border border-GRAY_400 rounded-3.5 bg-white'>
+            <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center pt-5 pb-6 py-5 px-4'>
                 <span className=''>Share this dataset</span>
                 <div className='p-1 cursor-pointer' onClick={handleCloseShareDatasetPopup}>
@@ -88,19 +180,20 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                 <div className='pt-0 px-5 pb-5'>
                   <MultiSelectInput
                     id='share-dataset'
-                    inputArrayList={inputArrayList}
-                    setInputArrayList={setInputArrayList}
-                    checkAudiencePresentInOrg
                     search={search}
                     setSearch={setSearch}
                     selectedRoleRef={selectedRoleRef}
-                    showValidationError={showValidationError}
-                    validationErrorText={validationErrorText}
                     isOpen={openShareDatasetPopup}
-                    setShowValidationError={setShowValidationError}
                     placeholderText={placeholderText}
-                    dropdownOptions={[]}
                     roleOptions={DATASET_ACCESS_PRIVILEGES_LIST}
+                    inputArrayList={selectedItems}
+                    setInputArrayList={setSelectedItems}
+                    validationErrorText={validationErrorText}
+                    showValidationError={showValidationError}
+                    setShowValidationError={setShowValidationError}
+                    onValidateAndAdd={handleValidateAndAdd}
+                    optionsList={customizedTeamMembersData}
+                    onSelectOption={handleOptionSelection}
                   />
                 </div>
                 <div className='flex items-center justify-between w-full py-4 px-5 border-t border-GRAY_400'>
@@ -127,12 +220,14 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
               </div>
             </div>
             {userAccessToDatasetList?.length > 0 && (
-              <div className='mt-2 rounded-3.5 p-2 border border-GRAY_400 bg-white'>
-                <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
-                  {userAccessToDatasetList?.map((audience, index) => (
-                    <DatasetAccessToAudiences key={index} {...audience} datasetId={datasetId} />
-                  ))}
+              <div className='relative h-auto'>
+                <div className=' mt-2 rounded-3.5 p-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
+                  <span className=' f-12-500 text-GRAY_700 p-2'>Who has access</span>
+                  <div className=' flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
+                    {userAccessToDatasetList?.map((audience, index) => (
+                      <DatasetAccessToAudiences key={index} {...audience} datasetId={datasetId} />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

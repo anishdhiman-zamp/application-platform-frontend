@@ -1,32 +1,29 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { useAppSelector } from 'hooks/toolkit';
-import { validateEmail } from 'modules/people/people.utils';
-import { RootState } from 'store';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
-import { ArrayListOption, MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
+import { MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   id,
-  inputArrayList,
-  setInputArrayList,
-  checkAudiencePresentInOrg,
   search,
   setSearch,
   selectedRoleRef,
-  showValidationError,
-  validationErrorText,
   isOpen,
-  setShowValidationError,
   placeholderText,
-  dropdownOptions,
   roleOptions,
+  inputArrayList,
+  setInputArrayList,
+  showValidationError,
+  setShowValidationError,
+  validationErrorText,
+  onValidateAndAdd,
+  optionsList,
+  onSelectOption,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,12 +31,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
   const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
-
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
-    { organizationId },
-    { skip: !organizationId || !checkAudiencePresentInOrg },
-  );
 
   const handleSetInputFocus = () => {
     setIsInputFocused(true);
@@ -52,59 +43,21 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
   }, [isOpen, inputRef]);
 
-  const handleClickKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && search.trim()) {
-        const value = search.trim();
-        let isValid = validateEmail(value);
-        let resource_audience_id = '';
-        let resource_audience_type = '';
+  const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && search.trim()) {
+      onValidateAndAdd(search.trim());
+      setSearch('');
+    }
+  };
 
-        if (checkAudiencePresentInOrg) {
-          const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
-
-          if (!audience) {
-            isValid = false;
-          } else {
-            resource_audience_type = audience?.resource_audience_type;
-            resource_audience_id = audience?.resource_audience_id;
-          }
-        }
-
-        setInputArrayList((prevEmails: ArrayListOption[]) => [
-          ...prevEmails,
-          {
-            value: value,
-            valid: isValid,
-            role: selectedRoleRef?.current?.value,
-            color: isValid ? COLORS.WHITE : COLORS.RED_100,
-            resource_audience_type,
-            resource_audience_id,
-          },
-        ]);
-        setSearch('');
-        setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
-      }
-    },
-    [
-      search,
-      setInputArrayList,
-      setSearch,
-      setShowValidationError,
-      selectedRoleRef,
-      checkAudiencePresentInOrg,
-      teamMembersData,
-    ],
-  );
-
-  const handleRemoveEmail = useCallback(
+  const handleRemoveItem = useCallback(
     (index: number) => {
       setInputArrayList((prev) => {
-        const updatedEmails = prev.filter((_, i) => i !== index);
+        const updatedItems = prev.filter((_, i) => i !== index);
 
-        setShowValidationError(updatedEmails.some((email) => !email.valid));
+        setShowValidationError(updatedItems.some((item) => !item.valid));
 
-        return updatedEmails;
+        return updatedItems;
       });
       inputRef.current?.focus();
     },
@@ -148,18 +101,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     };
   }, [search]);
 
-  const combinedOptions = useMemo(() => {
-    const teamOptions =
-      teamMembersData?.map((member) => ({
-        value: member?.user?.email,
-        label: member?.user?.email,
-        color: COLORS.WHITE,
-        resource_audience_type: member?.resource_audience_type,
-        resource_audience_id: member?.resource_audience_id,
-      })) ?? [];
-
-    return [...(dropdownOptions ?? []), ...teamOptions];
-  }, [dropdownOptions, teamMembersData]);
+  const combinedOptions = useMemo(() => optionsList ?? [], [optionsList]);
 
   const filteredDropdownOptions = useMemo(() => {
     if (!debouncedSearch.trim()) return [];
@@ -167,26 +109,16 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     return combinedOptions.filter((option) => option.value.toLowerCase().includes(debouncedSearch.toLowerCase()));
   }, [combinedOptions, debouncedSearch]);
 
-  const openDropdownOptions =
-    isInputFocused && debouncedSearch.trim().length > 0 && (filteredDropdownOptions?.length ?? 0) > 0;
+  const openDropdownOptions = isInputFocused && debouncedSearch.trim().length > 0 && filteredDropdownOptions.length > 0;
+
   const handleSelectDropdownOption = useCallback(
-    (option: { value: string; color?: string; resource_audience_type?: string; resource_audience_id?: string }) => {
-      setInputArrayList((prev) => [
-        ...prev,
-        {
-          value: option.value,
-          valid: true,
-          color: option?.color,
-          role: selectedRoleRef?.current?.value,
-          resource_audience_type: option?.resource_audience_type,
-          resource_audience_id: option?.resource_audience_id,
-        },
-      ]);
+    (option: { value: string; label: string; color?: string }) => {
+      onSelectOption?.(option);
       setSearch('');
+      setIsInputFocused(false);
       inputRef.current?.focus();
-      setIsInputFocused(true);
     },
-    [setInputArrayList, setSearch, inputRef, selectedRoleRef],
+    [onSelectOption, setSearch, inputRef],
   );
 
   return (
@@ -213,7 +145,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 width={10}
                 height={10}
                 color={item.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
-                onClick={() => handleRemoveEmail(index)}
+                onClick={() => handleRemoveItem(index)}
               />
             </div>
           ))}

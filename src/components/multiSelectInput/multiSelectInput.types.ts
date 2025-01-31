@@ -9,21 +9,19 @@ export type ArrayListOption = {
 
 export type MultiSelectInputPropsType = {
   id: string;
-  inputArrayList: ArrayListOption[];
-  setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
   checkAudiencePresentInOrg?: boolean;
-  setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>;
   search: string;
   setSearch: (value: string) => void;
   selectedRoleRef: React.MutableRefObject<any>;
-  showValidationError: boolean;
-  validationErrorText?: string;
   isOpen: boolean;
   placeholderText: string;
-  dropdownOptions?: Array<{ label: string; value: string; color?: string }>;
   roleOptions?: Array<{ label: string; value: string }>;
-  customDropdownMenuClass?: {
-    width?: string;
-    marginLeft?: string;
-  };
+  inputArrayList: ArrayListOption[];
+  setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
+  showValidationError: boolean;
+  setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>;
+  validationErrorText?: string;
+  onValidateAndAdd: (value: string) => void;
+  optionsList?: { value: string; label: string; color?: string }[];
+  onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
 };

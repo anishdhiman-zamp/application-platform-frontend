@@ -44,3 +44,7 @@ export type TeamMemberAccessPrivilegesType = {
   label: string;
   value: TEAM_MEMBERS_PRIVILEGES;
 };
+
+export type InvitedMembersRolePropsType = {
+  value: string;
+};

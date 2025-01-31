@@ -1,4 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -8,6 +9,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/people/people.constants';
 import { InviteMembersPopupPropsType, TeamMembersPrivilegeType } from 'modules/people/people.types';
+import { validateEmail } from 'modules/people/people.utils';
 import { RootState } from 'store';
 import { PostAudiencesInviteData } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -20,28 +22,29 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }) => {
   const selectedRoleRef = useRef<TeamMembersPrivilegeType>(TEAM_MEMBERS_PRIVILEGES_LIST[0]);
-  const [inputArrayList, setInputArrayList] = useState<ArrayListOption[]>([]);
   const [search, setSearch] = useState<string>('');
-  const [showValidationError, setShowValidationError] = useState<boolean>(false);
-  const validationErrorText = 'Email address incorrect';
   const placeholderText = 'Share with people and teams';
-  const isInvitable = !showValidationError && inputArrayList.length > 0;
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const [postInviteAudiences] = usePostInviteAudiencesByOrganisationIdMutation();
-  const { refetch: refetchAudiencesByOrganizationId } = useGetInvitedAudiencesByOrganisationIdQuery(
-    { organizationId },
-    { skip: !organizationId },
-  );
+  const { data: invitedTeamMembersData, refetch: refetchAudiencesByOrganizationId } =
+    useGetInvitedAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+
+  const [showValidationError, setShowValidationError] = useState<boolean>(false);
+  const [validationErrorText, setValidationErrorText] = useState<string>('');
+  const checkIfUser = useSelector((state: RootState) => state?.user?.user)?.user_email;
+  const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
+
+  const isInvitable = !showValidationError && selectedItems.length > 0;
 
   const handleCloseInviteMembersPopup = () => {
     onClose?.();
     setShowValidationError(false);
-    setInputArrayList([]);
+    setSelectedItems([]);
     setSearch('');
   };
 
-  const postAutdiencesInviteData: PostAudiencesInviteData = {
-    invitations: inputArrayList
+  const postAudiencesInviteData: PostAudiencesInviteData = {
+    invitations: selectedItems
       .map((item) => ({
         email: item.value,
         role: item.role ?? 'default_role',
@@ -51,13 +54,49 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
 
   const handleInviteMembers = async () => {
     try {
-      await postInviteAudiences({ organizationId, body: postAutdiencesInviteData }).unwrap();
+      await postInviteAudiences({ organizationId, body: postAudiencesInviteData }).unwrap();
       refetchAudiencesByOrganizationId();
       toast.success('Invitation sent successfully');
       handleCloseInviteMembersPopup();
     } catch {
       toast.error('Failed to send invitation');
     }
+  };
+
+  const handleValidateAndAdd = (value: string) => {
+    let isValid = validateEmail(value);
+    const resource_audience_id = '';
+    const resource_audience_type = '';
+
+    if (!isValid) {
+      setValidationErrorText('Email address incorrect');
+    }
+
+    const isAlreadyInvited = invitedTeamMembersData?.some((item) => item?.email === value);
+
+    if (isAlreadyInvited) {
+      isValid = false;
+      setValidationErrorText('User is already invited');
+    }
+
+    if (value === checkIfUser) {
+      isValid = false;
+      setShowValidationError(true);
+      setValidationErrorText('You cannot invite yourself');
+    }
+
+    setSelectedItems((prevEmails) => [
+      ...prevEmails,
+      {
+        value: value,
+        valid: isValid,
+        role: selectedRoleRef?.current?.value,
+        color: isValid ? COLORS.WHITE : COLORS.RED_100,
+        resource_audience_type,
+        resource_audience_id,
+      },
+    ]);
+    setShowValidationError((prevShowValidationError) => prevShowValidationError || !isValid);
   };
 
   return (
@@ -77,21 +116,18 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
         <div className='px-4 py-6'>
           <MultiSelectInput
             id='invite-members'
-            inputArrayList={inputArrayList}
-            setInputArrayList={setInputArrayList}
             search={search}
             setSearch={setSearch}
             selectedRoleRef={selectedRoleRef}
-            showValidationError={showValidationError}
-            validationErrorText={validationErrorText}
             isOpen={isOpen}
-            setShowValidationError={setShowValidationError}
             placeholderText={placeholderText}
             roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
-            customDropdownMenuClass={{
-              width: '120px',
-              marginLeft: '-20px',
-            }}
+            inputArrayList={selectedItems}
+            setInputArrayList={setSelectedItems}
+            validationErrorText={validationErrorText}
+            showValidationError={showValidationError}
+            setShowValidationError={setShowValidationError}
+            onValidateAndAdd={handleValidateAndAdd}
           />
         </div>
         <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full'>
