@@ -4,6 +4,7 @@ import { defaultFnType } from 'types/commonTypes';
 export enum SkeletonTypes {
   DEFAULT,
   PROGRESS_BAR,
+  CUSTOM,
 }
 
 export enum ErrorCardTypes {
@@ -32,6 +33,7 @@ export interface CommonWrapperPropsTypes {
   className?: string;
   skeletonItemCount?: number;
   skeletonClassName?: string;
+  loader?: ReactNode;
 }
 
 export interface ErrorCardPropTypes {

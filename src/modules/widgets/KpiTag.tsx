@@ -2,6 +2,9 @@ import { FC, useMemo } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { WidgetInstanceType } from 'types/api/pagesApi.types';
 import { getCommaSeparatedNumber } from 'utils/common';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import SkeletonElement from 'components/skeletons/SkeletonElement';
 
 interface KpiTagProps {
   widgetDetails: WidgetInstanceType;
@@ -10,7 +13,7 @@ interface KpiTagProps {
 }
 
 const KpiTag: FC<KpiTagProps> = ({ widgetDetails, currentPageFilters, isFilterInitialized }) => {
-  const { data: widgetData } = useGetWidgetDataQuery(
+  const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     { widgetId: widgetDetails?.widget_instance_id, filters: currentPageFilters },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
@@ -25,7 +28,13 @@ const KpiTag: FC<KpiTagProps> = ({ widgetDetails, currentPageFilters, isFilterIn
   return (
     <div className='bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 overflow-hidden'>
       <div className='f-13-450 text-GRAY_900 mb-2'>{widgetDetails?.title}</div>
-      <div className='f-24-450 text-GRAY_950'>{getCommaSeparatedNumber(Number(value), 2)}</div>
+      <CommonWrapper
+        skeletonType={SkeletonTypes.CUSTOM}
+        isLoading={isLoading}
+        loader={<SkeletonElement className='max-w-[250px]' />}
+      >
+        <div className='f-24-450 text-GRAY_950'>{getCommaSeparatedNumber(Number(value), 2)}</div>
+      </CommonWrapper>
     </div>
   );
 };

@@ -27,6 +27,7 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
   renderError,
   className = '',
   skeletonItemCount = 1,
+  loader,
 }) => {
   const getSkeleton = () => {
     switch (skeletonType) {
@@ -50,6 +51,8 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
             />
           </div>
         );
+      case SkeletonTypes.CUSTOM:
+        return <div>{loader}</div>;
     }
   };
 
