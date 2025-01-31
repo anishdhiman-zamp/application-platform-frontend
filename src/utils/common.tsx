@@ -1,5 +1,6 @@
 import { MouseEventHandler } from 'react';
 import clsx, { ClassValue } from 'clsx';
+import { CHIP_COLORS } from 'constants/colors';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
@@ -259,3 +260,28 @@ export const getMaxValue = (data: MapAny[], keys: string[]) => {
 
   return maxValue;
 };
+
+/**
+ * Calling cyclicIterator() returns a new iterator instance each time.
+ * The iterator function remembers its current index using a closure.
+ * When it reaches the last element, it loops back to the start.
+ * @param arr
+ * @returns a new iterator instance each time
+ */
+export const cyclicIterator = (arr: any[]) => {
+  let index = 0;
+
+  return () => {
+    const value = arr[index];
+
+    index = (index + 1) % arr.length;
+
+    return value;
+  };
+};
+
+/**
+ * Get a color from the predefined list of colors using a cyclic iterator
+ * @returns string color
+ */
+export const getChipColor: () => string = cyclicIterator(CHIP_COLORS);

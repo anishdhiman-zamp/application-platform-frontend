@@ -33,6 +33,7 @@ export const COLORS = {
   ORANGE_200: '#FCEDB9',
   BLUE_150: '#DFF0FF',
   VIOLET_100: '#E3E5FB',
+  GREEN_100: '#D0E8CF',
 
   TOAST_SHADOW: '#A6A6A62E',
   TRANSPARENT: '#00000000',
@@ -55,3 +56,11 @@ export const CHART_PALETTE = {
     strokes: ['gray'],
   },
 };
+
+export const CHIP_COLORS: string[] = [
+  COLORS.ORANGE_200,
+  COLORS.GREEN_100,
+  COLORS.VIOLET_100,
+  COLORS.BLUE_150,
+  COLORS.RED_250,
+];

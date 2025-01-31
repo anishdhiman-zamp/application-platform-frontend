@@ -2,8 +2,8 @@ import { ColDef } from 'ag-grid-community';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
 import { DatasetFilterConfigResponseType, DatasetType } from 'types/api/dataset.types';
-import CustomTagEditorCellRenderer from 'components/common/table/CustomCellEditorCellRenderers/CustomTagEditorCellRenderer';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
+import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
@@ -72,13 +72,9 @@ export const formatColumns = (
 export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {
   if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
     return {
-      cellEditor: 'agRichSelectCellEditor',
+      cellEditor: CustomTagEditor,
       cellEditorParams: {
         values: column.options,
-        allowTyping: true,
-        filterList: true,
-        cellHeight: 50,
-        cellRenderer: CustomTagEditorCellRenderer,
       },
     };
   }
