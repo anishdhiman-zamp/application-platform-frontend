@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
@@ -6,7 +6,7 @@ import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG, WIDGET_TYPES } from 'modules/widgets/widgets.constant';
-import { getChartOptions, transformData } from 'modules/widgets/widgets.utils';
+import { getChartOptions, groupTransactionsByDate, transformData } from 'modules/widgets/widgets.utils';
 import { WidgetInstanceType } from 'types/api/pagesApi.types';
 import { MapAny } from 'types/commonTypes';
 import { formatNumber, getMaxValue } from 'utils/common';
@@ -28,22 +28,45 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   isFilterInitialized,
   onNodeClick,
 }) => {
+  const [stackedValues, setStackedValues] = useState<MapAny[]>([]);
+  const [maxValue, setMaxValue] = useState<number>(0);
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     { widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
   const transformedData = useMemo(() => {
-    return widgetData?.result ? transformData(widgetData?.result) : [];
+    const data = widgetData?.result ? transformData(widgetData?.result) : [];
+
+    const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
+
+    setMaxValue(getMaxValue(data?.[0] ?? [], [axis?.column]) ?? '');
+
+    if (
+      (widgetType === WIDGET_TYPES.BAR_CHART || widgetType === WIDGET_TYPES.LINE_CHART) &&
+      widgetDetails?.data_mappings?.mappings[0]?.fields?.group_by?.length
+    ) {
+      const mappings = widgetDetails?.data_mappings?.mappings[0];
+      const groupedData = groupTransactionsByDate(
+        data[0],
+        mappings?.fields?.group_by?.[0]?.column ?? '',
+        mappings?.fields?.x_axis?.[0]?.column ?? '',
+        mappings?.fields?.y_axis?.[0]?.column ?? '',
+      );
+
+      setStackedValues(groupedData?.groupValues.map((value) => ({ column: value })));
+
+      return [groupedData.data];
+    }
+
+    return data;
   }, [widgetData]);
 
   const yAxisTitle = useMemo(() => {
     if (widgetType !== WIDGET_TYPES.BAR_CHART && widgetType !== WIDGET_TYPES.LINE_CHART) return '';
-
     const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
-    const maxValue = getMaxValue(transformedData?.[0] ?? [], [axis?.column]);
 
     return `${axis?.column} (${axis?.aggregation}), in ${formatNumber(maxValue, 0, true, true)}`;
-  }, [widgetDetails, transformedData]);
+  }, [widgetDetails, transformedData, maxValue]);
 
   const chartOptions = useMemo(() => {
     const baseOptions = {
@@ -54,15 +77,15 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       axes: AG_CHART_AXES,
     } as AgChartOptions;
 
-    return getChartOptions(widgetDetails, widgetType, onNodeClick, baseOptions);
-  }, [widgetDetails, onNodeClick, transformedData]);
+    return getChartOptions(widgetDetails, widgetType, onNodeClick, baseOptions, stackedValues);
+  }, [widgetDetails, onNodeClick, transformedData, stackedValues]);
 
   return (
     <div className=' bg-white h-full border border-GRAY_400 rounded-xl px-6 py-4.5 overflow-hidden'>
       <div className='f-18-450 text-GRAY_1000 mb-10'>{widgetDetails?.title}</div>
       <div className='relative'>
         {isLoading && (
-          <div className='absolute top-0 right-0 h-full w-full flex justify-center items-center z-100 bg-white'>
+          <div className='absolute top-0 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
             <ProgressBar
               trackColor={COLORS.BLACK}
               indicatorColor={COLORS.WHITE}

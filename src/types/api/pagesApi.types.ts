@@ -57,6 +57,7 @@ export interface MappingsType {
     slices?: AxisMappingType[];
     values?: AxisMappingType[];
     primary_value: AxisMappingType[];
+    group_by?: AxisMappingType[];
   };
 }
 

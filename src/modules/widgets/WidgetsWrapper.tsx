@@ -78,6 +78,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
     case WIDGET_TYPES.BAR_CHART:
     case WIDGET_TYPES.LINE_CHART:
     case WIDGET_TYPES.PIE_CHART:
+    case WIDGET_TYPES.DONUT_CHART:
       return (
         <AGChartsWidgets
           widgetDetails={widgetDetails}

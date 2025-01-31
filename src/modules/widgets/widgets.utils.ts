@@ -17,6 +17,41 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
 
+export function groupTransactionsByDate(
+  data: MapAny[],
+  groupBy: string,
+  xAxis: string,
+  yAxis: string,
+): { data: MapAny[]; groupValues: string[] } {
+  if (!data?.length) return { data: [], groupValues: [] };
+
+  const grouped: MapAny = {};
+  const groupValues = new Set<string>();
+
+  data?.forEach((dataItem: MapAny) => {
+    if (!grouped[dataItem[xAxis]]) {
+      grouped[dataItem[xAxis]] = {
+        [dataItem[groupBy]]: dataItem[yAxis],
+      };
+    }
+
+    const brand = dataItem[groupBy] ?? 'Unknown';
+    const amount = parseFloat(dataItem[yAxis]) || 0;
+
+    groupValues.add(brand);
+    if (!grouped[dataItem[xAxis]][brand]) {
+      grouped[dataItem[xAxis]][brand] = amount;
+    } else {
+      grouped[dataItem[xAxis]][brand] = (grouped[dataItem[xAxis]][brand] as number) + amount;
+    }
+  });
+
+  return {
+    data: Object.keys(grouped).map((key) => ({ [xAxis]: key, ...grouped[key] })),
+    groupValues: [...groupValues],
+  };
+}
+
 /**
  * Formats the data array based on the types specified in the columns array.
  * @param response - The response object containing columns and data.
@@ -66,10 +101,11 @@ export const getChartOptions = (
   widgetType: WIDGET_TYPES,
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
   baseOptions: AgChartOptions,
+  stackedValues?: MapAny[],
 ) => {
   const mappings = widgetDetails?.data_mappings?.mappings;
   const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
-  const yAxis = mappings?.[0]?.fields?.y_axis ?? [];
+  const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
   const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
 
   const navigatorConfig =
@@ -110,7 +146,6 @@ export const getChartOptions = (
           yKey: `${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
-          fill: CHART_PALETTE_COLORS[0],
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
@@ -140,6 +175,7 @@ export const getChartOptions = (
         })),
       };
     }
+    case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
       const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
@@ -149,6 +185,7 @@ export const getChartOptions = (
         series: [
           {
             ...DONUT_CHART_SERIES_CONFIG,
+            type: chartType,
             legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
             angleKey: sliceKey,
             calloutLabelKey: sliceKey,

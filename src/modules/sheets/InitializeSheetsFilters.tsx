@@ -52,6 +52,10 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
           type: filtersContextActions.SET_INITIALISED,
         });
       }
+    } else {
+      dispatch({
+        type: filtersContextActions.SET_INITIALISED,
+      });
     }
   }, [sheetFilterConfig]);
 
