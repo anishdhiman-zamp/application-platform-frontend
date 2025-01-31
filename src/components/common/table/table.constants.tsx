@@ -120,6 +120,7 @@ export const ArrayFilters = [
 export const cellSelectionConfig: CellSelectionOptions<any> = {
   handle: {
     mode: 'fill',
+    direction: 'y',
   },
 };
 

@@ -4,6 +4,7 @@ import {
   CellEditRequestEvent,
   ColDef,
   ColumnVisibleEvent,
+  FillEndEvent,
   IServerSideDatasource,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -20,6 +21,7 @@ interface DatasetTableProps {
   rows?: MapAny[];
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
+  onFillEnd?: (event: FillEndEvent) => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -32,6 +34,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   columnConfig,
   onColumnVisible,
   onCellEditRequest,
+  onFillEnd,
 }) => {
   return (
     <Table
@@ -46,6 +49,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
       showStatusBar
       enableCellSelection
       onColumnVisible={onColumnVisible}
+      onFillEnd={onFillEnd}
     />
   );
 };

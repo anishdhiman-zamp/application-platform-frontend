@@ -3,6 +3,7 @@ import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
   ColDef,
+  FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
 } from 'ag-grid-community';
@@ -128,11 +129,17 @@ const DatasetById = () => {
     setRefetchColumnList((prev) => prev + 1);
   };
 
-  // TODO: Integrate with update API
-  const onCellEditRequest = (event: CellEditRequestEvent) => {
-    const { colDef, newValue, data } = event;
-    const { field } = colDef;
-
+  const updateApi = ({
+    rowId,
+    field,
+    newValue,
+    operator = CONDITION_OPERATOR_TYPE.EQUAL,
+  }: {
+    rowId: string | string[];
+    field: string;
+    newValue: string;
+    operator?: CONDITION_OPERATOR_TYPE;
+  }) => {
     updateDatasetData({
       datasetId: id as string,
       data: {
@@ -141,8 +148,8 @@ const DatasetById = () => {
           conditions: [
             {
               column: '_zamp_id',
-              value: data?._zamp_id,
-              operator: CONDITION_OPERATOR_TYPE.EQUAL,
+              value: rowId,
+              operator: operator,
             },
           ],
         },
@@ -170,11 +177,51 @@ const DatasetById = () => {
       });
   };
 
+  const onCellEditRequest = (event: CellEditRequestEvent) => {
+    const { colDef, newValue, data, source } = event;
+    const { field } = colDef;
+
+    if (source === 'edit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
+  };
+
+  const onFillEnd = (event: FillEndEvent) => {
+    const { finalRange } = event;
+    const { startRow, endRow, startColumn } = finalRange;
+
+    const startIndex = startRow?.rowIndex as number;
+    const endIndex = endRow?.rowIndex as number;
+    const field = startColumn?.getColId();
+    const rowIds: string[] = [];
+    let newValue = '';
+    let loopStartIndex = startIndex;
+    let loopEndIndex = endIndex;
+
+    if (startIndex > endIndex) {
+      loopStartIndex = endIndex;
+      loopEndIndex = startIndex;
+    }
+    for (let i = loopStartIndex; i <= loopEndIndex; i++) {
+      const row = tableRef.current?.api?.getDisplayedRowAtIndex(i);
+
+      rowIds.push(row?.data?._zamp_id as string);
+      if (i === startIndex) {
+        newValue = row?.data?.[field as string] as string;
+      }
+    }
+
+    updateApi({
+      rowId: rowIds,
+      field,
+      newValue,
+      operator: CONDITION_OPERATOR_TYPE.CONTAINS,
+    });
+  };
+
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between pr-4'>
         <div className='flex items-center py-3'>
-          <FiltersWrapper label='Filter' allowActions={true} filterConfig={filtersConfig ?? []} />
+          <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
         </div>
         <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
       </div>
@@ -187,6 +234,7 @@ const DatasetById = () => {
           totalRows={totalRows}
           onColumnVisible={handleColumnVisible}
           onCellEditRequest={onCellEditRequest}
+          onFillEnd={onFillEnd}
           {...(data?.config?.is_drilldown_enabled ? { onCellDoubleClicked: onCellDoubleClicked } : {})}
         />
       </div>

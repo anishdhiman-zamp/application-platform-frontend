@@ -58,6 +58,7 @@ export const formatColumns = (
       hide: column.metadata?.is_hidden,
       cellRendererParams: column.metadata,
       editable: column.metadata?.is_editable && !isInitiatedAction,
+      suppressFillHandle: !column.metadata?.is_editable,
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];

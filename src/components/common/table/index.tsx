@@ -10,10 +10,12 @@ import {
   CustomEditorModule,
   CustomFilterModule,
   DateFilterModule,
+  FillEndEvent,
   IServerSideDatasource,
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  RowApiModule,
   RowClickedEvent,
   TextEditorModule,
   TextFilterModule,
@@ -80,6 +82,7 @@ ModuleRegistry.registerModules([
   CustomEditorModule,
   RichSelectModule,
   NumberEditorModule,
+  RowApiModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -100,6 +103,7 @@ interface TableProps {
   suppressCellFocus?: boolean;
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
+  onFillEnd?: (event: FillEndEvent) => void;
   onRowClicked?: (event: RowClickedEvent) => void;
 }
 
@@ -130,6 +134,7 @@ const Table: React.FC<TableProps> = ({
   suppressCellFocus = false,
   onColumnVisible,
   onCellEditRequest,
+  onFillEnd,
   onRowClicked,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
@@ -187,6 +192,7 @@ const Table: React.FC<TableProps> = ({
           onColumnVisible={onColumnVisible}
           readOnlyEdit
           onCellEditRequest={onCellEditRequest}
+          onFillEnd={onFillEnd}
           onRowClicked={onRowClicked}
           {...(serverSideDatasource
             ? {
