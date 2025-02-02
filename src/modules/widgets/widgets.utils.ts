@@ -5,11 +5,9 @@ import {
   CHART_CATEGORY_AXES,
   CHART_NUMBER_AXES,
   DONUT_CHART_SERIES_CONFIG,
-  WIDGET_TYPES,
   WidgetDataValueType,
 } from 'modules/widgets/widgets.constant';
-import { WidgetInstanceType } from 'types/api/pagesApi.types';
-import { WidgetDataType } from 'types/api/widgets.types';
+import { WIDGET_TYPES, WidgetDataType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { formatNumber } from 'utils/common';
@@ -98,15 +96,11 @@ export function transformData(responses: WidgetDataType[]) {
 
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
-  widgetType: WIDGET_TYPES,
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
   baseOptions: AgChartOptions,
   stackedValues?: MapAny[],
 ) => {
-  const mappings = widgetDetails?.data_mappings?.mappings;
-  const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
-  const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
-  const chartType = AG_CHART_TYPES[widgetType as unknown as keyof typeof AG_CHART_TYPES];
+  const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
 
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
@@ -133,8 +127,12 @@ export const getChartOptions = (
     },
   };
 
-  switch (widgetType) {
+  switch (widgetDetails.widget_type) {
     case WIDGET_TYPES.BAR_CHART: {
+      const mappings = widgetDetails?.data_mappings?.mappings;
+      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
+      const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
+
       return {
         ...baseOptions,
         ...navigatorConfig,
@@ -154,6 +152,10 @@ export const getChartOptions = (
       };
     }
     case WIDGET_TYPES.LINE_CHART: {
+      const mappings = widgetDetails?.data_mappings?.mappings;
+      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
+      const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
+
       return {
         ...baseOptions,
         ...navigatorConfig,
@@ -177,6 +179,7 @@ export const getChartOptions = (
     }
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
+      const mappings = widgetDetails?.data_mappings?.mappings;
       const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
 

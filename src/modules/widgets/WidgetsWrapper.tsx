@@ -2,10 +2,10 @@ import React, { FC, useMemo } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
-import { WIDGET_TYPES } from 'modules/widgets/widgets.constant';
+import { PivotTableWidget } from 'modules/widgets/Pivot/StackedPivot';
 import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
-import { WidgetInstanceType } from 'types/api/pagesApi.types';
+import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { isValidDate } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -83,7 +83,6 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
       return (
         <AGChartsWidgets
           widgetDetails={widgetDetails}
-          widgetType={widget_type}
           currentPageFilters={currentPageFilters}
           isFilterInitialized={isFilterInitialized}
           onNodeClick={onNodeClick}
@@ -93,6 +92,15 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
       return (
         <KpiTag
           widgetDetails={widgetDetails}
+          isFilterInitialized={isFilterInitialized}
+          currentPageFilters={currentPageFilters}
+        />
+      );
+    }
+    case WIDGET_TYPES.PIVOT_TABLE: {
+      return (
+        <PivotTableWidget
+          widgetInstanceDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
         />

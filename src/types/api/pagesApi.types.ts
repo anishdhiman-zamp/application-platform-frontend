@@ -1,4 +1,5 @@
-import { WIDGET_TYPES, WidgetDataValueType } from 'modules/widgets/widgets.constant';
+import { WidgetDataValueType } from 'modules/widgets/widgets.constant';
+import { WidgetInstanceType } from 'types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -30,44 +31,6 @@ export type SheetResponseType = {
   fractional_index: number;
   organization_id: string;
 };
-
-export interface WidgetInstanceType {
-  widget_instance_id: string;
-  widget_id: string;
-  sheet_id: string;
-  title: string;
-  dataset_id: string;
-  data_mappings: DataMappings;
-  created_at: string;
-  updated_at: string;
-  widget_type: WIDGET_TYPES;
-}
-
-export interface DataMappings {
-  version: string;
-  datasets: { id: string }[];
-  mappings: MappingsType[];
-}
-
-export interface MappingsType {
-  dataset_id: string;
-  fields: {
-    x_axis: AxisMappingType[];
-    y_axis: AxisMappingType[];
-    slices?: AxisMappingType[];
-    values?: AxisMappingType[];
-    primary_value: AxisMappingType[];
-    group_by?: AxisMappingType[];
-  };
-}
-
-export interface AxisMappingType {
-  type: string;
-  column: string;
-  field_type: 'dimension' | 'measure';
-  aggregation?: 'sum' | 'avg' | 'count' | 'min' | 'max';
-}
-
 export interface SheetDetailsResponseType {
   sheet_id: string;
   name: string;

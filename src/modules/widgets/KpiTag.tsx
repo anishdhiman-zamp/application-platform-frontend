@@ -1,13 +1,13 @@
 import { FC, useMemo } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
-import { WidgetInstanceType } from 'types/api/pagesApi.types';
+import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { getCommaSeparatedNumber } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SkeletonElement from 'components/skeletons/SkeletonElement';
 
 interface KpiTagProps {
-  widgetDetails: WidgetInstanceType;
+  widgetDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.KPI }>;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
 }

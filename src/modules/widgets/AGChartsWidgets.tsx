@@ -5,10 +5,10 @@ import { useGetWidgetDataQuery } from 'apis/widgets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES, WIDGET_LOADER } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
-import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG, WIDGET_TYPES } from 'modules/widgets/widgets.constant';
+import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
 import { getChartOptions, groupTransactionsByDate, transformData } from 'modules/widgets/widgets.utils';
 import Image from 'next/image';
-import { WidgetInstanceType } from 'types/api/pagesApi.types';
+import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { formatNumber, getMaxValue } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
@@ -16,8 +16,12 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface WidgetsWrapperProps {
-  widgetDetails: WidgetInstanceType;
-  widgetType: WIDGET_TYPES;
+  widgetDetails: Extract<
+    WidgetInstanceType,
+    {
+      widget_type: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART | WIDGET_TYPES.PIE_CHART | WIDGET_TYPES.DONUT_CHART;
+    }
+  >;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
@@ -25,7 +29,6 @@ interface WidgetsWrapperProps {
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   widgetDetails,
-  widgetType,
   currentPageFilters,
   isFilterInitialized,
   onNodeClick,
@@ -39,14 +42,14 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   const transformedData = useMemo(() => {
     const data = widgetData?.result ? transformData(widgetData?.result) : [];
 
-    const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
-
-    setMaxValue(getMaxValue(data?.[0] ?? [], [axis?.column]) ?? '');
-
     if (
-      (widgetType === WIDGET_TYPES.BAR_CHART || widgetType === WIDGET_TYPES.LINE_CHART) &&
+      (widgetDetails.widget_type === WIDGET_TYPES.BAR_CHART || widgetDetails.widget_type === WIDGET_TYPES.LINE_CHART) &&
       widgetDetails?.data_mappings?.mappings[0]?.fields?.group_by?.length
     ) {
+      const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
+
+      setMaxValue(getMaxValue(data?.[0] ?? [], [axis?.column]) ?? '');
+
       const mappings = widgetDetails?.data_mappings?.mappings[0];
       const groupedData = groupTransactionsByDate(
         data[0],
@@ -64,7 +67,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   }, [widgetData]);
 
   const yAxisTitle = useMemo(() => {
-    if (widgetType !== WIDGET_TYPES.BAR_CHART && widgetType !== WIDGET_TYPES.LINE_CHART) return '';
+    if (widgetDetails.widget_type !== WIDGET_TYPES.BAR_CHART && widgetDetails.widget_type !== WIDGET_TYPES.LINE_CHART)
+      return '';
     const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
 
     return `${axis?.column} (${axis?.aggregation}), in ${formatNumber(maxValue, 0, true, true)}`;
@@ -79,7 +83,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       axes: AG_CHART_AXES,
     } as AgChartOptions;
 
-    return getChartOptions(widgetDetails, widgetType, onNodeClick, baseOptions, stackedValues);
+    return getChartOptions(widgetDetails, onNodeClick, baseOptions, stackedValues);
   }, [widgetDetails, onNodeClick, transformedData, stackedValues]);
 
   return (
@@ -112,12 +116,14 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       >
         {chartOptions && (
           <div className='h-full w-full relative'>
-            {isLoading && (widgetType === WIDGET_TYPES.BAR_CHART || widgetType === WIDGET_TYPES.LINE_CHART) && (
-              <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
-                {yAxisTitle}
-                <div className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'></div>
-              </div>
-            )}
+            {isLoading &&
+              (widgetDetails.widget_type === WIDGET_TYPES.BAR_CHART ||
+                widgetDetails.widget_type === WIDGET_TYPES.LINE_CHART) && (
+                <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
+                  {yAxisTitle}
+                  <div className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'></div>
+                </div>
+              )}
             <AgCharts options={chartOptions as AgChartOptions} />
           </div>
         )}

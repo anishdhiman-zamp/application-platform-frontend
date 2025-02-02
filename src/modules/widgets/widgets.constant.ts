@@ -4,15 +4,6 @@ import { DATE_FORMATS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { formatNumber, isValidDate } from 'utils/common';
 
-export enum WIDGET_TYPES {
-  BAR_CHART = 'bar_chart',
-  LINE_CHART = 'line_chart',
-  PIE_CHART = 'pie_chart',
-  DONUT_CHART = 'donut_chart',
-  KPI = 'kpi',
-  TABLE = 'table',
-}
-
 export enum WidgetDataValueType {
   STRING = 'STRING',
   DECIMAL = 'DECIMAL',

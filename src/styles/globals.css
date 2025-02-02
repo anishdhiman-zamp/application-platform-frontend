@@ -137,6 +137,28 @@
   padding-right: 8px;
 }
 
+.ag-header-cell-menu-button {
+  display: none !important;
+}
+
+.ag-header,
+j.ag-row,
+.ag-cell,
+.ag-header-group-cell,
+.ag-header-cell,
+.ag-header-cell-comp-wrapper,
+.ag-pinned-left-header {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.ag-header-cell-comp-wrapper {
+  height: 100% !important;
+}
+
+.ag-header-cell-resize {
+  display: none !important;
+}
 .ag-charts-tooltip {
   font-family: 'Inter';
   border: 1px solid #ebebeb;

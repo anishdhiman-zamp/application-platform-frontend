@@ -94,6 +94,7 @@ const config: Config = {
   moduleDirectories: ['node_modules', 'src'],
   // If you still need specific aliases, you can keep them:
   moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1', // Optional: for @ alias if you use it
   },
 
@@ -186,9 +187,14 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: {
+          jsx: 'react-jsx',
+        },
       },
     ],
   },
+
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
