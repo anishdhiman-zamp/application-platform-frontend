@@ -1,14 +1,14 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import baseApi from 'services/api';
-import layoutConfig from 'store/slices/layout-configs';
+import layoutConfigsSliceReducer from 'store/slices/layout-configs';
 import userSliceReducer from 'store/slices/user';
 
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
     user: userSliceReducer,
-    layoutConfig: layoutConfig,
+    layoutConfig: layoutConfigsSliceReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });

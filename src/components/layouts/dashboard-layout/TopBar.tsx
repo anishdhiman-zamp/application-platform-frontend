@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
+import { useAppSelector } from 'hooks/toolkit';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { RootState } from 'store';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import Input from 'components/common/input';
+import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface TopbarProps {
@@ -16,8 +19,7 @@ interface TopbarProps {
 const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
   const [search, setSearch] = useState('');
   const router = useRouter();
-
-  //    <div className={cn('relative transition-all duration-300', isSidebarOpen ? 'w-60' : 'w-0')}>
+  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   return (
     <div className='h-12 flex items-center justify-between'>
@@ -60,6 +62,7 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
           onClick={router.back}
           className='cursor-pointer'
         />
+        <BreadCrumb breadcrumbStack={breadcrumbStack} />
       </div>
       <Input
         placeholder='Search'

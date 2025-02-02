@@ -22,6 +22,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
   const {
     state: { selectedFilters, filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
+
   const { currentPageFiltersConfig, currentWidgetSelectedFilters } = useMemo(() => {
     const currentWidgetSelectedFilters: MapAny = {};
     const currentPageFiltersConfig = filtersConfig?.filter((filter) =>
@@ -48,7 +49,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
   }, [currentPageFiltersConfig, selectedFilters]);
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
-    const datasetId = currentPageFiltersConfig?.[0]?.targets?.[0]?.dataset_id;
+    const datasetId = widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id;
 
     const isDate = isValidDate(clickedNode[xAxis]);
     //TODO:Update logic for filter type
