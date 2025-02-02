@@ -25,6 +25,7 @@ export interface OptionsType {
   isDisabled?: boolean;
   metadata?: MapAny;
   options?: OptionsType[];
+  desc?: string;
 }
 
 export type DashboardLayoutProps = {

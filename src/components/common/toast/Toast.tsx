@@ -6,7 +6,7 @@ import { CustomToastPropsType } from 'components/common/toast/toast.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const CustomToast: FC<CustomToastPropsType> = ({ text = '' }) => {
-  return <div className='f-14-400 flex w-full items-center gap-6 text-GRAY_700 -ml-[8px]'>{text}</div>;
+  return <div className='f-14-400 flex w-full items-center gap-6 text-GRAY_700 -ml-[8px] -mt-[2px]'>{text}</div>;
 };
 
 const closeToast = () => {
@@ -83,12 +83,13 @@ const defaultToastOptions: ToastOptions = {
     marginRight: '24px',
     marginBottom: '24px',
     padding: '20px',
-    maxHeight: '57px',
     minHeight: '57px',
     minWidth: '420px',
     border: `1px solid ${COLORS.GRAY_400}`,
     borderRadius: '10px',
     boxShadow: `1px 2px 10px ${COLORS.TOAST_SHADOW}`,
+    display: 'flex',
+    alignItems: 'start',
   },
 };
 

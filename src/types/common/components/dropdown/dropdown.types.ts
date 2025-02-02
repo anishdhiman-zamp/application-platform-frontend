@@ -171,7 +171,7 @@ export interface ChipProps {
 export interface SelectedOptionsProps {
   optionSelected: OptionsType[];
   closeIcon: React.ReactNode;
-  handleRemoveValue: () => void;
+  handleRemoveValue: defaultFnType;
 }
 
 export type MenuSingleValuePropsType = {
@@ -221,5 +221,5 @@ export type ResetSectionProps = {
     resetText?: string;
     resetTextClassName?: string;
   };
-  onClickReset: () => void;
+  onClickReset: defaultFnType;
 };

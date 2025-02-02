@@ -5,130 +5,144 @@ import {
   usePatchChangeAudienceRoleInDatasetMutation,
 } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
+import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { CHANGE_ACCESS_PRIVILEGES_LIST, DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, DatasetAccessToAudiencesPropsType } from 'modules/data/data.types';
 import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
-import { defaultFn } from 'types/commonTypes';
+import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
-import { Dropdown } from 'components/common/dropdown';
 import { toast } from 'components/common/toast/Toast';
+import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   resource_type,
   privilege,
   datasetId,
   resource_audience_id,
+  resource_audience_type,
   user,
 }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
-  const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
-
+  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
+  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<DatasetAccessPrivilegesType>(role as DatasetAccessPrivilegesType);
   const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
   const [changeRole] = usePatchChangeAudienceRoleInDatasetMutation();
   const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
-  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
 
-  const handleRoleChange = async (selectedOption: DatasetAccessPrivilegesType) => {
-    selectedRoleRef.current = selectedOption;
-    const changedRole = selectedRoleRef.current.value;
-
-    try {
-      await changeRole({
-        datasetId: datasetId,
-        body: {
-          audience_id: resource_audience_id,
-          role: changedRole,
-        },
-      }).unwrap();
-      refetchAudiencesByDatasetId();
-      toast.success('Role changed successfully');
-    } catch {
-      toast.error('Failed to change role');
-    }
+  const handleOpenChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(true);
   };
 
-  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
+  const handleCloseChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(false);
+  };
+
+  const handleRoleChange = (selectedOption: DatasetAccessPrivilegesType) => {
+    changeRole({
+      datasetId: datasetId,
+      body: {
+        audience_id: resource_audience_id,
+        role: selectedOption?.value,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        setSelectedRole(selectedOption);
+        setOpenChangeRoleDropdown(false);
+        setIsHoveredDropdown(false);
+        refetchAudiencesByDatasetId();
+        toast.success('Role changed successfully');
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || 'Failed to change role');
+      });
+  };
+
   const handleOpenRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(true);
   };
+
   const handleCloseRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(false);
   };
 
-  const handleDeleteAudience = async () => {
-    try {
-      await deleteAudience({
-        datasetId: datasetId,
-        body: {
-          audience_id: resource_audience_id,
-        },
-      }).unwrap();
-      handleCloseRemoveFromTeamPopup();
-      refetchAudiencesByDatasetId();
-      toast.success('Audience deleted successfully');
-    } catch {
-      handleCloseRemoveFromTeamPopup();
-      toast.error('Failed to delete audience');
-    }
+  const handleDeleteAudience = () => {
+    deleteAudience({
+      datasetId: datasetId,
+      body: {
+        audience_id: resource_audience_id,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        handleCloseRemoveFromTeamPopup();
+        refetchAudiencesByDatasetId();
+        toast.success('Audience deleted successfully');
+      })
+      .catch((err) => {
+        handleCloseRemoveFromTeamPopup();
+        toast.error(err?.data?.error || 'Failed to delete audience');
+      });
   };
+
+  useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
     <>
-      <div className='f-12-400 py-1.5 px-2 bg-white flex justify-between items-start'>
-        <div className='flex items-start justify-start gap-x-1 w-[120px]'>
-          {!!user?.email && (
+      <div className='f-12-400 px-2 bg-white flex justify-between items-center'>
+        <div className='flex items-center justify-start'>
+          <div className='flex items-start justify-start gap-x-1 w-[140px]'>
             <>
               <div className='w-fit'>
                 <Avatar
-                  name={user?.email}
+                  name={userName}
                   backgroundColor={COLORS.GRAY_1000}
                   className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
                 />
               </div>
-              <span>{user?.email}</span>
+              <span>{userName}</span>
             </>
-          )}
+          </div>
+          <div className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+            <SvgSpriteLoader
+              id='coins-stacked-04'
+              iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
+              width={12}
+              height={12}
+              color={COLORS.GRAY_1000}
+              className='mr-1'
+            />
+            {resource_type}
+          </div>
         </div>
-        <span className='flex text-wrap flex-wrap break-words whitespace-normal items-start justify-start w-[90px]'>
-          {resource_type}
-        </span>
-        <span
-          className='flex items-end justify-end w-[120px] -mt-[12px]'
-          onMouseEnter={() => setIsHoveredDropdown(true)}
-          onMouseLeave={() => setIsHoveredDropdown(false)}
-        >
-          <Dropdown
-            options={CHANGE_ACCESS_PRIVILEGES_LIST}
-            id='dataset-access-to-audiences-dropdown'
-            eventCallback={defaultFn}
-            onChange={handleRoleChange}
-            defaultValue={role}
-            value={selectedRoleRef.current}
-            placeholder='Member'
-            isSearchable={false}
-            enableDelete
-            onClickDelete={handleOpenRemoveFromTeamPopup}
-            customClass={{
-              focus: 'none',
-              border: 'transparent',
-              fontSize: 'f-12-400',
-            }}
-            customClassNames={{
-              placeholder: 'f-12-300',
-            }}
-            menuOptionClasses={{
-              contentWrapper: 'py-2',
-            }}
-            isHoveredDropdown={isHoveredDropdown}
-            showSelectedIcon
-          />
-        </span>
+
+        <AsyncDropdown
+          onOpen={handleOpenChangeRoleDropdown}
+          onClose={handleCloseChangeRoleDropdown}
+          isOpen={openChangeRoleDropdown}
+          onDelete={handleOpenRemoveFromTeamPopup}
+          onChange={(role) => handleRoleChange(role as DatasetAccessPrivilegesType)}
+          options={CHANGE_ACCESS_PRIVILEGES_LIST}
+          selectedValue={selectedRole}
+          defaultValue={role as DatasetAccessPrivilegesType}
+          showDelete
+          isHoveredDropdown={isHoveredDropdown}
+          setIsHoveredDropdown={setIsHoveredDropdown}
+          isOverflowStyle
+        />
       </div>
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
         feature='remove-access-from-dataset'
+        warningDescription={`${userName} will be immediately removed from ${resource_type} and lose all access`}
       />
     </>
   );

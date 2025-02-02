@@ -1,8 +1,9 @@
 import { InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
+import { defaultFnType } from 'types/commonTypes';
 
 export type InviteMembersPopupPropsType = {
   isOpen: boolean;
-  onClose?: () => void;
+  onClose?: defaultFnType;
 };
 
 export type TeamMembersPrivilegeType = {
@@ -13,9 +14,10 @@ export type TeamMembersPrivilegeType = {
 export type RemoveFromTeamPopupPropsType = {
   name?: string;
   isOpen: boolean;
-  onClose?: () => void;
-  onDelete?: () => void;
+  onClose?: defaultFnType;
+  onDelete?: defaultFnType;
   feature?: string;
+  warningDescription: string;
 };
 
 export type InvitedMembersEmailPropsType = {

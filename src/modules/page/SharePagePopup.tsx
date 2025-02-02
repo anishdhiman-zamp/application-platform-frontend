@@ -27,7 +27,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorText, setValidationErrorText] = useState<string>('');
-  const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(false);
+  const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(true);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
   const { data: getAudiencesByPageId, refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery(
@@ -59,15 +59,17 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     })),
   };
 
-  const handleSharePagePopup = async () => {
-    try {
-      await postInviteAudiences({ pageId, body: AudiencesSharePageData }).unwrap();
-      setSelectedItems([]);
-      refetchAudiencesByPageId();
-      toast.success('Page shared successfully');
-    } catch {
-      toast.error('Failed to share Page');
-    }
+  const handleSharePagePopup = () => {
+    postInviteAudiences({ pageId, body: AudiencesSharePageData })
+      .unwrap()
+      .then(() => {
+        setSelectedItems([]);
+        refetchAudiencesByPageId();
+        toast.success('Page shared successfully');
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || 'Failed to share Page');
+      });
   };
 
   const customizedTeamMembersData = teamMembersData?.map((member) => ({
@@ -223,17 +225,18 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
               </div>
             </div>
             {userAccessToDatasetList?.length > 0 && (
-              <div className='mt-2 rounded-3.5 p-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
+              <div className='mt-2 rounded-3.5 py-2 pl-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
                 <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
                 <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
                   {userAccessToDatasetList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
-                      resource_type={audience.resource_type}
-                      privilege={audience.privilege}
-                      resource_audience_id={audience.resource_audience_id}
-                      user={{ ...audience.user, email: audience.user?.email ?? '' }}
+                      resource_type={audience?.resource_type}
+                      privilege={audience?.privilege}
+                      resource_audience_id={audience?.resource_audience_id}
+                      user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
                       pageId={pageId}
+                      resource_audience_type={audience?.resource_audience_type}
                     />
                   ))}
                 </div>

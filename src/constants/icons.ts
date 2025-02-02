@@ -11,6 +11,7 @@ export const ERROR_WITH_BORDER = IMAGE_PREFIX + '/icons/error-with-border.svg';
 export const WIDGET_LOADER = IMAGE_PREFIX + '/images/widget-loader.gif';
 export const WIDGET_LOADER_1 = IMAGE_PREFIX + '/images/widget-loader-1.gif';
 export const WIDGET_LOADER_2 = IMAGE_PREFIX + '/images/widget-loader-2.gif';
+export const JOINED_DATASET_ICON = IMAGE_PREFIX + '/icons/joined-dataset.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

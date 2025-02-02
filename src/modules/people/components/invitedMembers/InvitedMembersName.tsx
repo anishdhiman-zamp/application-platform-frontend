@@ -6,7 +6,7 @@ import Avatar from 'components/common/avatar';
 
 const InvitedMembersName: FC<InvitedMembersNamePropsType> = ({ value = '' }) => {
   return (
-    <div className='flex items-center gap-1 w-full h-full'>
+    <div className='flex items-center justify-start gap-1 w-full h-full text-left py-3 px-2'>
       <Avatar
         name={value}
         backgroundColor={COLORS.GRAY_1000}

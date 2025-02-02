@@ -5,13 +5,15 @@ import {
   usePatchChangeAudienceRoleInPageMutation,
 } from 'apis/pages';
 import { COLORS } from 'constants/colors';
-import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
+import { JOINED_DATASET_ICON } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { CHANGE_PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
 import { PageAccessPrivilegesType, PageAccessToAudiencesPropsType } from 'modules/page/pages.types';
 import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
-import { defaultFn } from 'types/commonTypes';
+import Image from 'next/image';
+import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
-import { Dropdown } from 'components/common/dropdown';
 import { toast } from 'components/common/toast/Toast';
 
 const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
@@ -19,117 +21,121 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   privilege,
   pageId,
   resource_audience_id,
+  resource_audience_type,
   user,
 }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const role = CHANGE_PAGE_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
-  const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
-  const selectedRoleRef = useRef<PageAccessPrivilegesType>(CHANGE_PAGE_ACCESS_PRIVILEGES_LIST[0]);
-
+  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<PageAccessPrivilegesType>(role as PageAccessPrivilegesType);
   const { refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId });
   const [changeRole] = usePatchChangeAudienceRoleInPageMutation();
   const [deleteAudience] = useDeleteAudienceFromPageAccessMutation();
-  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
 
-  const handleRoleChange = async (selectedOption: PageAccessPrivilegesType) => {
-    selectedRoleRef.current = selectedOption;
-    const changedRole = selectedRoleRef.current.value;
+  const handleOpenChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(true);
+  };
 
-    try {
-      await changeRole({
-        pageId: pageId,
-        body: {
-          audience_id: resource_audience_id,
-          role: changedRole,
-        },
-      }).unwrap();
-      refetchAudiencesByPageId();
-      toast.success('Role changed successfully');
-    } catch {
-      toast.error('Failed to change role');
-    }
+  const handleCloseChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(false);
+  };
+
+  const handleRoleChange = (selectedOption: PageAccessPrivilegesType) => {
+    changeRole({
+      pageId: pageId,
+      body: {
+        audience_id: resource_audience_id,
+        role: selectedOption?.value,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        setSelectedRole(selectedOption);
+        setOpenChangeRoleDropdown(false);
+        setIsHoveredDropdown(false);
+        refetchAudiencesByPageId();
+        toast.success('Role changed successfully');
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || 'Failed to change role');
+      });
   };
 
   const handleOpenRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(true);
   };
+
   const handleCloseRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(false);
   };
 
-  const handleDeleteAudience = async () => {
-    try {
-      await deleteAudience({
-        pageId: pageId,
-        body: {
-          audience_id: resource_audience_id,
-        },
-      }).unwrap();
-      handleCloseRemoveFromTeamPopup();
-      refetchAudiencesByPageId();
-      toast.success('Audience deleted successfully');
-    } catch {
-      handleCloseRemoveFromTeamPopup();
-      toast.error('Failed to delete audience');
-    }
+  const handleDeleteAudience = () => {
+    deleteAudience({
+      pageId: pageId,
+      body: {
+        audience_id: resource_audience_id,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        handleCloseRemoveFromTeamPopup();
+        refetchAudiencesByPageId();
+        toast.success('Audience deleted successfully');
+      })
+      .catch((err) => {
+        handleCloseRemoveFromTeamPopup();
+        toast.error(err?.data?.error || 'Failed to delete audience');
+      });
   };
+
+  useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
     <>
-      <div className='f-12-400 py-1.5 px-2 bg-white flex justify-between items-start'>
-        <div className='flex items-start justify-start gap-x-1 w-[120px]'>
-          {!!user?.email && (
+      <div className='f-12-400 px-2 bg-white flex justify-between items-center'>
+        <div className='flex items-center justify-start'>
+          <div className='flex items-start justify-start gap-x-1 w-[140px]'>
             <>
               <div className='w-fit'>
                 <Avatar
-                  name={user?.email}
+                  name={userName}
                   backgroundColor={COLORS.GRAY_1000}
                   className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
                 />
               </div>
-              <span>{user?.email}</span>
+              <span>{userName}</span>
             </>
-          )}
+          </div>
+          <span className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+            <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
+            {resource_type}
+          </span>
         </div>
-        <span className='flex text-wrap flex-wrap break-words whitespace-normal items-start justify-start w-[90px]'>
-          {resource_type}
-        </span>
-        <span
-          className='flex items-end justify-end w-24 -mt-[12px]'
-          onMouseEnter={() => setIsHoveredDropdown(true)}
-          onMouseLeave={() => setIsHoveredDropdown(false)}
-        >
-          <Dropdown
-            options={CHANGE_PAGE_ACCESS_PRIVILEGES_LIST}
-            id='page-access-to-audiences-dropdown'
-            eventCallback={defaultFn}
-            onChange={handleRoleChange}
-            defaultValue={role}
-            value={selectedRoleRef.current}
-            placeholder='Member'
-            isSearchable={false}
-            enableDelete
-            onClickDelete={handleOpenRemoveFromTeamPopup}
-            customClass={{
-              focus: 'none',
-              border: 'transparent',
-              fontSize: 'f-12-400',
-            }}
-            customClassNames={{
-              placeholder: 'f-12-300',
-            }}
-            menuOptionClasses={{
-              contentWrapper: 'py-2',
-            }}
-            isHoveredDropdown={isHoveredDropdown}
-            showSelectedIcon
-          />
-        </span>
+
+        <AsyncDropdown
+          onOpen={handleOpenChangeRoleDropdown}
+          onClose={handleCloseChangeRoleDropdown}
+          isOpen={openChangeRoleDropdown}
+          onDelete={handleOpenRemoveFromTeamPopup}
+          onChange={(role) => handleRoleChange(role as PageAccessPrivilegesType)}
+          options={CHANGE_PAGE_ACCESS_PRIVILEGES_LIST}
+          selectedValue={selectedRole}
+          defaultValue={role as PageAccessPrivilegesType}
+          showDelete
+          isHoveredDropdown={isHoveredDropdown}
+          setIsHoveredDropdown={setIsHoveredDropdown}
+          isOverflowStyle
+        />
       </div>
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
         feature='remove-access-from-page'
+        warningDescription={`${userName} will be immediately removed from ${resource_type} and lose all access`}
       />
     </>
   );

@@ -1,122 +1,121 @@
 import { FC, useRef, useState } from 'react';
 import {
   useDeleteAudienceFromOrganizationAccessMutation,
-  useGetInvitedAudiencesByOrganisationIdQuery,
+  useGetAudiencesByOrganisationIdQuery,
   usePatchChangeAudienceRoleInOrganizationMutation,
 } from 'apis/people';
+import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/people/people.constants';
 import { TeamMemberAccessPrivilegesType, TeamMembersRolePropsType } from 'modules/people/people.types';
 import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
 import { RootState } from 'store';
-import { defaultFn } from 'types/commonTypes';
-import { Dropdown } from 'components/common/dropdown';
+import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 
 const TeamMembersRole: FC<TeamMembersRolePropsType> = ({ value }) => {
   const { user_id, privilege } = value;
-
   const role = TEAM_MEMBERS_PRIVILEGES_LIST.find((role) => role?.value === privilege);
-  const selectedRoleRef = useRef<TeamMemberAccessPrivilegesType>(TEAM_MEMBERS_PRIVILEGES_LIST[0]);
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-
-  const { refetch: refetchAudiencesByOrganizationId } = useGetInvitedAudiencesByOrganisationIdQuery(
-    { organizationId },
-    { skip: !organizationId },
+  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
+  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<TeamMemberAccessPrivilegesType>(
+    role as TeamMemberAccessPrivilegesType,
   );
   const [changeRole] = usePatchChangeAudienceRoleInOrganizationMutation();
   const [deleteAudience] = useDeleteAudienceFromOrganizationAccessMutation();
-  const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId },
+  );
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleRoleChange = async (selectedOption: TeamMemberAccessPrivilegesType) => {
-    selectedRoleRef.current = selectedOption;
-    const changedRole = selectedRoleRef.current.value;
+  const handleOpenChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(true);
+  };
 
-    await changeRole({
+  const handleCloseChangeRoleDropdown = () => {
+    setOpenChangeRoleDropdown(false);
+  };
+
+  const handleRoleChange = (selectedOption: TeamMemberAccessPrivilegesType) => {
+    changeRole({
       organizationId: organizationId,
       body: {
         user_id: user_id,
-        role: changedRole,
+        role: selectedOption?.value,
       },
     })
       .unwrap()
       .then(() => {
+        setSelectedRole(selectedOption);
+        setOpenChangeRoleDropdown(false);
+        setIsHoveredDropdown(false);
         refetchAudiencesByOrganizationId();
         toast.success('Role changed successfully');
       })
-      .catch(() => {
-        toast.error('Failed to change role');
+      .catch((err) => {
+        toast.error(err?.data?.error || 'Failed to change role');
       });
   };
 
-  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const handleOpenRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(true);
   };
+
   const handleCloseRemoveFromTeamPopup = () => {
     setIsOpenRemoveFromTeamPopup(false);
   };
 
   const handleDeleteAudience = async () => {
-    await deleteAudience({
-      organizationId: organizationId,
-      body: {
-        user_id: user_id,
-      },
-    })
-      .unwrap()
-      .then(() => {
-        handleCloseRemoveFromTeamPopup();
-        refetchAudiencesByOrganizationId();
-        toast.success('Audience deleted successfully');
-      })
-      .catch(() => {
-        handleCloseRemoveFromTeamPopup();
-        toast.error('Failed to delete audience');
-      });
+    try {
+      await deleteAudience({
+        organizationId: organizationId,
+        body: {
+          user_id: user_id,
+        },
+      }).unwrap();
+      handleCloseRemoveFromTeamPopup();
+      refetchAudiencesByOrganizationId();
+      toast.success('Audience deleted successfully');
+    } catch {
+      handleCloseRemoveFromTeamPopup();
+      toast.error('Failed to delete audience');
+    }
   };
 
+  useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
+
   return (
-    <>
-      <div className='flex gap-2 items-center h-full f-12-400 text-GRAY_1000'>{role?.label}</div>
-      <span
-        className='hidden items-end justify-end w-24 -mt-[12px]'
-        onMouseEnter={() => setIsHoveredDropdown(true)}
-        onMouseLeave={() => setIsHoveredDropdown(false)}
-      >
-        <Dropdown
+    <div className='w-full h-full text-left'>
+      <div className='relative w-fit'>
+        <AsyncDropdown
+          onOpen={handleOpenChangeRoleDropdown}
+          onClose={handleCloseChangeRoleDropdown}
+          isOpen={openChangeRoleDropdown}
+          onDelete={handleOpenRemoveFromTeamPopup}
+          onChange={(role) => handleRoleChange(role as TeamMemberAccessPrivilegesType)}
           options={TEAM_MEMBERS_PRIVILEGES_LIST}
-          id='members-change-role-dropdown'
-          eventCallback={defaultFn}
-          onChange={handleRoleChange}
-          defaultValue={role}
-          value={selectedRoleRef.current}
-          placeholder='Member'
-          isSearchable={false}
-          enableDelete
-          onClickDelete={handleOpenRemoveFromTeamPopup}
-          customClass={{
-            focus: 'none',
-            border: 'transparent',
-            fontSize: 'f-12-400',
-          }}
-          customClassNames={{
-            placeholder: 'f-12-300',
-          }}
-          menuOptionClasses={{
-            contentWrapper: 'py-2',
-          }}
+          selectedValue={selectedRole}
+          defaultValue={role as TeamMemberAccessPrivilegesType}
+          showDelete
           isHoveredDropdown={isHoveredDropdown}
+          setIsHoveredDropdown={setIsHoveredDropdown}
           showSelectedIcon
+          parentWrapperClassName='pl-2'
+          wrapperClassName='w-[200px]'
+          selectedOptionClassName='bg-GRAY_100'
         />
-      </span>
+      </div>
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
-        feature='remove-access-from-organization'
+        feature='remove-access-from-dataset'
+        warningDescription={` will be immediately removed from and lose all access`}
       />
-    </>
+    </div>
   );
 };
 

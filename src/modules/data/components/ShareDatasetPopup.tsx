@@ -220,14 +220,20 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
               </div>
             </div>
             {userAccessToDatasetList?.length > 0 && (
-              <div className='relative h-auto'>
-                <div className=' mt-2 rounded-3.5 p-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
-                  <span className=' f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                  <div className=' flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
-                    {userAccessToDatasetList?.map((audience, index) => (
-                      <DatasetAccessToAudiences key={index} {...audience} datasetId={datasetId} />
-                    ))}
-                  </div>
+              <div className='mt-2 rounded-3.5 py-2 pl-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
+                <span className=' f-12-500 text-GRAY_700 p-2'>Who has access</span>
+                <div className=' flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
+                  {userAccessToDatasetList?.map((audience, index) => (
+                    <DatasetAccessToAudiences
+                      key={index}
+                      datasetId={datasetId}
+                      resource_type={audience?.resource_type}
+                      privilege={audience?.privilege}
+                      resource_audience_id={audience?.resource_audience_id}
+                      user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
+                      resource_audience_type={audience?.resource_audience_type}
+                    />
+                  ))}
                 </div>
               </div>
             )}

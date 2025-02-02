@@ -1,10 +1,11 @@
 import React, { FC } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { defaultFnType } from 'types/commonTypes';
 import { FilterConfigType } from 'components/filter/filter.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface FilterDropdownControlProps {
-  onClick?: () => void;
+  onClick?: defaultFnType;
   className?: string;
   filterConfig: FilterConfigType;
   onClear?: ((filterKey: string) => void) | null;

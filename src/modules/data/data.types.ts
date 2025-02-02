@@ -30,6 +30,7 @@ export type DatasetAccessToAudiencesPropsType = {
   privilege?: string;
   datasetId: string;
   resource_audience_id: string;
+  resource_audience_type: string;
   user?: {
     email: string;
     name?: string;

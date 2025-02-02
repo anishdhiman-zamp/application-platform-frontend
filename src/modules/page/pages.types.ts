@@ -8,6 +8,7 @@ export type PageAccessToAudiencesPropsType = {
   privilege?: string;
   pageId: string;
   resource_audience_id: string;
+  resource_audience_type: string;
   user?: {
     email: string;
     name?: string;
@@ -17,6 +18,7 @@ export type PageAccessToAudiencesPropsType = {
 export enum PAGE_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
+  REMOVE = 'remove',
 }
 
 export type PageAccessPrivilegesType = {

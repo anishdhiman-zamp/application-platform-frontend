@@ -43,7 +43,7 @@ export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
     cellRenderer: InvitedMembersEmail,
   },
   {
-    headerName: 'Role',
+    headerName: 'Invited as',
     field: 'privilege',
     cellRenderer: InvitedMembersRole,
   },
