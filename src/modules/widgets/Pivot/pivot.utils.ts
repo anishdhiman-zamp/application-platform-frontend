@@ -1,6 +1,7 @@
-import { ColDef, RowStyle } from 'ag-grid-community';
+import { ColDef, RowStyle, ValueFormatterParams } from 'ag-grid-community';
+import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
-import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX } from 'modules/widgets/Pivot/pivot.constants';
+import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
 import { PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
@@ -103,8 +104,6 @@ export const getHumanReadableColumnName = (name: string): string => {
 };
 
 export const parseType = (type: string, value: any) => {
-  // console.log({ type, value })
-
   if (type === 'date') {
     return new Date(value);
   }
@@ -144,7 +143,7 @@ export const getPivotColumns = (
 
   // iterate over each mapping in the widget instance details; each mapping is a stack in the stacked pivot
   data_mappings.mappings.forEach((mapping, mappingIndex) => {
-    const { fields, name } = mapping;
+    const { fields, ref } = mapping;
 
     const { columns, values } = fields;
 
@@ -156,7 +155,7 @@ export const getPivotColumns = (
         name: col.column,
         dataType: col.type as 'string' | 'number' | 'date',
         sourceName: col.column,
-        mappingName: name,
+        mappingName: ref,
       });
     });
 
@@ -169,14 +168,14 @@ export const getPivotColumns = (
         dataType: val.type as 'string' | 'number' | 'date',
         aggregation: val.aggregation,
         sourceName: val.column,
-        mappingName: name,
+        mappingName: ref,
       });
     });
 
     // if the mapping has no rows, we create a default row with the mapping name; the mapping name becomes the row group name (eg: Closing Balance)
     const mappingRows = fields.rows || [
       {
-        column: mapping.name,
+        column: mapping.ref,
         type: 'string',
       },
     ];
@@ -223,7 +222,7 @@ export const getPivotColumns = (
               dataType: type,
               hasChildren: colIndex < depth - 1,
               sourceName: colName,
-              mappingName: name,
+              mappingName: ref,
             };
           });
         currentLevel += depth - 1;
@@ -234,7 +233,7 @@ export const getPivotColumns = (
           dataType: type,
           hasChildren: false,
           sourceName: column,
-          mappingName: name,
+          mappingName: ref,
         };
       }
     });
@@ -269,7 +268,8 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
       // Process each field in the row
       Object.entries(row).forEach(([key, value]) => {
         // Get the mapping name from the NAME field
-        const mappingName = transformedRow['NAME'];
+        const mappingName = transformedRow[PIVOT_REF];
+
         // Find matching pivot column based on mapping name and source column
         const pivotColumn = pivotColumns.find((col) => {
           return col.mappingName === mappingName && col.sourceName === key;
@@ -279,8 +279,8 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
           // If matching pivot column found, transform the value using its data type
           transformedRow[pivotColumn.name] = parseType(pivotColumn.dataType, value);
         } else {
-          if (key === 'NAME') {
-            // Special handling for NAME field - find pivot column by source name
+          if (key === PIVOT_REF) {
+            // Special handling for REF field - find pivot column by source name
             const transformedColumn = pivotColumns.find((col) => col.sourceName === value);
 
             if (transformedColumn) {
@@ -320,6 +320,10 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
           return {
             field: col.name,
             pivot: true,
+            headerComponent: PivotColGroupHeader,
+            valueFormatter: (params) => {
+              return formatPivotColGroupHeader(params);
+            },
             context: col,
           };
         case 'aggregate':
@@ -377,4 +381,18 @@ export const shouldAllowExpandingRow = <T extends AGGridPivotNode<T>>(node: T) =
   }
 
   return true;
+};
+
+const formatPivotColGroupHeader = (params: ValueFormatterParams) => {
+  const constructorName = params.value?.constructor?.name;
+
+  switch (constructorName) {
+    case 'Date': {
+      const formatted = params.value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      return formatted;
+    }
+    default:
+      return params.value;
+  }
 };

@@ -64,7 +64,7 @@ export type KPITagWidgetMapping = {
 
 export type PivotTableWidgetMapping = {
   dataset_id: string;
-  name: string;
+  ref: string;
   fields: {
     columns: {
       column: string;

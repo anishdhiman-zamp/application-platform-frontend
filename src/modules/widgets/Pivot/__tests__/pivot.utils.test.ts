@@ -13,8 +13,6 @@ describe('getPivotColDefs', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
     const result = getPivotColDefs(pivotColumns);
 
-    console.log(result);
-
     expect(result).toBeDefined();
   });
 });
@@ -25,8 +23,6 @@ describe('getPivotData', () => {
 
     const result = getPivotData(pivotColumns, widgetData);
 
-    console.log(result);
-
     expect(result).toBeDefined();
   });
 });
@@ -36,7 +32,6 @@ describe('getPivotColDefs', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
     const result = getPivotColDefs(pivotColumns);
 
-    console.log(result);
 
     expect(result).toBeDefined();
   });

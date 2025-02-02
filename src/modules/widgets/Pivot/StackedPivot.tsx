@@ -87,6 +87,7 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
   // generate pivot columns, colDefs and rowData
   const { colDef, rowData } = useMemo(() => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
+
     const pivotColDefs = getPivotColDefs(pivotColumns);
     const rowData = getPivotData(pivotColumns, widgetData);
 
