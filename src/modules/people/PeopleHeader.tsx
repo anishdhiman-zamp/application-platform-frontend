@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
-import SharePagePopup from 'modules/page/SharePagePopup';
 import InviteMembersPopup from 'modules/people/InviteMembersPopup';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -46,8 +44,6 @@ const PeopleHeader = () => {
         >
           Invite members
         </Button>
-        <ShareDatasetPopup datasetId='10d8e092-ea1c-4e20-a1b4-a364201f9c99' />
-        <SharePagePopup pageId='c71fe5bf-8f4c-4b12-ba5d-20c2d8de8124' />
         <InviteMembersPopup isOpen={isInviteMembersPopupOpen} onClose={handleCloseInviteMembersPopup} />
       </div>
     </>
