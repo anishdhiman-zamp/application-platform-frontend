@@ -1,4 +1,4 @@
-import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/mockPivotData';
+import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/pivot.utils.mock';
 import {
   AGGridPivotNode,
   flattenChildrenAfterGroup,

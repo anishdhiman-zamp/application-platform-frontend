@@ -23,6 +23,18 @@ const config: Config = {
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+    '!src/**/*.mock.{js,jsx,ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/components/**/*.{js,jsx,ts,tsx}',
+    '!src/apis/**/*.{js,jsx,ts,tsx}',
+    '!src/types/**/*.{js,jsx,ts,tsx}',
+    '!src/styles/**/*.{js,jsx,ts,tsx}',
+    '!src/constants/**/*.{js,jsx,ts,tsx}',
+    '!src/serviceWorker.ts'
+  ],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: 'coverage',
@@ -170,6 +182,10 @@ const config: Config = {
   // testPathIgnorePatterns: [
   //   "/node_modules/"
   // ],
+  testPathIgnorePatterns: [
+    // ... other patterns ...
+    '.*\\.mock\\.(ts|tsx|js)$'
+  ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
