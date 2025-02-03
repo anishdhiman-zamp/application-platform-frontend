@@ -139,7 +139,7 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
   };
 
   return (
-    <div className='h-full w-full'>
+    <div className='h-full w-full pivot'>
       <AgGridReact
         rowData={rowData}
         columnDefs={colDef}

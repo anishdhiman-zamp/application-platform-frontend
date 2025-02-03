@@ -32,7 +32,6 @@ describe('getPivotColDefs', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
     const result = getPivotColDefs(pivotColumns);
 
-
     expect(result).toBeDefined();
   });
 });
