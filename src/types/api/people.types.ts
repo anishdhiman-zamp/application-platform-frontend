@@ -1,11 +1,13 @@
-import { Session } from 'types/api/auth.types';
-
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
 };
 
 export type AudiencesByOrganisationIdResponse = {
-  user: Session;
+  user: {
+    email: string;
+    user_id: string;
+    name: string;
+  };
   privilege: string;
   resource_audience_type: string;
   resource_audience_id: string;

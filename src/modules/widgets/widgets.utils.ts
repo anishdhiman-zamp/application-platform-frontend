@@ -88,9 +88,10 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
             case WidgetDataValueType.BIGINT:
             case WidgetDataValueType.INT:
             case WidgetDataValueType.SMALLINT:
-            case WidgetDataValueType.TINYINT: {
-              formattedRow[column_name] = Math.abs(parseFloat(value as string) ?? 0);
-            }
+            case WidgetDataValueType.TINYINT:
+              {
+                formattedRow[column_name] = Math.abs(parseFloat(value as string) ?? 0);
+              }
               break;
             default:
               formattedRow[column_name] = value ?? 0; // Leave as is for unknown types.
@@ -117,12 +118,10 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
 
       const yAxisTitle = `${axis?.column} (${axis?.aggregation}), in ${formatNumber(
-        getMaxValue(
-          dataWithDataType?.[0] ?? [],
-          [axis?.column]) ?? '',
+        getMaxValue(dataWithDataType?.[0] ?? [], [axis?.column]) ?? '',
         0,
         true,
-        true
+        true,
       )}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
@@ -138,7 +137,10 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
       if (dataWithDataType?.[0]?.length > 5) {
-        return { transformedData: getGroupedDonutChartData(dataWithDataType, widgetDetails?.data_mappings?.mappings), stackedValues };
+        return {
+          transformedData: getGroupedDonutChartData(dataWithDataType, widgetDetails?.data_mappings?.mappings),
+          stackedValues,
+        };
       }
 
       return { transformedData: dataWithDataType?.[0], stackedValues };
@@ -160,13 +162,13 @@ export const getChartOptions = (
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
       ? {
-        zoom: {
-          enabled: true,
-          buttons: {
-            enabled: false,
+          zoom: {
+            enabled: true,
+            buttons: {
+              enabled: false,
+            },
           },
-        },
-      }
+        }
       : {};
 
   const label = {

@@ -69,7 +69,12 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
       <span
         onClick={disabled ? undefined : handlePress}
         data-checkboxid='check-box'
-        className={cn('absolute top-0 left-0 h-3.5 w-3.5 rounded', isCustomCheckMark ? customCheckMarkClassName : checkmarkStyles, displayContainerClassName, checkBoxStylesByState)}
+        className={cn(
+          'absolute top-0 left-0 h-3.5 w-3.5 rounded',
+          isCustomCheckMark ? customCheckMarkClassName : checkmarkStyles,
+          displayContainerClassName,
+          checkBoxStylesByState,
+        )}
         data-testid={`checkbox-span-${id}`}
       >
         {customCheckMark ?? null}

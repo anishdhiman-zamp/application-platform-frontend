@@ -6,10 +6,7 @@ import { WIDGET_LOADER } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
-import {
-  getChartOptions,
-  getTransformedData,
-} from 'modules/widgets/widgets.utils';
+import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
@@ -39,8 +36,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   );
 
   const { transformedData, stackedValues, yAxisTitle } = useMemo(() => {
-    return widgetData?.result ? getTransformedData(widgetData?.result, widgetDetails) : { transformedData: [], stackedValues: [] };
-
+    return widgetData?.result
+      ? getTransformedData(widgetData?.result, widgetDetails)
+      : { transformedData: [], stackedValues: [] };
   }, [widgetData]);
 
   const chartOptions = useMemo(() => {

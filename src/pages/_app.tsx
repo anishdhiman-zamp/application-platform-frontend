@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import { LicenseManager } from 'ag-grid-enterprise';
 import { SIZE } from 'constants/common.constants';
 import { FAVICON } from 'constants/icons';
+import { FeatureFlagsProvider } from 'modules/feature-flags/provider';
 import { AuthGuard } from 'modules/login/AuthGuard';
 import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
@@ -57,8 +58,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           }
           loginRoute='/login'
         >
-          <ToastContainer />
-          <div className={`${inter.className} h-screen light-mode`}>{getComponent()}</div>
+          <FeatureFlagsProvider>
+            <ToastContainer />
+            <div className={`${inter.className} h-screen light-mode`}>{getComponent()}</div>
+          </FeatureFlagsProvider>
         </AuthGuard>
       </Provider>
     </>

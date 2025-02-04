@@ -70,7 +70,6 @@ export type Organization = {
 
 export type Session = {
   user_id: string;
-  email: string;
   workspaces: Workspace[];
   organization_id: Workspace;
   user_email: string;

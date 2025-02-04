@@ -100,7 +100,11 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           values
             .filter((item) => item?.includes(inputValue))
             .map((item) => (
-              <div key={item} onClick={() => onChange(item)} className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'>
+              <div
+                key={item}
+                onClick={() => onChange(item)}
+                className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+              >
                 {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
                 <div className='min-w-[14px]'>
                   <CheckBox checked={selectedValues?.includes(item)} id='checkbox-1' />
