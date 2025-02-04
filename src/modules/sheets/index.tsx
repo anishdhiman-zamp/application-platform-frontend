@@ -3,7 +3,7 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { WIDGET_LOADER_2 } from 'constants/icons';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
-import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widget.constant';
+import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import WidgetsWrapper from 'modules/widgets/WidgetsWrapper';
 import Image from 'next/image';
 import CommonWrapper from 'components/commonWrapper';
@@ -46,12 +46,12 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
           skeletonType={SkeletonTypes.CUSTOM}
           loader={
             <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
-              <Image src={WIDGET_LOADER_2} alt='widget-loader' width={400} height={400} />
+              <Image unoptimized src={WIDGET_LOADER_2} alt='widget-loader' width={400} height={400} />
             </div>
           }
         >
-          <div className='flex justify-between items-center z-100'>
-            <div className='f-24-450 text-GRAY_950 mb-5.5'>{sheetDetails?.name}</div>
+          <div className='flex justify-between items-center z-100 px-5'>
+            <div className='f-24-450 text-GRAY_950 mb-2.5'>{sheetDetails?.name}</div>
             <FiltersWrapper
               allowClear={false}
               label='Filter'

@@ -85,13 +85,15 @@ export type PivotTableWidgetMapping = {
   };
 };
 
+export type FieldsMappingType = {
+  x_axis: AxisMappingType[];
+  y_axis: AxisMappingType[];
+  group_by?: AxisMappingType[];
+};
+
 export type BarLineChartWidgetMapping = {
   dataset_id: string;
-  fields: {
-    x_axis: AxisMappingType[];
-    y_axis: AxisMappingType[];
-    group_by?: AxisMappingType[];
-  };
+  fields: FieldsMappingType;
 };
 
 export interface PieDonutChartWidgetMapping {

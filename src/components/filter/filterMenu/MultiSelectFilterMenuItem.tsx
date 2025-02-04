@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
-import { camelCaseToNormalText, debounce } from 'utils/common';
+import { camelCaseToNormalText, cn, debounce } from 'utils/common';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -72,7 +72,10 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
 
   return (
     <div
-      className={`flex flex-col gap-2 bg-white py-2 w-[218px] border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] ${className}`}
+      className={cn(
+        'flex flex-col gap-2 bg-white pt-2 pb-1 w-[218px] border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px]',
+        className,
+      )}
     >
       <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 px-2.5'>
         <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
@@ -92,17 +95,15 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       <div className='px-2.5'>
         <Input size={SIZE_TYPES.XSMALL} value={inputValue} placeholder='type a value...' onChange={onSearchChange} />
       </div>
-      <div className='flex flex-col gap-1.5 h-full overflow-y-auto custom-scroll-bar-common'>
+      <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1'>
         {!!values?.length &&
           values
             .filter((item) => item?.includes(inputValue))
             .map((item) => (
-              <div key={item}>
-                <div className='flex items-center gap-2 justify-between py-1 px-2.5'>
-                  {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
-                  <div className='min-w-[14px]'>
-                    <CheckBox checked={selectedValues?.includes(item)} onPress={() => onChange(item)} id='checkbox-1' />
-                  </div>
+              <div key={item} onClick={() => onChange(item)} className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'>
+                {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
+                <div className='min-w-[14px]'>
+                  <CheckBox checked={selectedValues?.includes(item)} id='checkbox-1' />
                 </div>
               </div>
             ))}

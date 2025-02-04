@@ -53,7 +53,7 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
             />
           ))}
         </div>
-        <div className='px-1 py-2.5'>
+        <div className='px-2 py-2.5'>
           <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
           {pages?.map((item) => (
             <PageNavTab
@@ -65,13 +65,11 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
           ))}
         </div>
         <div
-          className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px]'
+          className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px] flex items-center gap-2.5 text-GRAY_900'
           onClick={handleLogout}
         >
-          <div className='flex items-center gap-2.5 text-GRAY_900'>
-            <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
-            <div className='f-13-500'>Logout</div>
-          </div>
+          <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
+          <div className='f-13-500'>Logout</div>
         </div>
       </div>
     </div>

@@ -1,27 +1,35 @@
 import { AgChartOptions } from 'ag-charts-community';
-import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
+import { COLORS } from 'constants/colors';
 import {
   AG_CHART_TYPES,
   CHART_CATEGORY_AXES,
   CHART_NUMBER_AXES,
-  DONUT_CHART_SERIES_CONFIG,
+  getDonutChartSeriesConfig,
   WidgetDataValueType,
 } from 'modules/widgets/widgets.constant';
-import { WIDGET_TYPES, WidgetDataType, WidgetInstanceType } from 'types/api/widgets.types';
+import {
+  FieldsMappingType,
+  PieDonutChartWidgetMapping,
+  WIDGET_TYPES,
+  WidgetDataType,
+  WidgetInstanceType,
+} from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
-import { formatNumber } from 'utils/common';
+import { formatNumber, getMaxValue } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
 
 export function groupTransactionsByDate(
   data: MapAny[],
-  groupBy: string,
-  xAxis: string,
-  yAxis: string,
+  fields: FieldsMappingType,
 ): { data: MapAny[]; groupValues: string[] } {
   if (!data?.length) return { data: [], groupValues: [] };
+
+  const groupBy = fields?.group_by?.[0]?.column ?? '';
+  const xAxis = fields?.x_axis?.[0]?.column ?? '';
+  const yAxis = fields?.y_axis?.[0]?.column ?? '';
 
   const grouped: MapAny = {};
   const groupValues = new Set<string>();
@@ -55,7 +63,7 @@ export function groupTransactionsByDate(
  * @param response - The response object containing columns and data.
  * @returns The formatted data array.
  */
-export function transformData(responses: WidgetDataType[]) {
+export function getDataWithDataType(responses: WidgetDataType[]) {
   return responses.map((response) => {
     const { columns, data } = response;
 
@@ -80,8 +88,9 @@ export function transformData(responses: WidgetDataType[]) {
             case WidgetDataValueType.BIGINT:
             case WidgetDataValueType.INT:
             case WidgetDataValueType.SMALLINT:
-            case WidgetDataValueType.TINYINT:
+            case WidgetDataValueType.TINYINT: {
               formattedRow[column_name] = Math.abs(parseFloat(value as string) ?? 0);
+            }
               break;
             default:
               formattedRow[column_name] = value ?? 0; // Leave as is for unknown types.
@@ -94,24 +103,70 @@ export function transformData(responses: WidgetDataType[]) {
   });
 }
 
+export const getTransformedData = (data: WidgetDataType[], widgetDetails: WidgetInstanceType) => {
+  const widgetType = widgetDetails.widget_type;
+  const stackedValues: MapAny[] = [];
+
+  const dataWithDataType = getDataWithDataType(data);
+
+  switch (widgetType) {
+    case WIDGET_TYPES.BAR_CHART:
+    case WIDGET_TYPES.LINE_CHART: {
+      const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
+      const mappings = widgetDetails?.data_mappings?.mappings[0];
+      const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
+
+      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), in ${formatNumber(
+        getMaxValue(
+          dataWithDataType?.[0] ?? [],
+          [axis?.column]) ?? '',
+        0,
+        true,
+        true
+      )}`;
+
+      if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
+        groupedData?.groupValues.forEach((value) => {
+          stackedValues.push({ column: value });
+        });
+
+        return { transformedData: groupedData?.data, stackedValues, yAxisTitle };
+      }
+
+      return { transformedData: dataWithDataType?.[0], stackedValues, yAxisTitle };
+    }
+    case WIDGET_TYPES.DONUT_CHART:
+    case WIDGET_TYPES.PIE_CHART: {
+      if (dataWithDataType?.[0]?.length > 5) {
+        return { transformedData: getGroupedDonutChartData(dataWithDataType, widgetDetails?.data_mappings?.mappings), stackedValues };
+      }
+
+      return { transformedData: dataWithDataType?.[0], stackedValues };
+    }
+    default:
+      return { transformedData: dataWithDataType?.[0], stackedValues };
+  }
+};
+
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
   baseOptions: AgChartOptions,
   stackedValues?: MapAny[],
+  dataLength?: number,
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
 
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
       ? {
-          zoom: {
-            enabled: true,
-            buttons: {
-              enabled: false,
-            },
+        zoom: {
+          enabled: true,
+          buttons: {
+            enabled: false,
           },
-        }
+        },
+      }
       : {};
 
   const label = {
@@ -166,14 +221,12 @@ export const getChartOptions = (
           yKey: `${axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
-          stroke: CHART_PALETTE_COLORS[Math.floor(Math.random() * CHART_PALETTE_COLORS.length - 2)],
           marker: {
             enabled: false,
           },
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
-          label,
         })),
       };
     }
@@ -182,12 +235,13 @@ export const getChartOptions = (
       const mappings = widgetDetails?.data_mappings?.mappings;
       const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
+      const chartConfig = getDonutChartSeriesConfig(dataLength ?? 0);
 
       return {
         ...baseOptions,
         series: [
           {
-            ...DONUT_CHART_SERIES_CONFIG,
+            ...chartConfig,
             type: chartType,
             legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
             angleKey: sliceKey,
@@ -277,4 +331,18 @@ export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selecte
     .filter((filter) => !!filter?.filters?.conditions.length && filter?.filters?.conditions[0] !== null);
 
   return appliedFilters;
+};
+
+export const getGroupedDonutChartData = (data: MapAny[], mappings: PieDonutChartWidgetMapping[]) => {
+  const sliceKey = mappings?.[0]?.fields?.slices?.[0]?.column;
+  const valueKey = mappings?.[0]?.fields?.values?.[0]?.column;
+  const slicedData = data[0]
+    ?.sort((a: MapAny, b: MapAny) => b[valueKey as keyof MapAny] - a[valueKey as keyof MapAny])
+    ?.slice(0, 5);
+  const total = slicedData?.reduce((acc: number, curr: MapAny) => acc + curr[valueKey as keyof MapAny], 0);
+  const remaining = data[0]?.reduce((acc: number, curr: MapAny) => acc + curr[valueKey as keyof MapAny], 0) - total;
+
+  slicedData.push({ [sliceKey as string]: 'Others', [valueKey as string]: remaining });
+
+  return slicedData;
 };
