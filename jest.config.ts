@@ -33,7 +33,7 @@ const config: Config = {
     '!src/types/**/*.{js,jsx,ts,tsx}',
     '!src/styles/**/*.{js,jsx,ts,tsx}',
     '!src/constants/**/*.{js,jsx,ts,tsx}',
-    '!src/serviceWorker.ts'
+    '!src/serviceWorker.ts',
   ],
 
   // The directory where Jest should output its coverage files
@@ -184,7 +184,7 @@ const config: Config = {
   // ],
   testPathIgnorePatterns: [
     // ... other patterns ...
-    '.*\\.mock\\.(ts|tsx|js)$'
+    '.*\\.mock\\.(ts|tsx|js)$',
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

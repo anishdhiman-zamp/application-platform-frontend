@@ -4,6 +4,8 @@ import {
   AudiencesByOrganisationIdRequest,
   AudiencesByOrganisationIdResponse,
   DeleteAudienceFromOrganizationAccessType,
+  GetMembershipRequestsByOrganizationIdRequest,
+  GetMembershipRequestsByOrganizationIdResponse,
   InvitedAudiencesByOrganisationIdResponse,
   PatchChangeAudienceRoleInOrganizationType,
   PostAudiencesInviteData,
@@ -52,6 +54,17 @@ const People = baseApi.injectEndpoints({
         body: body,
       }),
     }),
+    getMembershipRequestsByOrganizationId: builder.query<
+      GetMembershipRequestsByOrganizationIdResponse,
+      GetMembershipRequestsByOrganizationIdRequest
+    >({
+      query: ({ organizationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.MEMBERSHIP_REQUESTS_BY_ORGANIZATION_ID_GET, { organizationId }),
+      }),
+    }),
+    getOrganizationMembershipRequestsAll: builder.query<GetMembershipRequestsByOrganizationIdResponse, void>({
+      query: () => ({ url: API_ENDPOINTS.MEMBERSHIP_REQUESTS_ALL_GET }),
+    }),
   }),
 });
 
@@ -61,4 +74,6 @@ export const {
   usePostInviteAudiencesByOrganisationIdMutation,
   usePatchChangeAudienceRoleInOrganizationMutation,
   useDeleteAudienceFromOrganizationAccessMutation,
+  useGetMembershipRequestsByOrganizationIdQuery,
+  useGetOrganizationMembershipRequestsAllQuery,
 } = People;

@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { useWhoAmIQuery } from 'apis/auth';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
+import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { setUser, setWorkspace } from 'store/slices/user';
-import MembershipRequested from 'components/MembershipRequested';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -62,7 +62,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
   }
 
   if (session?.orgs?.length === 0) {
-    return <MembershipRequested />;
+    return <OrgMembershipPending />;
   }
 
   if (

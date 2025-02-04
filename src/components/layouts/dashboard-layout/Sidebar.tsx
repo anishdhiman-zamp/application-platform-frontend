@@ -1,9 +1,9 @@
 import React, { FC, useEffect } from 'react';
-import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { useGetPagesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { ROUTES_PATH, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
+import { useLogout } from 'hooks/useLogout';
 import { useRouter } from 'next/router';
 import { SidebarProps } from 'types/common/sidebar';
 import { cn } from 'utils/common';
@@ -15,8 +15,7 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
   const router = useRouter();
   const pathname = router?.pathname;
   const pageId = router?.query?.id;
-  const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
-  const [logOut] = useLazyLogoutQuery();
+  const { logout } = useLogout();
   const { data: pages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -27,16 +26,6 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
       pushToMostRelevantPage();
     }
   }, [pages]);
-
-  const handleLogout = async () => {
-    logOut(initiateLogoutFlow?.logout_url ?? '')
-      .then(() => {
-        router.push(ROUTES_PATH.LOGIN);
-      })
-      .catch(() => {
-        refetchLogoutFlow();
-      });
-  };
 
   return (
     <div className={cn('relative transition-all duration-300', isSidebarOpen ? 'w-60' : 'w-0')}>
@@ -66,7 +55,7 @@ const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
         </div>
         <div
           className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px] flex items-center gap-2.5 text-GRAY_900'
-          onClick={handleLogout}
+          onClick={logout}
         >
           <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
           <div className='f-13-500'>Logout</div>

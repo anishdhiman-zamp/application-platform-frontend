@@ -30,3 +30,15 @@ export type PatchChangeAudienceRoleInOrganizationType = {
 };
 
 export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };
+
+export type GetMembershipRequestsByOrganizationIdRequest = { organizationId: string };
+
+export type GetMembershipRequestsByOrganizationIdResponse = {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  status: string;
+}[];
