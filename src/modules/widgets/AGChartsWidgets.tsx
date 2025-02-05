@@ -10,6 +10,7 @@ import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.uti
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 interface WidgetsWrapperProps {
@@ -30,15 +31,16 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   isFilterInitialized,
   onNodeClick,
 }) => {
+  const widgetType = widgetDetails?.widget_type;
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     { widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 
-  const { transformedData, stackedValues, yAxisTitle } = useMemo(() => {
+  const { transformedData, stackedValues, yAxisTitle, donutOthersData } = useMemo(() => {
     return widgetData?.result
       ? getTransformedData(widgetData?.result, widgetDetails)
-      : { transformedData: [], stackedValues: [] };
+      : { transformedData: [], stackedValues: [], donutOthersData: [], yAxisTitle: '' };
   }, [widgetData]);
 
   const chartOptions = useMemo(() => {
@@ -50,12 +52,25 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       axes: AG_CHART_AXES,
     } as AgChartOptions;
 
-    return getChartOptions(widgetDetails, onNodeClick, baseOptions, stackedValues, transformedData?.length);
+    return getChartOptions(
+      widgetDetails,
+      onNodeClick,
+      baseOptions,
+      stackedValues,
+      transformedData?.length,
+      donutOthersData,
+    );
   }, [widgetDetails, onNodeClick, transformedData, stackedValues]);
 
   return (
     <div className=' bg-white h-full border border-GRAY_400 rounded-xl px-6 py-4.5 overflow-hidden'>
-      <div className='f-18-450 text-GRAY_1000 mb-10'>{widgetDetails?.title}</div>
+      <div
+        className={cn('f-18-450 text-GRAY_1000', {
+          'mb-10': ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType),
+        })}
+      >
+        {widgetDetails?.title}
+      </div>
       <CommonWrapper
         isLoading={isLoading}
         skeletonType={SkeletonTypes.CUSTOM}

@@ -1,10 +1,12 @@
-import { AgChartOptions } from 'ag-charts-community';
+import { AgCartesianSeriesTooltipRendererParams, AgChartOptions } from 'ag-charts-community';
 import { COLORS } from 'constants/colors';
 import {
   AG_CHART_TYPES,
   CHART_CATEGORY_AXES,
   CHART_NUMBER_AXES,
+  CHART_SLICE_TYPES,
   getDonutChartSeriesConfig,
+  MAX_DONUT_CHART_SLICE_COUNT,
   WidgetDataValueType,
 } from 'modules/widgets/widgets.constant';
 import {
@@ -16,7 +18,7 @@ import {
 } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
-import { formatNumber, getMaxValue } from 'utils/common';
+import { formatNumber, getCommaSeparatedNumber, getMaxValue } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
@@ -137,10 +139,12 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
       if (dataWithDataType?.[0]?.length > 5) {
-        return {
-          transformedData: getGroupedDonutChartData(dataWithDataType, widgetDetails?.data_mappings?.mappings),
-          stackedValues,
-        };
+        const { slicedData, remainingData } = getGroupedDonutChartData(
+          dataWithDataType,
+          widgetDetails?.data_mappings?.mappings,
+        );
+
+        return { transformedData: slicedData ?? [], donutOthersData: remainingData ?? [] };
       }
 
       return { transformedData: dataWithDataType?.[0], stackedValues };
@@ -156,6 +160,7 @@ export const getChartOptions = (
   baseOptions: AgChartOptions,
   stackedValues?: MapAny[],
   dataLength?: number,
+  donutOthersData?: MapAny[],
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
 
@@ -204,6 +209,17 @@ export const getChartOptions = (
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
+          tooltip: {
+            showArrow: false,
+            renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
+              data: [
+                {
+                  label: yName,
+                  value: getCommaSeparatedNumber(datum[yKey], 2),
+                },
+              ],
+            }),
+          },
           label,
         })),
       };
@@ -238,21 +254,44 @@ export const getChartOptions = (
       const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
       const chartConfig = getDonutChartSeriesConfig(dataLength ?? 0);
+      const sliceColumn = mappings?.[0]?.fields?.slices?.[0]?.column;
 
       return {
         ...baseOptions,
+        width: 500,
+        height: 350,
         series: [
           {
             ...chartConfig,
             type: chartType,
-            legendItemKey: mappings?.[0]?.fields?.slices?.[0]?.column,
+            legendItemKey: sliceColumn,
             angleKey: sliceKey,
             calloutLabelKey: sliceKey,
             tooltip: {
               showArrow: false,
-              renderer: () => {
+              renderer: ({ datum }: AgCartesianSeriesTooltipRendererParams) => {
+                const sliceValue = datum[sliceColumn ?? ''];
+
+                if (sliceValue !== CHART_SLICE_TYPES.OTHERS)
+                  return {
+                    heading: sliceKey,
+                    data: [
+                      {
+                        label: datum[sliceColumn ?? ''],
+                        value: getCommaSeparatedNumber(datum[sliceKey ?? ''], 2),
+                      },
+                    ],
+                  };
+
                 return {
-                  heading: sliceKey,
+                  heading: `${mappings?.[0]?.fields?.values?.[0]?.column.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
+                  title: datum[sliceColumn ?? ''],
+                  data: donutOthersData?.length
+                    ? donutOthersData.map((item) => ({
+                        label: item[sliceColumn ?? ''],
+                        value: getCommaSeparatedNumber(item[sliceKey ?? ''], 2),
+                      }))
+                    : [],
                 };
               },
             },
@@ -338,13 +377,15 @@ export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selecte
 export const getGroupedDonutChartData = (data: MapAny[], mappings: PieDonutChartWidgetMapping[]) => {
   const sliceKey = mappings?.[0]?.fields?.slices?.[0]?.column;
   const valueKey = mappings?.[0]?.fields?.values?.[0]?.column;
-  const slicedData = data[0]
-    ?.sort((a: MapAny, b: MapAny) => b[valueKey as keyof MapAny] - a[valueKey as keyof MapAny])
-    ?.slice(0, 5);
-  const total = slicedData?.reduce((acc: number, curr: MapAny) => acc + curr[valueKey as keyof MapAny], 0);
-  const remaining = data[0]?.reduce((acc: number, curr: MapAny) => acc + curr[valueKey as keyof MapAny], 0) - total;
+  const sortedData = data[0]?.sort((a: MapAny, b: MapAny) => b[valueKey as keyof MapAny] - a[valueKey as keyof MapAny]);
+  const slicedData = sortedData?.slice(0, MAX_DONUT_CHART_SLICE_COUNT);
+  const remainingData = sortedData?.slice(MAX_DONUT_CHART_SLICE_COUNT);
+  const remainingTotal = remainingData?.reduce((acc: number, curr: MapAny) => acc + curr[valueKey as keyof MapAny], 0);
 
-  slicedData.push({ [sliceKey as string]: 'Others', [valueKey as string]: remaining });
+  slicedData.push({
+    [sliceKey as string]: CHART_SLICE_TYPES.OTHERS,
+    [valueKey as string]: Number(remainingTotal.toFixed(2)),
+  });
 
-  return slicedData;
+  return { slicedData, remainingData };
 };

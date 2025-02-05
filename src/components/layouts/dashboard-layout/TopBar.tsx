@@ -25,14 +25,14 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
     <div className='h-12 flex items-center justify-between'>
       <div
         className={cn(
-          'py-4 h-12 flex gap-0 items-center justify-between text-GRAY_700 transition-all duration-300',
+          'py-4 h-12 flex items-center justify-between text-GRAY_700 transition-all duration-300',
           isSidebarOpen ? 'w-[240px]' : 'w-[48px]',
         )}
       >
         <div
           className={cn(
             'flex-1 transition-all duration-300 pl-4',
-            isSidebarOpen ? 'w-[188px] opacity-100' : 'w-0 opacity-0',
+            isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0',
           )}
         >
           <Image
@@ -44,16 +44,16 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
             priority={true}
           />
         </div>
-        <div className={cn('border-r', isSidebarOpen ? 'border-white' : ' border-GRAY_400')}>
+        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : ' border-GRAY_400')}>
           <SvgSpriteLoader
-            className='cursor-pointer pr-4'
+            className='cursor-pointer pr-5'
             onClick={onSidebarToggle}
             iconCategory={ICON_SPRITE_TYPES.LAYOUT}
             id='flex-align-right'
           />
         </div>
       </div>
-      <div className='flex items-center gap-2 w-full pl-4'>
+      <div className='flex items-center gap-2 w-full pl-8 h-full'>
         <SvgSpriteLoader
           id='arrow-left'
           iconCategory={ICON_SPRITE_TYPES.ARROWS}

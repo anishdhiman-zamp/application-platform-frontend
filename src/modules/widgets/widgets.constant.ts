@@ -17,6 +17,7 @@ export const SCREEN_BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 
 
 export const ROW_HEIGHT = 56; // Height of a single row in px
 export const WIDGETS_LAYOUT_MARGIN = [20, 20]; // Space between components (20px)
+export const MAX_DONUT_CHART_SLICE_COUNT = 5;
 
 export enum WidgetDataValueType {
   STRING = 'STRING',
@@ -41,6 +42,10 @@ export const AG_CHART_TYPES = {
   [WIDGET_TYPES.PIE_CHART]: 'pie',
   [WIDGET_TYPES.DONUT_CHART]: 'donut',
 };
+
+export enum CHART_SLICE_TYPES {
+  OTHERS = 'others',
+}
 
 export const CHART_CATEGORY_AXES: AgCartesianAxisOptions = {
   type: 'category' as const,
