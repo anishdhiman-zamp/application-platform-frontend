@@ -5,7 +5,8 @@ import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
-import { setUser, setWorkspace } from 'store/slices/user';
+import { setRoles, setUser, setWorkspace } from 'store/slices/user';
+import { UserRoleIdType } from 'types/api/auth.types';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -25,6 +26,9 @@ export const AuthGuard: React.FC<Props> = (props) => {
     if (session && isSuccess) {
       dispatch(setUser(session));
       const defaultWorkspace = session?.organization_id;
+      const user_role = session?.orgs[0]?.resource_audience_policies[0]?.privilege;
+
+      dispatch(setRoles([{ id: UserRoleIdType.USER, name: user_role }]));
 
       dispatch(setWorkspace(defaultWorkspace));
     }

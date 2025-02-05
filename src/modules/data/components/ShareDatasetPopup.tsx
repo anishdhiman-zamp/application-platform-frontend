@@ -1,5 +1,4 @@
 import React, { FC, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useGetAudiencesByDatasetIdQuery, usePostShareDatasetToAudiencesByDatasetIdMutation } from 'apis/dataset';
 import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
@@ -13,8 +12,13 @@ import { RootState } from 'store';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { accessPermissionForDataset } from 'utils/accessPermission/accessPermission';
+import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
+import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
@@ -28,14 +32,20 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const [openShareDatasetPopup, setOpenShareDatasetPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
-  const { data: getAudiencesAccessToDatasetData, refetch: refetchAudiencesByDatasetId } =
-    useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
+  const { data: getAudiencesByDatasetId, refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery(
+    { datasetId },
+    { skip: !datasetId },
+  );
   const [postInviteAudiences] = usePostShareDatasetToAudiencesByDatasetIdMutation();
-  const userAccessToDatasetList = getAudiencesAccessToDatasetData ?? [];
+  const userAccessToDatasetList = getAudiencesByDatasetId ?? [];
   const placeholderText = 'Share with people and teams';
-  const checkIfUser = useSelector((state: RootState) => state?.user?.user)?.user_email;
-
-  const isDatasetSharable = !showValidationError && selectedItems.length > 0;
+  const user_email = getUserEmail();
+  const user_role = getUserPrivilege();
+  const userPrivilege =
+    getAudiencesByDatasetId?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
+  const isDatasetSharable =
+    !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.DATA_READER;
+  const checkPermission = accessPermissionForDataset(userPrivilege);
 
   const handleOpenShareDatasetPopup = () => {
     setOpenShareDatasetPopup(true);
@@ -56,14 +66,22 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     })),
   };
 
-  const handleShareDatasetPopup = async () => {
-    try {
-      await postInviteAudiences({ datasetId, body: AudiencesDatasetShareData }).unwrap();
-      setSelectedItems([]);
-      refetchAudiencesByDatasetId();
-      toast.success('Dataset shared successfully');
-    } catch {
-      toast.error('Failed to share Dataset');
+  const handleShareDatasetPopup = () => {
+    if (!checkPermission) {
+      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.INVITE]);
+
+      return;
+    } else {
+      postInviteAudiences({ datasetId, body: AudiencesDatasetShareData })
+        .unwrap()
+        .then(() => {
+          setSelectedItems([]);
+          refetchAudiencesByDatasetId();
+          toast.success(TOAST_MESSAGES.SUCCESS_DATASET_SHARED);
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_DATASET_SHARED);
+        });
     }
   };
 
@@ -78,23 +96,23 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     let resource_audience_type = '';
 
     if (!isValid) {
-      return { isValid: false, message: 'Email address incorrect' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL };
     }
 
     const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
 
     if (!audience) {
-      return { isValid: false, message: 'User is not present in the organization' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
 
-    const isAlreadyInvited = getAudiencesAccessToDatasetData?.some((item) => item?.user?.email === value);
+    const isAlreadyInvited = getAudiencesByDatasetId?.some((item) => item?.user?.email === value);
 
     if (isAlreadyInvited) {
-      return { isValid: false, message: 'User is already invited' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
     }
 
-    if (value === checkIfUser) {
-      return { isValid: false, message: 'You cannot invite yourself' };
+    if (value === user_email) {
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.CANNOT_ADD_SELF };
     }
 
     resource_audience_type = audience?.resource_audience_type ?? '';
@@ -153,7 +171,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     <div className='flex w-fit'>
       <Button
         type={BUTTON_TYPES.SECONDARY}
-        id='send-user-invite-btn'
+        id='share-dataset-to-audience'
         size={SIZE_TYPES.SMALL}
         className='!bg-GRAY_100'
         onClick={handleOpenShareDatasetPopup}
@@ -232,6 +250,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                       resource_audience_id={audience?.resource_audience_id}
                       user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
                       resource_audience_type={audience?.resource_audience_type}
+                      userPrivilege={userPrivilege}
                     />
                   ))}
                 </div>

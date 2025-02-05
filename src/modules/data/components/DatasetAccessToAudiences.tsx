@@ -10,10 +10,15 @@ import { useOnClickOutside } from 'hooks';
 import { CHANGE_ACCESS_PRIVILEGES_LIST, DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, DatasetAccessToAudiencesPropsType } from 'modules/data/data.types';
 import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
+import { accessPermissionForDataset } from 'utils/accessPermission/accessPermission';
+import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
+import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
 import { toast } from 'components/common/toast/Toast';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
@@ -23,6 +28,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   resource_audience_id,
   resource_audience_type,
   user,
+  userPrivilege,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
@@ -33,7 +39,10 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
   const [changeRole] = usePatchChangeAudienceRoleInDatasetMutation();
   const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
+
+  const checkIfUser = checkIfCurrentUser(user?.email ?? '');
   const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
+  const checkPermission = accessPermissionForDataset(userPrivilege);
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -44,24 +53,30 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   };
 
   const handleRoleChange = (selectedOption: DatasetAccessPrivilegesType) => {
-    changeRole({
-      datasetId: datasetId,
-      body: {
-        audience_id: resource_audience_id,
-        role: selectedOption?.value,
-      },
-    })
-      .unwrap()
-      .then(() => {
-        setSelectedRole(selectedOption);
-        setOpenChangeRoleDropdown(false);
-        setIsHoveredDropdown(false);
-        refetchAudiencesByDatasetId();
-        toast.success('Role changed successfully');
+    if (!checkPermission) {
+      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.ROLE_CHANGE]);
+
+      return;
+    } else {
+      changeRole({
+        datasetId: datasetId,
+        body: {
+          audience_id: resource_audience_id,
+          role: selectedOption?.value,
+        },
       })
-      .catch((err) => {
-        toast.error(err?.data?.error || 'Failed to change role');
-      });
+        .unwrap()
+        .then(() => {
+          setSelectedRole(selectedOption);
+          setOpenChangeRoleDropdown(false);
+          setIsHoveredDropdown(false);
+          refetchAudiencesByDatasetId();
+          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
+        });
+    }
   };
 
   const handleOpenRemoveFromTeamPopup = () => {
@@ -73,29 +88,35 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   };
 
   const handleDeleteAudience = () => {
-    deleteAudience({
-      datasetId: datasetId,
-      body: {
-        audience_id: resource_audience_id,
-      },
-    })
-      .unwrap()
-      .then(() => {
-        handleCloseRemoveFromTeamPopup();
-        refetchAudiencesByDatasetId();
-        toast.success('Audience deleted successfully');
+    if (!checkPermission) {
+      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.DELETE]);
+
+      return;
+    } else {
+      deleteAudience({
+        datasetId: datasetId,
+        body: {
+          audience_id: resource_audience_id,
+        },
       })
-      .catch((err) => {
-        handleCloseRemoveFromTeamPopup();
-        toast.error(err?.data?.error || 'Failed to delete audience');
-      });
+        .unwrap()
+        .then(() => {
+          handleCloseRemoveFromTeamPopup();
+          refetchAudiencesByDatasetId();
+          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_DELETED);
+        })
+        .catch((err) => {
+          handleCloseRemoveFromTeamPopup();
+          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
+        });
+    }
   };
 
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
     <>
-      <div className='f-12-400 px-2 bg-white flex justify-between items-center'>
+      <div className='f-12-400 pl-2 bg-white flex justify-between items-center'>
         <div className='flex items-center justify-start'>
           <div className='flex items-start justify-start gap-x-1 w-[140px]'>
             <>
@@ -106,7 +127,10 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
                   className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
                 />
               </div>
-              <span>{userName}</span>
+              <div className='flex justify-center items-center gap-1'>
+                {userName}
+                <span className='f-12-400 text-GRAY_700'>{checkIfUser && '(You)'}</span>
+              </div>
             </>
           </div>
           <div className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
@@ -121,21 +145,25 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
             {resource_type}
           </div>
         </div>
-
-        <AsyncDropdown
-          onOpen={handleOpenChangeRoleDropdown}
-          onClose={handleCloseChangeRoleDropdown}
-          isOpen={openChangeRoleDropdown}
-          onDelete={handleOpenRemoveFromTeamPopup}
-          onChange={(role) => handleRoleChange(role as DatasetAccessPrivilegesType)}
-          options={CHANGE_ACCESS_PRIVILEGES_LIST}
-          selectedValue={selectedRole}
-          defaultValue={role as DatasetAccessPrivilegesType}
-          showDelete
-          isHoveredDropdown={isHoveredDropdown}
-          setIsHoveredDropdown={setIsHoveredDropdown}
-          isOverflowStyle
-        />
+        {checkPermission ? (
+          <AsyncDropdown
+            onOpen={handleOpenChangeRoleDropdown}
+            onClose={handleCloseChangeRoleDropdown}
+            isOpen={openChangeRoleDropdown}
+            onDelete={handleOpenRemoveFromTeamPopup}
+            onChange={(role) => handleRoleChange(role as DatasetAccessPrivilegesType)}
+            options={CHANGE_ACCESS_PRIVILEGES_LIST}
+            selectedValue={selectedRole}
+            defaultValue={role as DatasetAccessPrivilegesType}
+            showDelete
+            showSelectedIcon
+            isHoveredDropdown={isHoveredDropdown}
+            setIsHoveredDropdown={setIsHoveredDropdown}
+            isOverflowStyle
+          />
+        ) : (
+          <span className='flex justify-between items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2'>{role?.label}</span>
+        )}
       </div>
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}

@@ -1,5 +1,4 @@
 import React, { FC, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -14,9 +13,14 @@ import { RootState } from 'store';
 import { PostAudiencesInviteData } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
+import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
+import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
 import { toast } from 'components/common/toast/Toast';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 
@@ -31,10 +35,12 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
 
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorText, setValidationErrorText] = useState<string>('');
-  const checkIfUser = useSelector((state: RootState) => state?.user?.user)?.user_email;
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
+  const userPrivilege = getUserPrivilege();
+  const isInvitable = !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.MEMBER;
+  const user_email = getUserEmail();
 
-  const isInvitable = !showValidationError && selectedItems.length > 0;
+  const checkPermission = accessPermissionForPeople();
 
   const handleCloseInviteMembersPopup = () => {
     onClose?.();
@@ -52,14 +58,22 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
       .filter((item) => item.email),
   };
 
-  const handleInviteMembers = async () => {
-    try {
-      await postInviteAudiences({ organizationId, body: postAudiencesInviteData }).unwrap();
-      refetchAudiencesByOrganizationId();
-      toast.success('Invitation sent successfully');
-      handleCloseInviteMembersPopup();
-    } catch {
-      toast.error('Failed to send invitation');
+  const handleInviteMembers = () => {
+    if (!checkPermission) {
+      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.INVITE]);
+
+      return;
+    } else {
+      postInviteAudiences({ organizationId, body: postAudiencesInviteData })
+        .unwrap()
+        .then(() => {
+          refetchAudiencesByOrganizationId();
+          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_INVITED);
+          handleCloseInviteMembersPopup();
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_INVITED);
+        });
     }
   };
 
@@ -69,20 +83,20 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
     const resource_audience_type = '';
 
     if (!isValid) {
-      setValidationErrorText('Email address incorrect');
+      setValidationErrorText(VALIDATION_ERROR_MESSAGES.INVALID_EMAIL);
     }
 
     const isAlreadyInvited = invitedTeamMembersData?.some((item) => item?.email === value);
 
     if (isAlreadyInvited) {
       isValid = false;
-      setValidationErrorText('User is already invited');
+      setValidationErrorText(VALIDATION_ERROR_MESSAGES.USER_ALREADY_INVITED);
     }
 
-    if (value === checkIfUser) {
+    if (value === user_email) {
       isValid = false;
       setShowValidationError(true);
-      setValidationErrorText('You cannot invite yourself');
+      setValidationErrorText(VALIDATION_ERROR_MESSAGES.CANNOT_INVITE_SELF);
     }
 
     setSelectedItems((prevEmails) => [
@@ -133,7 +147,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
         <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full'>
           <Button
             type={BUTTON_TYPES.PRIMARY}
-            id='send-user-invite-btn'
+            id='send-user-invite'
             size={SIZE_TYPES.MEDIUM}
             disabled={!isInvitable}
             onClick={handleInviteMembers}

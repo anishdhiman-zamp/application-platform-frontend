@@ -11,6 +11,7 @@ export const ROUTES_PATH = {
   DRILLDOWN: '/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages/',
+  NO_ACCESS: '/no-access',
 };
 
 export const getPageRouteById = (pageId: string) => {

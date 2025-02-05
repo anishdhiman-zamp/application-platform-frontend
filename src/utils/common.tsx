@@ -285,3 +285,16 @@ export const cyclicIterator = (arr: any[]) => {
  * @returns string color
  */
 export const getChipColor: () => string = cyclicIterator(CHIP_COLORS);
+
+/**
+ * Get the leading path after the '/' from the current URL.
+ * @param path https://zamp.ai/datasets/12345678
+ * @returns {string} /datasets
+ */
+export const getLeadingPathFromURL = (path: string) => {
+  if (!path || path === '/') return '/';
+
+  const pathSegments = path.split('/').filter(Boolean);
+
+  return `/${pathSegments[0]}`;
+};

@@ -1,5 +1,4 @@
 import React, { FC, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useGetAudiencesByPageIdQuery, usePostPagesToAudiencesByPageIdMutation } from 'apis/pages';
 import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
@@ -15,8 +14,13 @@ import { RootState } from 'store';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { accessPermissionForPage } from 'utils/accessPermission/accessPermission';
+import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
+import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
@@ -27,7 +31,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorText, setValidationErrorText] = useState<string>('');
-  const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(true);
+  const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
   const { data: getAudiencesByPageId, refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery(
@@ -37,8 +41,12 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const [postInviteAudiences] = usePostPagesToAudiencesByPageIdMutation();
   const userAccessToDatasetList = getAudiencesByPageId ?? [];
   const placeholderText = 'Share with people and teams';
-  const checkIfUser = useSelector((state: RootState) => state?.user?.user)?.user_email;
-  const isPageSharable = !showValidationError && selectedItems.length > 0;
+  const user_email = getUserEmail();
+  const user_role = getUserPrivilege();
+  const userPrivilege =
+    getAudiencesByPageId?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
+  const isPageSharable = !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
+  const checkPermission = accessPermissionForPage(userPrivilege);
 
   const handleOpenSharePagePopup = () => {
     setOpenSharePagePopup(true);
@@ -60,16 +68,22 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   };
 
   const handleSharePagePopup = () => {
-    postInviteAudiences({ pageId, body: AudiencesSharePageData })
-      .unwrap()
-      .then(() => {
-        setSelectedItems([]);
-        refetchAudiencesByPageId();
-        toast.success('Page shared successfully');
-      })
-      .catch((err) => {
-        toast.error(err?.data?.error || 'Failed to share Page');
-      });
+    if (!checkPermission) {
+      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.ROLE_CHANGE]);
+
+      return;
+    } else {
+      postInviteAudiences({ pageId, body: AudiencesSharePageData })
+        .unwrap()
+        .then(() => {
+          setSelectedItems([]);
+          refetchAudiencesByPageId();
+          toast.success(TOAST_MESSAGES.SUCCESS_PAGE_SHARED);
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_PAGE_SHARED);
+        });
+    }
   };
 
   const customizedTeamMembersData = teamMembersData?.map((member) => ({
@@ -83,23 +97,23 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     let resource_audience_type = '';
 
     if (!isValid) {
-      return { isValid: false, message: 'Email address incorrect' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL };
     }
 
     const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
 
     if (!audience) {
-      return { isValid: false, message: 'User is not present in the organization' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
 
     const isAlreadyInvited = getAudiencesByPageId?.some((item) => item?.user?.email === value);
 
     if (isAlreadyInvited) {
-      return { isValid: false, message: 'User is already invited' };
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
     }
 
-    if (value === checkIfUser) {
-      return { isValid: false, message: 'You cannot invite yourself' };
+    if (value === user_email) {
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.CANNOT_ADD_SELF };
     }
 
     resource_audience_type = audience?.resource_audience_type ?? '';
@@ -158,7 +172,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     <div className='flex w-fit'>
       <Button
         type={BUTTON_TYPES.SECONDARY}
-        id='send-user-invite-btn'
+        id='share-page-to-audience'
         size={SIZE_TYPES.SMALL}
         className='!bg-GRAY_100'
         onClick={handleOpenSharePagePopup}
@@ -237,6 +251,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                       user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
                       pageId={pageId}
                       resource_audience_type={audience?.resource_audience_type}
+                      userPrivilege={userPrivilege}
                     />
                   ))}
                 </div>

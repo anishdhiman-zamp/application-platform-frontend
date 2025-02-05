@@ -30,10 +30,10 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
   useOnClickOutside(dropdownRef, onClose);
 
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
+    if (isOpen && buttonRef?.current) {
+      const rect = buttonRef?.current.getBoundingClientRect();
 
-      setDropdownTop(rect.bottom - 160);
+      setDropdownTop(rect.bottom - 100);
     }
   }, [isOpen, options.length]);
 
@@ -45,7 +45,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
     >
       <div
         className={cn(
-          'flex justify-between items-center py-3 pl-4 gap-2 cursor-pointer h-10 f-12-400',
+          'flex justify-between items-center py-3 pl-4 gap-0 cursor-pointer h-10 f-12-400',
           parentWrapperClassName,
         )}
         onClick={onOpen}
@@ -84,8 +84,8 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
               onClick={() => onChange(role)}
             >
               <span className='flex justify-between items-start f-12-500 text-GRAY_1000'>
-                {role.label}
-                {showSelectedIcon && role.value === selectedValue?.value && (
+                {role?.label}
+                {showSelectedIcon && role?.value === selectedValue?.value && (
                   <SvgSpriteLoader
                     id='check'
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -95,7 +95,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
                   />
                 )}
               </span>
-              <span className='f-10-500 text-GRAY_700 mt-1.5'>{role.desc}</span>
+              {!!role?.desc && <span className='f-10-500 text-GRAY_700 mt-1.5'>{role?.desc}</span>}
             </div>
           ))}
           {showDelete && (

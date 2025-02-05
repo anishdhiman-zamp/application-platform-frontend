@@ -66,6 +66,11 @@ export type Workspace = {
 
 export type Organization = {
   organization_id: string;
+  resource_audience_policies: {
+    privilege: string;
+    resource_audience_type: string;
+    resource_audience_id: string;
+  }[];
 };
 
 export type Session = {
@@ -80,3 +85,7 @@ export type loginPayloadType = {
   url: string;
   body: string;
 };
+
+export enum UserRoleIdType {
+  USER = 'user',
+}

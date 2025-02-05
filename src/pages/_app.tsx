@@ -5,7 +5,6 @@ import { LicenseManager } from 'ag-grid-enterprise';
 import { SIZE } from 'constants/common.constants';
 import { FAVICON } from 'constants/icons';
 import { FeatureFlagsProvider } from 'modules/feature-flags/provider';
-import { AuthGuard } from 'modules/login/AuthGuard';
 import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
 import Head from 'next/head';
@@ -13,6 +12,8 @@ import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
 import { AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
 import { Loader } from 'components/common/loader/Loader';
+import { AuthGuard } from 'components/hoc/AuthGuard';
+import { RouteGuard } from 'components/hoc/RouteGuard';
 import 'styles/fonts.css';
 import 'styles/globals.css';
 import 'styles/colors.css';
@@ -60,7 +61,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         >
           <FeatureFlagsProvider>
             <ToastContainer />
-            <div className={`${inter.className} h-screen light-mode`}>{getComponent()}</div>
+            <RouteGuard>
+              <div className={`${inter.className} h-screen light-mode`}>{getComponent()}</div>
+            </RouteGuard>
           </FeatureFlagsProvider>
         </AuthGuard>
       </Provider>

@@ -35,4 +35,5 @@ export type DatasetAccessToAudiencesPropsType = {
     email: string;
     name?: string;
   };
+  userPrivilege: string;
 };

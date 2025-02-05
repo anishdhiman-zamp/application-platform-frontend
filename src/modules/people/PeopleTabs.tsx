@@ -6,6 +6,7 @@ import TeamMembersListing from 'modules/people/components/teamMembers/TeamMember
 import { PEOPLE_TABS_LIST } from 'modules/people/people.constants';
 import { RootState } from 'store';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
+import { checkIfCurrentUserIsMember } from 'utils/accessPermission/accessPermission.utils';
 import { Tabs } from 'components/common/tabs/Tabs';
 
 const PeopleTabs = () => {
@@ -16,7 +17,7 @@ const PeopleTabs = () => {
     { organizationId },
     { skip: !organizationId },
   );
-
+  const checkIfSystemAdmin = !checkIfCurrentUserIsMember();
   const handleTabSelect = (selectedItem?: MenuItem) => {
     setSelectedTab(PEOPLE_TABS_LIST.findIndex((item) => item.value === selectedItem?.value));
   };
@@ -24,13 +25,15 @@ const PeopleTabs = () => {
   return (
     <>
       <div className='my-4'>
-        <Tabs
-          list={PEOPLE_TABS_LIST}
-          id='PEOPLE_TAB'
-          type={TAB_TYPES.UNDERLINE}
-          onSelect={handleTabSelect}
-          customSelectedIndex={selectedTab}
-        />
+        {checkIfSystemAdmin && (
+          <Tabs
+            list={PEOPLE_TABS_LIST}
+            id='PEOPLE_TAB'
+            type={TAB_TYPES.UNDERLINE}
+            onSelect={handleTabSelect}
+            customSelectedIndex={selectedTab}
+          />
+        )}
       </div>
       {selectedTab === 0
         ? !!teamMembersData?.length && <TeamMembersListing data={teamMembersData} />

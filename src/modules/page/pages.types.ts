@@ -13,12 +13,12 @@ export type PageAccessToAudiencesPropsType = {
     email: string;
     name?: string;
   };
+  userPrivilege: string;
 };
 
 export enum PAGE_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
-  REMOVE = 'remove',
 }
 
 export type PageAccessPrivilegesType = {
