@@ -8,6 +8,7 @@ export const ZAMP_ICON_BLACK = IMAGE_PREFIX + '/icons/zamp-icon-black.svg';
 export const GOOGLE_ICON = IMAGE_PREFIX + '/icons/google.svg';
 export const DRAG_ICON = IMAGE_PREFIX + '/icons/drag-icon.svg';
 export const ERROR_WITH_BORDER = IMAGE_PREFIX + '/icons/error-with-border.svg';
+export const RULE_ICON = IMAGE_PREFIX + '/icons/rule.svg';
 export const WIDGET_LOADER = IMAGE_PREFIX + '/images/widget-loader.gif';
 export const WIDGET_LOADER_1 = IMAGE_PREFIX + '/images/widget-loader-1.gif';
 export const WIDGET_LOADER_2 = IMAGE_PREFIX + '/images/widget-loader-2.gif';

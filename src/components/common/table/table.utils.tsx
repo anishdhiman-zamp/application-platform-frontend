@@ -22,7 +22,7 @@ import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType[] => {
   const { groupKeys, rowGroupCols } = request;
 
-  if (!groupKeys.length || !rowGroupCols.length) {
+  if (!groupKeys?.length || !rowGroupCols?.length) {
     return [];
   }
 
@@ -127,7 +127,7 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   }
 };
 
-const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsRequest): FilterModelType | null => {
+export const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsRequest): FilterModelType | null => {
   const filtersFromGroup = getFiltersFromGroupKeys(request);
   const filtersFromFilterModel = convertToFilterModel(request.filterModel);
 

@@ -22,7 +22,7 @@ import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
+import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { LogicalOperatorType } from 'types/components/table.type';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -59,32 +59,6 @@ const DatasetById = () => {
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
 
-  useEffect(() => {
-    if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, actionStatus?.length > 0 || isPolling);
-
-      if (columns.length > 0) {
-        setColumns(columns);
-        dispatch({
-          type: filtersContextActions.SET_FILTERS_CONFIG,
-          payload: {
-            filtersConfig: filterConfig.map((column) => ({
-              key: column.column,
-              label: column.column,
-              values: column.options,
-              type: column.type,
-            })),
-          },
-        });
-        if (filters)
-          dispatch({
-            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: JSON.parse(filters) ?? {} },
-          });
-      }
-    }
-  }, [filterConfig, actionStatus, isPolling, filters]);
-
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
@@ -96,6 +70,10 @@ const DatasetById = () => {
           .then((data) => {
             if (parameters.request.startRow === 0) {
               setTotalRows(data.total_count);
+              dispatch({
+                type: filtersContextActions.SET_TOTAL_ROWS,
+                payload: { totalRows: data.total_count },
+              });
             }
             parameters.success({
               rowData: data.rows,
@@ -108,10 +86,6 @@ const DatasetById = () => {
       },
     };
   }, [getDatasetData]);
-
-  useEffect(() => {
-    tableRef.current?.api?.setFilterModel(selectedFilters);
-  }, [selectedFilters]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
@@ -128,6 +102,22 @@ const DatasetById = () => {
 
   const handleColumnVisible = () => {
     setRefetchColumnList((prev) => prev + 1);
+  };
+
+  const handleSuccessfullUpdate = (data: DatasetUpdateResponseType) => {
+    setIsPolling(true);
+    startPolling({
+      fn: () => getActionStatus({ datasetId: id as string, params: { action_ids: [data.action_id] } }),
+      validate: (data: DatasetActionStatusResponseType[]) => {
+        return data.filter((item) => !item.is_completed).length === 0;
+      },
+      interval: 3000,
+      maxAttempts: 50,
+    }).then(() => {
+      setIsPolling(false);
+      tableRef.current?.api?.refreshServerSide();
+      refetchFilterConfig();
+    });
   };
 
   const updateApi = ({
@@ -161,21 +151,7 @@ const DatasetById = () => {
       },
     })
       .unwrap()
-      .then((data) => {
-        setIsPolling(true);
-        startPolling({
-          fn: () => getActionStatus({ datasetId: id as string, params: { action_ids: [data.action_id] } }),
-          validate: (data: DatasetActionStatusResponseType[]) => {
-            return data.filter((item) => !item.is_completed).length === 0;
-          },
-          interval: 3000,
-          maxAttempts: 50,
-        }).then(() => {
-          setIsPolling(false);
-          tableRef.current?.api?.refreshServerSide();
-          refetchFilterConfig();
-        });
-      });
+      .then(handleSuccessfullUpdate);
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
@@ -217,6 +193,41 @@ const DatasetById = () => {
       operator: CONDITION_OPERATOR_TYPE.CONTAINS,
     });
   };
+
+  useEffect(() => {
+    if (filterConfig?.length) {
+      const columns = formatColumns(
+        filterConfig,
+        actionStatus?.length > 0 || isPolling,
+        id as string,
+        handleSuccessfullUpdate,
+      );
+
+      if (columns.length > 0) {
+        setColumns(columns);
+        dispatch({
+          type: filtersContextActions.SET_FILTERS_CONFIG,
+          payload: {
+            filtersConfig: filterConfig.map((column) => ({
+              key: column.column,
+              label: column.column,
+              values: column.options,
+              type: column.type,
+            })),
+          },
+        });
+        if (filters)
+          dispatch({
+            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+            payload: { selectedFilters: JSON.parse(filters) ?? {} },
+          });
+      }
+    }
+  }, [filterConfig, actionStatus, isPolling, filters]);
+
+  useEffect(() => {
+    tableRef.current?.api?.setFilterModel(selectedFilters);
+  }, [selectedFilters]);
 
   return (
     <div className='h-full'>

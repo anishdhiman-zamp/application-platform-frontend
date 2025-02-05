@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { DATE_FORMATS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
@@ -116,9 +117,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
   return config;
 };
 
-export const getTagLabel = (tag: string) => {
-  return tag?.split('.').pop() ?? '';
-};
+export const getTagLabel = (tag?: string) => tag?.split('.').pop() ?? '';
 
 export const getTagParents = (tag: string) => {
   const parents = tag?.split('.').slice(0, -1) ?? [];
@@ -162,8 +161,13 @@ export const getFilterStatementValues = (filter: MapAny): JSX.Element[] => {
         Statement.push(
           <>
             <span className={fieldValueClassName}>{key}</span>
-            <span className={fieldOperatorClassName}>{filter[key].type}</span>
-            <span className={fieldValueClassName}>{filter[key].values.join(', ')}</span>
+            <span className={fieldOperatorClassName}>is</span>
+            {filter[key].values?.map((value: string, index: number) => (
+              <Fragment key={index}>
+                <span className={fieldValueClassName}>{value}</span>
+                {index !== filter[key].values?.length - 1 && <span className={fieldOperatorClassName}>or</span>}
+              </Fragment>
+            ))}
           </>,
         );
         break;

@@ -1,13 +1,19 @@
 import { ColDef } from 'ag-grid-community';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
-import { DatasetFilterConfigResponseType, DatasetType } from 'types/api/dataset.types';
+import {
+  DatasetFilterConfigResponseType,
+  DatasetType,
+  DatasetUpdateResponseType,
+  RuleFilters,
+} from 'types/api/dataset.types';
+import { MapAny } from 'types/commonTypes';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
+import CustomHeader from 'components/common/table/CustomHeader';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
-
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
   const lastUpdatedTime = new Date(updated_at);
@@ -44,6 +50,8 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
 export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
+  datasetId: string,
+  handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -63,6 +71,16 @@ export const formatColumns = (
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
+
+    if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
+      formattedColumn.headerComponent = CustomHeader;
+      formattedColumn.headerComponentParams = {
+        metadata: column?.metadata,
+        datasetId,
+        options: column.options,
+        handleSuccessfullUpdate,
+      };
+    }
 
     columns.push(formattedColumn);
   });
@@ -106,4 +124,22 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
         cellEditor: CustomDateTimeEditor,
       };
   }
+};
+
+export const convertApiFiltersToRuleFilters = (filters?: RuleFilters): MapAny => {
+  if (!filters) return {};
+  const { conditions } = filters;
+  const filtersConfig: MapAny = {};
+
+  conditions.forEach((condition) => {
+    const { Column, Operator, Value } = condition;
+
+    filtersConfig[Column.Column] = {
+      filterType: FILTER_TYPES.MULTI_SELECT,
+      type: Operator,
+      values: Value,
+    };
+  });
+
+  return filtersConfig;
 };

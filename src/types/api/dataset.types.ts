@@ -68,15 +68,15 @@ export type DatasetListingRequestType = {
 export type DatasetUpdateRequestType = {
   datasetId: string;
   data: {
-    filters: FilterModelType;
+    filters: FilterModelType | null;
     update: {
       column: string;
       value: string;
     };
+    save_as_rule?: boolean;
+    rule_title?: string;
+    rule_description?: string;
   };
-  saveAsRule?: boolean;
-  ruleTitle?: string;
-  ruleDescription?: string;
 };
 
 export type DatasetUpdateResponseType = {
@@ -135,3 +135,67 @@ export type PostShareDatasetToAudiencesByDatasetIdType = { datasetId: string; bo
 export type PatchChangeAudienceRoleInDatasetType = { datasetId: string; body: { audience_id: string; role: string } };
 
 export type DeleteAudienceFromDatasetAccessType = { datasetId: string; body: { audience_id: string } };
+
+export type GetRulesByDatasetColumnsRequestType = {
+  dataset_columns: string;
+};
+
+export type ConditionType = {
+  LogicalOperator: null;
+  Column: {
+    Column: string;
+    Datatype: string;
+    CustomDataConfig: null;
+    Alias: null;
+  };
+  Operator: string;
+  Value: string[];
+};
+
+export type RuleFilters = {
+  logical_operator: string;
+  conditions: ConditionType[];
+};
+
+export type RuleType = {
+  rule_id: string;
+  organization_id: string;
+  dataset_id: string;
+  column: string;
+  value: string;
+  filter_config: {
+    query_config: {
+      TableConfig: {
+        DatasetId: string;
+        Columns: string[];
+        Update: {
+          Column: {
+            Column: string;
+            Datatype: string;
+            CustomDataConfig: null;
+            Alias: null;
+          };
+          Value: string;
+        }[];
+      };
+      Filters: RuleFilters;
+    };
+  };
+  title: string;
+  description: string;
+  priority: number;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  deleted_at: string;
+  deleted_by: string;
+};
+
+export type RulesByDatasetColumnType = {
+  [column: string]: RuleType[];
+};
+
+export type GetRulesByDatasetColumnsResponseType = {
+  [datasetId: string]: RulesByDatasetColumnType;
+};

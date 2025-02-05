@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
   DATASET_ACTION_STATUS_GET: `datasets/{{datasetId}}/actions`,
   CHANGE_AUDIENCE_ROLE_IN_DATASET_PATCH: `datasets/{{datasetId}}/audiences`,
   DELETE_AUDIENCE_FROM_DATASET_ACCESS: `datasets/{{datasetId}}/audiences`,
+  DATASET_RULES_LISTING_GET: `datasets/rules/listing`,
 
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,

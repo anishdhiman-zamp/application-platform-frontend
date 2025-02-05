@@ -20,6 +20,7 @@ enum filtersContextActions {
   SET_FILTERS_CONFIG = 'SET_FILTERS_CONFIG',
   SET_TAG_SUGGESTIONS = 'SET_TAG_SUGGESTIONS',
   SET_PERIODICITY = 'SET_PERIODICITY',
+  SET_TOTAL_ROWS = 'SET_TOTAL_ROWS',
 }
 
 interface InitialStateType {
@@ -34,6 +35,7 @@ interface InitialStateType {
   isFilterInitialized?: boolean;
   periodicity?: FILTER_PERIODICITIES;
   currentPageFilters: string[];
+  totalRows: number;
 }
 
 export interface ActionType {
@@ -51,6 +53,7 @@ const initialState: InitialStateType = {
   isFilterInitialized: false,
   selectedFiltersInUI: {},
   currentPageFilters: [],
+  totalRows: 0,
 };
 
 const context = createContext<{
@@ -220,6 +223,10 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
 
       case filtersContextActions.INCREMENT_SELECTED_FILTERS_CHANGE_COUNT: {
         return { ...state, selectedFiltersChangeCount: state.selectedFiltersChangeCount + 1 };
+      }
+
+      case filtersContextActions.SET_TOTAL_ROWS: {
+        return { ...state, totalRows: action?.payload?.totalRows };
       }
 
       default:

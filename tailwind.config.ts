@@ -93,7 +93,6 @@ module.exports = {
         115: '460px',
         topbar: '72px',
         body: 'calc(100vh - 72px)',
-        sideDrawerContent: 'calc(100vh - 160px)',
       },
       maxHeight: {
         10.5: '42px',
@@ -124,6 +123,7 @@ module.exports = {
         100: '400px',
         104: '416px',
         content: 'calc(100vw - 272px)',
+        sideDrawer: '480px',
       },
       maxWidth: {
         formLayout: '438px',
@@ -141,7 +141,6 @@ module.exports = {
         4: '16px',
         4.5: '18px',
         25: '100px',
-        sideDrawer: '520px',
         sidebar: '200px',
         sidebarmini: '60px',
         5: '20px',
@@ -202,6 +201,7 @@ module.exports = {
         inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_700)',
         tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
         pageBottomBar: '0px -4px 0px 0px #00000005',
+        sideDrawer: '-1px 0px 36px 0px #B2CCF340',
       },
       borderRadius: {
         2.5: '10px',
