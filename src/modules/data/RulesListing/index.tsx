@@ -32,7 +32,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({ onClose, data
     () =>
       data?.[datasetId]?.[column]?.map((rule) => {
         return {
-          filters: convertApiFiltersToRuleFilters(rule?.filter_config?.query_config?.Filters),
+          filters: convertApiFiltersToRuleFilters(rule?.filter_config?.query_config?.filters),
           value: rule?.value,
           createdOn: rule?.created_at,
         };

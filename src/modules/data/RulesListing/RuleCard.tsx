@@ -49,7 +49,7 @@ const RuleCard: FC<RuleCardProps> = ({ filters, value, createdOn }) => {
         <SvgSpriteLoader id='dots-horizontal' iconCategory={ICON_SPRITE_TYPES.GENERAL} width={14} height={14} />
       </div>
       <div className='px-2.5 py-3 space-y-3'>
-        {!!value && <TagChip item={`${value} applied`} />}
+        {!!value && <TagChip item={`${value}`} />}
         <div className='flex items-center gap-1.5 flex-wrap f-11-400'>
           <Image src={RULE_ICON} alt='rule' width={12} height={13} />
           <span className='text-GRAY_1000 pl-1.5 pr-2 py-1'>If</span>

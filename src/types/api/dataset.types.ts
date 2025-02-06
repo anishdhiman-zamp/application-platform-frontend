@@ -141,15 +141,15 @@ export type GetRulesByDatasetColumnsRequestType = {
 };
 
 export type ConditionType = {
-  LogicalOperator: null;
-  Column: {
-    Column: string;
-    Datatype: string;
-    CustomDataConfig: null;
-    Alias: null;
+  logical_operator: string;
+  column: {
+    column: string;
+    datatype: string;
+    custom_data_config: null;
+    alias: null;
   };
-  Operator: string;
-  Value: string[];
+  operator: string;
+  value: string[];
 };
 
 export type RuleFilters = {
@@ -165,20 +165,20 @@ export type RuleType = {
   value: string;
   filter_config: {
     query_config: {
-      TableConfig: {
-        DatasetId: string;
-        Columns: string[];
-        Update: {
-          Column: {
-            Column: string;
-            Datatype: string;
-            CustomDataConfig: null;
-            Alias: null;
+      table_config: {
+        dataset_id: string;
+        columns: string[];
+        update: {
+          column: {
+            column: string;
+            datatype: string;
+            custom_data_config: null;
+            alias: null;
           };
-          Value: string;
+          value: string;
         }[];
       };
-      Filters: RuleFilters;
+      filters: RuleFilters;
     };
   };
   title: string;

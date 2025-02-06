@@ -52,7 +52,11 @@ const AddTag = ({
         filters: getFilterModelFromGroupAndFilterModel({ filterModel: selectedFilters } as IServerSideGetRowsRequest),
         update: {
           column: column,
-          value: selectedTag,
+          value: selectedTag
+            ?.trim()
+            ?.split('/')
+            ?.map((str) => str?.trim())
+            ?.join('.'),
         },
         save_as_rule: isActive,
       },

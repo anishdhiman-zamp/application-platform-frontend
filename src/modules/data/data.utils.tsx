@@ -132,12 +132,12 @@ export const convertApiFiltersToRuleFilters = (filters?: RuleFilters): MapAny =>
   const filtersConfig: MapAny = {};
 
   conditions.forEach((condition) => {
-    const { Column, Operator, Value } = condition;
+    const { column, operator, value } = condition;
 
-    filtersConfig[Column.Column] = {
+    filtersConfig[column.column] = {
       filterType: FILTER_TYPES.MULTI_SELECT,
-      type: Operator,
-      values: Value,
+      type: operator,
+      values: value,
     };
   });
 
