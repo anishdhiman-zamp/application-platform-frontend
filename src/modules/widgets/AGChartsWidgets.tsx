@@ -37,10 +37,10 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 
-  const { transformedData, stackedValues, yAxisTitle, donutOthersData } = useMemo(() => {
+  const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength } = useMemo(() => {
     return widgetData?.result
       ? getTransformedData(widgetData?.result, widgetDetails)
-      : { transformedData: [], stackedValues: [], donutOthersData: [], yAxisTitle: '' };
+      : { transformedData: [], stackedValues: [], donutOthersData: [], yAxisTitle: '', maxValueLength: 0 };
   }, [widgetData]);
 
   const chartOptions = useMemo(() => {
@@ -63,9 +63,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   }, [widgetDetails, onNodeClick, transformedData, stackedValues]);
 
   return (
-    <div className=' bg-white h-full border border-GRAY_400 rounded-xl px-6 py-4.5 overflow-hidden'>
+    <div className=' bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden'>
       <div
-        className={cn('f-18-450 text-GRAY_1000', {
+        className={cn('f-18-450 text-GRAY_1000 px-6', {
           'mb-10': ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType),
         })}
       >
@@ -88,7 +88,10 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
             {yAxisTitle && (
               <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
                 {yAxisTitle}
-                <div className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'></div>
+                <div
+                  className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'
+                  style={{ marginRight: `${maxValueLength * 5.5}px` }}
+                ></div>
               </div>
             )}
             <AgCharts options={chartOptions as AgChartOptions} />

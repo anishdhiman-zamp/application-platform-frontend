@@ -242,7 +242,7 @@ export function formatNumber(
 
   for (const { threshold, suffix } of suffixes) {
     if (value >= threshold) {
-      return (value / threshold).toFixed(value % 10 === 0 ? 0 : precision) + (allowSuffix ? suffix : '');
+      return (value / threshold).toFixed(precision).replace(/\.00$/, '') + (allowSuffix ? suffix : '');
     }
   }
 

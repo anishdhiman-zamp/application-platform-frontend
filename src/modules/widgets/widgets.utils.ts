@@ -118,23 +118,29 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
       const mappings = widgetDetails?.data_mappings?.mappings[0];
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
+      const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.column]);
 
-      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), in ${formatNumber(
-        getMaxValue(dataWithDataType?.[0] ?? [], [axis?.column]) ?? '',
-        0,
-        true,
-        true,
-      )}`;
+      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
           stackedValues.push({ column: value });
         });
 
-        return { transformedData: groupedData?.data, stackedValues, yAxisTitle };
+        return {
+          transformedData: groupedData?.data,
+          stackedValues,
+          yAxisTitle,
+          maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+        };
       }
 
-      return { transformedData: dataWithDataType?.[0], stackedValues, yAxisTitle };
+      return {
+        transformedData: dataWithDataType?.[0],
+        stackedValues,
+        yAxisTitle,
+        maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+      };
     }
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
@@ -172,6 +178,12 @@ export const getChartOptions = (
             buttons: {
               enabled: false,
             },
+            minVisibleItemsX: 12,
+          },
+          initialState: {
+            zoom: {
+              ratioX: dataLength && dataLength > 12 ? { start: 0.0, end: 12 / dataLength } : {},
+            },
           },
         }
       : {};
@@ -196,8 +208,8 @@ export const getChartOptions = (
       const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
-        ...baseOptions,
         ...navigatorConfig,
+        ...baseOptions,
         axes: [CHART_NUMBER_AXES, { ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 }],
         series: yAxis.map((axis) => ({
           type: chartType,
@@ -230,10 +242,10 @@ export const getChartOptions = (
       const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
-        ...baseOptions,
         ...navigatorConfig,
+        ...baseOptions,
+        axes: [CHART_NUMBER_AXES, { ...CHART_CATEGORY_AXES }],
         series: yAxis.map((axis) => ({
-          axis: [CHART_NUMBER_AXES, CHART_CATEGORY_AXES],
           type: chartType,
           xKey: xAxis,
           yKey: `${axis?.column}`,
@@ -245,6 +257,18 @@ export const getChartOptions = (
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
           },
+          tooltip: {
+            showArrow: false,
+            renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
+              data: [
+                {
+                  label: yName,
+                  value: getCommaSeparatedNumber(datum[yKey], 2),
+                },
+              ],
+            }),
+          },
+          label,
         })),
       };
     }
@@ -300,7 +324,7 @@ export const getChartOptions = (
             },
             calloutLabel: {
               formatter: (params: MapAny) => {
-                return formatNumber(params.datum[sliceKey ?? '']);
+                return formatNumber(params.datum[sliceKey ?? ''], 2);
               },
               offset: 8,
               enabled: true,
