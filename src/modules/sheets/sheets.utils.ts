@@ -20,27 +20,27 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
       return {
         filterType: filterType,
         type: filter.operator,
-        filter: filter.values[0],
+        filter: filter?.value?.[0],
       };
     case FILTER_TYPES.AMOUNT_RANGE:
       return {
         filterType: filterType,
         type: filter.operator,
-        filter: filter.from,
-        filterTo: filter.to,
+        filter: filter?.value?.[0],
+        filterTo: filter?.value?.[1],
       };
     case FILTER_TYPES.DATE_RANGE:
       return {
         filterType: filterType,
-        dateFrom: filter.from,
-        dateTo: filter.to,
-        type: filter.operator,
+        dateFrom: filter?.value?.[0],
+        dateTo: filter?.value?.[1],
+        type: filter?.operator,
       };
     case FILTER_TYPES.MULTI_SELECT:
       return {
         filterType: filterType,
-        type: filter.operator,
-        values: filter.values,
+        type: filter?.operator,
+        values: filter?.value,
       };
   }
 };

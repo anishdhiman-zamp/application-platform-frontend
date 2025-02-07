@@ -82,7 +82,7 @@ interface Target {
 
 export interface FilterDefaultValueType {
   operator: CONDITION_OPERATOR_TYPE; // Operator for range-based filters
-  values: string[];
+  value: string[];
   from: number | string; // Start value or single value
   to?: number | string; // End value (if applicable)
 }
