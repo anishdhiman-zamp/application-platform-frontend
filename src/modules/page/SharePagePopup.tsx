@@ -3,6 +3,7 @@ import { useGetAudiencesByPageIdQuery, usePostPagesToAudiencesByPageIdMutation }
 import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType } from 'modules/data/data.types';
@@ -26,6 +27,7 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
+  const sharePagePopupRef = useRef<HTMLDivElement>(null);
   const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
@@ -58,6 +60,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     setSelectedItems([]);
     setSearch('');
   };
+
+  useOnClickOutside(sharePagePopupRef, handleCloseSharePagePopup);
 
   const AudiencesSharePageData: AudiencesDatasetShareData = {
     audiences: selectedItems.map((item) => ({
@@ -181,7 +185,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       </Button>
       <div className='relative'>
         {openSharePagePopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
+          <div ref={sharePagePopupRef} className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center pt-5 pb-6 py-5 px-4'>
                 <span className=''>Share this page</span>

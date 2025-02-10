@@ -17,7 +17,6 @@ import {
 } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
-import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -235,10 +234,7 @@ const DatasetById = () => {
         <div className='flex items-center py-3'>
           <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
         </div>
-        <div className='flex items-center gap-4'>
-          <ShareDatasetPopup datasetId={id as string} />
-          <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
-        </div>
+        <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
       </div>
       <div className='z-10 w-full h-full'>
         <DatasetTable

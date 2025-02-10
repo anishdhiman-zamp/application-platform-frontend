@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { store } from 'store';
 import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
 import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
-import Topbar from 'components/layouts/dashboard-layout/TopBar';
+import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, contentWrapperClassName = '' }) => {
   const router = useRouter();

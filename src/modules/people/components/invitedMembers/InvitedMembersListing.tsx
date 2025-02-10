@@ -16,7 +16,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data = [] }
             </div>
           ))}
         </div>
-        <div className=''>
+        <div className='overflow-y-auto h-[calc(100vh-270px)]'>
           {data.map((row, index) => (
             <div key={index} className='grid grid-cols-3 gap-4 border-b-[0.5px] border-DIVIDER_GRAY'>
               <InvitedMembersName value={row?.email} />

@@ -1,25 +1,45 @@
-import React, { useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
+import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
+import SharePagePopup from 'modules/page/SharePagePopup';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType } from 'types/commonTypes';
+import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
+import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
+import { SHARE_BTN_ALLOWED_ROUTES, TopBarPropsType } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-interface TopbarProps {
-  isSidebarOpen: boolean;
-  onSidebarToggle: defaultFnType;
-}
-
-const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
+const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
   const [search, setSearch] = useState('');
   const router = useRouter();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
+  const currentRoute = router.pathname;
+
+  const renderShareButton = useMemo(() => {
+    if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES)) {
+      return <SharePagePopup pageId={router.query.id as string} />;
+    } else if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS)) {
+      return <ShareDatasetPopup datasetId={router.query.id as string} />;
+    } else {
+      return (
+        <Button
+          type={BUTTON_TYPES.SECONDARY}
+          id='share-page-to-audience'
+          size={SIZE_TYPES.SMALL}
+          className='!bg-GRAY_100'
+          disabled
+        >
+          Share
+        </Button>
+      );
+    }
+  }, [currentRoute, router.query.id]);
 
   return (
     <div className='h-12 flex items-center justify-between'>
@@ -73,10 +93,7 @@ const Topbar = ({ isSidebarOpen, onSidebarToggle }: TopbarProps) => {
           setSearch(e.target.value);
         }}
       />
-      {/* <div className='flex items-center gap-2 f-13-500'>
-        Share
-        <SvgSpriteLoader id='dots-vertical' iconCategory={ICON_SPRITE_TYPES.GENERAL} height={16} width={16} />
-      </div> */}
+      <div className='pr-4'>{renderShareButton}</div>
     </div>
   );
 };

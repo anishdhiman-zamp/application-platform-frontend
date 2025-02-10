@@ -3,6 +3,7 @@ import { useGetAudiencesByDatasetIdQuery, usePostShareDatasetToAudiencesByDatase
 import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import DatasetAccessToAudiences from 'modules/data/components/DatasetAccessToAudiences';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
@@ -24,6 +25,7 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
+  const shareDatasetPopupRef = useRef<HTMLDivElement>(null);
   const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
@@ -57,6 +59,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     setSelectedItems([]);
     setSearch('');
   };
+
+  useOnClickOutside(shareDatasetPopupRef, handleCloseShareDatasetPopup);
 
   const AudiencesDatasetShareData: AudiencesDatasetShareData = {
     audiences: selectedItems.map((item) => ({
@@ -180,7 +184,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
       </Button>
       <div className='relative'>
         {openShareDatasetPopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
+          <div ref={shareDatasetPopupRef} className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center pt-5 pb-6 py-5 px-4'>
                 <span className=''>Share this dataset</span>

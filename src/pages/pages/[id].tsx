@@ -2,7 +2,6 @@ import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery } from 'apis/pages';
 import { useAppDispatch } from 'hooks/toolkit';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
-import SharePagePopup from 'modules/page/SharePagePopup';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
@@ -49,9 +48,6 @@ const Page = () => {
 
   return (
     <div className='relative bg-white h-full rounded-tl-md py-6 px-3 overflow-y-auto pb-16 w-full'>
-      <div className='w-full flex justify-end'>
-        <SharePagePopup pageId={id as string} />
-      </div>
       <Sheets pageId={id as string} sheetId={currentSheetId as string} />
       <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
     </div>
