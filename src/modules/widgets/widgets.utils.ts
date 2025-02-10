@@ -182,7 +182,7 @@ export const getChartOptions = (
           },
           initialState: {
             zoom: {
-              ratioX: dataLength && dataLength > 12 ? { start: 0.0, end: 12 / dataLength } : {},
+              ratioX: dataLength && dataLength > 12 ? { start: 1 - 12 / dataLength, end: 1 } : {},
             },
           },
         }

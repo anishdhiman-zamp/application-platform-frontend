@@ -3,7 +3,7 @@ import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
 import { DATE_FORMATS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
-import { formatNumber, isValidDate } from 'utils/common';
+import { formatNumber, isValidDate, trimString } from 'utils/common';
 
 export enum SCREEN_BREAKPOINTS_NAMES {
   SM = 'sm',
@@ -74,6 +74,15 @@ export const CHART_CATEGORY_AXES: AgCartesianAxisOptions = {
 export const CHART_NUMBER_AXES: AgCartesianAxisOptions = {
   type: 'number' as const,
   position: 'right',
+  gridLine: {
+    enabled: true,
+    width: 0.5,
+    style: [
+      {
+        stroke: COLORS.GRAY_100,
+      },
+    ],
+  },
   label: {
     formatter: ({ value }) => {
       return formatNumber(value, 2, false);
@@ -117,6 +126,7 @@ export const AG_CHART_LEGEND_CONFIG = {
       fontWeight: 450,
       fontSize: 12,
       color: COLORS.GRAY_900,
+      formatter: ({ value = '' }) => trimString(value, 8),
     },
   },
 };

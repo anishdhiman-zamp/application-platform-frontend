@@ -298,3 +298,11 @@ export const getLeadingPathFromURL = (path: string) => {
 
   return `/${pathSegments[0]}`;
 };
+
+export function trimString(str: string, maxLength: number) {
+  if (str.length > maxLength) {
+    return str.slice(0, maxLength - 3) + '...'; // Slice the string to maxLength minus 3 for the ellipsis
+  }
+
+  return str;
+}
