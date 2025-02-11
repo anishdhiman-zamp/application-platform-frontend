@@ -1,4 +1,5 @@
 import { ColDef } from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
 import {
@@ -13,7 +14,7 @@ import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTag
 import CustomHeader from 'components/common/table/CustomHeader';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
+
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
   const lastUpdatedTime = new Date(updated_at);
@@ -52,16 +53,14 @@ export const formatColumns = (
   isInitiatedAction: boolean,
   datasetId: string,
   handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void,
+  tableRef: React.RefObject<AgGridReact>,
+  handleRulesListingSideDrawerOpen: (columnId: string) => void,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
     let formattedColumn: ColDef = {
       field: column.column,
-      filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
-      filterParams: {
-        values: column.options,
-      },
       flex: 1,
       hide: column.metadata?.is_hidden,
       cellRendererParams: column.metadata,
@@ -72,15 +71,16 @@ export const formatColumns = (
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
-    if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
-      formattedColumn.headerComponent = CustomHeader;
-      formattedColumn.headerComponentParams = {
-        metadata: column?.metadata,
-        datasetId,
-        options: column.options,
-        handleSuccessfullUpdate,
-      };
-    }
+    formattedColumn.headerComponent = CustomHeader;
+    formattedColumn.headerComponentParams = {
+      metadata: column?.metadata,
+      datasetId,
+      options: column.options,
+      handleSuccessfullUpdate,
+      tableRef,
+      handleRulesListingSideDrawerOpen,
+      filterType: column.type,
+    };
 
     columns.push(formattedColumn);
   });

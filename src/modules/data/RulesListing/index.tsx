@@ -7,6 +7,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import Input from 'components/common/input';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
+import CommonWrapper from 'components/commonWrapper';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 type RulesListingSideDrawerProps = {
@@ -17,7 +18,7 @@ type RulesListingSideDrawerProps = {
 
 const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({ onClose, datasetId, column }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data } = useGetRulesByDatasetColumnsQuery(
+  const { data, isLoading, isError } = useGetRulesByDatasetColumnsQuery(
     {
       dataset_columns: JSON.stringify([{ dataset_id: datasetId, columns: [column] }] as DatasetColumnRequest[]),
     },
@@ -52,16 +53,18 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({ onClose, data
           onChange={handleSearch}
           value={searchTerm}
         />
-        <div className='space-y-3.5'>
-          {listOfFilters?.map((filter, index) => (
-            <RuleCard
-              filters={filter?.filters}
-              key={index}
-              value={getTagLabel(filter?.value ?? '')}
-              createdOn={filter?.createdOn}
-            />
-          ))}
-        </div>
+        <CommonWrapper isLoading={isLoading} isError={isError}>
+          <div className='space-y-3.5'>
+            {listOfFilters?.map((filter, index) => (
+              <RuleCard
+                filters={filter?.filters}
+                key={index}
+                value={getTagLabel(filter?.value ?? '')}
+                createdOn={filter?.createdOn}
+              />
+            ))}
+          </div>
+        </CommonWrapper>
       </div>
     </SideDrawer>
   );

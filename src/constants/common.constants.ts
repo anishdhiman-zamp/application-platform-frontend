@@ -1,3 +1,12 @@
+import { Inter } from 'next/font/google';
+
+// Configure the Inter font
+export const inter = Inter({
+  subsets: ['latin'], // Specify subsets you need (e.g., 'latin', 'latin-ext').
+  variable: '--font-inter', // Define a CSS variable to use in your styles.
+  display: 'swap', // Controls font-display behavior.
+});
+
 export enum SIZE {
   XSMALL = 'xsmall',
   SMALL = 'small',

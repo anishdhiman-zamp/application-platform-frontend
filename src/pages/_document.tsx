@@ -15,7 +15,7 @@ export default function Document() {
             "
         /> */}
       </Head>
-      <body className='antialiased'>
+      <body className='antialiased light-mode'>
         <Main />
         <NextScript />
       </body>

@@ -1,8 +1,8 @@
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export enum OrderType {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  ASC = 'asc',
+  DESC = 'desc',
 }
 
 export enum LogicalOperatorType {

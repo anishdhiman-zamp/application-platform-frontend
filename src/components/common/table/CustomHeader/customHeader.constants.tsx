@@ -1,4 +1,3 @@
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 
 export const CustomHeaderMenuOptions = [
@@ -6,6 +5,20 @@ export const CustomHeaderMenuOptions = [
     label: 'Rules',
     value: CustomHeaderMenuOptionTypes.RULES,
     iconId: 'lightning-01',
-    iconCategory: ICON_SPRITE_TYPES.WEATHER,
+  },
+  {
+    label: 'Sort Ascending',
+    value: CustomHeaderMenuOptionTypes.SORT_ASC,
+    iconId: 'arrow-up',
+  },
+  {
+    label: 'Sort Descending',
+    value: CustomHeaderMenuOptionTypes.SORT_DESC,
+    iconId: 'arrow-down',
+  },
+  {
+    label: 'Filter',
+    value: CustomHeaderMenuOptionTypes.FILTER,
+    iconId: 'filter-lines',
   },
 ];

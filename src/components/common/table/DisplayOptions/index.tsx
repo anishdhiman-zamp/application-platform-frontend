@@ -1,6 +1,7 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
@@ -17,9 +18,17 @@ type DisplayOptionsProps = {
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, refetchColumnList }) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
+
+  useOnClickOutside(menuRef, () => {
+    setIsOpen(false);
+    setIsColumnListingOpen(false);
+    setIsGroupByOpen(false);
+  });
 
   const handleClick = (id: string) => {
     setIsOpen(false);
@@ -41,7 +50,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, refetchColumnList }
   };
 
   return (
-    <div className='relative'>
+    <div className='relative' ref={menuRef}>
       <Button
         id='display-options'
         onClick={() => setIsOpen(!isOpen)}

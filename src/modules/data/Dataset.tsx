@@ -19,6 +19,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
+import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
@@ -41,6 +42,9 @@ const DatasetById = () => {
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [isPolling, setIsPolling] = useState<boolean>(false);
   const [totalRows, setTotalRows] = useState<number>(0);
+  const [columnId, setColumnId] = useState<string>('');
+  const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
+
   const { data: actionStatus = [] } = useGetActionStatusQuery({
     datasetId: id as string,
     params: {
@@ -193,6 +197,11 @@ const DatasetById = () => {
     });
   };
 
+  const handleRulesListingSideDrawerOpen = (columnId: string) => {
+    setIsRulesListingSideDrawerOpen(true);
+    setColumnId(columnId);
+  };
+
   useEffect(() => {
     if (filterConfig?.length) {
       const columns = formatColumns(
@@ -200,6 +209,8 @@ const DatasetById = () => {
         actionStatus?.length > 0 || isPolling,
         id as string,
         handleSuccessfullUpdate,
+        tableRef,
+        handleRulesListingSideDrawerOpen,
       );
 
       if (columns.length > 0) {
@@ -229,14 +240,14 @@ const DatasetById = () => {
   }, [selectedFilters]);
 
   return (
-    <div className='h-full'>
-      <div className='flex items-center justify-between pr-4'>
-        <div className='flex items-center py-3'>
-          <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+    <>
+      <div className='h-full'>
+        <div className='flex items-center justify-between pr-4'>
+          <div className='flex items-center py-3'>
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+          </div>
+          <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
         </div>
-        <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
-      </div>
-      <div className='z-10 w-full h-full'>
         <DatasetTable
           tableRef={tableRef}
           columns={columns}
@@ -249,7 +260,14 @@ const DatasetById = () => {
           {...(data?.config?.is_drilldown_enabled ? { onCellDoubleClicked: onCellDoubleClicked } : {})}
         />
       </div>
-    </div>
+      {isRulesListingSideDrawerOpen && (
+        <RulesListingSideDrawer
+          column={columnId}
+          onClose={() => setIsRulesListingSideDrawerOpen(false)}
+          datasetId={id as string}
+        />
+      )}
+    </>
   );
 };
 

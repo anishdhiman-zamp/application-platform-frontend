@@ -37,7 +37,7 @@ const AddTag = ({
   const [searchResults, setSearchResults] = useState<string[]>(tagList);
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [updateDatasetData] = useUpdateDatasetDataMutation();
+  const [updateDatasetData, { isLoading }] = useUpdateDatasetDataMutation();
 
   const {
     state: { selectedFilters, totalRows },
@@ -62,7 +62,10 @@ const AddTag = ({
       },
     })
       .unwrap()
-      .then(handleSuccessfullUpdate);
+      .then((data) => {
+        onClose();
+        handleSuccessfullUpdate(data);
+      });
   };
 
   const handleTagClick = (tag: string) => {
@@ -152,7 +155,7 @@ const AddTag = ({
         </div>
       </div>
       <div className='flex flex-row-reverse items-center justify-between px-4 py-3 border-t border-BORDER_GRAY_400'>
-        <Button size={SIZE_TYPES.XSMALL} id='add-tag-transactions' onClick={handleClickAddTag}>
+        <Button size={SIZE_TYPES.XSMALL} id='add-tag-transactions' onClick={handleClickAddTag} isLoading={isLoading}>
           Add tag to {totalRows} transactions
         </Button>
       </div>
