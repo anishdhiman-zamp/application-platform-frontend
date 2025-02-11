@@ -71,6 +71,11 @@
     "*.ts": "eslint --fix",
     "*.tsx": "eslint --fix",
     "*.js": "eslint --fix",
-    "*.jsx": "eslint --fix"
+    "*.jsx": "eslint --fix",
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
