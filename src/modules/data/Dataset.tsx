@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  CellDoubleClickedEvent,
   CellEditRequestEvent,
   ColDef,
   FillEndEvent,
@@ -19,10 +18,12 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
+import RowProperties from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
+import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -44,6 +45,7 @@ const DatasetById = () => {
   const [totalRows, setTotalRows] = useState<number>(0);
   const [columnId, setColumnId] = useState<string>('');
   const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
+  const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
 
   const { data: actionStatus = [] } = useGetActionStatusQuery({
     datasetId: id as string,
@@ -92,16 +94,6 @@ const DatasetById = () => {
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
-
-  const onCellDoubleClicked = (event: CellDoubleClickedEvent) => {
-    const { colDef } = event;
-
-    if (!colDef?.cellRendererParams?.is_editable) {
-      router.push(
-        ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', event.data?._zamp_id as string),
-      );
-    }
-  };
 
   const handleColumnVisible = () => {
     setRefetchColumnList((prev) => prev + 1);
@@ -197,6 +189,14 @@ const DatasetById = () => {
     });
   };
 
+  const handleDrilldownClick = (data: MapAny) => {
+    router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', data?._zamp_id as string));
+  };
+
+  const handleRowPropertiesClick = (data: MapAny) => {
+    setRowPropertiesData(data);
+  };
+
   const handleRulesListingSideDrawerOpen = (columnId: string) => {
     setIsRulesListingSideDrawerOpen(true);
     setColumnId(columnId);
@@ -246,7 +246,7 @@ const DatasetById = () => {
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
-          <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} />
+          <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
         </div>
         <DatasetTable
           tableRef={tableRef}
@@ -257,7 +257,8 @@ const DatasetById = () => {
           onColumnVisible={handleColumnVisible}
           onCellEditRequest={onCellEditRequest}
           onFillEnd={onFillEnd}
-          {...(data?.config?.is_drilldown_enabled ? { onCellDoubleClicked: onCellDoubleClicked } : {})}
+          onRowPropertiesClick={handleRowPropertiesClick}
+          {...(data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
         />
       </div>
       {isRulesListingSideDrawerOpen && (
@@ -265,6 +266,14 @@ const DatasetById = () => {
           column={columnId}
           onClose={() => setIsRulesListingSideDrawerOpen(false)}
           datasetId={id as string}
+        />
+      )}
+      {rowPropertiesData && (
+        <RowProperties
+          data={rowPropertiesData}
+          onClose={() => setRowPropertiesData(undefined)}
+          datasetId={id as string}
+          isDrillDownEnabled={data?.config?.is_drilldown_enabled}
         />
       )}
     </>

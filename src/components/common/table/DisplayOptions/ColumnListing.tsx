@@ -3,9 +3,11 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
+import { getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType } from 'types/commonTypes';
+import { defaultFnType, MapAny } from 'types/commonTypes';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS,setToLocalStorage  } from 'utils/localstorage';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
@@ -18,10 +20,11 @@ type ColumnListingProps = {
   tableRef: React.RefObject<AgGridReact>;
   refetchColumnList: number;
   onClose: defaultFnType;
+  datasetId: string;
 };
 
-const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, onClose }) => {
-  const [columns, setColumns] = useState<Column[]>(tableRef?.current?.api?.getColumns() ?? []);
+const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, onClose, datasetId }) => {
+  const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   // State for grid layout
   const [layout, setLayout] = useState(
@@ -34,8 +37,28 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
     })),
   );
 
+  const updateLocalStorage = (columnOrderingVisibility: MapAny[]) => {
+    const currentColumnOrderingVisibility = JSON.parse(
+      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
+    );
+
+    setToLocalStorage(
+      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
+      JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: columnOrderingVisibility }),
+    );
+  };
+
   const handleCheckBoxClick = (column: Column) => {
     tableRef?.current?.api?.setColumnsVisible([column.getColId()], !column.isVisible());
+
+    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map(
+      (columnItem: MapAny) => ({
+        colId: columnItem.colId,
+        isVisible: columnItem.colId === column.getColId() ? !columnItem.isVisible : columnItem.isVisible,
+      }),
+    );
+
+    updateLocalStorage(columnOrderingVisibility);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,17 +86,32 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
 
     setColumns(orderedItems);
     tableRef?.current?.api?.moveColumns(orderedItems, 0);
+    const columnOrderingVisibility = orderedItems.map((column) => ({
+      colId: column.getColId(),
+      isVisible: column.isVisible(),
+    }));
+
+    updateLocalStorage(columnOrderingVisibility);
   };
 
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
 
+    const columnsWithRemovedHiddenColumns = latestColumns?.filter(
+      (column) => !column.getColDef().headerComponentParams?.metadata?.is_hidden,
+    );
+
+    // re-order columns based on the columnOrderingVisibilityForCurrentDataset
+    const orderedColumns: Column[] = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((column: MapAny) =>
+      columnsWithRemovedHiddenColumns?.find((col) => col.getColId() === column.colId),
+    );
+
     if (searchTerm) {
-      const filteredColumns = latestColumns?.filter((column) => column.getColId()?.includes(searchTerm));
+      const filteredColumns = orderedColumns?.filter((column) => column.getColId()?.includes(searchTerm));
 
       setColumns(filteredColumns);
     } else {
-      setColumns(latestColumns);
+      setColumns(orderedColumns);
     }
   }, [refetchColumnList]);
 

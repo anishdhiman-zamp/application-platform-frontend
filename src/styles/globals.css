@@ -87,13 +87,6 @@
   background: #93937b;
 }
 
-.ag-menu {
-  border-width: 0px;
-  box-shadow: none;
-  overflow-y: visible;
-  overflow-x: visible;
-}
-
 .ag-checkbox-input-wrapper {
   height: 14px;
   width: 14px;

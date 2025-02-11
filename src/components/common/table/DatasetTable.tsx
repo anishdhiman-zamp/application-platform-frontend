@@ -22,6 +22,8 @@ interface DatasetTableProps {
   onColumnVisible?: (event: ColumnVisibleEvent) => void;
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
   onFillEnd?: (event: FillEndEvent) => void;
+  onDrilldownClick?: (data: MapAny) => void;
+  onRowPropertiesClick?: (data: MapAny) => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -35,6 +37,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
   onColumnVisible,
   onCellEditRequest,
   onFillEnd,
+  onDrilldownClick,
+  onRowPropertiesClick,
 }) => {
   return (
     <Table
@@ -50,6 +54,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
       enableCellSelection
       onColumnVisible={onColumnVisible}
       onFillEnd={onFillEnd}
+      onDrilldownClick={onDrilldownClick}
+      onRowPropertiesClick={onRowPropertiesClick}
     />
   );
 };

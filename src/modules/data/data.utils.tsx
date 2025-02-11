@@ -9,11 +9,13 @@ import {
   RuleFilters,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
 import CustomHeader from 'components/common/table/CustomHeader';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
@@ -66,6 +68,10 @@ export const formatColumns = (
       cellRendererParams: column.metadata,
       editable: column.metadata?.is_editable && !isInitiatedAction,
       suppressFillHandle: !column.metadata?.is_editable,
+      filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
+      filterParams: {
+        values: column.options,
+      },
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
@@ -82,10 +88,17 @@ export const formatColumns = (
       filterType: column.type,
     };
 
-    columns.push(formattedColumn);
+    if (!column.metadata?.is_hidden) {
+      columns.push(formattedColumn);
+    }
   });
 
-  return columns;
+  // re-order columns based on the columnOrderingVisibilityForCurrentDataset
+  const orderedColumns: ColDef[] = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((column: MapAny) => {
+    return { ...columns.find((col) => col.field === column.colId), hide: !column.isVisible };
+  });
+
+  return orderedColumns;
 };
 
 export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {
@@ -142,4 +155,12 @@ export const convertApiFiltersToRuleFilters = (filters?: RuleFilters): MapAny =>
   });
 
   return filtersConfig;
+};
+
+export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string) => {
+  const currentColumnOrderingVisibility = JSON.parse(
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
+  );
+
+  return currentColumnOrderingVisibility[datasetId];
 };

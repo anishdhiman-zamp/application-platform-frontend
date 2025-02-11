@@ -149,7 +149,7 @@ const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] =>
     return [
       {
         column: rowGroupsToBeUsed[0]?.id,
-        alias: rowGroupsToBeUsed[0]?.displayName,
+        alias: rowGroupsToBeUsed[0]?.id,
       },
     ];
   }

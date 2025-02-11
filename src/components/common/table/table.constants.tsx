@@ -1,4 +1,5 @@
 import { CellSelectionOptions, themeQuartz } from 'ag-grid-community';
+import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { AggregationFunctionType, LogicalOperatorType } from 'types/components/table.type';
 import { DisplayOptionItemProps } from 'components/common/table/DisplayOptions/DisplayOptionItem';
@@ -15,7 +16,7 @@ export const myTheme = themeQuartz.withParams({
   headerHeight: 48,
   headerRowBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
   headerColumnBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
-  headerBackgroundColor: '#FFF',
+  headerBackgroundColor: COLORS.WHITE,
   wrapperBorderRadius: 0,
   iconSize: 12,
   rowHoverColor: '#FBFBFB',
@@ -25,8 +26,10 @@ export const myTheme = themeQuartz.withParams({
   checkboxCheckedShapeColor: '#FBFBFE',
   checkboxUncheckedBackgroundColor: '#FBFBFE',
   checkboxUncheckedBorderColor: '#EBEBEB',
-  sideBarBackgroundColor: '#FFFFFF',
-  headerColumnResizeHandleColor: '#FFFFFF',
+  sideBarBackgroundColor: COLORS.WHITE,
+  headerColumnResizeHandleColor: COLORS.WHITE,
+  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
+  menuBackgroundColor: COLORS.WHITE,
 });
 
 export const myIcons = {
@@ -76,7 +79,7 @@ export const DATA_TABLE_THEME_PARAMS = {
   headerRowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
   headerColumnBorder: { width: 0 },
   headerColumnResizeHandleWidth: 0,
-  headerBackgroundColor: '#FFFFFF',
+  headerBackgroundColor: COLORS.WHITE,
   rowHeight: 60,
   rowBorder: { style: 'solid', width: 0.5, color: '#EBEBEB' },
   rowHoverColor: '#FBFBFB',

@@ -5,7 +5,6 @@ import CustomAmountRenderer from 'components/common/table/CustomCellRenderers/Cu
 import CustomDateTimeRenderer from 'components/common/table/CustomCellRenderers/CustomDateTimeRenderer';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
-import { FILTER_TYPES } from 'components/filter/filter.types';
 
 export const LISTING_COLUMNS: ColDef[] = [
   {
@@ -87,23 +86,3 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST = [
     desc: 'Can read data only',
   },
 ];
-
-export const dummyFilters = {
-  description: {
-    type: 'contains',
-    filter: 'btb',
-    filterType: FILTER_TYPES.SEARCH,
-  },
-  amount: {
-    filterType: FILTER_TYPES.MULTI_SELECT,
-    type: 'contains',
-    values: ['debit'],
-  },
-  account: {
-    filterType: FILTER_TYPES.MULTI_SELECT,
-    type: 'contains',
-    values: ['The Saudi Awwal Bank SAR... • • 9001', 'The Saudi Awwal Bank SAR... • • 9002'],
-  },
-};
-
-export const listOfFilters = [dummyFilters, dummyFilters, dummyFilters, dummyFilters];

@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -11,6 +11,7 @@ import {
   CustomFilterModule,
   DateFilterModule,
   FillEndEvent,
+  GetContextMenuItemsParams,
   IServerSideDatasource,
   ModuleRegistry,
   NumberEditorModule,
@@ -39,6 +40,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
+import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
 import {
   AggregationFunctionMap,
   cellSelectionConfig,
@@ -105,6 +107,8 @@ interface TableProps {
   onCellEditRequest?: (event: CellEditRequestEvent) => void;
   onFillEnd?: (event: FillEndEvent) => void;
   onRowClicked?: (event: RowClickedEvent) => void;
+  onDrilldownClick?: (data: MapAny) => void;
+  onRowPropertiesClick?: (data: MapAny) => void;
 }
 
 export type TableColumnType = {
@@ -136,6 +140,8 @@ const Table: React.FC<TableProps> = ({
   onCellEditRequest,
   onFillEnd,
   onRowClicked,
+  onDrilldownClick,
+  onRowPropertiesClick,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -175,6 +181,40 @@ const Table: React.FC<TableProps> = ({
 
   const cellSelection = useMemo(() => (enableCellSelection ? cellSelectionConfig : undefined), [enableCellSelection]);
 
+  const getContextMenuItems = useCallback(
+    (params: GetContextMenuItemsParams) => {
+      const result = [];
+
+      if (onDrilldownClick) {
+        result.push({
+          name: 'Source drill down',
+          action: () => {
+            onDrilldownClick?.(params?.node?.data);
+          },
+          menuItem: CustomContextMenuItem,
+          menuItemParams: {
+            iconId: 'arrow-narrow-up-right',
+          },
+        });
+      }
+      if (onRowPropertiesClick) {
+        result.push({
+          name: 'Row properties',
+          action: () => {
+            onRowPropertiesClick?.(params?.node?.data);
+          },
+          menuItem: CustomContextMenuItem,
+          menuItemParams: {
+            iconId: 'info-circle',
+          },
+        });
+      }
+
+      return result;
+    },
+    [onDrilldownClick, onRowPropertiesClick, window],
+  );
+
   return (
     <div style={containerStyle}>
       <div style={gridStyle}>
@@ -194,6 +234,7 @@ const Table: React.FC<TableProps> = ({
           onCellEditRequest={onCellEditRequest}
           onFillEnd={onFillEnd}
           onRowClicked={onRowClicked}
+          getContextMenuItems={getContextMenuItems}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',
