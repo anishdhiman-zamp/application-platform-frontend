@@ -10,7 +10,7 @@ import Head from 'next/head';
 import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
+import { AG_CHART_KEY, AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
 import { Loader } from 'components/common/loader/Loader';
 import { AuthGuard } from 'components/hoc/AuthGuard';
 import { RouteGuard } from 'components/hoc/RouteGuard';
@@ -24,6 +24,7 @@ import 'react-date-range/dist/theme/default.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 LicenseManager.setLicenseKey(AG_GRID_KEY);
+LicenseManager.setLicenseKey(AG_CHART_KEY);
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
