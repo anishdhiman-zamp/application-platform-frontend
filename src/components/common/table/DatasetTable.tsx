@@ -56,6 +56,9 @@ const DatasetTable: FC<DatasetTableProps> = ({
       onFillEnd={onFillEnd}
       onDrilldownClick={onDrilldownClick}
       onRowPropertiesClick={onRowPropertiesClick}
+      autoSizeStrategy={{
+        type: 'fitCellContents',
+      }}
     />
   );
 };

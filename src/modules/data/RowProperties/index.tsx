@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { ColDef } from 'ag-grid-community';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Properties from 'modules/data/RowProperties/Properties';
@@ -18,9 +19,16 @@ type RowPropertiesSideDrawerProps = {
   data: MapAny;
   datasetId: string;
   isDrillDownEnabled?: boolean;
+  columns: ColDef[];
 };
 
-const RowProperties: FC<RowPropertiesSideDrawerProps> = ({ onClose, data, datasetId, isDrillDownEnabled = false }) => {
+const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
+  onClose,
+  data,
+  datasetId,
+  isDrillDownEnabled = false,
+  columns,
+}) => {
   const [selectedTab, setSelectedTab] = useState<ROW_PROPERTIES_TABS_TYPES>(ROW_PROPERTIES_TABS_TYPES.PROPERTIES);
   const router = useRouter();
 
@@ -35,7 +43,7 @@ const RowProperties: FC<RowPropertiesSideDrawerProps> = ({ onClose, data, datase
   const getTabContent = () => {
     switch (selectedTab) {
       case ROW_PROPERTIES_TABS_TYPES.PROPERTIES:
-        return <Properties data={data} />;
+        return <Properties data={data} columns={columns} />;
       case ROW_PROPERTIES_TABS_TYPES.RULES:
         return <Rules />;
     }
@@ -82,4 +90,4 @@ const RowProperties: FC<RowPropertiesSideDrawerProps> = ({ onClose, data, datase
   );
 };
 
-export default RowProperties;
+export default RowPropertiesSideDrawer;

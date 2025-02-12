@@ -18,7 +18,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
-import RowProperties from 'modules/data/RowProperties';
+import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -218,12 +218,14 @@ const DatasetById = () => {
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
           payload: {
-            filtersConfig: filterConfig.map((column) => ({
-              key: column.column,
-              label: column.column,
-              values: column.options,
-              type: column.type,
-            })),
+            filtersConfig: filterConfig
+              ?.filter((item) => !item?.metadata?.is_hidden)
+              ?.map((column) => ({
+                key: column.column,
+                label: column.column,
+                values: column.options,
+                type: column.type,
+              })),
           },
         });
         if (filters)
@@ -269,11 +271,12 @@ const DatasetById = () => {
         />
       )}
       {rowPropertiesData && (
-        <RowProperties
+        <RowPropertiesSideDrawer
           data={rowPropertiesData}
           onClose={() => setRowPropertiesData(undefined)}
           datasetId={id as string}
           isDrillDownEnabled={data?.config?.is_drilldown_enabled}
+          columns={columns}
         />
       )}
     </>

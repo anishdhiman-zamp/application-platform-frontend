@@ -1,21 +1,45 @@
-import { useRef, useState } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
+import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { MapAny } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const CustomHeader = (props: MapAny) => {
+type CustomHeaderProps = {
+  metadata: DatasetFilterConfigMetadataType;
+  handleRulesListingSideDrawerOpen: (colId: string) => void;
+  handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void;
+  datasetId: string;
+  tableRef: React.RefObject<AgGridReact>;
+  filterType: FILTER_TYPES;
+  options: string[];
+  column: {
+    colId: string;
+  };
+};
+const CustomHeader: FC<CustomHeaderProps> = ({
+  metadata,
+  handleRulesListingSideDrawerOpen,
+  handleSuccessfullUpdate,
+  datasetId,
+  tableRef,
+  filterType,
+  options,
+  column: { colId },
+}) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
 
   const {
     state: { selectedFilters },
@@ -26,27 +50,37 @@ const CustomHeader = (props: MapAny) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-  const columnId = props.column.colId;
   const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
+  const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
+  const sortState = tableRef.current?.api?.getColumn(colId)?.getSort();
+  const isFilterActive = tableRef.current?.api?.getColumn(colId)?.isFilterActive();
+
+  const filteredMenuOptions = useMemo(
+    () =>
+      CustomHeaderMenuOptions.filter((option) =>
+        option.value === CustomHeaderMenuOptionTypes.RULES ? isTagColumn : true,
+      ),
+    [isTagColumn],
+  );
 
   const handleMenuOptionClick = (option: CustomHeaderMenuOptionTypes) => {
     switch (option) {
       case CustomHeaderMenuOptionTypes.RULES:
         setIsMenuOpen(false);
-        props.handleRulesListingSideDrawerOpen(columnId);
+        handleRulesListingSideDrawerOpen(colId);
         break;
       case CustomHeaderMenuOptionTypes.ADD_TAG:
         setIsMenuOpen(false);
         setIsAddTagOpen(true);
         break;
       case CustomHeaderMenuOptionTypes.SORT_ASC:
-        props.tableRef.current?.api?.applyColumnState({
-          state: [{ colId: columnId, sort: OrderType.ASC }],
+        tableRef.current?.api?.applyColumnState({
+          state: [{ colId: colId, sort: OrderType.ASC }],
         });
         break;
       case CustomHeaderMenuOptionTypes.SORT_DESC:
-        props.tableRef.current?.api?.applyColumnState({
-          state: [{ colId: columnId, sort: OrderType.DESC }],
+        tableRef.current?.api?.applyColumnState({
+          state: [{ colId: colId, sort: OrderType.DESC }],
         });
         break;
       case CustomHeaderMenuOptionTypes.FILTER:
@@ -85,42 +119,46 @@ const CustomHeader = (props: MapAny) => {
   };
 
   return (
-    <>
-      <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
-        <div
-          className='w-full h-full flex-1 hover:bg-GRAY_100 cursor-pointer flex items-center justify-between px-4 group'
-          onClick={toggleMenu}
-        >
-          <div>{props.column.colId}</div>
-          <SvgSpriteLoader
-            id='chevron-down'
-            iconCategory={ICON_SPRITE_TYPES.ARROWS}
-            width={12}
-            height={12}
-            className='hidden group-hover:block'
-          />
+    <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
+      <div
+        className='w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1 gap-x-2.5'
+        onClick={toggleMenu}
+      >
+        <div>{colId}</div>
+        <div className='flex items-center gap-1'>
+          {!!sortState && (
+            <SvgSpriteLoader
+              id={sortState === OrderType.ASC ? 'arrow-narrow-up' : 'arrow-narrow-down'}
+              width={12}
+              height={12}
+              color={COLORS.BLUE_700}
+            />
+          )}
+          {isFilterActive && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />}
+          <SvgSpriteLoader id='chevron-down' width={12} height={12} className='hidden group-hover:block' />
         </div>
-        {isMenuOpen && (
-          <PositionedMenuWrapper
-            id='custom-header-menu'
-            className='mt-1 w-52 p-1'
-            childrenWrapperClassName='!overflow-auto'
-            menuPosition={menuPosition}
-          >
-            {CustomHeaderMenuOptions.map((option) => (
-              <div
-                key={option.value}
-                className='flex items-center gap-1.5 px-2.5 py-2 hover:bg-GRAY_100 cursor-pointer rounded-md'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMenuOptionClick(option.value);
-                }}
-                {...(option.value === CustomHeaderMenuOptionTypes.FILTER && { ref: buttonRef })}
-              >
-                <SvgSpriteLoader id={option.iconId} width={12} height={12} />
-                <div className='f-12-500'>{option.label}</div>
-              </div>
-            ))}
+      </div>
+      {isMenuOpen && (
+        <PositionedMenuWrapper
+          id='custom-header-menu'
+          className='w-52 p-1'
+          childrenWrapperClassName='!overflow-auto'
+          menuPosition={menuPosition}
+        >
+          {filteredMenuOptions.map((option) => (
+            <div
+              key={option.value}
+              className='flex items-center gap-1.5 px-2.5 py-2 hover:bg-GRAY_100 cursor-pointer rounded-md'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMenuOptionClick(option.value);
+              }}
+            >
+              <SvgSpriteLoader id={option.iconId} width={12} height={12} />
+              <div className='f-12-500'>{option.label}</div>
+            </div>
+          ))}
+          {isTagColumn && (
             <div className='px-2.5 py-3'>
               <Button
                 id='add-tag-button'
@@ -138,38 +176,37 @@ const CustomHeader = (props: MapAny) => {
                 </div>
               )}
             </div>
-          </PositionedMenuWrapper>
-        )}
-        {isAddTagOpen && (
-          <PositionedMenuWrapper
-            id='custom-header-add-tag-menu'
-            className='mt-1'
-            childrenWrapperClassName='!overflow-visible'
-            menuPosition={menuPosition}
+          )}
+        </PositionedMenuWrapper>
+      )}
+      {isAddTagOpen && (
+        <PositionedMenuWrapper
+          id='custom-header-add-tag-menu'
+          childrenWrapperClassName='!overflow-visible'
+          menuPosition={menuPosition}
+          onClose={handleAddTagClose}
+        >
+          <AddTag
+            tagList={options}
+            datasetId={datasetId}
+            handleSuccessfullUpdate={handleSuccessfullUpdate}
+            column={colId}
             onClose={handleAddTagClose}
-          >
-            <AddTag
-              tagList={props.options}
-              datasetId={props.datasetId}
-              handleSuccessfullUpdate={props.handleSuccessfullUpdate}
-              column={columnId}
-              onClose={handleAddTagClose}
-            />
-          </PositionedMenuWrapper>
-        )}
-        {isFilterOpen && (
-          <PositionedMenuWrapper
-            id='custom-header-filter-menu'
-            className='mt-1 border-none'
-            childrenWrapperClassName='!overflow-visible'
-            menuPosition={menuPosition}
-            onClose={handleFilterClose}
-          >
-            <FilterDropdownMenu filterKey={columnId} filterType={props.filterType} />
-          </PositionedMenuWrapper>
-        )}
-      </div>
-    </>
+          />
+        </PositionedMenuWrapper>
+      )}
+      {isFilterOpen && (
+        <PositionedMenuWrapper
+          id='custom-header-filter-menu'
+          className='border-none'
+          childrenWrapperClassName='!overflow-visible'
+          menuPosition={menuPosition}
+          onClose={handleFilterClose}
+        >
+          <FilterDropdownMenu filterKey={colId} filterType={filterType} />
+        </PositionedMenuWrapper>
+      )}
+    </div>
   );
 };
 

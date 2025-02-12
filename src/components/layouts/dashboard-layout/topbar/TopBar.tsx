@@ -73,7 +73,9 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
           />
         </div>
       </div>
-      <div className='flex items-center gap-2 w-full pl-8 h-full'>
+      <div
+        className={cn('flex items-center gap-2 w-full h-full transition-all duration-300', !isSidebarOpen && 'pl-8')}
+      >
         <SvgSpriteLoader
           id='arrow-left'
           iconCategory={ICON_SPRITE_TYPES.ARROWS}

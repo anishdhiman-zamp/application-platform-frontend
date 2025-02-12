@@ -11,21 +11,21 @@ export const myTheme = themeQuartz.withParams({
   headerFontSize: 12,
   headerFontWeight: 600,
   rowHeight: 32,
-  rowBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
-  columnBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
+  rowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
+  columnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
   headerHeight: 48,
-  headerRowBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
-  headerColumnBorder: { style: 'solid', width: 1, color: '#F2F2F2' },
+  headerRowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
+  headerColumnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
   headerBackgroundColor: COLORS.WHITE,
   wrapperBorderRadius: 0,
   iconSize: 12,
-  rowHoverColor: '#FBFBFB',
+  rowHoverColor: COLORS.BACKGROUND_GRAY_1,
   checkboxBorderRadius: 2,
-  checkboxCheckedBackgroundColor: '#171717',
-  checkboxCheckedBorderColor: '#A8A8A8',
-  checkboxCheckedShapeColor: '#FBFBFE',
-  checkboxUncheckedBackgroundColor: '#FBFBFE',
-  checkboxUncheckedBorderColor: '#EBEBEB',
+  checkboxCheckedBackgroundColor: COLORS.GRAY_1000,
+  checkboxCheckedBorderColor: COLORS.GRAY_600,
+  checkboxCheckedShapeColor: COLORS.WHITE,
+  checkboxUncheckedBackgroundColor: COLORS.WHITE,
+  checkboxUncheckedBorderColor: COLORS.GRAY_400,
   sideBarBackgroundColor: COLORS.WHITE,
   headerColumnResizeHandleColor: COLORS.WHITE,
   menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
@@ -51,7 +51,7 @@ export const myIcons = {
 `,
 };
 
-export const PAGE_SIZE = 100;
+export const PAGE_SIZE = 1000;
 
 export const sideBarConfig = {
   toolPanels: [

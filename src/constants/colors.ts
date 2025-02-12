@@ -37,6 +37,9 @@ export const COLORS = {
 
   TOAST_SHADOW: '#A6A6A62E',
   TRANSPARENT: '#00000000',
+  BLUE_700: '#2546F5',
+
+  BACKGROUND_GRAY_1: '#FBFBFB',
 };
 
 export const CHART_PALETTE_COLORS = [

@@ -46,7 +46,7 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
     <div
       className={cn(
         inter.className,
-        'bg-white abslolute z-1000 shadow-menuList rounded border border-GRAY_400',
+        'bg-white abslolute z-1000 shadow-menuList rounded-md border border-GRAY_500',
         className,
       )}
       data-testid={`menu-wrapper-${id}`}

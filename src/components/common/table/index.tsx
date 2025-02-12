@@ -6,6 +6,7 @@ import {
   ClientSideRowModelModule,
   ColDef,
   ColumnApiModule,
+  ColumnAutoSizeModule,
   ColumnVisibleEvent,
   CustomEditorModule,
   CustomFilterModule,
@@ -18,6 +19,9 @@ import {
   NumberFilterModule,
   RowApiModule,
   RowClickedEvent,
+  SizeColumnsToContentStrategy,
+  SizeColumnsToFitGridStrategy,
+  SizeColumnsToFitProvidedWidthStrategy,
   TextEditorModule,
   TextFilterModule,
   Theme,
@@ -85,6 +89,7 @@ ModuleRegistry.registerModules([
   RichSelectModule,
   NumberEditorModule,
   RowApiModule,
+  ColumnAutoSizeModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -109,6 +114,10 @@ interface TableProps {
   onRowClicked?: (event: RowClickedEvent) => void;
   onDrilldownClick?: (data: MapAny) => void;
   onRowPropertiesClick?: (data: MapAny) => void;
+  autoSizeStrategy?:
+    | SizeColumnsToFitGridStrategy
+    | SizeColumnsToFitProvidedWidthStrategy
+    | SizeColumnsToContentStrategy;
 }
 
 export type TableColumnType = {
@@ -142,6 +151,7 @@ const Table: React.FC<TableProps> = ({
   onRowClicked,
   onDrilldownClick,
   onRowPropertiesClick,
+  autoSizeStrategy,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -235,6 +245,7 @@ const Table: React.FC<TableProps> = ({
           onFillEnd={onFillEnd}
           onRowClicked={onRowClicked}
           getContextMenuItems={getContextMenuItems}
+          autoSizeStrategy={autoSizeStrategy}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

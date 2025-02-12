@@ -7,7 +7,7 @@ import { getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS,setToLocalStorage  } from 'utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';

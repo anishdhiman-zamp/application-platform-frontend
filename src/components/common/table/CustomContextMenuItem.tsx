@@ -8,9 +8,10 @@ interface CustomContextMenuItemProps extends CustomMenuItemProps {
   action: defaultFnType;
 }
 
-const CustomContextMenuItem: FC<CustomContextMenuItemProps> = ({ action, menuItemParams, name }) => {
+const CustomContextMenuItem: FC<CustomContextMenuItemProps> = ({ action, menuItemParams, name, closeMenu }) => {
   const handleClick = () => {
     action();
+    closeMenu();
   };
 
   return (
