@@ -306,3 +306,53 @@ export function trimString(str: string, maxLength: number) {
 
   return str;
 }
+
+export const extractFileNameFromUrl = (url: string): string => {
+  return url.split('/').pop()?.split('?')[0] ?? '';
+};
+
+export const fetchFileBlob = async (url: string) => {
+  const file = await fetch(url)
+    .then((response) => response.blob())
+    .then((data) => data);
+
+  return file;
+};
+
+/**
+ * @param {string | File} file
+ * @param {Function} setIsLoading
+ * @description Download File or from url
+ */
+export const downloadFile = async (
+  file: string | File | null,
+  setIsLoading?: (flag: boolean) => void,
+  overrideFileName?: string,
+) => {
+  try {
+    if (!file) return;
+
+    let fileBlob: Blob;
+    let fileName: string;
+
+    if (typeof file === 'string') {
+      fileName = extractFileNameFromUrl(file);
+      fileBlob = await fetchFileBlob(file).then((data) => data);
+    } else {
+      fileName = file.name;
+      fileBlob = file;
+    }
+
+    const aTag = document.createElement('a');
+    const objUrl = URL.createObjectURL(fileBlob);
+
+    aTag.setAttribute('href', objUrl);
+    if (fileName) aTag.setAttribute('download', overrideFileName ?? fileName);
+    document.body.appendChild(aTag);
+    aTag.click();
+    aTag.remove();
+    URL.revokeObjectURL(objUrl);
+  } finally {
+    setIsLoading?.(false);
+  }
+};

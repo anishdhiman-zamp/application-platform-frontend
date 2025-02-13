@@ -29,9 +29,22 @@ export type DatasetDataResponseType = {
   total_count: number;
 };
 
+export type DatasetExportResponseType = {
+  workflow_id: string;
+};
+
 export type DatasetDataRequestType = {
   datasetId: string;
   query_config?: string;
+};
+
+export type DatasetExportsSignedUrlRequestType = {
+  datasetId: string;
+  workflowId: string;
+};
+
+export type DatasetExportsSignedUrlResponseType = {
+  signed_url: string;
 };
 
 export type DatasetDrilldownRequestType = {

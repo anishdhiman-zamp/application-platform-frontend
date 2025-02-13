@@ -9,6 +9,9 @@ import {
   DatasetDataResponseType,
   DatasetDrilldownRequestType,
   DatasetDrilldownResponseType,
+  DatasetExportResponseType,
+  DatasetExportsSignedUrlRequestType,
+  DatasetExportsSignedUrlResponseType,
   DatasetFilterConfigResponseType,
   DatasetListingRequestType,
   DatasetListingResponseType,
@@ -36,6 +39,17 @@ const Dataset = baseApi.injectEndpoints({
         params: { query_config },
       }),
       transformResponse: ({ data }) => data,
+    }),
+    getDatasetExport: builder.query<DatasetExportResponseType, DatasetDataRequestType>({
+      query: ({ datasetId, query_config }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_EXPORT_GET, { datasetId }),
+        params: { query_config },
+      }),
+    }),
+    getDatasetExportsSignedUrl: builder.query<DatasetExportsSignedUrlResponseType, DatasetExportsSignedUrlRequestType>({
+      query: ({ datasetId, workflowId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_EXPORTS_SIGNED_URL_GET, { datasetId, workflowId }),
+      }),
     }),
     getDatasetDrilldown: builder.query<DatasetDrilldownResponseType, DatasetDrilldownRequestType>({
       query: ({ datasetId, rowId }) => ({
@@ -97,6 +111,8 @@ export const {
   useGetDatasetFilterConfigQuery,
   useGetDatasetDataQuery,
   useLazyGetDatasetDataQuery,
+  useLazyGetDatasetExportQuery,
+  useLazyGetDatasetExportsSignedUrlQuery,
   useGetDatasetDrilldownQuery,
   useLazyGetDatasetListingQuery,
   useUpdateDatasetDataMutation,

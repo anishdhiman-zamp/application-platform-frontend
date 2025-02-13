@@ -94,7 +94,7 @@ export const formatColumns = (
   });
 
   // re-order columns based on the columnOrderingVisibilityForCurrentDataset
-  const orderedColumns: ColDef[] = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((column: MapAny) => {
+  const orderedColumns: ColDef[] = getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) => {
     return { ...columns.find((col) => col.field === column.colId), hide: !column.isVisible };
   });
 
@@ -111,7 +111,7 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
     };
   }
 
-  switch (column.type) {
+  switch (column?.type) {
     case FILTER_TYPES.MULTI_SELECT:
       return {
         cellEditor: 'agRichSelectCellEditor',

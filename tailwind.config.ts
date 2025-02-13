@@ -84,6 +84,7 @@ module.exports = {
         0.25: '1px',
         3.5: '14px',
         4.5: '18px',
+        5.5: '22px',
         7.5: '30px',
         8.5: '34px',
         11.5: '42px',
@@ -107,6 +108,7 @@ module.exports = {
         0.25: '1px',
         3.5: '14px',
         4.5: '18px',
+        5.5: '22px',
         7.5: '30px',
         12.5: '50px',
         13.5: '54px',
@@ -232,6 +234,7 @@ module.exports = {
         'rightSideDrawer-unMount': 'rightSideDrawerUnMountTransition 0.4s normal forwards ease-out',
         'bottomSideDrawer-unMount': 'bottomSideDrawerUnMountTransition 0.4s normal forwards ease-out',
         'shimmer-round': 'shimmer-round 1.5s infinite linear',
+        width: 'position 1.5s linear infinite',
       },
       keyframes: {
         'reverse-spin': {
@@ -286,6 +289,11 @@ module.exports = {
         'shimmer-round': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        position: {
+          '0%': { left: '1px' },
+          '50%': { left: '6px' },
+          '100%': { left: '1px' },
         },
         'shimmer-skeleton': {
           '100%': { transform: 'translateX(100%)' },

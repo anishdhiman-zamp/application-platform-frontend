@@ -16,6 +16,7 @@ import {
 } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
+import ExportDataset from 'modules/data/components/exportDataset';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
@@ -46,6 +47,7 @@ const DatasetById = () => {
   const [columnId, setColumnId] = useState<string>('');
   const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
+  const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
 
   const { data: actionStatus = [] } = useGetActionStatusQuery({
     datasetId: id as string,
@@ -67,6 +69,7 @@ const DatasetById = () => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        setExportsDatasetQuery(getEncodedRequest(parameters.request));
         getDatasetData({
           datasetId: id as string,
           query_config: getEncodedRequest(parameters.request),
@@ -213,7 +216,7 @@ const DatasetById = () => {
         handleRulesListingSideDrawerOpen,
       );
 
-      if (columns.length > 0) {
+      if (columns?.length > 0) {
         setColumns(columns);
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
@@ -248,8 +251,13 @@ const DatasetById = () => {
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
-          <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
+          <div className='flex items-center gap-2.5'>
+            <ExportDataset query={exportsDatasetQuery} datasetId={id as string} />
+            <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
+          </div>
         </div>
+      </div>
+      <div className='z-10 w-full h-full'>
         <DatasetTable
           tableRef={tableRef}
           columns={columns}

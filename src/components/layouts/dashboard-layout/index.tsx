@@ -15,7 +15,10 @@ import { RootState, store } from 'store';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
-import { fadeOutOffsetTimeDifference, minLoaderDuration } from 'components/layouts/dashboard-layout/dashboardLayout.constants';
+import {
+  fadeOutOffsetTimeDifference,
+  minLoaderDuration,
+} from 'components/layouts/dashboard-layout/dashboardLayout.constants';
 import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 
