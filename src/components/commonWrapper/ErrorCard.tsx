@@ -22,15 +22,15 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
     case ErrorCardTypes.API_FAIL: {
       return (
         <div
-          className={cn('tw-animate-opacity tw-flex tw-items-center', className)}
+          className={cn('animate-opacity flex items-center h-full', className)}
           style={{ minHeight: height && height + 'px' }}
         >
-          <div className={cn('tw-w-full tw-flex tw-justify-center tw-py-6', contentClassName)}>
+          <div className={cn('w-full flex justify-center py-6', contentClassName)}>
             <div>
               <SvgSpriteLoader id='alert-circle' iconCategory={ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK} />
             </div>
-            <div className='tw-ml-2.5 '>
-              <div className='f-16-400 tw-mb-4'>{subtitle}</div>
+            <div className='ml-2.5 '>
+              <div className='f-16-400 mb-4'>{subtitle}</div>
               <div>
                 <Button
                   type={BUTTON_TYPES.SECONDARY}

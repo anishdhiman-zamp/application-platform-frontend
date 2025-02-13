@@ -10,9 +10,9 @@ const Widgets = baseApi.injectEndpoints({
       transformResponse: ({ data }) => data,
     }),
     getWidgetData: builder.query<WidgetDataResponseType, WidgetDataRequestType>({
-      query: ({ widgetId, filters }) => ({
+      query: ({ widgetId, payload }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DATA_GET, { widgetId }),
-        params: { filters },
+        params: payload,
       }),
     }),
   }),

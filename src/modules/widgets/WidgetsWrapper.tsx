@@ -16,12 +16,29 @@ interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceType;
 }
 
+//dummy comment
+
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
   const {
     state: { selectedFilters, filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
+
+  const periodicity = useMemo(() => {
+    if (!selectedFilters) return {};
+
+    for (const key in selectedFilters) {
+      if (selectedFilters[key] && typeof selectedFilters[key] === 'object' && 'periodicity' in selectedFilters[key]) {
+        return {
+          timeColumn: key,
+          periodicity: selectedFilters[key]?.periodicity,
+        };
+      }
+    }
+
+    return {};
+  }, [selectedFilters]);
 
   const { currentPageFiltersConfig, currentWidgetSelectedFilters } = useMemo(() => {
     const currentWidgetSelectedFilters: MapAny = {};
@@ -86,6 +103,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           currentPageFilters={currentPageFilters}
           isFilterInitialized={isFilterInitialized}
           onNodeClick={onNodeClick}
+          periodicity={periodicity.periodicity}
+          timeColumn={periodicity.timeColumn ?? ''}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -94,6 +113,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           widgetDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
+          periodicity={periodicity.periodicity}
+          timeColumn={periodicity.timeColumn ?? ''}
         />
       );
     }

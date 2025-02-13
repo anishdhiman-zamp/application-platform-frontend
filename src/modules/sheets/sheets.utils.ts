@@ -1,3 +1,4 @@
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { FilterDefaultValueType, SheetFilterType } from 'types/api/pagesApi.types';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -34,6 +35,7 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
         filterType: filterType,
         dateFrom: filter?.value?.[0],
         dateTo: filter?.value?.[1],
+        periodicity: PERIODICITY_TYPES.DAILY,
         type: filter?.operator,
       };
     case FILTER_TYPES.MULTI_SELECT:

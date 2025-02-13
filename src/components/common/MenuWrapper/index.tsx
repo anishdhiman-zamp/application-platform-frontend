@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export interface MenuWrapperProps {
@@ -29,7 +30,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
 
   return (
     <div
-      className={`bg-white relative z-1 shadow-menuList rounded border border-GRAY_400 ${className}`}
+      className={cn('bg-white relative z-1 shadow-menuList rounded-md border border-GRAY_400', className)}
       data-testid={`menu-wrapper-${id}`}
     >
       <div

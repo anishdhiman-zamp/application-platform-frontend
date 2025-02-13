@@ -67,7 +67,7 @@ export const DisplayDates: React.FC<DisplayDatesProps> = ({
   }, []);
 
   return (
-    <div className='flex mb-4 flex-col w-full'>
+    <div className='flex flex-col w-full px-3 pt-3 pb-4 '>
       <div className='mb-2 flex flex-col  items-start' onClick={() => setFocusedInput(DateRangeKeys.START_DATE)}>
         <div className='flex justify-between w-full'>
           <div className='f-12-400 mb-1.5 text-GRAY_500'>{isSingle ? 'Enter date' : 'From'} </div>

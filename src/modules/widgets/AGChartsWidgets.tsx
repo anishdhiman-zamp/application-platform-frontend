@@ -2,10 +2,11 @@ import React, { FC, useMemo } from 'react';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { WIDGET_LOADER } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
-import { AG_CHART_AXES, AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
+import { AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
@@ -23,6 +24,8 @@ interface WidgetsWrapperProps {
   currentPageFilters: string;
   isFilterInitialized?: boolean;
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
+  periodicity: string;
+  timeColumn: string;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -30,10 +33,24 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   currentPageFilters,
   isFilterInitialized,
   onNodeClick,
+  periodicity,
+  timeColumn,
 }) => {
   const widgetType = widgetDetails?.widget_type;
-  const { data: widgetData, isLoading } = useGetWidgetDataQuery(
-    { widgetId: widgetDetails.widget_instance_id, filters: currentPageFilters },
+  const {
+    data: widgetData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetWidgetDataQuery(
+    {
+      widgetId: widgetDetails.widget_instance_id,
+      payload: {
+        filters: currentPageFilters,
+        time_column: timeColumn,
+        periodicity: (periodicity as PERIODICITY_TYPES) ?? PERIODICITY_TYPES.DAILY,
+      },
+    },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 
@@ -49,7 +66,6 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       data: transformedData ?? [],
       legend: AG_CHART_LEGEND_CONFIG,
       animation: { enabled: true },
-      axes: AG_CHART_AXES,
     } as AgChartOptions;
 
     return getChartOptions(
@@ -59,8 +75,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       stackedValues,
       transformedData?.length,
       donutOthersData,
+      periodicity as PERIODICITY_TYPES,
     );
-  }, [widgetDetails, onNodeClick, transformedData, stackedValues]);
+  }, [widgetDetails, transformedData, stackedValues]);
 
   return (
     <div className=' bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden'>
@@ -77,6 +94,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         isNoData={!transformedData?.length}
         className='h-full'
         noDataBanner={<NoWidgetData />}
+        isError={isError}
+        refetchFunction={refetch}
         loader={
           <div className='top-0 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
             <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={300} height={300} />

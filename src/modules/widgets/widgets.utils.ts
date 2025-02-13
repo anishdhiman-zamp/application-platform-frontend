@@ -1,10 +1,11 @@
 import { AgCartesianSeriesTooltipRendererParams, AgChartOptions } from 'ag-charts-community';
 import { COLORS } from 'constants/colors';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import {
   AG_CHART_TYPES,
-  CHART_CATEGORY_AXES,
   CHART_NUMBER_AXES,
   CHART_SLICE_TYPES,
+  getCategoryAxis,
   getDonutChartSeriesConfig,
   MAX_DONUT_CHART_SLICE_COUNT,
   WidgetDataValueType,
@@ -38,19 +39,17 @@ export function groupTransactionsByDate(
 
   data?.forEach((dataItem: MapAny) => {
     if (!grouped[dataItem[xAxis]]) {
-      grouped[dataItem[xAxis]] = {
-        [dataItem[groupBy]]: dataItem[yAxis],
-      };
+      grouped[dataItem[xAxis]] = {};
     }
 
-    const brand = dataItem[groupBy] ?? 'Unknown';
-    const amount = parseFloat(dataItem[yAxis]) || 0;
+    const key = dataItem[groupBy] ?? 'Unknown';
+    const value = parseFloat(dataItem[yAxis]) || 0;
 
-    groupValues.add(brand);
-    if (!grouped[dataItem[xAxis]][brand]) {
-      grouped[dataItem[xAxis]][brand] = amount;
+    groupValues.add(key);
+    if (!grouped[dataItem[xAxis]][key]) {
+      grouped[dataItem[xAxis]][key] = value;
     } else {
-      grouped[dataItem[xAxis]][brand] = (grouped[dataItem[xAxis]][brand] as number) + amount;
+      grouped[dataItem[xAxis]][key] = (grouped[dataItem[xAxis]][key] as number) + value;
     }
   });
 
@@ -83,6 +82,8 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
               formattedRow[column_name] = String(value);
               break;
             case WidgetDataValueType.DATE:
+            case WidgetDataValueType.TIMESTAMP:
+            case WidgetDataValueType.LONG:
               formattedRow[column_name] = new Date(value as string);
               break;
             case WidgetDataValueType.DECIMAL:
@@ -167,8 +168,10 @@ export const getChartOptions = (
   stackedValues?: MapAny[],
   dataLength?: number,
   donutOthersData?: MapAny[],
+  periodicity: PERIODICITY_TYPES = PERIODICITY_TYPES.DAILY,
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
+  const categoryAxis = getCategoryAxis(periodicity);
 
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
@@ -210,7 +213,10 @@ export const getChartOptions = (
       return {
         ...navigatorConfig,
         ...baseOptions,
-        axes: [CHART_NUMBER_AXES, { ...CHART_CATEGORY_AXES, paddingInner: 0.5, paddingOuter: 1 }],
+        axes: [
+          CHART_NUMBER_AXES,
+          { ...categoryAxis, paddingInner: 0.5, paddingOuter: dataLength && dataLength > 1 ? 1 : 0.4 },
+        ],
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
@@ -244,7 +250,7 @@ export const getChartOptions = (
       return {
         ...navigatorConfig,
         ...baseOptions,
-        axes: [CHART_NUMBER_AXES, { ...CHART_CATEGORY_AXES }],
+        axes: [CHART_NUMBER_AXES, { ...categoryAxis }],
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,

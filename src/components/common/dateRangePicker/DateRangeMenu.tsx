@@ -8,12 +8,14 @@ import {
   dateFilterValueType,
   DateRangeKeys,
   DateRangeValue,
+  PERIODICITY_OPTIONS,
   RangeType,
 } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { format } from 'date-fns';
 import { EventCallbackType, MenuItem, TAB_TYPES } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { searchDateRange } from 'components/common/dateRangePicker/dateRangePicker.utils';
 import { DateUnitTabDisplay } from 'components/common/dateRangePicker/DateUnitTabDisplay';
 import { DisplayDates } from 'components/common/dateRangePicker/DisplayDates';
@@ -39,6 +41,9 @@ interface DateRangeMenuProps {
   dateFormat?: string;
   customTabValues?: DATE_RANGE_TYPES[];
   disableFutureDate?: boolean;
+  isPeriodicityEnabled?: boolean;
+  selectedPeriodicity?: OptionsType;
+  onPeriodicityChange?: (value: OptionsType) => void;
 }
 
 const DateRangeMenu: FC<DateRangeMenuProps> = ({
@@ -54,6 +59,9 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
   dateFormat = DATE_FORMATS.ddMMMyyyy,
   customTabValues = [],
   disableFutureDate,
+  isPeriodicityEnabled = false,
+  selectedPeriodicity,
+  onPeriodicityChange,
 }) => {
   const [currentValueStart, setCurrentValueStart] = useState<DateRangeValue | null>(null);
   const [currentValueEnd, setCurrentValueEnd] = useState<DateRangeValue | null>(null);
@@ -348,7 +356,12 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
               </div>
             </div>
           )}
-          <div className={`items-start flex flex-col p-3  ${isSingle ? 'h-full' : 'h-[calc(100%-38.5px)]'}`}>
+          <div
+            className={cn(
+              `items-start flex flex-col`,
+              isSingle ? 'h-full' : isPeriodicityEnabled ? 'h-[calc(100%-44px)]' : 'h-[calc(100%-38.5px)]',
+            )}
+          >
             {/* ----- Display value of startDate and endDate -------- */}
             <DisplayDates
               startDate={startDateDisplay}
@@ -375,6 +388,25 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
               focusedInput={focusedInput}
               disableFutureDate={disableFutureDate}
             />
+            {isPeriodicityEnabled && (
+              <div className='border-t border-GRAY_400 p-3 pb-4'>
+                <div className='f-13-500 mb-1.5'>Periodicity</div>
+                <div className='flex items-center gap-1.5 flex-wrap'>
+                  {PERIODICITY_OPTIONS.map((item) => (
+                    <div
+                      className={cn(
+                        'f-13-500 border border-GRAY_400 rounded px-2 py-1 f-12-400 cursor-pointer',
+                        selectedPeriodicity?.value === item.value ? 'bg-BG_GRAY_2' : '',
+                      )}
+                      key={item?.value}
+                      onClick={() => onPeriodicityChange?.(item)}
+                    >
+                      {item?.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

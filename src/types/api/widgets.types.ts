@@ -1,3 +1,4 @@
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { MapAny } from 'types/commonTypes';
 
 export enum WIDGET_TYPES {
@@ -34,7 +35,11 @@ export type WidgetDataResponseType = {
 
 export type WidgetDataRequestType = {
   widgetId: string;
-  filters: string;
+  payload: {
+    filters: string;
+    time_column?: string;
+    periodicity?: PERIODICITY_TYPES;
+  };
 };
 
 export enum AGGREGATION_TYPES {

@@ -61,7 +61,7 @@ export const PivotTableWidget = (props: PivotTableWidgetProps) => {
   const { data, isLoading, error } = useGetWidgetDataQuery(
     {
       widgetId: widgetInstanceDetails.widget_instance_id,
-      filters: currentPageFilters,
+      payload: { filters: currentPageFilters },
     },
     {
       refetchOnMountOrArgChange: true,

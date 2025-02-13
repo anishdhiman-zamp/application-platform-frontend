@@ -1,5 +1,10 @@
 import React, { FC } from 'react';
-import { DATE_FILTER_CATEGORIES, DATE_RANGE_TYPES, dateFilterValueType } from 'constants/date.constants';
+import {
+  DATE_FILTER_CATEGORIES,
+  DATE_RANGE_TYPES,
+  dateFilterValueType,
+  PERIODICITY_TYPES,
+} from 'constants/date.constants';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import DateRangePicker from 'components/common/dateRangePicker';
 
@@ -7,6 +12,7 @@ export type DateFilterValueType = {
   start_date: Date | null;
   end_date: Date | null;
   date_category?: DATE_FILTER_CATEGORIES;
+  periodicity?: PERIODICITY_TYPES;
 };
 
 const DateRangeFilter: FC<{
@@ -21,6 +27,7 @@ const DateRangeFilter: FC<{
   isSingle?: boolean;
   customTabValues?: DATE_RANGE_TYPES[];
   disableFutureDate?: boolean;
+  isPeriodicityEnabled?: boolean;
 }> = ({
   value,
   disabled = false,
@@ -31,6 +38,7 @@ const DateRangeFilter: FC<{
   isSingle = false,
   customTabValues,
   disableFutureDate,
+  isPeriodicityEnabled,
 }) => {
   const handleChange = (category: string, value: dateFilterValueType) => {
     const customCondition = category === DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE && value?.start && value?.end;
@@ -47,6 +55,7 @@ const DateRangeFilter: FC<{
         date_category: category as DATE_FILTER_CATEGORIES,
         start_date: value?.start || null,
         end_date: value?.end || null,
+        periodicity: value?.periodicity,
       });
     }
   };
@@ -74,6 +83,7 @@ const DateRangeFilter: FC<{
         isSingle={isSingle}
         customTabValues={customTabValues}
         disableFutureDate={disableFutureDate}
+        isPeriodicityEnabled={isPeriodicityEnabled}
         {...dateRangeProps}
       />
     </>

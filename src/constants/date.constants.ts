@@ -16,6 +16,11 @@ export const DATE_FORMATS = {
   HHMM: 'HH:mm',
   MMddyyyy: 'MM/dd/yyyy',
   dd_MMM_yyyy: 'dd MMM yyyy',
+  d_MMM_yyyy: 'd MMM yyyy',
+  MMM_yyyy: 'MMM yyyy',
+  YYYY: 'yyyy',
+  DD: 'dd',
+  QQ_yyyy: `'Q'Q yyyy`,
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);
@@ -78,7 +83,7 @@ export const DATE_FILTER_OPTIONS: OptionsType[] = [
   { label: 'Last Year', value: DATE_FILTER_CATEGORIES.LAST_YEAR },
 ];
 
-export type dateFilterValueType = { start: Date | undefined; end: Date | undefined };
+export type dateFilterValueType = { start: Date | undefined; end: Date | undefined; periodicity?: PERIODICITY_TYPES };
 // export type dateFilterValueType = { start: Date | null; end: Date | null };
 
 export type RangeType = {
@@ -148,3 +153,19 @@ export enum DateRangeKeys {
   START_DATE = 'startDate',
   END_DATE = 'endDate',
 }
+
+export enum PERIODICITY_TYPES {
+  DAILY = 'day',
+  WEEKLY = 'week',
+  MONTHLY = 'month',
+  QUARTERLY = 'quarter',
+  YEARLY = 'year',
+}
+
+export const PERIODICITY_OPTIONS: OptionsType[] = [
+  { label: 'Daily', value: PERIODICITY_TYPES.DAILY },
+  { label: 'Weekly', value: PERIODICITY_TYPES.WEEKLY },
+  { label: 'Monthly', value: PERIODICITY_TYPES.MONTHLY },
+  { label: 'Quarterly', value: PERIODICITY_TYPES.QUARTERLY },
+  { label: 'Yearly', value: PERIODICITY_TYPES.YEARLY },
+];

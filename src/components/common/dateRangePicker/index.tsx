@@ -5,10 +5,13 @@ import {
   DATE_FILTER_OPTIONS,
   DATE_RANGE_TYPES,
   dateFilterValueType,
+  PERIODICITY_OPTIONS,
+  PERIODICITY_TYPES,
   RangeType,
 } from 'constants/date.constants';
 import { EventCallbackType } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import DateRangeMenu from 'components/common/dateRangePicker/DateRangeMenu';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
@@ -25,6 +28,7 @@ interface DateFilterProps {
   dateFormat?: string;
   customTabValues?: DATE_RANGE_TYPES[];
   disableFutureDate?: boolean;
+  isPeriodicityEnabled?: boolean;
 }
 
 export interface DateRangeComponentProps {
@@ -53,11 +57,12 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   dateFormat,
   customTabValues,
   disableFutureDate,
+  isPeriodicityEnabled,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<DATE_FILTER_CATEGORIES>(
     defaultValue?.category ? (defaultValue?.category as DATE_FILTER_CATEGORIES) : DATE_FILTER_CATEGORIES.ALL_TIME,
   );
-
+  const [selectedPeriodicity, setSelectedPeriodicity] = useState(PERIODICITY_OPTIONS[0]);
   const [range, setRange] = useState<RangeType>({
     startDate: defaultValue?.start ?? undefined,
     endDate: defaultValue?.end ?? undefined,
@@ -117,6 +122,7 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
     const updatedDateRange: dateFilterValueType = {
       start: value.selection.startDate,
       end: value.selection.endDate,
+      periodicity: selectedPeriodicity?.value as PERIODICITY_TYPES,
     };
 
     if (updatedCategory) {
@@ -131,6 +137,19 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
     const updatedDateRange: dateFilterValueType = {
       start: range.startDate,
       end: range.endDate,
+      periodicity: selectedPeriodicity?.value as PERIODICITY_TYPES,
+    };
+
+    onChange(DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE, updatedDateRange);
+  };
+
+  const handlePeriodicityChange = (value: OptionsType) => {
+    setSelectedPeriodicity(value);
+
+    const updatedDateRange: dateFilterValueType = {
+      start: range.startDate,
+      end: range.endDate,
+      periodicity: value?.value as PERIODICITY_TYPES,
     };
 
     onChange(DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE, updatedDateRange);
@@ -153,7 +172,14 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
   return (
     <MenuWrapper
       id={`${id}_DATE_RANGE_FILTER`}
-      childrenWrapperClassName={`!overflow-visible !max-h-125 !w-[277px] ${isSingle ? '!h-[390px]' : '!h-[466px]'}`}
+      childrenWrapperClassName={cn(
+        '!overflow-visible !w-[284px]',
+        isSingle
+          ? '!h-[390px] !max-h-125'
+          : isPeriodicityEnabled
+            ? '!h-[590px] !max-h-[590px]'
+            : '!h-[480px] !max-h-125',
+      )}
     >
       <DateRangeMenu
         onDateChange={handleDateChange}
@@ -171,6 +197,9 @@ const DateRangePicker: React.FC<DateFilterProps> = ({
         dateFormat={dateFormat}
         customTabValues={customTabValues}
         disableFutureDate={disableFutureDate}
+        isPeriodicityEnabled={isPeriodicityEnabled}
+        selectedPeriodicity={selectedPeriodicity}
+        onPeriodicityChange={handlePeriodicityChange}
       />
     </MenuWrapper>
   );

@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { getCommaSeparatedNumber } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
@@ -10,11 +11,22 @@ interface KpiTagProps {
   widgetDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.KPI }>;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
+  periodicity: string;
+  timeColumn: string;
 }
 
-const KpiTag: FC<KpiTagProps> = ({ widgetDetails, currentPageFilters, isFilterInitialized }) => {
+const KpiTag: FC<KpiTagProps> = ({
+  widgetDetails,
+  currentPageFilters,
+  isFilterInitialized,
+  periodicity,
+  timeColumn,
+}) => {
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
-    { widgetId: widgetDetails?.widget_instance_id, filters: currentPageFilters },
+    {
+      widgetId: widgetDetails?.widget_instance_id,
+      payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
+    },
     { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 

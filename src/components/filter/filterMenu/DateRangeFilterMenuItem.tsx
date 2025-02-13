@@ -5,7 +5,12 @@ import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
-const DateRangeFilterMenuItem = ({ column }: { column: any }) => {
+interface DateRangeFilterMenuItemProps {
+  column: { colId: string };
+  isPeriodicityEnabled?: boolean;
+}
+
+const DateRangeFilterMenuItem = ({ column, isPeriodicityEnabled = false }: DateRangeFilterMenuItemProps) => {
   const { state, dispatch } = useFiltersContextStore();
   const columnId = column?.colId;
 
@@ -18,6 +23,7 @@ const DateRangeFilterMenuItem = ({ column }: { column: any }) => {
             dateFrom: value?.start_date?.toISOString(),
             dateTo: value?.end_date?.toISOString(),
             filterType: FILTER_TYPES.DATE_RANGE,
+            periodicity: value?.periodicity,
             type: CONDITION_OPERATOR_TYPE.IN_BETWEEN,
           },
         },
@@ -38,6 +44,7 @@ const DateRangeFilterMenuItem = ({ column }: { column: any }) => {
         controlClassName='px-2 py-1.5 border-DIVIDER_SAIL_2 rounded-lg h-auto mr-3 cursor-pointer'
         isSingle={false}
         disableFutureDate={false}
+        isPeriodicityEnabled={isPeriodicityEnabled}
       />
     </div>
   );

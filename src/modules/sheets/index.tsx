@@ -58,6 +58,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
               className='px-0'
               allowActions={false}
               filterConfig={filtersConfig ?? []}
+              isPeriodicityEnabled
             />
           </div>
 

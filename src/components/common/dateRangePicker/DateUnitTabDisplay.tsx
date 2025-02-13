@@ -50,7 +50,10 @@ export const DateUnitTabDisplay: React.FC<DateUnitTabDisplayProps> = ({
   }, [currentTab]);
 
   return (
-    <div className='h-[calc(100%-65px)] overflow-y-auto date-unit-container' ref={containerRef}>
+    <div
+      className='h-[calc(100%-65px)] pt-3 px-3 border-t border-GRAY_400 w-full overflow-y-auto date-unit-container'
+      ref={containerRef}
+    >
       {currentTab === DATE_RANGE_TYPES.MONTH ? (
         <MonthOrQuarterPicker
           onSelect={onSetCurrentValue}

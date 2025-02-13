@@ -1,8 +1,9 @@
 import { AgCartesianAxisOptions, time } from 'ag-charts-community';
 import { CHART_PALETTE_COLORS, COLORS } from 'constants/colors';
-import { DATE_FORMATS } from 'constants/date.constants';
-import { format } from 'date-fns';
+import { DATE_FORMATS, PERIODICITY_TYPES } from 'constants/date.constants';
+import { endOfWeek, format, startOfWeek } from 'date-fns';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
+import { MapAny } from 'types/commonTypes';
 import { formatNumber, isValidDate, trimString } from 'utils/common';
 
 export enum SCREEN_BREAKPOINTS_NAMES {
@@ -33,6 +34,7 @@ export enum WidgetDataValueType {
   DATE = 'DATE',
   TIMESTAMP = 'TIMESTAMP',
   TIME = 'TIME',
+  LONG = 'LONG',
   DATETIME = 'DATETIME',
 }
 
@@ -47,28 +49,49 @@ export enum CHART_SLICE_TYPES {
   OTHERS = 'others',
 }
 
-export const CHART_CATEGORY_AXES: AgCartesianAxisOptions = {
-  type: 'category' as const,
-  position: 'bottom',
-  label: {
-    minSpacing: 20,
-    autoRotate: false,
-    formatter: function (params) {
-      if (isValidDate(params.value)) {
-        return format(new Date(params.value), DATE_FORMATS.ddMMMyyyy);
-      }
+export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, date: string) => {
+  switch (periodicity) {
+    case PERIODICITY_TYPES.DAILY:
+      return format(new Date(date), DATE_FORMATS.ddMMMyyyy);
+    case PERIODICITY_TYPES.WEEKLY: {
+      const start = startOfWeek(new Date(date), { weekStartsOn: 1 }); // Monday as start of week
+      const end = endOfWeek(new Date(date), { weekStartsOn: 1 });
 
-      return params.value;
+      return `${format(start, DATE_FORMATS.DD)}-${format(end, DATE_FORMATS.d_MMM_yyyy)}`;
+    }
+    case PERIODICITY_TYPES.MONTHLY:
+      return format(new Date(date), DATE_FORMATS.MMM_yyyy);
+    case PERIODICITY_TYPES.QUARTERLY:
+      return format(new Date(date), DATE_FORMATS.QQ_yyyy);
+    case PERIODICITY_TYPES.YEARLY:
+      return format(new Date(date), DATE_FORMATS.YYYY);
+  }
+};
+
+export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
+  return {
+    type: 'category' as const,
+    position: 'bottom',
+    label: {
+      minSpacing: 20,
+      autoRotate: false,
+      formatter: function (params: MapAny) {
+        if (isValidDate(params.value)) {
+          return getFormattedDateWithPeriodicity(periodicity, params.value);
+        }
+
+        return params.value;
+      },
     },
-  },
-  tick: {
-    size: 10, // Changed from length to size
-    width: 0.75,
-  },
-  line: {
-    width: 1,
-    stroke: COLORS.GRAY_400,
-  },
+    tick: {
+      size: 10, // Changed from length to size
+      width: 0.75,
+    },
+    line: {
+      width: 1,
+      stroke: COLORS.GRAY_400,
+    },
+  };
 };
 
 export const CHART_NUMBER_AXES: AgCartesianAxisOptions = {
@@ -107,8 +130,6 @@ export const AG_CHART_TIME_AXES: AgCartesianAxisOptions = {
     stroke: COLORS.GRAY_400,
   },
 };
-
-export const AG_CHART_AXES: AgCartesianAxisOptions[] = [CHART_CATEGORY_AXES, CHART_NUMBER_AXES, AG_CHART_TIME_AXES];
 
 export const AG_CHART_LEGEND_CONFIG = {
   enabled: true,
