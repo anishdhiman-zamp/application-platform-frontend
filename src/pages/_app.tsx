@@ -1,6 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
+import { LicenseManager as LicenseManagerCharts } from 'ag-charts-enterprise';
 import { LicenseManager } from 'ag-grid-enterprise';
 import { inter } from 'constants/common.constants';
 import { FAVICON } from 'constants/icons';
@@ -23,7 +24,7 @@ import 'react-date-range/dist/theme/default.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 LicenseManager.setLicenseKey(AG_GRID_KEY);
-LicenseManager.setLicenseKey(AG_CHART_KEY);
+LicenseManagerCharts.setLicenseKey(AG_CHART_KEY);
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
