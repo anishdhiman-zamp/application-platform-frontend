@@ -26,7 +26,7 @@ const InputTag: FC<InputTagProps> = ({
   inputRoundedClassName = 'rounded-md',
   inputSizeClassName = 'p-6',
   customPaddingClassName,
-  errorClass = '!border-RED_700 !focus:shadow-inputErrorOutlineShadow',
+  errorClass = '!border-RED_700 focus:shadow-inputErrorOutlineShadow',
   onChange = defaultFn,
   onKeyPress = defaultFn,
   onKeyDown = defaultFn,
@@ -72,9 +72,15 @@ const InputTag: FC<InputTagProps> = ({
 
   inputSizeClassName = customPaddingClassName ? customPaddingClassName : inputSizeClassName;
   const inputStateClassName = cn(
-    `${overrideInputBgClassName} ${inputFontClassName} ${inputClassName} ${focusClassNames} ${cursorClassname} ${inputSizeClassName} ${
-      error ? errorClass : ''
-    } ${readOnlyInputClasses} ${disabledInputClasses} `,
+    overrideInputBgClassName,
+    inputFontClassName,
+    inputClassName,
+    focusClassNames,
+    cursorClassname,
+    inputSizeClassName,
+    error && errorClass,
+    readOnlyInputClasses,
+    disabledInputClasses,
   );
 
   const inputTagWrapperClasses = cn(
@@ -106,7 +112,7 @@ const InputTag: FC<InputTagProps> = ({
   };
 
   return (
-    <div className={cn(`flex ${inputTagWrapperClasses}`)}>
+    <div className={cn(`flex flex-col ${inputTagWrapperClasses}`)}>
       {isMulti ? (
         <div className={cn(`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto ${inputPillsWrapperClasses}`)}>
           {tags.map((tag, index) => (
@@ -180,6 +186,7 @@ const InputTag: FC<InputTagProps> = ({
           onKeyUp={onKeyUp}
         />
       )}
+      {error && <span className='f-11-400 mt-2 text-RED_700'>{error}</span>}
     </div>
   );
 };

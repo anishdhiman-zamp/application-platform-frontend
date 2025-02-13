@@ -2,30 +2,28 @@ import React from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
+import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
+import LoginButton from 'modules/login/LoginButton';
+import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
-import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
-import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
 export const LoginForm = () => {
   const [email, setEmail] = React.useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
-
   const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
-
   const [error, setError] = React.useState<string | null>(null);
-
   const [loading, setLoading] = React.useState<boolean>(false);
 
-  const [oidcLoginMethod, setOidcLoginMethod] = React.useState<LOGIN_PROVIDERS | null>(null);
-
-  console.log(oidcLoginMethod);
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e?.target?.value !== undefined) {
+      setEmail(e.target.value);
+    }
+  };
 
   const initiateOidcLogin = async (url: string, method: string, providerId: LOGIN_PROVIDERS) => {
-    setOidcLoginMethod(providerId);
-
     try {
       const resp = await fetch(url, {
         method: method,
@@ -59,62 +57,63 @@ export const LoginForm = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setOidcLoginMethod(null);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e?.preventDefault();
     setError(null);
     setLoading(true);
     if (!isValidEmail(email)) {
       setError('Please enter a valid email address');
+      setLoading(false);
 
       return;
     }
 
-    try {
-      const response = await fetch(`${API_DOMAIN}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`, {
-        method: REQUEST_TYPES.POST,
-        body: JSON.stringify({
-          email,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        credentials: 'include',
-      });
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`${API_DOMAIN}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`, {
+          method: REQUEST_TYPES.POST,
+          body: JSON.stringify({
+            email,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        });
 
-      const respJson = await response.json();
+        const respJson = await response.json();
 
-      if (response.status !== 200) {
-        setError(respJson.error);
-        removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+        if (response.status !== 200) {
+          setError(respJson.error);
+          removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
 
-        return;
-      }
-
-      setLoginFlow(respJson);
-
-      // if the number of login methods is 1 and it is OIDC, we can directly login
-      if (respJson?.ui?.nodes?.length == 1) {
-        const loginNode = respJson.ui.nodes[0];
-
-        if (loginNode?.group === 'oidc') {
-          await initiateOidcLogin(
-            respJson.ui.action,
-            respJson.ui.method,
-            loginNode.attributes.value as LOGIN_PROVIDERS,
-          );
+          return;
         }
+
+        setLoginFlow(respJson);
+
+        // if the number of login methods is 1 and it is OIDC, we can directly login
+        if (respJson?.ui?.nodes?.length == 1) {
+          const loginNode = respJson.ui.nodes[0];
+
+          if (loginNode?.group === 'oidc') {
+            await initiateOidcLogin(
+              respJson.ui.action,
+              respJson.ui.method,
+              loginNode.attributes.value as LOGIN_PROVIDERS,
+            );
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    }, 3400);
   };
 
   const inputDisabled = loading;
@@ -124,50 +123,28 @@ export const LoginForm = () => {
   }
 
   return (
-    <div className='flex flex-col items-center justify-center h-screen bg-[#F2F1ED]'>
-      <div className='w-full max-w-xs'>
-        <div className='bg-white shadow-md rounded p-8'>
-          <div className='flex justify-center mb-6'>
-            <div className='font-bold text-xl'>
-              zamp <i className='fas fa-equals'></i>
-            </div>
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <Input
-                id='login-email'
-                label='Email'
-                placeholder='Enter your email address'
-                name='email'
-                type='email'
-                value={email}
-                onChange={(e) => {
-                  if (e?.target?.value !== undefined) {
-                    setEmail(e.target.value);
-                  }
-                }}
-                disabled={inputDisabled}
-              />
-            </div>
-            {error && (
-              <div
-                className='mt-2 mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative'
-                role='alert'
-              >
-                <span className='block sm:inline'>{error}</span>
-              </div>
-            )}
-            <Button
-              id='login'
-              className='w-full mt-4'
-              disabled={inputDisabled}
-              size={SIZE_TYPES.LARGE}
-              isLoading={loading ? loading : false}
-            >
-              <span className='f-16-500'>Login</span>
-            </Button>
-          </form>
-        </div>
+    <div className='relative flex items-center justify-center w-screen h-screen bg-BG_GRAY_5'>
+      <video autoPlay muted loop className='absolute z-0 w-full h-full object-cover'>
+        <source src={ZAMP_LOGIN_BG} type='video/mp4' />
+        <span className='f-14-400 text-GRAY_1000'>Your browser does not support the video tag.</span>
+      </video>
+
+      <div className='bg-white z-50 w-[540px] rounded-4.5 shadow-tableFilterMenu px-16 py-18 border border-GRAY_100'>
+        <Image src={ZAMP_FULL_LOGO} alt='ZAMP' width={98} height={24} />
+        <form onSubmit={handleSubmit}>
+          <Input
+            id='login-email'
+            placeholder='Enter your email address'
+            className='mt-10'
+            name='email'
+            type='email'
+            value={email}
+            error={error ? error : ''}
+            onChange={handleEmailChange}
+            disabled={inputDisabled}
+          />
+          <LoginButton loading={loading} onClick={() => handleSubmit} />
+        </form>
       </div>
     </div>
   );

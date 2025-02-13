@@ -13,6 +13,8 @@ export const WIDGET_LOADER = IMAGE_PREFIX + '/images/widget-loader.gif';
 export const WIDGET_LOADER_1 = IMAGE_PREFIX + '/images/widget-loader-1.gif';
 export const WIDGET_LOADER_2 = IMAGE_PREFIX + '/images/widget-loader-2.gif';
 export const JOINED_DATASET_ICON = IMAGE_PREFIX + '/icons/joined-dataset.svg';
+export const ZAMP_LOGIN_BG = IMAGE_PREFIX + '/mp4/zamp-login-bg.mp4';
+export const ZAMP_FULL_LOGO = IMAGE_PREFIX + '/icons/zamp-full-logo.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

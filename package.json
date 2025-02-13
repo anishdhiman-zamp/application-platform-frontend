@@ -12,6 +12,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@reduxjs/toolkit": "^2.4.0",
     "ag-charts-community": "11.0.0",
     "ag-charts-enterprise": "11.0.0",

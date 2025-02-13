@@ -11,6 +11,7 @@ export type UserState = {
   configuration?: MapAny;
   merchantDetails?: MapAny;
   roles?: { id: string; name: string }[];
+  dashboardLoader: boolean;
 };
 
 const initialState: UserState = {
@@ -21,6 +22,7 @@ const initialState: UserState = {
   configuration: undefined,
   merchantDetails: {},
   workspace: null,
+  dashboardLoader: false,
 };
 
 export const userSlice = createSlice({
@@ -51,6 +53,9 @@ export const userSlice = createSlice({
 
       return state;
     },
+    setDashboardLoader: (state, action: PayloadAction<boolean>) => {
+      state.dashboardLoader = action.payload;
+    },
 
     setWorkspace: (state, action: PayloadAction<Workspace>) => {
       state.workspace = action.payload;
@@ -73,6 +78,7 @@ export const {
   setRoles,
   setUser,
   setWorkspace,
+  setDashboardLoader,
 } = userSlice.actions;
 
 export default userSlice.reducer;

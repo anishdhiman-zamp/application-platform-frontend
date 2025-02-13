@@ -29,6 +29,9 @@ module.exports = {
 
         BG_GRAY_1: 'var(--BG_GRAY_1)',
         BG_GRAY_2: 'var(--BG_GRAY_2)',
+        BG_GRAY_3: 'var(--BG_GRAY_3)',
+        BG_GRAY_4: 'var(--BG_GRAY_4)',
+        BG_GRAY_5: 'var(--BG_GRAY_5)',
         BORDER_GRAY_400: 'var(--BORDER_GRAY_400)',
 
         BLUE_100: 'var(--BLUE_100)',
@@ -191,6 +194,7 @@ module.exports = {
         5.5: '22px',
         6.5: '26px',
         8.5: '34px',
+        18: '72px',
       },
       marginTop: {
         5.5: '22px',
@@ -198,7 +202,7 @@ module.exports = {
       boxShadow: {
         overlay: '1px 2px 10px rgba(197, 220, 255, 0.54)',
         inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
-        inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_700)',
+        inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_100)',
         tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
         pageBottomBar: '0px -4px 0px 0px #00000005',
         sideDrawer: '-1px 0px 36px 0px #B2CCF340',
@@ -207,6 +211,7 @@ module.exports = {
       borderRadius: {
         2.5: '10px',
         3.5: '14px',
+        4.5: '18px',
       },
       backgroundImage: {},
       screens: {
@@ -281,6 +286,9 @@ module.exports = {
         'shimmer-round': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        'shimmer-skeleton': {
+          '100%': { transform: 'translateX(100%)' },
         },
       },
       transitionProperty: {

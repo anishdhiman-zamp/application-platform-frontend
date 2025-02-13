@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import { LicenseManager } from 'ag-grid-enterprise';
-import { inter, SIZE } from 'constants/common.constants';
+import { inter } from 'constants/common.constants';
 import { FAVICON } from 'constants/icons';
 import { FeatureFlagsProvider } from 'modules/feature-flags/provider';
 import type { AppProps } from 'next/app';
@@ -11,7 +11,6 @@ import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { AG_CHART_KEY, AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
-import { Loader } from 'components/common/loader/Loader';
 import { AuthGuard } from 'components/hoc/AuthGuard';
 import { RouteGuard } from 'components/hoc/RouteGuard';
 import 'styles/fonts.css';
@@ -45,14 +44,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <link rel='icon' type='image/x-icon' href={FAVICON} />
       </Head>
       <Provider store={store}>
-        <AuthGuard
-          loader={
-            <div className='flex w-full h-screen items-center justify-center'>
-              <Loader size={SIZE.LARGE} />
-            </div>
-          }
-          loginRoute='/login'
-        >
+        <AuthGuard loginRoute='/login'>
           <FeatureFlagsProvider>
             <ToastContainer />
             <RouteGuard>

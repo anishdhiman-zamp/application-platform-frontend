@@ -1,17 +1,32 @@
-import React, { Children, cloneElement, FC, isValidElement, ReactNode, useEffect, useRef, useState } from 'react';
-import { Provider } from 'react-redux';
+import React, {
+  Children,
+  cloneElement,
+  FC,
+  isValidElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import { store } from 'store';
+import { RootState, store } from 'store';
+import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
+import DashboardLoader from 'components/common/loader/DashboardLoader';
+import { fadeOutOffsetTimeDifference, minLoaderDuration } from 'components/layouts/dashboard-layout/dashboardLayout.constants';
 import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, contentWrapperClassName = '' }) => {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const dispatch = useDispatch();
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousRoute = useRef<string>('');
+  const previousRoute = useRef<string>(router.pathname);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFadingOutEffect, setIsFadingOutEffect] = useState(false);
+  const showDashboardLoader = useSelector((state: RootState) => state.user.dashboardLoader);
 
   useEffect(() => {
     if (previousRoute.current === router.pathname) return;
@@ -38,9 +53,31 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
     return childrenWithProps;
   };
 
+  const hideLoader = useCallback(() => {
+    setIsFadingOutEffect(true);
+    setTimeout(() => {
+      dispatch(setDashboardLoader(false));
+      setIsSidebarOpen(true);
+    }, fadeOutOffsetTimeDifference);
+  }, [dispatch, setIsSidebarOpen]);
+
+  useEffect(() => {
+    if (showDashboardLoader) {
+      setIsFadingOutEffect(false);
+
+      const fadeTimeout = setTimeout(() => setIsFadingOutEffect(true), minLoaderDuration - fadeOutOffsetTimeDifference);
+      const hideTimeout = setTimeout(hideLoader, minLoaderDuration);
+
+      return () => {
+        clearTimeout(fadeTimeout);
+        clearTimeout(hideTimeout);
+      };
+    }
+  }, [showDashboardLoader, hideLoader]);
+
   return (
     <Provider store={store}>
-      <div className='bg-BACKGROUND_GRAY_1'>
+      <div className='bg-BACKGROUND_GRAY_1 relative'>
         <Topbar isSidebarOpen={isSidebarOpen} onSidebarToggle={() => setIsSidebarOpen((prev) => !prev)} />
         <div className={`w-full min-w-[768px] flex relative h-[calc(100vh-48px)]`}>
           <Sidebar isSidebarOpen={isSidebarOpen} />
@@ -52,6 +89,8 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
             </div>
           </div>
         </div>
+
+        {showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
       </div>
     </Provider>
   );

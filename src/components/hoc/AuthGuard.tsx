@@ -5,12 +5,11 @@ import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
-import { setRoles, setUser, setWorkspace } from 'store/slices/user';
+import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
-  loader: React.ReactNode;
   loginRoute: string;
   children: React.ReactNode;
 };
@@ -32,7 +31,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
 
       dispatch(setWorkspace(defaultWorkspace));
     }
-  }, [session, isSuccess]);
+  }, [session, isSuccess, dispatch]);
 
   if (isError && router.pathname !== props.loginRoute) {
     let query = {};
@@ -44,7 +43,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
       query,
     });
 
-    return;
+    return null;
   }
 
   if (isSuccess && session?.user_id && router.pathname === props.loginRoute) {
@@ -54,7 +53,9 @@ export const AuthGuard: React.FC<Props> = (props) => {
   }
 
   if (isLoading || (session?.user_id && workspace === null)) {
-    return props.loader;
+    dispatch(setDashboardLoader(true));
+
+    return null;
   }
 
   if (!session) {
