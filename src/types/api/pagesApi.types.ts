@@ -43,17 +43,23 @@ export interface SheetDetailsResponseType {
   page_id: string;
 }
 
+export interface LayoutType {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface WidgetType {
+  name: string;
+  layout: LayoutType;
+  default_widget: string;
+  widget_group: string[];
+}
+
 export interface SheetConfigType {
   version: string;
-  sheet_layout: Record<
-    string,
-    {
-      x: number;
-      y: number;
-      w: number;
-      h: number;
-    }
-  >;
+  sheet_layout: WidgetType[];
 }
 
 export type SheetDetailsRequestType = {

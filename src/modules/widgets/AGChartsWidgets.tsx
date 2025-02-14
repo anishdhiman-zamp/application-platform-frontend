@@ -6,12 +6,12 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { WIDGET_LOADER } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
+import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import { AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
-import { MapAny } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { MapAny, OptionsType } from 'types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 interface WidgetsWrapperProps {
@@ -26,6 +26,8 @@ interface WidgetsWrapperProps {
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
   periodicity: string;
   timeColumn: string;
+  groupWidgetsOptions: OptionsType[];
+  onWidgetChange: (widgetId: string) => void;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -35,6 +37,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   onNodeClick,
   periodicity,
   timeColumn,
+  groupWidgetsOptions,
+  onWidgetChange,
 }) => {
   const widgetType = widgetDetails?.widget_type;
   const {
@@ -51,7 +55,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         periodicity: (periodicity as PERIODICITY_TYPES) ?? PERIODICITY_TYPES.DAILY,
       },
     },
-    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
+    { refetchOnMountOrArgChange: false, skip: !isFilterInitialized },
   );
 
   const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength } = useMemo(() => {
@@ -81,13 +85,12 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   return (
     <div className=' bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden'>
-      <div
-        className={cn('f-18-450 text-GRAY_1000 px-6', {
-          'mb-10': ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType),
-        })}
-      >
-        {widgetDetails?.title}
-      </div>
+      <WidgetTitle
+        title={widgetDetails?.title}
+        groupWidgetsOptions={groupWidgetsOptions}
+        onWidgetChange={onWidgetChange}
+        widgetType={widgetType}
+      />
       <CommonWrapper
         isLoading={isLoading}
         skeletonType={SkeletonTypes.CUSTOM}

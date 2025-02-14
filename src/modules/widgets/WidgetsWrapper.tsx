@@ -6,7 +6,7 @@ import { PivotTableWidget } from 'modules/widgets/Pivot/StackedPivot';
 import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
-import { MapAny } from 'types/commonTypes';
+import { MapAny, OptionsType } from 'types/commonTypes';
 import { isValidDate } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -14,11 +14,11 @@ import { useFiltersContextStore } from 'components/filter/filters.context';
 
 interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceType;
+  groupWidgetsOptions: OptionsType[];
+  onWidgetChange: (widgetId: string) => void;
 }
 
-//dummy comment
-
-const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
+const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOptions, onWidgetChange }) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
   const {
@@ -105,6 +105,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           onNodeClick={onNodeClick}
           periodicity={periodicity.periodicity}
           timeColumn={periodicity.timeColumn ?? ''}
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -113,8 +115,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           widgetDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
-          periodicity={periodicity.periodicity}
-          timeColumn={periodicity.timeColumn ?? ''}
+          periodicity={periodicity?.periodicity}
+          timeColumn={periodicity?.timeColumn ?? ''}
         />
       );
     }

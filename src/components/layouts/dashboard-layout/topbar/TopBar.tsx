@@ -56,10 +56,10 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
           )}
         >
           <Image
-            width={20}
+            width={16}
             height={16}
             alt='zamp logo'
-            className='w-5 align-middle cursor-pointer'
+            className='w-4 align-middle cursor-pointer'
             src={ZAMP_ICON}
             priority={true}
           />
@@ -67,6 +67,8 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
         <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : ' border-GRAY_400')}>
           <SvgSpriteLoader
             className='cursor-pointer pr-5'
+            width={16}
+            height={16}
             onClick={onSidebarToggle}
             iconCategory={ICON_SPRITE_TYPES.LAYOUT}
             id='flex-align-right'

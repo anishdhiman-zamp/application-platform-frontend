@@ -3,8 +3,8 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { WIDGET_LOADER_2 } from 'constants/icons';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
+import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
-import WidgetsWrapper from 'modules/widgets/WidgetsWrapper';
 import Image from 'next/image';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -30,10 +30,10 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   );
 
   const sheetLayout = useMemo(() => {
-    return Object.keys(sheetDetails?.sheet_config?.sheet_layout ?? {}).map((key) => {
+    return sheetDetails?.sheet_config?.sheet_layout.map((widgetConfig) => {
       return {
-        i: key,
-        ...sheetDetails?.sheet_config?.sheet_layout[key],
+        i: widgetConfig?.default_widget,
+        ...widgetConfig?.layout,
       };
     });
   }, [sheetDetails?.sheet_config?.sheet_layout]);
@@ -75,13 +75,18 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
               isDraggable={false}
               useCSSTransforms={false}
             >
-              {sheetDetails.widget_instances?.map((widget, idx) => (
+              {sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => (
                 <div
-                  key={`widget-${idx}`}
-                  data-grid={sheetLayout.find((layout) => layout.i === widget.widget_instance_id)}
+                  key={`widget-${widgetConfig?.default_widget}`}
+                  data-grid={sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)}
                   className='bg-white'
                 >
-                  <WidgetsWrapper widgetDetails={widget} />
+                  <div key={widgetConfig?.default_widget}>
+                    <WidgetSwitcher
+                      widgetConfig={widgetConfig}
+                      widgetInstances={sheetDetails?.widget_instances ?? []}
+                    />
+                  </div>
                 </div>
               ))}
             </ResponsiveGridLayout>

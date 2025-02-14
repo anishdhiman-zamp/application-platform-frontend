@@ -1,6 +1,7 @@
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { FilterDefaultValueType, SheetFilterType } from 'types/api/pagesApi.types';
 import { MapAny } from 'types/commonTypes';
+import { getPastDateByNumberOfDays } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 
 export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
@@ -33,8 +34,8 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
     case FILTER_TYPES.DATE_RANGE:
       return {
         filterType: filterType,
-        dateFrom: filter?.value?.[0],
-        dateTo: filter?.value?.[1],
+        dateFrom: filter?.value?.[0] ?? getPastDateByNumberOfDays(0).toISOString(),
+        dateTo: filter?.value?.[1] ?? getPastDateByNumberOfDays(30).toISOString(),
         periodicity: PERIODICITY_TYPES.DAILY,
         type: filter?.operator,
       };

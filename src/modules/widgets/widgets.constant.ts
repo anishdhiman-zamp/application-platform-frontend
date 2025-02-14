@@ -147,7 +147,7 @@ export const AG_CHART_LEGEND_CONFIG = {
       fontWeight: 450,
       fontSize: 12,
       color: COLORS.GRAY_900,
-      formatter: ({ value = '' }) => trimString(value, 8),
+      formatter: ({ value = '' }) => trimString(value, 20),
     },
   },
 };

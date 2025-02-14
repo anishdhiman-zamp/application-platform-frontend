@@ -356,3 +356,11 @@ export const downloadFile = async (
     setIsLoading?.(false);
   }
 };
+
+export const getPastDateByNumberOfDays = (numberOfDays: number) => {
+  const pastDate = new Date();
+
+  pastDate.setDate(pastDate.getDate() - numberOfDays);
+
+  return pastDate;
+};

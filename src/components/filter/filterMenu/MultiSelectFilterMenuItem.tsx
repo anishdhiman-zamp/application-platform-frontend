@@ -95,7 +95,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       <div className='px-2.5'>
         <Input size={SIZE_TYPES.XSMALL} value={inputValue} placeholder='type a value...' onChange={onSearchChange} />
       </div>
-      <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1'>
+      <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
         {!!values?.length &&
           values
             .filter((item) => item?.includes(inputValue))
