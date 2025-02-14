@@ -124,6 +124,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails }) => {
           widgetInstanceDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
+          periodicity={periodicity.periodicity}
+          timeColumn={periodicity.timeColumn ?? ''}
         />
       );
     }

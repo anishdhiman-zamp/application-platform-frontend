@@ -19,6 +19,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotAutoGroupHeader from 'modules/widgets/Pivot/components/PivotAutoGroupHeader';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
@@ -52,16 +53,18 @@ export type PivotTableWidgetProps = {
   widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
+  periodicity: string;
+  timeColumn: string;
 };
 
 export const PivotTableWidget = (props: PivotTableWidgetProps) => {
-  const { widgetInstanceDetails, currentPageFilters, isFilterInitialized } = props;
+  const { widgetInstanceDetails, currentPageFilters, isFilterInitialized, timeColumn, periodicity } = props;
 
   // fetch widget data
   const { data, isLoading, error } = useGetWidgetDataQuery(
     {
       widgetId: widgetInstanceDetails.widget_instance_id,
-      payload: { filters: currentPageFilters },
+      payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
     },
     {
       refetchOnMountOrArgChange: true,
