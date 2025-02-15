@@ -118,6 +118,12 @@ export const widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: W
       },
     ],
   },
+  display_config: {
+    show_percentages: {
+      only_parent: true,
+    },
+    show_icons: true,
+  },
 };
 
 export const widgetData: WidgetDataResponseType = {

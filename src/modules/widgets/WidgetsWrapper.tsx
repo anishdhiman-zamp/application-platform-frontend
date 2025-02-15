@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
@@ -128,6 +128,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           currentPageFilters={currentPageFilters}
           periodicity={periodicity.periodicity}
           timeColumn={periodicity.timeColumn ?? ''}
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
         />
       );
     }

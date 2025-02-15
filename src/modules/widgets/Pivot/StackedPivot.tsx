@@ -18,7 +18,7 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
-import PivotAutoGroupHeader from 'modules/widgets/Pivot/components/PivotAutoGroupHeader';
+import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
@@ -38,6 +38,7 @@ import {
   getPivotData,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
+import { OptionsType } from 'types/commonTypes';
 
 ModuleRegistry.registerModules([CellStyleModule]);
 ModuleRegistry.registerModules([
@@ -58,14 +59,24 @@ ModuleRegistry.registerModules([
 type StackedPivotProps = {
   widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;
   widgetData: WidgetDataResponseType;
+  groupWidgetsOptions: OptionsType[];
+  onWidgetChange: (widgetId: string) => void;
 };
 
-const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) => {
+const StackedPivot = ({
+  widgetInstanceDetails,
+  widgetData,
+  groupWidgetsOptions,
+  onWidgetChange,
+}: StackedPivotProps) => {
+  const {
+    data_mappings: { mappings },
+    title,
+    display_config,
+  } = widgetInstanceDetails;
+
   const isSingleValue = useMemo(() => {
-    return (
-      widgetInstanceDetails?.data_mappings.mappings?.length === 1 &&
-      widgetInstanceDetails?.data_mappings?.mappings?.[0]?.fields?.values?.length === 1
-    );
+    return mappings?.length === 1 && mappings?.[0]?.fields?.values?.length === 1;
   }, [widgetInstanceDetails]);
 
   const { colDef, rowData } = useMemo(() => {
@@ -91,21 +102,25 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
             value={valueFormatted ?? ''}
             node={node}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+            showPercentage={display_config?.show_percentages}
           />
         );
       },
     };
-  }, []);
+  }, [widgetInstanceDetails, display_config, colDef]);
 
   const autoGroupColumnDef = useMemo<ColDef>(() => {
     return {
       minWidth: PINNED_COL_WIDTH,
       resizable: false,
       pinned: 'left',
-      headerComponent: PivotAutoGroupHeader,
+      headerComponent: WidgetTitle,
       headerComponentParams: {
-        title: widgetInstanceDetails?.title,
+        title: title,
         isSingleValue,
+        groupWidgetsOptions,
+        onWidgetChange,
+        widgetType: WIDGET_TYPES.PIVOT_TABLE,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
@@ -113,6 +128,7 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
             node={props.node}
             value={props.value}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+            showIcons={display_config?.show_icons}
           />
         );
       },
@@ -121,17 +137,21 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
         suppressPadding: true,
       },
     };
-  }, [widgetInstanceDetails?.title, isSingleValue, colDef?.filter((col) => col.rowGroup).length]);
+  }, [widgetInstanceDetails, isSingleValue, colDef]);
 
-  const getRowStyle = (params: any) =>
-    getDynamicRowStyle(backendConfig.styleConfig.rowStyles, params.node.level, params.node.value);
+  const getRowStyle = useMemo(() => {
+    return (params: any) =>
+      getDynamicRowStyle(backendConfig.styleConfig.rowStyles, params.node.level, params.node.value);
+  }, [backendConfig.styleConfig.rowStyles]);
 
-  const processPivotResultColGroupDef = (colGroupDef: ColGroupDef) => {
-    colGroupDef.headerGroupComponent = PivotColGroupHeader;
-    colGroupDef.headerGroupComponentParams = {
-      isSingleValue,
+  const processPivotResultColGroupDef = useMemo(() => {
+    return (colGroupDef: ColGroupDef) => {
+      colGroupDef.headerGroupComponent = PivotColGroupHeader;
+      colGroupDef.headerGroupComponentParams = {
+        isSingleValue,
+      };
     };
-  };
+  }, [isSingleValue]);
 
   return (
     <div className='h-full w-full'>
@@ -152,7 +172,7 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
           suppressRowHoverHighlight
           suppressCellFocus
           scrollbarWidth={12}
-          grandTotalRow={GRAND_ROW_TOTAL_POSITION}
+          grandTotalRow={display_config?.show_column_aggregations && GRAND_ROW_TOTAL_POSITION}
           getRowId={(params) => params?.data?.id}
         />
       </div>

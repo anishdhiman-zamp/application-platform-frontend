@@ -128,13 +128,14 @@
   }
 }
 
+.ag-row-group {
+  z-index: 0 !important;
+  overflow: visible !important;
+}
+
 .ag-input-field-input:where(:not([type='checkbox'], [type='radio'])) {
   padding-left: 8px;
   padding-right: 8px;
-}
-
-.pivot .ag-header-cell-menu-button {
-  display: none !important;
 }
 
 .pivot .ag-header,
@@ -146,6 +147,18 @@
 .pivot .ag-pinned-left-header {
   padding: 0 !important;
   border: none !important;
+}
+
+.pivot .ag-header {
+  overflow: visible !important;
+}
+
+.pivot .ag-header .ag-pinned-left-header {
+  overflow: visible !important;
+}
+
+.pivot .ag-header .ag-pinned-left-header .ag-header-cell {
+  overflow: visible !important;
 }
 
 .pivot .ag-header-cell-comp-wrapper {

@@ -6,6 +6,7 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import { OptionsType } from 'types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -15,6 +16,8 @@ export type PivotTableWidgetPropsType = {
   isFilterInitialized?: boolean;
   periodicity: string;
   timeColumn: string;
+  groupWidgetsOptions: OptionsType[];
+  onWidgetChange: (widgetId: string) => void;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -23,6 +26,8 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   isFilterInitialized,
   periodicity,
   timeColumn,
+  groupWidgetsOptions,
+  onWidgetChange,
 }) => {
   const { data, isFetching, error, refetch } = useGetWidgetDataQuery(
     {
@@ -50,7 +55,14 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
         </div>
       }
     >
-      {data && <StackedPivot widgetData={data} widgetInstanceDetails={widgetInstanceDetails} />}
+      {data && (
+        <StackedPivot
+          widgetData={data}
+          widgetInstanceDetails={widgetInstanceDetails}
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
+        />
+      )}
     </CommonWrapper>
   );
 };

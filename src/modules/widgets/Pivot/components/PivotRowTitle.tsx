@@ -12,9 +12,10 @@ type PivotRowTitleProps = {
   node: IRowNode;
   value: string;
   maxGroupingLevel: number;
+  showIcons?: boolean;
 };
 
-const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel }) => {
+const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, showIcons = false }) => {
   const [expanded, setExpanded] = useState(node?.expanded || false);
   const allowExpanding = shouldAllowExpandingRow(node);
 
@@ -34,7 +35,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel }
   return (
     <div
       className={cn(
-        'h-full w-full flex items-center gap-3 border-b-0.5 border-r-0.5 border-GRAY_400',
+        'h-full w-full flex items-center gap-3 border-b-0.5 border-r-0.5 border-GRAY_400 z-10',
         allowExpanding && 'cursor-pointer',
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
         isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1',
@@ -52,7 +53,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel }
         />
       )}
 
-      {isTopLevel && (
+      {showIcons && isTopLevel && (
         <MemoizedSvgSpriteLoader
           id={RECON_STATUS_ICONS[value as keyof typeof RECON_STATUS_ICONS].id}
           iconCategory={
@@ -64,7 +65,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel }
         />
       )}
 
-      {isLowestLevel && (
+      {showIcons && isLowestLevel && (
         <Image
           src={RECON_PAYMENT_ICONS[value as keyof typeof RECON_PAYMENT_ICONS] ?? OTHER_GATEWAY}
           alt={value ?? 'Bank'}

@@ -10,13 +10,19 @@ interface WidgetTitleProps {
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   widgetType: WIDGET_TYPES;
+  isSingleValue?: boolean;
 }
 
-const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }: WidgetTitleProps) => {
+const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, isSingleValue }: WidgetTitleProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isGroupWidget, setIsGroupWidget] = useState<boolean>(false);
 
   useOnClickOutside(ref, () => setIsGroupWidget(false));
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsGroupWidget((prev) => !prev);
+  };
 
   return (
     <div
@@ -24,11 +30,15 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }:
         'f-18-450 text-GRAY_1000 px-6 flex items-center gap-1 relative select-none',
         ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) ? 'mb-10' : '',
         groupWidgetsOptions?.length > 1 ? 'cursor-pointer' : '',
+        [WIDGET_TYPES.PIVOT_TABLE].includes(widgetType)
+          ? 'bg-white mb-0 w-full h-full p-6 flex items-start border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400'
+          : '',
+        [WIDGET_TYPES.PIVOT_TABLE].includes(widgetType) && isSingleValue ? 'items-center' : '',
       )}
-      onClick={() => setIsGroupWidget(!isGroupWidget)}
+      onClick={handleToggle}
     >
       {title}
-      {groupWidgetsOptions?.length > 1 && <SvgSpriteLoader id='chevron-down' width={16} height={16} />}
+      {groupWidgetsOptions?.length > 1 && <SvgSpriteLoader id='chevron-down' width={18} height={18} />}
       {isGroupWidget && (
         <div
           ref={ref}

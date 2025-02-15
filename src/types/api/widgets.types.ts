@@ -118,7 +118,7 @@ export interface AxisMappingType {
 
 export type WidgetInstanceResponseType = WidgetInstanceType;
 
-export type WidgetInstanceBaseType = {
+export interface WidgetInstanceBaseType {
   widget_instance_id: string;
   widget_id: string;
   sheet_id: string;
@@ -126,42 +126,43 @@ export type WidgetInstanceBaseType = {
   dataset_id: string;
   created_at: string;
   updated_at: string;
-};
+  display_config: MapAny;
+}
 
-export type LineBarChartWidgetInstanceType = WidgetInstanceBaseType & {
+export interface LineBarChartWidgetInstanceType extends WidgetInstanceBaseType {
   widget_type: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART;
   data_mappings: {
     version: string;
     datasets: { id: string }[];
     mappings: BarLineChartWidgetMapping[];
   };
-};
+}
 
-export type PieDonutChartWidgetInstanceType = WidgetInstanceBaseType & {
+export interface PieDonutChartWidgetInstanceType extends WidgetInstanceBaseType {
   widget_type: WIDGET_TYPES.PIE_CHART | WIDGET_TYPES.DONUT_CHART;
   data_mappings: {
     version: string;
     datasets: { id: string }[];
     mappings: PieDonutChartWidgetMapping[];
   };
-};
+}
 
-export type PivotTableWidgetInstanceType = WidgetInstanceBaseType & {
+export interface PivotTableWidgetInstanceType extends WidgetInstanceBaseType {
   widget_type: WIDGET_TYPES.PIVOT_TABLE;
   data_mappings: {
     version: string;
     datasets: { id: string }[];
     mappings: PivotTableWidgetMapping[];
   };
-};
+}
 
-export type KPITagWidgetInstanceType = WidgetInstanceBaseType & {
+export interface KPITagWidgetInstanceType extends WidgetInstanceBaseType {
   widget_type: WIDGET_TYPES.KPI;
   data_mappings: {
     version: string;
     mappings: KPITagWidgetMapping[];
   };
-};
+}
 
 export type WidgetInstanceType =
   | LineBarChartWidgetInstanceType

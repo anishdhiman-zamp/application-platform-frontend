@@ -1,14 +1,16 @@
-import { FC, memo, useMemo, useState } from 'react';
+import { FC, memo, useMemo, useRef, useState } from 'react';
 import { IRowNode } from 'ag-grid-community';
+import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 
 interface PivotCellPropsType {
   node: IRowNode;
   value: string | number;
   maxGroupingLevel: number;
+  showPercentage?: MapAny;
 }
 
-const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel }) => {
+const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, showPercentage }) => {
   const [toggledRows, setToggledRows] = useState<Record<string, boolean>>({});
 
   const { isLastNode, isTopNode, isRootLevel } = useMemo(() => {
@@ -18,6 +20,8 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel }) =>
       isRootLevel: node.level === -1,
     };
   }, [node.level, maxGroupingLevel]);
+
+  const { only_parent = false } = showPercentage || {};
 
   const numericValue = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[$,]/g, ''));
 
@@ -33,14 +37,28 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel }) =>
       ? getCommaSeparatedNumber(Math.round(((numericValue || 0) / totalValue) * 100 * 100) / 100, 2) + '%'
       : '0%';
 
-  const displayValue = isTopNode ? (isToggled ? value : percentageValue) : value;
+  const shouldShowPercentage = !isRootLevel && (only_parent ? isTopNode : true);
+
+  const displayValue = shouldShowPercentage ? (isToggled ? value : percentageValue) : value;
+
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleToggle = () => {
-    if (isTopNode) {
-      setToggledRows((prev) => ({
-        ...prev,
-        [node?.id || node?.key || '']: !prev[node?.id || node?.key || ''],
-      }));
+    if (shouldShowPercentage) {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+
+        return;
+      }
+
+      clickTimeoutRef.current = setTimeout(() => {
+        setToggledRows((prev) => ({
+          ...prev,
+          [node?.id || node?.key || '']: !prev[node?.id || node?.key || ''],
+        }));
+        clickTimeoutRef.current = null;
+      }, 200);
     }
   };
 
