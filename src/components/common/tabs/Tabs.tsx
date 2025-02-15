@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { TAB_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -10,7 +10,7 @@ export const Tabs: FC<TabsPropsType> = ({
   customSelectedIndex = 0,
   onSelect = defaultFn,
   TabItemComponent = null,
-  scrollWrapperClassName = 'pb-[0.5px]',
+  scrollWrapperClassName = 'pb-0.5',
   wrapperClassName = '',
   tabItemWrapperClassName = 'relative flex justify-center items-center w-fit',
   scrollWrapperStyle = '',

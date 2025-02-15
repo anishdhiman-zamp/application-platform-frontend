@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import Select from 'react-select';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
@@ -244,7 +244,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           cn(
             `${customClass?.fontSize ? customClass?.fontSize : (customClassNames?.placeholder ?? DROPDOWN_SIZE_STYLES[size].customClassNames.placeholder)}`,
           ),
-        menu: () => cn(`${customClassNames?.menu ?? 'bg-white border-[0.5px] border-DIVIDER_GRAY'}`),
+        menu: () => cn(`${customClassNames?.menu ?? 'bg-white border-0.5 border-DIVIDER_GRAY'}`),
         noOptionsMessage: () => cn(customClassNames?.noOptionsMessage ?? 'h-16 flex items-center justify-center'),
       }}
       onChange={handleChange}

@@ -5,8 +5,10 @@ import { formRequestUrlWithParams } from 'utils/common';
 
 const Widgets = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getWidgetInstance: builder.query<WidgetInstanceResponseType, WidgetDataRequestType>({
-      query: ({ widgetId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_INSTANCE_GET, { widgetId }) }),
+    getWidgetInstance: builder.query<WidgetInstanceResponseType, string>({
+      query: (widgetId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_INSTANCE_GET, { widgetId }),
+      }),
       transformResponse: ({ data }) => data,
     }),
     getWidgetData: builder.query<WidgetDataResponseType, WidgetDataRequestType>({

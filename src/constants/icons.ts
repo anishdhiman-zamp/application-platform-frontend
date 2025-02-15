@@ -15,6 +15,12 @@ export const WIDGET_LOADER_2 = IMAGE_PREFIX + '/images/widget-loader-2.gif';
 export const JOINED_DATASET_ICON = IMAGE_PREFIX + '/icons/joined-dataset.svg';
 export const ZAMP_LOGIN_BG = IMAGE_PREFIX + '/mp4/zamp-login-bg.mp4';
 export const ZAMP_FULL_LOGO = IMAGE_PREFIX + '/icons/zamp-full-logo.svg';
+export const PIVOT_HEADER_BG = IMAGE_PREFIX + '/images/pivot-header-bg.svg';
+
+export const ADYEN = IMAGE_PREFIX + '/icons/bank-icons/adyen.png';
+export const CHECKOUT = IMAGE_PREFIX + '/icons/bank-icons/checkout.svg';
+export const DEFAULT_BANK = IMAGE_PREFIX + '/icons/bank-icons/default-bank.svg';
+export const OTHER_GATEWAY = IMAGE_PREFIX + '/icons/bank-icons/other-gateway.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

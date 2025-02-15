@@ -5,7 +5,7 @@ import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'module
 import { PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
-import { capitalizeFirstLetter } from 'utils/common';
+import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
 
 export const backendConfig = {
   styleConfig: {
@@ -93,14 +93,6 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
   }
 
   return {}; // Default cell style
-};
-
-export const getHumanReadableColumnName = (name: string): string => {
-  return name
-    .toLowerCase()
-    .split('_')
-    .map((n) => capitalizeFirstLetter(n))
-    .join(' ');
 };
 
 export const parseType = (type: string, value: any) => {
@@ -303,9 +295,7 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
 
 export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] => {
   return pivotColumns
-    .filter((col, index, self) => {
-      return self.findIndex((t) => t.name === col.name) === index;
-    })
+    .filter((col, index, self) => self.findIndex((t) => t.name === col.name) === index)
     .map((col) => {
       switch (col.kind) {
         case 'group':
@@ -321,31 +311,26 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
             field: col.name,
             pivot: true,
             headerComponent: PivotColGroupHeader,
-            valueFormatter: (params) => {
-              return formatPivotColGroupHeader(params);
-            },
+            valueFormatter: (params) => formatPivotColGroupHeader(params),
             context: col,
           };
-        case 'aggregate':
+        case 'aggregate': {
           return {
             field: col.name,
             aggFunc: col.aggregation,
-            valueFormatter: (params) => {
-              const value = params.value;
-              const numValue = isNaN(Number(value)) ? '$0.00' : `$${Number(value).toFixed(2)}`;
-
-              return numValue;
-            },
+            valueFormatter: (params) => formatCurrencyValue(params.value),
             headerComponent: PivotColHeader,
+            headerName: snakeCaseToSentenceCase(col.name),
             cellStyle: (params) =>
               getDynamicCellStyle(
                 backendConfig.styleConfig.cellStyles,
-                getHumanReadableColumnName(col.name),
+                snakeCaseToSentenceCase(col.name),
                 params.node.level,
                 params.value,
               ),
             context: col,
           };
+        }
       }
     });
 };

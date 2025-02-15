@@ -191,6 +191,7 @@ module.exports = {
         37.5: '150px',
       },
       padding: {
+        0.5: '0.5px',
         2.5: '10px',
         4.5: '18px',
         5.5: '22px',
@@ -215,9 +216,11 @@ module.exports = {
         3.5: '14px',
         4.5: '18px',
       },
-      backgroundImage: {},
       screens: {
         '2xl_custom': { max: '1440px' },
+      },
+      borderWidth: {
+        0.5: '0.5px',
       },
       fontFamily: {
         outfit: 'Outfit',

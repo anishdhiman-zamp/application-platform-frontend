@@ -364,3 +364,40 @@ export const getPastDateByNumberOfDays = (numberOfDays: number) => {
 
   return pastDate;
 };
+
+/**
+ * Formats a given value as a currency string.
+ *
+ * @param value - The value to be formatted. If the value is not a number, it will be treated as 0.
+ * @returns The formatted currency string with a dollar sign, commas as thousand separators, and two decimal places.
+ */
+export const formatCurrencyValue = (value: any): string => {
+  const numValue = isNaN(Number(value)) ? 0 : Number(value);
+
+  return `$${numValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+};
+
+/**
+ *
+ * @param text e.g. Abcd Efgh
+ * @returns sentence casew e.g. Abcd efgh
+ */
+export const sentenceCase = (str: string) => {
+  if (str === undefined || str === null || str === '') return '';
+
+  // Convert the input to a string
+  str = str.toString();
+
+  // Capitalize the first letter and leave the rest unchanged
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+/**
+ * Converts a snake_case string to Sentence case.
+ *
+ * @param str - The snake_case string to be converted.
+ * @returns The converted string in Sentence case.
+ */
+export const snakeCaseToSentenceCase = (str: string) => {
+  return sentenceCase(str?.split('_').join(' '));
+};

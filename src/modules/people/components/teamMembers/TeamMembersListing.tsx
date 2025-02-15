@@ -13,7 +13,7 @@ const TeamMembersListing: FC<TeamMembersListingProps> = ({ data = [] }) => {
   return (
     !!data && (
       <>
-        <div className='grid grid-cols-3 gap-4 border-b-[0.5px] border-DIVIDER_GRAY'>
+        <div className='grid grid-cols-3 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
           {TEAM_MEMBERS_LISTING_COLUMN_DEFS.map((column, index) => (
             <div key={index} className='py-2 px-2'>
               <span className='text-left f-11-400 text-GRAY_700'>{column.headerName}</span>
@@ -22,7 +22,7 @@ const TeamMembersListing: FC<TeamMembersListingProps> = ({ data = [] }) => {
         </div>
         <div className='overflow-y-auto h-[calc(100vh-270px)]'>
           {data.map((row, index) => (
-            <div key={index} className='grid grid-cols-3 gap-4 border-b-[0.5px] border-DIVIDER_GRAY'>
+            <div key={index} className='grid grid-cols-3 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
               <TeamMembersName value={row?.user?.email} />
               <TeamMembersEmail value={row?.user?.email} />
               <TeamMembersRole value={{ user_id: row?.user?.user_id, privilege: row?.privilege }} />

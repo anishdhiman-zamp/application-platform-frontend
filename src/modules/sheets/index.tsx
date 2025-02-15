@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { WIDGET_LOADER_2 } from 'constants/icons';
@@ -24,7 +24,13 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   const {
     state: { filtersConfig },
   } = useFiltersContextStore();
-  const { data: sheetDetails, isLoading: isSheetLoading } = useGetSheetDetailsQuery(
+
+  const {
+    data: sheetDetails,
+    isFetching: isSheetLoading,
+    isError: isSheetDetailsError,
+    refetch: refetchSheetDetails,
+  } = useGetSheetDetailsQuery(
     { pageId: pageId as string, sheetId: sheetId as string },
     { skip: !pageId || !sheetId, refetchOnMountOrArgChange: false },
   );
@@ -44,6 +50,8 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
         <CommonWrapper
           isLoading={isSheetLoading}
           skeletonType={SkeletonTypes.CUSTOM}
+          isError={isSheetDetailsError}
+          refetchFunction={refetchSheetDetails}
           loader={
             <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
               <Image unoptimized src={WIDGET_LOADER_2} alt='widget-loader' width={400} height={400} />
@@ -81,7 +89,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
                   data-grid={sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)}
                   className='bg-white'
                 >
-                  <div key={widgetConfig?.default_widget}>
+                  <div key={widgetConfig?.default_widget} className='h-full w-full'>
                     <WidgetSwitcher
                       widgetConfig={widgetConfig}
                       widgetInstances={sheetDetails?.widget_instances ?? []}

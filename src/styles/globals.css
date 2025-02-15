@@ -148,13 +148,28 @@
   border: none !important;
 }
 
-.pivot.ag-header-cell-comp-wrapper {
+.pivot .ag-header-cell-comp-wrapper {
   height: 100% !important;
 }
 
 .pivot .ag-header-cell-resize {
   display: none !important;
 }
+
+.pivot .ag-horizontal-left-spacer {
+  border-right: none !important;
+}
+
+.ag-body-horizontal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ebebeb #f0f0f0;
+}
+
+.ag-body-vertical-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ebebeb #f0f0f0;
+}
+
 .ag-charts-tooltip {
   font-family: 'Inter';
   border: 1px solid #ebebeb;
@@ -177,7 +192,7 @@
   margin-bottom: 4px;
 }
 
-.ag-root-wrapper {
+.dataset .ag-root-wrapper {
   border-left: none;
 }
 

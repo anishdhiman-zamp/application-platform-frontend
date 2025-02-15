@@ -18,12 +18,18 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
-import { useGetWidgetDataQuery } from 'apis/widgets';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotAutoGroupHeader from 'modules/widgets/Pivot/components/PivotAutoGroupHeader';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
-import PivotRow from 'modules/widgets/Pivot/components/PivotRow';
+import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
+import {
+  COL_MIN_WIDTH,
+  GRAND_ROW_TOTAL_POSITION,
+  PINNED_COL_WIDTH,
+  PIVOT_GROUP_HEADER_HEIGHT,
+  PIVOT_HEADER_HEIGHT,
+  ROW_HEIGHT,
+} from 'modules/widgets/Pivot/pivot.constants';
 import {
   backendConfig,
   getDynamicRowStyle,
@@ -46,40 +52,8 @@ ModuleRegistry.registerModules([
   CellStyleModule,
   RowStyleModule,
   RowApiModule,
-  ValidationModule /* Development Only */,
+  ValidationModule,
 ]);
-
-export type PivotTableWidgetProps = {
-  widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;
-  currentPageFilters: string;
-  isFilterInitialized?: boolean;
-  periodicity: string;
-  timeColumn: string;
-};
-
-export const PivotTableWidget = (props: PivotTableWidgetProps) => {
-  const { widgetInstanceDetails, currentPageFilters, isFilterInitialized, timeColumn, periodicity } = props;
-
-  // fetch widget data
-  const { data, isLoading, error } = useGetWidgetDataQuery(
-    {
-      widgetId: widgetInstanceDetails.widget_instance_id,
-      payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
-    },
-    {
-      refetchOnMountOrArgChange: true,
-      skip: !isFilterInitialized,
-    },
-  );
-
-  // loading state: TODO
-  if (isLoading) return <div />;
-
-  // error state: TODO
-  if (error || !data) return <div>Error</div>;
-
-  return <StackedPivot {...props} widgetData={data} />;
-};
 
 type StackedPivotProps = {
   widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;
@@ -87,7 +61,13 @@ type StackedPivotProps = {
 };
 
 const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) => {
-  // generate pivot columns, colDefs and rowData
+  const isSingleValue = useMemo(() => {
+    return (
+      widgetInstanceDetails?.data_mappings.mappings?.length === 1 &&
+      widgetInstanceDetails?.data_mappings?.mappings?.[0]?.fields?.values?.length === 1
+    );
+  }, [widgetInstanceDetails]);
+
   const { colDef, rowData } = useMemo(() => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
@@ -97,29 +77,39 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
     return { colDef: pivotColDefs, rowData };
   }, [widgetInstanceDetails, widgetData]);
 
-  // default colDef
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       flex: 1,
-      minWidth: 130,
+      minWidth: COL_MIN_WIDTH,
       enableValue: true,
       enableRowGroup: true,
       enablePivot: true,
-      cellRenderer: (props: GroupCellRendererParams) => {
-        return <PivotCell value={props.valueFormatted || ''} />;
+      resizable: false,
+      cellRenderer: ({ valueFormatted, node }: GroupCellRendererParams) => {
+        return (
+          <PivotCell
+            value={valueFormatted ?? ''}
+            node={node}
+            maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+          />
+        );
       },
     };
   }, []);
 
-  // Auto-group column config for row grouping display
   const autoGroupColumnDef = useMemo<ColDef>(() => {
     return {
-      minWidth: 360,
+      minWidth: PINNED_COL_WIDTH,
+      resizable: false,
       pinned: 'left',
       headerComponent: PivotAutoGroupHeader,
+      headerComponentParams: {
+        title: widgetInstanceDetails?.title,
+        isSingleValue,
+      },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
-          <PivotRow
+          <PivotRowTitle
             node={props.node}
             value={props.value}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
@@ -131,33 +121,43 @@ const StackedPivot = ({ widgetInstanceDetails, widgetData }: StackedPivotProps) 
         suppressPadding: true,
       },
     };
-  }, [colDef]);
+  }, [widgetInstanceDetails?.title, isSingleValue, colDef?.filter((col) => col.rowGroup).length]);
 
-  // todo: remove any
   const getRowStyle = (params: any) =>
     getDynamicRowStyle(backendConfig.styleConfig.rowStyles, params.node.level, params.node.value);
 
   const processPivotResultColGroupDef = (colGroupDef: ColGroupDef) => {
     colGroupDef.headerGroupComponent = PivotColGroupHeader;
+    colGroupDef.headerGroupComponentParams = {
+      isSingleValue,
+    };
   };
 
   return (
-    <div className='h-full w-full pivot'>
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={colDef}
-        getRowStyle={getRowStyle}
-        defaultColDef={defaultColDef}
-        autoGroupColumnDef={autoGroupColumnDef}
-        pivotMode={true}
-        suppressContextMenu={true}
-        suppressMenuHide={false}
-        pivotHeaderHeight={64}
-        pivotGroupHeaderHeight={42}
-        rowHeight={42}
-        processPivotResultColGroupDef={processPivotResultColGroupDef}
-        suppressCellFocus
-      />
+    <div className='h-full w-full'>
+      <div className='h-full w-full pivot'>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={colDef}
+          getRowStyle={getRowStyle}
+          defaultColDef={defaultColDef}
+          autoGroupColumnDef={autoGroupColumnDef}
+          pivotMode
+          suppressContextMenu
+          suppressMenuHide={false}
+          pivotHeaderHeight={isSingleValue ? 0 : PIVOT_HEADER_HEIGHT}
+          pivotGroupHeaderHeight={isSingleValue ? PIVOT_HEADER_HEIGHT : PIVOT_GROUP_HEADER_HEIGHT}
+          rowHeight={ROW_HEIGHT}
+          processPivotResultColGroupDef={processPivotResultColGroupDef}
+          suppressRowHoverHighlight
+          suppressCellFocus
+          scrollbarWidth={12}
+          grandTotalRow={GRAND_ROW_TOTAL_POSITION}
+          getRowId={(params) => params?.data?.id}
+        />
+      </div>
     </div>
   );
 };
+
+export default StackedPivot;

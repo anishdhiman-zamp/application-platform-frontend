@@ -227,7 +227,7 @@ const Table: React.FC<TableProps> = ({
 
   return (
     <div style={containerStyle}>
-      <div style={gridStyle}>
+      <div className='dataset' style={gridStyle}>
         <AgGridReact
           ref={tableRef}
           columnDefs={columns}

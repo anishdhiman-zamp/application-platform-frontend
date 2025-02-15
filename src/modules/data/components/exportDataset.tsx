@@ -86,7 +86,7 @@ const ExportDataset = ({ query, datasetId }: ExportDatasetProps) => {
       {isPolling && showExportStatus && (
         <div
           ref={dropdownRef}
-          className='p-5 absolute top-7 -right-[86px] h-[55px] f-13-500 bg-white rounded-[10px] text-GRAY_1000 f-12-450 z-1000 flex items-center w-[308px] border-[0.5px] border-GRAY_500 gap-3'
+          className='p-5 absolute top-7 -right-[86px] h-[55px] f-13-500 bg-white rounded-[10px] text-GRAY_1000 f-12-450 z-1000 flex items-center w-[308px] border-0.5 border-GRAY_500 gap-3'
         >
           <ProgressBar
             trackColor={COLORS.GRAY_400}

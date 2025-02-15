@@ -2,7 +2,7 @@ import React, { FC, useMemo } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
-import { PivotTableWidget } from 'modules/widgets/Pivot/StackedPivot';
+import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
 import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
@@ -122,7 +122,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
     }
     case WIDGET_TYPES.PIVOT_TABLE: {
       return (
-        <PivotTableWidget
+        <PivotTableWidgetWrapper
           widgetInstanceDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
