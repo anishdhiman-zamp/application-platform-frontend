@@ -1,4 +1,5 @@
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
+import { ResourceAudienceType } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
@@ -132,7 +133,7 @@ export type AudiencesByDatasetIdResponseType = {
     name?: string;
   };
   privilege: string;
-  resource_audience_type: string;
+  resource_audience_type: ResourceAudienceType;
   resource_audience_id: string;
   resource_type: string;
 };

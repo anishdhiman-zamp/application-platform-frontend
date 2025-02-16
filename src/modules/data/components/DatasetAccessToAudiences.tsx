@@ -134,15 +134,19 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
             </>
           </div>
           <div className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
-            <SvgSpriteLoader
-              id='coins-stacked-04'
-              iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
-              width={12}
-              height={12}
-              color={COLORS.GRAY_1000}
-              className='mr-1'
-            />
-            {resource_type}
+            {checkPermission && (
+              <>
+                <SvgSpriteLoader
+                  id='coins-stacked-04'
+                  iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
+                  width={12}
+                  height={12}
+                  color={COLORS.GRAY_1000}
+                  className='mr-1'
+                />
+                {resource_type}
+              </>
+            )}
           </div>
         </div>
         {checkPermission ? (

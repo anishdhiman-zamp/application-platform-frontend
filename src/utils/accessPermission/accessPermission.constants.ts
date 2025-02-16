@@ -9,6 +9,7 @@ export const PERMISSION_MESSAGES = {
 export enum VALIDATION_ERROR_MESSAGES {
   INVALID_EMAIL = 'Invalid email address',
   USER_NOT_IN_ORG = 'This user is not part of the organization.',
+  ORG_ALREADY_HAS_ACCESS = 'Organization already has access.',
   USER_ALREADY_HAS_ACCESS = 'This user already has access.',
   USER_ALREADY_INVITED = 'This user is already invited.',
   CANNOT_ADD_SELF = 'You cannot add yourself.',

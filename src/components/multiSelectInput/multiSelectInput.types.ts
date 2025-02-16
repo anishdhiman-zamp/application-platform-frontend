@@ -25,3 +25,9 @@ export type MultiSelectInputPropsType = {
   optionsList?: { value: string; label: string; color?: string }[];
   onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
 };
+
+export enum KEY_CODES {
+  ENTER = 'Enter',
+  COMMA = ',',
+  SPACE = ' ',
+}

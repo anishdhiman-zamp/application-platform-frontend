@@ -133,8 +133,12 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
             </>
           </div>
           <span className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
-            <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
-            {resource_type}
+            {checkPermission && (
+              <>
+                <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
+                {resource_type}
+              </>
+            )}
           </span>
         </div>
 

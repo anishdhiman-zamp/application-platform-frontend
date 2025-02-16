@@ -33,7 +33,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
     if (isOpen && buttonRef?.current) {
       const rect = buttonRef?.current.getBoundingClientRect();
 
-      setDropdownTop(rect.bottom - 100);
+      setDropdownTop(rect.bottom - 40);
     }
   }, [isOpen, options.length]);
 

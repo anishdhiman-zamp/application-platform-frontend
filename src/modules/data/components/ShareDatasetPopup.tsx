@@ -10,6 +10,7 @@ import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, ShareDatasetPopupPropsType } from 'modules/data/data.types';
 import { validateEmail } from 'modules/people/people.utils';
 import { RootState } from 'store';
+import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -38,7 +39,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     { datasetId },
     { skip: !datasetId },
   );
-  const [postInviteAudiences] = usePostShareDatasetToAudiencesByDatasetIdMutation();
+  const [postInviteAudiences, {isLoading: postInviteAudiencesIsLoading}] = usePostShareDatasetToAudiencesByDatasetIdMutation();
   const userAccessToDatasetList = getAudiencesByDatasetId ?? [];
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
@@ -48,6 +49,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const isDatasetSharable =
     !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.DATA_READER;
   const checkPermission = accessPermissionForDataset(userPrivilege);
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
+  const orgLabel = `Everyone in ${orgName}`;
 
   const handleOpenShareDatasetPopup = () => {
     setOpenShareDatasetPopup(true);
@@ -89,30 +92,51 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     }
   };
 
-  const customizedTeamMembersData = teamMembersData?.map((member) => ({
-    label: member?.user?.email,
-    value: member?.user?.email,
-  }));
+  const customizedTeamMembersData = [
+    { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
+    ...(teamMembersData?.map((member) => ({
+      label: member?.user?.email ?? '',
+      value: member?.user?.email ?? '',
+      type: member?.resource_audience_type ?? '',
+    })) || []),
+  ];
 
   const validateAndGetUserDetails = (value: string) => {
     const isValid = validateEmail(value);
     let resource_audience_id = '';
     let resource_audience_type = '';
 
+    
+    if (value === orgName) {
+      return {
+        isValid: true,
+        resource_audience_type: ResourceAudienceType.ORGANIZATION,
+        resource_audience_id: organizationId,
+      };
+    }
+    
     if (!isValid) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL };
     }
-
+    
     const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
-
+    
     if (!audience) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
-
+    
     const isAlreadyInvited = getAudiencesByDatasetId?.some((item) => item?.user?.email === value);
-
+    
     if (isAlreadyInvited) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
+    }
+
+    const isOrgAlreadyInvited = getAudiencesByDatasetId?.some(
+      (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
+    );
+
+    if (isOrgAlreadyInvited && value === orgName) {
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.ORG_ALREADY_HAS_ACCESS };
     }
 
     if (value === user_email) {
@@ -225,9 +249,9 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
                       width={12}
                       height={12}
-                      color={COLORS.GRAY_1000}
+                      color={COLORS.GRAY_600}
                     />
-                    <span>Copy link</span>
+                    <span className='f-11-500 text-GRAY_600'>Copy link</span>
                   </span>
                   <Button
                     type={BUTTON_TYPES.PRIMARY}
@@ -235,6 +259,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                     size={SIZE_TYPES.SMALL}
                     disabled={!isDatasetSharable}
                     onClick={handleShareDatasetPopup}
+                    isLoading={postInviteAudiencesIsLoading}
                   >
                     Share
                   </Button>

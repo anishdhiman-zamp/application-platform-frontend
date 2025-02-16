@@ -5,7 +5,7 @@ import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
-import { MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
+import { KEY_CODES, MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
@@ -44,8 +44,15 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   }, [isOpen, inputRef]);
 
   const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && search.trim()) {
-      onValidateAndAdd(search.trim());
+    const trimmedSearch = search.trim();
+    const keyEvent = e.key;
+
+    if (
+      (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) &&
+      trimmedSearch
+    ) {
+      e.preventDefault();
+      onValidateAndAdd(trimmedSearch);
       setSearch('');
     }
   };
@@ -201,7 +208,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
-            <div className='w-full max-h-[200px] overflow-y-scroll'>
+            <div className='w-full max-h-[200px] overflow-y-auto'>
               {filteredDropdownOptions?.map((option, index) => (
                 <div
                   key={index}
@@ -211,8 +218,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   <span
                     className='f-12-400 text-GRAY_1000 w-full px-1.5 py-0.5 rounded'
                     style={{
-                      backgroundColor: option?.color,
-                      border: `1px solid ${option?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400}`,
+                      backgroundColor: option?.color ?? COLORS.WHITE,
+                      border: `1px solid ${COLORS.GRAY_400}`,
                     }}
                   >
                     {option?.label}

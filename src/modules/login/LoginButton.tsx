@@ -39,7 +39,7 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
         </span>
         <span
           className={cn(
-            'flex justify-center items-center f-14-500 scale',
+            'flex justify-center items-center f-14-500 scale -translate-y-[2px]',
             loading
               ? 'login-btn-scale-20 opacity-0 login-btn-opacity-300-easeInOut'
               : 'login-btn-scale-100 opacity-100 login-btn-opacity-300-easeInOut',

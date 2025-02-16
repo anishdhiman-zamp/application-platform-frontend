@@ -2,7 +2,7 @@ import React from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
-import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
+import { ZAMP_FULL_LOGO } from 'constants/icons';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import LoginButton from 'modules/login/LoginButton';
 import Image from 'next/image';
@@ -124,11 +124,6 @@ export const LoginForm = () => {
 
   return (
     <div className='relative flex items-center justify-center w-screen h-screen bg-BG_GRAY_5'>
-      <video autoPlay muted loop className='absolute z-0 w-full h-full object-cover'>
-        <source src={ZAMP_LOGIN_BG} type='video/mp4' />
-        <span className='f-14-400 text-GRAY_1000'>Your browser does not support the video tag.</span>
-      </video>
-
       <div className='bg-white z-50 w-[540px] rounded-4.5 shadow-tableFilterMenu px-16 py-18 border border-GRAY_100'>
         <Image src={ZAMP_FULL_LOGO} alt='ZAMP' width={98} height={24} />
         <form onSubmit={handleSubmit}>
