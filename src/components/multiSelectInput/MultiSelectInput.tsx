@@ -27,19 +27,21 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
-  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
+  const [openDropdownOptions, setOpenDropdownOptions] = useState<boolean>(false);
   const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
 
   const handleSetInputFocus = () => {
     setIsInputFocused(true);
+    inputRef.current?.focus();
+    setOpenDropdownOptions(true);
   };
 
   useEffect(() => {
     if (isOpen) {
       setIsInputFocused(true);
-      inputRef.current?.focus();
     }
   }, [isOpen, inputRef]);
 
@@ -62,7 +64,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       setInputArrayList((prev) => {
         const updatedItems = prev.filter((_, i) => i !== index);
 
-        setShowValidationError(updatedItems.some((item) => !item.valid));
+        setShowValidationError(updatedItems.some((item) => !item?.valid));
 
         return updatedItems;
       });
@@ -79,7 +81,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       ) {
         return;
       }
-      setTimeout(() => setIsInputFocused(false), 0);
+      setTimeout(() => {
+        setIsInputFocused(false);
+        setOpenDropdownOptions(false);
+      }, 0);
     },
     [containerRef, dropdownOptionsRef],
   );
@@ -89,14 +94,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [handleClickOutside]);
-
-  useEffect(() => {
-    if (isInputFocused) {
-      inputRef.current?.focus();
-    } else {
-      inputRef.current?.blur();
-    }
-  }, [isInputFocused]);
 
   useEffect(() => {
     const debounceHandler = setTimeout(() => {
@@ -111,21 +108,26 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   const combinedOptions = useMemo(() => optionsList ?? [], [optionsList]);
 
   const filteredDropdownOptions = useMemo(() => {
-    if (!debouncedSearch.trim()) return [];
+    if (!combinedOptions) return [];
+    if (!debouncedSearch.trim()) return combinedOptions;
 
-    return combinedOptions.filter((option) => option.value.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    const filteredOptions = combinedOptions.filter((option) =>
+      option?.value.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    );
+
+    setOpenDropdownOptions(filteredOptions?.length > 0);
+
+    return filteredOptions;
   }, [combinedOptions, debouncedSearch]);
-
-  const openDropdownOptions = isInputFocused && debouncedSearch.trim().length > 0 && filteredDropdownOptions.length > 0;
 
   const handleSelectDropdownOption = useCallback(
     (option: { value: string; label: string; color?: string }) => {
       onSelectOption?.(option);
       setSearch('');
-      setIsInputFocused(false);
+      setIsInputFocused(true);
       inputRef.current?.focus();
     },
-    [onSelectOption, setSearch, inputRef],
+    [onSelectOption, setSearch, inputRef, showValidationError],
   );
 
   return (
@@ -134,24 +136,26 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         className={cn(
           `flex justify-between items-start w-full rounded-md gap-1.5 border ${isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400'}`,
         )}
+        ref={containerRef}
+        onClick={handleSetInputFocus}
       >
-        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full' ref={containerRef} onClick={handleSetInputFocus}>
+        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full'>
           {inputArrayList.map((item, index) => (
             <div
               key={index}
               className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit'
               style={{
-                backgroundColor: item.valid ? (item?.color ? item.color : COLORS.GRAY_50) : COLORS.RED_100,
-                border: `1px solid ${item.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
+                backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
+                border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
               }}
             >
-              <span className='f-12-500 text-GRAY_1000'>{item.value}</span>
+              <span className='f-12-500 text-GRAY_1000'>{item?.value}</span>
               <SvgSpriteLoader
                 id='x-close'
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 width={10}
                 height={10}
-                color={item.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
+                color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
                 onClick={() => handleRemoveItem(index)}
               />
             </div>
@@ -200,7 +204,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           </div>
         )}
       </div>
-      {openDropdownOptions && (
+      {!!combinedOptions?.length && openDropdownOptions && (
         <div className='w-full relative'>
           <div
             ref={dropdownOptionsRef}
@@ -208,7 +212,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
-            <div className='w-full max-h-[200px] overflow-y-auto'>
+            <div className='w-full max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
               {filteredDropdownOptions?.map((option, index) => (
                 <div
                   key={index}

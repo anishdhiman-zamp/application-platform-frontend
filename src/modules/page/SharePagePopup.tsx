@@ -107,12 +107,12 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     let resource_audience_id = '';
     let resource_audience_type = '';
 
-    if (value === orgName) {
-      return {
-        isValid: true,
-        resource_audience_type: ResourceAudienceType.ORGANIZATION,
-        resource_audience_id: organizationId,
-      };
+    const isOrgAlreadyInvited = getAudiencesByPageId?.some(
+      (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
+    );
+
+    if (isOrgAlreadyInvited && value === orgName) {
+      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.ORG_ALREADY_HAS_ACCESS };
     }
 
     if (!isValid) {
@@ -130,13 +130,6 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     if (isAlreadyInvited) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
     }
-    const isOrgAlreadyInvited = getAudiencesByPageId?.some(
-      (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
-    );
-
-    if (isOrgAlreadyInvited && value === orgName) {
-      return { isValid: false, message: VALIDATION_ERROR_MESSAGES.ORG_ALREADY_HAS_ACCESS };
-    }
 
     if (value === user_email) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.CANNOT_ADD_SELF };
@@ -151,47 +144,53 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const handleValidateAndAdd = (value: string) => {
     const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value);
 
+    setSelectedItems((prev) => {
+      const updatedItems = [
+        ...prev,
+        {
+          value,
+          valid: isValid,
+          role: selectedRoleRef?.current?.value,
+          color: isValid ? COLORS.WHITE : COLORS.RED_100,
+          resource_audience_type,
+          resource_audience_id,
+        },
+      ];
+
+      setShowValidationError(updatedItems.some((item) => !item.valid));
+
+      return updatedItems;
+    });
+
     if (!isValid) {
       setValidationErrorText(message ?? '');
-      setShowValidationError(true);
-    } else {
-      setShowValidationError(false);
     }
-
-    setSelectedItems((prev) => [
-      ...prev,
-      {
-        value,
-        valid: isValid,
-        role: selectedRoleRef?.current?.value,
-        color: isValid ? COLORS.WHITE : COLORS.RED_100,
-        resource_audience_type,
-        resource_audience_id,
-      },
-    ]);
   };
 
   const handleOptionSelection = (option: { value: string; label: string }) => {
     const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(option?.value);
 
-    if (!isValid) {
-      setShowValidationError(true);
-      setValidationErrorText(message ?? '');
-    } else {
-      setShowValidationError(false);
-    }
+    setSelectedItems((prev) => {
+      const updatedItems = [
+        ...prev,
+        {
+          value: option.value,
+          valid: isValid,
+          color: isValid ? COLORS.WHITE : COLORS.RED_100,
+          role: selectedRoleRef?.current?.value,
+          resource_audience_type,
+          resource_audience_id,
+        },
+      ];
 
-    setSelectedItems((prev) => [
-      ...prev,
-      {
-        value: option.value,
-        valid: isValid,
-        color: isValid ? COLORS.WHITE : COLORS.RED_100,
-        role: selectedRoleRef?.current?.value,
-        resource_audience_type,
-        resource_audience_id,
-      },
-    ]);
+      setShowValidationError(updatedItems.some((item) => !item.valid));
+
+      return updatedItems;
+    });
+
+    if (!isValid) {
+      setValidationErrorText(message ?? '');
+    }
   };
 
   return (
@@ -266,9 +265,9 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
               </div>
             </div>
             {userAccessToDatasetList?.length > 0 && (
-              <div className='mt-2 rounded-3.5 py-2 pl-2 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
+              <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
                 <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-scroll'>
+                <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
                   {userAccessToDatasetList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
