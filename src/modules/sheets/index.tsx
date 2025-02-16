@@ -74,7 +74,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
             <ResponsiveGridLayout
               className='layout'
               layout={sheetLayout}
-              cols={{ lg: 16, md: 8, sm: 8, xs: 8 }}
+              cols={{ lg: 16, md: 16, sm: 8, xs: 8 }}
               breakpoints={SCREEN_BREAKPOINTS}
               rowHeight={ROW_HEIGHT}
               width={1200} // Adjust grid width as per container
