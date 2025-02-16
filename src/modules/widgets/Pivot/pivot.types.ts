@@ -24,3 +24,16 @@ export type PivotColumnMetadata =
       sourceName: string;
       mappingName: string;
     };
+
+export enum PIVOT_DATA_TYPES {
+  STRING = 'string',
+  NUMBER = 'number',
+  DATE = 'date',
+  STATUS = 'status',
+  TIMESTAMP = 'timestamp',
+  COUNTRY = 'country',
+  BANK = 'bank',
+  TAG = 'tag',
+  BOOLEAN = 'boolean',
+  AMOUNT = 'amount',
+}

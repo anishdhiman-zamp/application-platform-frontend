@@ -29,24 +29,24 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   groupWidgetsOptions,
   onWidgetChange,
 }) => {
-  const { data, isFetching, error, refetch } = useGetWidgetDataQuery(
+  const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
       widgetId: widgetInstanceDetails.widget_instance_id,
       payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
     },
     {
       refetchOnMountOrArgChange: false,
-      skip: !isFilterInitialized,
+      skip: !isFilterInitialized || !timeColumn,
     },
   );
 
   return (
     <CommonWrapper
-      isLoading={isFetching}
+      isLoading={isFetching || !isFilterInitialized || !timeColumn}
       skeletonType={SkeletonTypes.CUSTOM}
-      isNoData={!data}
-      isError={!!error}
+      isNoData={data?.result.every((res) => res.rowcount === 0)}
       refetchFunction={refetch}
+      isError={isError}
       className='h-full w-full'
       noDataBanner={<NoWidgetData />}
       loader={

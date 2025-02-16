@@ -16,6 +16,11 @@ export const JOINED_DATASET_ICON = IMAGE_PREFIX + '/icons/joined-dataset.svg';
 export const ZAMP_LOGIN_BG = IMAGE_PREFIX + '/mp4/zamp-login-bg.mp4';
 export const ZAMP_FULL_LOGO = IMAGE_PREFIX + '/icons/zamp-full-logo.svg';
 export const PIVOT_HEADER_BG = IMAGE_PREFIX + '/images/pivot-header-bg.svg';
+export const ARROW_RIGHT = IMAGE_PREFIX + '/icons/arrow-right.svg';
+export const CHEVRON_DOWN = IMAGE_PREFIX + '/icons/chevron-down.svg';
+export const CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/chevron-right.svg';
+export const RED_ALERT_ICON = IMAGE_PREFIX + '/icons/red-alert-circle.svg';
+export const GREEN_CHECK_ICON = IMAGE_PREFIX + '/icons/green-check-circle.svg';
 
 export const ADYEN = IMAGE_PREFIX + '/icons/bank-icons/adyen.png';
 export const CHECKOUT = IMAGE_PREFIX + '/icons/bank-icons/checkout.svg';

@@ -29,7 +29,8 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
   const [search, setSearch] = useState<string>('');
   const placeholderText = 'Share with people and teams';
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const [postInviteAudiences, {isLoading: postInviteAudiencesIsLoading}] = usePostInviteAudiencesByOrganisationIdMutation();
+  const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
+    usePostInviteAudiencesByOrganisationIdMutation();
   const { data: invitedTeamMembersData, refetch: refetchAudiencesByOrganizationId } =
     useGetInvitedAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
 

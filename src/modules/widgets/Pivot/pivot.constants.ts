@@ -1,5 +1,4 @@
-import { COLORS } from 'constants/colors';
-import { ADYEN, CHECKOUT, ICON_SPRITE_TYPES } from 'constants/icons';
+import { ADYEN, CHECKOUT, GREEN_CHECK_ICON, RED_ALERT_ICON } from 'constants/icons';
 
 export const PIVOT_REF = '__REF';
 export const NESTING_LEVEL_INFIX = '_LEVEL_';
@@ -28,53 +27,21 @@ export enum RECON_PAYMENT_GATEWAY_TYPES {
   CHECKOUT = 'checkout',
   ADYEN = 'adyen',
 }
-
-const createIcon = (id: string, iconCategory: ICON_SPRITE_TYPES, color: string) => ({
-  id,
-  iconCategory,
-  color,
-});
-
-export const RECON_STATUS_ICONS: Record<
-  RECON_STATUS_TYPES,
-  { id: string; iconCategory: ICON_SPRITE_TYPES; color: string }
-> = {
-  [RECON_STATUS_TYPES.SETTLED]: createIcon('check-circle', ICON_SPRITE_TYPES.GENERAL, COLORS.GREEN_PRIMARY),
-  [RECON_STATUS_TYPES.MISSING_FROM_ACQUIRER]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.MISSING_FROM_INTERNAL]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.MISSING_FROM_PG]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.MISSING_FROM_STRIP]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.MISSING_FROM_PARTNER]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.MISSING_FROM_NETSUITE]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
-  [RECON_STATUS_TYPES.AMOUNT_MISMATCH]: createIcon(
-    'alert-circle',
-    ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK,
-    COLORS.RED_PRIMARY,
-  ),
+export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
+  switch (status) {
+    case RECON_STATUS_TYPES.SETTLED:
+      return GREEN_CHECK_ICON;
+    case RECON_STATUS_TYPES.MISSING_FROM_ACQUIRER:
+    case RECON_STATUS_TYPES.MISSING_FROM_INTERNAL:
+    case RECON_STATUS_TYPES.MISSING_FROM_PG:
+    case RECON_STATUS_TYPES.MISSING_FROM_STRIP:
+    case RECON_STATUS_TYPES.MISSING_FROM_PARTNER:
+    case RECON_STATUS_TYPES.MISSING_FROM_NETSUITE:
+    case RECON_STATUS_TYPES.AMOUNT_MISMATCH:
+      return RED_ALERT_ICON;
+    default:
+      return GREEN_CHECK_ICON;
+  }
 };
 
 export const RECON_PAYMENT_ICONS: Record<RECON_PAYMENT_GATEWAY_TYPES, string> = {

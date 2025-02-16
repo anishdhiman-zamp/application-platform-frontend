@@ -2,7 +2,7 @@ import { ColDef, RowStyle, ValueFormatterParams } from 'ag-grid-community';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import { PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
+import { PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
@@ -49,66 +49,75 @@ export const backendConfig = {
 };
 
 export const evaluateConditions = (conditions: MapAny[], groupingLevel: number, value: string, operator = 'AND') => {
-  const results = conditions.map((condition) => {
-    if (condition.level !== undefined && groupingLevel === condition.level) {
+  const results = conditions?.map((condition) => {
+    if (condition?.level !== undefined && groupingLevel === condition?.level) {
       return true;
     }
-    if (condition.equals !== undefined && value === condition.equals) {
+    if (condition?.equals !== undefined && value === condition?.equals) {
       return true;
     }
-    if (condition.greaterThan !== undefined && value > condition.greaterThan) {
+    if (condition?.greaterThan !== undefined && value > condition?.greaterThan) {
       return true;
     }
-    if (condition.default) {
+    if (condition?.default) {
       return true;
     }
-    if (condition.type === 'dateLessThanToday') {
+    if (condition?.type === 'dateLessThanToday') {
       const today = new Date().toISOString().split('T')[0];
 
       return new Date(value).toISOString().split('T')[0] < today;
     }
 
-    return false; // If no condition matches
+    return false;
   });
 
-  // Combine results based on operator
-  return operator === 'AND' ? results.every(Boolean) : results.some(Boolean);
+  return operator === 'AND' ? results?.every(Boolean) : results?.some(Boolean);
 };
 
 export const getDynamicRowStyle = (rowStyles: MapAny[], groupingLevel: number, value: string): RowStyle => {
   for (const rule of rowStyles) {
-    if (evaluateConditions(rule.conditions, groupingLevel, value, rule.operator)) {
-      return rule.style;
+    if (evaluateConditions(rule?.conditions, groupingLevel, value, rule?.operator)) {
+      return rule?.style;
     }
   }
 
-  return {}; // Default row style
+  return {};
 };
 
 export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupingLevel: number, value: string) => {
   for (const rule of cellStyles) {
-    if (rule.field === field && evaluateConditions(rule.conditions, groupingLevel, value, rule.operator)) {
-      return rule.style;
+    if (rule?.field === field && evaluateConditions(rule?.conditions, groupingLevel, value, rule?.operator)) {
+      return rule?.style;
     }
   }
 
   return {}; // Default cell style
 };
 
-export const parseType = (type: string, value: any) => {
-  if (type === 'date') {
-    return new Date(value);
-  }
+export const parseType = (type: PIVOT_DATA_TYPES, value: any) => {
+  switch (type) {
+    case PIVOT_DATA_TYPES.DATE:
+    case PIVOT_DATA_TYPES.TIMESTAMP: {
+      const date = new Date(value);
 
-  if (type === 'number') {
-    return isNaN(Number(value)) ? 0 : Number(value);
-  }
+      return isNaN(date?.getTime?.()) ? null : date;
+    }
+    case PIVOT_DATA_TYPES.NUMBER:
+    case PIVOT_DATA_TYPES.AMOUNT: {
+      const number = Number(value);
 
-  if (type === 'string') {
-    return value;
+      return isNaN(number) ? 0 : number;
+    }
+    case PIVOT_DATA_TYPES.BANK:
+    case PIVOT_DATA_TYPES.TAG:
+    case PIVOT_DATA_TYPES.COUNTRY:
+    case PIVOT_DATA_TYPES.STATUS:
+      return value;
+    case PIVOT_DATA_TYPES.BOOLEAN:
+      return value === 'true' || value === true;
+    default:
+      return value;
   }
-
-  return JSON.stringify(value);
 };
 
 export const getGroupingColName = (groupingLevel: number) => {
@@ -134,15 +143,15 @@ export const getPivotColumns = (
   const pivotColumns: PivotColumnMetadata[] = [];
 
   // iterate over each mapping in the widget instance details; each mapping is a stack in the stacked pivot
-  data_mappings.mappings.forEach((mapping, mappingIndex) => {
+  data_mappings?.mappings?.forEach((mapping, mappingIndex) => {
     const { fields, ref } = mapping;
 
     const { columns, values } = fields;
 
     // iterate over each column in the columns array
     // each column is a pivot column
-    columns.forEach((col) => {
-      pivotColumns.push({
+    columns?.forEach((col) => {
+      pivotColumns?.push({
         kind: 'pivot',
         name: col.column,
         dataType: col.type as 'string' | 'number' | 'date',
@@ -153,19 +162,19 @@ export const getPivotColumns = (
 
     // iterate over each value in the values array
     // each value is an aggregate column
-    values.forEach((val) => {
-      pivotColumns.push({
+    values?.forEach((val) => {
+      pivotColumns?.push({
         kind: 'aggregate',
-        name: val.column,
-        dataType: val.type as 'string' | 'number' | 'date',
-        aggregation: val.aggregation,
-        sourceName: val.column,
+        name: val?.column,
+        dataType: val?.type as 'string' | 'number' | 'date',
+        aggregation: val?.aggregation,
+        sourceName: val?.column,
         mappingName: ref,
       });
     });
 
     // if the mapping has no rows, we create a default row with the mapping name; the mapping name becomes the row group name (eg: Closing Balance)
-    const mappingRows = fields.rows || [
+    const mappingRows = fields?.rows || [
       {
         column: mapping.ref,
         type: 'string',
@@ -187,20 +196,20 @@ export const getPivotColumns = (
 
     // iterate over each row in the rows array
     // we normalize the rows of every mapping to the same format
-    mappingRows.forEach((row) => {
+    mappingRows?.forEach((row) => {
       currentLevel += 1;
       const { column, type } = row;
 
       // check if the row has hierarchy; if it does, we need to determine the depth of the hierarchy;
       // hirarchy is determined by _LEVEL_<n> suffix and the order of the columns in the row set
-      const hasHierarchy = wInstanceData.result[mappingIndex].columns.find((c) =>
+      const hasHierarchy = wInstanceData?.result[mappingIndex]?.columns?.find((c) =>
         c.column_name.startsWith(getNestedGroupingColName(column, -1)),
       );
 
       if (hasHierarchy) {
-        const depth = wInstanceData.result[mappingIndex].columns.filter((c) =>
+        const depth = wInstanceData?.result[mappingIndex]?.columns?.filter((c) =>
           c.column_name.startsWith(getNestedGroupingColName(column, -1)),
-        ).length;
+        )?.length;
 
         // iterate over each level of the hierarchy
         Array(depth)
@@ -234,7 +243,7 @@ export const getPivotColumns = (
       pivotColumns.push({
         kind: 'group',
         ...colData,
-        dataType: colData.dataType as 'string' | 'number' | 'date',
+        dataType: colData?.dataType as 'string' | 'number' | 'date',
         maxHeirarchy: currentLevel,
       });
     });
@@ -250,7 +259,7 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
 
   // Process each result set in the widget data
   wInstanceData.result.forEach((resultSet) => {
-    const resultRows = resultSet.data;
+    const resultRows = resultSet?.data;
 
     // Transform each row in the result set
     resultRows.forEach((row) => {
@@ -258,25 +267,23 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
       const transformedRow = { ...row };
 
       // Process each field in the row
-      Object.entries(row).forEach(([key, value]) => {
+      Object.entries(row)?.forEach(([key, value]) => {
         // Get the mapping name from the NAME field
         const mappingName = transformedRow[PIVOT_REF];
 
         // Find matching pivot column based on mapping name and source column
-        const pivotColumn = pivotColumns.find((col) => {
-          return col.mappingName === mappingName && col.sourceName === key;
-        });
+        const pivotColumn = pivotColumns?.find((col) => col?.mappingName === mappingName && col?.sourceName === key);
 
         if (pivotColumn) {
           // If matching pivot column found, transform the value using its data type
-          transformedRow[pivotColumn.name] = parseType(pivotColumn.dataType, value);
+          transformedRow[pivotColumn?.name] = parseType(pivotColumn?.dataType as PIVOT_DATA_TYPES, value);
         } else {
           if (key === PIVOT_REF) {
             // Special handling for REF field - find pivot column by source name
-            const transformedColumn = pivotColumns.find((col) => col.sourceName === value);
+            const transformedColumn = pivotColumns?.find((col) => col?.sourceName === value);
 
             if (transformedColumn) {
-              transformedRow[transformedColumn.name] = value;
+              transformedRow[transformedColumn?.name] = value;
             }
           } else {
             // Keep original key-value pair if no transformation needed
@@ -295,20 +302,20 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
 
 export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] => {
   return pivotColumns
-    .filter((col, index, self) => self.findIndex((t) => t.name === col.name) === index)
+    .filter((col, index, self) => self?.findIndex((t) => t?.name === col?.name) === index)
     .map((col) => {
       switch (col.kind) {
         case 'group':
           return {
-            field: col.name,
+            field: col?.name,
             rowGroup: true,
             context: col,
             cellStyle: (params) =>
-              getDynamicCellStyle(backendConfig.styleConfig.cellStyles, col.name, params.node.level, params.value),
+              getDynamicCellStyle(backendConfig.styleConfig.cellStyles, col?.name, params?.node?.level, params?.value),
           };
         case 'pivot':
           return {
-            field: col.name,
+            field: col?.name,
             pivot: true,
             headerComponent: PivotColGroupHeader,
             valueFormatter: (params) => formatPivotColGroupHeader(params),
@@ -316,17 +323,17 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
           };
         case 'aggregate': {
           return {
-            field: col.name,
-            aggFunc: col.aggregation,
-            valueFormatter: (params) => formatCurrencyValue(params.value),
+            field: col?.name,
+            aggFunc: col?.aggregation,
+            valueFormatter: (params) => formatCurrencyValue(params?.value),
             headerComponent: PivotColHeader,
-            headerName: snakeCaseToSentenceCase(col.name),
+            headerName: snakeCaseToSentenceCase(col?.name),
             cellStyle: (params) =>
               getDynamicCellStyle(
                 backendConfig.styleConfig.cellStyles,
                 snakeCaseToSentenceCase(col.name),
-                params.node.level,
-                params.value,
+                params.node?.level,
+                params?.value,
               ),
             context: col,
           };
@@ -356,12 +363,12 @@ export const shouldAllowExpandingRow = <T extends AGGridPivotNode<T>>(node: T) =
   const flattenedChildren = flattenChildrenAfterGroup(node);
 
   // return false if the node has no children
-  if (flattenedChildren.length === 0) {
+  if (flattenedChildren?.length === 0) {
     return false;
   }
 
   // return false if the node has all children with key=""
-  if (flattenedChildren.every((child) => child.key === '' || child.key === null || child.key === undefined)) {
+  if (flattenedChildren.every((child) => child?.key === '' || child?.key === null || child?.key === undefined)) {
     return false;
   }
 
@@ -373,11 +380,11 @@ const formatPivotColGroupHeader = (params: ValueFormatterParams) => {
 
   switch (constructorName) {
     case 'Date': {
-      const formatted = params.value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const formatted = params?.value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
       return formatted;
     }
     default:
-      return params.value;
+      return params?.value;
   }
 };

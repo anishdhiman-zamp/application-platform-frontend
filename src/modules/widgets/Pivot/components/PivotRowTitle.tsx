@@ -1,12 +1,15 @@
 import { FC, useEffect, useState } from 'react';
 import { IRowNode } from 'ag-grid-community';
-import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES, OTHER_GATEWAY } from 'constants/icons';
-import { RECON_PAYMENT_ICONS, RECON_STATUS_ICONS, ROOT_LEVEL_TITLE } from 'modules/widgets/Pivot/pivot.constants';
+import { ARROW_RIGHT, CHEVRON_DOWN, CHEVRON_RIGHT, OTHER_GATEWAY } from 'constants/icons';
+import {
+  getReconStatusIcon,
+  RECON_PAYMENT_ICONS,
+  RECON_STATUS_TYPES,
+  ROOT_LEVEL_TITLE,
+} from 'modules/widgets/Pivot/pivot.constants';
 import { shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
-import MemoizedSvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type PivotRowTitleProps = {
   node: IRowNode;
@@ -44,25 +47,17 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
       onClick={() => allowExpanding && node.setExpanded(!expanded)}
     >
       {allowExpanding && !isRootLevel && (
-        <MemoizedSvgSpriteLoader
-          id={expanded ? 'chevron-down' : 'chevron-right'}
-          iconCategory={ICON_SPRITE_TYPES.ARROWS}
+        <Image
+          src={expanded ? CHEVRON_DOWN : CHEVRON_RIGHT}
           width={18}
           height={18}
-          color={expanded ? COLORS.GRAY_950 : COLORS.GRAY_600}
+          alt={expanded ? 'chevron-down' : 'chevron-right'}
+          priority
         />
       )}
 
       {showIcons && isTopLevel && (
-        <MemoizedSvgSpriteLoader
-          id={RECON_STATUS_ICONS[value as keyof typeof RECON_STATUS_ICONS].id}
-          iconCategory={
-            RECON_STATUS_ICONS[value as keyof typeof RECON_STATUS_ICONS].iconCategory ?? ICON_SPRITE_TYPES.GENERAL
-          }
-          width={18}
-          height={18}
-          color={RECON_STATUS_ICONS[value as keyof typeof RECON_STATUS_ICONS].color ?? COLORS.GRAY_400}
-        />
+        <Image src={getReconStatusIcon(value as RECON_STATUS_TYPES)} alt={value} width={18} height={18} priority />
       )}
 
       {showIcons && isLowestLevel && (
@@ -77,15 +72,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
 
       <span className='f-13-550 text-GRAY_950'>{isRootLevel ? ROOT_LEVEL_TITLE : formattedValue}</span>
 
-      {isRootLevel && (
-        <MemoizedSvgSpriteLoader
-          id='arrow-right'
-          iconCategory={ICON_SPRITE_TYPES.ARROWS}
-          width={18}
-          height={18}
-          color={COLORS.GRAY_950}
-        />
-      )}
+      {isRootLevel && <Image src={ARROW_RIGHT} alt={'arrow-right'} width={18} height={18} priority />}
     </div>
   );
 };

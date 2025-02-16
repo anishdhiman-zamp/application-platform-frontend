@@ -39,7 +39,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     { datasetId },
     { skip: !datasetId },
   );
-  const [postInviteAudiences, {isLoading: postInviteAudiencesIsLoading}] = usePostShareDatasetToAudiencesByDatasetIdMutation();
+  const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
+    usePostShareDatasetToAudiencesByDatasetIdMutation();
   const userAccessToDatasetList = getAudiencesByDatasetId ?? [];
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
@@ -106,7 +107,6 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     let resource_audience_id = '';
     let resource_audience_type = '';
 
-    
     if (value === orgName) {
       return {
         isValid: true,
@@ -114,19 +114,19 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
         resource_audience_id: organizationId,
       };
     }
-    
+
     if (!isValid) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL };
     }
-    
+
     const audience = teamMembersData?.find((audience) => audience?.user?.email === value);
-    
+
     if (!audience) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
-    
+
     const isAlreadyInvited = getAudiencesByDatasetId?.some((item) => item?.user?.email === value);
-    
+
     if (isAlreadyInvited) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
     }
