@@ -136,10 +136,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         className={cn(
           `flex justify-between items-start w-full rounded-md gap-1.5 border ${isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400'}`,
         )}
-        ref={containerRef}
-        onClick={handleSetInputFocus}
       >
-        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full'>
+        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full' ref={containerRef} onClick={handleSetInputFocus}>
           {inputArrayList.map((item, index) => (
             <div
               key={index}
