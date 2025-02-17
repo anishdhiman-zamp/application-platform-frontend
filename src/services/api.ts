@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { captureException } from '@sentry/browser';
 import { Mutex } from 'async-mutex';
 import { ABORT_ERROR, API_DOMAIN, API_TAGS } from 'constants/api.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -46,21 +47,13 @@ const baseQueryWithAuth: any = async (args: any, api: any, extraOptions: any) =>
     if (status !== 401 && error?.error !== ABORT_ERROR) {
       const errorObj = new Error(JSON.stringify(`${status}=${data?.error?.code ?? 'NA'}`));
 
-      console.log(errorObj, {
+      captureException(errorObj, {
         extra: {
           error: JSON.stringify(error),
           args: JSON.stringify(args),
           rtkEndpoint: api?.endpoint,
         },
       });
-
-      // captureException(errorObj, {
-      //   extra: {
-      //     error: JSON.stringify(error),
-      //     args: JSON.stringify(args),
-      //     rtkEndpoint: api?.endpoint,
-      //   },
-      // });
     }
   }
 
