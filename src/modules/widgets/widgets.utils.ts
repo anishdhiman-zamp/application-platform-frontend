@@ -1,6 +1,19 @@
 import { AgCartesianSeriesTooltipRendererParams, AgChartOptions } from 'ag-charts-community';
 import { COLORS } from 'constants/colors';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { DATE_FORMATS, PERIODICITY_TYPES } from 'constants/date.constants';
+import {
+  endOfMonth,
+  endOfQuarter,
+  endOfWeek,
+  endOfYear,
+  format,
+  max,
+  min,
+  startOfMonth,
+  startOfQuarter,
+  startOfWeek,
+  startOfYear,
+} from 'date-fns';
 import {
   AG_CHART_TYPES,
   CHART_NUMBER_AXES,
@@ -418,4 +431,55 @@ export const getGroupedDonutChartData = (data: MapAny[], mappings: PieDonutChart
   });
 
   return { slicedData, remainingData };
+};
+
+export const getDateRangeWithPeriodicity = (
+  periodicity: PERIODICITY_TYPES,
+  date: string,
+  startDate: string,
+  endDate: string,
+): [string, string] => {
+  const currentDate = new Date(date);
+  let minDate = new Date(startDate);
+  let maxDate = new Date(endDate);
+
+  switch (periodicity) {
+    case PERIODICITY_TYPES.DAILY: {
+      minDate = max([currentDate, minDate]);
+      maxDate = min([currentDate, maxDate]);
+
+      return [format(minDate, DATE_FORMATS.d_MMM_yyyy), format(maxDate, DATE_FORMATS.d_MMM_yyyy)];
+    }
+
+    case PERIODICITY_TYPES.WEEKLY: {
+      minDate = max([startOfWeek(currentDate, { weekStartsOn: 1 }), minDate]);
+      maxDate = min([endOfWeek(currentDate, { weekStartsOn: 1 }), maxDate]);
+
+      return [format(minDate, DATE_FORMATS.d_MMM_yyyy), format(maxDate, DATE_FORMATS.d_MMM_yyyy)];
+    }
+
+    case PERIODICITY_TYPES.MONTHLY: {
+      minDate = max([startOfMonth(currentDate), minDate]);
+      maxDate = min([endOfMonth(currentDate), maxDate]);
+
+      return [format(minDate, DATE_FORMATS.d_MMM_yyyy), format(maxDate, DATE_FORMATS.d_MMM_yyyy)];
+    }
+
+    case PERIODICITY_TYPES.QUARTERLY: {
+      minDate = max([startOfQuarter(currentDate), minDate]);
+      maxDate = min([endOfQuarter(currentDate), maxDate]);
+
+      return [format(minDate, DATE_FORMATS.d_MMM_yyyy), format(maxDate, DATE_FORMATS.d_MMM_yyyy)];
+    }
+
+    case PERIODICITY_TYPES.YEARLY: {
+      minDate = max([startOfYear(currentDate), minDate]);
+      maxDate = min([endOfYear(currentDate), maxDate]);
+
+      return [format(minDate, DATE_FORMATS.d_MMM_yyyy), format(maxDate, DATE_FORMATS.d_MMM_yyyy)];
+    }
+
+    default:
+      return [format(currentDate, DATE_FORMATS.d_MMM_yyyy), format(currentDate, DATE_FORMATS.d_MMM_yyyy)];
+  }
 };

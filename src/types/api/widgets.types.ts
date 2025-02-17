@@ -1,5 +1,6 @@
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { MapAny } from 'types/commonTypes';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export enum WIDGET_TYPES {
   BAR_CHART = 'bar_chart',
@@ -114,6 +115,8 @@ export interface AxisMappingType {
   column: string;
   field_type: FIELD_TYPES;
   aggregation?: AGGREGATION_TYPES;
+  drilldown_filter_type?: string;
+  drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
 }
 
 export type WidgetInstanceResponseType = WidgetInstanceType;

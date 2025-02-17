@@ -3,9 +3,9 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
-import { getCurrentPageFilters } from 'modules/widgets/widgets.utils';
+import { getCurrentPageFilters, getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
-import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import { FieldsMappingType, WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { isValidDate } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -21,6 +21,27 @@ interface WidgetsWrapperProps {
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOptions, onWidgetChange }) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
+  const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
+
+  const { filterType, filterOperator } = useMemo(() => {
+    if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
+      return {
+        filterType: (fields as FieldsMappingType)?.x_axis?.[0]?.drilldown_filter_type,
+        filterOperator: (fields as FieldsMappingType)?.x_axis?.[0]?.drilldown_filter_operator,
+      };
+    }
+
+    if (widget_type === WIDGET_TYPES.PIE_CHART || widget_type === WIDGET_TYPES.DONUT_CHART) {
+      return {
+        filterType: (fields as { slices: { drilldown_filter_type: string }[] })?.slices?.[0]?.drilldown_filter_type,
+        filterOperator: (fields as { slices: { drilldown_filter_operator: string }[] })?.slices?.[0]
+          ?.drilldown_filter_operator,
+      };
+    }
+
+    return { filterType: undefined, operator: undefined };
+  }, [fields, widget_type]);
+
   const {
     state: { selectedFilters, filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
@@ -67,8 +88,33 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
     const datasetId = widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id;
+    const clickFilter: MapAny = {};
+
+    if (filterType === FILTER_TYPES.DATE_RANGE) {
+      if (currentWidgetSelectedFilters[xAxis]?.dateFrom && currentWidgetSelectedFilters[xAxis]?.dateTo) {
+        const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
+          periodicity.periodicity,
+          clickedNode[xAxis],
+          currentWidgetSelectedFilters[xAxis]?.dateFrom,
+          currentWidgetSelectedFilters[xAxis]?.dateTo,
+        );
+
+        clickFilter[xAxis] = {
+          filterType: FILTER_TYPES.DATE_RANGE,
+          type: filterOperator,
+          values: [dateFrom, dateTo],
+        };
+      }
+    } else if (filterType === FILTER_TYPES.MULTI_SELECT) {
+      clickFilter[xAxis] = {
+        filterType: FILTER_TYPES.MULTI_SELECT,
+        type: filterOperator,
+        values: [clickedNode[xAxis]],
+      };
+    }
 
     const isDate = isValidDate(clickedNode[xAxis]);
+
     //TODO:Update logic for filter type
     const onClickFilter = isDate
       ? {
@@ -88,7 +134,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
         };
 
     router.push(
-      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...onClickFilter })}`,
+      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...onClickFilter, ...clickFilter })}`,
     );
   };
 
