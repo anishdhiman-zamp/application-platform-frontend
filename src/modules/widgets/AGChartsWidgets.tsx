@@ -28,6 +28,7 @@ interface WidgetsWrapperProps {
   timeColumn: string;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
+  isFilterLoading?: boolean;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -39,6 +40,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   timeColumn,
   groupWidgetsOptions,
   onWidgetChange,
+  isFilterLoading,
 }) => {
   const widgetType = widgetDetails?.widget_type;
   const {
@@ -92,7 +94,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         widgetType={widgetType}
       />
       <CommonWrapper
-        isLoading={isLoading}
+        isLoading={isLoading || isFilterLoading}
         skeletonType={SkeletonTypes.CUSTOM}
         isNoData={!transformedData?.length}
         className='h-full'

@@ -13,6 +13,7 @@ interface KpiTagProps {
   isFilterInitialized?: boolean;
   periodicity: string;
   timeColumn: string;
+  isFilterLoading?: boolean;
 }
 
 const KpiTag: FC<KpiTagProps> = ({
@@ -21,6 +22,7 @@ const KpiTag: FC<KpiTagProps> = ({
   isFilterInitialized,
   periodicity,
   timeColumn,
+  isFilterLoading,
 }) => {
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     {
@@ -42,7 +44,7 @@ const KpiTag: FC<KpiTagProps> = ({
       <div className='f-13-450 text-GRAY_900 mb-2'>{widgetDetails?.title}</div>
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isLoading}
+        isLoading={isLoading || isFilterLoading}
         loader={<SkeletonElement className='max-w-[250px]' />}
       >
         <div className='f-24-450 text-GRAY_950'>{getCommaSeparatedNumber(Number(value), 2)}</div>

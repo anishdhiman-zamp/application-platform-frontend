@@ -18,6 +18,7 @@ export type PivotTableWidgetPropsType = {
   timeColumn: string;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
+  isFilterLoading?: boolean;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -28,6 +29,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   timeColumn,
   groupWidgetsOptions,
   onWidgetChange,
+  isFilterLoading,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -42,7 +44,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
 
   return (
     <CommonWrapper
-      isLoading={isFetching || !isFilterInitialized || !timeColumn}
+      isLoading={isFetching || !isFilterInitialized || !timeColumn || isFilterLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={data?.result.every((res) => res.rowcount === 0)}
       refetchFunction={refetch}

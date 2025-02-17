@@ -9,7 +9,11 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   sheetId,
 }) => {
   const { dispatch } = useFiltersContextStore();
-  const { data: sheetFilterConfig } = useGetSheetFilterConfigQuery(
+  const {
+    data: sheetFilterConfig,
+    isSuccess,
+    isLoading,
+  } = useGetSheetFilterConfigQuery(
     { pageId: pageId as string, sheetId: sheetId as string },
     { skip: !sheetId, refetchOnMountOrArgChange: false },
   );
@@ -53,11 +57,19 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
         });
       }
     } else {
-      dispatch({
-        type: filtersContextActions.SET_INITIALISED,
-      });
+      if (isSuccess)
+        dispatch({
+          type: filtersContextActions.SET_INITIALISED,
+        });
     }
   }, [sheetFilterConfig]);
+
+  useEffect(() => {
+    dispatch({
+      type: filtersContextActions.SET_FILTER_LOADING,
+      payload: { isFilterLoading: isLoading },
+    });
+  }, [isLoading]);
 
   return <div>{children}</div>;
 };

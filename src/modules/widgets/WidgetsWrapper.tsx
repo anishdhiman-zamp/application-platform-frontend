@@ -7,9 +7,7 @@ import { getCurrentPageFilters, getDateRangeWithPeriodicity } from 'modules/widg
 import { useRouter } from 'next/router';
 import { FieldsMappingType, WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
-import { isValidDate } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 
 interface WidgetsWrapperProps {
@@ -22,6 +20,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
   const router = useRouter();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
+  const {
+    state: { selectedFilters, filtersConfig, isFilterInitialized, isFilterLoading },
+  } = useFiltersContextStore();
 
   const { filterType, filterOperator } = useMemo(() => {
     if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
@@ -41,10 +42,6 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
 
     return { filterType: undefined, operator: undefined };
   }, [fields, widget_type]);
-
-  const {
-    state: { selectedFilters, filtersConfig, isFilterInitialized },
-  } = useFiltersContextStore();
 
   const periodicity = useMemo(() => {
     if (!selectedFilters) return {};
@@ -91,20 +88,19 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
     const clickFilter: MapAny = {};
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
-      if (currentWidgetSelectedFilters[xAxis]?.dateFrom && currentWidgetSelectedFilters[xAxis]?.dateTo) {
-        const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
-          periodicity.periodicity,
-          clickedNode[xAxis],
-          currentWidgetSelectedFilters[xAxis]?.dateFrom,
-          currentWidgetSelectedFilters[xAxis]?.dateTo,
-        );
+      const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
+        periodicity.periodicity,
+        clickedNode[xAxis],
+        currentWidgetSelectedFilters[xAxis]?.dateFrom ?? '',
+        currentWidgetSelectedFilters[xAxis]?.dateTo ?? '',
+      );
 
-        clickFilter[xAxis] = {
-          filterType: FILTER_TYPES.DATE_RANGE,
-          type: filterOperator,
-          values: [dateFrom, dateTo],
-        };
-      }
+      clickFilter[xAxis] = {
+        filterType: FILTER_TYPES.DATE_RANGE,
+        type: filterOperator,
+        dateFrom,
+        dateTo,
+      };
     } else if (filterType === FILTER_TYPES.MULTI_SELECT) {
       clickFilter[xAxis] = {
         filterType: FILTER_TYPES.MULTI_SELECT,
@@ -113,28 +109,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
       };
     }
 
-    const isDate = isValidDate(clickedNode[xAxis]);
-
-    //TODO:Update logic for filter type
-    const onClickFilter = isDate
-      ? {
-          [xAxis]: {
-            dateFrom: clickedNode[xAxis],
-            dateTo: clickedNode[xAxis],
-            filterType: FILTER_TYPES.DATE_RANGE,
-            type: CONDITION_OPERATOR_TYPE.IN_BETWEEN,
-          },
-        }
-      : {
-          [xAxis]: {
-            filterType: FILTER_TYPES.MULTI_SELECT,
-            type: CONDITION_OPERATOR_TYPE.CONTAINS,
-            values: [clickedNode[xAxis]],
-          },
-        };
-
     router.push(
-      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...onClickFilter, ...clickFilter })}`,
+      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...clickFilter })}`,
     );
   };
 
@@ -153,6 +129,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           timeColumn={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          isFilterLoading={isFilterLoading}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -163,6 +140,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           currentPageFilters={currentPageFilters}
           periodicity={periodicity?.periodicity}
           timeColumn={periodicity?.timeColumn ?? ''}
+          isFilterLoading={isFilterLoading}
         />
       );
     }
@@ -176,6 +154,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           timeColumn={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          isFilterLoading={isFilterLoading}
         />
       );
     }
