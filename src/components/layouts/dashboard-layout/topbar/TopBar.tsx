@@ -1,11 +1,12 @@
 import React, { FC, useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
-import { useAppSelector } from 'hooks/toolkit';
+import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
+import { removeLastBreadcrumb } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
@@ -18,6 +19,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
   const [search, setSearch] = useState('');
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
   const currentRoute = router.pathname;
 
@@ -40,6 +42,11 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
       );
     }
   }, [currentRoute, router.query.id]);
+
+  const handleBackClick = () => {
+    dispatch(removeLastBreadcrumb());
+    router.back();
+  };
 
   return (
     <div className='h-12 flex items-center justify-between'>
@@ -83,7 +90,7 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
           iconCategory={ICON_SPRITE_TYPES.ARROWS}
           height={16}
           width={16}
-          onClick={router.back}
+          onClick={handleBackClick}
           className='cursor-pointer'
         />
         <BreadCrumb breadcrumbStack={breadcrumbStack} />

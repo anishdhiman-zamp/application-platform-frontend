@@ -7,6 +7,7 @@ import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'type
 import { SIZE_TYPES } from 'types/common/components';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
+import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
@@ -121,7 +122,10 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   return (
     <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
       <div
-        className='w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1 gap-x-2.5'
+        className={cn(
+          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1 gap-x-2.5',
+          { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
+        )}
         onClick={toggleMenu}
       >
         <div>{colId}</div>

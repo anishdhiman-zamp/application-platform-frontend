@@ -94,11 +94,12 @@ export const formatColumns = (
   });
 
   // re-order columns based on the columnOrderingVisibilityForCurrentDataset
-  const orderedColumns: ColDef[] = getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) => {
-    return { ...columns.find((col) => col.field === column.colId), hide: !column.isVisible };
-  });
+  const orderedColumns: ColDef[] =
+    getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) => {
+      return { ...columns.find((col) => col.field === column.colId), hide: !column.isVisible };
+    }) ?? [];
 
-  return orderedColumns;
+  return orderedColumns?.length ? orderedColumns : columns;
 };
 
 export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {

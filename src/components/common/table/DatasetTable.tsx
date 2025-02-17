@@ -41,25 +41,27 @@ const DatasetTable: FC<DatasetTableProps> = ({
   onRowPropertiesClick,
 }) => {
   return (
-    <Table
-      tableRef={tableRef}
-      columns={columns}
-      rows={rows}
-      columnConfig={columnConfig}
-      onCellDoubleClicked={onCellDoubleClicked}
-      totalRows={totalRows}
-      serverSideDatasource={serverSideDatasource}
-      onCellEditRequest={onCellEditRequest}
-      showStatusBar
-      enableCellSelection
-      onColumnVisible={onColumnVisible}
-      onFillEnd={onFillEnd}
-      onDrilldownClick={onDrilldownClick}
-      onRowPropertiesClick={onRowPropertiesClick}
-      autoSizeStrategy={{
-        type: 'fitCellContents',
-      }}
-    />
+    <div id='dataset-table'>
+      <Table
+        tableRef={tableRef}
+        columns={columns}
+        rows={rows}
+        columnConfig={columnConfig}
+        onCellDoubleClicked={onCellDoubleClicked}
+        totalRows={totalRows}
+        serverSideDatasource={serverSideDatasource}
+        onCellEditRequest={onCellEditRequest}
+        showStatusBar
+        enableCellSelection
+        onColumnVisible={onColumnVisible}
+        onFillEnd={onFillEnd}
+        onDrilldownClick={onDrilldownClick}
+        onRowPropertiesClick={onRowPropertiesClick}
+        autoSizeStrategy={{
+          type: 'fitCellContents',
+        }}
+      />
+    </div>
   );
 };
 

@@ -51,6 +51,11 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
+    removeLastBreadcrumb: (state) => {
+      state.breadcrumbStack = state.breadcrumbStack.slice(0, -1);
+
+      return state;
+    },
   },
 });
 
@@ -62,6 +67,7 @@ export const {
   addBreadcrumb,
   removeBreadcrumb,
   resetBreadcrumb,
+  removeLastBreadcrumb,
 } = layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

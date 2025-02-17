@@ -26,36 +26,14 @@
 
 /* Handle */
 * > ::-webkit-scrollbar-thumb {
-  background: #e2e2da;
+  background: #f2f2f2;
   border-radius: 12px;
   overflow: hidden;
 }
 
 /* Handle on hover */
 * > ::-webkit-scrollbar-thumb:hover {
-  background: #93937b;
-}
-
-/* Handle */
-.custom-scroll-bar-common::-webkit-scrollbar-thumb {
-  border-radius: 12px;
-  outline: none;
-  overflow: hidden;
-}
-
-/* Handle */
-.custom-scroll-bar-sail-2::-webkit-scrollbar-thumb {
-  background: #e9e9e0;
-}
-
-/* Handle on hover */
-.custom-scroll-bar-sail-2::-webkit-scrollbar-thumb:hover {
-  background: #e9e9e0;
-}
-
-/* Handle */
-.custom-scroll-bar::-webkit-scrollbar-thumb {
-  background: #93937b;
+  background: #ebebeb;
 }
 
 .ag-cell-wrapper {
@@ -207,6 +185,12 @@
 
 .dataset .ag-root-wrapper {
   border-left: none;
+}
+
+#dataset-table .ag-header {
+  box-shadow: 0px 3px 0px 0px rgba(0, 0, 0, 0.02);
+  z-index: 2; /* Ensure it stays above the grid rows */
+  position: relative;
 }
 
 .login-btn-scale-100 {

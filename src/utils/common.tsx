@@ -307,6 +307,24 @@ export function trimString(str: string, maxLength: number) {
   return str;
 }
 
+/**
+ * Copy the text to the clipboard
+ * @param copyText string
+ */
+export const copyToClipBoard = (copyText: string) => {
+  if ('clipboard' in navigator) {
+    navigator.clipboard.writeText(copyText);
+  } else {
+    const textField = document.createElement('textarea');
+
+    textField.innerText = copyText;
+    document.body.appendChild(textField);
+    textField.select();
+    document.execCommand('copy');
+    textField.remove();
+  }
+};
+
 export const extractFileNameFromUrl = (url: string): string => {
   return url.split('/').pop()?.split('?')[0] ?? '';
 };

@@ -1,7 +1,50 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
+import { useGetRulesByRuleIdsQuery } from 'apis/dataset';
+import { convertApiFiltersToRuleFilters } from 'modules/data/data.utils';
+import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
+import CommonWrapper from 'components/commonWrapper';
+import { getTagLabel } from 'components/filter/filter.utils';
 
-const Rules: FC = () => {
-  return <div>Rules</div>;
+type RulesProps = {
+  ruleIds: string[];
+  selectedRuleId: string;
+};
+
+const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
+  const {
+    data: rulesData,
+    isLoading,
+    isError,
+  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleIds }, { skip: !ruleIds.length });
+
+  const listOfFilters: RuleCardProps[] = useMemo(
+    () =>
+      rulesData?.map((rule) => {
+        return {
+          filters: convertApiFiltersToRuleFilters(rule?.filter_config?.query_config?.filters),
+          value: rule?.value,
+          createdOn: rule?.created_at,
+          defaultExpanded: selectedRuleId === rule?.rule_id,
+        };
+      }) ?? [],
+    [rulesData, selectedRuleId],
+  );
+
+  return (
+    <CommonWrapper isLoading={isLoading} isError={isError}>
+      <div className='space-y-3.5'>
+        {listOfFilters?.map((filter, index) => (
+          <RuleCard
+            filters={filter?.filters}
+            key={index}
+            value={getTagLabel(filter?.value ?? '')}
+            createdOn={filter?.createdOn}
+            defaultExpanded={filter?.defaultExpanded}
+          />
+        ))}
+      </div>
+    </CommonWrapper>
+  );
 };
 
 export default Rules;

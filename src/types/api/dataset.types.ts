@@ -56,6 +56,7 @@ export type DatasetDrilldownRequestType = {
 export type DatasetDrilldownResponseType = {
   tabs: {
     dataset_id: string;
+    dataset_title: string;
     dataset_data: DatasetDataResponseType;
   }[];
 };
@@ -214,4 +215,8 @@ export type RulesByDatasetColumnType = {
 
 export type GetRulesByDatasetColumnsResponseType = {
   [datasetId: string]: RulesByDatasetColumnType;
+};
+
+export type GetRulesByRuleIdsRequestType = {
+  rule_ids: string[];
 };

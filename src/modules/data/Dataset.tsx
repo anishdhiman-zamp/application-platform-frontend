@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CellEditRequestEvent,
   ColDef,
@@ -15,28 +15,41 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { useAppDispatch } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
 import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
+import { addBreadcrumb } from 'store/slices/layout-configs';
 import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
+import CommonWrapper from 'components/commonWrapper';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
-const DatasetById = () => {
-  const { id } = useParams();
+type DatasetByIdProps = {
+  id: string;
+};
+
+const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
   const filters = useSearchParams().get('filters');
-  const { data: filterConfig, refetch: refetchFilterConfig } = useGetDatasetFilterConfigQuery({
+  const appDispatch = useAppDispatch();
+
+  const {
+    data: filterConfig,
+    refetch: refetchFilterConfig,
+    isLoading,
+    isError,
+  } = useGetDatasetFilterConfigQuery({
     datasetId: id as string,
   });
   const [updateDatasetData] = useUpdateDatasetDataMutation();
@@ -93,7 +106,7 @@ const DatasetById = () => {
           });
       },
     };
-  }, [getDatasetData]);
+  }, [getDatasetData, id]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
@@ -193,6 +206,7 @@ const DatasetById = () => {
   };
 
   const handleDrilldownClick = (data: MapAny) => {
+    appDispatch(addBreadcrumb('Drilldown'));
     router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', data?._zamp_id as string));
   };
 
@@ -238,7 +252,7 @@ const DatasetById = () => {
           });
       }
     }
-  }, [filterConfig, actionStatus, isPolling, filters]);
+  }, [filterConfig, actionStatus, isPolling, filters, id]);
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
@@ -246,7 +260,7 @@ const DatasetById = () => {
 
   return (
     <>
-      <div className='h-full'>
+      <CommonWrapper className='h-full' isLoading={isLoading} isError={isError} refetchFunction={refetchFilterConfig}>
         <div className='flex items-center justify-between pr-4'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
@@ -256,21 +270,22 @@ const DatasetById = () => {
             <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
           </div>
         </div>
-      </div>
-      <div className='z-10 w-full h-full'>
-        <DatasetTable
-          tableRef={tableRef}
-          columns={columns}
-          serverSideDatasource={serverSideDatasource}
-          columnConfig={{ enableRowGroup: true, enableValue: true }}
-          totalRows={totalRows}
-          onColumnVisible={handleColumnVisible}
-          onCellEditRequest={onCellEditRequest}
-          onFillEnd={onFillEnd}
-          onRowPropertiesClick={handleRowPropertiesClick}
-          {...(data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
-        />
-      </div>
+
+        <div className='z-10 w-full h-full'>
+          <DatasetTable
+            tableRef={tableRef}
+            columns={columns}
+            serverSideDatasource={serverSideDatasource}
+            columnConfig={{ enableRowGroup: true, enableValue: true }}
+            totalRows={totalRows}
+            onColumnVisible={handleColumnVisible}
+            onCellEditRequest={onCellEditRequest}
+            onFillEnd={onFillEnd}
+            onRowPropertiesClick={handleRowPropertiesClick}
+            {...(data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
+          />
+        </div>
+      </CommonWrapper>
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
           column={columnId}

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ICellRendererParams } from 'ag-grid-community';
+import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 const CustomTagRenderer = (props: ICellRendererParams) => {
@@ -7,7 +8,7 @@ const CustomTagRenderer = (props: ICellRendererParams) => {
 
   const tag = useMemo(() => getTagLabel(value), [value]);
 
-  return tag ? <div className='py-1 px-1.5 bg-gray-100 rounded w-fit'>{tag}</div> : <></>;
+  return tag ? <TagChip item={tag} /> : <></>;
 };
 
 export default CustomTagRenderer;

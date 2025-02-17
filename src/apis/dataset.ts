@@ -20,8 +20,10 @@ import {
   DeleteAudienceFromDatasetAccessType,
   GetRulesByDatasetColumnsRequestType,
   GetRulesByDatasetColumnsResponseType,
+  GetRulesByRuleIdsRequestType,
   PatchChangeAudienceRoleInDatasetType,
   PostShareDatasetToAudiencesByDatasetIdType,
+  RuleType,
 } from 'types/api/dataset.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -104,6 +106,12 @@ const Dataset = baseApi.injectEndpoints({
         params,
       }),
     }),
+    getRulesByRuleIds: builder.query<RuleType[], GetRulesByRuleIdsRequestType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.DATASET_RULES_BY_RULE_IDS_GET,
+        params,
+      }),
+    }),
   }),
 });
 
@@ -123,4 +131,6 @@ export const {
   usePatchChangeAudienceRoleInDatasetMutation,
   useDeleteAudienceFromDatasetAccessMutation,
   useGetRulesByDatasetColumnsQuery,
+  useGetRulesByRuleIdsQuery,
+  useLazyGetRulesByRuleIdsQuery,
 } = Dataset;

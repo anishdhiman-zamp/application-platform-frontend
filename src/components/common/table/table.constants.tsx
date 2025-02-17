@@ -14,7 +14,7 @@ export const myTheme = themeQuartz.withParams({
   rowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
   columnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
   headerHeight: 48,
-  headerRowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
+  headerRowBorder: { style: 'solid', width: 2, color: COLORS.GRAY_400 },
   headerColumnBorder: { style: 'solid', width: 1, color: COLORS.GRAY_100 },
   headerBackgroundColor: COLORS.WHITE,
   wrapperBorderRadius: 0,
@@ -30,6 +30,7 @@ export const myTheme = themeQuartz.withParams({
   headerColumnResizeHandleColor: COLORS.WHITE,
   menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
   menuBackgroundColor: COLORS.WHITE,
+  wrapperBorder: { width: 1, style: 'solid', color: COLORS.GRAY_400 },
 });
 
 export const myIcons = {

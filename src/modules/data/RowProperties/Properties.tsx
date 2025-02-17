@@ -1,25 +1,20 @@
 import { FC, Fragment } from 'react';
 import { ColDef } from 'ag-grid-community';
+import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
+import { useAppSelector } from 'hooks/toolkit';
+import PropertyRow from 'modules/data/RowProperties/PropertyRow';
+import { RootState } from 'store';
 import { MapAny } from 'types/commonTypes';
-import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
-import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 
 type PropertiesProps = {
   data: MapAny;
   columns: ColDef[];
+  onRuleClick: (ruleId: string) => void;
 };
 
-const Properties: FC<PropertiesProps> = ({ data, columns }) => {
-  const getValue = (column: ColDef, value: any) => {
-    if (column.cellRenderer) {
-      if (column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG)
-        return <TagChip item={value} />;
-
-      return column.cellRenderer({ colDef: column, data, value });
-    }
-
-    return <p>{value}</p>;
-  };
+const Properties: FC<PropertiesProps> = ({ data, columns, onRuleClick }) => {
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
 
   return (
     <div className='grid grid-cols-2 gap-2.5'>
@@ -28,10 +23,14 @@ const Properties: FC<PropertiesProps> = ({ data, columns }) => {
 
         return value && column ? (
           <Fragment key={key}>
-            <div className='f-12-400 text-GRAY_700 h-6 flex items-center'>
-              <p>{key}</p>
-            </div>
-            <div className='f-11-400 text-GRAY_1000 h-6 flex items-center'>{getValue(column, value)}</div>
+            <PropertyRow
+              columnKey={key}
+              value={value}
+              column={column}
+              data={data}
+              teamMembersData={teamMembersData}
+              onRuleClick={onRuleClick}
+            />
           </Fragment>
         ) : null;
       })}

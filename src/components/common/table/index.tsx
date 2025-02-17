@@ -246,6 +246,8 @@ const Table: React.FC<TableProps> = ({
           onRowClicked={onRowClicked}
           getContextMenuItems={getContextMenuItems}
           autoSizeStrategy={autoSizeStrategy}
+          suppressServerSideFullWidthLoadingRow
+          serverSideInitialRowCount={10}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

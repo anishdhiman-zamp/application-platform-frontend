@@ -97,21 +97,20 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
 
-    const columnsWithRemovedHiddenColumns = latestColumns?.filter(
-      (column) => !column.getColDef().headerComponentParams?.metadata?.is_hidden,
-    );
-
     // re-order columns based on the columnOrderingVisibilityForCurrentDataset
-    const orderedColumns: Column[] = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((column: MapAny) =>
-      columnsWithRemovedHiddenColumns?.find((col) => col.getColId() === column.colId),
-    );
+    const orderedColumns: Column[] =
+      getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) =>
+        latestColumns?.find((col) => col.getColId() === column.colId),
+      ) ?? [];
+
+    const finalColumns = orderedColumns?.length ? orderedColumns : latestColumns;
 
     if (searchTerm) {
-      const filteredColumns = orderedColumns?.filter((column) => column.getColId()?.includes(searchTerm));
+      const filteredColumns = finalColumns?.filter((column) => column.getColId()?.includes(searchTerm));
 
       setColumns(filteredColumns);
     } else {
-      setColumns(orderedColumns);
+      setColumns(finalColumns);
     }
   }, [refetchColumnList]);
 

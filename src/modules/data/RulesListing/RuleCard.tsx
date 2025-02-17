@@ -17,10 +17,11 @@ export type RuleCardProps = {
   filters: MapAny;
   value?: string;
   createdOn?: string;
+  defaultExpanded?: boolean;
 };
 
-const RuleCard: FC<RuleCardProps> = ({ filters, value, createdOn }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const RuleCard: FC<RuleCardProps> = ({ filters, value, createdOn, defaultExpanded = false }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const filterStatement = getFilterStatementValues(filters);
   const nonExpandedFilterStatement = filterStatement?.slice(0, 1)?.[0];
   const filterStatementLength = filterStatement?.length;
