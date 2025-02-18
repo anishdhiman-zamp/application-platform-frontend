@@ -34,7 +34,6 @@ import {
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
   PIVOT_REF,
-  PIVOT_REF_TYPES,
   ROW_HEIGHT,
 } from 'modules/widgets/Pivot/pivot.constants';
 import { ParentFilters, ParentMappingDetail } from 'modules/widgets/Pivot/pivot.types';
@@ -49,6 +48,7 @@ import {
   getPivotColDefs,
   getPivotColumns,
   getPivotData,
+  getTagDetails,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
@@ -232,25 +232,31 @@ const StackedPivot = ({
     const pivotKey = colDef?.pivotKeys?.[0];
 
     const currentRowContext = node?.rowGroupColumn?.getColDef()?.context?.sourceName;
-    const parentDetails = getAllParentKeys(node);
-    const isTag = filteredRowData?.[PIVOT_REF] === PIVOT_REF_TYPES.TAGS;
+    const parentDetails = getAllParentKeys(node, filteredRowData);
     const isLeaf = node?.leafGroup;
     const isTopNode = node?.level === 0;
+    const { isTag, tagColumnName } = getTagDetails(filteredRowData, currentNodeKey);
 
     const datasetId = mappingStructure?.[filteredRowData?.[PIVOT_REF]]?.datasetId;
     const columnMappingDetails = getMappingDetails(mappingStructure, filteredRowData?.[PIVOT_REF], pivotColId);
     const rowMappingDetails = getMappingDetails(
       mappingStructure,
       filteredRowData?.[PIVOT_REF],
-      isTag && !isLeaf ? 'TAG' : currentRowContext,
+      isTag ? tagColumnName : currentRowContext,
     );
 
-    const parentMappingDetails: ParentMappingDetail[] = parentDetails.map(({ key, context }) => ({
+    const parentMappingDetails: ParentMappingDetail[] = parentDetails.map(({ key, context, tag }) => ({
       key,
-      mappingDetails: getMappingDetails(mappingStructure, filteredRowData?.[PIVOT_REF], isTag ? 'TAG' : context),
+      tag,
+      mappingDetails: getMappingDetails(
+        mappingStructure,
+        filteredRowData?.[PIVOT_REF],
+        isTag ? tagColumnName : context,
+      ),
     }));
 
-    const parentFilters = generateParentFilters(parentMappingDetails, isTag, isLeaf, currentNodeKey);
+    const parentFilters = generateParentFilters(parentMappingDetails, currentNodeKey, isTag);
+
     const columnFilterWithPeriodicity = getColumnFilterWithPeriodicity(
       columnMappingDetails,
       periodicity as PERIODICITY_TYPES,

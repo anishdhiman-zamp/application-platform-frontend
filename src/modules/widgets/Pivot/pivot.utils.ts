@@ -418,14 +418,34 @@ export const formatDateToISO = (dateStr: string): string => {
   return `${day}-${month}-${year}T00:00:00Z`;
 };
 
-export const getAllParentKeys = (node: any): MapAny[] => {
+export const columnNameFromTagContext = (context?: string) => {
+  const match = context?.match(/^__(.*?)_/);
+
+  return match ? match[1] : null;
+};
+
+export const getTagDetails = (filteredRowData: Record<string, any>, currentNodeKey: string) => {
+  const tagRowContext = Object.keys(filteredRowData)
+    .filter((key) => filteredRowData[key] === currentNodeKey)
+    ?.find((key) => key.startsWith('__'));
+
+  return {
+    isTag: !!tagRowContext && tagRowContext.startsWith('__'),
+    tagColumnName: columnNameFromTagContext(tagRowContext),
+  };
+};
+
+export const getAllParentKeys = (node: any, filteredRowData: Record<string, any>): MapAny[] => {
   const parentKeys: MapAny[] = [];
 
   while (node?.parent) {
     if (node?.parent?.key && node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName) {
       parentKeys.push({
         key: node?.parent?.key,
-        context: node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName,
+        tag: getTagDetails(filteredRowData, node?.parent?.key).isTag,
+        context: getTagDetails(filteredRowData, node?.parent?.key).isTag
+          ? getTagDetails(filteredRowData, node?.parent?.key).tagColumnName
+          : node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName,
       });
     }
     node = node.parent;
@@ -440,13 +460,14 @@ export const getMappingDetails = (mappingStructure: any, pivotRef: string, key: 
 
 export const generateParentFilters = (
   parentMappingDetails: ParentMappingDetail[],
-  isTag: boolean,
-  isLeaf: boolean,
   currentNodeKey: string,
+  isTag: boolean,
 ): ParentFilters => {
-  return parentMappingDetails.reduce((acc: ParentFilters, { key, mappingDetails }, index, array) => {
-    const allKeys = isTag
-      ? [...array.slice(0, index + 1).map(({ key }) => key), ...(isLeaf ? [] : [currentNodeKey])].join('.')
+  return parentMappingDetails.reduce((acc: ParentFilters, { key, mappingDetails, tag }, index, array) => {
+    const allKeys = tag
+      ? isTag
+        ? [...array.slice(0, index + 1).map(({ key }) => key), currentNodeKey].join('.')
+        : [...array.slice(0, index + 1).map(({ key }) => key)].join('.')
       : key;
 
     if (mappingDetails?.column) {
@@ -494,18 +515,6 @@ export const buildTagFilter = (
   parentFilters: ParentFilters,
   columnFilterWithPeriodicity: ParentFilters,
 ): ParentFilters => {
-  if (isLeaf) {
-    return {
-      [rowMappingDetails?.column ?? '']: {
-        filterType: rowMappingDetails?.drilldown_filter_type,
-        type: rowMappingDetails?.drilldown_filter_operator,
-        values: [currentNodeKey],
-      },
-      ...parentFilters,
-      ...columnFilterWithPeriodicity,
-    };
-  }
-
   return isTopNode
     ? {
         [rowMappingDetails?.column ?? '']: {

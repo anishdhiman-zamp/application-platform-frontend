@@ -46,6 +46,7 @@ export type MappingDetails = {
 
 export type ParentMappingDetail = {
   key: string;
+  tag: boolean;
   mappingDetails: MappingDetails | null;
 };
 
