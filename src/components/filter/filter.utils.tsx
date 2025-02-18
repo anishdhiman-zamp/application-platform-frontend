@@ -7,6 +7,7 @@ import {
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,
   CONDITION_OPERATOR_TYPE,
   FILTER_KEYS,
+  SEARCH_FILTER_OPTIONS,
 } from 'components/filter/filters.constants';
 
 export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfigType[], selectedFilters: MapAny) => {
@@ -71,7 +72,8 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
     case FILTER_TYPES.SEARCH: {
       const filter = selectedFilters[key];
-      let title = filter?.filter;
+      const operatorLabel = SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label;
+      let title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
 
       if (!filter) {
         title = '';
