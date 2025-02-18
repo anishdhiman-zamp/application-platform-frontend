@@ -47,7 +47,7 @@ const Page = () => {
   }, [pageDetails]);
 
   return (
-    <div className='relative bg-white h-full rounded-tl-md py-6 px-3 overflow-y-auto pb-16 w-full'>
+    <div className='relative h-full rounded-tl-md py-6 px-3 overflow-y-auto pb-16 w-full'>
       <Sheets pageId={id as string} sheetId={currentSheetId as string} />
       <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
     </div>

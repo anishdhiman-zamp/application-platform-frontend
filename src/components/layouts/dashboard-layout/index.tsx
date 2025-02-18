@@ -86,7 +86,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
           <Sidebar isSidebarOpen={isSidebarOpen} />
           <div ref={containerRef} className={`flex flex-col flex-grow relative h-screen ${containerStyle}`}>
             <div
-              className={`w-full relative mx-auto border border-GRAY_400 overflow-hidden bg-white h-[calc(100vh-48px)] rounded-tl-xl ${contentWrapperClassName}`}
+              className={`w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)] rounded-tl-xl ${contentWrapperClassName}`}
             >
               {renderChildrenWithProps(children)}
             </div>

@@ -3,7 +3,7 @@ import PeopleTabs from 'modules/people/PeopleTabs';
 
 const PeoplePage = () => {
   return (
-    <div className='p-10 w-full h-full bg-white'>
+    <div className='p-10 w-full h-full'>
       <PeopleHeader />
       <PeopleTabs />
     </div>

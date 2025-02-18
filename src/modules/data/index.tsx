@@ -43,9 +43,9 @@ const Listing = () => {
   }, [getDatasetListing]);
 
   return (
-    <>
+    <div className='h-full rounded-tl-xl overflow-hidden'>
       <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
-    </>
+    </div>
   );
 };
 
