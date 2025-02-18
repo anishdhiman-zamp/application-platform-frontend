@@ -150,6 +150,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           widgetInstanceDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
+          currentWidgetSelectedFilter={currentWidgetSelectedFilters}
           periodicity={periodicity.periodicity}
           timeColumn={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}

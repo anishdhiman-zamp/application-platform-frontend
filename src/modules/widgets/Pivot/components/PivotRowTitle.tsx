@@ -57,7 +57,13 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
       )}
 
       {showIcons && isTopLevel && (
-        <Image src={getReconStatusIcon(value as RECON_STATUS_TYPES)} alt={value} width={18} height={18} priority />
+        <Image
+          src={getReconStatusIcon(value as RECON_STATUS_TYPES)}
+          alt={value ?? 'recon-status'}
+          width={18}
+          height={18}
+          priority
+        />
       )}
 
       {showIcons && isLowestLevel && (

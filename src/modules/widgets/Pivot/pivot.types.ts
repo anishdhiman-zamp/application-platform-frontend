@@ -37,3 +37,24 @@ export enum PIVOT_DATA_TYPES {
   BOOLEAN = 'boolean',
   AMOUNT = 'amount',
 }
+
+export type MappingDetails = {
+  column?: string;
+  drilldown_filter_type?: string;
+  drilldown_filter_operator?: string;
+};
+
+export type ParentMappingDetail = {
+  key: string;
+  mappingDetails: MappingDetails | null;
+};
+
+export type FilterConfig = {
+  filterType?: string;
+  type?: string;
+  values?: string[];
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+export type ParentFilters = Record<string, FilterConfig>;

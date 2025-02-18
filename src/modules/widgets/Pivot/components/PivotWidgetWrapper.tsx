@@ -6,7 +6,7 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
-import { OptionsType } from 'types/commonTypes';
+import { MapAny, OptionsType } from 'types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -14,11 +14,12 @@ export type PivotTableWidgetPropsType = {
   widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
-  periodicity: string;
+  periodicity: PERIODICITY_TYPES;
   timeColumn: string;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   isFilterLoading?: boolean;
+  currentWidgetSelectedFilter: MapAny;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -30,6 +31,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   groupWidgetsOptions,
   onWidgetChange,
   isFilterLoading,
+  currentWidgetSelectedFilter,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -37,7 +39,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
     },
     {
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
       skip: !isFilterInitialized || !timeColumn,
     },
   );
@@ -63,6 +65,8 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           widgetInstanceDetails={widgetInstanceDetails}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          periodicity={periodicity}
+          currentWidgetSelectedFilter={currentWidgetSelectedFilter}
         />
       )}
     </CommonWrapper>

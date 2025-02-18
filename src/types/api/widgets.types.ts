@@ -76,17 +76,23 @@ export type PivotTableWidgetMapping = {
       column: string;
       type: string;
       field_type: FIELD_TYPES;
+      drilldown_filter_type?: string;
+      drilldown_filter_operator?: string;
     }[];
     rows?: {
       column: string;
       type: string;
       field_type: FIELD_TYPES;
+      drilldown_filter_type?: string;
+      drilldown_filter_operator?: string;
     }[];
     values: {
       column: string;
       aggregation: AGGREGATION_TYPES;
       type: string;
       field_type: FIELD_TYPES;
+      drilldown_filter_type?: string;
+      drilldown_filter_operator?: string;
     }[];
   };
 };
@@ -129,7 +135,7 @@ export interface WidgetInstanceBaseType {
   dataset_id: string;
   created_at: string;
   updated_at: string;
-  display_config: MapAny;
+  display_config?: MapAny;
 }
 
 export interface LineBarChartWidgetInstanceType extends WidgetInstanceBaseType {
@@ -156,6 +162,7 @@ export interface PivotTableWidgetInstanceType extends WidgetInstanceBaseType {
     version: string;
     datasets: { id: string }[];
     mappings: PivotTableWidgetMapping[];
+    display_config?: MapAny;
   };
 }
 

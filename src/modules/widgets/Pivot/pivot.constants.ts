@@ -5,12 +5,20 @@ export const NESTING_LEVEL_INFIX = '_LEVEL_';
 export const GROUPING_COL_NAME_PREFIX = 'GROUPING_DEPTH_';
 export const ROOT_LEVEL_TITLE = 'Total';
 
+export enum PIVOT_REF_TYPES {
+  RECONCILLIATION = 'Reconciliation Data',
+  TAGS = 'Tag',
+}
+
 export const COL_MIN_WIDTH = 170;
 export const PINNED_COL_WIDTH = 380;
 export const PIVOT_HEADER_HEIGHT = 64;
 export const PIVOT_GROUP_HEADER_HEIGHT = 42;
 export const ROW_HEIGHT = 42;
 export const GRAND_ROW_TOTAL_POSITION = 'bottom';
+
+export const OPENING_BALANCE = 'Opening Balance';
+export const CLOSING_BALANCE = 'Closing Balance';
 
 export enum RECON_STATUS_TYPES {
   SETTLED = 'settled',

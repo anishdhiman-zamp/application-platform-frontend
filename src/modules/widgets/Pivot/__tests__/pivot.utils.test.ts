@@ -1,3 +1,4 @@
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/pivot.utils.mock';
 import {
   AGGridPivotNode,
@@ -7,6 +8,13 @@ import {
   getPivotData,
 } from 'modules/widgets/Pivot/pivot.utils';
 import '@testing-library/jest-dom';
+
+jest.mock('next/font/google', () => ({
+  Inter: jest.fn(() => ({
+    className: 'mocked-inter',
+    variable: '--font-inter',
+  })),
+}));
 
 describe('getPivotColDefs', () => {
   it('works correctly', () => {
@@ -21,7 +29,8 @@ describe('getPivotData', () => {
   it('works correctly', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
-    const result = getPivotData(pivotColumns, widgetData);
+    const periodicity = PERIODICITY_TYPES.DAILY;
+    const result = getPivotData(pivotColumns, widgetData, periodicity);
 
     expect(result).toBeDefined();
   });

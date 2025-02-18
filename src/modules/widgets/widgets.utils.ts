@@ -440,8 +440,8 @@ export const getDateRangeWithPeriodicity = (
   endDate: string,
 ): [string, string] => {
   const currentDate = new Date(date);
-  let minDate = startDate ? new Date(startDate) : new Date(-8640000000000000); // Min JS Date
-  let maxDate = endDate ? new Date(endDate) : new Date(8640000000000000); // Max JS Date
+  let minDate = startDate ? new Date(startDate) : new Date(315532800); // 1st Jan 1980
+  let maxDate = endDate ? new Date(endDate) : new Date(7262226444222); // 1st Jan 2200
 
   switch (periodicity) {
     case PERIODICITY_TYPES.DAILY: {

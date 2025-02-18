@@ -49,7 +49,7 @@ export enum CHART_SLICE_TYPES {
   OTHERS = 'others',
 }
 
-export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, date: string) => {
+export const getFormattedDateWithPeriodicity = (date: string, periodicity: PERIODICITY_TYPES) => {
   switch (periodicity) {
     case PERIODICITY_TYPES.DAILY:
       return format(new Date(date), DATE_FORMATS.ddMMMyyyy);

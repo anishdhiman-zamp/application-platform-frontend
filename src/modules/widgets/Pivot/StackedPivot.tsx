@@ -9,6 +9,7 @@ import {
   ColumnsToolPanelModule,
   ContextMenuModule,
   FiltersToolPanelModule,
+  GridStateModule,
   GroupCellRendererParams,
   ModuleRegistry,
   PivotModule,
@@ -18,27 +19,40 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { ROUTES_PATH } from 'constants/routeConfig';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import {
+  CLOSING_BALANCE,
   COL_MIN_WIDTH,
   GRAND_ROW_TOTAL_POSITION,
+  OPENING_BALANCE,
   PINNED_COL_WIDTH,
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
+  PIVOT_REF,
+  PIVOT_REF_TYPES,
   ROW_HEIGHT,
 } from 'modules/widgets/Pivot/pivot.constants';
+import { ParentFilters, ParentMappingDetail } from 'modules/widgets/Pivot/pivot.types';
 import {
   backendConfig,
+  buildTagFilter,
+  generateParentFilters,
+  getAllParentKeys,
+  getColumnFilterWithPeriodicity,
   getDynamicRowStyle,
+  getMappingDetails,
   getPivotColDefs,
   getPivotColumns,
   getPivotData,
 } from 'modules/widgets/Pivot/pivot.utils';
+import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
-import { OptionsType } from 'types/commonTypes';
+import { MapAny, OptionsType } from 'types/commonTypes';
 
 ModuleRegistry.registerModules([CellStyleModule]);
 ModuleRegistry.registerModules([
@@ -54,6 +68,7 @@ ModuleRegistry.registerModules([
   RowStyleModule,
   RowApiModule,
   ValidationModule,
+  GridStateModule,
 ]);
 
 type StackedPivotProps = {
@@ -61,6 +76,8 @@ type StackedPivotProps = {
   widgetData: WidgetDataResponseType;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
+  currentWidgetSelectedFilter: MapAny;
+  periodicity: PERIODICITY_TYPES;
 };
 
 const StackedPivot = ({
@@ -68,12 +85,45 @@ const StackedPivot = ({
   widgetData,
   groupWidgetsOptions,
   onWidgetChange,
+  currentWidgetSelectedFilter,
+  periodicity,
 }: StackedPivotProps) => {
+  const router = useRouter();
+
   const {
     data_mappings: { mappings },
     title,
     display_config,
   } = widgetInstanceDetails;
+
+  const mappingStructure = useMemo(() => {
+    const generateMappingStructure = (mappings: any[]) => {
+      const mappingObject: Record<string, any> = {};
+
+      mappings.forEach((mapping) => {
+        const ref = mapping?.ref;
+        const datasetId = mapping?.dataset_id;
+
+        if (!mappingObject[ref]) {
+          mappingObject[ref] = { datasetId };
+        }
+
+        const allFields = [
+          ...(mapping?.fields?.columns || []),
+          ...(mapping?.fields?.rows || []),
+          ...(mapping?.fields?.values || []),
+        ];
+
+        allFields.forEach((field) => {
+          mappingObject[ref][field?.column] = field;
+        });
+      });
+
+      return mappingObject;
+    };
+
+    return generateMappingStructure(mappings);
+  }, [mappings]);
 
   const isSingleValue = useMemo(() => {
     return mappings?.length === 1 && mappings?.[0]?.fields?.values?.length === 1;
@@ -83,10 +133,10 @@ const StackedPivot = ({
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
     const pivotColDefs = getPivotColDefs(pivotColumns);
-    const rowData = getPivotData(pivotColumns, widgetData);
+    const rowData = getPivotData(pivotColumns, widgetData, periodicity as PERIODICITY_TYPES);
 
     return { colDef: pivotColDefs, rowData };
-  }, [widgetInstanceDetails, widgetData]);
+  }, [widgetInstanceDetails, widgetData, periodicity]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -153,6 +203,92 @@ const StackedPivot = ({
     };
   }, [isSingleValue]);
 
+  const getRowDetails = (key: string) => {
+    return rowData.find((row) => Object.values(row).includes(key)) || null;
+  };
+
+  const navigateToDataset = (datasetId: string | null, filters: Record<string, any>) => {
+    const query = {
+      ...currentWidgetSelectedFilter,
+      ...filters,
+    };
+    const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
+
+    router.push(`${path}?filters=${JSON.stringify(query)}`);
+  };
+
+  const handleOnCellDoubleClicked = (params: any) => {
+    const { node, colDef, api } = params;
+    const currentNodeKey = node?.key;
+
+    if (!currentNodeKey || node?.level === -1 || colDef?.pinned === 'left') return;
+
+    const filteredRowData = getRowDetails(currentNodeKey);
+
+    if (!filteredRowData) return;
+
+    const pivotCols = api?.getPivotColumns();
+    const pivotColId = pivotCols?.[0]?.getColId();
+    const pivotKey = colDef?.pivotKeys?.[0];
+
+    const currentRowContext = node?.rowGroupColumn?.getColDef()?.context?.sourceName;
+    const parentDetails = getAllParentKeys(node);
+    const isTag = filteredRowData?.[PIVOT_REF] === PIVOT_REF_TYPES.TAGS;
+    const isLeaf = node?.leafGroup;
+    const isTopNode = node?.level === 0;
+
+    const datasetId = mappingStructure?.[filteredRowData?.[PIVOT_REF]]?.datasetId;
+    const columnMappingDetails = getMappingDetails(mappingStructure, filteredRowData?.[PIVOT_REF], pivotColId);
+    const rowMappingDetails = getMappingDetails(
+      mappingStructure,
+      filteredRowData?.[PIVOT_REF],
+      isTag && !isLeaf ? 'TAG' : currentRowContext,
+    );
+
+    const parentMappingDetails: ParentMappingDetail[] = parentDetails.map(({ key, context }) => ({
+      key,
+      mappingDetails: getMappingDetails(mappingStructure, filteredRowData?.[PIVOT_REF], isTag ? 'TAG' : context),
+    }));
+
+    const parentFilters = generateParentFilters(parentMappingDetails, isTag, isLeaf, currentNodeKey);
+    const columnFilterWithPeriodicity = getColumnFilterWithPeriodicity(
+      columnMappingDetails,
+      periodicity as PERIODICITY_TYPES,
+      pivotKey,
+      currentWidgetSelectedFilter,
+    );
+
+    if ([OPENING_BALANCE, CLOSING_BALANCE].includes(currentNodeKey)) {
+      return navigateToDataset(datasetId, columnFilterWithPeriodicity);
+    }
+
+    if (isTag) {
+      return navigateToDataset(
+        datasetId,
+        buildTagFilter(
+          isLeaf,
+          isTopNode,
+          rowMappingDetails,
+          currentNodeKey,
+          parentFilters,
+          columnFilterWithPeriodicity,
+        ),
+      );
+    }
+
+    const widgetFilter: ParentFilters = {
+      [rowMappingDetails?.column ?? '']: {
+        filterType: rowMappingDetails?.drilldown_filter_type,
+        type: rowMappingDetails?.drilldown_filter_operator,
+        values: [currentNodeKey],
+      },
+      ...parentFilters,
+      ...columnFilterWithPeriodicity,
+    };
+
+    return navigateToDataset(datasetId, widgetFilter);
+  };
+
   return (
     <div className='h-full w-full'>
       <div className='h-full w-full pivot'>
@@ -170,10 +306,13 @@ const StackedPivot = ({
           rowHeight={ROW_HEIGHT}
           processPivotResultColGroupDef={processPivotResultColGroupDef}
           suppressRowHoverHighlight
+          suppressRowDrag
+          suppressMovableColumns
           suppressCellFocus
           scrollbarWidth={12}
-          grandTotalRow={display_config?.show_column_aggregations && GRAND_ROW_TOTAL_POSITION}
+          grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
           getRowId={(params) => params?.data?.id}
+          onCellDoubleClicked={handleOnCellDoubleClicked}
         />
       </div>
     </div>

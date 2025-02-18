@@ -1,8 +1,17 @@
 import { ColDef, RowStyle, ValueFormatterParams } from 'ag-grid-community';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import { PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
+import {
+  MappingDetails,
+  ParentFilters,
+  ParentMappingDetail,
+  PIVOT_DATA_TYPES,
+  PivotColumnMetadata,
+} from 'modules/widgets/Pivot/pivot.types';
+import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
+import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
@@ -94,13 +103,11 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
   return {}; // Default cell style
 };
 
-export const parseType = (type: PIVOT_DATA_TYPES, value: any) => {
+export const parseType = (type: PIVOT_DATA_TYPES, value: any, periodicity: PERIODICITY_TYPES) => {
   switch (type) {
     case PIVOT_DATA_TYPES.DATE:
     case PIVOT_DATA_TYPES.TIMESTAMP: {
-      const date = new Date(value);
-
-      return isNaN(date?.getTime?.()) ? null : date;
+      return getFormattedDateWithPeriodicity(value, periodicity);
     }
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
@@ -253,7 +260,11 @@ export const getPivotColumns = (
 };
 
 // transform the pivot data into a format that can be used by ag-grid
-export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData: WidgetDataResponseType) => {
+export const getPivotData = (
+  pivotColumns: PivotColumnMetadata[],
+  wInstanceData: WidgetDataResponseType,
+  periodicity: PERIODICITY_TYPES,
+) => {
   // Array to store transformed rows
   const rows: MapAny[] = [];
 
@@ -276,7 +287,11 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
 
         if (pivotColumn) {
           // If matching pivot column found, transform the value using its data type
-          transformedRow[pivotColumn?.name] = parseType(pivotColumn?.dataType as PIVOT_DATA_TYPES, value);
+          transformedRow[pivotColumn?.name] = parseType(
+            pivotColumn?.dataType as PIVOT_DATA_TYPES,
+            value,
+            periodicity as PERIODICITY_TYPES,
+          );
         } else {
           if (key === PIVOT_REF) {
             // Special handling for REF field - find pivot column by source name
@@ -387,4 +402,121 @@ const formatPivotColGroupHeader = (params: ValueFormatterParams) => {
     default:
       return params?.value;
   }
+};
+
+export const formatDateToISO = (dateStr: string): string => {
+  const date = new Date(dateStr);
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date format');
+  }
+
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}T00:00:00Z`;
+};
+
+export const getAllParentKeys = (node: any): MapAny[] => {
+  const parentKeys: MapAny[] = [];
+
+  while (node?.parent) {
+    if (node?.parent?.key && node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName) {
+      parentKeys.push({
+        key: node?.parent?.key,
+        context: node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName,
+      });
+    }
+    node = node.parent;
+  }
+
+  return parentKeys;
+};
+
+export const getMappingDetails = (mappingStructure: any, pivotRef: string, key: string): MappingDetails | null => {
+  return mappingStructure?.[pivotRef]?.[key] || null;
+};
+
+export const generateParentFilters = (
+  parentMappingDetails: ParentMappingDetail[],
+  isTag: boolean,
+  isLeaf: boolean,
+  currentNodeKey: string,
+): ParentFilters => {
+  return parentMappingDetails.reduce((acc: ParentFilters, { key, mappingDetails }, index, array) => {
+    const allKeys = isTag
+      ? [...array.slice(0, index + 1).map(({ key }) => key), ...(isLeaf ? [] : [currentNodeKey])].join('.')
+      : key;
+
+    if (mappingDetails?.column) {
+      acc[mappingDetails.column] = {
+        filterType: mappingDetails.drilldown_filter_type,
+        type: mappingDetails.drilldown_filter_operator,
+        values: [allKeys],
+      };
+    }
+
+    return acc;
+  }, {});
+};
+
+export const getColumnFilterWithPeriodicity = (
+  columnMappingDetails: MappingDetails | null,
+  periodicity: PERIODICITY_TYPES,
+  pivotKey: string,
+  currentWidgetSelectedFilter: Record<string, any>,
+): ParentFilters => {
+  if (!columnMappingDetails?.column) return {};
+
+  const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
+    periodicity,
+    pivotKey,
+    currentWidgetSelectedFilter[columnMappingDetails.column]?.dateFrom,
+    currentWidgetSelectedFilter[columnMappingDetails.column]?.dateTo,
+  );
+
+  return {
+    [columnMappingDetails.column]: {
+      filterType: columnMappingDetails.drilldown_filter_type,
+      type: columnMappingDetails.drilldown_filter_operator,
+      dateFrom,
+      dateTo,
+    },
+  };
+};
+
+export const buildTagFilter = (
+  isLeaf: boolean,
+  isTopNode: boolean,
+  rowMappingDetails: MappingDetails | null,
+  currentNodeKey: string,
+  parentFilters: ParentFilters,
+  columnFilterWithPeriodicity: ParentFilters,
+): ParentFilters => {
+  if (isLeaf) {
+    return {
+      [rowMappingDetails?.column ?? '']: {
+        filterType: rowMappingDetails?.drilldown_filter_type,
+        type: rowMappingDetails?.drilldown_filter_operator,
+        values: [currentNodeKey],
+      },
+      ...parentFilters,
+      ...columnFilterWithPeriodicity,
+    };
+  }
+
+  return isTopNode
+    ? {
+        [rowMappingDetails?.column ?? '']: {
+          filterType: rowMappingDetails?.drilldown_filter_type,
+          type: rowMappingDetails?.drilldown_filter_operator,
+          values: [currentNodeKey],
+        },
+        ...columnFilterWithPeriodicity,
+      }
+    : {
+        ...parentFilters,
+        ...columnFilterWithPeriodicity,
+      };
 };

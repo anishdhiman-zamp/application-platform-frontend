@@ -29,7 +29,7 @@ const KpiTag: FC<KpiTagProps> = ({
       widgetId: widgetDetails?.widget_instance_id,
       payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
     },
-    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
+    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized || !periodicity || !timeColumn },
   );
 
   const value: string = useMemo(() => {
