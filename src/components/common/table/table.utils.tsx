@@ -1,4 +1,6 @@
 import { IServerSideGetRowsRequest, themeQuartz } from 'ag-grid-community';
+import { DATE_FORMATS } from 'constants/date.constants';
+import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
 import {
   AggregationType,
@@ -61,10 +63,17 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
       } else return null;
     case FILTER_TYPES.DATE_RANGE:
       if (condition.dateFrom && condition.dateTo) {
+        const startDate = new Date(condition.dateFrom);
+
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(condition.dateTo);
+
+        endDate.setHours(23, 59, 59, 999);
+
         return {
           column: condition.colId,
           operator: condition.type,
-          value: [condition.dateFrom, condition.dateTo],
+          value: [format(startDate, DATE_FORMATS.YYYYMMDD_HHMMSS), format(endDate, DATE_FORMATS.YYYYMMDD_HHMMSS)],
         };
       } else return null;
     case FILTER_TYPES.SEARCH:

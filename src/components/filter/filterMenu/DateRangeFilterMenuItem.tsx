@@ -20,8 +20,8 @@ const DateRangeFilterMenuItem = ({ column, isPeriodicityEnabled = false }: DateR
       payload: {
         selectedFilters: {
           [columnId]: {
-            dateFrom: value?.start_date?.toISOString(),
-            dateTo: value?.end_date?.toISOString(),
+            dateFrom: value?.start_date,
+            dateTo: value?.end_date,
             filterType: FILTER_TYPES.DATE_RANGE,
             periodicity: value?.periodicity,
             type: CONDITION_OPERATOR_TYPE.IN_BETWEEN,
