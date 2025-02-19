@@ -210,7 +210,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
-            <div className='w-full max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
+            <div className='flex flex-col w-full max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
               {filteredDropdownOptions?.map((option, index) => (
                 <div
                   key={index}

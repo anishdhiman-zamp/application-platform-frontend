@@ -42,11 +42,12 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
     usePostShareDatasetToAudiencesByDatasetIdMutation();
   const userAccessToDatasetList = getAudiencesByDatasetId ?? [];
+
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_role = getUserPrivilege();
   const userPrivilege =
-    getAudiencesByDatasetId?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
+    userAccessToDatasetList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const isDatasetSharable =
     !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.DATA_READER;
   const checkPermission = accessPermissionForDataset(userPrivilege);
@@ -107,12 +108,18 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     let resource_audience_id = '';
     let resource_audience_type = '';
 
-    const isOrgAlreadyInvited = getAudiencesByDatasetId?.some(
+    const isOrgAlreadyInvited = userAccessToDatasetList?.some(
       (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
     );
 
     if (isOrgAlreadyInvited && value === orgName) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.ORG_ALREADY_HAS_ACCESS };
+    } else if (value === orgName) {
+      return {
+        isValid: true,
+        resource_audience_type: ResourceAudienceType.ORGANIZATION,
+        resource_audience_id: organizationId,
+      };
     }
 
     if (!isValid) {
@@ -125,7 +132,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
 
-    const isAlreadyInvited = getAudiencesByDatasetId?.some((item) => item?.user?.email === value);
+    const isAlreadyInvited = userAccessToDatasetList?.some((item) => item?.user?.email === value);
 
     if (isAlreadyInvited) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };

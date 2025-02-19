@@ -42,12 +42,12 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     { skip: !pageId },
   );
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostPagesToAudiencesByPageIdMutation();
-  const userAccessToDatasetList = getAudiencesByPageId ?? [];
+  const userAccessToPageList = getAudiencesByPageId ?? [];
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_role = getUserPrivilege();
   const userPrivilege =
-    getAudiencesByPageId?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
+    userAccessToPageList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const isPageSharable = !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
   const checkPermission = accessPermissionForPage(userPrivilege);
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
@@ -107,12 +107,18 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     let resource_audience_id = '';
     let resource_audience_type = '';
 
-    const isOrgAlreadyInvited = getAudiencesByPageId?.some(
+    const isOrgAlreadyInvited = userAccessToPageList?.some(
       (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
     );
 
     if (isOrgAlreadyInvited && value === orgName) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.ORG_ALREADY_HAS_ACCESS };
+    } else if (value === orgName) {
+      return {
+        isValid: true,
+        resource_audience_type: ResourceAudienceType.ORGANIZATION,
+        resource_audience_id: organizationId,
+      };
     }
 
     if (!isValid) {
@@ -125,7 +131,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_NOT_IN_ORG };
     }
 
-    const isAlreadyInvited = getAudiencesByPageId?.some((item) => item?.user?.email === value);
+    const isAlreadyInvited = userAccessToPageList?.some((item) => item?.user?.email === value);
 
     if (isAlreadyInvited) {
       return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
@@ -268,11 +274,11 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                 </div>
               </div>
             </div>
-            {userAccessToDatasetList?.length > 0 && (
+            {userAccessToPageList?.length > 0 && (
               <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
                 <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
                 <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
-                  {userAccessToDatasetList?.map((audience, index) => (
+                  {userAccessToPageList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
                       resource_type={audience?.resource_type}
