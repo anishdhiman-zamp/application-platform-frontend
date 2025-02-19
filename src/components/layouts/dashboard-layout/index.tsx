@@ -10,11 +10,13 @@ import React, {
   useState,
 } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
+import { useAppSelector } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
 import { RootState, store } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
 import {
   fadeOutOffsetTimeDifference,
@@ -30,6 +32,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   const previousRoute = useRef<string>(router.pathname);
   const [isFadingOutEffect, setIsFadingOutEffect] = useState(false);
   const showDashboardLoader = useSelector((state: RootState) => state.user.dashboardLoader);
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   useEffect(() => {
     if (previousRoute.current === router.pathname) return;
@@ -86,7 +89,13 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
           <Sidebar />
           <div ref={containerRef} className={`flex flex-col flex-grow relative h-screen ${containerStyle}`}>
             <div
-              className={`w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)] rounded-tl-xl ${contentWrapperClassName}`}
+              className={cn(
+                'w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)]',
+                contentWrapperClassName,
+                {
+                  'rounded-tl-xl': isSidebarOpen,
+                },
+              )}
             >
               {renderChildrenWithProps(children)}
             </div>

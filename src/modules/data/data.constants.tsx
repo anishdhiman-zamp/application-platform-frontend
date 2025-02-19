@@ -1,6 +1,8 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
+import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACCESS_PRIVILEGES } from 'modules/data/data.types';
+import Image from 'next/image';
 import CustomAmountRenderer from 'components/common/table/CustomCellRenderers/CustomAmountRenderer';
 import CustomDateTimeRenderer from 'components/common/table/CustomCellRenderers/CustomDateTimeRenderer';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
@@ -9,7 +11,15 @@ import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 export const LISTING_COLUMNS: ColDef[] = [
   {
     field: 'title',
-    headerName: 'Name',
+    headerName: 'Datasets',
+    cellRenderer: (params: ICellRendererParams) => {
+      return (
+        <div className='flex items-center gap-2.5'>
+          <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
+          {params.value}
+        </div>
+      );
+    },
   },
   {
     field: 'description',

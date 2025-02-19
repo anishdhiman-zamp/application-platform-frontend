@@ -184,6 +184,7 @@ const InputTag: FC<InputTagProps> = ({
           ref={inputRef}
           inputMode='none'
           onKeyUp={onKeyUp}
+          onDrop={(e) => e.preventDefault()}
         />
       )}
       {error && <span className='f-11-400 mt-2 text-RED_700'>{error}</span>}

@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { Label } from 'components/common/Label';
+import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { getTagLabel, getTagParents } from 'components/filter/filter.utils';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 
@@ -17,9 +18,8 @@ const Tags: FC<TagsProps> = ({ column, values, className }) => {
       className={className}
       LabelComponent={(item: string) => (
         <Label
-          title={getTagLabel(item)}
+          title={<TagChip item={getTagLabel(item)} />}
           description={getTagParents(item)}
-          titleClassName='f-11-400 py-1 px-1.5 bg-GRAY_100 rounded-md mb-1 w-fit'
           descriptionClassName='f-11-400 text-GRAY_700 ml-1'
         />
       )}

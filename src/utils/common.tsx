@@ -427,3 +427,36 @@ export const sentenceCase = (str: string) => {
 export const snakeCaseToSentenceCase = (str: string) => {
   return sentenceCase(str?.split('_').join(' '));
 };
+
+/**
+ * Creates a date object from a UTC string
+ * @param date
+ * @returns date object
+ */
+export const createDateObjectFromUTCString = (date: string | Date) => {
+  if (date instanceof Date) return date;
+
+  const dateParts = date?.split('T');
+  const timeParts = dateParts?.[1]?.split(':');
+  const dateObject = new Date(dateParts?.[0]);
+
+  const adjustedDate = new Date(
+    Date.UTC(dateObject.getUTCFullYear(), dateObject.getUTCMonth(), dateObject.getUTCDate()),
+  );
+
+  adjustedDate.setHours(Number(timeParts?.[0]), Number(timeParts?.[1]), 0, 0);
+
+  return adjustedDate;
+};
+
+/**
+ * Formats a count with the appropriate singular or plural form.
+ *
+ * @param count - The number according to which the plural or singular form is to be used.
+ * @param word - The word to be used if the count is 1.
+ * @param pluralWord - The plural word to be used if the count is greater than 1 else the default plural word will be `${word}s`.
+ * @returns The formatted string with the appropriate singular or plural form.
+ */
+export const formatPlural = (count: number, word: string, pluralWord?: string) => {
+  return `${count} ${count > 1 ? (pluralWord ?? `${word}s`) : word}`;
+};

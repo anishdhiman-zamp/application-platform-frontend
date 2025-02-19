@@ -9,6 +9,7 @@ import {
   RuleFilters,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
+import { createDateObjectFromUTCString, formatPlural } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
@@ -19,28 +20,29 @@ import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
-  const lastUpdatedTime = new Date(updated_at);
-  const differenceInMinutesString = differenceInMinutes(currentTime, lastUpdatedTime);
+  const lastUpdatedTime = createDateObjectFromUTCString(updated_at);
 
-  if (differenceInMinutesString < 60) {
-    return `${differenceInMinutesString} minutes ago`;
+  const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
+
+  if (differenceInMinutesValue < 60) {
+    return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
   }
 
-  const differenceInHoursString = differenceInHours(currentTime, lastUpdatedTime);
+  const differenceInHoursValue = differenceInHours(currentTime, lastUpdatedTime);
 
-  if (differenceInHoursString < 24) {
-    return `${differenceInHoursString} hours ago`;
+  if (differenceInHoursValue < 24) {
+    return `${formatPlural(differenceInHoursValue, 'hour')} ago`;
   }
 
-  const differenceInDaysString = differenceInDays(currentTime, lastUpdatedTime);
+  const differenceInDaysValue = differenceInDays(currentTime, lastUpdatedTime);
 
-  if (differenceInDaysString < 30) {
-    return `${differenceInDaysString} days ago`;
+  if (differenceInDaysValue < 30) {
+    return `${formatPlural(differenceInDaysValue, 'day')} ago`;
   }
 
-  const differenceInMonthsString = differenceInMonths(currentTime, lastUpdatedTime);
+  const differenceInMonthsValue = differenceInMonths(currentTime, lastUpdatedTime);
 
-  return `${differenceInMonthsString} months ago`;
+  return `${formatPlural(differenceInMonthsValue, 'month')} ago`;
 };
 
 export const formatData = (data: DatasetType[]): DatasetType[] => {
@@ -85,7 +87,7 @@ export const formatColumns = (
       handleSuccessfullUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,
-      filterType: column.type,
+      filterType: column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column.type,
     };
 
     if (!column.metadata?.is_hidden) {

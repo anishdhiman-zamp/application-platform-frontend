@@ -73,7 +73,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 bg-white pt-2 pb-1 w-[218px] border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px]',
+        'flex flex-col gap-2 bg-white pt-2 pb-1 w-[218px] border-0.5 border-GRAY_500 rounded-md shadow-tableFilterMenu max-h-[330px]',
         className,
       )}
     >

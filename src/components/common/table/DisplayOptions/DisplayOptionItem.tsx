@@ -14,7 +14,7 @@ const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, icon
   return (
     <div
       key={id}
-      className='flex items-center justify-between py-2 px-2.5 hover:bg-GRAY_100 group cursor-pointer'
+      className='flex items-center justify-between py-2 px-2.5 hover:bg-GRAY_100 group cursor-pointer rounded-md'
       onClick={() => onClick?.(id)}
     >
       <div className='flex items-center gap-1.5'>

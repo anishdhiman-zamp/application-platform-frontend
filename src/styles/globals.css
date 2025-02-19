@@ -214,3 +214,21 @@
   transition: none;
   transform: translateX(-150%);
 }
+
+.react-grid-item.cssTransforms {
+  background: none !important; /* Remove red background */
+}
+
+.ag-cell-focus:before {
+  border-radius: 3px;
+}
+
+.ag-cell-range-single-cell {
+  border-radius: 4px;
+}
+
+.ag-fill-handle {
+  border-radius: 100%;
+  border-width: 1px;
+  border-color: white;
+}

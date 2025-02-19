@@ -27,7 +27,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     const data = event.dataTransfer.getData('text/plain');
     const column: string = data;
 
-    setGroupedColumns((prev) => [...prev, column]);
+    setGroupedColumns((prev) => (prev?.includes(column) ? prev : [...(prev ?? []), column]));
     setAvailableColumns((prev) => prev?.filter((col) => col !== column));
     tableRef?.current?.api?.applyColumnState({
       state: [{ colId: column, rowGroup: true }],
@@ -39,7 +39,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
 
     const column: string = data;
 
-    setAvailableColumns((prev) => [...(prev ?? []), column]);
+    setAvailableColumns((prev) => (prev?.includes(column) ? prev : [...(prev ?? []), column]));
     setGroupedColumns((prev) => prev?.filter((col) => col !== column));
     tableRef?.current?.api?.applyColumnState({
       state: [{ colId: column, rowGroup: false }],
@@ -67,13 +67,14 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
 
     setGroupedColumns([]);
     setAvailableColumns(columnIds);
+    tableRef?.current?.api?.setRowGroupColumns([]);
   };
 
   const handleRemoveGroupedColumn = (column: string) => {
     setGroupedColumns((prev) => prev?.filter((col) => col !== column));
     setAvailableColumns((prev) => [...(prev ?? []), column]);
     tableRef?.current?.api?.applyColumnState({
-      state: [{ colId: column, rowGroup: false }],
+      state: [{ colId: column, rowGroup: false, hide: false }],
     });
   };
 
@@ -144,9 +145,10 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
           placeholder='Search Columns..'
           size={SIZE_TYPES.XSMALL}
           noBorders
-          focusClassNames='placeholder:italic mt-3 mb-2'
+          focusClassNames='mt-3 mb-2 !pl-0'
           onChange={handleSearch}
           value={searchTerm}
+          autoFocus
         />
         {/* Available Columns */}
         <div
@@ -166,7 +168,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
           ))}
         </div>
       </div>
-      <div className='w-full flex flex-row-reverse f-12-500 text-GRAY_1000 py-2.5 px-3 border-t border-GRAY_400 absolute bottom-0 bg-white'>
+      <div className='w-full flex flex-row-reverse f-12-500 text-GRAY_1000 py-2.5 px-3 border-t border-GRAY_400 absolute bottom-0 bg-white rounded-b-md'>
         <div className='cursor-pointer' onClick={handleReset}>
           Reset
         </div>

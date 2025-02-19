@@ -135,9 +135,10 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
         placeholder='Search Columns..'
         size={SIZE_TYPES.XSMALL}
         noBorders
-        focusClassNames='placeholder:italic mt-2 mb-2.5'
+        focusClassNames='mt-2 mb-2.5'
         onChange={handleSearch}
         value={searchTerm}
+        autoFocus
       />
       <div className='text-GRAY_900 !overflow-y-auto max-h-[340px]'>
         <ResponsiveGridLayout

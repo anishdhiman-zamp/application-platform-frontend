@@ -27,6 +27,7 @@ export const ADYEN = IMAGE_PREFIX + '/icons/bank-icons/adyen.png';
 export const CHECKOUT = IMAGE_PREFIX + '/icons/bank-icons/checkout.svg';
 export const DEFAULT_BANK = IMAGE_PREFIX + '/icons/bank-icons/default-bank.svg';
 export const OTHER_GATEWAY = IMAGE_PREFIX + '/icons/bank-icons/other-gateway.svg';
+export const DATASET_ICON = IMAGE_PREFIX + '/icons/dataset.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

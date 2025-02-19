@@ -8,30 +8,33 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import {
-  useGetActionStatusQuery,
   useGetDatasetFilterConfigQuery,
   useLazyGetActionStatusQuery,
   useLazyGetDatasetDataQuery,
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
+import { PAGE_LOADER } from 'constants/lottie/page_loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { useAppDispatch } from 'hooks/toolkit';
+import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
-import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { formatColumns } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
+import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
 import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
+import { cn } from 'utils/common';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import Player from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -43,15 +46,21 @@ type DatasetByIdProps = {
 const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
+  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   const {
     data: filterConfig,
     refetch: refetchFilterConfig,
     isLoading,
     isError,
-  } = useGetDatasetFilterConfigQuery({
-    datasetId: id as string,
-  });
+  } = useGetDatasetFilterConfigQuery(
+    {
+      datasetId: id as string,
+    },
+    {
+      skip: !id,
+    },
+  );
   const [updateDatasetData] = useUpdateDatasetDataMutation();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [columns, setColumns] = useState<ColDef[]>([]);
@@ -61,18 +70,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
   const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
-
-  const { data: actionStatus = [] } = useGetActionStatusQuery({
-    datasetId: id as string,
-    params: {
-      status: DATASET_ACTION_STATUS.INITIATED,
-    },
-  });
+  const [datasetTitle, setDatasetTitle] = useState<string>('');
 
   const { startPolling } = usePolling();
   const [refetchColumnList, setRefetchColumnList] = useState<number>(0);
 
-  const [getDatasetData, { data }] = useLazyGetDatasetDataQuery();
+  const [getDatasetData, { data: datasetData }] = useLazyGetDatasetDataQuery();
 
   const {
     dispatch,
@@ -88,17 +91,18 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
           query_config: getEncodedRequest(parameters.request),
         })
           .unwrap()
-          .then((data) => {
+          .then((response) => {
             if (parameters.request.startRow === 0) {
-              setTotalRows(data.total_count);
+              setDatasetTitle(response?.title);
+              setTotalRows(response?.data?.total_count);
               dispatch({
                 type: filtersContextActions.SET_TOTAL_ROWS,
-                payload: { totalRows: data.total_count },
+                payload: { totalRows: response?.data?.total_count },
               });
             }
             parameters.success({
-              rowData: data.rows,
-              ...(parameters.request.startRow === 0 ? { rowCount: data.total_count } : {}),
+              rowData: response?.data?.rows,
+              ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
             });
           })
           .catch(() => {
@@ -115,7 +119,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
     setRefetchColumnList((prev) => prev + 1);
   };
 
-  const handleSuccessfullUpdate = (data: DatasetUpdateResponseType) => {
+  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType) => {
     setIsPolling(true);
     startPolling({
       fn: () => getActionStatus({ datasetId: id as string, params: { action_ids: [data.action_id] } }),
@@ -162,7 +166,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
       },
     })
       .unwrap()
-      .then(handleSuccessfullUpdate);
+      .then(handleSuccessfulUpdate);
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
@@ -223,9 +227,9 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
     if (filterConfig?.length) {
       const columns = formatColumns(
         filterConfig,
-        actionStatus?.length > 0 || isPolling,
+        isPolling,
         id as string,
-        handleSuccessfullUpdate,
+        handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
       );
@@ -252,15 +256,32 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
           });
       }
     }
-  }, [filterConfig, actionStatus, isPolling, filters, id]);
+  }, [filterConfig, isPolling, filters, id]);
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
   }, [selectedFilters]);
 
+  useEffect(() => {
+    if (datasetTitle && breadcrumbStack?.length === 0) {
+      appDispatch(addBreadcrumb([datasetTitle]));
+    }
+  }, [datasetTitle, breadcrumbStack]);
+
   return (
     <>
-      <CommonWrapper className='h-full' isLoading={isLoading} isError={isError} refetchFunction={refetchFilterConfig}>
+      <CommonWrapper
+        className={cn('h-full', {
+          'flex flex-col items-center justify-center': isLoading,
+        })}
+        isLoading={isLoading}
+        isError={isError}
+        skeletonType={SkeletonTypes.CUSTOM}
+        refetchFunction={refetchFilterConfig}
+        loader={
+          <Player src={PAGE_LOADER} className='lottie-player' autoplay keepLastFrame style={{ height: '200px' }} />
+        }
+      >
         <div className='flex items-center justify-between pr-4'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
@@ -282,7 +303,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
             onCellEditRequest={onCellEditRequest}
             onFillEnd={onFillEnd}
             onRowPropertiesClick={handleRowPropertiesClick}
-            {...(data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
+            {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
           />
         </div>
       </CommonWrapper>
@@ -298,7 +319,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
           data={rowPropertiesData}
           onClose={() => setRowPropertiesData(undefined)}
           datasetId={id as string}
-          isDrillDownEnabled={data?.config?.is_drilldown_enabled}
+          isDrillDownEnabled={datasetData?.data?.config?.is_drilldown_enabled}
           columns={columns}
         />
       )}

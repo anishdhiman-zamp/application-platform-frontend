@@ -8,7 +8,7 @@ const Home = () => {
   const appDispatch = useAppDispatch();
 
   useEffect(() => {
-    appDispatch(resetBreadcrumb([]));
+    appDispatch(resetBreadcrumb(['Data']));
   }, []);
 
   return <Listing />;

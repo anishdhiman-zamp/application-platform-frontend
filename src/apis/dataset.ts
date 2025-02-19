@@ -40,7 +40,6 @@ const Dataset = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId }),
         params: { query_config },
       }),
-      transformResponse: ({ data }) => data,
     }),
     getDatasetExport: builder.query<DatasetExportResponseType, DatasetDataRequestType>({
       query: ({ datasetId, query_config }) => ({

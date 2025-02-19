@@ -22,12 +22,16 @@ export type DatasetFilterConfigResponseType = {
 };
 
 export type DatasetDataResponseType = {
-  rows: MapAny[];
-  columns: MapAny[];
-  config: {
-    is_drilldown_enabled: boolean;
+  data: {
+    rows: MapAny[];
+    columns: MapAny[];
+    config: {
+      is_drilldown_enabled: boolean;
+    };
+    total_count: number;
   };
-  total_count: number;
+  description: string;
+  title: string;
 };
 
 export type DatasetExportResponseType = {
