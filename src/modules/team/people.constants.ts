@@ -1,10 +1,7 @@
-import InvitedMembersEmail from 'modules/people/components/invitedMembers/InvitedMembersEmail';
-import InvitedMembersName from 'modules/people/components/invitedMembers/InvitedMembersName';
-import InvitedMembersRole from 'modules/people/components/invitedMembers/InvitedMembersRole';
-import TeamMembersEmail from 'modules/people/components/teamMembers/TeamMembersEmail';
-import TeamMembersName from 'modules/people/components/teamMembers/TeamMembersName';
-import TeamMembersRole from 'modules/people/components/teamMembers/TeamMembersRole';
-import { TEAM_MEMBERS_PRIVILEGES } from 'modules/people/people.types';
+import MembersEmail from 'modules/team/components/members/MembersEmail';
+import MembersName from 'modules/team/components/members/MembersName';
+import MembersRole from 'modules/team/components/members/MembersRole';
+import { TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
 import { MapAny } from 'types/commonTypes';
 import { capitalizeFirstLetter } from 'utils/common';
 
@@ -13,13 +10,13 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
     headerName: 'Name',
     field: 'user',
     valueFormatter: ({ value }: MapAny) => value.name || value?.email,
-    cellRenderer: TeamMembersName,
+    cellRenderer: MembersName,
   },
   {
     headerName: 'Email',
     field: 'user',
     valueFormatter: ({ value }: MapAny) => value.email,
-    cellRenderer: TeamMembersEmail,
+    cellRenderer: MembersEmail,
   },
   {
     headerName: 'Role',
@@ -27,7 +24,7 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
       user_id: data?.user?.user_id,
       privilege: data?.privilege,
     }),
-    cellRenderer: TeamMembersRole,
+    cellRenderer: MembersRole,
   },
 ];
 
@@ -35,17 +32,17 @@ export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   {
     headerName: 'Name',
     field: 'email',
-    cellRenderer: InvitedMembersName,
+    cellRenderer: MembersName,
   },
   {
     headerName: 'Email',
     field: 'email',
-    cellRenderer: InvitedMembersEmail,
+    cellRenderer: MembersEmail,
   },
   {
     headerName: 'Invited as',
     field: 'privilege',
-    cellRenderer: InvitedMembersRole,
+    cellRenderer: MembersRole,
   },
 ];
 

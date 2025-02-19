@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { RemoveFromTeamPopupPropsType } from 'modules/people/people.types';
+import { RemoveFromTeamPopupPropsType } from 'modules/team/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';

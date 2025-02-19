@@ -85,14 +85,4 @@ export const SHORTCUTS_TABS = [
     value: 'data',
     id: ROUTES_PATH.DATA,
   },
-  {
-    label: 'Payments',
-    value: 'payments',
-    id: ROUTES_PATH.PAYMENTS,
-  },
-  {
-    label: 'Settings',
-    value: 'settings',
-    id: ROUTES_PATH.SETTINGS,
-  },
 ];

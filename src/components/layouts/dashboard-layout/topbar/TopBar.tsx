@@ -8,9 +8,7 @@ import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
-import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -30,17 +28,7 @@ const Topbar = () => {
     } else if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS)) {
       return <ShareDatasetPopup datasetId={router.query.id as string} />;
     } else {
-      return (
-        <Button
-          type={BUTTON_TYPES.SECONDARY}
-          id='share-page-to-audience'
-          size={SIZE_TYPES.SMALL}
-          className='!bg-GRAY_100'
-          disabled
-        >
-          Share
-        </Button>
-      );
+      return null;
     }
   }, [currentRoute, router.query.id]);
 

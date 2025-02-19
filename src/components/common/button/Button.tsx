@@ -40,6 +40,14 @@ const BUTTON_STATE_STYLES = {
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-RED_100 disabled:text-white',
     [BUTTON_STATE_TYPES.LOADING]: 'bg-RED_500 !cursor-not-allowed',
   },
+  [BUTTON_TYPES.SHARE]: {
+    [BUTTON_STATE_TYPES.COMMON]: '',
+    [BUTTON_STATE_TYPES.DEFAULT]: 'outline-0 !bg-transparent !text-GRAY_1000 !border-BORDER_GRAY_400',
+    [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-BG_GRAY_2',
+    [BUTTON_STATE_TYPES.PRESSED]: '!bg-GRAY_400',
+    [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-BG_GRAY_2 disabled:text-GRAY_700',
+    [BUTTON_STATE_TYPES.LOADING]: '!cursor-not-allowed',
+  },
 };
 
 const ICON_SIZE_BY_TYPE = {

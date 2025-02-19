@@ -1,5 +1,15 @@
-import { InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
+import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { defaultFnType } from 'types/commonTypes';
+
+export enum TEAM_TABS_TYPES {
+  TEAM_MEMBERS = 'team_members',
+  INVITED_MEMBERS = 'invited_members',
+}
+
+export const TeamTabsList = [
+  { label: 'Team members', value: TEAM_TABS_TYPES.TEAM_MEMBERS },
+  { label: 'Invited', value: TEAM_TABS_TYPES.INVITED_MEMBERS },
+];
 
 export type InviteMembersPopupPropsType = {
   isOpen: boolean;
@@ -20,20 +30,23 @@ export type RemoveFromTeamPopupPropsType = {
   warningDescription: string;
 };
 
-export type InvitedMembersEmailPropsType = {
+export type MembersEmailPropsType = {
   value: string;
 };
 
 export type InvitedMembersListingPropsType = {
+  isLoadingInvitedTeamMembersData: boolean;
   data: InvitedAudiencesByOrganisationIdResponse[];
 };
 
-export type InvitedMembersNamePropsType = {
+export type MembersNamePropsType = {
   value: string;
+  member?: boolean;
 };
 
-export type TeamMembersRolePropsType = {
+export type MembersRolePropsType = {
   value: { user_id: string; privilege: string };
+  member?: boolean;
 };
 
 export enum TEAM_MEMBERS_PRIVILEGES {
@@ -47,6 +60,11 @@ export type TeamMemberAccessPrivilegesType = {
   value: TEAM_MEMBERS_PRIVILEGES;
 };
 
-export type InvitedMembersRolePropsType = {
-  value: string;
+export type EmptyStateListingPropsType = {
+  title?: string;
+};
+
+export type TeamMembersListingPropsType = {
+  isLoadingTeamMembersData: boolean;
+  data: AudiencesByOrganisationIdResponse[];
 };

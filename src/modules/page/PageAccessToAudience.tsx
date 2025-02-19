@@ -9,7 +9,7 @@ import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { CHANGE_PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
 import { PageAccessPrivilegesType, PageAccessToAudiencesPropsType } from 'modules/page/pages.types';
-import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
+import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { accessPermissionForPage } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';

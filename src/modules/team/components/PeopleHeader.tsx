@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import InviteMembersPopup from 'modules/people/InviteMembersPopup';
+import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
@@ -8,9 +8,13 @@ import { getUserPrivilege } from 'utils/accessPermission/accessPermission.utils'
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
-const PeopleHeader = () => {
+type PeopleHeaderPropsType = {
+  search: string;
+  setSearch: (value: string) => void;
+};
+
+const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [search, setSearch] = useState('');
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
   const userPrivilege = getUserPrivilege();
   const checkIfMember = userPrivilege === PERMISSION_ROLES.MEMBER;
@@ -24,10 +28,10 @@ const PeopleHeader = () => {
 
   return (
     <>
-      <div className='f-20-600 text-GRAY_1000'>People</div>
+      <div className='f-20-600 text-GRAY_1000'>Team</div>
       <div className='flex justify-between items-center w-full mt-5'>
         <Input
-          placeholder='Search people'
+          placeholder='Search team members'
           className='w-80'
           inputRef={inputRef}
           value={search}

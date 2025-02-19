@@ -7,6 +7,7 @@ export enum BUTTON_TYPES {
   SECONDARY = 'SECONDARY',
   TEXT_NAV = 'TEXT_NAV',
   DANGER = 'DANGER',
+  SHARE = 'SHARE',
 }
 
 export enum ICON_POSITION_TYPES {
@@ -29,7 +30,7 @@ export interface ButtonProps {
   className?: string;
   disabled?: boolean;
   size?: SIZE_TYPES;
-  state?: BUTTON_STATE_TYPES.DEFAULT | BUTTON_STATE_TYPES.DISABLED;
+  state?: BUTTON_STATE_TYPES;
   onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   isLoading?: boolean;
   defaultLoader?: boolean;

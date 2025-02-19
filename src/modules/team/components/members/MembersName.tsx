@@ -1,16 +1,14 @@
 import { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { COLORS } from 'constants/colors';
+import { MembersNamePropsType } from 'modules/team/people.types';
 import { RootState } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import Avatar from 'components/common/avatar';
 
-interface TeamMembersNameProps {
-  value: string;
-}
-
-const TeamMembersName: FC<TeamMembersNameProps> = ({ value = '' }) => {
+const MembersName: FC<MembersNamePropsType> = ({ value = '', member = false }) => {
   const isCurrentUser = useSelector((state: RootState) => state?.user?.user)?.user_email === value;
+  const showCurrentUser = isCurrentUser && member;
 
   return (
     !!value && (
@@ -22,11 +20,11 @@ const TeamMembersName: FC<TeamMembersNameProps> = ({ value = '' }) => {
         />
         <div className='flex items-center justify-center gap-1'>
           <span className='f-12-400 text-GRAY_1000'>{convertEmailUsernameToName(getUserNameFromEmail(value))}</span>
-          {isCurrentUser && <span className='f-12-400 text-GRAY_700'>(You)</span>}
+          {showCurrentUser && <span className='f-12-400 text-GRAY_700'>(You)</span>}
         </div>
       </div>
     )
   );
 };
 
-export default TeamMembersName;
+export default MembersName;

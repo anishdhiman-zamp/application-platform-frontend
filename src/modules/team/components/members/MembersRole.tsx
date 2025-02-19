@@ -6,9 +6,9 @@ import {
 } from 'apis/people';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
-import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/people/people.constants';
-import { TeamMemberAccessPrivilegesType, TeamMembersRolePropsType } from 'modules/people/people.types';
-import RemoveFromTeamPopup from 'modules/people/RemoveFromTeamPopup';
+import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
+import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
+import { MembersRolePropsType, TeamMemberAccessPrivilegesType } from 'modules/team/people.types';
 import { RootState } from 'store';
 import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
@@ -17,7 +17,7 @@ import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
-const TeamMembersRole: FC<TeamMembersRolePropsType> = ({ value }) => {
+const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
   const { user_id, privilege } = value;
   const role = TEAM_MEMBERS_PRIVILEGES_LIST.find((role) => role?.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
@@ -34,7 +34,7 @@ const TeamMembersRole: FC<TeamMembersRolePropsType> = ({ value }) => {
     { skip: !organizationId },
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const checkPermission = accessPermissionForPeople();
+  const checkPermission = accessPermissionForPeople() && member;
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -142,4 +142,4 @@ const TeamMembersRole: FC<TeamMembersRolePropsType> = ({ value }) => {
   );
 };
 
-export default TeamMembersRole;
+export default MembersRole;

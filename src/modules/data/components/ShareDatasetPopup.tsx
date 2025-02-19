@@ -8,7 +8,7 @@ import { useAppSelector } from 'hooks/toolkit';
 import DatasetAccessToAudiences from 'modules/data/components/DatasetAccessToAudiences';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, ShareDatasetPopupPropsType } from 'modules/data/data.types';
-import { validateEmail } from 'modules/people/people.utils';
+import { validateEmail } from 'modules/team/people.utils';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
@@ -18,6 +18,7 @@ import { accessPermissionForDataset } from 'utils/accessPermission/accessPermiss
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
+import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -206,18 +207,19 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
 
   return (
     <div className='flex w-fit'>
-      <Button
-        type={BUTTON_TYPES.SECONDARY}
-        id='share-dataset-to-audience'
-        size={SIZE_TYPES.SMALL}
-        className='!bg-GRAY_100'
+      <div
+        id='share-page-to-audience-btn'
         onClick={handleOpenShareDatasetPopup}
+        className={cn(
+          openShareDatasetPopup && '!border !border-GRAY_400 bg-GRAY_100',
+          'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-GRAY_100 border border-transparent',
+        )}
       >
         Share
-      </Button>
+      </div>
       <div className='relative'>
         {openShareDatasetPopup && (
-          <div ref={shareDatasetPopupRef} className='absolute flex flex-col w-[400px] right-0 top-8 z-1000'>
+          <div ref={shareDatasetPopupRef} className='absolute flex flex-col w-[400px] right-0 top-9 z-1000'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center pt-5 pb-6 py-5 px-4'>
                 <span className=''>Share this dataset</span>

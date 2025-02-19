@@ -6,9 +6,9 @@ import {
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
-import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/people/people.constants';
-import { InviteMembersPopupPropsType, TeamMembersPrivilegeType } from 'modules/people/people.types';
-import { validateEmail } from 'modules/people/people.utils';
+import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
+import { InviteMembersPopupPropsType, TeamMembersPrivilegeType } from 'modules/team/people.types';
+import { validateEmail } from 'modules/team/people.utils';
 import { RootState } from 'store';
 import { PostAudiencesInviteData } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
