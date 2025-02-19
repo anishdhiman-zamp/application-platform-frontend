@@ -12,6 +12,7 @@ import React, {
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { RootState, store } from 'store';
+import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps, DashboardLayoutProps } from 'types/commonTypes';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
@@ -27,7 +28,6 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   const dispatch = useDispatch();
   const containerRef = useRef<HTMLDivElement>(null);
   const previousRoute = useRef<string>(router.pathname);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFadingOutEffect, setIsFadingOutEffect] = useState(false);
   const showDashboardLoader = useSelector((state: RootState) => state.user.dashboardLoader);
 
@@ -60,9 +60,9 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
     setIsFadingOutEffect(true);
     setTimeout(() => {
       dispatch(setDashboardLoader(false));
-      setIsSidebarOpen(true);
+      dispatch(toggleSidebar());
     }, fadeOutOffsetTimeDifference);
-  }, [dispatch, setIsSidebarOpen]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (showDashboardLoader) {
@@ -81,9 +81,9 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   return (
     <Provider store={store}>
       <div className='bg-BACKGROUND_GRAY_1 relative'>
-        <Topbar isSidebarOpen={isSidebarOpen} onSidebarToggle={() => setIsSidebarOpen((prev) => !prev)} />
+        <Topbar />
         <div className={`w-full min-w-[768px] flex relative h-[calc(100vh-48px)]`}>
-          <Sidebar isSidebarOpen={isSidebarOpen} />
+          <Sidebar />
           <div ref={containerRef} className={`flex flex-col flex-grow relative h-screen ${containerStyle}`}>
             <div
               className={`w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)] rounded-tl-xl ${contentWrapperClassName}`}

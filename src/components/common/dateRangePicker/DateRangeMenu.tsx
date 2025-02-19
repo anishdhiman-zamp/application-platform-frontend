@@ -395,8 +395,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   {PERIODICITY_OPTIONS.map((item) => (
                     <div
                       className={cn(
-                        'f-13-500 border border-GRAY_400 rounded px-2 py-1 f-12-400 cursor-pointer',
-                        selectedPeriodicity?.value === item.value ? 'bg-BG_GRAY_2' : '',
+                        'f-13-500 border rounded px-2 py-1 f-12-400 cursor-pointer',
+                        selectedPeriodicity?.value === item.value ? 'bg-BG_GRAY_2 border-GRAY_500' : 'border-GRAY_400',
                       )}
                       key={item?.value}
                       onClick={() => onPeriodicityChange?.(item)}

@@ -4,12 +4,14 @@ export type UserState = {
   modalStack: string[];
   fullPageLayoutStack: string[];
   breadcrumbStack: string[];
+  isSidebarOpen: boolean;
 };
 
 const initialState: UserState = {
   modalStack: [],
   fullPageLayoutStack: [],
   breadcrumbStack: [],
+  isSidebarOpen: false,
 };
 
 export const layoutConfigsSlice = createSlice({
@@ -56,6 +58,11 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
+    toggleSidebar: (state) => {
+      state.isSidebarOpen = !state.isSidebarOpen;
+
+      return state;
+    },
   },
 });
 
@@ -68,6 +75,7 @@ export const {
   removeBreadcrumb,
   resetBreadcrumb,
   removeLastBreadcrumb,
+  toggleSidebar,
 } = layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

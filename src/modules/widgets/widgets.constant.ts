@@ -49,10 +49,11 @@ export enum CHART_SLICE_TYPES {
   OTHERS = 'others',
 }
 
-export const getFormattedDateWithPeriodicity = (date: string, periodicity: PERIODICITY_TYPES) => {
+export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, date: string) => {
   switch (periodicity) {
-    case PERIODICITY_TYPES.DAILY:
+    case PERIODICITY_TYPES.DAILY: {
       return format(new Date(date), DATE_FORMATS.ddMMMyyyy);
+    }
     case PERIODICITY_TYPES.WEEKLY: {
       const start = startOfWeek(new Date(date), { weekStartsOn: 1 }); // Monday as start of week
       const end = endOfWeek(new Date(date), { weekStartsOn: 1 });

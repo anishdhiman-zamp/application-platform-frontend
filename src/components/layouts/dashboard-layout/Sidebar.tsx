@@ -1,17 +1,19 @@
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useGetPagesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
 import { useRouter } from 'next/router';
-import { SidebarProps } from 'types/common/sidebar';
+import { RootState } from 'store';
 import { cn } from 'utils/common';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const Sidebar: FC<SidebarProps> = ({ isSidebarOpen }) => {
+const Sidebar = () => {
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const router = useRouter();
   const pathname = router?.pathname;
   const pageId = router?.query?.id;

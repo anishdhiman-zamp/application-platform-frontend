@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -6,17 +6,18 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
-import { removeLastBreadcrumb } from 'store/slices/layout-configs';
+import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
-import { SHARE_BTN_ALLOWED_ROUTES, TopBarPropsType } from 'components/layouts/dashboard-layout/topbar/topbar.types';
+import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
+const Topbar = () => {
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const [search, setSearch] = useState('');
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -48,6 +49,10 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
     router.back();
   };
 
+  const handleSidebarToggle = () => {
+    dispatch(toggleSidebar());
+  };
+
   return (
     <div className='h-12 flex items-center justify-between'>
       <div
@@ -76,14 +81,17 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
             className='cursor-pointer pr-5'
             width={16}
             height={16}
-            onClick={onSidebarToggle}
+            onClick={handleSidebarToggle}
             iconCategory={ICON_SPRITE_TYPES.LAYOUT}
             id='flex-align-right'
           />
         </div>
       </div>
       <div
-        className={cn('flex items-center gap-2 w-full h-full transition-all duration-300', !isSidebarOpen && 'pl-8')}
+        className={cn(
+          'flex items-center gap-2 pl-8 w-full h-full transition-all duration-300',
+          !isSidebarOpen && 'pl-8',
+        )}
       >
         <SvgSpriteLoader
           id='arrow-left'
@@ -104,7 +112,7 @@ const Topbar: FC<TopBarPropsType> = ({ isSidebarOpen, onSidebarToggle }) => {
           setSearch(e.target.value);
         }}
       />
-      <div className='pr-4'>{renderShareButton}</div>
+      <div className='pr-8'>{renderShareButton}</div>
     </div>
   );
 };

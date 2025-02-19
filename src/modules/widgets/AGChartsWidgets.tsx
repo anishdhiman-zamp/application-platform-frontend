@@ -102,8 +102,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         isError={isError}
         refetchFunction={refetch}
         loader={
-          <div className='top-0 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
-            <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={300} height={300} />
+          <div className='top-0 -mt-5 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
+            <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={150} height={150} />
           </div>
         }
       >

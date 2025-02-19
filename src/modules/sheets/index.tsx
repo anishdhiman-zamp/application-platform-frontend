@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
-import { WIDGET_LOADER_2 } from 'constants/icons';
+import { ZAMP_LOADER } from 'constants/icons';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
@@ -54,7 +54,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
           refetchFunction={refetchSheetDetails}
           loader={
             <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
-              <Image unoptimized src={WIDGET_LOADER_2} alt='widget-loader' width={400} height={400} />
+              <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={200} height={200} />
             </div>
           }
         >

@@ -52,7 +52,7 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
           </div>
         );
       case SkeletonTypes.CUSTOM:
-        return <div>{loader}</div>;
+        return <>{loader}</>;
     }
   };
 

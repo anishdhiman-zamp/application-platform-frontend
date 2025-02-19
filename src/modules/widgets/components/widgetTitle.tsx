@@ -42,7 +42,7 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, i
       {isGroupWidget && (
         <div
           ref={ref}
-          className='absolute z-40 top-full left-5 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]'
+          className='absolute z-40 top-full mt-1 left-5 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]'
         >
           <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1 select-none'>
             {groupWidgetsOptions?.map((option) => (

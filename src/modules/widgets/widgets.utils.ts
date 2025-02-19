@@ -353,8 +353,8 @@ export const getChartOptions = (
               color: COLORS.GRAY_950,
             },
             calloutLine: {
-              length: 18,
-              strokeWidth: 2,
+              length: 35,
+              strokeWidth: 1,
               colors: [COLORS.GRAY_400],
             },
             innerLabels: [
@@ -367,7 +367,7 @@ export const getChartOptions = (
                 color: COLORS.GRAY_950,
               },
               {
-                text: `${mappings?.[0]?.fields?.values?.[0]?.column.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
+                text: `${mappings?.[0]?.fields?.values?.[0]?.column?.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
                 fontWeight: '500',
                 fontFamily: 'Inter',
                 fontSize: 11,
