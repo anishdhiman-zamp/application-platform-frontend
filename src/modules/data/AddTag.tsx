@@ -21,13 +21,15 @@ const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
 
 const AddTag = ({
   datasetId,
-  handleSuccessfullUpdate,
+  zampIds,
+  handleSuccessfulUpdate,
   tagList,
   column,
   onClose,
 }: {
   datasetId: string;
-  handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void;
+  zampIds?: string[];
+  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   tagList: string[];
   column: string;
   onClose: defaultFnType;
@@ -49,7 +51,10 @@ const AddTag = ({
     updateDatasetData({
       datasetId: datasetId,
       data: {
-        filters: getFilterModelFromGroupAndFilterModel({ filterModel: selectedFilters } as IServerSideGetRowsRequest),
+        filters: getFilterModelFromGroupAndFilterModel(
+          { filterModel: selectedFilters } as IServerSideGetRowsRequest,
+          zampIds,
+        ),
         update: {
           column: column,
           value: selectedTag
@@ -64,7 +69,7 @@ const AddTag = ({
       .unwrap()
       .then((data) => {
         onClose();
-        handleSuccessfullUpdate(data);
+        handleSuccessfulUpdate(data);
       });
   };
 
@@ -90,7 +95,7 @@ const AddTag = ({
     const value = e.target.value;
 
     setSearchValue(value);
-    setSearchResults(tagList?.filter((tag) => tag?.includes(value)));
+    setSearchResults(tagList?.filter((tag) => tag?.toLowerCase()?.includes(value?.toLowerCase())));
     if (value) {
       setIsOpen(true);
     }

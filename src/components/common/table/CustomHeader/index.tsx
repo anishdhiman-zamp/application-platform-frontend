@@ -1,5 +1,6 @@
 import { FC, useMemo, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { useGetDatasetDataQuery } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
@@ -10,18 +11,21 @@ import { OrderType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
-import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
+import {
+  CustomHeaderMenuOptions,
+  getEncodedRequestWithAggregations,
+} from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
-import { useFiltersContextStore } from 'components/filter/filters.context';
+import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type CustomHeaderProps = {
   metadata: DatasetFilterConfigMetadataType;
   handleRulesListingSideDrawerOpen: (colId: string) => void;
-  handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void;
+  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   datasetId: string;
   tableRef: React.RefObject<AgGridReact>;
   filterType: FILTER_TYPES;
@@ -29,27 +33,37 @@ type CustomHeaderProps = {
   column: {
     colId: string;
   };
+  zampIds?: string[];
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
   metadata,
   handleRulesListingSideDrawerOpen,
-  handleSuccessfullUpdate,
+  handleSuccessfulUpdate,
   datasetId,
   tableRef,
   filterType,
   options,
   column: { colId },
+  zampIds,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const {
     state: { selectedFilters },
+    dispatch,
   } = useFiltersContextStore();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddTagOpen, setIsAddTagOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const { data } = useGetDatasetDataQuery(
+    {
+      datasetId,
+      query_config: getEncodedRequestWithAggregations(colId),
+    },
+    { skip: !(datasetId && colId && filterType === FILTER_TYPES.AMOUNT_RANGE) },
+  );
 
   const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
@@ -110,6 +124,17 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Function to open menu and set position
   const toggleMenu = () => {
+    if (filterType === FILTER_TYPES.AMOUNT_RANGE && !isMenuOpen) {
+      dispatch({
+        type: filtersContextActions.SET_STATUS_BAR,
+        payload: { statusBar: data?.data?.rows?.[0] },
+      });
+    } else {
+      dispatch({
+        type: filtersContextActions.SET_STATUS_BAR,
+        payload: { statusBar: null },
+      });
+    }
     updateMenuPosition();
     setIsMenuOpen((prev) => !prev);
     setIsFilterOpen(false);
@@ -193,9 +218,10 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           <AddTag
             tagList={options}
             datasetId={datasetId}
-            handleSuccessfullUpdate={handleSuccessfullUpdate}
+            handleSuccessfulUpdate={handleSuccessfulUpdate}
             column={colId}
             onClose={handleAddTagClose}
+            zampIds={zampIds}
           />
         </PositionedMenuWrapper>
       )}

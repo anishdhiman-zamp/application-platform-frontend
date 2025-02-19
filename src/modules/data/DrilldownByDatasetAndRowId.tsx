@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGetDatasetDrilldownQuery } from 'apis/dataset';
+import { PAGE_LOADER } from 'constants/lottie/page_loader';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import Player from 'components/DynamicLottiePlayer';
 
 const DrilldownByDatasetAndRowId = () => {
   const { datasetId, rowId } = useParams();
@@ -36,7 +39,13 @@ const DrilldownByDatasetAndRowId = () => {
   }, [tabs]);
 
   return (
-    <CommonWrapper isLoading={isLoading} isError={isError} refetchFunction={refetch}>
+    <CommonWrapper
+      isLoading={isLoading}
+      isError={isError}
+      refetchFunction={refetch}
+      skeletonType={SkeletonTypes.CUSTOM}
+      loader={<Player src={PAGE_LOADER} className='lottie-player' autoplay keepLastFrame style={{ height: '200px' }} />}
+    >
       <div className='h-full'>
         <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400'>
           {tabs.length > 1 && (

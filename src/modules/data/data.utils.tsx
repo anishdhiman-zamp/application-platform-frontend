@@ -56,9 +56,10 @@ export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
   datasetId: string,
-  handleSuccessfullUpdate: (data: DatasetUpdateResponseType) => void,
+  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
   tableRef: React.RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (columnId: string) => void,
+  zampIds?: string[],
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -84,9 +85,10 @@ export const formatColumns = (
       metadata: column?.metadata,
       datasetId,
       options: column.options,
-      handleSuccessfullUpdate,
+      handleSuccessfulUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,
+      zampIds,
       filterType: column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column.type,
     };
 

@@ -1,6 +1,7 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { PERSISTENT_FILTER_ID, usePersistFilters } from 'hooks/usePersistFilters';
 import { MapAny } from 'types/commonTypes';
+import { AggregationFunctionType } from 'types/components/table.type';
 import { FilterConfigType, FilterEntityMenuType } from 'components/filter/filter.types';
 import { FILTER_PERIODICITIES } from 'components/filter/filters.constants';
 
@@ -22,6 +23,7 @@ enum filtersContextActions {
   SET_PERIODICITY = 'SET_PERIODICITY',
   SET_TOTAL_ROWS = 'SET_TOTAL_ROWS',
   SET_FILTER_LOADING = 'SET_FILTER_LOADING',
+  SET_STATUS_BAR = 'SET_STATUS_BAR',
 }
 
 interface InitialStateType {
@@ -38,6 +40,12 @@ interface InitialStateType {
   periodicity?: FILTER_PERIODICITIES;
   currentPageFilters: string[];
   totalRows: number;
+  statusBar?: {
+    [AggregationFunctionType.AggregationFunctionSum]: number;
+    [AggregationFunctionType.AggregationFunctionAvg]: number;
+    [AggregationFunctionType.AggregationFunctionMin]: number;
+    [AggregationFunctionType.AggregationFunctionMax]: number;
+  };
 }
 
 export interface ActionType {
@@ -234,6 +242,10 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
 
       case filtersContextActions.SET_FILTER_LOADING: {
         return { ...state, isFilterLoading: action?.payload?.isFilterLoading };
+      }
+
+      case filtersContextActions.SET_STATUS_BAR: {
+        return { ...state, statusBar: action?.payload?.statusBar };
       }
 
       default:

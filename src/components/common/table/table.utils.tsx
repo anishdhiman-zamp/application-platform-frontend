@@ -136,14 +136,25 @@ const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   }
 };
 
-export const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRowsRequest): FilterModelType | null => {
+export const getFilterModelFromGroupAndFilterModel = (
+  request: IServerSideGetRowsRequest,
+  zampIds?: string[],
+): FilterModelType | null => {
   const filtersFromGroup = getFiltersFromGroupKeys(request);
   const filtersFromFilterModel = convertToFilterModel(request.filterModel);
+  const filtersFromZampIds =
+    zampIds?.map((zampId) => ({
+      column: '_zamp_id',
+      operator: CONDITION_OPERATOR_TYPE.IN,
+      value: zampId,
+    })) ?? [];
 
   if (filtersFromGroup.length) {
     return {
       logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-      conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
+      conditions: filtersFromFilterModel
+        ? [...filtersFromGroup, filtersFromFilterModel, ...filtersFromZampIds]
+        : [...filtersFromGroup, ...filtersFromZampIds],
     };
   }
 
@@ -152,9 +163,9 @@ export const getFilterModelFromGroupAndFilterModel = (request: IServerSideGetRow
 
 const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] => {
   const { rowGroupCols, groupKeys } = request;
-  const rowGroupsToBeUsed = groupKeys.length ? rowGroupCols.slice(groupKeys.length) : rowGroupCols;
+  const rowGroupsToBeUsed = groupKeys?.length ? rowGroupCols.slice(groupKeys.length) : rowGroupCols;
 
-  if (rowGroupsToBeUsed.length) {
+  if (rowGroupsToBeUsed?.length) {
     return [
       {
         column: rowGroupsToBeUsed[0]?.id,
@@ -166,16 +177,20 @@ const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] =>
   return [];
 };
 
-const getAggregations = (request: IServerSideGetRowsRequest): AggregationType[] => {
+const getAggregations = (
+  request: IServerSideGetRowsRequest,
+  useAlias?: boolean,
+  ignoreGroupCheck?: boolean,
+): AggregationType[] => {
   const { valueCols, rowGroupCols, groupKeys } = request;
 
-  if (rowGroupCols.length === groupKeys.length) {
+  if (rowGroupCols?.length === groupKeys?.length && !ignoreGroupCheck) {
     return [];
   }
 
   return valueCols.map((item) => ({
     column: item.id,
-    alias: item.id,
+    alias: useAlias ? item.displayName : item.id,
     function: AggregationFunctionMap[item?.aggFunc ?? 'sum'],
   }));
 };
@@ -183,18 +198,23 @@ const getAggregations = (request: IServerSideGetRowsRequest): AggregationType[] 
 const getOrderByColumns = (request: IServerSideGetRowsRequest): OrderByType[] => {
   const { sortModel } = request;
 
-  return sortModel.map((item) => ({
+  return sortModel?.map((item) => ({
     column: item.colId,
     order: item.sort as OrderType,
   }));
 };
 
-const formatRequest = (request: IServerSideGetRowsRequest): RequestType => {
+const formatRequest = (
+  request: IServerSideGetRowsRequest,
+  zampIds?: string[],
+  useAlias?: boolean,
+  ignoreGroupCheck?: boolean,
+): RequestType => {
   const { endRow } = request;
 
   return {
-    filters: getFilterModelFromGroupAndFilterModel(request),
-    aggregations: getAggregations(request),
+    filters: getFilterModelFromGroupAndFilterModel(request, zampIds),
+    aggregations: getAggregations(request, useAlias, ignoreGroupCheck),
     group_by: getGroupByColumns(request),
     order_by: getOrderByColumns(request),
     pagination: {
@@ -211,8 +231,13 @@ export const encodeRequest = (request: RequestType): string => {
   return jsonString;
 };
 
-export const getEncodedRequest = (request: IServerSideGetRowsRequest): string => {
-  const formattedRequest = formatRequest(request);
+export const getEncodedRequest = (
+  request: IServerSideGetRowsRequest,
+  zampIds?: string[],
+  useAlias?: boolean,
+  ignoreGroupCheck?: boolean,
+): string => {
+  const formattedRequest = formatRequest(request, zampIds, useAlias, ignoreGroupCheck);
   const encodedRequest = encodeRequest(formattedRequest);
 
   return encodedRequest;

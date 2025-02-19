@@ -41,9 +41,10 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 
 type DatasetByIdProps = {
   id: string;
+  zampIds?: string[];
 };
 
-const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
+const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -79,16 +80,16 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
 
   const {
     dispatch,
-    state: { selectedFilters, filtersConfig },
+    state: { selectedFilters, filtersConfig, statusBar },
   } = useFiltersContextStore();
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        setExportsDatasetQuery(getEncodedRequest(parameters.request));
+        setExportsDatasetQuery(getEncodedRequest(parameters.request, zampIds));
         getDatasetData({
           datasetId: id as string,
-          query_config: getEncodedRequest(parameters.request),
+          query_config: getEncodedRequest(parameters.request, zampIds),
         })
           .unwrap()
           .then((response) => {
@@ -232,6 +233,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
+        zampIds,
       );
 
       if (columns?.length > 0) {
@@ -303,6 +305,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id }) => {
             onCellEditRequest={onCellEditRequest}
             onFillEnd={onFillEnd}
             onRowPropertiesClick={handleRowPropertiesClick}
+            statusBarValues={statusBar}
             {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
           />
         </div>

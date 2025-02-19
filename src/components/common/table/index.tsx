@@ -45,6 +45,7 @@ import {
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
+import CustomStatusBar from 'components/common/table/CustomStatusBar';
 import {
   AggregationFunctionMap,
   cellSelectionConfig,
@@ -53,7 +54,6 @@ import {
   PAGE_SIZE,
   sideBarConfig,
 } from 'components/common/table/table.constants';
-import TotalRowsStatusBar from 'components/common/table/TotalRowsStatusBar';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
@@ -118,6 +118,7 @@ interface TableProps {
     | SizeColumnsToFitGridStrategy
     | SizeColumnsToFitProvidedWidthStrategy
     | SizeColumnsToContentStrategy;
+  statusBarValues?: MapAny;
 }
 
 export type TableColumnType = {
@@ -152,6 +153,7 @@ const Table: React.FC<TableProps> = ({
   onDrilldownClick,
   onRowPropertiesClick,
   autoSizeStrategy,
+  statusBarValues,
 }) => {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -182,12 +184,16 @@ const Table: React.FC<TableProps> = ({
     return showStatusBar
       ? {
           statusPanels: [
-            { statusPanel: (props: CustomStatusPanelProps) => <TotalRowsStatusBar {...props} totalRows={totalRows} /> },
+            {
+              statusPanel: (props: CustomStatusPanelProps) => (
+                <CustomStatusBar {...props} totalRows={totalRows} statusBarValues={statusBarValues} />
+              ),
+            },
             { statusPanel: 'agAggregationComponent' },
           ],
         }
       : undefined;
-  }, [totalRows, showStatusBar]);
+  }, [totalRows, showStatusBar, statusBarValues]);
 
   const cellSelection = useMemo(() => (enableCellSelection ? cellSelectionConfig : undefined), [enableCellSelection]);
 
