@@ -1,13 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-export type UserState = {
+export type LayoutConfigState = {
   modalStack: string[];
   fullPageLayoutStack: string[];
   breadcrumbStack: string[];
   isSidebarOpen: boolean;
 };
 
-const initialState: UserState = {
+const initialState: LayoutConfigState = {
   modalStack: [],
   fullPageLayoutStack: [],
   breadcrumbStack: [],

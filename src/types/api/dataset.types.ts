@@ -61,7 +61,7 @@ export type DatasetDrilldownResponseType = {
   tabs: {
     dataset_id: string;
     dataset_title: string;
-    dataset_data: DatasetDataResponseType;
+    zamp_ids: string[];
   }[];
 };
 

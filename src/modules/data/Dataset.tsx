@@ -86,10 +86,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        setExportsDatasetQuery(getEncodedRequest(parameters.request, zampIds));
+        const queryConfig = getEncodedRequest(parameters.request, zampIds);
+
+        setExportsDatasetQuery(queryConfig);
         getDatasetData({
           datasetId: id as string,
-          query_config: getEncodedRequest(parameters.request, zampIds),
+          query_config: queryConfig,
         })
           .unwrap()
           .then((response) => {
@@ -111,7 +113,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           });
       },
     };
-  }, [getDatasetData, id]);
+  }, [getDatasetData, id, zampIds]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);

@@ -4,6 +4,7 @@ import { PAGE_LOADER } from 'constants/lottie/page_loader';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
+import { cn } from 'utils/common';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -40,6 +41,9 @@ const DrilldownByDatasetAndRowId = () => {
 
   return (
     <CommonWrapper
+      className={cn('h-full', {
+        'flex flex-col items-center justify-center': isLoading,
+      })}
       isLoading={isLoading}
       isError={isError}
       refetchFunction={refetch}
@@ -59,7 +63,9 @@ const DrilldownByDatasetAndRowId = () => {
             />
           )}
         </div>
-        {selectedTab && <DatasetById id={selectedTab} />}
+        {selectedTab && (
+          <DatasetById id={selectedTab} zampIds={data?.tabs.find((tab) => tab.dataset_id === selectedTab)?.zamp_ids} />
+        )}
       </div>
     </CommonWrapper>
   );

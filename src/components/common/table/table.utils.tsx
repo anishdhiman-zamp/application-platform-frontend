@@ -142,23 +142,32 @@ export const getFilterModelFromGroupAndFilterModel = (
 ): FilterModelType | null => {
   const filtersFromGroup = getFiltersFromGroupKeys(request);
   const filtersFromFilterModel = convertToFilterModel(request.filterModel);
-  const filtersFromZampIds =
-    zampIds?.map((zampId) => ({
-      column: '_zamp_id',
-      operator: CONDITION_OPERATOR_TYPE.IN,
-      value: zampId,
-    })) ?? [];
+  const filtersFromZampIds = {
+    column: '_zamp_id',
+    operator: CONDITION_OPERATOR_TYPE.IN,
+    value: zampIds,
+  };
 
   if (filtersFromGroup.length) {
-    return {
-      logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-      conditions: filtersFromFilterModel
-        ? [...filtersFromGroup, filtersFromFilterModel, ...filtersFromZampIds]
-        : [...filtersFromGroup, ...filtersFromZampIds],
-    };
+    return zampIds?.length
+      ? {
+          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+          conditions: filtersFromFilterModel
+            ? [...filtersFromGroup, filtersFromFilterModel, filtersFromZampIds]
+            : [...filtersFromGroup, filtersFromZampIds],
+        }
+      : {
+          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+          conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
+        };
   }
 
-  return filtersFromFilterModel;
+  return zampIds?.length
+    ? {
+        logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+        conditions: filtersFromFilterModel ? [filtersFromFilterModel, filtersFromZampIds] : [filtersFromZampIds],
+      }
+    : filtersFromFilterModel;
 };
 
 const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] => {
