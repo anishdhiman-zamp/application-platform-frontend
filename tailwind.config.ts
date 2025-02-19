@@ -216,6 +216,7 @@ module.exports = {
         3.5: '14px',
         4.5: '18px',
       },
+
       screens: {
         '2xl_custom': { max: '1440px' },
       },

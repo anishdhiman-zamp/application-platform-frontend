@@ -16,6 +16,7 @@ import {
   RowApiModule,
   RowGroupingPanelModule,
   RowStyleModule,
+  Theme,
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
@@ -34,7 +35,7 @@ import {
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
   PIVOT_REF,
-  ROW_HEIGHT,
+  PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
 import { ParentFilters, ParentMappingDetail } from 'modules/widgets/Pivot/pivot.types';
 import {
@@ -53,6 +54,8 @@ import {
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { myTheme } from 'components/common/table/table.constants';
+import { getDataTableTheme } from 'components/common/table/table.utils';
 
 ModuleRegistry.registerModules([CellStyleModule]);
 ModuleRegistry.registerModules([
@@ -146,10 +149,12 @@ const StackedPivot = ({
       enableRowGroup: true,
       enablePivot: true,
       resizable: false,
-      cellRenderer: ({ valueFormatted, node }: GroupCellRendererParams) => {
+      cellRenderer: ({ valueFormatted, node, api, column }: GroupCellRendererParams) => {
         return (
           <PivotCell
             value={valueFormatted ?? ''}
+            column={column}
+            api={api}
             node={node}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
             showPercentage={display_config?.show_percentages}
@@ -233,7 +238,6 @@ const StackedPivot = ({
 
     const currentRowContext = node?.rowGroupColumn?.getColDef()?.context?.sourceName;
     const parentDetails = getAllParentKeys(node, filteredRowData);
-    const isLeaf = node?.leafGroup;
     const isTopNode = node?.level === 0;
     const { isTag, tagColumnName } = getTagDetails(filteredRowData, currentNodeKey);
 
@@ -271,14 +275,7 @@ const StackedPivot = ({
     if (isTag) {
       return navigateToDataset(
         datasetId,
-        buildTagFilter(
-          isLeaf,
-          isTopNode,
-          rowMappingDetails,
-          currentNodeKey,
-          parentFilters,
-          columnFilterWithPeriodicity,
-        ),
+        buildTagFilter(isTopNode, rowMappingDetails, currentNodeKey, parentFilters, columnFilterWithPeriodicity),
       );
     }
 
@@ -295,10 +292,18 @@ const StackedPivot = ({
     return navigateToDataset(datasetId, widgetFilter);
   };
 
+  const customTheme = getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} });
+
+  const theme = useMemo<Theme | 'legacy'>(() => {
+    return customTheme ?? myTheme;
+  }, [customTheme]);
+
   return (
     <div className='h-full w-full'>
       <div className='h-full w-full pivot'>
         <AgGridReact
+          theme={theme}
+          className='group'
           rowData={rowData}
           columnDefs={colDef}
           getRowStyle={getRowStyle}
@@ -308,16 +313,13 @@ const StackedPivot = ({
           suppressContextMenu
           suppressMenuHide={false}
           pivotHeaderHeight={isSingleValue ? 0 : PIVOT_HEADER_HEIGHT}
-          pivotGroupHeaderHeight={isSingleValue ? PIVOT_HEADER_HEIGHT : PIVOT_GROUP_HEADER_HEIGHT}
-          rowHeight={ROW_HEIGHT}
+          pivotGroupHeaderHeight={isSingleValue ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
           processPivotResultColGroupDef={processPivotResultColGroupDef}
-          suppressRowHoverHighlight
           suppressRowDrag
           suppressMovableColumns
           suppressCellFocus
-          scrollbarWidth={12}
+          scrollbarWidth={0}
           grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
-          getRowId={(params) => params?.data?.id}
           onCellDoubleClicked={handleOnCellDoubleClicked}
         />
       </div>

@@ -1,10 +1,9 @@
 import { FC } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { WIDGET_LOADER } from 'constants/icons';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
+import PivotTableLoader from 'modules/widgets/Pivot/loader/PivotTableLoader';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
-import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
@@ -40,24 +39,20 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
     },
     {
       refetchOnMountOrArgChange: true,
-      skip: !isFilterInitialized || !timeColumn,
+      skip: !isFilterInitialized,
     },
   );
 
   return (
     <CommonWrapper
-      isLoading={isFetching || !isFilterInitialized || !timeColumn || isFilterLoading}
+      isLoading={isFetching || !isFilterInitialized || isFilterLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={data?.result.every((res) => res.rowcount === 0)}
       refetchFunction={refetch}
       isError={isError}
       className='h-full w-full'
-      noDataBanner={<NoWidgetData />}
-      loader={
-        <div className='top-0 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
-          <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={300} height={300} />
-        </div>
-      }
+      noDataBanner={<NoWidgetData className='w-full h-full border border-GRAY_400 rounded-xl' />}
+      loader={<PivotTableLoader />}
     >
       {data && (
         <StackedPivot

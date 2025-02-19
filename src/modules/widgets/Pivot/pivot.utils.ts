@@ -107,7 +107,7 @@ export const parseType = (type: PIVOT_DATA_TYPES, value: any, periodicity: PERIO
   switch (type) {
     case PIVOT_DATA_TYPES.DATE:
     case PIVOT_DATA_TYPES.TIMESTAMP: {
-      return getFormattedDateWithPeriodicity(value, periodicity);
+      return getFormattedDateWithPeriodicity(periodicity, value);
     }
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
@@ -160,9 +160,9 @@ export const getPivotColumns = (
     columns?.forEach((col) => {
       pivotColumns?.push({
         kind: 'pivot',
-        name: col.column,
-        dataType: col.type as 'string' | 'number' | 'date',
-        sourceName: col.column,
+        name: col?.column,
+        dataType: col?.type as 'string' | 'number' | 'date',
+        sourceName: col?.alias ? col?.alias : col?.column,
         mappingName: ref,
       });
     });
@@ -508,7 +508,6 @@ export const getColumnFilterWithPeriodicity = (
 };
 
 export const buildTagFilter = (
-  isLeaf: boolean,
   isTopNode: boolean,
   rowMappingDetails: MappingDetails | null,
   currentNodeKey: string,

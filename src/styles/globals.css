@@ -127,6 +127,24 @@
   border: none !important;
 }
 
+.pivot .ag-root-wrapper {
+  border-radius: 12px !important;
+  border: 1px solid #ebebeb !important;
+}
+
+.pivot .ag-header-group-cell {
+  border-right: 0.5px solid #ebebeb !important;
+  border-bottom: 0.5px solid #ebebeb !important;
+}
+
+.pivot .ag-header-group-cell.ag-column-last {
+  border-right: none !important;
+}
+
+.pivot .ag-sticky-bottom {
+  border-top: 0.5px solid #ebebeb !important;
+}
+
 .pivot .ag-header {
   overflow: visible !important;
 }
@@ -151,13 +169,11 @@
   border-right: none !important;
 }
 
-.ag-body-horizontal-scroll {
-  scrollbar-width: thin;
+.pivot .ag-body-horizontal-scroll {
   scrollbar-color: #ebebeb #f0f0f0;
 }
 
-.ag-body-vertical-scroll {
-  scrollbar-width: thin;
+.pivot .ag-body-vertical-scroll {
   scrollbar-color: #ebebeb #f0f0f0;
 }
 

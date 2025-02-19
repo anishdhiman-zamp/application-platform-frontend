@@ -74,6 +74,7 @@ export type PivotTableWidgetMapping = {
   fields: {
     columns: {
       column: string;
+      alias?: string;
       type: string;
       field_type: FIELD_TYPES;
       drilldown_filter_type?: string;
@@ -81,6 +82,7 @@ export type PivotTableWidgetMapping = {
     }[];
     rows?: {
       column: string;
+      alias?: string;
       type: string;
       field_type: FIELD_TYPES;
       drilldown_filter_type?: string;
@@ -88,6 +90,7 @@ export type PivotTableWidgetMapping = {
     }[];
     values: {
       column: string;
+      alias?: string;
       aggregation: AGGREGATION_TYPES;
       type: string;
       field_type: FIELD_TYPES;

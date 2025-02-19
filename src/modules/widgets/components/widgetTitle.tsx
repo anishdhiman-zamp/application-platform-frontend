@@ -13,7 +13,7 @@ interface WidgetTitleProps {
   isSingleValue?: boolean;
 }
 
-const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, isSingleValue }: WidgetTitleProps) => {
+const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }: WidgetTitleProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isGroupWidget, setIsGroupWidget] = useState<boolean>(false);
 
@@ -24,39 +24,75 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, i
     setIsGroupWidget((prev) => !prev);
   };
 
+  const isPivotTable = [WIDGET_TYPES.PIVOT_TABLE].includes(widgetType);
+  const isGroupWidgetOptions = groupWidgetsOptions?.length > 1;
+
   return (
     <div
       className={cn(
-        'f-18-450 text-GRAY_1000 px-6 flex items-center gap-1 relative select-none',
-        ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) ? 'mb-10' : '',
-        groupWidgetsOptions?.length > 1 ? 'cursor-pointer' : '',
-        [WIDGET_TYPES.PIVOT_TABLE].includes(widgetType)
-          ? 'bg-white mb-0 w-full h-full p-6 flex items-start border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400'
+        '',
+        isPivotTable
+          ? 'bg-white w-full flex h-full p-6 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400'
           : '',
-        [WIDGET_TYPES.PIVOT_TABLE].includes(widgetType) && isSingleValue ? 'items-center' : '',
       )}
-      onClick={handleToggle}
     >
-      {title}
-      {groupWidgetsOptions?.length > 1 && <SvgSpriteLoader id='chevron-down' width={18} height={18} />}
-      {isGroupWidget && (
-        <div
-          ref={ref}
-          className='absolute z-40 top-full mt-1 left-5 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]'
-        >
-          <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1 select-none'>
-            {groupWidgetsOptions?.map((option) => (
-              <div
-                key={option?.value}
-                onClick={() => onWidgetChange(option?.value as string)}
-                className='py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
-              >
-                {<div className='f-12-400 text-GRAY_1000'>{option?.label}</div>}
-              </div>
-            ))}
-          </div>
+      <div
+        className={cn(
+          'px-6 flex flex-col items-start relative select-none',
+          ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) ? 'mb-10' : '',
+          isGroupWidgetOptions ? 'cursor-pointer' : '',
+          isPivotTable && !isGroupWidgetOptions ? 'mb-0 px-0 justify-center' : '',
+          isPivotTable && isGroupWidgetOptions ? 'h-fit w-fit px-0 gap-y-2 items-start justify-center mb-0' : '',
+        )}
+        onClick={handleToggle}
+      >
+        <div className='flex items-center gap-1'>
+          <span
+            className={cn(
+              'f-18-450 text-GRAY_1000 w-fit h-fit',
+              isPivotTable && isGroupWidgetOptions
+                ? 'group-hover:underline decoration-1 decoration-GRAY_500 underline-offset-[5px] '
+                : '',
+            )}
+          >
+            {title}
+          </span>
+          {isGroupWidgetOptions && (
+            <SvgSpriteLoader
+              id='chevron-down'
+              width={18}
+              height={18}
+              className={
+                isPivotTable ? 'transform transition-transform duration-200 opacity-0 group-hover:opacity-100' : ''
+              }
+            />
+          )}
         </div>
-      )}
+        {isGroupWidgetOptions && (
+          <span className='f-12-450 text-GRAY_700 w-fit opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions?.length} Variants`}</span>
+        )}
+        {isGroupWidget && (
+          <div
+            ref={ref}
+            className={cn(
+              'absolute z-40 top-8 left-5 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]',
+              isPivotTable ? 'left-0 top-8' : '',
+            )}
+          >
+            <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1 select-none'>
+              {groupWidgetsOptions?.map((option) => (
+                <div
+                  key={option?.value}
+                  onClick={() => onWidgetChange(option?.value as string)}
+                  className='py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+                >
+                  {<div className='f-12-400 text-GRAY_1000'>{option?.label}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

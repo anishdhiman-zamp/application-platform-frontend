@@ -12,7 +12,7 @@ export enum PIVOT_REF_TYPES {
 
 export const COL_MIN_WIDTH = 170;
 export const PINNED_COL_WIDTH = 380;
-export const PIVOT_HEADER_HEIGHT = 64;
+export const PIVOT_HEADER_HEIGHT = 70;
 export const PIVOT_GROUP_HEADER_HEIGHT = 42;
 export const ROW_HEIGHT = 42;
 export const GRAND_ROW_TOTAL_POSITION = 'bottom';
@@ -55,4 +55,10 @@ export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
 export const RECON_PAYMENT_ICONS: Record<RECON_PAYMENT_GATEWAY_TYPES, string> = {
   [RECON_PAYMENT_GATEWAY_TYPES.CHECKOUT]: CHECKOUT,
   [RECON_PAYMENT_GATEWAY_TYPES.ADYEN]: ADYEN,
+};
+
+export const PIVOT_TABLE_THEME_PARAMS = {
+  fontFamily: { googleFont: 'Inter' },
+  rowHoverColor: '#FAFAFA',
+  rowHeigh: ROW_HEIGHT,
 };
