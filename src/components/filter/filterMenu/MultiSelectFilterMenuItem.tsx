@@ -73,7 +73,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 bg-white pt-2 pb-1 w-[218px] border-0.5 border-GRAY_500 rounded-md shadow-tableFilterMenu max-h-[330px]',
+        'flex flex-col gap-2 bg-white pt-2 pb-1 w-[218px] border-0.5 border-GRAY_500 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[230px]',
         className,
       )}
     >
@@ -98,7 +98,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
         {!!values?.length &&
           values
-            .filter((item) => item?.includes(inputValue))
+            .filter((item) => item?.toLowerCase()?.includes(inputValue?.toLowerCase()))
             .map((item) => (
               <div
                 key={item}

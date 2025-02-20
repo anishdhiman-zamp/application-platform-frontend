@@ -73,6 +73,9 @@ export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
   return {
     type: 'category' as const,
     position: 'bottom',
+    crosshair: {
+      enabled: false,
+    },
     label: {
       minSpacing: 20,
       autoRotate: false,
@@ -98,6 +101,9 @@ export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
 export const CHART_NUMBER_AXES: AgCartesianAxisOptions = {
   type: 'number' as const,
   position: 'right',
+  crosshair: {
+    enabled: false,
+  },
   gridLine: {
     enabled: true,
     width: 0.5,
