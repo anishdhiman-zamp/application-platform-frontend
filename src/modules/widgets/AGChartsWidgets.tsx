@@ -55,7 +55,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       widgetId: widgetDetails.widget_instance_id,
       payload: {
         filters: currentPageFilters,
-        time_column: timeColumns,
+        time_columns: timeColumns,
         periodicity: (periodicity as PERIODICITY_TYPES) ?? PERIODICITY_TYPES.DAILY,
         currency: currency,
       },

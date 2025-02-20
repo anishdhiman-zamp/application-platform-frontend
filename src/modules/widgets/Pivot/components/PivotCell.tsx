@@ -37,7 +37,7 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, show
   const matchingField = Object.keys(aggData).find(
     (key) => parseFloat(aggData[key]?.toFixed(2)) === parseFloat(numericValue?.toFixed(2)),
   );
-  const totalValue = matchingField ? (parseFloat(node?.parent?.aggData?.[matchingField].toFixed(2)) ?? 0) : 0;
+  const totalValue = matchingField ? (parseFloat(node?.parent?.aggData?.[matchingField]?.toFixed(2)) ?? 0) : 0;
   const isToggled = toggledRows[node?.id || node?.key || ''];
 
   const percentageValue =

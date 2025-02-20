@@ -40,7 +40,7 @@ export type WidgetDataRequestType = {
   widgetId: string;
   payload: {
     filters: string;
-    time_column?: string;
+    time_columns?: string;
     periodicity?: PERIODICITY_TYPES;
     currency?: string;
   };

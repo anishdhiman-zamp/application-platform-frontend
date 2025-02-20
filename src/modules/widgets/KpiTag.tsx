@@ -31,7 +31,7 @@ const KpiTag: FC<KpiTagProps> = ({
       widgetId: widgetDetails?.widget_instance_id,
       payload: {
         filters: currentPageFilters,
-        time_column: JSON.stringify(timeColumns),
+        time_columns: timeColumns,
         periodicity: periodicity as PERIODICITY_TYPES,
         currency: currency,
       },

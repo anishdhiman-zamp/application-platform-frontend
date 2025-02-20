@@ -39,7 +39,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       widgetId: widgetInstanceDetails.widget_instance_id,
       payload: {
         filters: currentPageFilters,
-        time_column: timeColumns,
+        time_columns: timeColumns,
         periodicity: periodicity as PERIODICITY_TYPES,
         currency: currency,
       },
