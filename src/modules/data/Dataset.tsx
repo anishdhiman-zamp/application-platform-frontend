@@ -18,7 +18,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
-import { formatColumns } from 'modules/data/data.utils';
+import { formatColumns, getFilters } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { useSearchParams } from 'next/navigation';
@@ -256,7 +256,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         if (filters)
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: JSON.parse(filters) ?? {} },
+            payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
           });
       }
     }

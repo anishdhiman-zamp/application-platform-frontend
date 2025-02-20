@@ -16,7 +16,7 @@ import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTag
 import CustomHeader from 'components/common/table/CustomHeader';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';
+import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
@@ -168,4 +168,25 @@ export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string) 
   );
 
   return currentColumnOrderingVisibility[datasetId];
+};
+
+export const getFilters = (filtersString: string, filterConfig: DatasetFilterConfigResponseType[]) => {
+  const filters = JSON.parse(filtersString);
+  const filterKeys = Object.keys(filters);
+
+  const requiredFilterConfigs = filterConfig.filter(
+    (item) => item.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG && filterKeys.includes(item.column),
+  );
+
+  requiredFilterConfigs.forEach((item) => {
+    const startsWithValues: string = filters[item.column]?.values?.[0];
+
+    filters[item.column] = {
+      filterType: FILTER_TYPES.MULTI_SELECT,
+      type: CONDITION_OPERATOR_TYPE.CONTAINS,
+      values: item.options.filter((option) => option && option.startsWith(startsWithValues)),
+    };
+  });
+
+  return filters;
 };
