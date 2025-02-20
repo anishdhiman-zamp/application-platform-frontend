@@ -27,11 +27,10 @@ import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import {
-  CLOSING_BALANCE,
   COL_MIN_WIDTH,
   GRAND_ROW_TOTAL_POSITION,
-  OPENING_BALANCE,
   PINNED_COL_WIDTH,
+  PINNED_DIRECTION,
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
   PIVOT_REF,
@@ -126,6 +125,10 @@ const StackedPivot = ({
     };
 
     return generateMappingStructure(mappings);
+  }, [mappings]);
+
+  const allRefs = useMemo(() => {
+    return mappings?.map((mapping) => mapping?.ref) || [];
   }, [mappings]);
 
   const isSingleValue = useMemo(() => {
@@ -226,7 +229,7 @@ const StackedPivot = ({
     const { node, colDef, api } = params;
     const currentNodeKey = node?.key;
 
-    if (!currentNodeKey || node?.level === -1 || colDef?.pinned === 'left') return;
+    if (!currentNodeKey || node?.level === -1 || colDef?.pinned === PINNED_DIRECTION.LEFT) return;
 
     const filteredRowData = getRowDetails(currentNodeKey);
 
@@ -268,7 +271,7 @@ const StackedPivot = ({
       currentWidgetSelectedFilter,
     );
 
-    if ([OPENING_BALANCE, CLOSING_BALANCE].includes(currentNodeKey)) {
+    if (allRefs?.includes(currentNodeKey)) {
       return navigateToDataset(datasetId, columnFilterWithPeriodicity);
     }
 

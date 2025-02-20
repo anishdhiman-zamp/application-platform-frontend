@@ -175,18 +175,26 @@ export const getPivotColumns = (
         name: val?.column,
         dataType: val?.type as 'string' | 'number' | 'date',
         aggregation: val?.aggregation,
-        sourceName: val?.column,
+        sourceName: val?.alias ? val?.alias : val?.column,
         mappingName: ref,
       });
     });
 
     // if the mapping has no rows, we create a default row with the mapping name; the mapping name becomes the row group name (eg: Closing Balance)
-    const mappingRows = fields?.rows || [
-      {
-        column: mapping.ref,
-        type: 'string',
-      },
-    ];
+    const mappingRows = [];
+
+    if (data_mappings.mappings.length === 1) {
+      if (fields?.rows) {
+        mappingRows.push(...fields.rows);
+      } else {
+        mappingRows.push({
+          column: mapping?.ref,
+          type: 'string',
+        });
+      }
+    } else {
+      mappingRows.push({ column: mapping?.ref, type: 'string' }, ...(fields?.rows || []));
+    }
 
     let currentLevel = 0;
     const colNameMapping: Record<

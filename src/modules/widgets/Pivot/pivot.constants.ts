@@ -4,6 +4,10 @@ export const PIVOT_REF = '__REF';
 export const NESTING_LEVEL_INFIX = '_LEVEL_';
 export const GROUPING_COL_NAME_PREFIX = 'GROUPING_DEPTH_';
 export const ROOT_LEVEL_TITLE = 'Total';
+export enum PINNED_DIRECTION {
+  LEFT = 'left',
+  RIGHT = 'right',
+}
 
 export enum PIVOT_REF_TYPES {
   RECONCILLIATION = 'Reconciliation Data',
@@ -19,6 +23,7 @@ export const GRAND_ROW_TOTAL_POSITION = 'bottom';
 
 export const OPENING_BALANCE = 'Opening Balance';
 export const CLOSING_BALANCE = 'Closing Balance';
+export const OG_BALANCE = 'OG Balance';
 
 export enum RECON_STATUS_TYPES {
   SETTLED = 'settled',

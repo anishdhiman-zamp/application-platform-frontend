@@ -45,7 +45,7 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, show
       ? getCommaSeparatedNumber(Math.round(((numericValue || 0) / totalValue) * 100 * 100) / 100, 2) + '%'
       : '0%';
 
-  const shouldShowPercentage = !isRootLevel && (only_parent ? isTopNode : true);
+  const shouldShowPercentage = showPercentage && !isRootLevel && (only_parent ? isTopNode : true);
 
   const displayValue = shouldShowPercentage ? (isToggled ? value : percentageValue) : value;
 
