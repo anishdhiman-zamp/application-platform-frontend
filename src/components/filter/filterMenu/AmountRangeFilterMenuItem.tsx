@@ -5,6 +5,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import Input from 'components/common/input';
+import { Tooltip } from 'components/common/tooltip';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
@@ -35,7 +36,11 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
 
   const setFilter = (operator: string, startValue: string, endValue: string) => {
     const condition =
-      operator === CONDITION_OPERATOR_TYPE.IN_BETWEEN ? endValue !== '' && startValue !== '' : startValue !== '';
+      operator === CONDITION_OPERATOR_TYPE.IN_BETWEEN
+        ? endValue !== '' && startValue !== ''
+        : operator === CONDITION_OPERATOR_TYPE.IS_NULL
+          ? true
+          : startValue !== '';
 
     dispatch({
       type: filtersContextActions.SET_SELECTED_FILTERS,
@@ -125,12 +130,20 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
         </div>
       </div>
       <div className='flex flex-col gap-2'>
-        <Input
-          size={SIZE_TYPES.XSMALL}
-          value={startValue}
-          placeholder='type a value...'
-          onChange={(e) => onChange(true, e.target.value)}
-        />
+        <Tooltip
+          tooltipBody={`condition set to “is blank”`}
+          tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+          className='z-1 !cursor-not-allowed'
+          disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
+        >
+          <Input
+            size={SIZE_TYPES.XSMALL}
+            value={startValue}
+            placeholder='type a value...'
+            onChange={(e) => onChange(true, e.target.value)}
+            disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
+          />
+        </Tooltip>
         {selectedOperator?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
           <span className='f-11-400 text-GRAY_700 select-none'>and</span>
         )}

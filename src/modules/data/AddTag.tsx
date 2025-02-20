@@ -164,7 +164,13 @@ const AddTag = ({
         </div>
       </div>
       <div className='flex flex-row-reverse items-center justify-between px-4 py-3 border-t border-BORDER_GRAY_400'>
-        <Button size={SIZE_TYPES.XSMALL} id='add-tag-transactions' onClick={handleClickAddTag} isLoading={isLoading}>
+        <Button
+          size={SIZE_TYPES.XSMALL}
+          id='add-tag-transactions'
+          onClick={handleClickAddTag}
+          isLoading={isLoading}
+          disabled={!selectedTag}
+        >
           Add tag to {totalRows} transactions
         </Button>
       </div>

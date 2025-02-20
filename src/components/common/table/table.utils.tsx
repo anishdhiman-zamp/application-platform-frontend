@@ -46,6 +46,12 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
             value: [Number(condition.filter), Number(condition.filterTo)],
           };
         else return null;
+      } else if (condition.type === CONDITION_OPERATOR_TYPE.IS_NULL) {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: '',
+        };
       } else if (condition.filter !== '') {
         return {
           column: condition.colId,
@@ -59,6 +65,12 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
           column: condition.colId,
           operator: condition.type,
           value: condition.values,
+        };
+      } else if (condition.type === CONDITION_OPERATOR_TYPE.IS_NULL) {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: '',
         };
       } else return null;
     case FILTER_TYPES.DATE_RANGE:

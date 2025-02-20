@@ -4,9 +4,11 @@ import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 import {
+  AMOUNT_RANGE_FILTER_OPTIONS,
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,
   CONDITION_OPERATOR_TYPE,
   FILTER_KEYS,
+  MULTI_SELECT_FILTER_OPTIONS,
   SEARCH_FILTER_OPTIONS,
 } from 'components/filter/filters.constants';
 
@@ -17,13 +19,16 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
     case FILTER_TYPES.AMOUNT_RANGE: {
       const amountRangeFilter = selectedFilters?.[key];
       const isInBetween = amountRangeFilter?.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN;
+      const isNull = amountRangeFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
       const rangeValue = isInBetween
         ? `${amountRangeFilter?.filter} & ${amountRangeFilter?.filterTo}`
         : amountRangeFilter?.filter;
 
-      const title = `${
-        AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
-      } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
+      const title = isNull
+        ? AMOUNT_RANGE_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
+        : `${
+            AMOUNT_RANGE_TYPE_SYMBOL_MAP[amountRangeFilter?.type as keyof typeof AMOUNT_RANGE_TYPE_SYMBOL_MAP] ?? ''
+          } ${rangeValue ?? ''} ${amountRangeFilter?.label ?? ''}`;
 
       return {
         ...config,
@@ -33,9 +38,13 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
     case FILTER_TYPES.MULTI_SELECT: {
       const selectedFilter = selectedFilters[key];
+      const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
+
       let title = '';
 
-      title = selectedFilter?.values?.join(', ');
+      title = isNull
+        ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
+        : selectedFilter?.values?.join(', ');
 
       if (!selectedFilter?.values?.length) {
         title = '';

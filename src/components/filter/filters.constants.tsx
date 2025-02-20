@@ -85,6 +85,7 @@ export const AMOUNT_RANGE_FILTER_OPTIONS = [
   { label: 'is less than', value: CONDITION_OPERATOR_TYPE.LESS_THAN },
   { label: 'is less than or equal to', value: CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL },
   { label: 'is between', value: CONDITION_OPERATOR_TYPE.IN_BETWEEN },
+  { label: 'is blank', value: CONDITION_OPERATOR_TYPE.IS_NULL },
 ];
 
 export const SEARCH_FILTER_OPTIONS = [
@@ -94,4 +95,15 @@ export const SEARCH_FILTER_OPTIONS = [
   { label: 'does not equal', value: CONDITION_OPERATOR_TYPE.NOT_EQUAL },
   { label: 'begins with', value: CONDITION_OPERATOR_TYPE.STARTS_WITH },
   { label: 'ends with', value: CONDITION_OPERATOR_TYPE.ENDS_WITH },
+];
+
+export const MULTI_SELECT_FILTER_OPTIONS = [
+  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
+  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
+  { label: 'is blank', value: CONDITION_OPERATOR_TYPE.IS_NULL },
+];
+
+export const TAGS_SELECT_FILTER_OPTIONS = [
+  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
+  { label: 'Untagged', value: CONDITION_OPERATOR_TYPE.IS_NULL },
 ];

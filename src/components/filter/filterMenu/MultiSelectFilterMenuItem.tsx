@@ -1,11 +1,13 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
+import { OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
+import { Tooltip } from 'components/common/tooltip';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+import { CONDITION_OPERATOR_TYPE, MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -14,6 +16,7 @@ interface MultiSelectFilterMenuItemProps {
   values: string[];
   className?: string;
   LabelComponent?: (item: string) => React.ReactNode;
+  operatorOptions?: OptionsType[];
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -21,36 +24,43 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   values,
   className,
   LabelComponent,
+  operatorOptions = MULTI_SELECT_FILTER_OPTIONS,
 }) => {
+  const ref = useRef(null);
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
+  const currentOperator = operatorOptions.find((option) => option.value === selectedFilters[columnId]?.type);
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedFilters[columnId]?.values || []);
   const [inputValue, setInputValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? operatorOptions[0]);
   const onSearchChange = (value: ChangeEvent<HTMLInputElement>) => {
     setInputValue(value.target.value);
   };
 
-  const setFilter = (updatedValues: string[]) => {
-    dispatch({
-      type: filtersContextActions.SET_SELECTED_FILTERS,
-      payload: {
-        selectedFilters: {
-          [columnId]: {
-            filterType: FILTER_TYPES.MULTI_SELECT,
-            type: CONDITION_OPERATOR_TYPE.CONTAINS,
-            values: updatedValues,
+  const setFilter = (operator: string, updatedValues: string[]) => {
+    if (operator === CONDITION_OPERATOR_TYPE.IS_NULL || updatedValues.length >= 0) {
+      dispatch({
+        type: filtersContextActions.SET_SELECTED_FILTERS,
+        payload: {
+          selectedFilters: {
+            [columnId]: {
+              filterType: FILTER_TYPES.MULTI_SELECT,
+              type: operator,
+              values: updatedValues,
+            },
           },
         },
-      },
-    });
+      });
+    }
   };
 
   const handleSetValues = useCallback(
-    debounce((updatedValues: string[]) => {
-      setFilter(updatedValues);
+    debounce((operator: string, updatedValues: string[]) => {
+      setFilter(operator, updatedValues);
     }, 800),
     [],
   );
@@ -61,13 +71,23 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       : [...selectedValues, value];
 
     setSelectedValues(updatedValues);
-    handleSetValues(updatedValues);
+    handleSetValues(selectedOperator?.value as string, updatedValues);
   };
 
   const onReset = () => {
     setSelectedValues([]);
     setInputValue('');
-    setFilter([]);
+    setFilter(selectedOperator?.value as string, []);
+  };
+
+  const onOperatorChange = (option: OptionsType) => {
+    setSelectedOperator(option);
+    if (option?.value === CONDITION_OPERATOR_TYPE.IS_NULL) {
+      setSelectedValues([]);
+      handleSetValues(option?.value as string, []);
+    } else {
+      handleSetValues(option?.value as string, selectedValues);
+    }
   };
 
   return (
@@ -81,7 +101,31 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
         <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>
-
+        <div
+          className='flex items-center gap-[2px] cursor-pointer relative select-none grow'
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
+            {selectedOperator?.label || 'is equal to'}
+          </div>
+          <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
+          {isOpen && (
+            <div
+              ref={ref}
+              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
+            >
+              {operatorOptions.map((option) => (
+                <div
+                  className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
+                  key={option.value}
+                  onClick={() => onOperatorChange(option)}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <div className='flex justify-end text-GRAY_700 cursor-pointer'>
           <SvgSpriteLoader
             id='refresh-ccw-01'
@@ -106,9 +150,20 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
                 className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
               >
                 {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
-                <div className='min-w-[14px]'>
-                  <CheckBox checked={selectedValues?.includes(item)} id='checkbox-1' />
-                </div>
+                <Tooltip
+                  tooltipBody={`condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`}
+                  tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md z-999 bg-black text-white w-28'
+                  className='z-1'
+                  disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
+                >
+                  <div className='min-w-[14px]'>
+                    <CheckBox
+                      checked={selectedValues?.includes(item)}
+                      id='checkbox-1'
+                      disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
+                    />
+                  </div>
+                </Tooltip>
               </div>
             ))}
       </div>
