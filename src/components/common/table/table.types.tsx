@@ -1,10 +1,15 @@
 export enum CUSTOM_COLUMNS_TYPE {
-  AMOUNT = 'amount',
-  DATE_TIME = 'date_time',
   TAG = 'tags',
 }
 
 export enum DISPLAY_OPTIONS {
   COLUMNS = 'columns',
   GROUP_BY = 'group_by',
+}
+
+export enum VALUE_FORMAT_TYPE {
+  ROUND_OFF = 'round_off',
+  DATE_TIME = 'date_time',
+  PREFIX = 'prefix',
+  COLUMN_PREFIX = 'column_prefix',
 }

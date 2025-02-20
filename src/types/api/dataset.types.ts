@@ -2,14 +2,24 @@ import { DATASET_ACTION_STATUS } from 'modules/data/data.types';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
-import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+
+export type ValueFormatType = {
+  type: VALUE_FORMAT_TYPE;
+  value: number | string;
+};
 
 export type DatasetFilterConfigMetadataType = {
   is_hidden?: boolean;
   custom_type?: CUSTOM_COLUMNS_TYPE;
-  format?: string;
-  currency_column_prefix?: string;
+  config?: {
+    currency_column?: string;
+    amount_column?: string;
+    currency_value?: string;
+    format?: string;
+    value_format?: ValueFormatType[];
+  };
   is_editable?: boolean;
 };
 
@@ -18,6 +28,7 @@ export type DatasetFilterConfigResponseType = {
   type: FILTER_TYPES;
   options: string[];
   datatype: string;
+  alias: string;
   metadata?: DatasetFilterConfigMetadataType;
 };
 

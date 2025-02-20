@@ -1,20 +1,29 @@
-import { ColDef } from 'ag-grid-community';
+import { ColDef, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { differenceInDays, differenceInHours, differenceInMinutes, differenceInMonths } from 'date-fns';
+import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInMonths,
+  format,
+  isValid,
+} from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
 import {
   DatasetFilterConfigResponseType,
   DatasetType,
   DatasetUpdateResponseType,
   RuleFilters,
+  ValueFormatType,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { createDateObjectFromUTCString, formatPlural, getChipColor } from 'utils/common';
+import { createDateObjectFromUTCString, formatPlural, getChipColor, getCommaSeparatedNumber } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
 import CustomHeader from 'components/common/table/CustomHeader';
-import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
+import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -75,6 +84,7 @@ export const formatColumns = (
       filterParams: {
         values: column.options,
       },
+      headerName: column.alias,
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
@@ -91,6 +101,10 @@ export const formatColumns = (
       zampIds,
       filterType: column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column.type,
     };
+
+    if (column.metadata?.config?.value_format) {
+      formattedColumn = { ...formattedColumn, valueFormatter: getValueFormatter(column) };
+    }
 
     if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
       const tagColorMap: MapAny = {};
@@ -206,4 +220,57 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   });
 
   return filters;
+};
+
+export const getValueFormatter = (
+  column: DatasetFilterConfigResponseType,
+): ((params: ValueFormatterParams) => string) => {
+  const valueFormatter = (params: ValueFormatterParams) => {
+    let formattedValue = params.value;
+    const valueFormats = Array.isArray(column.metadata?.config?.value_format)
+      ? column.metadata?.config?.value_format
+      : [column.metadata?.config?.value_format];
+
+    valueFormats?.forEach((valueFormat) => {
+      switch (valueFormat?.type) {
+        case VALUE_FORMAT_TYPE.ROUND_OFF:
+          formattedValue = getCommaSeparatedNumber(Number(formattedValue), valueFormat?.value as number);
+          break;
+        case VALUE_FORMAT_TYPE.DATE_TIME:
+          formattedValue = getFormattedDate(valueFormat, formattedValue);
+          break;
+        case VALUE_FORMAT_TYPE.PREFIX:
+          formattedValue = getFormattedValueWithPrefix(valueFormat, formattedValue);
+          break;
+        case VALUE_FORMAT_TYPE.COLUMN_PREFIX:
+          formattedValue = getFormattedValueWithColumnPrefix(valueFormat, formattedValue, params.data);
+          break;
+      }
+    });
+
+    return formattedValue;
+  };
+
+  return valueFormatter;
+};
+
+const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
+  const dateFormat = valueFormat?.value as string;
+  const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
+  const date = new Date(value);
+
+  return isValid(date) ? format(date, validDateFormat) : value;
+};
+
+const getFormattedValueWithPrefix = (valueFormat: ValueFormatType, value: string) => {
+  const prefix = valueFormat?.value ?? '';
+
+  return prefix && value ? `${prefix} ${value}` : value;
+};
+
+const getFormattedValueWithColumnPrefix = (valueFormat: ValueFormatType, value: string, data: MapAny) => {
+  const columnToBeUsedForPrefix = valueFormat?.value ?? '';
+  const prefixValue = data?.[columnToBeUsedForPrefix]?.toUpperCase();
+
+  return prefixValue && value ? `${prefixValue} ${value}` : value;
 };

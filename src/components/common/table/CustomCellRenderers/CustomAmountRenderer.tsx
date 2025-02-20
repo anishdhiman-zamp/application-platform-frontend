@@ -2,9 +2,11 @@ import React from 'react';
 import { ICellRendererParams } from 'ag-grid-community';
 
 const CustomAmountRenderer = (props: ICellRendererParams) => {
-  const { colDef, data, value } = props;
-  const prefix = data[colDef?.cellRendererParams?.currency_column_prefix]?.toUpperCase();
-  const formattedValue = prefix ? `${prefix} ${value}` : value;
+  const { colDef, data, value, valueFormatted } = props;
+  const valueToDisplay = valueFormatted ?? value;
+  const prefix = data[colDef?.cellRendererParams?.config?.currency_column]?.toUpperCase();
+
+  const formattedValue = prefix && valueToDisplay ? `${prefix} ${valueToDisplay}` : valueToDisplay;
 
   return <div>{formattedValue}</div>;
 };

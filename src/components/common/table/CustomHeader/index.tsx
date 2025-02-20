@@ -1,4 +1,5 @@
 import { FC, useMemo, useRef, useState } from 'react';
+import { ColDef } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useGetDatasetDataQuery } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
@@ -33,6 +34,7 @@ type CustomHeaderProps = {
   options: string[];
   column: {
     colId: string;
+    colDef: ColDef;
   };
   zampIds?: string[];
   filterComponentProps?: MapAny;
@@ -45,10 +47,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   tableRef,
   filterType,
   options,
-  column: { colId },
+  column,
   zampIds,
   filterComponentProps,
 }) => {
+  const { colId, colDef } = column;
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -156,7 +160,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         )}
         onClick={toggleMenu}
       >
-        <div>{colId}</div>
+        <div>{colDef?.headerName}</div>
         <div className='flex items-center gap-1'>
           {!!sortState && (
             <SvgSpriteLoader

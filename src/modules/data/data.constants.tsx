@@ -3,8 +3,6 @@ import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACCESS_PRIVILEGES } from 'modules/data/data.types';
 import Image from 'next/image';
-import CustomAmountRenderer from 'components/common/table/CustomCellRenderers/CustomAmountRenderer';
-import CustomDateTimeRenderer from 'components/common/table/CustomCellRenderers/CustomDateTimeRenderer';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 
@@ -32,8 +30,6 @@ export const LISTING_COLUMNS: ColDef[] = [
 ];
 
 export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => JSX.Element> = {
-  [CUSTOM_COLUMNS_TYPE.AMOUNT]: CustomAmountRenderer,
-  [CUSTOM_COLUMNS_TYPE.DATE_TIME]: CustomDateTimeRenderer,
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
 };
 
