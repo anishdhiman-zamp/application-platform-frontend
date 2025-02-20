@@ -160,7 +160,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         )}
         onClick={toggleMenu}
       >
-        <div>{colDef?.headerName}</div>
+        <div>{colDef?.headerName ?? colId}</div>
         <div className='flex items-center gap-1'>
           {!!sortState && (
             <SvgSpriteLoader
