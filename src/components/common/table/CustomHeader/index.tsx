@@ -6,6 +6,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
+import { MapAny } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { cn } from 'utils/common';
@@ -34,6 +35,7 @@ type CustomHeaderProps = {
     colId: string;
   };
   zampIds?: string[];
+  filterComponentProps?: MapAny;
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
   metadata,
@@ -45,6 +47,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   options,
   column: { colId },
   zampIds,
+  filterComponentProps,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -216,7 +219,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           onClose={handleAddTagClose}
         >
           <AddTag
-            tagList={options}
+            tagList={options?.filter((option) => !!option)}
             datasetId={datasetId}
             handleSuccessfulUpdate={handleSuccessfulUpdate}
             column={colId}
@@ -233,7 +236,15 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           menuPosition={menuPosition}
           onClose={handleFilterClose}
         >
-          <FilterDropdownMenu filterKey={colId} filterType={filterType} />
+          <FilterDropdownMenu
+            filterKey={colId}
+            filterType={filterType}
+            {...(filterType === FILTER_TYPES.TAGS
+              ? {
+                  filterComponentProps,
+                }
+              : {})}
+          />
         </PositionedMenuWrapper>
       )}
     </div>

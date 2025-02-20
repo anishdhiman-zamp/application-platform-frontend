@@ -14,7 +14,7 @@ const CreateTag: FC<CreateTagProps> = ({ value, handleCreateTag, existingList })
     <Fragment>
       {!!value && (
         <div
-          className='mx-1 mb-1 px-2.5 py-2 space-x-1.5 text-GRAY_700 f-11-500 hover:bg-GRAY_100 rounded-md cursor-pointer'
+          className='mx-1 mb-1 px-2.5 py-2 space-x-1.5 text-GRAY_700 f-11-500 hover:bg-GRAY_100 rounded-md cursor-pointer flex items-center'
           onClick={handleCreateTag}
         >
           <span>Create</span>

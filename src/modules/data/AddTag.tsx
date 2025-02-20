@@ -116,7 +116,7 @@ const AddTag = ({
           />
         </div>
         <div className='px-4'>
-          <Input placeholder='Search Tag' onChange={handleChange} value={searchValue} />
+          <Input placeholder='Search Tag' onChange={handleChange} value={searchValue} onFocus={() => setIsOpen(true)} />
           {isOpen && (
             <MenuWrapper
               id='custom-tag-editor-menu'
@@ -138,25 +138,29 @@ const AddTag = ({
               </div>
             </MenuWrapper>
           )}
-          <div className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-fit flex flex-wrap gap-y-2 items-center'>
-            <span className={fieldOperatorClassName}>If</span>
-            {filterStatement.map((value, index) => (
-              <RuleStatement
-                index={index}
-                filterStatement={value}
-                numberOfFilters={filterStatement.length}
-                key={`filter-statement-${index}`}
-              />
-            ))}
-          </div>
-          <div className='flex items-center gap-1.5 mb-1.5'>
-            <ToggleSwitch id='add-tag-make-rule' onChange={setIsActive} checked={isActive} />
-            <div className='f-11-400 text-GRAY_1000'>Make this a rule</div>
-          </div>
-          <div className='f-11-400 text-GRAY_700 text-wrap'>
-            Rule applies selected tags to all transactions meeting its criteria, historical & future, replacing any
-            existing tags
-          </div>
+          {filterStatement.length > 0 && (
+            <>
+              <div className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-fit flex flex-wrap gap-y-2 items-center'>
+                <span className={fieldOperatorClassName}>If</span>
+                {filterStatement.map((value, index) => (
+                  <RuleStatement
+                    index={index}
+                    filterStatement={value}
+                    numberOfFilters={filterStatement.length}
+                    key={`filter-statement-${index}`}
+                  />
+                ))}
+              </div>
+              <div className='flex items-center gap-1.5 mb-1.5'>
+                <ToggleSwitch id='add-tag-make-rule' onChange={setIsActive} checked={isActive} />
+                <div className='f-11-400 text-GRAY_1000'>Make this a rule</div>
+              </div>
+              <div className='f-11-400 text-GRAY_700 text-wrap'>
+                Rule applies selected tags to all transactions meeting its criteria, historical & future, replacing any
+                existing tags
+              </div>
+            </>
+          )}
         </div>
       </div>
       <div className='flex flex-row-reverse items-center justify-between px-4 py-3 border-t border-BORDER_GRAY_400'>

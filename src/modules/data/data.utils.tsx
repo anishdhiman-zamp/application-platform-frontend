@@ -9,7 +9,7 @@ import {
   RuleFilters,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { createDateObjectFromUTCString, formatPlural } from 'utils/common';
+import { createDateObjectFromUTCString, formatPlural, getChipColor } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
@@ -92,6 +92,23 @@ export const formatColumns = (
       filterType: column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column.type,
     };
 
+    if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
+      const tagColorMap: MapAny = {};
+
+      column.options.forEach((option) => {
+        if (option) tagColorMap[option] = getChipColor();
+      });
+      formattedColumn.cellRendererParams = { ...formattedColumn.cellRendererParams, tagColorMap };
+      formattedColumn.headerComponentParams = {
+        ...formattedColumn.headerComponentParams,
+        filterComponentProps: { tagColorMap },
+      };
+      formattedColumn.cellEditorParams = {
+        ...formattedColumn.cellEditorParams,
+        tagColorMap,
+      };
+    }
+
     if (!column.metadata?.is_hidden) {
       columns.push(formattedColumn);
     }
@@ -111,7 +128,7 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
     return {
       cellEditor: CustomTagEditor,
       cellEditorParams: {
-        values: column.options,
+        values: column.options.filter((option) => !!option),
       },
     };
   }
