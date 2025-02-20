@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import NoWidgetData from 'modules/widgets/components/NoWidgetData';
+import NoPivotData from 'modules/widgets/Pivot/loader/NoPivotData';
 import PivotTableLoader from 'modules/widgets/Pivot/loader/PivotTableLoader';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
@@ -58,7 +58,13 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       refetchFunction={refetch}
       isError={isError}
       className='h-full w-full'
-      noDataBanner={<NoWidgetData className='w-full h-full border border-GRAY_400 rounded-xl' />}
+      noDataBanner={
+        <NoPivotData
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
+          title={widgetInstanceDetails?.title}
+        />
+      }
       loader={<PivotTableLoader />}
     >
       {data && (

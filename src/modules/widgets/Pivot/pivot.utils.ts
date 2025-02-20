@@ -12,7 +12,7 @@ import {
 } from 'modules/widgets/Pivot/pivot.types';
 import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
-import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
+import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
 
@@ -160,9 +160,9 @@ export const getPivotColumns = (
     columns?.forEach((col) => {
       pivotColumns?.push({
         kind: 'pivot',
-        name: col.column,
+        name: col.alias ? col.alias : col.column,
         dataType: col.type as 'string' | 'number' | 'date',
-        sourceName: col.alias ? col.alias : col.column,
+        sourceName: col.alias ? col?.alias : col?.column,
         mappingName: ref,
       });
     });
@@ -172,7 +172,7 @@ export const getPivotColumns = (
     values?.forEach((val) => {
       pivotColumns?.push({
         kind: 'aggregate',
-        name: val?.column,
+        name: val?.alias ? val?.alias : val?.column,
         dataType: val?.type as 'string' | 'number' | 'date',
         aggregation: val?.aggregation,
         sourceName: val?.alias ? val?.alias : val?.column,
@@ -348,7 +348,7 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
         case 'aggregate': {
           return {
             field: col?.name,
-            aggFunc: col?.aggregation,
+            aggFunc: AGGREGATION_TYPES.SUM,
             valueFormatter: (params) => formatCurrencyValue(params?.value),
             headerComponent: PivotColHeader,
             headerName: snakeCaseToSentenceCase(col?.name),

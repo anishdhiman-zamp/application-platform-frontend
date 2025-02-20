@@ -21,10 +21,6 @@ export const PIVOT_GROUP_HEADER_HEIGHT = 42;
 export const ROW_HEIGHT = 42;
 export const GRAND_ROW_TOTAL_POSITION = 'bottom';
 
-export const OPENING_BALANCE = 'Opening Balance';
-export const CLOSING_BALANCE = 'Closing Balance';
-export const OG_BALANCE = 'OG Balance';
-
 export enum RECON_STATUS_TYPES {
   SETTLED = 'settled',
   MISSING_FROM_ACQUIRER = 'missing_from_acquirer',

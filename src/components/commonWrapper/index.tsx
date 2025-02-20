@@ -1,4 +1,4 @@
-import React, { FC, Fragment } from 'react';
+import { FC, Fragment } from 'react';
 import { COLORS } from 'constants/colors';
 import { SIZE } from 'constants/common.constants';
 import { cn } from 'utils/common';

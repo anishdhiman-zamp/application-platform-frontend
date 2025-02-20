@@ -131,10 +131,6 @@ const StackedPivot = ({
     return mappings?.map((mapping) => mapping?.ref) || [];
   }, [mappings]);
 
-  const isSingleValue = useMemo(() => {
-    return mappings?.length === 1 && mappings?.[0]?.fields?.values?.length === 1;
-  }, [widgetInstanceDetails]);
-
   const { colDef, rowData } = useMemo(() => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
@@ -143,6 +139,10 @@ const StackedPivot = ({
 
     return { colDef: pivotColDefs, rowData };
   }, [widgetInstanceDetails, widgetData, periodicity]);
+
+  const isSingleHeader = useMemo(() => {
+    return colDef?.filter((col) => 'aggFunc' in col).length === 1;
+  }, [colDef]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -175,7 +175,7 @@ const StackedPivot = ({
       headerComponent: WidgetTitle,
       headerComponentParams: {
         title: title,
-        isSingleValue,
+        isSingleHeader,
         groupWidgetsOptions,
         onWidgetChange,
         widgetType: WIDGET_TYPES.PIVOT_TABLE,
@@ -195,7 +195,7 @@ const StackedPivot = ({
         suppressPadding: true,
       },
     };
-  }, [widgetInstanceDetails, isSingleValue, colDef]);
+  }, [widgetInstanceDetails, isSingleHeader, colDef]);
 
   const getRowStyle = useMemo(() => {
     return (params: any) =>
@@ -206,10 +206,10 @@ const StackedPivot = ({
     return (colGroupDef: ColGroupDef) => {
       colGroupDef.headerGroupComponent = PivotColGroupHeader;
       colGroupDef.headerGroupComponentParams = {
-        isSingleValue,
+        isSingleHeader,
       };
     };
-  }, [isSingleValue]);
+  }, [isSingleHeader]);
 
   const getRowDetails = (key: string) => {
     return rowData.find((row) => Object.values(row).includes(key)) || null;
@@ -315,8 +315,8 @@ const StackedPivot = ({
           pivotMode
           suppressContextMenu
           suppressMenuHide={false}
-          pivotHeaderHeight={isSingleValue ? 0 : PIVOT_HEADER_HEIGHT}
-          pivotGroupHeaderHeight={isSingleValue ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
+          pivotHeaderHeight={isSingleHeader ? 0 : PIVOT_HEADER_HEIGHT}
+          pivotGroupHeaderHeight={isSingleHeader ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
           processPivotResultColGroupDef={processPivotResultColGroupDef}
           suppressRowDrag
           suppressMovableColumns

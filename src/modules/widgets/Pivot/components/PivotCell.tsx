@@ -34,7 +34,7 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, show
   const numericValue = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[$,]/g, ''));
 
   const aggData = node?.aggData;
-  const matchingField = Object.keys(aggData).find(
+  const matchingField = Object.keys(aggData)?.find(
     (key) => parseFloat(aggData[key]?.toFixed(2)) === parseFloat(numericValue?.toFixed(2)),
   );
   const totalValue = matchingField ? (parseFloat(node?.parent?.aggData?.[matchingField]?.toFixed(2)) ?? 0) : 0;

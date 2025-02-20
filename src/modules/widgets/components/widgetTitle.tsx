@@ -21,6 +21,7 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }:
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (groupWidgetsOptions?.length === 1) return;
     setIsGroupWidget((prev) => !prev);
   };
 
@@ -30,7 +31,6 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }:
   return (
     <div
       className={cn(
-        '',
         isPivotTable
           ? 'bg-white w-full flex h-full p-6 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400'
           : '',
@@ -38,9 +38,8 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }:
     >
       <div
         className={cn(
-          'px-6 flex flex-col items-start relative select-none',
+          'px-6 flex flex-col items-start relative select-none cursor-pointer',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) ? 'mb-10' : '',
-          isGroupWidgetOptions ? 'cursor-pointer' : '',
           isPivotTable && !isGroupWidgetOptions ? 'mb-0 px-0 justify-center' : '',
           isPivotTable && isGroupWidgetOptions ? 'h-fit w-fit px-0 gap-y-2 items-start justify-center mb-0' : '',
         )}
