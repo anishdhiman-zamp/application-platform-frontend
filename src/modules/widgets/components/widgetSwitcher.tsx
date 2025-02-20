@@ -6,9 +6,10 @@ import { WidgetInstanceType } from 'types/api/widgets.types';
 interface WidgetSwitcherProps {
   widgetConfig: WidgetType;
   widgetInstances: WidgetInstanceType[];
+  currency: string[];
 }
 
-const WidgetSwitcher: FC<WidgetSwitcherProps> = ({ widgetConfig, widgetInstances }) => {
+const WidgetSwitcher: FC<WidgetSwitcherProps> = ({ widgetConfig, widgetInstances, currency }) => {
   const [activeWidget, setActiveWidget] = useState<string>(widgetConfig?.default_widget);
 
   const onWidgetChange = (widgetId: string) => {
@@ -31,6 +32,7 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({ widgetConfig, widgetInstances
       widgetDetails={widgetDetails}
       groupWidgetsOptions={groupWidgetsOptions}
       onWidgetChange={onWidgetChange}
+      currency={currency}
     />
   ) : (
     <div>No widget found</div>

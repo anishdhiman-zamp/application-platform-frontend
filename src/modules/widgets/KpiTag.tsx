@@ -12,8 +12,9 @@ interface KpiTagProps {
   currentPageFilters: string;
   isFilterInitialized?: boolean;
   periodicity: string;
-  timeColumn: string;
+  timeColumns: string;
   isFilterLoading?: boolean;
+  currency: string;
 }
 
 const KpiTag: FC<KpiTagProps> = ({
@@ -21,15 +22,21 @@ const KpiTag: FC<KpiTagProps> = ({
   currentPageFilters,
   isFilterInitialized,
   periodicity,
-  timeColumn,
+  timeColumns,
   isFilterLoading,
+  currency,
 }) => {
   const { data: widgetData, isLoading } = useGetWidgetDataQuery(
     {
       widgetId: widgetDetails?.widget_instance_id,
-      payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
+      payload: {
+        filters: currentPageFilters,
+        time_column: JSON.stringify(timeColumns),
+        periodicity: periodicity as PERIODICITY_TYPES,
+        currency: currency,
+      },
     },
-    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized || !periodicity || !timeColumn },
+    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
   );
 
   const value: string = useMemo(() => {
@@ -47,7 +54,11 @@ const KpiTag: FC<KpiTagProps> = ({
         isLoading={isLoading || isFilterLoading}
         loader={<SkeletonElement className='max-w-[250px]' />}
       >
-        <div className='f-24-450 text-GRAY_950'>{getCommaSeparatedNumber(Number(value), 2)}</div>
+        <div className='f-24-450 text-GRAY_950'>
+          {widgetData?.currency
+            ? `${widgetData?.currency} ${getCommaSeparatedNumber(Number(value), 2)}`
+            : getCommaSeparatedNumber(Number(value), 2)}
+        </div>
       </CommonWrapper>
     </div>
   );

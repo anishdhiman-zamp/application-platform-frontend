@@ -160,9 +160,9 @@ export const getPivotColumns = (
     columns?.forEach((col) => {
       pivotColumns?.push({
         kind: 'pivot',
-        name: col?.column,
-        dataType: col?.type as 'string' | 'number' | 'date',
-        sourceName: col?.alias ? col?.alias : col?.column,
+        name: col.column,
+        dataType: col.type as 'string' | 'number' | 'date',
+        sourceName: col.alias ? col.alias : col.column,
         mappingName: ref,
       });
     });
@@ -340,6 +340,7 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
           return {
             field: col?.name,
             pivot: true,
+            sort: 'desc',
             headerComponent: PivotColGroupHeader,
             valueFormatter: (params) => formatPivotColGroupHeader(params),
             context: col,

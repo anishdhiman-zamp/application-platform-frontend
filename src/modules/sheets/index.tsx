@@ -1,8 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { ZAMP_LOADER } from 'constants/icons';
+import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
+import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import Image from 'next/image';
@@ -22,8 +24,9 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   const {
-    state: { filtersConfig },
+    state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
+  const [currency, setCurrency] = useState<string[]>(['USD']);
 
   const {
     data: sheetDetails,
@@ -59,15 +62,29 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
           }
         >
           <div className='flex justify-between items-center z-100 px-5'>
-            <div className='f-24-450 text-GRAY_950'>{sheetDetails?.name}</div>
-            <FiltersWrapper
-              allowClear={false}
-              label='Filter'
-              className='px-0'
-              allowActions={false}
-              filterConfig={filtersConfig ?? []}
-              isPeriodicityEnabled
-            />
+            <div className='f-24-450 text-GRAY_950 mb-2.5'>{sheetDetails?.name}</div>
+            <div className='flex items-center gap-2'>
+              <FiltersWrapper
+                allowClear={false}
+                label='Filter'
+                className='px-0'
+                allowActions={false}
+                filterConfig={filtersConfig ?? []}
+                isPeriodicityEnabled
+              />
+              {isFilterInitialized && currency && (
+                <div className='flex items-center gap-2'>
+                  <div className='border-r border-GRAY_400 h-7'></div>
+                  <SingleSelectFilter
+                    key='currency'
+                    options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== 'local')}
+                    onFilterChange={(value) => setCurrency(value)}
+                    value={currency}
+                    label='Currency'
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {sheetDetails && (
@@ -92,6 +109,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
                   <div key={widgetConfig?.default_widget} className='h-full w-full'>
                     <WidgetSwitcher
                       widgetConfig={widgetConfig}
+                      currency={currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                     />
                   </div>

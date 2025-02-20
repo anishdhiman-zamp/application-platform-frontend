@@ -22,6 +22,7 @@ interface FilterDropdownMenuProps {
   disableFutureDate?: boolean;
   operatorOptions?: OptionsType[];
   isPeriodicityEnabled?: boolean;
+  onFilterChange?: (value: string[]) => void;
 }
 
 const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
@@ -29,6 +30,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
   filterType,
   filterComponentProps = {},
   isPeriodicityEnabled = false,
+  onFilterChange,
 }) => {
   const {
     state: { filtersConfig },
@@ -45,6 +47,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
       key={filterKey}
       className='w-full'
       isPeriodicityEnabled={isPeriodicityEnabled}
+      onFilterChange={onFilterChange}
       {...filterComponentProps}
     />
   ) : null;

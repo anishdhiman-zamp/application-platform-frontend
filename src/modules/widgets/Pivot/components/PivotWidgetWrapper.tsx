@@ -14,10 +14,11 @@ export type PivotTableWidgetPropsType = {
   currentPageFilters: string;
   isFilterInitialized?: boolean;
   periodicity: PERIODICITY_TYPES;
-  timeColumn: string;
+  timeColumns: string;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   isFilterLoading?: boolean;
+  currency: string;
   currentWidgetSelectedFilter: MapAny;
 };
 
@@ -26,16 +27,22 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   currentPageFilters,
   isFilterInitialized,
   periodicity,
-  timeColumn,
+  timeColumns,
   groupWidgetsOptions,
   onWidgetChange,
   isFilterLoading,
+  currency,
   currentWidgetSelectedFilter,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
       widgetId: widgetInstanceDetails.widget_instance_id,
-      payload: { filters: currentPageFilters, time_column: timeColumn, periodicity: periodicity as PERIODICITY_TYPES },
+      payload: {
+        filters: currentPageFilters,
+        time_column: timeColumns,
+        periodicity: periodicity as PERIODICITY_TYPES,
+        currency: currency,
+      },
     },
     {
       refetchOnMountOrArgChange: true,

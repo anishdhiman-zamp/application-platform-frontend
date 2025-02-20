@@ -25,10 +25,11 @@ interface WidgetsWrapperProps {
   isFilterInitialized?: boolean;
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
   periodicity: string;
-  timeColumn: string;
+  timeColumns: string;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   isFilterLoading?: boolean;
+  currency: string;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -37,10 +38,11 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   isFilterInitialized,
   onNodeClick,
   periodicity,
-  timeColumn,
+  timeColumns,
   groupWidgetsOptions,
   onWidgetChange,
   isFilterLoading,
+  currency,
 }) => {
   const widgetType = widgetDetails?.widget_type;
   const {
@@ -53,8 +55,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       widgetId: widgetDetails.widget_instance_id,
       payload: {
         filters: currentPageFilters,
-        time_column: timeColumn,
+        time_column: timeColumns,
         periodicity: (periodicity as PERIODICITY_TYPES) ?? PERIODICITY_TYPES.DAILY,
+        currency: currency,
       },
     },
     { refetchOnMountOrArgChange: false, skip: !isFilterInitialized },
@@ -62,7 +65,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength } = useMemo(() => {
     return widgetData?.result
-      ? getTransformedData(widgetData?.result, widgetDetails)
+      ? getTransformedData(widgetData?.result, widgetDetails, widgetData?.currency)
       : { transformedData: [], stackedValues: [], donutOthersData: [], yAxisTitle: '', maxValueLength: 0 };
   }, [widgetData]);
 
@@ -78,6 +81,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       widgetDetails,
       onNodeClick,
       baseOptions,
+      currency,
       stackedValues,
       transformedData?.length,
       donutOthersData,

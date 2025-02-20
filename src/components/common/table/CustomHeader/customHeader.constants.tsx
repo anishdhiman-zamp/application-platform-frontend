@@ -55,4 +55,4 @@ const getAggregations = (colId: string): MapAny => {
 };
 
 export const getEncodedRequestWithAggregations = (colId: string) =>
-  getEncodedRequest(getAggregations(colId) as IServerSideGetRowsRequest, [], true, true);
+  getEncodedRequest(getAggregations(colId) as IServerSideGetRowsRequest, '', [], true, true);

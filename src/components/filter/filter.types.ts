@@ -6,6 +6,7 @@ export type FilterValueTypes = string | null | Array<MapAny> | MapAny;
 export enum FILTER_TYPES {
   SEARCH = 'search',
   MULTI_SELECT = 'multi-select',
+  SINGLE_SELECT = 'single-select',
   DATE_RANGE = 'date-range',
   AMOUNT_RANGE = 'amount-range',
   TAGS = 'tags',

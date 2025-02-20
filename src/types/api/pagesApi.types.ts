@@ -74,14 +74,14 @@ export type SheetFilterConfigResponseType = {
 export type SheetFilterType = {
   name: string; // Name of the filter
   filter_type: FILTER_TYPES; // Type of filter
-  data_type: WidgetDataValueType; // Data type of the filter
-  widgets_in_scope: string[]; // List of widgets affected by this filter
-  targets: Target[]; // List of dataset targets for this filter
+  data_type?: WidgetDataValueType; // Data type of the filter
+  widgets_in_scope?: string[]; // List of widgets affected by this filter
+  targets: TargetType[]; // List of dataset targets for this filter
   default_value?: FilterDefaultValueType; // Default value for the filter
   options?: string[]; // Options for multi-select filters (if applicable)
 };
 
-interface Target {
+export interface TargetType {
   dataset_id: string; // Unique identifier for the dataset
   column: string; // Column name in the dataset
 }
@@ -89,7 +89,7 @@ interface Target {
 export interface FilterDefaultValueType {
   operator: CONDITION_OPERATOR_TYPE; // Operator for range-based filters
   value: string[];
-  from: number | string; // Start value or single value
+  from?: number | string; // Start value or single value
   to?: number | string; // End value (if applicable)
 }
 

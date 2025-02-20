@@ -120,7 +120,7 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
   });
 }
 
-export const getTransformedData = (data: WidgetDataType[], widgetDetails: WidgetInstanceType) => {
+export const getTransformedData = (data: WidgetDataType[], widgetDetails: WidgetInstanceType, currency?: string) => {
   const widgetType = widgetDetails.widget_type;
   const stackedValues: MapAny[] = [];
 
@@ -134,7 +134,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
       const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.column]);
 
-      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), in ${formatNumber(maxValue ?? '', 0, true, true)}`;
+      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), ${currency} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
@@ -178,6 +178,7 @@ export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
   onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
   baseOptions: AgChartOptions,
+  currency: string,
   stackedValues?: MapAny[],
   dataLength?: number,
   donutOthersData?: MapAny[],
@@ -198,7 +199,7 @@ export const getChartOptions = (
           },
           initialState: {
             zoom: {
-              ratioX: dataLength && dataLength > 12 ? { start: 1 - 12 / dataLength, end: 1 } : {},
+              ratioX: dataLength && dataLength > 5 ? { start: 1 - 5 / dataLength, end: 1 } : {},
             },
           },
         }
@@ -246,7 +247,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: yName,
-                  value: getCommaSeparatedNumber(datum[yKey], 2),
+                  value: `${currency} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
                 },
               ],
             }),

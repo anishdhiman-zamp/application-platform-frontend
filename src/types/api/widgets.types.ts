@@ -32,6 +32,8 @@ export type WidgetDataType = {
 
 export type WidgetDataResponseType = {
   result: WidgetDataType[];
+  periodicity?: PERIODICITY_TYPES;
+  currency?: string;
 };
 
 export type WidgetDataRequestType = {
@@ -40,6 +42,7 @@ export type WidgetDataRequestType = {
     filters: string;
     time_column?: string;
     periodicity?: PERIODICITY_TYPES;
+    currency?: string;
   };
 };
 

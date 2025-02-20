@@ -227,6 +227,7 @@ const getOrderByColumns = (request: IServerSideGetRowsRequest): OrderByType[] =>
 
 const formatRequest = (
   request: IServerSideGetRowsRequest,
+  fx_currency?: string,
   zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
@@ -243,6 +244,7 @@ const formatRequest = (
       page_size: PAGE_SIZE,
     },
     get_total_records: true,
+    fx_currency: fx_currency ?? '',
   };
 };
 
@@ -254,11 +256,12 @@ export const encodeRequest = (request: RequestType): string => {
 
 export const getEncodedRequest = (
   request: IServerSideGetRowsRequest,
+  fx_currency?: string,
   zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
 ): string => {
-  const formattedRequest = formatRequest(request, zampIds, useAlias, ignoreGroupCheck);
+  const formattedRequest = formatRequest(request, fx_currency, zampIds, useAlias, ignoreGroupCheck);
   const encodedRequest = encodeRequest(formattedRequest);
 
   return encodedRequest;

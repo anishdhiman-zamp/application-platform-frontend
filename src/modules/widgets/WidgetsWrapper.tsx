@@ -1,4 +1,5 @@
 import { FC, useMemo } from 'react';
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
@@ -9,14 +10,14 @@ import { FieldsMappingType, WIDGET_TYPES, WidgetInstanceType } from 'types/api/w
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { useFiltersContextStore } from 'components/filter/filters.context';
-
 interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceType;
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
+  currency: string[];
 }
 
-const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOptions, onWidgetChange }) => {
+const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOptions, onWidgetChange, currency }) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
@@ -48,8 +49,10 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
 
     for (const key in selectedFilters) {
       if (selectedFilters[key] && typeof selectedFilters[key] === 'object' && 'periodicity' in selectedFilters[key]) {
+        const filter = filtersConfig?.find((filter) => filter?.key === key);
+
         return {
-          timeColumn: key,
+          timeColumn: JSON.stringify(filter?.targets),
           periodicity: selectedFilters[key]?.periodicity,
         };
       }
@@ -110,7 +113,10 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
     }
 
     router.push(
-      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({ ...currentWidgetSelectedFilters, ...clickFilter })}`,
+      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({
+        ...currentWidgetSelectedFilters,
+        ...clickFilter,
+      })}&currency=${currency}`,
     );
   };
 
@@ -125,11 +131,12 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           currentPageFilters={currentPageFilters}
           isFilterInitialized={isFilterInitialized}
           onNodeClick={onNodeClick}
-          periodicity={periodicity.periodicity}
-          timeColumn={periodicity.timeColumn ?? ''}
+          periodicity={periodicity.periodicity ?? PERIODICITY_TYPES.DAILY}
+          timeColumns={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           isFilterLoading={isFilterLoading}
+          currency={currency?.[0]}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -138,9 +145,10 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           widgetDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
-          periodicity={periodicity?.periodicity}
-          timeColumn={periodicity?.timeColumn ?? ''}
+          periodicity={periodicity?.periodicity ?? PERIODICITY_TYPES.DAILY}
+          timeColumns={periodicity?.timeColumn ?? ''}
           isFilterLoading={isFilterLoading}
+          currency={currency?.[0]}
         />
       );
     }
@@ -151,11 +159,12 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
           currentWidgetSelectedFilter={currentWidgetSelectedFilters}
-          periodicity={periodicity.periodicity}
-          timeColumn={periodicity.timeColumn ?? ''}
+          periodicity={periodicity.periodicity ?? PERIODICITY_TYPES.DAILY}
+          timeColumns={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           isFilterLoading={isFilterLoading}
+          currency={currency?.[0]}
         />
       );
     }

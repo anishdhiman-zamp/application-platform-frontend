@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { DATE_FORMATS } from 'constants/date.constants';
+import { DATE_FORMATS, PERIODICITY_OPTIONS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
@@ -41,13 +41,14 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
       const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
 
       let title = '';
+      const count = selectedFilter?.values?.length;
 
       title = isNull
         ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
         : selectedFilter?.values?.join(', ');
 
-      if (!selectedFilter?.values?.length) {
-        title = '';
+      if (count) {
+        title = `${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
       }
 
       return {
@@ -66,7 +67,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
           const startDate = format(new Date(current?.dateFrom), DATE_FORMATS.dd_MMM_yyyy);
           const endDate = format(new Date(current?.dateTo), DATE_FORMATS.dd_MMM_yyyy);
 
-          title = `${startDate} - ${endDate}`;
+          title = `${startDate} - ${endDate}, ${PERIODICITY_OPTIONS.find((p) => p.value === current?.periodicity)?.label ?? ''}`;
         }
 
         return {

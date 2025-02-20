@@ -21,6 +21,8 @@ import ExportDataset from 'modules/data/components/exportDataset';
 import { formatColumns, getFilters } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
+import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -46,6 +48,7 @@ type DatasetByIdProps = {
 
 const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const filters = useSearchParams().get('filters');
+  const currency = useSearchParams().get('currency') ?? 'local';
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
@@ -72,6 +75,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
   const [datasetTitle, setDatasetTitle] = useState<string>('');
+  const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
 
   const { startPolling } = usePolling();
   const [refetchColumnList, setRefetchColumnList] = useState<number>(0);
@@ -86,7 +90,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        const queryConfig = getEncodedRequest(parameters.request, zampIds);
+        const queryConfig = getEncodedRequest(parameters.request, fxCurrency?.[0], zampIds);
 
         setExportsDatasetQuery(queryConfig);
         getDatasetData({
@@ -113,7 +117,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           });
       },
     };
-  }, [getDatasetData, id, zampIds]);
+  }, [getDatasetData, id, zampIds, fxCurrency]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
@@ -264,7 +268,11 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
-  }, [selectedFilters]);
+  }, [selectedFilters, fxCurrency]);
+
+  const handleFilterChange = (value: string[]) => {
+    setFxCurrency(value);
+  };
 
   useEffect(() => {
     if (datasetTitle && breadcrumbStack?.length === 0) {
@@ -293,6 +301,16 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           <div className='flex items-center gap-2.5'>
             <ExportDataset query={exportsDatasetQuery} datasetId={id as string} />
             <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
+            <div className='flex items-center gap-2'>
+              <div className='border-r border-GRAY_400 h-7'></div>
+              <SingleSelectFilter
+                onFilterChange={handleFilterChange}
+                value={fxCurrency}
+                key='fx_currency'
+                label='Currency'
+                options={PAGE_CURRENCY_OPTIONS}
+              />
+            </div>
           </div>
         </div>
 

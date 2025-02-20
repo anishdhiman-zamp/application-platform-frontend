@@ -16,6 +16,8 @@ interface FilterDropdownProps {
   allowClear?: boolean;
   allowActions: boolean;
   isPeriodicityEnabled?: boolean;
+  onFilterChange?: (value: string[]) => void;
+  closeOnSelect?: boolean;
 }
 
 const FilterDropdown: FC<FilterDropdownProps> = ({
@@ -28,6 +30,8 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   allowClear = true,
   allowActions = true,
   isPeriodicityEnabled = false,
+  onFilterChange,
+  closeOnSelect = false,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
   const controlRef = useRef<HTMLDivElement>(null);
@@ -49,6 +53,14 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
 
   const onClick = () => {
     setIsOpen((prev) => !prev);
+  };
+
+  const onChange = (value: string[]) => {
+    if (closeOnSelect) {
+      setIsOpen(false);
+    }
+
+    onFilterChange?.(value);
   };
 
   return (
@@ -83,6 +95,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           onClose={() => setIsOpen(false)}
           allowClear={allowClear}
           isPeriodicityEnabled={isPeriodicityEnabled}
+          onFilterChange={onChange}
           {...props}
         />
       </div>

@@ -6,7 +6,7 @@ import { FILTER_TYPES } from 'components/filter/filter.types';
 
 export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
   return {
-    key: filter?.targets[0]?.column,
+    key: filter?.targets?.[0]?.column,
     label: filter?.name,
     values: filter?.options,
     datatype: filter?.data_type,
@@ -53,7 +53,7 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
 
   filters.forEach((filter) => {
     if (filter?.default_value) {
-      defaultFilters[filter.targets[0]?.column] = getFilterDefaultValue(filter?.default_value, filter.filter_type);
+      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(filter?.default_value, filter.filter_type);
     }
   });
 
