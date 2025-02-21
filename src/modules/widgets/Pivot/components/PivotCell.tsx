@@ -3,27 +3,45 @@ import { Column, GridApi, IRowNode } from 'ag-grid-community';
 import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 
-interface PivotCellPropsType {
+interface PivotCellProps {
   node: IRowNode;
   value: string | number;
   maxGroupingLevel: number;
   showPercentage?: MapAny;
   column?: Column;
   api?: GridApi;
+  currency?: string;
 }
 
-const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, showPercentage, api, column }) => {
+const PivotCell: FC<PivotCellProps> = ({
+  node,
+  value,
+  maxGroupingLevel,
+  showPercentage,
+  api,
+  column,
+  currency = 'USD',
+}) => {
   const [toggledRows, setToggledRows] = useState<Record<string, boolean>>({});
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { isLastNode, isTopNode, isRootLevel } = useMemo(() => {
-    return {
+  const formattedValue = useMemo(() => {
+    const numericValue =
+      typeof value === 'number' ? value : parseFloat(value?.toString().replace(/[^0-9.-]/g, '') || '0');
+
+    if (isNaN(numericValue)) return '-';
+
+    return `${currency || 'USD'} ${getCommaSeparatedNumber(numericValue, 2)}`;
+  }, [currency, value]);
+
+  const { isLastNode, isTopNode, isRootLevel } = useMemo(
+    () => ({
       isLastNode: node.level === maxGroupingLevel,
       isTopNode: node.level === 0,
       isRootLevel: node.level === -1,
-    };
-  }, [node.level, maxGroupingLevel]);
-
-  const { only_parent = false } = showPercentage || {};
+    }),
+    [node.level, maxGroupingLevel],
+  );
 
   const isLastCell = useMemo(() => {
     const displayedColumns = api?.getAllDisplayedColumns();
@@ -31,25 +49,25 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, show
     return displayedColumns?.[displayedColumns.length - 1] === column;
   }, [column, api]);
 
-  const numericValue = typeof value === 'number' ? value : parseFloat(value.toString().replace(/[$,]/g, ''));
+  const numericValue = useMemo(() => {
+    return typeof value === 'number' ? value : parseFloat(value.toString().replace(/[$,]/g, ''));
+  }, [value]);
 
-  const aggData = node?.aggData;
-  const matchingField = Object.keys(aggData)?.find(
+  const aggData = node?.aggData || {};
+  const matchingField = Object.keys(aggData).find(
     (key) => parseFloat(aggData[key]?.toFixed(2)) === parseFloat(numericValue?.toFixed(2)),
   );
-  const totalValue = matchingField ? (parseFloat(node?.parent?.aggData?.[matchingField]?.toFixed(2)) ?? 0) : 0;
-  const isToggled = toggledRows[node?.id || node?.key || ''];
 
-  const percentageValue =
-    totalValue > 0
-      ? getCommaSeparatedNumber(Math.round(((numericValue || 0) / totalValue) * 100 * 100) / 100, 2) + '%'
-      : '0%';
+  const totalValue = matchingField ? parseFloat(node?.parent?.aggData?.[matchingField]?.toFixed(2)) || 0 : 0;
+  const isToggled = toggledRows[node?.id || node?.key || ''];
+  const { only_parent = false } = showPercentage || {};
+
+  const percentageValue = useMemo(() => {
+    return totalValue > 0 ? `${getCommaSeparatedNumber(((numericValue || 0) / totalValue) * 100, 2)}%` : '0.00%';
+  }, [numericValue, totalValue]);
 
   const shouldShowPercentage = showPercentage && !isRootLevel && (only_parent ? isTopNode : true);
-
-  const displayValue = shouldShowPercentage ? (isToggled ? value : percentageValue) : value;
-
-  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const displayValue = shouldShowPercentage ? (isToggled ? formattedValue : percentageValue) : formattedValue;
 
   const handleToggle = () => {
     if (shouldShowPercentage) {
@@ -76,8 +94,6 @@ const PivotCell: FC<PivotCellPropsType> = ({ node, value, maxGroupingLevel, show
         'h-full w-full flex items-center justify-end gap-3 px-3 py-2 text-GRAY_950 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400 f-13-450 cursor-pointer select-none',
         {
           'bg-BACKGROUND_GRAY_1': isLastNode || isRootLevel,
-        },
-        {
           'border-r-0': isLastCell,
         },
       )}

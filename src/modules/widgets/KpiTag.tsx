@@ -26,7 +26,7 @@ const KpiTag: FC<KpiTagProps> = ({
   isFilterLoading,
   currency,
 }) => {
-  const { data: widgetData, isLoading } = useGetWidgetDataQuery(
+  const { data: widgetData, isFetching } = useGetWidgetDataQuery(
     {
       widgetId: widgetDetails?.widget_instance_id,
       payload: {
@@ -51,7 +51,7 @@ const KpiTag: FC<KpiTagProps> = ({
       <div className='f-13-450 text-GRAY_900 mb-2'>{widgetDetails?.title}</div>
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isLoading || isFilterLoading}
+        isLoading={isFetching || isFilterLoading}
         loader={<SkeletonElement className='max-w-[250px]' />}
       >
         <div className='f-24-450 text-GRAY_950'>

@@ -340,7 +340,6 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
           return {
             field: col?.name,
             pivot: true,
-            sort: 'desc',
             headerComponent: PivotColGroupHeader,
             valueFormatter: (params) => formatPivotColGroupHeader(params),
             context: col,
@@ -536,4 +535,33 @@ export const buildTagFilter = (
         ...parentFilters,
         ...columnFilterWithPeriodicity,
       };
+};
+
+export const getRowDetails = (key: string, rowData: MapAny[]) => {
+  return rowData.find((row) => Object.values(row).includes(key)) || null;
+};
+
+export const generateMappingStructure = (mappings: any[]) => {
+  const mappingObject: Record<string, any> = {};
+
+  mappings.forEach((mapping) => {
+    const ref = mapping?.ref;
+    const datasetId = mapping?.dataset_id;
+
+    if (!mappingObject[ref]) {
+      mappingObject[ref] = { datasetId };
+    }
+
+    const allFields = [
+      ...(mapping?.fields?.columns || []),
+      ...(mapping?.fields?.rows || []),
+      ...(mapping?.fields?.values || []),
+    ];
+
+    allFields.forEach((field) => {
+      mappingObject[ref][field?.column] = field;
+    });
+  });
+
+  return mappingObject;
 };

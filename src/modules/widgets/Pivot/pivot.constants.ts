@@ -63,3 +63,17 @@ export const PIVOT_TABLE_THEME_PARAMS = {
   rowHoverColor: '#FAFAFA',
   rowHeigh: ROW_HEIGHT,
 };
+
+export const PIVOT_GRID_OPTIONS = {
+  pivotMode: true,
+  suppressContextMenu: true,
+  suppressMenuHide: false,
+  suppressRowDrag: true,
+  suppressMovableColumns: true,
+  suppressCellFocus: true,
+  maintainColumnOrder: true,
+  scrollbarWidth: 0,
+  groupMaintainOrder: true,
+  columnMaintainOrder: true,
+  animateRows: false,
+};

@@ -177,6 +177,11 @@
   scrollbar-color: #ebebeb #f0f0f0;
 }
 
+.pivot .ag-body-viewport {
+  max-height: 500px !important;
+  overflow: auto !important;
+}
+
 .ag-charts-tooltip {
   font-family: 'Inter';
   border: 1px solid #ebebeb;

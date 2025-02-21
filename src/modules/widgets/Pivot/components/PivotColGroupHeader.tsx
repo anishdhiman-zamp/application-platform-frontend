@@ -4,13 +4,13 @@ import Image from 'next/image';
 
 type PivotAutoGroupHeaderProps = {
   displayName: string;
-  isSingleValue: boolean;
+  isSingleHeader: boolean;
 };
 
-const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSingleValue = false }) => {
+const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSingleHeader = false }) => {
   return (
     <>
-      {isSingleValue ? (
+      {isSingleHeader ? (
         <div className='relative w-full h-full flex items-end justify-end p-3 break-words whitespace-normal bg-white overflow-hidden '>
           <Image
             src={PIVOT_HEADER_BG}

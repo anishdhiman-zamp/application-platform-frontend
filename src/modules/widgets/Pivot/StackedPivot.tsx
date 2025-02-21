@@ -16,7 +16,6 @@ import {
   RowApiModule,
   RowGroupingPanelModule,
   RowStyleModule,
-  Theme,
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
@@ -31,6 +30,7 @@ import {
   GRAND_ROW_TOTAL_POSITION,
   PINNED_COL_WIDTH,
   PINNED_DIRECTION,
+  PIVOT_GRID_OPTIONS,
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
   PIVOT_REF,
@@ -38,16 +38,16 @@ import {
 } from 'modules/widgets/Pivot/pivot.constants';
 import { ParentFilters, ParentMappingDetail } from 'modules/widgets/Pivot/pivot.types';
 import {
-  backendConfig,
   buildTagFilter,
+  generateMappingStructure,
   generateParentFilters,
   getAllParentKeys,
   getColumnFilterWithPeriodicity,
-  getDynamicRowStyle,
   getMappingDetails,
   getPivotColDefs,
   getPivotColumns,
   getPivotData,
+  getRowDetails,
   getTagDetails,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { useRouter } from 'next/navigation';
@@ -91,61 +91,29 @@ const StackedPivot = ({
   periodicity,
 }: StackedPivotProps) => {
   const router = useRouter();
-
+  const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const {
     data_mappings: { mappings },
     title,
     display_config,
   } = widgetInstanceDetails;
 
-  const mappingStructure = useMemo(() => {
-    const generateMappingStructure = (mappings: any[]) => {
-      const mappingObject: Record<string, any> = {};
-
-      mappings.forEach((mapping) => {
-        const ref = mapping?.ref;
-        const datasetId = mapping?.dataset_id;
-
-        if (!mappingObject[ref]) {
-          mappingObject[ref] = { datasetId };
-        }
-
-        const allFields = [
-          ...(mapping?.fields?.columns || []),
-          ...(mapping?.fields?.rows || []),
-          ...(mapping?.fields?.values || []),
-        ];
-
-        allFields.forEach((field) => {
-          mappingObject[ref][field?.column] = field;
-        });
-      });
-
-      return mappingObject;
-    };
-
-    return generateMappingStructure(mappings);
-  }, [mappings]);
-
-  const allRefs = useMemo(() => {
-    return mappings?.map((mapping) => mapping?.ref) || [];
-  }, [mappings]);
+  const mappingStructure = useMemo(() => generateMappingStructure(mappings), [mappings]);
+  const allRefs = useMemo(() => mappings.map((m) => m.ref), [mappings]);
 
   const { colDef, rowData } = useMemo(() => {
-    const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
+    const pivotCols = getPivotColumns(widgetInstanceDetails, widgetData);
 
-    const pivotColDefs = getPivotColDefs(pivotColumns);
-    const rowData = getPivotData(pivotColumns, widgetData, periodicity as PERIODICITY_TYPES);
-
-    return { colDef: pivotColDefs, rowData };
+    return {
+      colDef: getPivotColDefs(pivotCols),
+      rowData: getPivotData(pivotCols, widgetData, periodicity),
+    };
   }, [widgetInstanceDetails, widgetData, periodicity]);
 
-  const isSingleHeader = useMemo(() => {
-    return colDef?.filter((col) => 'aggFunc' in col).length === 1;
-  }, [colDef]);
+  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col).length === 1, [colDef]);
 
-  const defaultColDef = useMemo<ColDef>(() => {
-    return {
+  const defaultColDef = useMemo<ColDef>(
+    () => ({
       flex: 1,
       minWidth: COL_MIN_WIDTH,
       enableValue: true,
@@ -159,16 +127,18 @@ const StackedPivot = ({
             column={column}
             api={api}
             node={node}
+            currency={widgetData?.currency}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
             showPercentage={display_config?.show_percentages}
           />
         );
       },
-    };
-  }, [widgetInstanceDetails, display_config, colDef]);
+    }),
+    [widgetInstanceDetails, display_config, colDef, widgetData],
+  );
 
-  const autoGroupColumnDef = useMemo<ColDef>(() => {
-    return {
+  const autoGroupColumnDef = useMemo<ColDef>(
+    () => ({
       minWidth: PINNED_COL_WIDTH,
       resizable: false,
       pinned: 'left',
@@ -194,13 +164,9 @@ const StackedPivot = ({
         suppressCount: true,
         suppressPadding: true,
       },
-    };
-  }, [widgetInstanceDetails, isSingleHeader, colDef]);
-
-  const getRowStyle = useMemo(() => {
-    return (params: any) =>
-      getDynamicRowStyle(backendConfig.styleConfig.rowStyles, params.node.level, params.node.value);
-  }, [backendConfig.styleConfig.rowStyles]);
+    }),
+    [widgetInstanceDetails, isSingleHeader, colDef, groupWidgetsOptions, onWidgetChange, title, display_config],
+  );
 
   const processPivotResultColGroupDef = useMemo(() => {
     return (colGroupDef: ColGroupDef) => {
@@ -210,10 +176,6 @@ const StackedPivot = ({
       };
     };
   }, [isSingleHeader]);
-
-  const getRowDetails = (key: string) => {
-    return rowData.find((row) => Object.values(row).includes(key)) || null;
-  };
 
   const navigateToDataset = (datasetId: string | null, filters: Record<string, any>) => {
     const query = {
@@ -231,7 +193,7 @@ const StackedPivot = ({
 
     if (!currentNodeKey || node?.level === -1 || colDef?.pinned === PINNED_DIRECTION.LEFT) return;
 
-    const filteredRowData = getRowDetails(currentNodeKey);
+    const filteredRowData = getRowDetails(currentNodeKey, rowData);
 
     if (!filteredRowData) return;
 
@@ -295,37 +257,26 @@ const StackedPivot = ({
     return navigateToDataset(datasetId, widgetFilter);
   };
 
-  const customTheme = getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} });
-
-  const theme = useMemo<Theme | 'legacy'>(() => {
-    return customTheme ?? myTheme;
-  }, [customTheme]);
-
   return (
-    <div className='h-full w-full'>
-      <div className='h-full w-full pivot'>
-        <AgGridReact
-          theme={theme}
-          className='group'
-          rowData={rowData}
-          columnDefs={colDef}
-          getRowStyle={getRowStyle}
-          defaultColDef={defaultColDef}
-          autoGroupColumnDef={autoGroupColumnDef}
-          pivotMode
-          suppressContextMenu
-          suppressMenuHide={false}
-          pivotHeaderHeight={isSingleHeader ? 0 : PIVOT_HEADER_HEIGHT}
-          pivotGroupHeaderHeight={isSingleHeader ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
-          processPivotResultColGroupDef={processPivotResultColGroupDef}
-          suppressRowDrag
-          suppressMovableColumns
-          suppressCellFocus
-          scrollbarWidth={0}
-          grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
-          onCellDoubleClicked={handleOnCellDoubleClicked}
-        />
-      </div>
+    <div className='h-fit w-full pivot'>
+      <AgGridReact
+        theme={customTheme ?? myTheme}
+        domLayout='autoHeight'
+        className='group'
+        rowData={rowData}
+        columnDefs={colDef}
+        defaultColDef={defaultColDef}
+        autoGroupColumnDef={autoGroupColumnDef}
+        pivotHeaderHeight={isSingleHeader ? 0 : PIVOT_HEADER_HEIGHT}
+        pivotGroupHeaderHeight={isSingleHeader ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
+        grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
+        processPivotResultColGroupDef={processPivotResultColGroupDef}
+        onCellDoubleClicked={handleOnCellDoubleClicked}
+        autoSizeStrategy={{
+          type: 'fitGridWidth',
+        }}
+        {...PIVOT_GRID_OPTIONS}
+      />
     </div>
   );
 };

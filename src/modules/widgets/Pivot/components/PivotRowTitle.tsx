@@ -76,7 +76,12 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         />
       )}
 
-      <span className='f-13-550 text-GRAY_950'>{isRootLevel ? ROOT_LEVEL_TITLE : formattedValue}</span>
+      <span
+        className='f-13-550 text-GRAY_950 overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px]'
+        title={formattedValue}
+      >
+        {isRootLevel ? ROOT_LEVEL_TITLE : formattedValue}
+      </span>
 
       {isRootLevel && <Image src={ARROW_RIGHT} alt={'arrow-right'} width={18} height={18} priority />}
     </div>
