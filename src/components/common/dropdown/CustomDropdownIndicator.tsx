@@ -8,7 +8,7 @@ import { DROPDOWN_SIZE_STYLES } from 'components/common/dropdown/dropdown.consta
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => {
-  const { selectProps = {}, isHoveredDropdown } = props;
+  const { selectProps = {}, isHoveredDropdown, customDropdownIndicatorSize } = props;
 
   // @ts-ignore selectProps contains all props passed to react select. It's passed to each child component of react-select and takes custom props as well.
   const { size, menuIsOpen } = selectProps;
@@ -18,8 +18,16 @@ export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => 
       <SvgSpriteLoader
         id={menuIsOpen ? 'chevron-up' : 'chevron-down'}
         iconCategory={ICON_SPRITE_TYPES.ARROWS}
-        width={DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.width}
-        height={DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.height}
+        width={
+          customDropdownIndicatorSize
+            ? customDropdownIndicatorSize
+            : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.width
+        }
+        height={
+          customDropdownIndicatorSize
+            ? customDropdownIndicatorSize
+            : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.height
+        }
         color={COLORS.GRAY_900}
       />
     </div>

@@ -38,7 +38,7 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   const [selectedRole, setSelectedRole] = useState<PageAccessPrivilegesType>(role as PageAccessPrivilegesType);
   const { refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId });
   const [changeRole] = usePatchChangeAudienceRoleInPageMutation();
-  const [deleteAudience] = useDeleteAudienceFromPageAccessMutation();
+  const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromPageAccessMutation();
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
   const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
   const checkPermission = accessPermissionForPage(userPrivilege);
@@ -166,6 +166,7 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
+        isLoading={isLoadingDeleteAudience}
         feature='remove-access-from-page'
         warningDescription={`${userName} will be immediately removed from ${resource_type} and lose all access`}
       />

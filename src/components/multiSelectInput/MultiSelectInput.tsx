@@ -24,6 +24,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   onValidateAndAdd,
   optionsList,
   onSelectOption,
+  selectOnlyFromList = false,
+  transformLabel,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,6 +33,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
   const [openDropdownOptions, setOpenDropdownOptions] = useState<boolean>(false);
+  const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(0);
   const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
 
   const handleSetInputFocus = () => {
@@ -46,16 +49,51 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   }, [isOpen, inputRef]);
 
   const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const trimmedSearch = search.trim();
     const keyEvent = e.key;
 
-    if (
-      (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) &&
-      trimmedSearch
-    ) {
+    if (selectOnlyFromList) {
+      if (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) {
+        e.preventDefault();
+
+        const selectedOption = filteredDropdownOptions[hoveredOptionIndex ?? 0];
+
+        if (selectedOption) {
+          onValidateAndAdd(selectedOption.value);
+          setSearch('');
+        }
+      } else if (keyEvent === 'ArrowDown' || keyEvent === 'ArrowUp') {
+        handleKeyDown(e);
+      }
+    } else {
+      const trimmedSearch = search.trim();
+
+      if (
+        (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) &&
+        trimmedSearch
+      ) {
+        e.preventDefault();
+        onValidateAndAdd(trimmedSearch);
+        setSearch('');
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!filteredDropdownOptions.length) return;
+
+    if (e.key === KEY_CODES.ARROW_DOWN) {
       e.preventDefault();
-      onValidateAndAdd(trimmedSearch);
-      setSearch('');
+      setHoveredOptionIndex((prevIndex) =>
+        prevIndex === null || prevIndex === filteredDropdownOptions.length - 1 ? 0 : prevIndex + 1,
+      );
+    } else if (e.key === KEY_CODES.ARROW_UP) {
+      e.preventDefault();
+      setHoveredOptionIndex((prevIndex) =>
+        prevIndex === null || prevIndex === 0 ? filteredDropdownOptions.length - 1 : prevIndex - 1,
+      );
+    } else if (e.key === 'Enter' && hoveredOptionIndex !== null) {
+      e.preventDefault();
+      handleSelectDropdownOption(filteredDropdownOptions[hoveredOptionIndex]);
     }
   };
 
@@ -112,13 +150,22 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     if (!debouncedSearch.trim()) return combinedOptions;
 
     const filteredOptions = combinedOptions.filter((option) =>
-      option?.value.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      option?.value.toLowerCase().startsWith(debouncedSearch.toLowerCase()),
     );
 
     setOpenDropdownOptions(filteredOptions?.length > 0);
 
     return filteredOptions;
   }, [combinedOptions, debouncedSearch]);
+
+  useEffect(() => {
+    if (debouncedSearch.trim()) {
+      setOpenDropdownOptions((prev) =>
+        prev !== filteredDropdownOptions.length > 0 ? filteredDropdownOptions.length > 0 : prev,
+      );
+    }
+    setHoveredOptionIndex(0);
+  }, [filteredDropdownOptions, debouncedSearch]);
 
   const handleSelectDropdownOption = useCallback(
     (option: { value: string; label: string; color?: string }) => {
@@ -141,7 +188,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           {inputArrayList.map((item, index) => (
             <div
               key={index}
-              className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit'
+              className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit cursor-default'
               style={{
                 backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
                 border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
@@ -153,8 +200,9 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 width={10}
                 height={10}
-                color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
                 onClick={() => handleRemoveItem(index)}
+                color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
+                className='cursor-pointer'
               />
             </div>
           ))}
@@ -169,11 +217,11 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             customPaddingClassName='p-0'
             focusClassNames='focus:outline-none focus:border-none focus:shadow-none'
             cursorClassname='cursor-default'
-            inputFontClassName='f-12-500 py-0 !rounded-none'
+            inputFontClassName='f-13-400 py-0 !rounded-none'
           />
         </div>
         {roleOptions && (
-          <div className='flex min-w-max h-fit'>
+          <div className='flex min-w-max h-fit !cursor-pointer'>
             <Dropdown
               options={roleOptions}
               id={`${id}-multi-select-input-dropdown`}
@@ -198,6 +246,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
               menuOptionClasses={{
                 contentWrapper: 'py-2',
               }}
+              customDropdownIndicatorSize={14}
             />
           </div>
         )}
@@ -210,21 +259,30 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
-            <div className='flex flex-col w-full max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
+            <div
+              className='flex flex-col w-full max-h-[200px] overflow-y-auto'
+              style={{ scrollbarWidth: 'none' }}
+              tabIndex={0}
+            >
               {filteredDropdownOptions?.map((option, index) => (
                 <div
                   key={index}
-                  className='w-full py-1.5 hover:bg-GRAY_50 px-1.5 rounded-md'
+                  className={cn(
+                    'w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer',
+                    hoveredOptionIndex === null && index === 0 ? 'bg-GRAY_50' : '',
+                    hoveredOptionIndex === index ? 'bg-GRAY_50' : '',
+                  )}
+                  onMouseEnter={() => setHoveredOptionIndex(index)}
                   onClick={() => handleSelectDropdownOption(option)}
                 >
                   <span
-                    className='f-12-400 text-GRAY_1000 w-full px-1.5 py-0.5 rounded'
+                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize'
                     style={{
                       backgroundColor: option?.color ?? COLORS.WHITE,
                       border: `1px solid ${COLORS.GRAY_400}`,
                     }}
                   >
-                    {option?.label}
+                    {transformLabel ? transformLabel(option?.label) : option?.label}
                   </span>
                 </div>
               ))}

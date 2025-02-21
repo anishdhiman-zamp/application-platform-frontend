@@ -294,7 +294,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           <Player src={PAGE_LOADER} className='lottie-player' autoplay keepLastFrame style={{ height: '200px' }} />
         }
       >
-        <div className='flex items-center justify-between pr-4'>
+        <div className='flex items-center justify-between pr-8'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>

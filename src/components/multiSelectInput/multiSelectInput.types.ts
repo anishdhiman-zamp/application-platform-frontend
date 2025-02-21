@@ -24,10 +24,14 @@ export type MultiSelectInputPropsType = {
   onValidateAndAdd: (value: string) => void;
   optionsList?: { value: string; label: string; color?: string }[];
   onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
+  selectOnlyFromList?: boolean;
+  transformLabel?: (label: string) => string;
 };
 
 export enum KEY_CODES {
   ENTER = 'Enter',
   COMMA = ',',
   SPACE = ' ',
+  ARROW_DOWN = 'ArrowDown',
+  ARROW_UP = 'ArrowUp',
 }

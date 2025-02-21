@@ -12,6 +12,7 @@ const RemoveFromTeamPopup: FC<RemoveFromTeamPopupPropsType> = ({
   isOpen,
   onClose,
   onDelete,
+  isLoading,
   warningDescription,
 }) => {
   return (
@@ -32,7 +33,13 @@ const RemoveFromTeamPopup: FC<RemoveFromTeamPopupPropsType> = ({
           <Button id={`${feature}-cancel-btn`} size={SIZE_TYPES.MEDIUM} type={BUTTON_TYPES.SECONDARY} onClick={onClose}>
             Cancel
           </Button>
-          <Button id='delete-btn' size={SIZE_TYPES.MEDIUM} type={BUTTON_TYPES.DANGER} onClick={onDelete}>
+          <Button
+            id='delete-btn'
+            size={SIZE_TYPES.MEDIUM}
+            type={BUTTON_TYPES.DANGER}
+            onClick={onDelete}
+            isLoading={isLoading}
+          >
             Delete
           </Button>
         </div>

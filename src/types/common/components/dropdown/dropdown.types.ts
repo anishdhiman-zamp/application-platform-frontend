@@ -85,10 +85,12 @@ export type DropdownProps = {
   onClickDelete?: defaultFnType;
   isHoveredDropdown?: boolean;
   showSelectedIcon?: boolean;
+  customDropdownIndicatorSize?: number;
 };
 
 export interface CustomDropdownIndicatorProps extends DropdownIndicatorProps<OptionsType> {
   isHoveredDropdown?: boolean;
+  customDropdownIndicatorSize?: number;
 }
 
 export interface DropdownCustomClassNames {

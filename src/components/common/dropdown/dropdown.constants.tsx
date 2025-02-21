@@ -15,6 +15,8 @@ export const DROPDOWN_SIZE_STYLES = {
         borderRadius: '0px',
         padding: '21px 24px',
         minHeight: '72px',
+        width: 'fit-content',
+        cursor: 'pointer',
       },
       option: {
         height: '64px',
@@ -45,6 +47,8 @@ export const DROPDOWN_SIZE_STYLES = {
         borderRadius: '6px',
         padding: '21px 24px',
         minHeight: '72px',
+        width: 'fit-content',
+        cursor: 'pointer',
       },
       option: {
         height: '64px',
@@ -76,6 +80,7 @@ export const DROPDOWN_SIZE_STYLES = {
         padding: '6px 12px',
         minHeight: '40px',
         width: 'fit-content',
+        cursor: 'pointer',
       },
       option: {
         fontSize: '13px',

@@ -18,7 +18,7 @@ import { accessPermissionForDataset } from 'utils/accessPermission/accessPermiss
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { cn } from 'utils/common';
+import { cn, getUserNameFromEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -211,8 +211,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
         id='share-page-to-audience-btn'
         onClick={handleOpenShareDatasetPopup}
         className={cn(
-          openShareDatasetPopup && '!border !border-GRAY_400 bg-GRAY_100',
-          'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-GRAY_100 border border-transparent',
+          openShareDatasetPopup && '!border !border-GRAY_400 !bg-GRAY_100',
+          'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-BG_GRAY_2 active:bg-GRAY_400 border border-GRAY_400 bg-white',
         )}
       >
         Share
@@ -221,20 +221,20 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
         {openShareDatasetPopup && (
           <div ref={shareDatasetPopupRef} className='absolute flex flex-col w-[400px] right-0 top-9 z-1000'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
-              <div className='flex w-full justify-between items-center pt-5 pb-6 py-5 px-4'>
-                <span className=''>Share this dataset</span>
+              <div className='flex w-full justify-between items-center p-5'>
+                <span className='f-16-600 text-GRAY_950'>Share this dataset</span>
                 <div className='p-1 cursor-pointer' onClick={handleCloseShareDatasetPopup}>
                   <SvgSpriteLoader
                     id='x-close'
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
                     width={16}
                     height={16}
-                    color={COLORS.TEXT_PRIMARY}
+                    className='text-GRAY_800 hover:text-GRAY_1000'
                   />
                 </div>
               </div>
               <div className='flex flex-col rounded-b-3.5 w-[400px]'>
-                <div className='pt-0 px-5 pb-5'>
+                <div className='pt-0 px-4 pb-5'>
                   <MultiSelectInput
                     id='share-dataset'
                     search={search}
@@ -251,6 +251,8 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                     onValidateAndAdd={handleValidateAndAdd}
                     optionsList={customizedTeamMembersData}
                     onSelectOption={handleOptionSelection}
+                    transformLabel={getUserNameFromEmail}
+                    selectOnlyFromList
                   />
                 </div>
                 <div className='flex items-center justify-between w-full py-4 px-5 border-t border-GRAY_400'>
@@ -280,7 +282,10 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
             {userAccessToDatasetList?.length > 0 && (
               <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
                 <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-auto ag-body-vertical-scroll'>
+                <div
+                  className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-auto'
+                  style={{ scrollbarWidth: 'none' }}
+                >
                   {userAccessToDatasetList?.map((audience, index) => (
                     <DatasetAccessToAudiences
                       key={index}

@@ -26,6 +26,7 @@ export type RemoveFromTeamPopupPropsType = {
   isOpen: boolean;
   onClose?: defaultFnType;
   onDelete?: defaultFnType;
+  isLoading?: boolean;
   feature?: string;
   warningDescription: string;
 };

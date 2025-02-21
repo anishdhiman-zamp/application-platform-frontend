@@ -48,6 +48,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
   enableDelete,
   isHoveredDropdown,
   showSelectedIcon,
+  customDropdownIndicatorSize,
 }) => {
   return (
     <Select
@@ -64,7 +65,13 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
       hideSelectedOptions={false}
       components={{
         Option: CustomOption,
-        DropdownIndicator: (props) => <CustomDropdownIndicator {...props} isHoveredDropdown={isHoveredDropdown} />,
+        DropdownIndicator: (props) => (
+          <CustomDropdownIndicator
+            {...props}
+            customDropdownIndicatorSize={customDropdownIndicatorSize}
+            isHoveredDropdown={isHoveredDropdown}
+          />
+        ),
         MultiValueRemove: CustomMultivalueRemove,
         SingleValue: CustomSingleValue,
         ...(enableReset ? { MenuList } : {}),
@@ -85,6 +92,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
           paddingBottom: '4px',
           paddingLeft: '0',
           paddingRight: '8px',
+          cursor: 'pointer',
           backgroundColor: isSelected ? (showSelectedIcon ? 'white' : COLORS.GRAY_100) : 'white',
           color: isSelected ? COLORS.GRAY_1000 : COLORS.GRAY_900,
           ':active': {

@@ -88,6 +88,7 @@ export const Dropdown: FC<DropdownProps> = ({
   onClickDelete,
   isHoveredDropdown,
   showSelectedIcon,
+  customDropdownIndicatorSize,
 }) => {
   const valueRef = useRef(value);
 
@@ -301,6 +302,7 @@ export const Dropdown: FC<DropdownProps> = ({
           enableDelete={enableDelete}
           isHoveredDropdown={isHoveredDropdown}
           showSelectedIcon={showSelectedIcon}
+          customDropdownIndicatorSize={customDropdownIndicatorSize}
         />
       </div>
       {showSupporterInfo && <SupporterInfo {...supporterInfoProps} />}
