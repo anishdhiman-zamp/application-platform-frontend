@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { IRowNode } from 'ag-grid-community';
-import { ARROW_RIGHT, CHEVRON_DOWN, CHEVRON_RIGHT, OTHER_GATEWAY } from 'constants/icons';
+import { ARROW_RIGHT, CHEVRON_DOWN, CHEVRON_RIGHT, DISABLED_CHEVRON_RIGHT, OTHER_GATEWAY } from 'constants/icons';
 import {
   getReconStatusIcon,
   RECON_PAYMENT_ICONS,
@@ -43,12 +43,15 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
         isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1',
       )}
-      style={{ paddingLeft: `${node?.level * (isLowestLevel ? 52 : 28) + 24}px`, willChange: 'transform' }}
+      style={{
+        paddingLeft: `${node?.level * (isLowestLevel ? 46 : 28) + 24}px`,
+        willChange: 'transform',
+      }}
       onClick={() => allowExpanding && node.setExpanded(!expanded)}
     >
-      {allowExpanding && !isRootLevel && (
+      {!isRootLevel && !isLowestLevel && (
         <Image
-          src={expanded ? CHEVRON_DOWN : CHEVRON_RIGHT}
+          src={allowExpanding ? (expanded ? CHEVRON_DOWN : CHEVRON_RIGHT) : DISABLED_CHEVRON_RIGHT}
           width={18}
           height={18}
           alt={expanded ? 'chevron-down' : 'chevron-right'}
@@ -73,6 +76,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
           width={18}
           height={18}
           priority
+          className='ml-1.5'
         />
       )}
 

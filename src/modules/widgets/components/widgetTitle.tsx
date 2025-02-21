@@ -11,9 +11,10 @@ interface WidgetTitleProps {
   onWidgetChange: (widgetId: string) => void;
   widgetType: WIDGET_TYPES;
   isSingleValue?: boolean;
+  activeWidget: string;
 }
 
-const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }: WidgetTitleProps) => {
+const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, activeWidget }: WidgetTitleProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isGroupWidget, setIsGroupWidget] = useState<boolean>(false);
 
@@ -83,7 +84,9 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType }:
                 <div
                   key={option?.value}
                   onClick={() => onWidgetChange(option?.value as string)}
-                  className='py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+                  className={cn('py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100', {
+                    'bg-GRAY_100': activeWidget === option?.value,
+                  })}
                 >
                   {<div className='f-12-400 text-GRAY_1000'>{option?.label}</div>}
                 </div>

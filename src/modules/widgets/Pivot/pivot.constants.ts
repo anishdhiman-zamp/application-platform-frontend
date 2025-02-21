@@ -74,6 +74,6 @@ export const PIVOT_GRID_OPTIONS = {
   maintainColumnOrder: true,
   scrollbarWidth: 0,
   groupMaintainOrder: true,
-  columnMaintainOrder: true,
   animateRows: false,
+  suppressGroupRowsSticky: true,
 };

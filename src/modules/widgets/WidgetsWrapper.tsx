@@ -15,9 +15,16 @@ interface WidgetsWrapperProps {
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   currency: string[];
+  activeWidget: string;
 }
 
-const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOptions, onWidgetChange, currency }) => {
+const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
+  widgetDetails,
+  groupWidgetsOptions,
+  onWidgetChange,
+  currency,
+  activeWidget,
+}) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
@@ -135,6 +142,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           timeColumns={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
         />
@@ -163,6 +171,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({ widgetDetails, groupWidgetsOp
           timeColumns={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
         />

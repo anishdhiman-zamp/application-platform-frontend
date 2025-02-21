@@ -1,4 +1,4 @@
-import { ColDef, RowStyle, ValueFormatterParams } from 'ag-grid-community';
+import { ColDef, RowStyle } from 'ag-grid-community';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
@@ -10,7 +10,6 @@ import {
   PIVOT_DATA_TYPES,
   PivotColumnMetadata,
 } from 'modules/widgets/Pivot/pivot.types';
-import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
@@ -103,12 +102,8 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
   return {}; // Default cell style
 };
 
-export const parseType = (type: PIVOT_DATA_TYPES, value: any, periodicity: PERIODICITY_TYPES) => {
+export const parseType = (type: PIVOT_DATA_TYPES, value: any) => {
   switch (type) {
-    case PIVOT_DATA_TYPES.DATE:
-    case PIVOT_DATA_TYPES.TIMESTAMP: {
-      return getFormattedDateWithPeriodicity(periodicity, value);
-    }
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
       const number = Number(value);
@@ -268,11 +263,7 @@ export const getPivotColumns = (
 };
 
 // transform the pivot data into a format that can be used by ag-grid
-export const getPivotData = (
-  pivotColumns: PivotColumnMetadata[],
-  wInstanceData: WidgetDataResponseType,
-  periodicity: PERIODICITY_TYPES,
-) => {
+export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData: WidgetDataResponseType) => {
   // Array to store transformed rows
   const rows: MapAny[] = [];
 
@@ -295,11 +286,7 @@ export const getPivotData = (
 
         if (pivotColumn) {
           // If matching pivot column found, transform the value using its data type
-          transformedRow[pivotColumn?.name] = parseType(
-            pivotColumn?.dataType as PIVOT_DATA_TYPES,
-            value,
-            periodicity as PERIODICITY_TYPES,
-          );
+          transformedRow[pivotColumn?.name] = parseType(pivotColumn?.dataType as PIVOT_DATA_TYPES, value);
         } else {
           if (key === PIVOT_REF) {
             // Special handling for REF field - find pivot column by source name
@@ -341,7 +328,6 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
             field: col?.name,
             pivot: true,
             headerComponent: PivotColGroupHeader,
-            valueFormatter: (params) => formatPivotColGroupHeader(params),
             context: col,
           };
         case 'aggregate': {
@@ -396,20 +382,6 @@ export const shouldAllowExpandingRow = <T extends AGGridPivotNode<T>>(node: T) =
   }
 
   return true;
-};
-
-const formatPivotColGroupHeader = (params: ValueFormatterParams) => {
-  const constructorName = params.value?.constructor?.name;
-
-  switch (constructorName) {
-    case 'Date': {
-      const formatted = params?.value.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-      return formatted;
-    }
-    default:
-      return params?.value;
-  }
 };
 
 export const formatDateToISO = (dateStr: string): string => {

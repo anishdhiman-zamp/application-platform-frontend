@@ -1,4 +1,3 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/pivot.utils.mock';
 import {
   AGGridPivotNode,
@@ -29,8 +28,7 @@ describe('getPivotData', () => {
   it('works correctly', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
-    const periodicity = PERIODICITY_TYPES.DAILY;
-    const result = getPivotData(pivotColumns, widgetData, periodicity);
+    const result = getPivotData(pivotColumns, widgetData);
 
     expect(result).toBeDefined();
   });

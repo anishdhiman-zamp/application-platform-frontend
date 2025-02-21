@@ -33,6 +33,7 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({ widgetConfig, widgetInstances
       groupWidgetsOptions={groupWidgetsOptions}
       onWidgetChange={onWidgetChange}
       currency={currency}
+      activeWidget={activeWidget}
     />
   ) : (
     <div>No widget found</div>

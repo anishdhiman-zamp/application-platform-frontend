@@ -5,6 +5,7 @@ import {
   ColDef,
   ColGroupDef,
   ColumnApiModule,
+  ColumnAutoSizeModule,
   ColumnMenuModule,
   ColumnsToolPanelModule,
   ContextMenuModule,
@@ -71,6 +72,7 @@ ModuleRegistry.registerModules([
   RowApiModule,
   ValidationModule,
   GridStateModule,
+  ColumnAutoSizeModule,
 ]);
 
 type StackedPivotProps = {
@@ -80,6 +82,7 @@ type StackedPivotProps = {
   onWidgetChange: (widgetId: string) => void;
   currentWidgetSelectedFilter: MapAny;
   periodicity: PERIODICITY_TYPES;
+  activeWidget: string;
 };
 
 const StackedPivot = ({
@@ -89,6 +92,7 @@ const StackedPivot = ({
   onWidgetChange,
   currentWidgetSelectedFilter,
   periodicity,
+  activeWidget,
 }: StackedPivotProps) => {
   const router = useRouter();
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
@@ -106,7 +110,7 @@ const StackedPivot = ({
 
     return {
       colDef: getPivotColDefs(pivotCols),
-      rowData: getPivotData(pivotCols, widgetData, periodicity),
+      rowData: getPivotData(pivotCols, widgetData),
     };
   }, [widgetInstanceDetails, widgetData, periodicity]);
 
@@ -149,6 +153,7 @@ const StackedPivot = ({
         groupWidgetsOptions,
         onWidgetChange,
         widgetType: WIDGET_TYPES.PIVOT_TABLE,
+        activeWidget,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
@@ -173,9 +178,10 @@ const StackedPivot = ({
       colGroupDef.headerGroupComponent = PivotColGroupHeader;
       colGroupDef.headerGroupComponentParams = {
         isSingleHeader,
+        periodicity,
       };
     };
-  }, [isSingleHeader]);
+  }, [isSingleHeader, periodicity]);
 
   const navigateToDataset = (datasetId: string | null, filters: Record<string, any>) => {
     const query = {

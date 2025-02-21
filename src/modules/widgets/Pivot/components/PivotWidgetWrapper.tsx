@@ -20,6 +20,7 @@ export type PivotTableWidgetPropsType = {
   isFilterLoading?: boolean;
   currency: string;
   currentWidgetSelectedFilter: MapAny;
+  activeWidget: string;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -33,6 +34,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   isFilterLoading,
   currency,
   currentWidgetSelectedFilter,
+  activeWidget,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -63,6 +65,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           title={widgetInstanceDetails?.title}
+          activeWidget={activeWidget}
         />
       }
       loader={<PivotTableLoader />}
@@ -73,6 +76,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           widgetInstanceDetails={widgetInstanceDetails}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
+          activeWidget={activeWidget}
           periodicity={periodicity}
           currentWidgetSelectedFilter={currentWidgetSelectedFilter}
         />

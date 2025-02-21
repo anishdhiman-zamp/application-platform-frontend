@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
@@ -30,6 +30,7 @@ interface WidgetsWrapperProps {
   onWidgetChange: (widgetId: string) => void;
   isFilterLoading?: boolean;
   currency: string;
+  activeWidget: string;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -43,6 +44,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   onWidgetChange,
   isFilterLoading,
   currency,
+  activeWidget,
 }) => {
   const widgetType = widgetDetails?.widget_type;
   const {
@@ -96,6 +98,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         groupWidgetsOptions={groupWidgetsOptions}
         onWidgetChange={onWidgetChange}
         widgetType={widgetType}
+        activeWidget={activeWidget}
       />
       <CommonWrapper
         isLoading={isLoading || isFilterLoading}

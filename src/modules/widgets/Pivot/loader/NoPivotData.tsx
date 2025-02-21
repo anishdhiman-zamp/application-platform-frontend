@@ -8,9 +8,10 @@ interface NoPivotDataProps {
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   title: string;
+  activeWidget: string;
 }
 
-const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange, title }) => {
+const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange, title, activeWidget }) => {
   return (
     <div className='overflow-x-auto flex flex-col w-full h-full border border-GRAY_400 rounded-xl overflow-hidden group'>
       <div className='w-full h-[80px] border-b bg-red-500 border-GRAY_400'>
@@ -19,6 +20,7 @@ const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange
           onWidgetChange={onWidgetChange}
           title={title}
           widgetType={WIDGET_TYPES.PIVOT_TABLE}
+          activeWidget={activeWidget}
         />
       </div>
       <div className='w-full h-full flex items-center justify-center z-0'>

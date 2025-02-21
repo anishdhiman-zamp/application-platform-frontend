@@ -16,7 +16,15 @@ const PivotColHeader = (props: Props) => {
 
   return (
     <div className='relative w-full h-full flex items-end justify-end p-3 border-r-0.5 border-b-0.5 border-GRAY_400 break-words whitespace-normal bg-white overflow-hidden'>
-      <Image src={PIVOT_HEADER_BG} alt='Pivot Header Background' fill objectFit='cover' priority />
+      <Image
+        src={PIVOT_HEADER_BG}
+        alt='Pivot Header Background'
+        fill
+        objectFit='cover'
+        priority
+        className='shrink-0'
+        objectPosition='center'
+      />
       <span className='relative z-10 f-13-550'>{contextFieldName || props.displayName}</span>
     </div>
   );
