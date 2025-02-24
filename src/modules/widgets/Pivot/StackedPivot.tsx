@@ -154,6 +154,7 @@ const StackedPivot = ({
         onWidgetChange,
         widgetType: WIDGET_TYPES.PIVOT_TABLE,
         activeWidget,
+        isPortalNeeded: true,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (

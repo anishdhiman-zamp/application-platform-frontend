@@ -61,7 +61,7 @@ export const RECON_PAYMENT_ICONS: Record<RECON_PAYMENT_GATEWAY_TYPES, string> = 
 export const PIVOT_TABLE_THEME_PARAMS = {
   fontFamily: { googleFont: 'Inter' },
   rowHoverColor: '#FAFAFA',
-  rowHeigh: ROW_HEIGHT,
+  rowHeight: ROW_HEIGHT,
 };
 
 export const PIVOT_GRID_OPTIONS = {
