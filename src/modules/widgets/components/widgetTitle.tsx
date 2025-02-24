@@ -12,9 +12,17 @@ interface WidgetTitleProps {
   widgetType: WIDGET_TYPES;
   isSingleValue?: boolean;
   activeWidget: string;
+  className?: string;
 }
 
-const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, activeWidget }: WidgetTitleProps) => {
+const WidgetTitle = ({
+  title,
+  groupWidgetsOptions,
+  onWidgetChange,
+  widgetType,
+  activeWidget,
+  className,
+}: WidgetTitleProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isGroupWidget, setIsGroupWidget] = useState<boolean>(false);
 
@@ -32,6 +40,7 @@ const WidgetTitle = ({ title, groupWidgetsOptions, onWidgetChange, widgetType, a
   return (
     <div
       className={cn(
+        className,
         isPivotTable
           ? 'bg-white w-full flex h-full p-6 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400'
           : '',

@@ -1,8 +1,8 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { useGetPagesQuery } from 'apis/pages';
-import { COLORS } from 'constants/colors';
+import { ZAMP_LOADER } from 'constants/icons';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
-import ProgressBar from 'components/common/RingProgress';
+import Image from 'next/image';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
 const Home = () => {
@@ -12,7 +12,7 @@ const Home = () => {
 
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }
@@ -21,15 +21,9 @@ const Home = () => {
   return (
     <div className='flex justify-center items-center h-full'>
       {isLoading || (pages || []).length > 0 ? (
-        <ProgressBar
-          trackColor={COLORS.BLACK}
-          indicatorColor={COLORS.WHITE}
-          indicatorWidth={10}
-          trackWidth={5}
-          className='animate-spin'
-          size={100}
-          progress={30}
-        />
+        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
+          <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+        </div>
       ) : (
         <p>No Pages Found</p>
       )}

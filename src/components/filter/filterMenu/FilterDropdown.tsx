@@ -79,7 +79,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
       <div
         ref={menuRef}
         className={cn(
-          `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50`,
+          `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50 min-w-[218px]`,
           controlClassName,
           getMenuPlacement ? 'right-0' : 'left-0',
           isOpen ? '' : 'max-h-0 overflow-hidden border-0',

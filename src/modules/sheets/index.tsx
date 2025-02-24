@@ -62,7 +62,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
           }
         >
           <div className='flex justify-between items-center z-100 px-5'>
-            <div className='f-24-450 text-GRAY_950 mb-2.5'>{sheetDetails?.name}</div>
+            <div className='f-24-450 text-GRAY_950'>{sheetDetails?.name}</div>
             <div className='flex items-center gap-2'>
               <FiltersWrapper
                 allowClear={false}

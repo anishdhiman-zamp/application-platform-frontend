@@ -99,6 +99,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         onWidgetChange={onWidgetChange}
         widgetType={widgetType}
         activeWidget={activeWidget}
+        className='!z-1000'
       />
       <CommonWrapper
         isLoading={isLoading || isFilterLoading}
@@ -109,7 +110,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         isError={isError}
         refetchFunction={refetch}
         loader={
-          <div className='top-0 -mt-5 right-0 h-full w-full flex justify-center items-center z-1000 bg-white'>
+          <div className='absolute top-0 left-0 h-full w-full flex justify-center items-center z-100 '>
             <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={150} height={150} />
           </div>
         }

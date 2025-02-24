@@ -50,7 +50,11 @@ const Listing = () => {
     };
   }, [getDatasetListing]);
 
-  return <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />;
+  return (
+    <div className='rounded-tl-xl overflow-hidden'>
+      <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
+    </div>
+  );
 };
 
 export default Listing;
