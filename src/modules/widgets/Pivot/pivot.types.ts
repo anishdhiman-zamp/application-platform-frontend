@@ -1,9 +1,14 @@
+import { ColumnContext } from 'modules/widgets/Pivot/pivot.utils';
+import { FILTER_TYPES } from 'components/filter/filter.types';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+
 export type PivotColumnMetadata =
   | {
       kind: 'group';
       name: string;
       dataType: 'string' | 'number' | 'date';
       sourceName: string;
+      alias: string;
       mappingName: string;
       heirarchy: number;
       hasChildren: boolean;
@@ -14,6 +19,7 @@ export type PivotColumnMetadata =
       name: string;
       dataType: 'string' | 'number' | 'date';
       sourceName: string;
+      alias: string;
       mappingName: string;
     }
   | {
@@ -22,6 +28,7 @@ export type PivotColumnMetadata =
       dataType: 'string' | 'number' | 'date';
       aggregation: string;
       sourceName: string;
+      alias: string;
       mappingName: string;
     };
 
@@ -56,6 +63,30 @@ export type FilterConfig = {
   values?: string[];
   dateFrom?: string;
   dateTo?: string;
+  column?: string;
 };
 
 export type ParentFilters = Record<string, FilterConfig>;
+
+export type PivotContext = {
+  filterContext: Record<string, ColumnFilterConfig[]>;
+  widgetMappingDatasets: Record<string, string>;
+  columnContextMapping: Record<string, Record<string, ColumnContext>>;
+};
+
+export type ColumnFilterConfig = {
+  column: string;
+} & (
+  | {
+      filterType: FILTER_TYPES.MULTI_SELECT;
+      type: CONDITION_OPERATOR_TYPE.IN;
+    }
+  | {
+      filterType: FILTER_TYPES.DATE_RANGE;
+      type: CONDITION_OPERATOR_TYPE.IN_BETWEEN;
+    }
+  | {
+      filterType: FILTER_TYPES.SEARCH;
+      type: CONDITION_OPERATOR_TYPE.STARTS_WITH;
+    }
+);

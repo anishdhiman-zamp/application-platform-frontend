@@ -1,10 +1,13 @@
+import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/pivot.utils.mock';
 import {
   AGGridPivotNode,
+  concatTagFilters,
   flattenChildrenAfterGroup,
   getPivotColDefs,
   getPivotColumns,
   getPivotData,
+  unwrapTagColumn,
 } from 'modules/widgets/Pivot/pivot.utils';
 import '@testing-library/jest-dom';
 
@@ -28,7 +31,8 @@ describe('getPivotData', () => {
   it('works correctly', () => {
     const pivotColumns = getPivotColumns(widgetInstanceDetails, widgetData);
 
-    const result = getPivotData(pivotColumns, widgetData);
+    const periodicity = PERIODICITY_TYPES.DAILY;
+    const result = getPivotData(pivotColumns, widgetData, periodicity);
 
     expect(result).toBeDefined();
   });
@@ -115,5 +119,139 @@ describe('flattenChildrenAfterGroup', () => {
     const result = flattenChildrenAfterGroup(node);
 
     expect(result).toHaveLength(0);
+  });
+});
+
+describe('concatTagFilters', () => {
+  it('should concatenate tag filters with correct hierarchy', () => {
+    const filters = {
+      __tag_LEVEL_1: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+      __tag_LEVEL_2: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['aws'],
+      },
+      __tag_LEVEL_3: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['ec2'],
+      },
+      otherFilter: {
+        filterType: 'search',
+        values: ['something'],
+      },
+    };
+
+    const result = concatTagFilters(filters);
+
+    expect(result).toEqual({
+      tag: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud.aws.ec2'],
+      },
+      otherFilter: {
+        filterType: 'search',
+        values: ['something'],
+      },
+    });
+  });
+
+  it('should handle single level tag filter', () => {
+    const filters = {
+      __tag_LEVEL_1: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+    };
+
+    const result = concatTagFilters(filters);
+
+    expect(result).toEqual({
+      tag: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+    });
+  });
+
+  it('should handle non-sequential tag levels', () => {
+    const filters = {
+      __tag_LEVEL_1: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+      __tag_LEVEL_3: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['ec2'],
+      },
+    };
+
+    const result = concatTagFilters(filters);
+
+    expect(result).toEqual({
+      tag: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud.ec2'],
+      },
+    });
+  });
+
+  it('should handle empty filters object', () => {
+    const filters = {};
+    const result = concatTagFilters(filters);
+
+    expect(result).toEqual({});
+  });
+
+  it('should preserve non-tag filters', () => {
+    const filters = {
+      status: {
+        filterType: 'search',
+        values: ['active'],
+      },
+      __tag_LEVEL_1: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+    };
+
+    const result = concatTagFilters(filters);
+
+    expect(result).toEqual({
+      tag: {
+        filterType: 'search',
+        type: 'startswith',
+        values: ['cloud'],
+      },
+      status: {
+        filterType: 'search',
+        values: ['active'],
+      },
+    });
+  });
+});
+
+describe('unwrapTagColumn', () => {
+  it('works correctly', () => {
+    const result = unwrapTagColumn('__tag_LEVEL_1');
+
+    expect(result).toEqual({ name: 'tag', hierarchy: 1 });
+  });
+
+  it('works correctly', () => {
+    const result = unwrapTagColumn('__tag_name_test_LEVEL_5');
+
+    expect(result).toEqual({ name: 'tag_name_test', hierarchy: 5 });
   });
 });

@@ -1,5 +1,4 @@
 import { FC, memo } from 'react';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { PIVOT_HEADER_BG } from 'constants/icons';
 import { formatPivotValue } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
@@ -7,11 +6,10 @@ import Image from 'next/image';
 type PivotAutoGroupHeaderProps = {
   displayName: string;
   isSingleHeader: boolean;
-  periodicity?: PERIODICITY_TYPES;
 };
 
-const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, periodicity, isSingleHeader = false }) => {
-  const formattedDisplayName = formatPivotValue(displayName, periodicity);
+const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSingleHeader = false }) => {
+  const formattedDisplayName = formatPivotValue(displayName);
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { MapAny } from 'types/commonTypes';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export enum WIDGET_TYPES {
@@ -80,16 +81,16 @@ export type PivotTableWidgetMapping = {
       alias?: string;
       type: string;
       field_type: FIELD_TYPES;
-      drilldown_filter_type?: string;
-      drilldown_filter_operator?: string;
+      drilldown_filter_type?: FILTER_TYPES; // todo -- use discrimnated unions
+      drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
     }[];
     rows?: {
       column: string;
       alias?: string;
       type: string;
       field_type: FIELD_TYPES;
-      drilldown_filter_type?: string;
-      drilldown_filter_operator?: string;
+      drilldown_filter_type?: FILTER_TYPES; // todo -- use discrimnated unions
+      drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
     }[];
     values: {
       column: string;
@@ -97,8 +98,8 @@ export type PivotTableWidgetMapping = {
       aggregation: AGGREGATION_TYPES;
       type: string;
       field_type: FIELD_TYPES;
-      drilldown_filter_type?: string;
-      drilldown_filter_operator?: string;
+      drilldown_filter_type?: FILTER_TYPES; // todo -- use discrimnated unions
+      drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
     }[];
   };
 };

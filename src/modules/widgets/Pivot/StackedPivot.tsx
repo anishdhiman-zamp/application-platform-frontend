@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import {
+  CellDoubleClickedEvent,
   CellStyleModule,
   ClientSideRowModelModule,
   ColDef,
@@ -34,22 +35,19 @@ import {
   PIVOT_GRID_OPTIONS,
   PIVOT_GROUP_HEADER_HEIGHT,
   PIVOT_HEADER_HEIGHT,
-  PIVOT_REF,
   PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { ParentFilters, ParentMappingDetail } from 'modules/widgets/Pivot/pivot.types';
+import { ColumnFilterConfig, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
 import {
-  buildTagFilter,
-  generateMappingStructure,
-  generateParentFilters,
-  getAllParentKeys,
-  getColumnFilterWithPeriodicity,
-  getMappingDetails,
+  concatTagFilters,
+  getColumnLevelFilters,
+  getFilterContext,
   getPivotColDefs,
   getPivotColumns,
   getPivotData,
-  getRowDetails,
-  getTagDetails,
+  getRowLevelFilters,
+  getTopNode,
+  getWidgetMappingDatasets,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
@@ -96,23 +94,27 @@ const StackedPivot = ({
 }: StackedPivotProps) => {
   const router = useRouter();
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
-  const {
-    data_mappings: { mappings },
-    title,
-    display_config,
-  } = widgetInstanceDetails;
+  const { title, display_config } = widgetInstanceDetails;
 
-  const mappingStructure = useMemo(() => generateMappingStructure(mappings), [mappings]);
-  const allRefs = useMemo(() => mappings.map((m) => m.ref), [mappings]);
-
-  const { colDef, rowData } = useMemo(() => {
+  const { colDef, rowData, columnContextMapping } = useMemo(() => {
     const pivotCols = getPivotColumns(widgetInstanceDetails, widgetData);
+    const { coldefs, columnContextMapping } = getPivotColDefs(pivotCols);
 
     return {
-      colDef: getPivotColDefs(pivotCols),
-      rowData: getPivotData(pivotCols, widgetData),
+      colDef: coldefs,
+      rowData: getPivotData(pivotCols, widgetData, periodicity),
+      columnContextMapping,
     };
   }, [widgetInstanceDetails, widgetData, periodicity]);
+
+  const pivotContext: PivotContext = useMemo(
+    () => ({
+      filterContext: getFilterContext(widgetInstanceDetails),
+      widgetMappingDatasets: getWidgetMappingDatasets(widgetInstanceDetails),
+      columnContextMapping,
+    }),
+    [widgetInstanceDetails, columnContextMapping],
+  );
 
   const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col).length === 1, [colDef]);
 
@@ -179,12 +181,11 @@ const StackedPivot = ({
       colGroupDef.headerGroupComponent = PivotColGroupHeader;
       colGroupDef.headerGroupComponentParams = {
         isSingleHeader,
-        periodicity,
       };
     };
-  }, [isSingleHeader, periodicity]);
+  }, [isSingleHeader]);
 
-  const navigateToDataset = (datasetId: string | null, filters: Record<string, any>) => {
+  const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
     const query = {
       ...currentWidgetSelectedFilter,
       ...filters,
@@ -194,74 +195,65 @@ const StackedPivot = ({
     router.push(`${path}?filters=${JSON.stringify(query)}`);
   };
 
-  const handleOnCellDoubleClicked = (params: any) => {
-    const { node, colDef, api } = params;
-    const currentNodeKey = node?.key;
+  const handleDrilldown = (params: CellDoubleClickedEvent<MapAny[], PivotContext>) => {
+    const { node, colDef: currentColDef } = params;
 
-    if (!currentNodeKey || node?.level === -1 || colDef?.pinned === PINNED_DIRECTION.LEFT) return;
+    if (node?.level === -1 || currentColDef?.pinned === PINNED_DIRECTION.LEFT) return;
 
-    const filteredRowData = getRowDetails(currentNodeKey, rowData);
+    // extract the context from the params
+    const context: PivotContext = params.context;
 
-    if (!filteredRowData) return;
+    // extract the current mapping ref from the colDef
+    let currentRef = currentColDef?.context?.mappingName;
 
-    const pivotCols = api?.getPivotColumns();
-    const pivotColId = pivotCols?.[0]?.getColId();
-    const pivotKey = colDef?.pivotKeys?.[0];
-
-    const currentRowContext = node?.rowGroupColumn?.getColDef()?.context?.sourceName;
-    const parentDetails = getAllParentKeys(node, filteredRowData);
-    const isTopNode = node?.level === 0;
-    const { isTag, tagColumnName } = getTagDetails(filteredRowData, currentNodeKey);
-
-    const datasetId = mappingStructure?.[filteredRowData?.[PIVOT_REF]]?.datasetId;
-    const columnMappingDetails = getMappingDetails(mappingStructure, filteredRowData?.[PIVOT_REF], pivotColId);
-    const rowMappingDetails = getMappingDetails(
-      mappingStructure,
-      filteredRowData?.[PIVOT_REF],
-      isTag ? tagColumnName : currentRowContext,
-    );
-
-    const parentMappingDetails: ParentMappingDetail[] = parentDetails.map(({ key, context, tag }) => ({
-      key,
-      tag,
-      mappingDetails: getMappingDetails(
-        mappingStructure,
-        filteredRowData?.[PIVOT_REF],
-        isTag ? tagColumnName : context,
-      ),
-    }));
-
-    const parentFilters = generateParentFilters(parentMappingDetails, currentNodeKey, isTag);
-
-    const columnFilterWithPeriodicity = getColumnFilterWithPeriodicity(
-      columnMappingDetails,
-      periodicity as PERIODICITY_TYPES,
-      pivotKey,
-      currentWidgetSelectedFilter,
-    );
-
-    if (allRefs?.includes(currentNodeKey)) {
-      return navigateToDataset(datasetId, columnFilterWithPeriodicity);
+    // if there are more than one mappings, then the current ref is the top node
+    if (Object.keys(context?.columnContextMapping).length > 1) {
+      currentRef = getTopNode(node)?.key;
     }
+    if (!currentRef) return;
 
-    if (isTag) {
-      return navigateToDataset(
-        datasetId,
-        buildTagFilter(isTopNode, rowMappingDetails, currentNodeKey, parentFilters, columnFilterWithPeriodicity),
-      );
-    }
+    // extract the column filters for the current ref
+    const currentRefColumnFilters: ColumnFilterConfig[] = context?.filterContext?.[currentRef];
 
-    const widgetFilter: ParentFilters = {
-      [rowMappingDetails?.column ?? '']: {
-        filterType: rowMappingDetails?.drilldown_filter_type,
-        type: rowMappingDetails?.drilldown_filter_operator,
-        values: [currentNodeKey],
+    if (!currentRefColumnFilters) return;
+
+    // extract the column context mapping for the current ref
+    // this mapping holds the mapping of identifiers set in AGGrid against the column context (name, alias)
+    const currentRefColumnContextMapping = context?.columnContextMapping[currentRef];
+
+    if (!currentRefColumnContextMapping) return;
+
+    // extract the row level filters for the currently clickedn ode
+    const rowLevelFilters = getRowLevelFilters(currentRefColumnFilters, currentRefColumnContextMapping, node);
+
+    // get the pivot columns that the current cell belongs to
+    const pivotColumns = params.api.getPivotColumns().map((col) => col.getColDef());
+
+    // get the column level filters for the current cell
+    const columnLevelFilters = getColumnLevelFilters(
+      currentRefColumnFilters,
+      pivotColumns,
+      currentRefColumnContextMapping,
+      {
+        periodicity,
+        widgetSelectedFilter: currentWidgetSelectedFilter,
       },
-      ...parentFilters,
-      ...columnFilterWithPeriodicity,
-    };
+      currentColDef.pivotKeys || [],
+    );
 
-    return navigateToDataset(datasetId, widgetFilter);
+    // merge the row level and column level filters
+    const widgetFilter: ParentFilters = concatTagFilters({
+      ...rowLevelFilters,
+      ...columnLevelFilters,
+    });
+
+    // extract the dataset id from the context
+    const datasetId = context?.widgetMappingDatasets?.[currentRef];
+
+    if (!datasetId) return;
+
+    // navigate to the dataset
+    navigateToDataset(datasetId, widgetFilter);
   };
 
   return (
@@ -269,6 +261,7 @@ const StackedPivot = ({
       <AgGridReact
         theme={customTheme ?? myTheme}
         domLayout='autoHeight'
+        context={pivotContext}
         className='group'
         rowData={rowData}
         columnDefs={colDef}
@@ -278,7 +271,8 @@ const StackedPivot = ({
         pivotGroupHeaderHeight={isSingleHeader ? 93 : PIVOT_GROUP_HEADER_HEIGHT}
         grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
         processPivotResultColGroupDef={processPivotResultColGroupDef}
-        onCellDoubleClicked={handleOnCellDoubleClicked}
+        onCellDoubleClicked={handleDrilldown}
+        enableStrictPivotColumnOrder
         {...PIVOT_GRID_OPTIONS}
       />
     </div>

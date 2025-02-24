@@ -1,20 +1,22 @@
-import { ColDef, RowStyle } from 'ag-grid-community';
+import { ColDef, IRowNode, RowStyle } from 'ag-grid-community';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import {
-  MappingDetails,
-  ParentFilters,
-  ParentMappingDetail,
-  PIVOT_DATA_TYPES,
-  PivotColumnMetadata,
-} from 'modules/widgets/Pivot/pivot.types';
+import { ColumnFilterConfig, PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
 import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
-import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
+import {
+  AGGREGATION_TYPES,
+  PivotTableWidgetInstanceType,
+  WIDGET_TYPES,
+  WidgetDataResponseType,
+  WidgetInstanceType,
+} from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
+import { FILTER_TYPES } from 'components/filter/filter.types';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const backendConfig = {
   styleConfig: {
@@ -111,11 +113,11 @@ const resetToMidnight = (isoString: string) => {
   return date?.toISOString();
 };
 
-export const parseType = (type: PIVOT_DATA_TYPES, value: any) => {
+export const parseType = (type: PIVOT_DATA_TYPES, value: any, periodicity: PERIODICITY_TYPES) => {
   switch (type) {
     case PIVOT_DATA_TYPES.DATE:
     case PIVOT_DATA_TYPES.TIMESTAMP:
-      return resetToMidnight(value);
+      return getFormattedDateWithPeriodicity(periodicity, resetToMidnight(value));
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
       const number = Number(value);
@@ -169,8 +171,9 @@ export const getPivotColumns = (
         kind: 'pivot',
         name: col.alias ? col.alias : col.column,
         dataType: col.type as 'string' | 'number' | 'date',
-        sourceName: col.alias ? col?.alias : col?.column,
+        sourceName: col?.column,
         mappingName: ref,
+        alias: col.alias ? col.alias : col.column,
       });
     });
 
@@ -182,8 +185,9 @@ export const getPivotColumns = (
         name: val?.alias ? val?.alias : val?.column,
         dataType: val?.type as 'string' | 'number' | 'date',
         aggregation: val?.aggregation,
-        sourceName: val?.alias ? val?.alias : val?.column,
+        sourceName: val?.column,
         mappingName: ref,
+        alias: val?.alias ? val?.alias : val?.column,
       });
     });
 
@@ -197,7 +201,7 @@ export const getPivotColumns = (
         mappingRows.push({
           column: mapping?.ref,
           type: 'string',
-          alias: '',
+          alias: mapping?.ref,
         });
       }
     } else {
@@ -214,6 +218,7 @@ export const getPivotColumns = (
         hasChildren: boolean;
         sourceName: string;
         mappingName: string;
+        alias: string;
       }
     > = {};
 
@@ -247,6 +252,7 @@ export const getPivotColumns = (
               hasChildren: colIndex < depth - 1,
               sourceName: colName,
               mappingName: ref,
+              alias: row?.alias || column,
             };
           });
         currentLevel += depth - 1;
@@ -258,6 +264,7 @@ export const getPivotColumns = (
           hasChildren: false,
           sourceName: alias ? alias : column,
           mappingName: ref,
+          alias: row?.alias || column,
         };
       }
     });
@@ -267,6 +274,7 @@ export const getPivotColumns = (
         kind: 'group',
         ...colData,
         dataType: colData?.dataType as 'string' | 'number' | 'date',
+        alias: colData?.alias,
         maxHeirarchy: currentLevel,
       });
     });
@@ -276,7 +284,11 @@ export const getPivotColumns = (
 };
 
 // transform the pivot data into a format that can be used by ag-grid
-export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData: WidgetDataResponseType) => {
+export const getPivotData = (
+  pivotColumns: PivotColumnMetadata[],
+  wInstanceData: WidgetDataResponseType,
+  periodicity: PERIODICITY_TYPES,
+) => {
   // Array to store transformed rows
   const rows: MapAny[] = [];
 
@@ -299,17 +311,14 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
 
         if (pivotColumn) {
           // If matching pivot column found, transform the value using its data type
-          transformedRow[pivotColumn?.name] = parseType(pivotColumn?.dataType as PIVOT_DATA_TYPES, value);
+          transformedRow[pivotColumn?.name] = parseType(pivotColumn?.dataType as PIVOT_DATA_TYPES, value, periodicity);
         } else {
           if (key === PIVOT_REF) {
             // Special handling for REF field - find pivot column by source name
             const transformedColumn = pivotColumns?.find((col) => col?.sourceName === value);
 
             if (transformedColumn) {
-              transformedRow[transformedColumn?.name] = parseType(
-                transformedColumn?.dataType as PIVOT_DATA_TYPES,
-                value,
-              );
+              transformedRow[transformedColumn?.name] = value;
             }
           } else {
             // Keep original key-value pair if no transformation needed
@@ -326,8 +335,27 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
   return rows;
 };
 
-export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] => {
-  return pivotColumns
+export type ColumnContext = {
+  name: string;
+  alias: string;
+};
+
+export const getPivotColDefs = (
+  pivotColumns: PivotColumnMetadata[],
+): { coldefs: ColDef[]; columnContextMapping: Record<string, Record<string, ColumnContext>> } => {
+  const columnContextMapping: Record<string, Record<string, ColumnContext>> = {};
+
+  pivotColumns.forEach((col) => {
+    if (!columnContextMapping[col?.mappingName]) {
+      columnContextMapping[col?.mappingName] = {};
+    }
+    columnContextMapping[col?.mappingName][col?.name] = {
+      name: col?.sourceName,
+      alias: col?.alias,
+    };
+  });
+
+  const coldefs: ColDef[] = pivotColumns
     .filter((col, index, self) => self?.findIndex((t) => t?.name === col?.name) === index)
     .map((col) => {
       switch (col.kind) {
@@ -364,10 +392,13 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
         }
       }
     });
+
+  return { coldefs, columnContextMapping };
 };
 
 export type AGGridPivotNode<T extends AGGridPivotNode<T>> = {
   key?: string | null;
+  parent?: T | null;
   childrenAfterGroup?: T[] | null;
 };
 export const flattenChildrenAfterGroup = <T extends AGGridPivotNode<T>>(node: T): T[] => {
@@ -399,144 +430,224 @@ export const shouldAllowExpandingRow = <T extends AGGridPivotNode<T>>(node: T) =
   return true;
 };
 
-export const columnNameFromTagContext = (context?: string) => {
-  const match = context?.match(/^__(.*?)_/);
+export const getFilterContext = (
+  widgetInstance: PivotTableWidgetInstanceType,
+): Record<string, ColumnFilterConfig[]> => {
+  const { data_mappings } = widgetInstance;
 
-  return match ? match[1] : null;
-};
+  const columnFilterConfigs: Record<string, ColumnFilterConfig[]> = {};
 
-export const getTagDetails = (filteredRowData: Record<string, any>, currentNodeKey: string) => {
-  const tagRowContext = Object.keys(filteredRowData)
-    .filter((key) => filteredRowData[key] === currentNodeKey)
-    ?.find((key) => key.startsWith('__'));
-
-  return {
-    isTag: !!tagRowContext && tagRowContext.startsWith('__'),
-    tagColumnName: columnNameFromTagContext(tagRowContext),
-  };
-};
-
-export const getAllParentKeys = (node: any, filteredRowData: Record<string, any>): MapAny[] => {
-  const parentKeys: MapAny[] = [];
-
-  while (node?.parent) {
-    if (node?.parent?.key && node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName) {
-      parentKeys.push({
-        key: node?.parent?.key,
-        tag: getTagDetails(filteredRowData, node?.parent?.key).isTag,
-        context: getTagDetails(filteredRowData, node?.parent?.key).isTag
-          ? getTagDetails(filteredRowData, node?.parent?.key).tagColumnName
-          : node?.parent?.rowGroupColumn?.getColDef()?.context?.sourceName,
-      });
-    }
-    node = node.parent;
-  }
-
-  return parentKeys;
-};
-
-export const getMappingDetails = (mappingStructure: any, pivotRef: string, key: string): MappingDetails | null => {
-  return mappingStructure?.[pivotRef]?.[key] || null;
-};
-
-export const generateParentFilters = (
-  parentMappingDetails: ParentMappingDetail[],
-  currentNodeKey: string,
-  isTag: boolean,
-): ParentFilters => {
-  return parentMappingDetails.reduce((acc: ParentFilters, { key, mappingDetails, tag }, index, array) => {
-    const allKeys = tag
-      ? isTag
-        ? [...array.slice(0, index + 1).map(({ key }) => key), currentNodeKey].join('.')
-        : [...array.slice(0, index + 1).map(({ key }) => key)].join('.')
-      : key;
-
-    if (mappingDetails?.column) {
-      acc[mappingDetails.column] = {
-        filterType: mappingDetails.drilldown_filter_type,
-        type: mappingDetails.drilldown_filter_operator,
-        values: [allKeys],
-      };
+  data_mappings?.mappings?.forEach((mapping) => {
+    if (!columnFilterConfigs[mapping?.ref]) {
+      columnFilterConfigs[mapping?.ref] = [];
     }
 
-    return acc;
-  }, {});
-};
+    const { fields } = mapping;
 
-export const getColumnFilterWithPeriodicity = (
-  columnMappingDetails: MappingDetails | null,
-  periodicity: PERIODICITY_TYPES,
-  pivotKey: string,
-  currentWidgetSelectedFilter: Record<string, any>,
-): ParentFilters => {
-  if (!columnMappingDetails?.column) return {};
+    fields?.rows?.forEach((row) => {
+      columnFilterConfigs[mapping?.ref].push({
+        column: row?.column,
+        filterType: row?.drilldown_filter_type as FILTER_TYPES,
+        type: row?.drilldown_filter_operator as CONDITION_OPERATOR_TYPE,
+      } as ColumnFilterConfig);
+    });
 
-  const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
-    periodicity,
-    pivotKey,
-    currentWidgetSelectedFilter[columnMappingDetails.column]?.dateFrom,
-    currentWidgetSelectedFilter[columnMappingDetails.column]?.dateTo,
-  );
-
-  return {
-    [columnMappingDetails.column]: {
-      filterType: columnMappingDetails.drilldown_filter_type,
-      type: columnMappingDetails.drilldown_filter_operator,
-      dateFrom,
-      dateTo,
-    },
-  };
-};
-
-export const buildTagFilter = (
-  isTopNode: boolean,
-  rowMappingDetails: MappingDetails | null,
-  currentNodeKey: string,
-  parentFilters: ParentFilters,
-  columnFilterWithPeriodicity: ParentFilters,
-): ParentFilters => {
-  return isTopNode
-    ? {
-        [rowMappingDetails?.column ?? '']: {
-          filterType: rowMappingDetails?.drilldown_filter_type,
-          type: rowMappingDetails?.drilldown_filter_operator,
-          values: [currentNodeKey],
-        },
-        ...columnFilterWithPeriodicity,
-      }
-    : {
-        ...parentFilters,
-        ...columnFilterWithPeriodicity,
-      };
-};
-
-export const getRowDetails = (key: string, rowData: MapAny[]) => {
-  return rowData.find((row) => Object.values(row).includes(key)) || null;
-};
-
-export const generateMappingStructure = (mappings: any[]) => {
-  const mappingObject: Record<string, any> = {};
-
-  mappings.forEach((mapping) => {
-    const ref = mapping?.ref;
-    const datasetId = mapping?.dataset_id;
-
-    if (!mappingObject[ref]) {
-      mappingObject[ref] = { datasetId };
-    }
-
-    const allFields = [
-      ...(mapping?.fields?.columns || []),
-      ...(mapping?.fields?.rows || []),
-      ...(mapping?.fields?.values || []),
-    ];
-
-    allFields.forEach((field) => {
-      mappingObject[ref][field?.column] = field;
+    fields?.columns?.forEach((col) => {
+      columnFilterConfigs[mapping?.ref].push({
+        column: col?.column,
+        filterType: col?.drilldown_filter_type as FILTER_TYPES,
+        type: col?.drilldown_filter_operator as CONDITION_OPERATOR_TYPE,
+      } as ColumnFilterConfig);
     });
   });
 
-  return mappingObject;
+  return columnFilterConfigs;
+};
+
+// utility function to execute a function on a node and all its parents
+const execOnNodeTillParent = (node: IRowNode | null, exec: (node: IRowNode) => void) => {
+  if (!node) return;
+
+  exec(node);
+
+  if (node?.level > 0) {
+    execOnNodeTillParent(node?.parent || null, exec);
+  }
+};
+
+export const getRowLevelFilters = (
+  rowColumnFilters: ColumnFilterConfig[],
+  rowGroupMapping: Record<string, ColumnContext>,
+  currentNode: IRowNode,
+) => {
+  // holds the row level filters
+  const rowLevelFilters: Record<string, any> = {};
+
+  // build filters by traversing every node in the tree from current node to the top node
+  const exec = (node: IRowNode) => {
+    const nodeColumnName = rowGroupMapping[node.field || ''];
+
+    if (!nodeColumnName) return;
+
+    let filterColumnName = nodeColumnName?.alias || nodeColumnName?.name;
+
+    const rowColumnFilterConfig = rowColumnFilters?.find((col) => {
+      if (isTagColumn(nodeColumnName?.name)) {
+        const { name } = unwrapTagColumn(nodeColumnName?.name);
+
+        if (col?.column === name) {
+          filterColumnName = nodeColumnName?.name;
+
+          return true;
+        }
+      }
+
+      return col?.column === nodeColumnName?.alias || col?.column === nodeColumnName?.name;
+    });
+
+    if (rowColumnFilterConfig) {
+      const _rowColumnFilterConfig = { ...rowColumnFilterConfig };
+
+      rowLevelFilters[filterColumnName] = _rowColumnFilterConfig;
+
+      switch (rowColumnFilterConfig?.filterType) {
+        case FILTER_TYPES.MULTI_SELECT:
+          rowLevelFilters[filterColumnName].values = [node?.key];
+          break;
+        case FILTER_TYPES.SEARCH:
+          rowLevelFilters[filterColumnName].values = [node?.key];
+          break;
+      }
+    }
+  };
+
+  // execute the function on the current node and all its parents
+  execOnNodeTillParent(currentNode, exec);
+
+  return rowLevelFilters;
+};
+
+// TODO: Break this function into smaller functions
+export const getColumnLevelFilters = (
+  columnColumnFilters: ColumnFilterConfig[],
+  colDefs: ColDef[],
+  mappingColumnContext: Record<string, ColumnContext>,
+  currentDateConfig: {
+    periodicity: PERIODICITY_TYPES;
+    widgetSelectedFilter: Record<string, any>;
+  },
+  currentPivotKeys: string[],
+): Record<string, any> => {
+  // holds the column level filters
+  const columnLevelFilters: Record<string, any> = {};
+
+  // for all coldefs in the pivot, build the column level filters
+  colDefs?.forEach((colDef, i) => {
+    // get the label (alias or name) of the column
+    const colLabel = colDef.context?.alias || colDef.context?.name;
+
+    // find the filter config for the label; either the column name or the column alias
+    const columnColumnFilterConfig = columnColumnFilters?.find((col) => {
+      return col?.column === colLabel || mappingColumnContext[colLabel]?.name === col?.column;
+    });
+
+    // get the pivot key for the column
+    // this is the key of the column in the pivot
+    const pivotKey = currentPivotKeys[i];
+
+    if (columnColumnFilterConfig) {
+      columnLevelFilters[columnColumnFilterConfig?.column] = columnColumnFilterConfig;
+      switch (columnColumnFilterConfig.filterType) {
+        case FILTER_TYPES.MULTI_SELECT: {
+          columnLevelFilters[columnColumnFilterConfig.column].values = [pivotKey];
+          break;
+        }
+        case FILTER_TYPES.SEARCH: {
+          columnLevelFilters[columnColumnFilterConfig.column].values = [pivotKey];
+          break;
+        }
+        case FILTER_TYPES.DATE_RANGE: {
+          const [updatedDateFrom, updatedDateTo] = getDateRangeWithPeriodicity(
+            currentDateConfig.periodicity,
+            pivotKey,
+            currentDateConfig.widgetSelectedFilter[columnColumnFilterConfig.column]?.dateFrom,
+            currentDateConfig.widgetSelectedFilter[columnColumnFilterConfig.column]?.dateTo,
+          );
+
+          columnLevelFilters[columnColumnFilterConfig.column].dateFrom = updatedDateFrom;
+          columnLevelFilters[columnColumnFilterConfig.column].dateTo = updatedDateTo;
+          break;
+        }
+      }
+    }
+  });
+
+  return columnLevelFilters;
+};
+
+// used to map the ref to the dataset id
+export const getWidgetMappingDatasets = (widgetInstance: PivotTableWidgetInstanceType): Record<string, string> => {
+  const { data_mappings } = widgetInstance;
+
+  const mappingDatasets: Record<string, string> = {};
+
+  data_mappings?.mappings?.forEach((mapping) => {
+    mappingDatasets[mapping?.ref] = mapping?.dataset_id;
+  });
+
+  return mappingDatasets;
+};
+
+// utility function to get the top node of the tree
+export const getTopNode = (node: IRowNode): IRowNode => {
+  if (!node?.parent || node?.level === 0) return node;
+
+  return getTopNode(node.parent);
+};
+
+const isTagColumn = (colName: string) => {
+  return colName?.startsWith('__') && colName?.includes(NESTING_LEVEL_INFIX);
+};
+
+// remove the prefix and the infix --- for example __tag_LEVEL_1 should return tag and 1
+export const unwrapTagColumn = (colName: string): { name: string; hierarchy: number } => {
+  // remove the prefix and the infix
+  const nameWithoutPrefix = colName?.substring(2);
+  const name = nameWithoutPrefix?.substring(0, nameWithoutPrefix?.indexOf(NESTING_LEVEL_INFIX));
+  const hierarchy = parseInt(nameWithoutPrefix.split(NESTING_LEVEL_INFIX).pop() || '');
+
+  return { name, hierarchy };
+};
+
+export const concatTagFilters = (filters: Record<string, any>) => {
+  const concatenatedFilters = { ...filters };
+
+  // heirarchy <> filter value
+  const tagFilters: Record<string, any> = {};
+
+  let tagName = '';
+
+  Object.entries(filters)?.forEach(([key, value]) => {
+    if (isTagColumn(key)) {
+      const { name, hierarchy } = unwrapTagColumn(key);
+
+      tagName = name;
+      tagFilters[hierarchy] = value?.values?.[0];
+      delete concatenatedFilters[key];
+    }
+  });
+
+  const sortedTagFilters = Object.entries(tagFilters)?.sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+
+  if (tagName && sortedTagFilters?.length > 0) {
+    concatenatedFilters[tagName] = {
+      filterType: FILTER_TYPES.SEARCH,
+      type: CONDITION_OPERATOR_TYPE.STARTS_WITH,
+      values: [sortedTagFilters?.map(([, value]) => value).join('.')],
+    };
+  }
+
+  return concatenatedFilters;
 };
 
 export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES): string => {
