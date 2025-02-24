@@ -18,6 +18,7 @@ import {
   ValueFormatType,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
+import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { createDateObjectFromUTCString, formatPlural, getChipColor, getCommaSeparatedNumber } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
@@ -273,4 +274,29 @@ const getFormattedValueWithColumnPrefix = (valueFormat: ValueFormatType, value: 
   const prefixValue = data?.[columnToBeUsedForPrefix]?.toUpperCase();
 
   return prefixValue && value ? `${prefixValue} ${value}` : value;
+};
+
+export const convertFilterModelToRuleFilters = (filterModel: FilterModelType | null): RuleFilters | null => {
+  if (!filterModel) return null;
+
+  const ruleFilters: RuleFilters = {
+    logical_operator: filterModel.logical_operator ?? LogicalOperatorType.OperatorLogicalAnd,
+    conditions: [],
+  };
+
+  filterModel.conditions?.forEach((condition) => {
+    ruleFilters.conditions.push({
+      logical_operator: condition.logicalOperator ?? LogicalOperatorType.OperatorLogicalAnd,
+      column: {
+        column: condition.column as string,
+        datatype: '',
+        custom_data_config: {},
+        alias: '',
+      },
+      operator: condition.operator ?? CONDITION_OPERATOR_TYPE.EQUAL,
+      value: condition.value,
+    });
+  });
+
+  return ruleFilters;
 };

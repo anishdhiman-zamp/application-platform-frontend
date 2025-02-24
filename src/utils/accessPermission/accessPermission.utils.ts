@@ -29,3 +29,9 @@ export const checkIfCurrentUserIsMember = () => {
 
   return userRole === PERMISSION_ROLES.MEMBER;
 };
+
+/**
+ * Get the user id from store
+ * @returns string
+ */
+export const getUserId = () => store.getState()?.user?.user?.user_id ?? '';

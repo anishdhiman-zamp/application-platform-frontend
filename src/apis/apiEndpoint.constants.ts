@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   DELETE_AUDIENCE_FROM_DATASET_ACCESS: `datasets/{{datasetId}}/audiences`,
   DATASET_RULES_LISTING_GET: `datasets/rules/listing`,
   DATASET_RULES_BY_RULE_IDS_GET: `datasets/rules/ids`,
+  DATASET_RULES_PRIORITY_PATCH: `datasets/rules/priority`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
 

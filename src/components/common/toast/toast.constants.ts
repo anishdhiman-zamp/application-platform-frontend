@@ -10,4 +10,6 @@ export enum TOAST_MESSAGES {
   FAILED_AUDIENCE_ROLE_CHANGED = 'Failed to change role',
   FAILED_AUDIENCE_DELETED = 'Failed to delete audience',
   FAILED_AUDIENCE_INVITED = 'Failed to send invitation',
+
+  SUCCESS_TAGGING_COMPLETED = 'Tagging completed successfully',
 }

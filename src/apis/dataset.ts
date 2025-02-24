@@ -24,6 +24,7 @@ import {
   PatchChangeAudienceRoleInDatasetType,
   PostShareDatasetToAudiencesByDatasetIdType,
   RuleType,
+  UpdateRulePriorityRequestType,
 } from 'types/api/dataset.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -58,7 +59,7 @@ const Dataset = baseApi.injectEndpoints({
       }),
     }),
     getDatasetListing: builder.query<DatasetListingResponseType, DatasetListingRequestType>({
-      query: () => ({ url: API_ENDPOINTS.DATASET_LISTING_GET }),
+      query: (params) => ({ url: API_ENDPOINTS.DATASET_LISTING_GET, params }),
     }),
     updateDatasetData: builder.mutation<DatasetUpdateResponseType, DatasetUpdateRequestType>({
       query: ({ datasetId, data }) => ({
@@ -111,6 +112,13 @@ const Dataset = baseApi.injectEndpoints({
         params,
       }),
     }),
+    updateRulePriority: builder.mutation<DatasetUpdateResponseType, UpdateRulePriorityRequestType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.DATASET_RULES_PRIORITY_PATCH,
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -132,4 +140,5 @@ export const {
   useGetRulesByDatasetColumnsQuery,
   useGetRulesByRuleIdsQuery,
   useLazyGetRulesByRuleIdsQuery,
+  useUpdateRulePriorityMutation,
 } = Dataset;

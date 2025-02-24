@@ -110,7 +110,7 @@ const parseCondition = (condition: MapAny): FilterType | null => {
   }
 };
 
-const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
+export const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   if (!input) {
     return null;
   } else if (input.filterType === 'join') {

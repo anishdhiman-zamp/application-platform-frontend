@@ -4,6 +4,7 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export type ValueFormatType = {
   type: VALUE_FORMAT_TYPE;
@@ -95,6 +96,7 @@ export type DatasetListingResponseType = {
 export type DatasetListingRequestType = {
   page: number;
   pageSize: number;
+  sort?: string;
 };
 
 export type DatasetUpdateRequestType = {
@@ -177,11 +179,12 @@ export type ConditionType = {
   column: {
     column: string;
     datatype: string;
-    custom_data_config: null;
-    alias: null;
+    custom_data_config?: MapAny;
+    alias?: string;
   };
-  operator: string;
-  value: string[];
+  operator: CONDITION_OPERATOR_TYPE;
+  value: string[] | string;
+  conditions?: ConditionType[];
 };
 
 export type RuleFilters = {
@@ -234,4 +237,20 @@ export type GetRulesByDatasetColumnsResponseType = {
 
 export type GetRulesByRuleIdsRequestType = {
   rule_ids: string[];
+};
+
+export type RulePriorityType = {
+  rule_id: string;
+  priority: number;
+};
+
+export type RulePrioritiesType = {
+  updated_by: string;
+  rule_priority: RulePriorityType[];
+};
+
+export type UpdateRulePriorityRequestType = {
+  dataset_id: string;
+  column: string;
+  rule_priorities: RulePrioritiesType;
 };

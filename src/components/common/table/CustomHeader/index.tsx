@@ -218,7 +218,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       {isAddTagOpen && (
         <PositionedMenuWrapper
           id='custom-header-add-tag-menu'
-          childrenWrapperClassName='!overflow-visible'
+          childrenWrapperClassName='!overflow-visible !max-h-[380px]'
           menuPosition={menuPosition}
           onClose={handleAddTagClose}
         >

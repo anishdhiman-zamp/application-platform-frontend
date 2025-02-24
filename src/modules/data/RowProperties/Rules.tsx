@@ -1,6 +1,5 @@
 import { FC, useMemo } from 'react';
 import { useGetRulesByRuleIdsQuery } from 'apis/dataset';
-import { convertApiFiltersToRuleFilters } from 'modules/data/data.utils';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import CommonWrapper from 'components/commonWrapper';
 import { getTagLabel } from 'components/filter/filter.utils';
@@ -21,7 +20,7 @@ const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
     () =>
       rulesData?.map((rule) => {
         return {
-          filters: convertApiFiltersToRuleFilters(rule?.filter_config?.query_config?.filters),
+          filters: rule?.filter_config?.query_config?.filters,
           value: rule?.value,
           createdOn: rule?.created_at,
           defaultExpanded: selectedRuleId === rule?.rule_id,

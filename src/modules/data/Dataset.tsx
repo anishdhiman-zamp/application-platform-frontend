@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
 import { formatColumns, getFilters } from 'modules/data/data.utils';
+import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
@@ -34,6 +35,8 @@ import { cn } from 'utils/common';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
+import { toast } from 'components/common/toast/Toast';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import Player from 'components/DynamicLottiePlayer';
@@ -76,6 +79,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
+  const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
 
   const { startPolling } = usePolling();
   const [refetchColumnList, setRefetchColumnList] = useState<number>(0);
@@ -128,15 +132,18 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
 
   const handleSuccessfulUpdate = (data: DatasetUpdateResponseType) => {
     setIsPolling(true);
+    setInitiatedActionIds((prev) => [...prev, data.action_id]);
     startPolling({
-      fn: () => getActionStatus({ datasetId: id as string, params: { action_ids: [data.action_id] } }),
+      fn: () =>
+        getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
         return data.filter((item) => !item.is_completed).length === 0;
       },
-      interval: 3000,
+      interval: 30000,
       maxAttempts: 50,
     }).then(() => {
       setIsPolling(false);
+      toast.success(TOAST_MESSAGES.SUCCESS_TAGGING_COMPLETED);
       tableRef.current?.api?.refreshServerSide();
       refetchFilterConfig();
     });
@@ -212,7 +219,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       rowId: rowIds,
       field,
       newValue,
-      operator: CONDITION_OPERATOR_TYPE.CONTAINS,
+      operator: CONDITION_OPERATOR_TYPE.IN,
     });
   };
 
@@ -234,7 +241,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
     if (filterConfig?.length) {
       const columns = formatColumns(
         filterConfig,
-        isPolling,
+        false,
         id as string,
         handleSuccessfulUpdate,
         tableRef,
@@ -299,6 +306,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
           <div className='flex items-center gap-2.5'>
+            <Notification isPolling={isPolling} />
             <ExportDataset query={exportsDatasetQuery} datasetId={id as string} />
             <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
             <div className='flex items-center gap-2'>
@@ -335,6 +343,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           column={columnId}
           onClose={() => setIsRulesListingSideDrawerOpen(false)}
           datasetId={id as string}
+          handleSuccessfulUpdate={handleSuccessfulUpdate}
         />
       )}
       {rowPropertiesData && (

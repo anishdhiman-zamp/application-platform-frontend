@@ -7,6 +7,7 @@ import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { formatData } from 'modules/data/data.utils';
 import { useRouter } from 'next/router';
 import { addBreadcrumb } from 'store/slices/layout-configs';
+import { OrderType } from 'types/components/table.type';
 import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
@@ -24,9 +25,16 @@ const Listing = () => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        const sortModel =
+          parameters.request.sortModel?.map((item) => ({
+            column: item.colId,
+            desc: item.sort === OrderType.DESC,
+          })) ?? [];
+
         getDatasetListing({
           page: Math.floor(parameters.request.endRow ?? 0) / PAGE_SIZE,
           pageSize: PAGE_SIZE,
+          sort: JSON.stringify(sortModel),
         })
           .unwrap()
           .then((data) => {

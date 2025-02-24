@@ -10,8 +10,11 @@ const CustomTagEditor = (props: MapAny) => {
   const [searchResults, setSearchResults] = useState<string[]>(values);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-    setSearchResults(values.filter((tag: string) => tag.includes(e.target.value)));
+    const value = e.target.value;
+
+    if (value?.includes('.')) return;
+    setSearchValue(value);
+    setSearchResults(values.filter((tag: string) => tag.includes(value)));
   };
 
   const handleTagClick = (tag: string) => {

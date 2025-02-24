@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { useUpdateDatasetDataMutation } from 'apis/dataset';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { convertFilterModelToRuleFilters } from 'modules/data/data.utils';
 import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import { DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -11,12 +12,11 @@ import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';
 import TagWithHierarchy from 'components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';
-import { getFilterModelFromGroupAndFilterModel } from 'components/common/table/table.utils';
+import { convertToFilterModel, getFilterModelFromGroupAndFilterModel } from 'components/common/table/table.utils';
 import ToggleSwitch from 'components/common/toggleSwitch';
 import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
 const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
 
 const AddTag = ({
@@ -45,7 +45,10 @@ const AddTag = ({
     state: { selectedFilters, totalRows },
   } = useFiltersContextStore();
 
-  const filterStatement = useMemo(() => getFilterStatementValues(selectedFilters), [selectedFilters]);
+  const filterStatement = useMemo(
+    () => getFilterStatementValues(convertFilterModelToRuleFilters(convertToFilterModel(selectedFilters))),
+    [selectedFilters],
+  );
 
   const handleClickAddTag = () => {
     updateDatasetData({
@@ -94,6 +97,8 @@ const AddTag = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
+    if (value?.includes('.')) return;
+
     setSearchValue(value);
     setSearchResults(tagList?.filter((tag) => tag?.toLowerCase()?.includes(value?.toLowerCase())));
     if (value) {
@@ -140,7 +145,10 @@ const AddTag = ({
           )}
           {filterStatement.length > 0 && (
             <>
-              <div className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-fit flex flex-wrap gap-y-2 items-center'>
+              <div
+                className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-[140px] overflow-y-auto flex flex-wrap gap-y-2 items-center'
+                style={{ scrollbarWidth: 'none' }}
+              >
                 <span className={fieldOperatorClassName}>If</span>
                 {filterStatement.map((value, index) => (
                   <RuleStatement

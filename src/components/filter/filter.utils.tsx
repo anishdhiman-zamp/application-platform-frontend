@@ -1,12 +1,14 @@
 import { Fragment } from 'react';
 import { DATE_FORMATS, PERIODICITY_OPTIONS } from 'constants/date.constants';
 import { format } from 'date-fns';
+import { RuleFilters } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 import {
   AMOUNT_RANGE_FILTER_OPTIONS,
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,
   CONDITION_OPERATOR_TYPE,
+  CONDITION_OPERATOR_TYPE_LABEL_MAP,
   FILTER_KEYS,
   MULTI_SELECT_FILTER_OPTIONS,
   SEARCH_FILTER_OPTIONS,
@@ -129,7 +131,13 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
   return config;
 };
 
-export const getTagLabel = (tag?: string) => tag?.split('.').pop() ?? '';
+export const getTagLabel = (tag?: string) => {
+  const tagParts = tag?.split('.');
+
+  const label = tagParts?.[tagParts?.length - 1] || tagParts?.[tagParts?.length - 2] || '';
+
+  return label;
+};
 
 export const getTagParents = (tag: string) => {
   const parents = tag?.split('.').slice(0, -1) ?? [];
@@ -137,68 +145,35 @@ export const getTagParents = (tag: string) => {
   return parents.length ? parents.join(' / ') : null;
 };
 
-const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1';
-const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
+const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';
+const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1 text-nowrap h-fit';
 
-export const getFilterStatementValues = (filter: MapAny): JSX.Element[] => {
+export const getFilterStatementValues = (filter: RuleFilters | null): JSX.Element[] => {
   const Statement: JSX.Element[] = [];
 
-  Object.keys(filter).forEach((key) => {
-    switch (filter[key].filterType) {
-      case FILTER_TYPES.SEARCH:
-        Statement.push(
-          <>
-            <span className={fieldValueClassName}>{key}</span>
-            <span className={fieldOperatorClassName}>{filter[key].type}</span>
-            <span className={fieldValueClassName}>{filter[key].filter}</span>
-          </>,
-        );
-        break;
-      case FILTER_TYPES.DATE_RANGE:
-        Statement.push(
-          <>
-            <span className={fieldValueClassName}>{key}</span>
-            <span className={fieldOperatorClassName}>{filter[key].type}</span>
-            {filter[key].dateFrom && (
-              <span className={fieldValueClassName}>{new Date(filter[key].dateFrom)?.toLocaleDateString()}</span>
-            )}
-            {filter[key].dateFrom && filter[key].dateTo && <span className={fieldOperatorClassName}>-</span>}
-            {filter[key].dateTo && (
-              <span className={fieldValueClassName}>{new Date(filter[key].dateTo)?.toLocaleDateString()}</span>
-            )}
-          </>,
-        );
-        break;
-      case FILTER_TYPES.MULTI_SELECT:
-        Statement.push(
-          <>
-            <span className={fieldValueClassName}>{key}</span>
-            <span className={fieldOperatorClassName}>is</span>
-            {filter[key].values?.map((value: string, index: number) => (
-              <Fragment key={index}>
-                <span className={fieldValueClassName}>{value}</span>
-                {index !== filter[key].values?.length - 1 && <span className={fieldOperatorClassName}>or</span>}
-              </Fragment>
-            ))}
-          </>,
-        );
-        break;
-      case FILTER_TYPES.AMOUNT_RANGE:
-        Statement.push(
-          <>
-            <span className={fieldValueClassName}>{key}</span>
-            <span className={fieldOperatorClassName}>{filter[key].type}</span>
-            <span className={fieldValueClassName}>{filter[key].filter}</span>
-            {filter[key].filterTo && (
-              <>
-                <span className={fieldOperatorClassName}>-</span>
-                <span className={fieldValueClassName}>{filter[key].filterTo}</span>
-              </>
-            )}
-          </>,
-        );
-        break;
-    }
+  if (!filter) return Statement;
+  filter?.conditions?.forEach((condition) => {
+    const { column, operator, value } = condition;
+    const columnName = column?.column;
+
+    Statement.push(
+      <>
+        <span className={fieldValueClassName}>{columnName}</span>
+        <span className={fieldOperatorClassName}>
+          {CONDITION_OPERATOR_TYPE_LABEL_MAP[operator as keyof typeof CONDITION_OPERATOR_TYPE_LABEL_MAP]}
+        </span>
+        {Array.isArray(value) ? (
+          value?.map((item: string, index: number) => (
+            <Fragment key={index}>
+              <span className={fieldValueClassName}>{item}</span>
+              {index !== value?.length - 1 && <span className={fieldOperatorClassName}>or</span>}
+            </Fragment>
+          ))
+        ) : (
+          <span className={fieldValueClassName}>{value}</span>
+        )}
+      </>,
+    );
   });
 
   return Statement;
