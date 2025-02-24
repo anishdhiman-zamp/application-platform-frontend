@@ -59,5 +59,5 @@ export type RequestType = {
   order_by: OrderByType[];
   pagination: PaginationType;
   get_total_records: boolean;
-  fx_currency: string;
+  fx_currency?: string | undefined;
 };

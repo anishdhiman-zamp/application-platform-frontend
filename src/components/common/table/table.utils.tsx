@@ -227,7 +227,7 @@ const getOrderByColumns = (request: IServerSideGetRowsRequest): OrderByType[] =>
 
 const formatRequest = (
   request: IServerSideGetRowsRequest,
-  fx_currency?: string,
+  fx_currency?: string | undefined,
   zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
@@ -244,7 +244,7 @@ const formatRequest = (
       page_size: PAGE_SIZE,
     },
     get_total_records: true,
-    fx_currency: fx_currency ?? '',
+    fx_currency: !fx_currency || fx_currency === 'local' ? undefined : fx_currency,
   };
 };
 

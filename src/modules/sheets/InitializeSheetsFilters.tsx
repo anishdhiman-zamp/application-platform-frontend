@@ -14,7 +14,7 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   const {
     data: sheetFilterConfig,
     isSuccess,
-    isLoading,
+    isFetching,
   } = useGetSheetFilterConfigQuery(
     { pageId: pageId as string, sheetId: sheetId as string },
     { skip: !sheetId, refetchOnMountOrArgChange: false },
@@ -75,9 +75,9 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   useEffect(() => {
     dispatch({
       type: filtersContextActions.SET_FILTER_LOADING,
-      payload: { isFilterLoading: isLoading },
+      payload: { isFilterLoading: isFetching },
     });
-  }, [isLoading]);
+  }, [isFetching]);
 
   return <div>{children}</div>;
 };

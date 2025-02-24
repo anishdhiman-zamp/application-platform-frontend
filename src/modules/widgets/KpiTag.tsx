@@ -36,7 +36,7 @@ const KpiTag: FC<KpiTagProps> = ({
         currency: currency,
       },
     },
-    { refetchOnMountOrArgChange: true, skip: !isFilterInitialized },
+    { refetchOnMountOrArgChange: false, skip: !isFilterInitialized },
   );
 
   const value: string = useMemo(() => {

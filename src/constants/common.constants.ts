@@ -39,3 +39,10 @@ export enum STORAGE_TYPES {
   SESSION = 'session',
   LOCAL = 'local',
 }
+
+export const SCREEN_BREAKPOINTS = {
+  MIN_WIDTH: 854,
+  MIN_HEIGHT: 300,
+  XL_WIDTH: 1280,
+  LG_WIDTH: 1024,
+};

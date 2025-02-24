@@ -66,7 +66,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     }
 
     return {};
-  }, [selectedFilters]);
+  }, [selectedFilters, filtersConfig]);
 
   const { currentPageFiltersConfig, currentWidgetSelectedFilters } = useMemo(() => {
     const currentWidgetSelectedFilters: MapAny = {};

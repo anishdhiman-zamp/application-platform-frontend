@@ -4,6 +4,13 @@ import { useGetOrganizationMembershipRequestsAllQuery } from 'apis/people';
 import { useLogout } from 'hooks/useLogout';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 
+jest.mock('next/font/google', () => ({
+  Inter: jest.fn(() => ({
+    className: 'mocked-inter',
+    variable: '--font-inter',
+  })),
+}));
+
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));

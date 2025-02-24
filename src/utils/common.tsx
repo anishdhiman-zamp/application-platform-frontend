@@ -1,6 +1,7 @@
 import { MouseEventHandler } from 'react';
 import clsx, { ClassValue } from 'clsx';
 import { CHIP_COLORS } from 'constants/colors';
+import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
@@ -458,3 +459,6 @@ export const createDateObjectFromUTCString = (date: string | Date) => {
 export const formatPlural = (count: number, word: string, pluralWord?: string) => {
   return `${count} ${count > 1 ? (pluralWord ?? `${word}s`) : word}`;
 };
+
+export const checkScreenBreakpoint = (width: number, height: number) =>
+  width && height ? width < SCREEN_BREAKPOINTS.MIN_WIDTH || height < SCREEN_BREAKPOINTS.MIN_HEIGHT : false;

@@ -2,8 +2,10 @@ import { FC, useEffect } from 'react';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { useWindowDimensions } from 'hooks/useWindowDimensions';
+import ScreenSupport from 'modules/cards/ScreenSupport';
 import { useRouter } from 'next/router';
-import { getLeadingPathFromURL } from 'utils/common';
+import { checkScreenBreakpoint, getLeadingPathFromURL } from 'utils/common';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 type AuthGuardPropsType = {
@@ -17,6 +19,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const currentPathName = getLeadingPathFromURL(pathname);
   const PAGES = getLeadingPathFromURL(ROUTES_PATH.PAGES);
   const DATASETS = getLeadingPathFromURL(ROUTES_PATH.DATASET);
+  const { width, height } = useWindowDimensions();
 
   const { data: pages, isLoading: isPagesLoading } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -46,6 +49,10 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
       }
     }
   }, [currentPathName, id, pages, isPagesLoading, router]);
+
+  const breakpoint = checkScreenBreakpoint(width, height);
+
+  if (breakpoint) return <ScreenSupport />;
 
   return props.children;
 };
