@@ -1,7 +1,7 @@
 import { FC, memo } from 'react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { PIVOT_HEADER_BG } from 'constants/icons';
-import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
+import { formatPivotValue } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 
 type PivotAutoGroupHeaderProps = {
@@ -11,13 +11,7 @@ type PivotAutoGroupHeaderProps = {
 };
 
 const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, periodicity, isSingleHeader = false }) => {
-  const formatDisplayName = (displayName: string, periodicity?: PERIODICITY_TYPES): string => {
-    if (!isNaN(Date.parse(displayName as string))) {
-      return getFormattedDateWithPeriodicity(periodicity ?? PERIODICITY_TYPES.DAILY, displayName as string);
-    }
-
-    return displayName;
-  };
+  const formattedDisplayName = formatPivotValue(displayName, periodicity);
 
   return (
     <>
@@ -28,14 +22,14 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, perio
             alt='Pivot Header Background'
             fill
             priority
-            objectPosition='center'
-            objectFit='cover'
-            className='shrink-0'
+            className='shrink-0 object-cover object-center'
           />
-          <div className='relative z-10 f-13-550'>{formatDisplayName(displayName, periodicity)}</div>
+          <div className='relative z-10 f-13-550'>{formattedDisplayName}</div>
         </div>
       ) : (
-        <div className='w-full h-full f-13-450 p-3 flex items-center justify-center bg-white'>{displayName}</div>
+        <div className='w-full h-full f-13-450 p-3 flex items-center justify-center bg-white'>
+          {formattedDisplayName}
+        </div>
       )}
     </>
   );

@@ -10,6 +10,7 @@ import {
   PIVOT_DATA_TYPES,
   PivotColumnMetadata,
 } from 'modules/widgets/Pivot/pivot.types';
+import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
@@ -102,8 +103,19 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
   return {}; // Default cell style
 };
 
+const resetToMidnight = (isoString: string) => {
+  const date = new Date(isoString);
+
+  date?.setUTCHours(0, 0, 0, 0);
+
+  return date?.toISOString();
+};
+
 export const parseType = (type: PIVOT_DATA_TYPES, value: any) => {
   switch (type) {
+    case PIVOT_DATA_TYPES.DATE:
+    case PIVOT_DATA_TYPES.TIMESTAMP:
+      return resetToMidnight(value);
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
       const number = Number(value);
@@ -185,10 +197,11 @@ export const getPivotColumns = (
         mappingRows.push({
           column: mapping?.ref,
           type: 'string',
+          alias: '',
         });
       }
     } else {
-      mappingRows.push({ column: mapping?.ref, type: 'string' }, ...(fields?.rows || []));
+      mappingRows.push({ column: mapping?.ref, type: 'string', alias: '' }, ...(fields?.rows || []));
     }
 
     let currentLevel = 0;
@@ -208,24 +221,24 @@ export const getPivotColumns = (
     // we normalize the rows of every mapping to the same format
     mappingRows?.forEach((row) => {
       currentLevel += 1;
-      const { column, type } = row;
+      const { column, type, alias } = row;
 
       // check if the row has hierarchy; if it does, we need to determine the depth of the hierarchy;
       // hirarchy is determined by _LEVEL_<n> suffix and the order of the columns in the row set
       const hasHierarchy = wInstanceData?.result[mappingIndex]?.columns?.find((c) =>
-        c.column_name.startsWith(getNestedGroupingColName(column, -1)),
+        c.column_name.startsWith(getNestedGroupingColName(alias ? alias : column, -1)),
       );
 
       if (hasHierarchy) {
         const depth = wInstanceData?.result[mappingIndex]?.columns?.filter((c) =>
-          c.column_name.startsWith(getNestedGroupingColName(column, -1)),
+          c.column_name.startsWith(getNestedGroupingColName(alias ? alias : column, -1)),
         )?.length;
 
         // iterate over each level of the hierarchy
         Array(depth)
           .fill(null)
           .forEach((_, colIndex: number) => {
-            const colName = getNestedGroupingColName(column, colIndex + 1);
+            const colName = getNestedGroupingColName(alias ? alias : column, colIndex + 1);
 
             colNameMapping[colName] = {
               name: getGroupingColName(currentLevel + colIndex),
@@ -238,12 +251,12 @@ export const getPivotColumns = (
           });
         currentLevel += depth - 1;
       } else {
-        colNameMapping[column] = {
+        colNameMapping[alias ? alias : column] = {
           name: getGroupingColName(currentLevel),
           heirarchy: currentLevel,
           dataType: type,
           hasChildren: false,
-          sourceName: column,
+          sourceName: alias ? alias : column,
           mappingName: ref,
         };
       }
@@ -293,7 +306,10 @@ export const getPivotData = (pivotColumns: PivotColumnMetadata[], wInstanceData:
             const transformedColumn = pivotColumns?.find((col) => col?.sourceName === value);
 
             if (transformedColumn) {
-              transformedRow[transformedColumn?.name] = value;
+              transformedRow[transformedColumn?.name] = parseType(
+                transformedColumn?.dataType as PIVOT_DATA_TYPES,
+                value,
+              );
             }
           } else {
             // Keep original key-value pair if no transformation needed
@@ -336,7 +352,6 @@ export const getPivotColDefs = (pivotColumns: PivotColumnMetadata[]): ColDef[] =
             aggFunc: AGGREGATION_TYPES.SUM,
             valueFormatter: (params) => formatCurrencyValue(params?.value),
             headerComponent: PivotColHeader,
-            headerName: snakeCaseToSentenceCase(col?.name),
             cellStyle: (params) =>
               getDynamicCellStyle(
                 backendConfig.styleConfig.cellStyles,
@@ -382,20 +397,6 @@ export const shouldAllowExpandingRow = <T extends AGGridPivotNode<T>>(node: T) =
   }
 
   return true;
-};
-
-export const formatDateToISO = (dateStr: string): string => {
-  const date = new Date(dateStr);
-
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid date format');
-  }
-
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
-  const year = date.getFullYear();
-
-  return `${day}-${month}-${year}T00:00:00Z`;
 };
 
 export const columnNameFromTagContext = (context?: string) => {
@@ -536,4 +537,16 @@ export const generateMappingStructure = (mappings: any[]) => {
   });
 
   return mappingObject;
+};
+
+export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES): string => {
+  if (!isNaN(Date.parse(value))) {
+    return getFormattedDateWithPeriodicity(periodicity ?? PERIODICITY_TYPES.DAILY, value);
+  }
+
+  if (value?.includes('_')) {
+    return snakeCaseToSentenceCase(value);
+  }
+
+  return value;
 };

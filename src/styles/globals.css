@@ -169,17 +169,13 @@
   border-right: none !important;
 }
 
-.pivot .ag-body-horizontal-scroll {
-  scrollbar-color: #ebebeb #f0f0f0;
-}
-
-.pivot .ag-body-vertical-scroll {
-  scrollbar-color: #ebebeb #f0f0f0;
-}
-
 .pivot .ag-body-viewport {
   max-height: 500px !important;
   overflow: auto !important;
+}
+
+.pivot .ag-center-cols-viewport {
+  min-height: unset !important;
 }
 
 .ag-charts-tooltip {

@@ -7,25 +7,25 @@ import {
   RECON_STATUS_TYPES,
   ROOT_LEVEL_TITLE,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
+import { formatPivotValue, shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { cn } from 'utils/common';
 
-type PivotRowTitleProps = {
+interface PivotRowTitleProps {
   node: IRowNode;
   value: string;
   maxGroupingLevel: number;
   showIcons?: boolean;
-};
+}
 
 const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, showIcons = false }) => {
   const [expanded, setExpanded] = useState(node?.expanded || false);
   const allowExpanding = shouldAllowExpandingRow(node);
 
-  const isLowestLevel = node?.level === maxGroupingLevel;
-  const isTopLevel = node?.level === 0;
-  const isRootLevel = node?.level === -1;
-  const formattedValue = snakeCaseToSentenceCase(value);
+  const isLowestLevel = node?.level === maxGroupingLevel; //This is the leaf node
+  const isTopLevel = node?.level === 0; // This is the top level node
+  const isRootLevel = node?.level === -1; // This is the total showing node
+  const formattedValue = formatPivotValue(value);
 
   useEffect(() => {
     const updateExpandState = () => setExpanded(node?.expanded || false);
@@ -33,7 +33,9 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
     node?.addEventListener?.('expandedChanged', updateExpandState);
 
     return () => node?.removeEventListener?.('expandedChanged', updateExpandState);
-  }, [node?.expanded]);
+  }, [node]);
+
+  const paddingLeft = `${node?.level * (isLowestLevel ? 46 : 28) + 24}px`;
 
   return (
     <div
@@ -41,12 +43,9 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         'h-full w-full flex items-center gap-2 border-b-0.5 border-r-0.5 border-GRAY_400 z-10',
         allowExpanding && 'cursor-pointer',
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
-        isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1',
+        isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1 border-b-0',
       )}
-      style={{
-        paddingLeft: `${node?.level * (isLowestLevel ? 46 : 28) + 24}px`,
-        willChange: 'transform',
-      }}
+      style={{ paddingLeft, willChange: 'transform' }}
       onClick={() => allowExpanding && node.setExpanded(!expanded)}
     >
       {!isRootLevel && !isLowestLevel && (
@@ -87,7 +86,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         {isRootLevel ? ROOT_LEVEL_TITLE : formattedValue}
       </span>
 
-      {isRootLevel && <Image src={ARROW_RIGHT} alt={'arrow-right'} width={18} height={18} priority />}
+      {isRootLevel && <Image src={ARROW_RIGHT} alt='arrow-right' width={18} height={18} priority />}
     </div>
   );
 };

@@ -16,7 +16,7 @@ export enum PIVOT_REF_TYPES {
 
 export const COL_MIN_WIDTH = 170;
 export const PINNED_COL_WIDTH = 380;
-export const PIVOT_HEADER_HEIGHT = 70;
+export const PIVOT_HEADER_HEIGHT = 93;
 export const PIVOT_GROUP_HEADER_HEIGHT = 42;
 export const ROW_HEIGHT = 42;
 export const GRAND_ROW_TOTAL_POSITION = 'bottom';

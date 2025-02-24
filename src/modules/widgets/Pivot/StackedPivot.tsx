@@ -158,9 +158,9 @@ const StackedPivot = ({
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
           <PivotRowTitle
-            node={props.node}
-            value={props.value}
-            maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+            node={props?.node}
+            value={props?.value}
+            maxGroupingLevel={colDef?.filter((col) => col?.rowGroup)?.length - 1}
             showIcons={display_config?.show_icons}
           />
         );
@@ -278,9 +278,6 @@ const StackedPivot = ({
         grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
         processPivotResultColGroupDef={processPivotResultColGroupDef}
         onCellDoubleClicked={handleOnCellDoubleClicked}
-        autoSizeStrategy={{
-          type: 'fitGridWidth',
-        }}
         {...PIVOT_GRID_OPTIONS}
       />
     </div>
