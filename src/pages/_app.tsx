@@ -10,7 +10,6 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
-import { cn } from 'utils/common';
 import { AG_CHART_KEY, AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
 import { AuthGuard } from 'components/hoc/AuthGuard';
 import { RouteGuard } from 'components/hoc/RouteGuard';
@@ -45,14 +44,16 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <link rel='icon' type='image/x-icon' href={FAVICON} />
       </Head>
       <Provider store={store}>
-        <AuthGuard loginRoute='/login'>
-          <FeatureFlagsProvider>
-            <ToastContainer />
-            <RouteGuard>
-              <div className={cn(inter.className, 'h-screen light-mode')}>{getComponent()}</div>
-            </RouteGuard>
-          </FeatureFlagsProvider>
-        </AuthGuard>
+        <div className={inter.className}>
+          <AuthGuard loginRoute='/login'>
+            <FeatureFlagsProvider>
+              <ToastContainer />
+              <RouteGuard>
+                <div className={'h-screen light-mode'}>{getComponent()}</div>
+              </RouteGuard>
+            </FeatureFlagsProvider>
+          </AuthGuard>
+        </div>
       </Provider>
     </>
   );
