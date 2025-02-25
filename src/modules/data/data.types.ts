@@ -1,6 +1,6 @@
 export enum DATASET_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
-  DATA_READER = 'data_reader',
+  VIEWER = 'viewer',
 }
 
 export type UserAccessToDataSetType = {

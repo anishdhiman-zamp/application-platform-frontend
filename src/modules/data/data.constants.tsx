@@ -75,8 +75,8 @@ export const DATASET_ACCESS_PRIVILEGES_LIST = [
     value: DATASET_ACCESS_PRIVILEGES.ADMIN,
   },
   {
-    label: 'Data Reader',
-    value: DATASET_ACCESS_PRIVILEGES.DATA_READER,
+    label: 'Viewer',
+    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
   },
 ];
 
@@ -87,8 +87,8 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST = [
     desc: 'Can manage and share dataset',
   },
   {
-    label: 'Data Reader',
-    value: DATASET_ACCESS_PRIVILEGES.DATA_READER,
+    label: 'Viewer',
+    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
     desc: 'Can read data only',
   },
 ];

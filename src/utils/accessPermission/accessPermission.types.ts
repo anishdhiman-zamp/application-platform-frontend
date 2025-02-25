@@ -3,7 +3,6 @@ export enum PERMISSION_ROLES {
   MEMBER = 'member',
   ADMIN = 'admin',
   VIEWER = 'viewer',
-  DATA_READER = 'data_reader',
   DATA_EDITOR = 'data_editor',
 }
 
