@@ -3,6 +3,7 @@ import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
+import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
@@ -18,6 +19,7 @@ export const LoginForm = () => {
   const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [hasError, setHasError] = React.useState<boolean>(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -50,19 +52,27 @@ export const LoginForm = () => {
           const url = new URL(redirectUrl);
           const emailDomain = getDomainFromEmail(email);
 
+          setHasError(false);
           url.searchParams.set('hd', emailDomain);
           window.location.href = url.toString();
         } catch (error) {
           setLoading(false);
           console.error(error);
+          setHasError(true);
         }
+      } else if (resp.status === 400) {
+        setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
+        setHasError(true);
       } else {
+        setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
+        setHasError(true);
         setLoading(false);
         setLoginFlow(respJson);
       }
     } catch (error) {
       setLoading(false);
       console.error(error);
+      setHasError(true);
     }
   };
 
@@ -92,10 +102,13 @@ export const LoginForm = () => {
 
       const respJson = await response.json();
 
+      setHasError(false);
+
       if (response.status !== 200) {
-        setLoading(false);
         setError(respJson.error);
         removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+        setHasError(true);
+        setLoading(false);
 
         return;
       }
@@ -117,13 +130,14 @@ export const LoginForm = () => {
         setLoading(false);
       }
     } catch {
+      setHasError(true);
       setLoading(false);
     }
   };
 
   const inputDisabled = loading;
 
-  if (loginFlow && loginFlow?.ui?.nodes?.length > 1) {
+  if (!hasError && loginFlow && loginFlow?.ui?.nodes?.length > 1) {
     return <LocaldevEmailPasswordLogin loginFlow={loginFlow} setLoginFlow={setLoginFlow} />;
   }
 

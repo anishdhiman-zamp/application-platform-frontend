@@ -4,21 +4,24 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { browserTracingIntegration, replayIntegration } from '@sentry/nextjs';
+export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
 const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 
-Sentry.init({
-  dsn: SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  release: process.env.NEXT_PUBLIC_ENVIRONMENT,
-  allowUrls: ['zamp.ai'],
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-  integrations: [
-    browserTracingIntegration(),
-    replayIntegration({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
-});
+if (ENVIRONMENT === 'production') {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    tracesSampleRate: 1.0,
+    release: process.env.NEXT_PUBLIC_ENVIRONMENT,
+    allowUrls: ['zamp.ai'],
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [
+      browserTracingIntegration(),
+      replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+  });
+}

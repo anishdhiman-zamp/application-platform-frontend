@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
 import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
+import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { LoginFlow } from 'types/api/auth.types';
@@ -10,8 +11,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
-
-const LOGIN_ERROR_TEXT = 'Unable to login, please try again.';
 
 type LoginFormProps = {
   className?: string;
