@@ -14,7 +14,7 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
       id='google-login'
       type='submit'
       className={cn(
-        'relative bg-BG_GRAY_3 h-10 w-full mt-4 rounded-md',
+        'relative bg-BG_GRAY_3 h-12 w-full mt-4 rounded-md',
         loading ? '!cursor-not-allowed' : '!cursor-pointer',
       )}
       onClick={onClick}
@@ -25,7 +25,7 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
           { active: loading },
         )}
       ></div>
-      <div className='absolute -top-2 right-36 text-white'>
+      <div className='absolute -top-1 right-40 text-white'>
         <span
           className={cn(
             'translate-y-4 flex justify-center items-center gap-1.5 f-14-500',

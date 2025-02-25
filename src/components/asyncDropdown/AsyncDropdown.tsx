@@ -27,6 +27,14 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
   const buttonRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleToggleDropdown = () => {
+    if (isOpen) {
+      onClose();
+    } else {
+      onOpen();
+    }
+  };
+
   useOnClickOutside(dropdownRef, onClose);
 
   useEffect(() => {
@@ -48,7 +56,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
           'flex justify-between items-center py-3 pl-4 gap-0 cursor-pointer h-10 f-12-400',
           parentWrapperClassName,
         )}
-        onClick={onOpen}
+        onClick={handleToggleDropdown}
         ref={buttonRef}
       >
         {selectedValue?.label}

@@ -26,7 +26,7 @@ const PeoplePage = () => {
           teamMembersData?.filter((member) =>
             convertEmailUsernameToName(getUserNameFromEmail(member?.user?.email))
               .toLowerCase()
-              .includes(searchValue.toLowerCase()),
+              .startsWith(searchValue.toLowerCase()),
           ),
         );
       }, 300),
@@ -40,7 +40,7 @@ const PeoplePage = () => {
           invitedTeamMembersData?.filter((member) =>
             convertEmailUsernameToName(getUserNameFromEmail(member?.email))
               .toLowerCase()
-              .includes(searchValue.toLowerCase()),
+              .startsWith(searchValue.toLowerCase()),
           ),
         );
       }, 300),

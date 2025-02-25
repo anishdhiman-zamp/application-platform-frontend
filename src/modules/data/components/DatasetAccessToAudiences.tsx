@@ -133,7 +133,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
               </div>
             </>
           </div>
-          <div className='flex text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+          <div className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
             {checkPermission && (
               <>
                 <SvgSpriteLoader
