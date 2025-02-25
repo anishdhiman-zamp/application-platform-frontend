@@ -77,3 +77,8 @@ export const PIVOT_GRID_OPTIONS = {
   animateRows: false,
   suppressGroupRowsSticky: true,
 };
+
+export enum PIVOT_DATA_EXPORT_FORMAT {
+  CSV = 'csv',
+  EXCEL = 'excel',
+}

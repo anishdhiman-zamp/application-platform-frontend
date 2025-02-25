@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -10,7 +10,9 @@ import {
   ColumnMenuModule,
   ColumnsToolPanelModule,
   ContextMenuModule,
+  CsvExportModule,
   FiltersToolPanelModule,
+  GridApi,
   GridStateModule,
   GroupCellRendererParams,
   ModuleRegistry,
@@ -18,6 +20,7 @@ import {
   RowApiModule,
   RowGroupingPanelModule,
   RowStyleModule,
+  ScrollApiModule,
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
@@ -26,6 +29,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
+import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import {
   COL_MIN_WIDTH,
@@ -62,6 +66,7 @@ ModuleRegistry.registerModules([
   ColumnsToolPanelModule,
   ColumnMenuModule,
   ContextMenuModule,
+  ScrollApiModule,
   PivotModule,
   ColumnApiModule,
   FiltersToolPanelModule,
@@ -72,6 +77,7 @@ ModuleRegistry.registerModules([
   ValidationModule,
   GridStateModule,
   ColumnAutoSizeModule,
+  CsvExportModule,
 ]);
 
 type StackedPivotProps = {
@@ -94,9 +100,14 @@ const StackedPivot = ({
   activeWidget,
 }: StackedPivotProps) => {
   const router = useRouter();
+  const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
-  const { title, display_config } = widgetInstanceDetails;
 
+  const handleExportAgGridData = () => {
+    gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
+  };
+
+  const { title, display_config } = widgetInstanceDetails;
   const { colDef, rowData, columnContextMapping } = useMemo(() => {
     const pivotCols = getPivotColumns(widgetInstanceDetails, widgetData);
     const { coldefs, columnContextMapping } = getPivotColDefs(pivotCols);
@@ -174,7 +185,17 @@ const StackedPivot = ({
         suppressPadding: true,
       },
     }),
-    [widgetInstanceDetails, isSingleHeader, colDef, groupWidgetsOptions, onWidgetChange, title, display_config],
+    [
+      widgetInstanceDetails,
+      isSingleHeader,
+      colDef,
+      groupWidgetsOptions,
+      onWidgetChange,
+      title,
+      display_config,
+      activeWidget,
+      handleExportAgGridData,
+    ],
   );
 
   const processPivotResultColGroupDef = useMemo(() => {
@@ -261,13 +282,34 @@ const StackedPivot = ({
     navigateToDataset(datasetId, widgetFilter);
   };
 
+  const handleScrollToRightEnd = () => {
+    if (gridApi?.current) {
+      const allColumns = gridApi.current?.getDisplayedCenterColumns();
+
+      if (allColumns?.length > 0) {
+        const lastColumn = allColumns[allColumns?.length - 1];
+
+        gridApi.current?.ensureColumnVisible(lastColumn);
+      }
+    }
+  };
+
+  const onGridReady = (params: { api: GridApi }) => {
+    gridApi.current = params.api;
+
+    setTimeout(() => {
+      handleScrollToRightEnd();
+    }, 0);
+  };
+
   return (
-    <div className='h-fit w-full pivot'>
+    <div className='h-fit w-full relative pivot group'>
+      <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
+        onGridReady={onGridReady}
         theme={customTheme ?? myTheme}
         domLayout='autoHeight'
         context={pivotContext}
-        className='group'
         rowData={rowData}
         columnDefs={colDef}
         defaultColDef={defaultColDef}

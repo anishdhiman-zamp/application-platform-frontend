@@ -75,6 +75,7 @@ const WidgetTitle = ({
             />
           )}
         </div>
+
         {isGroupWidgetOptions && (
           <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions.length} Variants`}</span>
         )}
