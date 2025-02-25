@@ -87,6 +87,13 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
 
                 xhr.onload = function () {
                   if (xhr.status === 200) {
+                    onFileSelect({
+                      rawFile: filesToUpload,
+                      identifier: file_upload_id,
+                      url: upload_url,
+                      fileName: filesToUpload.name,
+                      downloadableUrl: upload_url,
+                    });
                     triggerPreviewTransformation(file_upload_id);
                   } else {
                     setIsLoading(false);

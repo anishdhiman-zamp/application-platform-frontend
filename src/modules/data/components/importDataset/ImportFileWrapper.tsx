@@ -30,7 +30,7 @@ const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
   };
 
   const renderPreviewComponent = () => {
-    if (mappedData && startAiTransformation) {
+    if (startAiTransformation) {
       return (
         <ImportedDataPreview
           fileName={fileName}
