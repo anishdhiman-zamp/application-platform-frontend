@@ -102,6 +102,19 @@ export type PivotTableWidgetMapping = {
       drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
     }[];
   };
+  default_filters?: Partial<DefaultFilterType>;
+};
+
+export type DefaultFilterType = {
+  logical_operator: string;
+  conditions: {
+    logical_operator: string;
+    conditions: string;
+    column: string;
+    type: string;
+    operator: string;
+    value: string[];
+  }[];
 };
 
 export type FieldsMappingType = {

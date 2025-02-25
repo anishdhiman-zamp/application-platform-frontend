@@ -3,12 +3,18 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import { ColumnFilterConfig, PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
+import {
+  ColumnFilterConfig,
+  FilterConfig,
+  PIVOT_DATA_TYPES,
+  PivotColumnMetadata,
+} from 'modules/widgets/Pivot/pivot.types';
 import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import {
   AGGREGATION_TYPES,
   PivotTableWidgetInstanceType,
+  PivotTableWidgetMapping,
   WIDGET_TYPES,
   WidgetDataResponseType,
   WidgetInstanceType,
@@ -648,6 +654,24 @@ export const concatTagFilters = (filters: Record<string, any>) => {
   }
 
   return concatenatedFilters;
+};
+
+export const getDefaultFilterByDatasetId = (mappings: PivotTableWidgetMapping[], datasetId?: string) => {
+  const defaultFilters: Record<string, FilterConfig> = {};
+
+  mappings?.forEach((mapping) => {
+    if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
+      mapping?.default_filters?.conditions?.forEach((condition) => {
+        defaultFilters[condition?.column] = {
+          filterType: condition.type,
+          type: condition.operator,
+          values: [...condition.value],
+        };
+      });
+    }
+  });
+
+  return defaultFilters;
 };
 
 export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES): string => {

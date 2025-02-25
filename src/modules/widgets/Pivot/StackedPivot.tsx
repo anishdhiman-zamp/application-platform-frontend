@@ -41,6 +41,7 @@ import { ColumnFilterConfig, ParentFilters, PivotContext } from 'modules/widgets
 import {
   concatTagFilters,
   getColumnLevelFilters,
+  getDefaultFilterByDatasetId,
   getFilterContext,
   getPivotColDefs,
   getPivotColumns,
@@ -186,10 +187,14 @@ const StackedPivot = ({
   }, [isSingleHeader]);
 
   const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
+    const defaultFilters = getDefaultFilterByDatasetId(widgetInstanceDetails?.data_mappings?.mappings, datasetId ?? '');
+
     const query = {
       ...currentWidgetSelectedFilter,
+      ...defaultFilters,
       ...filters,
     };
+
     const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
 
     router.push(`${path}?filters=${JSON.stringify(query)}`);
