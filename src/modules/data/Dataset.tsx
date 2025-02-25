@@ -304,7 +304,11 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           </div>
           <div className='flex items-center gap-2.5'>
             <Notification isPolling={isPolling} />
-            <ExportDataset query={exportsDatasetQuery} datasetId={id as string} />
+            <ExportDataset
+              query={exportsDatasetQuery}
+              datasetId={id as string}
+              hasFilters={!!Object.keys(selectedFilters)?.length}
+            />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
             <div className='flex items-center gap-2'>
               <div className='border-r border-GRAY_400 h-7'></div>

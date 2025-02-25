@@ -11,14 +11,16 @@ import usePolling from 'hooks/usePolling';
 import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import ProgressBar from 'components/common/RingProgress';
+import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface ExportDatasetProps {
   query: string;
   datasetId: string;
+  hasFilters: boolean;
 }
 
-const ExportDataset = ({ query, datasetId }: ExportDatasetProps) => {
+const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { startPolling } = usePolling();
@@ -72,17 +74,27 @@ const ExportDataset = ({ query, datasetId }: ExportDatasetProps) => {
 
   return (
     <div className='relative  cursor-pointer w-5.5 h-5.5 rounded' onClick={downloadCsv}>
-      <div className='hover:bg-GRAY_100 h-full w-full rounded flex items-center justify-center'>
-        <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
-        {isPolling && (
-          <div className='absolute bottom-px left-[3px]'>
-            <div className='relative'>
-              <div className='w-4 border border-GRAY_400 rounded-full'></div>
-              <div className='absolute top-0 w-2 border border-GRAY_1000 rounded-full animate-width'></div>
+      <Tooltip
+        tooltipBody={hasFilters ? 'Export filtered' : 'Export all'}
+        color='{TMS_COLORS.GRAY_200}'
+        tooltipBodyClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
+        className='z-1 h-full w-full'
+        tooltipBodystyle='f-10-400'
+        disabled={isPolling}
+        position={TooltipPositions.BOTTOM}
+      >
+        <div className='hover:bg-GRAY_100 h-full w-full rounded flex items-center justify-center'>
+          <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
+          {isPolling && (
+            <div className='absolute bottom-px left-[3px]'>
+              <div className='relative'>
+                <div className='w-4 border border-GRAY_400 rounded-full'></div>
+                <div className='absolute top-0 w-2 border border-GRAY_1000 rounded-full animate-width'></div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </Tooltip>
       {isPolling && showExportStatus && (
         <div
           ref={dropdownRef}

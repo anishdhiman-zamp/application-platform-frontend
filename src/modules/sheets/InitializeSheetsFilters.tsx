@@ -1,8 +1,6 @@
 import React, { FC, ReactNode, useEffect } from 'react';
 import { useGetSheetFilterConfigQuery } from 'apis/pages';
 import { getDefaultFilterValues, getFormattedSheetsFiltersConfig } from 'modules/sheets/sheets.utils';
-import { FILTER_TYPES } from 'components/filter/filter.types';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId: string }> = ({
@@ -24,12 +22,6 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
     if (sheetFilterConfig?.native_filter_config?.length) {
       const filtersConfig = sheetFilterConfig?.native_filter_config;
       const defaultFilterValues = getDefaultFilterValues(filtersConfig);
-
-      defaultFilterValues.currency = {
-        filterType: FILTER_TYPES.MULTI_SELECT,
-        type: CONDITION_OPERATOR_TYPE.IN,
-        values: ['USD'],
-      };
 
       const filters = filtersConfig.map((filter) => {
         dispatch({
@@ -73,6 +65,16 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   }, [sheetFilterConfig]);
 
   useEffect(() => {
+    if (isFetching) {
+      dispatch({
+        type: filtersContextActions.RESET_ALL_FILTERS,
+        payload: { shouldClearDate: false },
+      });
+      dispatch({
+        type: filtersContextActions.SET_FILTERS_CONFIG,
+        payload: { filtersConfig: [] },
+      });
+    }
     dispatch({
       type: filtersContextActions.SET_FILTER_LOADING,
       payload: { isFilterLoading: isFetching },

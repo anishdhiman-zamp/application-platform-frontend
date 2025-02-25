@@ -3,6 +3,7 @@ import { FilterDefaultValueType, SheetFilterType } from 'types/api/pagesApi.type
 import { MapAny } from 'types/commonTypes';
 import { getPastDateByNumberOfDays } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
   return {
@@ -53,7 +54,12 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
 
   filters.forEach((filter) => {
     if (filter?.default_value) {
-      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(filter?.default_value, filter.filter_type);
+      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(filter?.default_value, filter?.filter_type);
+    } else if (filter?.filter_type === FILTER_TYPES.DATE_RANGE) {
+      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(
+        { value: [], operator: CONDITION_OPERATOR_TYPE.IN },
+        filter?.filter_type,
+      );
     }
   });
 

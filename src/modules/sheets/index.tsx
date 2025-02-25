@@ -74,7 +74,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
               />
               {isFilterInitialized && currency && (
                 <div className='flex items-center gap-2'>
-                  <div className='border-r border-GRAY_400 h-7'></div>
+                  {!!filtersConfig?.length && <div className='border-r border-GRAY_400 h-7'></div>}
                   <SingleSelectFilter
                     key='currency'
                     options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== 'local')}
