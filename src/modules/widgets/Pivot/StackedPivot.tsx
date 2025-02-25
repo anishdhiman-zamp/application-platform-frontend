@@ -176,7 +176,7 @@ const StackedPivot = ({
             node={props?.node}
             value={props?.value}
             maxGroupingLevel={colDef?.filter((col) => col?.rowGroup)?.length - 1}
-            showIcons={display_config?.show_icons}
+            displayConfig={display_config}
           />
         );
       },

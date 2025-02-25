@@ -51,7 +51,7 @@ const WidgetTitle = ({
           'px-6 flex flex-col items-start w-fit select-none cursor-pointer',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) && 'mb-10',
           isPivotTable && isGroupWidgetOptions && 'px-0 gap-y-2 items-start justify-center mb-0',
-          isPivotTable && !isGroupWidgetOptions && 'mb-0 px-0 justify-center',
+          isPivotTable && !isGroupWidgetOptions && 'mb-0 px-0 justify-center cursor-default',
         )}
         onClick={handleToggle}
       >

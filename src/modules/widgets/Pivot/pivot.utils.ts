@@ -20,7 +20,7 @@ import {
   WidgetInstanceType,
 } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
-import { formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
+import { capitalizeFirstLetter, formatCurrencyValue, snakeCaseToSentenceCase } from 'utils/common';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -683,5 +683,5 @@ export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES)
     return snakeCaseToSentenceCase(value);
   }
 
-  return value;
+  return capitalizeFirstLetter(value);
 };

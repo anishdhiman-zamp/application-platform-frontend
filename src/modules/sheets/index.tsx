@@ -39,7 +39,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
   );
 
   const sheetLayout = useMemo(() => {
-    return sheetDetails?.sheet_config?.sheet_layout.map((widgetConfig) => {
+    return sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => {
       return {
         i: widgetConfig?.default_widget,
         ...widgetConfig?.layout,
