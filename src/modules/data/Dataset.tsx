@@ -2,6 +2,7 @@ import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CellEditRequestEvent,
   ColDef,
+  ColumnMovedEvent,
   FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
@@ -22,7 +23,7 @@ import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import { formatColumns, getFilters } from 'modules/data/data.utils';
+import { formatColumns, getColumnOrderingVisibilityForCurrentDataset, getFilters } from 'modules/data/data.utils';
 import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
@@ -37,6 +38,7 @@ import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'type
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
@@ -84,6 +86,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
+  const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
+
   const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
     open: boolean;
     status: string;
@@ -118,6 +122,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             if (parameters.request.startRow === 0) {
               setDatasetTitle(response?.title);
               setTotalRows(response?.data?.total_count);
+              setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
               dispatch({
                 type: filtersContextActions.SET_TOTAL_ROWS,
                 payload: { totalRows: response?.data?.total_count },
@@ -285,6 +290,14 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
   }, [selectedFilters, fxCurrency]);
 
+  useEffect(() => {
+    if (isNoRowsOverlayVisible) {
+      tableRef.current?.api?.showNoRowsOverlay();
+    } else {
+      tableRef.current?.api?.hideOverlay();
+    }
+  }, [isNoRowsOverlayVisible]);
+
   const handleFilterChange = (value: string[]) => {
     setFxCurrency(value);
   };
@@ -300,6 +313,48 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       datasetId: id as string,
       query_config: exportsDatasetQuery,
     });
+  };
+
+  const handleColumnMoved = (event: ColumnMovedEvent) => {
+    const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(id);
+    const latestColumns = event?.api?.getColumns() ?? [];
+    const { column, toIndex = 0 } = event;
+
+    if (!column) return;
+    const columnOrderingVisibility: { colId: string; isVisible: boolean }[] = columnOrderingFromLocalStorage?.length
+      ? columnOrderingFromLocalStorage
+      : latestColumns.map((column) => ({
+          colId: column.getColId(),
+          isVisible: column.isVisible(),
+        }));
+
+    const movedColumn = columnOrderingVisibility.find((item) => item.colId === column?.getColId()) ?? {};
+    const fromIndex = columnOrderingVisibility.findIndex((item) => item.colId === column?.getColId());
+
+    if (fromIndex === toIndex) return;
+    let finalList: { colId?: string; isVisible?: boolean }[] = [];
+
+    if (fromIndex < toIndex) {
+      const zeroToOldIndex = columnOrderingVisibility.slice(0, fromIndex) ?? [];
+      const oldIndexToNewIndex = columnOrderingVisibility.slice(fromIndex + 1, toIndex + 1) ?? [];
+      const newIndexToEnd = columnOrderingVisibility.slice(toIndex + 1) ?? [];
+
+      finalList = [...zeroToOldIndex, ...oldIndexToNewIndex, movedColumn, ...newIndexToEnd];
+    } else {
+      const endToOldIndex = columnOrderingVisibility.slice(fromIndex + 1) ?? [];
+      const oldIndexToNewIndex = columnOrderingVisibility.slice(toIndex, fromIndex) ?? [];
+      const newIndexToStart = columnOrderingVisibility.slice(0, toIndex) ?? [];
+
+      finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
+    }
+    const currentColumnOrderingVisibility = JSON.parse(
+      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
+    );
+
+    setToLocalStorage(
+      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
+      JSON.stringify({ ...currentColumnOrderingVisibility, [id]: finalList }),
+    );
   };
 
   return (
@@ -363,6 +418,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             onFillEnd={onFillEnd}
             onRowPropertiesClick={handleRowPropertiesClick}
             statusBarValues={statusBar}
+            onColumnMoved={handleColumnMoved}
             {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
           />
         </div>

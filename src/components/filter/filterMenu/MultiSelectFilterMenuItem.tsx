@@ -142,14 +142,14 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
         {!!values?.length &&
           values
-            .filter((item) => item?.toLowerCase()?.includes(inputValue?.toLowerCase()))
+            .filter((item) => item !== null && String(item)?.toLowerCase()?.includes(String(inputValue)?.toLowerCase()))
             .map((item) => (
               <div
                 key={item}
                 onClick={() => onChange(item)}
                 className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
               >
-                {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
+                {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{String(item)}</div>}
                 <Tooltip
                   tooltipBody={`condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`}
                   tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md z-999 bg-black text-white w-28'

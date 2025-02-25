@@ -21,6 +21,11 @@ export const CustomHeaderMenuOptions = [
     iconId: 'arrow-down',
   },
   {
+    label: 'Remove Sort',
+    value: CustomHeaderMenuOptionTypes.REMOVE_SORT,
+    iconId: 'x-close',
+  },
+  {
     label: 'Filter',
     value: CustomHeaderMenuOptionTypes.FILTER,
     iconId: 'filter-lines',

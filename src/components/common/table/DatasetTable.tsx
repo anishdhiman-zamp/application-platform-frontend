@@ -3,6 +3,7 @@ import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
   ColDef,
+  ColumnMovedEvent,
   ColumnVisibleEvent,
   FillEndEvent,
   IServerSideDatasource,
@@ -25,6 +26,7 @@ interface DatasetTableProps {
   onDrilldownClick?: (data: MapAny) => void;
   onRowPropertiesClick?: (data: MapAny) => void;
   statusBarValues?: MapAny;
+  onColumnMoved?: (event: ColumnMovedEvent) => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -41,6 +43,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   onDrilldownClick,
   onRowPropertiesClick,
   statusBarValues,
+  onColumnMoved,
 }) => {
   return (
     <div id='dataset-table'>
@@ -63,6 +66,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
           type: 'fitCellContents',
         }}
         statusBarValues={statusBarValues}
+        onColumnMoved={onColumnMoved}
       />
     </div>
   );

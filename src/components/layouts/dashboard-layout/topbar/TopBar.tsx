@@ -76,10 +76,7 @@ const Topbar = () => {
         </div>
       </div>
       <div
-        className={cn(
-          'flex items-center gap-2 pl-8 w-full h-full transition-all duration-300',
-          !isSidebarOpen && 'pl-8',
-        )}
+        className={cn('flex items-center gap-2 w-full h-full transition-all duration-300', !isSidebarOpen && 'pl-8')}
       >
         <SvgSpriteLoader
           id='arrow-left'

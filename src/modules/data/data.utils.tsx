@@ -95,7 +95,7 @@ export const formatColumns = (
     formattedColumn.headerComponentParams = {
       metadata: column?.metadata,
       datasetId,
-      options: column.options,
+      options: column.options?.filter((option) => option !== null),
       handleSuccessfulUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,

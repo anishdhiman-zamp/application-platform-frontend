@@ -96,6 +96,22 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     updateLocalStorage(columnOrderingVisibility);
   };
 
+  const handleSelectAll = () => {
+    tableRef?.current?.api?.setColumnsVisible(
+      columns.map((column) => column.getColId()),
+      true,
+    );
+    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map(
+      (columnItem: MapAny) => ({
+        colId: columnItem.colId,
+        isVisible: true,
+      }),
+    );
+
+    updateLocalStorage(columnOrderingVisibility);
+    setColumnsChecked(columnOrderingVisibility);
+  };
+
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
     // re-order columns based on the columnOrderingVisibilityForCurrentDataset
@@ -137,10 +153,15 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           className='cursor-pointer'
           onClick={onClose}
         />
-        <div className='f-12-500 text-GRAY_1000'>Columns</div>
+        <div className='f-12-500 text-GRAY_1000 flex justify-between w-full'>
+          <div>Columns</div>
+          <div className='cursor-pointer' onClick={handleSelectAll}>
+            Select All
+          </div>
+        </div>
       </div>
       <Input
-        placeholder='Search Columns..'
+        placeholder='Search Columns...'
         size={SIZE_TYPES.XSMALL}
         noBorders
         focusClassNames='mt-2 mb-2.5'

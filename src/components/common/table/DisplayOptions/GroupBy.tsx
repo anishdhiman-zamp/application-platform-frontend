@@ -30,7 +30,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     setGroupedColumns((prev) => (prev?.includes(column) ? prev : [...(prev ?? []), column]));
     setAvailableColumns((prev) => prev?.filter((col) => col !== column));
     tableRef?.current?.api?.applyColumnState({
-      state: [{ colId: column, rowGroup: true }],
+      state: [{ colId: column, rowGroup: true, hide: true }],
     });
   };
 
@@ -114,7 +114,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
           className='border border-GRAY_500 rounded-md p-2.5 bg-BG_GRAY_2 min-h-[70px]'
         >
           <div className='f-12-400 text-GRAY_700 mb-3'>Drag columns here to group by</div>
-          <div className='flex gap-1 flex-wrap'>
+          <div className='flex gap-1 flex-wrap overflow-y-auto max-h-[100px] overflow-x-visible'>
             {groupedColumns.map((col, index) => (
               <div className='flex gap-1 items-center' key={col}>
                 <div
@@ -142,7 +142,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
           </div>
         </div>
         <Input
-          placeholder='Search Columns..'
+          placeholder='Search Columns...'
           size={SIZE_TYPES.XSMALL}
           noBorders
           focusClassNames='mt-3 mb-2 !pl-0'
@@ -154,14 +154,14 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
         <div
           onDragOver={(event) => event.preventDefault()}
           onDrop={handleDropOnAvailable}
-          className='flex flex-wrap gap-1.5 overflow-y-auto max-h-[150px] overflow-x-visible'
+          className='flex flex-wrap gap-1.5 overflow-y-auto max-h-[150px] overflow-x-visible pb-2'
         >
           {availableColumns?.map((col) => (
             <div
               key={col}
               draggable
               onDragStart={handleDragStart(col)}
-              className='border border-GRAY_400 rounded-md px-2 py-1 w-fit cursor-pointer text-GRAY_900 f-12-400'
+              className='border border-GRAY_400 rounded-md px-2 py-1 w-fit cursor-move text-GRAY_900 f-12-400 hover:bg-BG_GRAY_2'
             >
               {col}
             </div>

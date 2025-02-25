@@ -40,6 +40,7 @@ export const COLORS = {
   BLUE_700: '#2546F5',
 
   BACKGROUND_GRAY_1: '#FBFBFB',
+  BACKGROUND_GRAY_2: '#FAFAFA',
 };
 
 export const CHART_PALETTE_COLORS = [

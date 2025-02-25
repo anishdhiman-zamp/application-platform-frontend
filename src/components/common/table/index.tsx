@@ -7,6 +7,7 @@ import {
   ColDef,
   ColumnApiModule,
   ColumnAutoSizeModule,
+  ColumnMovedEvent,
   ColumnVisibleEvent,
   CustomEditorModule,
   CustomFilterModule,
@@ -43,8 +44,11 @@ import {
   StatusBarModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
+import { COLORS } from 'constants/colors';
 import { MapAny } from 'types/commonTypes';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
+import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
+import CustomNoRowsOverlay from 'components/common/table/CustomNoRowsOverlay';
 import CustomStatusBar from 'components/common/table/CustomStatusBar';
 import {
   AggregationFunctionMap,
@@ -119,6 +123,7 @@ interface TableProps {
     | SizeColumnsToFitProvidedWidthStrategy
     | SizeColumnsToContentStrategy;
   statusBarValues?: MapAny;
+  onColumnMoved?: (event: ColumnMovedEvent) => void;
 }
 
 export type TableColumnType = {
@@ -154,7 +159,9 @@ const Table: React.FC<TableProps> = ({
   onRowPropertiesClick,
   autoSizeStrategy,
   statusBarValues,
+  onColumnMoved,
 }) => {
+  // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       flex: 1,
@@ -166,6 +173,16 @@ const Table: React.FC<TableProps> = ({
       headerClass: 'f-12-600 text-GRAY_1000',
       cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
+      cellStyle: (params: MapAny) => {
+        if (!params.node?.__hasChildren && params.node?.parent?.key) {
+          return { backgroundColor: COLORS.BACKGROUND_GRAY_2 };
+        }
+        if (params.node?.__hasChildren) {
+          return { border: 'none' };
+        }
+
+        return undefined;
+      },
       ...columnConfig,
     };
   }, [columnConfig]);
@@ -196,6 +213,17 @@ const Table: React.FC<TableProps> = ({
   }, [totalRows, showStatusBar, statusBarValues]);
 
   const cellSelection = useMemo(() => (enableCellSelection ? cellSelectionConfig : undefined), [enableCellSelection]);
+
+  const autoGroupColumnDef = useMemo<ColDef>(
+    () => ({
+      pinned: 'left',
+      headerComponent: CustomGroupHeader,
+      editable: false,
+      suppressFillHandle: true,
+      cellClass: 'p-0 f-11-400 text-GRAY_1000 content-center',
+    }),
+    [],
+  );
 
   const getContextMenuItems = useCallback(
     (params: GetContextMenuItemsParams) => {
@@ -254,6 +282,12 @@ const Table: React.FC<TableProps> = ({
           autoSizeStrategy={autoSizeStrategy}
           suppressServerSideFullWidthLoadingRow
           serverSideInitialRowCount={10}
+          autoGroupColumnDef={autoGroupColumnDef}
+          enableCellTextSelection
+          noRowsOverlayComponent={CustomNoRowsOverlay}
+          maintainColumnOrder
+          suppressDragLeaveHidesColumns
+          onColumnMoved={onColumnMoved}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

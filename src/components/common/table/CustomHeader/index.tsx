@@ -79,10 +79,14 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   const filteredMenuOptions = useMemo(
     () =>
-      CustomHeaderMenuOptions.filter((option) =>
-        option.value === CustomHeaderMenuOptionTypes.RULES ? isTagColumn : true,
-      ),
-    [isTagColumn],
+      CustomHeaderMenuOptions.filter((option) => {
+        if (option.value === CustomHeaderMenuOptionTypes.REMOVE_SORT) {
+          return !!sortState;
+        }
+
+        return option.value === CustomHeaderMenuOptionTypes.RULES ? isTagColumn : true;
+      }),
+    [isTagColumn, sortState],
   );
 
   const handleMenuClose = () => setIsMenuOpen(false);
@@ -109,6 +113,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         break;
       case CustomHeaderMenuOptionTypes.FILTER:
         setIsFilterOpen(true);
+        break;
+      case CustomHeaderMenuOptionTypes.REMOVE_SORT:
+        tableRef.current?.api?.applyColumnState({
+          state: [{ colId: colId, sort: null }],
+        });
         break;
     }
   };
