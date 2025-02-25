@@ -8,4 +8,5 @@ export type TopBarPropsType = {
 export const enum SHARE_BTN_ALLOWED_ROUTES {
   PAGES = '/pages/',
   DATASETS = '/datasets/',
+  DATASET = '/datasets',
 }

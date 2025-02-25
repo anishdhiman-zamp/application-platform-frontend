@@ -235,6 +235,28 @@ export type GetRulesByDatasetColumnsResponseType = {
   [datasetId: string]: RulesByDatasetColumnType;
 };
 
+export type UploadFileResponseType = {
+  identifier: string;
+  url: string;
+  fileName: string;
+  downloadableUrl: string;
+  rawFile: File | null;
+};
+
+export type TableData = {
+  columns: string[];
+  rows: { [key: string]: string | number | boolean | null }[];
+};
+
+export type TransformationPreviewMetadata = {
+  data_preview: TableData;
+};
+
+export type RawMetadata = {
+  columns: string[];
+  rows: { [key: string]: string | number | boolean | null }[];
+};
+
 export type GetRulesByRuleIdsRequestType = {
   rule_ids: string[];
 };
@@ -253,4 +275,34 @@ export type UpdateRulePriorityRequestType = {
   dataset_id: string;
   column: string;
   rule_priorities: RulePrioritiesType;
+};
+
+export type SignedUrlBodyType = {
+  file_name: string;
+  file_type: string;
+};
+export type PreviewTransformationRequest = {
+  file_upload_id: string;
+  dataset_id?: string;
+};
+
+export type PreviewTransformationResponse = {
+  dataset_action_id: string;
+};
+
+export type PostAiTransformationConfirmResponseType = {
+  message: string;
+};
+
+export type GetAiTransformationResponseType = {
+  data_preview: TableData;
+};
+
+export type GetAiTransformationRequestType = {
+  file_upload_id: string;
+};
+
+export type PostAiTransformationConfirmRequestType = {
+  file_upload_id: string;
+  dataset_id?: string;
 };

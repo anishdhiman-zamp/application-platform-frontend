@@ -1,6 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -19,7 +18,6 @@ type DisplayOptionsProps = {
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
@@ -59,7 +57,6 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
         iconPosition={ICON_POSITION_TYPES.LEFT}
         iconProps={{
           id: 'settings-04',
-          iconCategory: ICON_SPRITE_TYPES.GENERAL,
         }}
       >
         Display

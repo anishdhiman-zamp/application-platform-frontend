@@ -18,13 +18,21 @@ import {
   DatasetUpdateRequestType,
   DatasetUpdateResponseType,
   DeleteAudienceFromDatasetAccessType,
+  GetAiTransformationRequestType,
+  GetAiTransformationResponseType,
   GetRulesByDatasetColumnsRequestType,
   GetRulesByDatasetColumnsResponseType,
   GetRulesByRuleIdsRequestType,
   PatchChangeAudienceRoleInDatasetType,
+  PostAiTransformationConfirmRequestType,
+  PostAiTransformationConfirmResponseType,
   PostShareDatasetToAudiencesByDatasetIdType,
+  PreviewTransformationRequest,
+  PreviewTransformationResponse,
   RuleType,
+  SignedUrlBodyType,
   UpdateRulePriorityRequestType,
+  UploadFileResponseType,
 } from 'types/api/dataset.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -106,6 +114,40 @@ const Dataset = baseApi.injectEndpoints({
         params,
       }),
     }),
+    getSignedUrl: builder.mutation<UploadFileResponseType, SignedUrlBodyType>({
+      query: (payload) => ({
+        url: API_ENDPOINTS.DATASET_SIGNED_UPLOAD_URL_POST,
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+    }),
+    getPreviewTransformation: builder.mutation<PreviewTransformationResponse, PreviewTransformationRequest>({
+      query: ({ file_upload_id, dataset_id }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORTS_ACTION_ID, { file_upload_id }),
+        method: REQUEST_TYPES.POST,
+        body: { dataset_id },
+      }),
+    }),
+    getAiTransformation: builder.query<GetAiTransformationResponseType, GetAiTransformationRequestType>({
+      query: ({ file_upload_id }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORTS_PREVIEW_TRANSFORMATION_GET, {
+          file_upload_id,
+        }),
+      }),
+    }),
+    postAiTransformationConfirm: builder.mutation<
+      PostAiTransformationConfirmResponseType,
+      PostAiTransformationConfirmRequestType
+    >({
+      query: ({ file_upload_id, dataset_id }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORTS_PREVIEW_TRANSFORMATION_CONFIRM_POST, {
+          file_upload_id,
+        }),
+        method: REQUEST_TYPES.POST,
+        body: { dataset_id },
+      }),
+    }),
+
     getRulesByRuleIds: builder.query<RuleType[], GetRulesByRuleIdsRequestType>({
       query: (params) => ({
         url: API_ENDPOINTS.DATASET_RULES_BY_RULE_IDS_GET,
@@ -138,7 +180,12 @@ export const {
   usePatchChangeAudienceRoleInDatasetMutation,
   useDeleteAudienceFromDatasetAccessMutation,
   useGetRulesByDatasetColumnsQuery,
+  useGetSignedUrlMutation,
+  useGetPreviewTransformationMutation,
   useGetRulesByRuleIdsQuery,
   useLazyGetRulesByRuleIdsQuery,
   useUpdateRulePriorityMutation,
+  useGetAiTransformationQuery,
+  useLazyGetAiTransformationQuery,
+  usePostAiTransformationConfirmMutation,
 } = Dataset;

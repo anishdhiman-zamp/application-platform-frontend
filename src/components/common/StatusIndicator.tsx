@@ -1,0 +1,33 @@
+import React, { FC } from 'react';
+import { COLORS } from 'constants/colors';
+import { LOADER_STATUS } from 'modules/data/data.types';
+import ProgressBar from 'components/common/RingProgress';
+import SvgSpriteLoader from 'components/SvgSpriteLoader';
+
+type StatusIndicatorPropsType = {
+  status: LOADER_STATUS;
+};
+
+const StatusIndicator: FC<StatusIndicatorPropsType> = ({ status }) => {
+  if (status === LOADER_STATUS.LOADING || status === LOADER_STATUS.INITIATED) {
+    return (
+      <ProgressBar
+        trackColor={COLORS.GRAY_400}
+        indicatorColor={'#22A356'}
+        indicatorWidth={3}
+        trackWidth={3}
+        size={20}
+        className='animate-spin'
+        progress={30}
+      />
+    );
+  }
+
+  if (status === LOADER_STATUS.SUCCESS) {
+    return <SvgSpriteLoader id='check-circle' width={16} height={16} color={COLORS.GREEN_PRIMARY} className='mt-0.5' />;
+  }
+
+  return <SvgSpriteLoader id='alert-circle' width={16} height={16} color={COLORS.RED_700} className='mt-0.5' />;
+};
+
+export default StatusIndicator;

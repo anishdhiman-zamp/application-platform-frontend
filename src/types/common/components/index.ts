@@ -43,5 +43,6 @@ export interface MenuItem {
 export enum TAB_TYPES {
   FILLED = 'FILLED',
   OUTLINE = 'OUTLINE',
+  FILLED_OUTLINED = 'FILLED_OUTLINED',
   UNDERLINE = 'UNDERLINE',
 }

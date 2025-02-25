@@ -13,6 +13,12 @@ export const TAB_STYLES = {
     tabItemGapClassName: 'mr-1.5',
     tabItemClassName: 'py-2 px-3 rounded-lg',
   },
+  [TAB_TYPES.FILLED_OUTLINED]: {
+    tabItemSelectedClassName: 'text-GRAY_1000 border border-GRAY_400 bg-white transition-all transform',
+    tabItemDefaultClassName: 'text-GRAY_900 bg-GRAY_100 border border-transparent',
+    tabItemGapClassName: 'mr-0',
+    tabItemClassName: 'py-1.5 px-6 rounded',
+  },
   [TAB_TYPES.UNDERLINE]: {
     tabItemSelectedClassName: 'text-GRAY_1000 border-b-2 border-GRAY_1000',
     tabItemDefaultClassName: 'text-GRAY_700 border-b-2 border-transparent',

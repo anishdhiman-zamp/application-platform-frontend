@@ -17,7 +17,11 @@ import { ZAMP_LOADER } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
+import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
+import ImportDataset from 'modules/data/components/importDataset/index';
+import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
+import { LOADER_STATUS } from 'modules/data/data.types';
 import { formatColumns, getFilters } from 'modules/data/data.utils';
 import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
@@ -80,9 +84,18 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
-
+  const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
+    open: boolean;
+    status: string;
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    status: LOADER_STATUS.LOADING,
+    title: '',
+    description: '',
+  });
   const { startPolling } = usePolling();
-
   const [getDatasetData, { data: datasetData }] = useLazyGetDatasetDataQuery();
 
   const {
@@ -282,6 +295,13 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
     }
   }, [datasetTitle, breadcrumbStack]);
 
+  const handleRefetchDataset = () => {
+    getDatasetData({
+      datasetId: id as string,
+      query_config: exportsDatasetQuery,
+    });
+  };
+
   return (
     <>
       <CommonWrapper
@@ -302,13 +322,22 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
-          <div className='flex items-center gap-2.5'>
+          <div className='relative flex items-center gap-2.5'>
             <Notification isPolling={isPolling} />
+            <TableSchemaAlignmentStatus
+              showAiTransformationStatus={showAiTransformationStatus}
+              setShowAiTransformationStatus={setShowAiTransformationStatus}
+            />
             <ExportDataset
               query={exportsDatasetQuery}
               datasetId={id as string}
               hasFilters={!!Object.keys(selectedFilters)?.length}
             />
+            <ImportDataset
+              onRefetch={handleRefetchDataset}
+              setShowAiTransformationStatus={setShowAiTransformationStatus}
+            />
+            <DatasetHistory />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
             <div className='flex items-center gap-2'>
               <div className='border-r border-GRAY_400 h-7'></div>

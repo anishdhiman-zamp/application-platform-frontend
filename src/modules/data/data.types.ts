@@ -42,3 +42,10 @@ export type DatasetColumnRequest = {
   dataset_id: string;
   columns: string[];
 };
+
+export enum LOADER_STATUS {
+  INITIATED = 'initiated',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}

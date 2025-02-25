@@ -27,7 +27,7 @@ const Topbar = () => {
       return <SharePagePopup pageId={router.query.id as string} />;
     } else if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS)) {
       return <ShareDatasetPopup datasetId={router.query.id as string} />;
-    } else {
+    } else if (currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET) {
       return null;
     }
   }, [currentRoute, router.query.id]);

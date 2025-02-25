@@ -232,6 +232,11 @@
   transform: translateX(-150%);
 }
 
+.ag-grid-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e2da #fff0;
+}
+
 .react-grid-item.cssTransforms {
   background: none !important; /* Remove red background */
 }

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { LOADER_STATUS } from 'modules/data/data.types';
 import { Session, Workspace } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 
@@ -12,6 +13,7 @@ export type UserState = {
   merchantDetails?: MapAny;
   roles?: { id: string; name: string }[];
   dashboardLoader: boolean;
+  datasetBulkLoaders?: { id: string; status: LOADER_STATUS; title: string; description: string }[];
 };
 
 const initialState: UserState = {
@@ -23,6 +25,7 @@ const initialState: UserState = {
   merchantDetails: {},
   workspace: null,
   dashboardLoader: false,
+  datasetBulkLoaders: [],
 };
 
 export const userSlice = createSlice({
@@ -56,7 +59,20 @@ export const userSlice = createSlice({
     setDashboardLoader: (state, action: PayloadAction<boolean>) => {
       state.dashboardLoader = action.payload;
     },
-
+    addDatasetBulkLoaders: (
+      state,
+      action: PayloadAction<{ id: string; status: LOADER_STATUS; title: string; description: string }>,
+    ) => {
+      if (!state.datasetBulkLoaders) {
+        state.datasetBulkLoaders = [];
+      }
+      state.datasetBulkLoaders.push(action.payload);
+    },
+    removeDatasetBulkLoader: (state, action: PayloadAction<string>) => {
+      if (state.datasetBulkLoaders) {
+        state.datasetBulkLoaders = state.datasetBulkLoaders.filter((loader) => loader.id !== action.payload);
+      }
+    },
     setWorkspace: (state, action: PayloadAction<Workspace>) => {
       state.workspace = action.payload;
 
@@ -77,6 +93,8 @@ export const {
   setMerchantDetails,
   setRoles,
   setUser,
+  addDatasetBulkLoaders,
+  removeDatasetBulkLoader,
   setWorkspace,
   setDashboardLoader,
 } = userSlice.actions;

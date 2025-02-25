@@ -8,6 +8,7 @@ import {
 import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
+import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import ProgressBar from 'components/common/RingProgress';
@@ -87,10 +88,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
           <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
           {isPolling && (
             <div className='absolute bottom-px left-[3px]'>
-              <div className='relative'>
-                <div className='w-4 border border-GRAY_400 rounded-full'></div>
-                <div className='absolute top-0 w-2 border border-GRAY_1000 rounded-full animate-width'></div>
-              </div>
+              <LoadingWidthAnimation />
             </div>
           )}
         </div>

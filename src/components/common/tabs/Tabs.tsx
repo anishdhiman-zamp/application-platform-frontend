@@ -77,11 +77,12 @@ export const Tabs: FC<TabsPropsType> = ({
                     ) : (
                       <div
                         className={cn(
-                          `flex gap-1 w-full justify-center items-center f-12-500 ${tabItemClassName} ${tabItemStyle} ${
-                            selected
-                              ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
-                              : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`
-                          }`,
+                          'flex gap-1 w-full justify-center items-center f-12-500',
+                          tabItemClassName,
+                          tabItemStyle,
+                          selected
+                            ? `${tabItemSelectedClassName} ${tabItemSelectedStyle}`
+                            : `${tabItemDefaultClassName} ${tabItemDefaultStyle}`,
                         )}
                       >
                         {tabItem?.label}

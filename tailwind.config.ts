@@ -239,6 +239,7 @@ module.exports = {
         'bottomSideDrawer-unMount': 'bottomSideDrawerUnMountTransition 0.4s normal forwards ease-out',
         'shimmer-round': 'shimmer-round 1.5s infinite linear',
         width: 'position 1.5s linear infinite',
+        slide: 'slide 1.5s linear infinite',
       },
       keyframes: {
         'reverse-spin': {
@@ -301,6 +302,10 @@ module.exports = {
         },
         'shimmer-skeleton': {
           '100%': { transform: 'translateX(100%)' },
+        },
+        slide: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
         },
       },
       transitionProperty: {

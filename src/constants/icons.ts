@@ -16,6 +16,7 @@ export const WIDGET_LOADER_2 = IMAGE_PREFIX + '/images/widget-loader-2.gif';
 export const JOINED_DATASET_ICON = IMAGE_PREFIX + '/icons/joined-dataset.svg';
 export const ZAMP_LOGIN_BG = IMAGE_PREFIX + '/mp4/zamp-login-bg.mp4';
 export const ZAMP_FULL_LOGO = IMAGE_PREFIX + '/icons/zamp-full-logo.svg';
+export const COINS_STACKED_05 = IMAGE_PREFIX + '/icons/coins-stacked-05.svg';
 export const PIVOT_HEADER_BG = IMAGE_PREFIX + '/images/pivot-header-bg.svg';
 export const ARROW_RIGHT = IMAGE_PREFIX + '/icons/arrow-right.svg';
 export const CHEVRON_DOWN = IMAGE_PREFIX + '/icons/chevron-down.svg';
