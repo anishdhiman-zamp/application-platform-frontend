@@ -35,8 +35,8 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
     case FILTER_TYPES.DATE_RANGE:
       return {
         filterType: filterType,
-        dateFrom: filter?.value?.[0] ?? getPastDateByNumberOfDays(0).toISOString(),
-        dateTo: filter?.value?.[1] ?? getPastDateByNumberOfDays(30).toISOString(),
+        dateFrom: filter?.value?.[0] ?? getPastDateByNumberOfDays(30).toISOString(),
+        dateTo: filter?.value?.[1] ?? getPastDateByNumberOfDays(0).toISOString(),
         periodicity: PERIODICITY_TYPES.DAILY,
         type: filter?.operator,
       };
