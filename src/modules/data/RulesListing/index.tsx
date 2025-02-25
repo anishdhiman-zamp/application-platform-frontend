@@ -167,6 +167,24 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
 
   const handleDiscardChanges = () => {
     handleApplyChangesPopupClose();
+    const orderedItems = rules.sort((a, b) => {
+      if (prioritySorting === OrderType.ASC) {
+        return (a.priority ?? 0) - (b.priority ?? 0);
+      } else {
+        return (b.priority ?? 0) - (a.priority ?? 0);
+      }
+    });
+
+    setLayout(
+      orderedItems?.map((rule, index) => ({
+        i: rule?.id,
+        x: 0,
+        y: index,
+        w: 1,
+        h: 1,
+      })),
+    );
+    setRules(orderedItems);
   };
 
   const handleExpandRule = (id: string) => {

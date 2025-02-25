@@ -13,3 +13,8 @@ export enum VALUE_FORMAT_TYPE {
   PREFIX = 'prefix',
   COLUMN_PREFIX = 'column_prefix',
 }
+
+export type ColumnVisibility = {
+  colId: string;
+  isVisible: boolean;
+};

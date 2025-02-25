@@ -85,14 +85,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     [isTagColumn],
   );
 
+  const handleMenuClose = () => setIsMenuOpen(false);
+
   const handleMenuOptionClick = (option: CustomHeaderMenuOptionTypes) => {
+    handleMenuClose();
+
     switch (option) {
       case CustomHeaderMenuOptionTypes.RULES:
-        setIsMenuOpen(false);
         handleRulesListingSideDrawerOpen(colId);
         break;
       case CustomHeaderMenuOptionTypes.ADD_TAG:
-        setIsMenuOpen(false);
         setIsAddTagOpen(true);
         break;
       case CustomHeaderMenuOptionTypes.SORT_ASC:
@@ -106,14 +108,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         });
         break;
       case CustomHeaderMenuOptionTypes.FILTER:
-        setIsMenuOpen(false);
         setIsFilterOpen(true);
         break;
     }
   };
 
   const handleAddTagClose = () => {
-    setIsMenuOpen(true);
     setIsAddTagOpen(false);
   };
 
@@ -144,7 +144,6 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     }
     updateMenuPosition();
     setIsMenuOpen((prev) => !prev);
-    setIsFilterOpen(false);
   };
 
   const handleFilterClose = () => {
@@ -160,8 +159,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         )}
         onClick={toggleMenu}
       >
-        <div>{colDef?.headerName ?? colId}</div>
         <div className='flex items-center gap-1'>
+          <div>{colDef?.headerName ?? colId}</div>
           {!!sortState && (
             <SvgSpriteLoader
               id={sortState === OrderType.ASC ? 'arrow-narrow-up' : 'arrow-narrow-down'}
@@ -171,8 +170,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
             />
           )}
           {isFilterActive && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />}
-          <SvgSpriteLoader id='chevron-down' width={12} height={12} className='hidden group-hover:block' />
         </div>
+        <SvgSpriteLoader id='chevron-down' width={12} height={12} className='hidden group-hover:block' />
       </div>
       {isMenuOpen && (
         <PositionedMenuWrapper
@@ -180,6 +179,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           className='w-52 p-1'
           childrenWrapperClassName='!overflow-auto'
           menuPosition={menuPosition}
+          onClose={handleMenuClose}
         >
           {filteredMenuOptions.map((option) => (
             <div

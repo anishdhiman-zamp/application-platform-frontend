@@ -11,6 +11,7 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'util
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
+import { ColumnVisibility } from 'components/common/table/table.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 import 'react-grid-layout/css/styles.css';
 
@@ -18,14 +19,14 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 type ColumnListingProps = {
   tableRef: React.RefObject<AgGridReact>;
-  refetchColumnList: number;
   onClose: defaultFnType;
   datasetId: string;
 };
 
-const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, onClose, datasetId }) => {
+const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
   // State for grid layout
   const [layout, setLayout] = useState(
     columns.map((column, index) => ({
@@ -59,6 +60,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
     );
 
     updateLocalStorage(columnOrderingVisibility);
+    setColumnsChecked(columnOrderingVisibility);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +98,6 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
 
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
-
     // re-order columns based on the columnOrderingVisibilityForCurrentDataset
     const orderedColumns: Column[] =
       getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) =>
@@ -112,7 +113,14 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
     } else {
       setColumns(finalColumns);
     }
-  }, [refetchColumnList]);
+
+    setColumnsChecked(
+      finalColumns?.map((column) => ({
+        colId: column?.getColId(),
+        isVisible: column?.isVisible(),
+      })),
+    );
+  }, []);
 
   return (
     <MenuWrapper
@@ -157,14 +165,14 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, refetchColumnList, on
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
               </div>
               <CheckBox
-                checked={column.isVisible()}
+                checked={columnsChecked?.find((col) => col?.colId === column?.getColId())?.isVisible ?? false}
                 onPress={(e) => {
                   e.stopPropagation();
                   handleCheckBoxClick(column);
                 }}
-                id={column.getColId() ?? ''}
+                id={column?.getColId() ?? ''}
               />
-              <div className='f-12-400 text-GRAY_1000'>{column.getColId()}</div>
+              <div className='f-12-400 text-GRAY_1000'>{column?.getColId()}</div>
             </div>
           ))}
         </ResponsiveGridLayout>

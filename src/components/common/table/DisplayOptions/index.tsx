@@ -14,11 +14,10 @@ import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 
 type DisplayOptionsProps = {
   tableRef: React.RefObject<AgGridReact>;
-  refetchColumnList: number;
   datasetId: string;
 };
 
-const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, refetchColumnList, datasetId }) => {
+const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -77,12 +76,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, refetchColumnList, 
         </MenuWrapper>
       )}
       {isColumnListingOpen && (
-        <ColumnListing
-          tableRef={tableRef}
-          refetchColumnList={refetchColumnList}
-          onClose={handleCloseColumnListing}
-          datasetId={datasetId}
-        />
+        <ColumnListing tableRef={tableRef} onClose={handleCloseColumnListing} datasetId={datasetId} />
       )}
       {isGroupByOpen && <GroupBy onClose={handleCloseGroupBy} tableRef={tableRef} />}
     </div>

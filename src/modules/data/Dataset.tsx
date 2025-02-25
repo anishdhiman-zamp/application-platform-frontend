@@ -82,7 +82,6 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
 
   const { startPolling } = usePolling();
-  const [refetchColumnList, setRefetchColumnList] = useState<number>(0);
 
   const [getDatasetData, { data: datasetData }] = useLazyGetDatasetDataQuery();
 
@@ -125,10 +124,6 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
-
-  const handleColumnVisible = () => {
-    setRefetchColumnList((prev) => prev + 1);
-  };
 
   const handleSuccessfulUpdate = (data: DatasetUpdateResponseType) => {
     setIsPolling(true);
@@ -310,7 +305,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           <div className='flex items-center gap-2.5'>
             <Notification isPolling={isPolling} />
             <ExportDataset query={exportsDatasetQuery} datasetId={id as string} />
-            <DisplayOptions tableRef={tableRef} refetchColumnList={refetchColumnList} datasetId={id as string} />
+            <DisplayOptions tableRef={tableRef} datasetId={id as string} />
             <div className='flex items-center gap-2'>
               <div className='border-r border-GRAY_400 h-7'></div>
               <SingleSelectFilter
@@ -331,7 +326,6 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             serverSideDatasource={serverSideDatasource}
             columnConfig={{ enableRowGroup: true, enableValue: true }}
             totalRows={totalRows}
-            onColumnVisible={handleColumnVisible}
             onCellEditRequest={onCellEditRequest}
             onFillEnd={onFillEnd}
             onRowPropertiesClick={handleRowPropertiesClick}
