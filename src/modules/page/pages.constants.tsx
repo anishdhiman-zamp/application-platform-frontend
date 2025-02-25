@@ -69,3 +69,7 @@ export const PAGE_CURRENCY_OPTIONS = [
   'EUR',
   'UZS',
 ];
+
+export const CURRENCY_SYMBOLS = {
+  USD: '$',
+};
