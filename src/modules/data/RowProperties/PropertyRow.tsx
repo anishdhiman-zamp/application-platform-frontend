@@ -96,7 +96,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, tea
       <div className='f-12-400 text-GRAY_700 h-6 flex items-center'>
         <p>{columnKey}</p>
       </div>
-      <div className='f-11-400 text-GRAY_1000 h-6 flex items-center'>{getValue(column, value)}</div>
+      <div className='f-11-400 text-GRAY_1000 min-h-6 h-fit flex items-center break-all'>{getValue(column, value)}</div>
     </>
   );
 };

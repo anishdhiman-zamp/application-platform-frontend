@@ -88,19 +88,14 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
       headerClassName='!p-6'
       topBar={
         <div className='flex items-center justify-between flex-1'>
-          {ruleIds.length > 0 ? (
-            <Tabs
-              id='row-properties-tabs'
-              list={ROW_PROPERTIES_TABS}
-              type={TAB_TYPES.FILLED}
-              onSelect={handleTabChange}
-              customSelectedIndex={selectedTab === ROW_PROPERTIES_TABS_TYPES.RULES ? 1 : 0}
-            />
-          ) : (
-            <Button type={BUTTON_TYPES.SECONDARY} id='row-properties' size={SIZE_TYPES.XSMALL} className='!bg-GRAY_100'>
-              Properties
-            </Button>
-          )}
+          <Tabs
+            id='row-properties-tabs'
+            list={ROW_PROPERTIES_TABS}
+            type={TAB_TYPES.FILLED}
+            onSelect={handleTabChange}
+            customSelectedIndex={selectedTab === ROW_PROPERTIES_TABS_TYPES.RULES ? 1 : 0}
+            showSingleAsWell
+          />
           {isDrillDownEnabled && (
             <Button
               type={BUTTON_TYPES.SECONDARY}

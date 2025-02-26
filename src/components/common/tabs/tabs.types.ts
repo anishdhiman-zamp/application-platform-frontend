@@ -22,4 +22,5 @@ export type TabsPropsType = {
   indicatorStyle?: string;
   selectedTabIndicatorStyle?: string;
   disabled?: boolean;
+  showSingleAsWell?: boolean;
 };

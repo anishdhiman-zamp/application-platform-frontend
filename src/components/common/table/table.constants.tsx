@@ -28,13 +28,14 @@ export const myTheme = themeQuartz.withParams({
   checkboxUncheckedBorderColor: COLORS.GRAY_400,
   sideBarBackgroundColor: COLORS.WHITE,
   headerColumnResizeHandleColor: COLORS.WHITE,
-  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
+  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_500 },
   menuBackgroundColor: COLORS.WHITE,
   wrapperBorder: { width: 1, style: 'solid', color: COLORS.GRAY_400 },
   rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
   selectCellBorder: { style: 'solid', width: 1, color: COLORS.BLUE_700 },
   rangeSelectionBorderColor: COLORS.BLUE_700,
   cellEditingBorder: { style: 'solid', width: 1, color: COLORS.BLUE_700 },
+  menuShadow: '1px 2px 20px 0px #0000001A',
 });
 
 export const myIcons = {

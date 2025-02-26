@@ -245,3 +245,7 @@
   border-width: 1px;
   border-color: white;
 }
+
+#dataset-table .ag-menu {
+  border-radius: 6px;
+}

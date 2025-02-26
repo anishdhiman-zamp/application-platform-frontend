@@ -22,6 +22,7 @@ export const Tabs: FC<TabsPropsType> = ({
   id = '',
   disabled,
   type = TAB_TYPES.FILLED,
+  showSingleAsWell = false,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number>(customSelectedIndex);
   const firstLoad = useRef(true);
@@ -47,7 +48,7 @@ export const Tabs: FC<TabsPropsType> = ({
 
   return (
     <>
-      {hasMultipleItems && (
+      {(hasMultipleItems || showSingleAsWell) && (
         <div className={`overflow-hidden no-scrollbar select-none ${scrollWrapperClassName} ${scrollWrapperStyle}`}>
           <div className={`flex w-full ${wrapperClassName} ${wrapperStyle}`}>
             {list?.map((tabItem, index) => {
