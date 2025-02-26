@@ -337,7 +337,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
       <div className='flex  overflow-hidden h-full'>
         <div className='flex-1 shadow-dateContainer w-full' data-testid={`date-range-menu-custom-${id}`}>
           {!isSingle && (
-            <div className='border-b border-GRAY_400 mx-3 pt-3 flex w-auto justify-between '>
+            <div className='border-b border-GRAY_400 mx-3 pt-3 flex w-auto justify-between items-center'>
               <div className=''>
                 <Tabs
                   customSelectedIndex={dateRangeTabs?.findIndex((tab) => tab.value === currentTab)}
@@ -350,8 +350,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   type={TAB_TYPES.UNDERLINE}
                 />
               </div>
-
-              <div className=' cursor-pointer' onClick={onResetFilter} data-testid='reset-date-range'>
+              <div className='cursor-pointer' onClick={onResetFilter} data-testid='reset-date-range'>
                 <SvgSpriteLoader id='refresh-ccw-01' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={14} height={14} />
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
@@ -17,6 +17,7 @@ interface SingleSelectFilterMenuItemProps {
   allowSearch?: boolean;
   onFilterChange?: (value: string[]) => void;
   debounceTime?: number;
+  isOpen?: boolean;
 }
 
 const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
@@ -28,7 +29,9 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   allowSearch = true,
   onFilterChange,
   debounceTime = 800,
+  isOpen = false,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
@@ -75,6 +78,12 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
     setFilter([]);
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
   return (
     <div
       className={cn(
@@ -101,7 +110,13 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
       </div>
       {allowSearch && (
         <div className='px-2.5'>
-          <Input size={SIZE_TYPES.XSMALL} value={inputValue} placeholder='type a value...' onChange={onSearchChange} />
+          <Input
+            size={SIZE_TYPES.XSMALL}
+            inputRef={inputRef}
+            value={inputValue}
+            placeholder='type a value...'
+            onChange={onSearchChange}
+          />
         </div>
       )}
       <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>

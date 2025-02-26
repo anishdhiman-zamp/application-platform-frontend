@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
@@ -17,6 +17,7 @@ interface MultiSelectFilterMenuItemProps {
   className?: string;
   LabelComponent?: (item: string) => React.ReactNode;
   operatorOptions?: OptionsType[];
+  isOpen?: boolean;
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -25,8 +26,10 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   className,
   LabelComponent,
   operatorOptions = MULTI_SELECT_FILTER_OPTIONS,
+  isOpen = false,
 }) => {
   const ref = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
@@ -35,7 +38,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   const currentOperator = operatorOptions.find((option) => option.value === selectedFilters[columnId]?.type);
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedFilters[columnId]?.values || []);
   const [inputValue, setInputValue] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isConditionOpen, setIsConditionOpen] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? operatorOptions[0]);
   const onSearchChange = (value: ChangeEvent<HTMLInputElement>) => {
     setInputValue(value.target.value);
@@ -90,6 +93,12 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
   return (
     <div
       className={cn(
@@ -103,13 +112,13 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow'
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsConditionOpen(!isConditionOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}
           </div>
           <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
-          {isOpen && (
+          {isConditionOpen && (
             <div
               ref={ref}
               className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
@@ -137,7 +146,13 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
         </div>
       </div>
       <div className='px-2.5'>
-        <Input size={SIZE_TYPES.XSMALL} value={inputValue} placeholder='type a value...' onChange={onSearchChange} />
+        <Input
+          size={SIZE_TYPES.XSMALL}
+          inputRef={inputRef}
+          value={inputValue}
+          placeholder='type a value...'
+          onChange={onSearchChange}
+        />
       </div>
       <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
         {!!values?.length &&

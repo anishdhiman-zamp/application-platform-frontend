@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
@@ -14,10 +14,12 @@ interface SearchFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
+  isOpen?: boolean;
 }
 
-const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className }) => {
+const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className, isOpen = false }) => {
   const ref = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
@@ -26,7 +28,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
   const currentOperatorValue = selectedFilters[columnId]?.type;
   const currentOperator = SEARCH_FILTER_OPTIONS.find((option) => option.value === currentOperatorValue);
   const [searchValue, setSearchValue] = useState(selectedFilters[columnId]?.filter || '');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isConditionOptionsOpen, setIsConditionOptionsOpen] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? SEARCH_FILTER_OPTIONS[0]);
 
   const setFilter = (operator: string, searchValue: string) => {
@@ -68,7 +70,13 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
     setFilter(selectedOperator?.value as string, '');
   };
 
-  useOnClickOutside(ref, () => setIsOpen(false));
+  useOnClickOutside(ref, () => setIsConditionOptionsOpen(false));
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
 
   return (
     <div
@@ -80,13 +88,13 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow'
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsConditionOptionsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}
           </div>
           <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
-          {isOpen && (
+          {isConditionOptionsOpen && (
             <div
               ref={ref}
               className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
@@ -115,6 +123,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
       </div>
       <div className='flex flex-col gap-2'>
         <Input
+          inputRef={inputRef}
           size={SIZE_TYPES.XSMALL}
           value={searchValue}
           placeholder='type a value...'
