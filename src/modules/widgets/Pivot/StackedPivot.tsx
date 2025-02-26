@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -289,18 +289,18 @@ const StackedPivot = ({
       if (allColumns?.length > 0) {
         const lastColumn = allColumns[allColumns?.length - 1];
 
-        gridApi.current?.ensureColumnVisible(lastColumn);
+        gridApi.current?.ensureColumnVisible(lastColumn, 'end');
       }
     }
   };
 
-  const onGridReady = (params: { api: GridApi }) => {
+  const onGridReady = useCallback((params: { api: GridApi }) => {
     gridApi.current = params.api;
 
     setTimeout(() => {
       handleScrollToRightEnd();
     }, 0);
-  };
+  }, []);
 
   return (
     <div className='h-fit w-full relative pivot group'>
