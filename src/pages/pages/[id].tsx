@@ -1,19 +1,23 @@
 import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery } from 'apis/pages';
+import { ZAMP_LOADER } from 'constants/icons';
 import { useAppDispatch } from 'hooks/toolkit';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 import 'ag-charts-enterprise';
 
 const Page = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { data: pageDetails } = useGetPageDetailsQuery(id as string, { skip: !id });
+  const { data: pageDetails, isLoading, isError, refetch } = useGetPageDetailsQuery(id as string, { skip: !id });
   const dispatch = useAppDispatch();
   const currentSheetId = useMemo(
     () => getSheetIdFromPath(router.asPath, id as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
@@ -47,10 +51,22 @@ const Page = () => {
   }, [pageDetails]);
 
   return (
-    <div className='relative h-full rounded-tl-md py-6 pl-3 pr-2 overflow-y-auto pb-16 w-full'>
-      <Sheets pageId={id as string} sheetId={currentSheetId as string} />
-      <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
-    </div>
+    <CommonWrapper
+      isLoading={isLoading}
+      skeletonType={SkeletonTypes.CUSTOM}
+      isError={isError}
+      refetchFunction={refetch}
+      loader={
+        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white mt-6'>
+          <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+        </div>
+      }
+    >
+      <div className='relative h-full rounded-tl-md py-6 pl-3 pr-2 overflow-y-auto pb-16 w-full'>
+        <Sheets pageId={id as string} sheetId={currentSheetId as string} />
+        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
+      </div>
+    </CommonWrapper>
   );
 };
 

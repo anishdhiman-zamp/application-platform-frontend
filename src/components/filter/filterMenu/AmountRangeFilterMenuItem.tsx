@@ -91,11 +91,11 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
       className={`px-2.5 py-2 w-[250px] min-w-[250px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
     >
       <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 mb-2'>
-        <div className='f-11-400 text-GRAY_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
+        <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>
         <div
-          className='flex items-center gap-[2px] cursor-pointer relative select-none grow'
+          className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-4'
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>

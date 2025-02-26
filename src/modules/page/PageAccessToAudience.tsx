@@ -36,7 +36,10 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<PageAccessPrivilegesType>(role as PageAccessPrivilegesType);
-  const { refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId });
+  const { refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery(
+    { pageId },
+    { skip: !pageId, refetchOnMountOrArgChange: false },
+  );
   const [changeRole] = usePatchChangeAudienceRoleInPageMutation();
   const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromPageAccessMutation();
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');

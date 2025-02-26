@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
@@ -99,6 +99,14 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
     }
   }, [isOpen]);
 
+  const filteredValues = useMemo(
+    () =>
+      values?.filter(
+        (item) => item !== null && String(item)?.toLowerCase()?.includes(String(inputValue)?.toLowerCase()),
+      ),
+    [values, inputValue],
+  );
+
   return (
     <div
       className={cn(
@@ -154,33 +162,31 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           onChange={onSearchChange}
         />
       </div>
-      <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
-        {!!values?.length &&
-          values
-            .filter((item) => item !== null && String(item)?.toLowerCase()?.includes(String(inputValue)?.toLowerCase()))
-            .map((item) => (
-              <div
-                key={item}
-                onClick={() => onChange(item)}
-                className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+      <div className='flex flex-col h-full overflow-y-auto overflow-x-hidden px-1 [&::-webkit-scrollbar]:hidden'>
+        {!!filteredValues?.length &&
+          filteredValues.map((item) => (
+            <div
+              key={item}
+              onClick={() => onChange(item)}
+              className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+            >
+              {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{String(item)}</div>}
+              <Tooltip
+                tooltipBody={`condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`}
+                tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md z-999 bg-black text-white w-28'
+                className='z-1'
+                disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
               >
-                {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{String(item)}</div>}
-                <Tooltip
-                  tooltipBody={`condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`}
-                  tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md z-999 bg-black text-white w-28'
-                  className='z-1'
-                  disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
-                >
-                  <div className='min-w-[14px]'>
-                    <CheckBox
-                      checked={selectedValues?.includes(item)}
-                      id='checkbox-1'
-                      disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
-                    />
-                  </div>
-                </Tooltip>
-              </div>
-            ))}
+                <div className='min-w-[14px]'>
+                  <CheckBox
+                    checked={selectedValues?.includes(item)}
+                    id='checkbox-1'
+                    disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
+                  />
+                </div>
+              </Tooltip>
+            </div>
+          ))}
       </div>
     </div>
   );

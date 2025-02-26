@@ -40,7 +40,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
   const { data: getAudiencesByPageId, refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery(
     { pageId },
-    { skip: !pageId },
+    { skip: !pageId, refetchOnMountOrArgChange: false },
   );
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostPagesToAudiencesByPageIdMutation();
   const userAccessToPageList = getAudiencesByPageId ?? [];

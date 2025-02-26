@@ -55,6 +55,8 @@ const KpiTag: FC<KpiTagProps> = ({
       widgetData?.currency &&
       (CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ?? widgetData?.currency);
 
+    if (isNaN(Number(data?.[key]))) return data?.[key];
+
     return `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}`;
   }, [widgetData]);
 
