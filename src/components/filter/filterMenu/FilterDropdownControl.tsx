@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { FilterConfigType } from 'components/filter/filter.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -12,6 +13,7 @@ interface FilterDropdownControlProps {
   controlClassName?: string;
   isMenuDropdownOpen?: boolean;
   allowClear?: boolean;
+  isOpen?: boolean;
 }
 
 const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
@@ -22,6 +24,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   onClear,
   isMenuDropdownOpen,
   allowClear,
+  isOpen,
 }) => {
   const handleRemoveFilter = (e: React.MouseEvent) => {
     if (allowClear) {
@@ -50,7 +53,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
               iconCategory={ICON_SPRITE_TYPES.GENERAL}
               width={12}
               height={12}
-              className='text-GRAY_700 mt-0.5'
+              className={'text-GRAY_700 mt-0.5'}
             />
           ) : (
             <SvgSpriteLoader
@@ -58,7 +61,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
               iconCategory={ICON_SPRITE_TYPES.ARROWS}
               width={16}
               height={16}
-              className='text-GRAY_700'
+              className={cn('text-GRAY_700 transition-transform duration-300', isOpen ? 'rotate-180' : 'rotate-0')}
             />
           )}
         </div>

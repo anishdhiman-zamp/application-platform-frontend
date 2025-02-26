@@ -115,7 +115,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       )}
     >
       <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 px-2.5'>
-        <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
+        <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>
         <div
@@ -125,7 +125,15 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}
           </div>
-          <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
+          <SvgSpriteLoader
+            id='chevron-down'
+            className={cn(
+              'text-GRAY_700 transition-transform duration-300',
+              isConditionOpen ? 'rotate-180' : 'rotate-0',
+            )}
+            height={12}
+            width={12}
+          />
           {isConditionOpen && (
             <div
               ref={ref}

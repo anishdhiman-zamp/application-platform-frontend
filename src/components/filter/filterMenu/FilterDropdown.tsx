@@ -74,6 +74,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           onClear={onRemoveFilter}
           controlClassName={controlClassName}
           allowClear={allowClear}
+          isOpen={isOpen}
         />
       </div>
       <div

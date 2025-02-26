@@ -169,10 +169,6 @@
   border-right: none !important;
 }
 
-.pivot .ag-center-cols-viewport {
-  min-height: unset !important;
-}
-
 .ag-charts-tooltip {
   font-family: 'Inter';
   border: 1px solid #ebebeb;
