@@ -15,7 +15,7 @@ import {
   RECON_STATUS_TYPES,
   ROOT_LEVEL_TITLE,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { formatPivotValue, shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
+import { formatRowTitleValue, shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -36,7 +36,9 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
   const isTopLevel = node?.level === 0;
   const isRootLevel = node?.level === -1;
 
-  const formattedValue = formatPivotValue(show_bank_icons && isTopLevel ? BANK_NAME_ICON_MAPPING[value]?.name : value);
+  const formattedValue = formatRowTitleValue(
+    show_bank_icons && isTopLevel ? BANK_NAME_ICON_MAPPING[value]?.name : value,
+  );
 
   useEffect(() => {
     const updateExpandState = () => setExpanded(node?.expanded || false);

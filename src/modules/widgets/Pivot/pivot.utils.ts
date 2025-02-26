@@ -1,5 +1,6 @@
 import { ColDef, IRowNode, RowStyle } from 'ag-grid-community';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { isValid, parse } from 'date-fns';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
@@ -119,11 +120,11 @@ const resetToMidnight = (isoString: string) => {
   return date?.toISOString();
 };
 
-export const parseType = (type: PIVOT_DATA_TYPES, value: any, periodicity: PERIODICITY_TYPES) => {
+export const parseType = (type: PIVOT_DATA_TYPES, value: string | number | boolean, periodicity: PERIODICITY_TYPES) => {
   switch (type) {
     case PIVOT_DATA_TYPES.DATE:
     case PIVOT_DATA_TYPES.TIMESTAMP:
-      return getFormattedDateWithPeriodicity(periodicity, resetToMidnight(value));
+      return getFormattedDateWithPeriodicity(periodicity, resetToMidnight(value as string));
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
       const number = Number(value);
@@ -313,7 +314,9 @@ export const getPivotData = (
         const mappingName = transformedRow[PIVOT_REF];
 
         // Find matching pivot column based on mapping name and source column
-        const pivotColumn = pivotColumns?.find((col) => col?.mappingName === mappingName && col?.sourceName === key);
+        const pivotColumn = pivotColumns?.find(
+          (col) => col?.mappingName === mappingName && (col?.sourceName === key || col?.alias === key),
+        );
 
         if (pivotColumn) {
           // If matching pivot column found, transform the value using its data type
@@ -377,8 +380,10 @@ export const getPivotColDefs = (
           return {
             field: col?.name,
             pivot: true,
+            pivotComparator: pivotComparator,
             headerComponent: PivotColGroupHeader,
             context: col,
+            sortable: false,
           };
         case 'aggregate': {
           return {
@@ -386,6 +391,7 @@ export const getPivotColDefs = (
             aggFunc: AGGREGATION_TYPES.SUM,
             valueFormatter: (params) => formatCurrencyValue(params?.value),
             headerComponent: PivotColHeader,
+            sortable: false,
             cellStyle: (params) =>
               getDynamicCellStyle(
                 backendConfig.styleConfig.cellStyles,
@@ -674,9 +680,9 @@ export const getDefaultFilterByDatasetId = (mappings: PivotTableWidgetMapping[],
   return defaultFilters;
 };
 
-export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES): string => {
+export const formatRowTitleValue = (value: string): string => {
   if (!isNaN(Date.parse(value))) {
-    return getFormattedDateWithPeriodicity(periodicity ?? PERIODICITY_TYPES.DAILY, value);
+    return getFormattedDateWithPeriodicity(PERIODICITY_TYPES.DAILY, value);
   }
 
   if (value?.includes('_')) {
@@ -684,4 +690,26 @@ export const formatPivotValue = (value: string, periodicity?: PERIODICITY_TYPES)
   }
 
   return capitalizeFirstLetter(value);
+};
+
+const parseDate = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+
+  // Handle ranges like "1-7 Jan 2025" by extracting the first date
+  const rangeMatch = dateStr?.match(/^(\d+)-\d+\s([A-Za-z]+)\s(\d{4})$/);
+
+  if (rangeMatch) {
+    dateStr = `${rangeMatch[1]} ${rangeMatch[2]} ${rangeMatch[3]}`;
+  }
+
+  const formats = ['d MMM yyyy', 'MMM yyyy', "'Q'q yyyy", 'yyyy']; // DATE_FORMATS.ddMMMyyyy, DATE_FORMATS.MMM_yyyy, DATE_FORMATS.QQ_yyyy, DATE_FORMATS.YYYY
+
+  return formats.map((format) => parse(dateStr, format, new Date()))?.find((date) => isValid(date)) || null;
+};
+
+const pivotComparator = (a: string, b: string): number => {
+  const dateA = parseDate(a);
+  const dateB = parseDate(b);
+
+  return dateA && dateB ? dateA.getTime() - dateB.getTime() : dateA ? -1 : dateB ? 1 : a.localeCompare(b);
 };

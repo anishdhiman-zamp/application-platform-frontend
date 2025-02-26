@@ -1,7 +1,7 @@
 import { FC, memo } from 'react';
 import { PIVOT_HEADER_BG } from 'constants/icons';
-import { formatPivotValue } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
+import { capitalizeFirstLetter, snakeCaseToSentenceCase } from 'utils/common';
 
 type PivotAutoGroupHeaderProps = {
   displayName: string;
@@ -9,7 +9,9 @@ type PivotAutoGroupHeaderProps = {
 };
 
 const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSingleHeader = false }) => {
-  const formattedDisplayName = formatPivotValue(displayName);
+  const formattedDisplayName = displayName?.includes('_')
+    ? snakeCaseToSentenceCase(displayName)
+    : capitalizeFirstLetter(displayName);
 
   return (
     <>
