@@ -95,7 +95,6 @@ const PivotCell: FC<PivotCellProps> = ({
         {
           'bg-BACKGROUND_GRAY_1': isLastNode || isRootLevel,
           'border-r-0': isLastCell,
-          'border-b-0': isRootLevel,
         },
       )}
       onClick={handleToggle}

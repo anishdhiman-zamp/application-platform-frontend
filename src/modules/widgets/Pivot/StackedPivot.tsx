@@ -303,12 +303,11 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className='h-fit w-full relative pivot group'>
+    <div className='h-full w-full relative pivot group'>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}
         theme={customTheme ?? myTheme}
-        domLayout='autoHeight'
         context={pivotContext}
         rowData={rowData}
         columnDefs={colDef}

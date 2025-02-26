@@ -169,11 +169,6 @@
   border-right: none !important;
 }
 
-.pivot .ag-body-viewport {
-  max-height: 500px !important;
-  overflow: auto !important;
-}
-
 .pivot .ag-center-cols-viewport {
   min-height: unset !important;
 }
