@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import { useGetAudiencesByPageIdQuery, usePostPagesToAudiencesByPageIdMutation } from 'apis/pages';
 import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
@@ -66,6 +66,14 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   };
 
   useOnClickOutside(sharePagePopupRef, handleCloseSharePagePopup);
+
+  const handleToggleSharePagePopup = useCallback(() => {
+    if (openSharePagePopup) {
+      handleCloseSharePagePopup();
+    } else {
+      handleOpenSharePagePopup();
+    }
+  }, [openSharePagePopup]);
 
   const AudiencesSharePageData: AudiencesDatasetShareData = {
     audiences: selectedItems.map((item) => ({
@@ -205,10 +213,10 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   };
 
   return (
-    <div className='flex w-fit'>
+    <div ref={sharePagePopupRef} className='flex w-fit'>
       <div
         id='share-page-to-audience-btn'
-        onClick={handleOpenSharePagePopup}
+        onClick={handleToggleSharePagePopup}
         className={cn(
           openSharePagePopup && '!border !border-GRAY_400 !bg-GRAY_100',
           'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-BG_GRAY_2 active:bg-GRAY_400 border border-GRAY_400 bg-white',
@@ -218,7 +226,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       </div>
       <div className='relative'>
         {openSharePagePopup && (
-          <div ref={sharePagePopupRef} className='absolute flex flex-col w-[400px] right-0 top-9 z-1000'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>Share this page</span>
