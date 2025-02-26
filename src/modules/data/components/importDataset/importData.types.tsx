@@ -124,12 +124,9 @@ export type ImportFileWrapperPropsType = {
   isOpen: boolean;
   onClose: defaultFnType;
   setStartPollingPreview: Dispatch<SetStateAction<{ check: boolean; actionId: string; fileUploadId: string }>>;
-  rawData: RawMetadata | null;
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
-  mappedData: TransformationPreviewMetadata | null;
-  startAiTransformation: boolean;
-  fileUploadId: string;
-  onRefetch: defaultFnType;
+  fileName: string | null;
+  setFileName: (fileName: string | null) => void;
 };
 
 export type ImportedDataPreviewPropsType = {
@@ -140,6 +137,9 @@ export type ImportedDataPreviewPropsType = {
   fileUploadId: string;
   fileName: string | null;
   onRefetch: defaultFnType;
+  setShowAiTransformationStatus: Dispatch<
+    SetStateAction<{ open: boolean; status: string; title: string; description: string }>
+  >;
 };
 
 export type DataPreviewContentPropsType = {
@@ -152,6 +152,9 @@ export type DataPreviewSidebarPropsType = {
   onReset: defaultFnType;
   fileUploadId: string;
   onRefetch: defaultFnType;
+  setShowAiTransformationStatus: Dispatch<
+    SetStateAction<{ open: boolean; status: string; title: string; description: string }>
+  >;
 };
 
 export type StartPollingPreviewType = {

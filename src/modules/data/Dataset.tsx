@@ -368,7 +368,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
+          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
             <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
           </div>
         }

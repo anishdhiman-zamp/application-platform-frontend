@@ -29,7 +29,7 @@ const TableSchemaAlignmentStatus: FC<TableSchemaAlignmentStatusPropsType> = ({
   if (!showAiTransformationStatus?.open) return null;
 
   return (
-    <div className='absolute flex justify-center items-start gap-5 right-0 top-8 border-[0.5px] border-GRAY_500 rounded-2.5 py-3 px-5 w-[300px] bg-white z-1000 shadow-tableFilterMenu'>
+    <div className='animate-slideInOut absolute flex justify-center items-start gap-5 right-0 top-8 border-[0.5px] border-GRAY_500 rounded-2.5 py-3 px-5 w-[300px] bg-white z-1000 shadow-tableFilterMenu'>
       <div className='flex gap-3 items-start'>
         <StatusIndicator status={showAiTransformationStatus?.status as LOADER_STATUS} />
         <div className='flex flex-col'>

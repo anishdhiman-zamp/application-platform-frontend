@@ -240,6 +240,7 @@ module.exports = {
         'shimmer-round': 'shimmer-round 1.5s infinite linear',
         width: 'position 1.5s linear infinite',
         slide: 'slide 1.5s linear infinite',
+        slideInOut: 'slideInOut 5s cubic-bezier(0.85, 0, 0.15, 1) forwards',
       },
       keyframes: {
         'reverse-spin': {
@@ -306,6 +307,12 @@ module.exports = {
         slide: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(200%)' },
+        },
+        slideInOut: {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '10%': { transform: 'translateX(0)', opacity: '1' },
+          '90%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
         },
       },
       transitionProperty: {

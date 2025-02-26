@@ -306,3 +306,24 @@ export type PostAiTransformationConfirmRequestType = {
   file_upload_id: string;
   dataset_id?: string;
 };
+
+export type GetFileImportHistoryRequestType = {
+  datasetId: string;
+};
+
+export type userDetailsType = {
+  email: string;
+  name: string;
+};
+
+export type GetFileImportHistoryResponseType = {
+  file_uploads: {
+    id: string;
+    dataset_id: string;
+    file_id: string;
+    file_name: string;
+    file_upload_status: string;
+    file_upload_created_at: string;
+    uploaded_by_user: userDetailsType;
+  }[];
+};

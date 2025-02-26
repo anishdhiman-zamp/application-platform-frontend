@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useLazyGetActionStatusQuery, useLazyGetAiTransformationQuery } from 'apis/dataset';
 import { COINS_STACKED_05 } from 'constants/icons';
 import usePolling from 'hooks/usePolling';
+import ImportedDataPreview from 'modules/data/components/importDataset/dataPreview';
 import { AI_TRANSFORMATION_STATUS } from 'modules/data/components/importDataset/importData.constants';
 import {
   ImportDatasetPropsType,
@@ -31,6 +32,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
     actionId: '',
     fileUploadId: '',
   });
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const handleOpenImportFilePopup = () => setIsImportFilePopupOpen(true);
   const handleCloseImportFilePopup = () => setIsImportFilePopupOpen(false);
@@ -76,8 +78,9 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
           title: AI_TRANSFORMATION_STATUS.STATUS_SUCCESS.title,
           description: AI_TRANSFORMATION_STATUS.STATUS_SUCCESS.description,
         });
-
+        setIsImportFilePopupOpen(true);
         setStartAiTransformation(true);
+
         setMappedData({
           data_preview: data?.data_preview,
         });
@@ -102,20 +105,28 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
 
   return (
     <div className={cn('p-1 hover:bg-GRAY_100 rounded', isImportFilePopupOpen && 'bg-GRAY_100')}>
-      {isImportFilePopupOpen && (
+      {isImportFilePopupOpen && !startAiTransformation ? (
         <ImportFileWrapper
-          onReset={handleReset}
+          fileName={fileName}
+          setFileName={setFileName}
           isOpen={isImportFilePopupOpen}
-          onClose={handleCloseImportFilePopup}
-          rawData={rawData}
           setRawData={setRawData}
+          setStartPollingPreview={setStartPollingPreview}
+          onReset={handleReset}
+          onClose={handleCloseImportFilePopup}
+        />
+      ) : isImportFilePopupOpen && startAiTransformation ? (
+        <ImportedDataPreview
+          fileName={fileName}
+          onReset={handleReset}
+          rawData={rawData}
           mappedData={mappedData}
           startAiTransformation={startAiTransformation}
+          setShowAiTransformationStatus={setShowAiTransformationStatus}
           fileUploadId={startPollingPreview?.fileUploadId}
-          setStartPollingPreview={setStartPollingPreview}
           onRefetch={onRefetch}
         />
-      )}
+      ) : null}
       <Image
         src={COINS_STACKED_05}
         alt='coins-stacked-05'

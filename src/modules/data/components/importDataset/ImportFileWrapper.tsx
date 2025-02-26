@@ -1,53 +1,24 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import ImportedDataPreview from 'modules/data/components/importDataset/dataPreview';
 import { IMPORT_ALLOWED_FILE_FORMATS } from 'modules/data/components/importDataset/importData.constants';
 import { ImportFileWrapperPropsType } from 'modules/data/components/importDataset/importData.types';
 import ImportFile from 'modules/data/components/importDataset/ImportFile';
 import Popup from 'components/common/popup/Popup';
 
 const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
-  onReset,
   isOpen,
   onClose,
   setStartPollingPreview,
-  rawData,
   setRawData,
-  mappedData,
-  startAiTransformation,
-  fileUploadId,
-  onRefetch,
+  fileName,
+  setFileName,
 }) => {
-  const [fileName, setFileName] = useState<string | null>(null);
-
-  const handleReset = () => {
-    onReset();
-  };
-
   const handleClosePopup = () => {
     onClose();
   };
 
-  const renderPreviewComponent = () => {
-    if (startAiTransformation) {
-      return (
-        <ImportedDataPreview
-          fileName={fileName}
-          onReset={handleReset}
-          rawData={rawData}
-          mappedData={mappedData}
-          startAiTransformation={startAiTransformation}
-          fileUploadId={fileUploadId}
-          onRefetch={onRefetch}
-        />
-      );
-    }
-
-    return null;
-  };
-
-  const importComponent = (
+  return (
     <Popup
       title='Import Data'
       titleClassName='f-16-600 text-GRAY_950'
@@ -72,13 +43,6 @@ const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
         />
       </div>
     </Popup>
-  );
-
-  return (
-    <div>
-      {renderPreviewComponent()}
-      {!mappedData && !startAiTransformation && importComponent}
-    </div>
   );
 };
 

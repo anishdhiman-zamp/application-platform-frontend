@@ -56,7 +56,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
           isError={isSheetDetailsError}
           refetchFunction={refetchSheetDetails}
           loader={
-            <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white'>
+            <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
               <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
             </div>
           }

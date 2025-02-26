@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import {
   useDeleteAudienceFromOrganizationAccessMutation,
   useGetAudiencesByOrganisationIdQuery,
@@ -13,13 +13,15 @@ import { RootState } from 'store';
 import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
-  const { user_id, privilege } = value;
+  const { user_id, privilege, userEmail } = value;
   const role = TEAM_MEMBERS_PRIVILEGES_LIST.find((role) => role?.value === privilege);
+  const userName = useMemo(() => convertEmailUsernameToName(getUserNameFromEmail(userEmail ?? '')), [userEmail]);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
@@ -27,7 +29,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
     role as TeamMemberAccessPrivilegesType,
   );
   const [changeRole] = usePatchChangeAudienceRoleInOrganizationMutation();
-  const [deleteAudience] = useDeleteAudienceFromOrganizationAccessMutation();
+  const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromOrganizationAccessMutation();
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -80,7 +82,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
   };
 
   const handleDeleteAudience = () => {
-    if (checkPermission) {
+    if (!checkPermission) {
       toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.DELETE]);
 
       return;
@@ -134,9 +136,10 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
+        isLoading={isLoadingDeleteAudience}
         onDelete={handleDeleteAudience}
         feature='remove-access-from-dataset'
-        warningDescription={` will be immediately removed from and lose all access`}
+        warningDescription={`${userName} will be immediately removed from the organization and lose all access`}
       />
     </div>
   );

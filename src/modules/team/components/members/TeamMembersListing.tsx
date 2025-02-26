@@ -36,7 +36,10 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
             <div key={index} className='grid grid-cols-3 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
               <MembersName value={row?.user?.email} member />
               <MembersEmail value={row?.user?.email} />
-              <MembersRole value={{ user_id: row?.user?.user_id, privilege: row?.privilege }} member />
+              <MembersRole
+                value={{ user_id: row?.user?.user_id, privilege: row?.privilege, userEmail: row?.user?.email }}
+                member
+              />
             </div>
           ))}
         </div>

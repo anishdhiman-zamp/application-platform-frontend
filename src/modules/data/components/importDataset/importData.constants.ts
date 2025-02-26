@@ -59,6 +59,11 @@ export const AI_TRANSFORMATION_STATUS = {
     title: 'File transformed successfully',
     description: 'Done',
   },
+  STATUS_INGESTION_ONGOING: {
+    status: LOADER_STATUS.LOADING,
+    title: 'Data will be ingested in your dataset in few minutes',
+    description: 'In progress',
+  },
 };
 
 export enum FILE_IMPORT_STATUS_MSG {
@@ -69,6 +74,7 @@ export enum FILE_IMPORT_STATUS_MSG {
   FILE_UPLOAD_COMMON_ERROR = 'Your file couldn’t be processed, you can try again with a new file.',
   FILE_IMPORT_DATA_FAILED = 'Failed to import dataset',
   PREVIEW_DATA_FAILED = 'Error generating preview data',
+  FILE_IMPORT_AFTER_AI_SUCCESS = 'File imported successfully',
 }
 
 export const enum DATA_PREVIEW_TABS_TYPES {

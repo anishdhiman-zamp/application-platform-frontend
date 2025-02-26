@@ -28,18 +28,19 @@ export const formattedDate = (date: string) => {
  * @param fileName string LsRwCYzZQZFPvLetDo6T5B_01_29_1732008234522_qx4SidxmzEoABnvxFvWyUb_11_19.csv
  * @returns string LsRw...Ub_11_19.csv
  */
-export const formattedFilename = (filename: string) => {
-  if (!filename) return '';
+export const maskString = (str: string, start: number, end: number, limit?: number) => {
+  if (!str) return '';
 
-  const parts = filename.split('.');
+  const parts = str.split('.');
   const extension = parts.pop();
   const name = parts.join('.');
 
-  if (name.length > 8) {
-    return `${name.slice(0, 4)}...${name.slice(-4)}.${extension}`;
+  limit = limit ?? 16;
+  if (name.length > limit) {
+    return `${name.slice(0, start)}...${name.slice(-end)}.${extension}`;
   }
 
-  return filename;
+  return str;
 };
 
 /**

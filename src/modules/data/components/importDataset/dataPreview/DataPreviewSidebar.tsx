@@ -1,7 +1,10 @@
 import React, { FC } from 'react';
 import { usePostAiTransformationConfirmMutation } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
-import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
+import {
+  AI_TRANSFORMATION_STATUS,
+  FILE_IMPORT_STATUS_MSG,
+} from 'modules/data/components/importDataset/importData.constants';
 import { DataPreviewSidebarPropsType } from 'modules/data/components/importDataset/importData.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
@@ -10,7 +13,13 @@ import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({ fileName, onReset, fileUploadId, onRefetch }) => {
+const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
+  fileName,
+  onReset,
+  fileUploadId,
+  onRefetch,
+  setShowAiTransformationStatus,
+}) => {
   const router = useRouter();
   const datasetId = router?.query?.id as string;
   const [postAiTransformationConfirm, { isLoading: isLoadingPostAiTransformationConfirm }] =
@@ -20,6 +29,13 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({ fileName, onReset
     postAiTransformationConfirm({ file_upload_id: fileUploadId, dataset_id: datasetId })
       .unwrap()
       .then(() => {
+        toast.success(FILE_IMPORT_STATUS_MSG.FILE_IMPORT_AFTER_AI_SUCCESS);
+        setShowAiTransformationStatus({
+          open: true,
+          status: AI_TRANSFORMATION_STATUS.STATUS_INGESTION_ONGOING.status,
+          title: AI_TRANSFORMATION_STATUS.STATUS_INGESTION_ONGOING.title,
+          description: AI_TRANSFORMATION_STATUS.STATUS_INGESTION_ONGOING.description,
+        });
         onRefetch();
         onReset();
       })

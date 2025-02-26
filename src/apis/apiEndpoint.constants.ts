@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_DATASET_PATCH: `datasets/{{datasetId}}/audiences`,
   DELETE_AUDIENCE_FROM_DATASET_ACCESS: `datasets/{{datasetId}}/audiences`,
   DATASET_RULES_LISTING_GET: `datasets/rules/listing`,
+  DATASET_FILE_IMPORT_HISTORY_GET: `datasets/{{datasetId}}/file-imports/history`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,

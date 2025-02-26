@@ -20,6 +20,7 @@ import {
   DeleteAudienceFromDatasetAccessType,
   GetAiTransformationRequestType,
   GetAiTransformationResponseType,
+  GetFileImportHistoryResponseType,
   GetRulesByDatasetColumnsRequestType,
   GetRulesByDatasetColumnsResponseType,
   GetRulesByRuleIdsRequestType,
@@ -161,6 +162,11 @@ const Dataset = baseApi.injectEndpoints({
         body,
       }),
     }),
+    getFileImportHistory: builder.query<GetFileImportHistoryResponseType, { datasetId: string }>({
+      query: ({ datasetId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORT_HISTORY_GET, { datasetId }),
+      }),
+    }),
   }),
 });
 
@@ -188,4 +194,5 @@ export const {
   useGetAiTransformationQuery,
   useLazyGetAiTransformationQuery,
   usePostAiTransformationConfirmMutation,
+  useGetFileImportHistoryQuery,
 } = Dataset;

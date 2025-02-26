@@ -8,6 +8,7 @@ const ImportedDataPreview: FC<ImportedDataPreviewPropsType> = ({
   rawData,
   mappedData,
   startAiTransformation,
+  setShowAiTransformationStatus,
   fileUploadId,
   fileName,
   onRefetch,
@@ -24,6 +25,7 @@ const ImportedDataPreview: FC<ImportedDataPreviewPropsType> = ({
             <DataPreviewSidebar
               fileName={fileName}
               fileUploadId={fileUploadId}
+              setShowAiTransformationStatus={setShowAiTransformationStatus}
               onReset={handleReset}
               onRefetch={onRefetch}
             />

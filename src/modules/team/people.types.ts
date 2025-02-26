@@ -46,7 +46,7 @@ export type MembersNamePropsType = {
 };
 
 export type MembersRolePropsType = {
-  value: { user_id: string; privilege: string };
+  value: { user_id: string; privilege: string; userEmail?: string };
   member?: boolean;
 };
 
