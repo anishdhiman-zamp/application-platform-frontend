@@ -29,7 +29,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
   return (
     <div
       className={cn(
-        'flex items-center fixed bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-pageBottomBar px-8 gap-3 transition-all duration-300',
+        'flex items-center fixed overflow-auto z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-pageBottomBar px-8 gap-3 transition-all duration-300',
         !isSidebarOpen ? 'w-full' : 'w-[calc(100%-240px)]',
       )}
     >
@@ -45,7 +45,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
           )}
           size={SIZE_TYPES.MEDIUM}
         >
-          <div className={`transition-all duration-100 f-12-450`}>{tab?.label}</div>
+          <div className={`transition-all duration-100 f-12-450 whitespace-nowrap`}>{tab?.label}</div>
         </Button>
       ))}
 
@@ -58,7 +58,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
       >
         <div className='flex items-center gap-1 f-12-450 text-GRAY_700 cursor-not-allowed select-none'>
           <SvgSpriteLoader id='plus' width={16} height={16} />
-          <div>New sheet</div>
+          <div className='whitespace-nowrap'>New sheet</div>
         </div>
       </Tooltip>
     </div>

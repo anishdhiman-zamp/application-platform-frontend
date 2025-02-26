@@ -42,7 +42,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
         } ${controlClassName}`}
       >
         <div className='f-12-400 text-GRAY_900'>{filterConfig?.label}</div>
-        <div className='f-12-500 text-GRAY_1000'>{filterConfig?.title}</div>
+        <div className='f-12-500 text-GRAY_1000 whitespace-nowrap'>{filterConfig?.title}</div>
         <div onClick={handleRemoveFilter}>
           {allowClear ? (
             <SvgSpriteLoader

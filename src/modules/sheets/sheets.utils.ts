@@ -57,7 +57,7 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
       defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(filter?.default_value, filter?.filter_type);
     } else if (filter?.filter_type === FILTER_TYPES.DATE_RANGE) {
       defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(
-        { value: [], operator: CONDITION_OPERATOR_TYPE.IN },
+        { value: [], operator: CONDITION_OPERATOR_TYPE.IN_BETWEEN },
         filter?.filter_type,
       );
     }
