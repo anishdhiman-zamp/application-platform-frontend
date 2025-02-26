@@ -31,11 +31,14 @@ const Listing = () => {
             desc: item.sort === OrderType.DESC,
           })) ?? [];
 
-        getDatasetListing({
-          page: Math.floor(parameters.request.endRow ?? 0) / PAGE_SIZE,
-          pageSize: PAGE_SIZE,
-          sort: JSON.stringify(sortModel),
-        })
+        getDatasetListing(
+          {
+            page: Math.floor(parameters.request.endRow ?? 0) / PAGE_SIZE,
+            pageSize: PAGE_SIZE,
+            sort: JSON.stringify(sortModel),
+          },
+          true,
+        )
           .unwrap()
           .then((data) => {
             parameters.success({

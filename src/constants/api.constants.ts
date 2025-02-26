@@ -15,6 +15,8 @@ export const PLATFORM_TMS = 'TMS';
 
 export enum APITags {
   GET_USER = 'GET_USER',
+  GET_PEOPLE_INVITATIONS = 'GET_PEOPLE_INVITATIONS',
+  GET_PEOPLE_TEAM_MEMBERS = 'GET_PEOPLE_TEAM_MEMBERS',
 }
 export const API_TAGS = Object.values(APITags);
 

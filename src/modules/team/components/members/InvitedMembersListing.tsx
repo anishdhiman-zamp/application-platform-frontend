@@ -16,7 +16,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: invitedTeamMembersData } = useGetInvitedAudiencesByOrganisationIdQuery(
     { organizationId },
-    { skip: !organizationId },
+    { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
   const hasData = (invitedTeamMembersData?.length ?? 0) > 0;
 

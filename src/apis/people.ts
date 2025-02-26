@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
+import { APITags } from 'constants/api.constants';
 import baseApi from 'services/api';
 import {
   AudiencesByOrganisationIdRequest,
@@ -19,6 +20,7 @@ const People = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),
       transformResponse: (data) => data,
+      providesTags: [APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     getInvitedAudiencesByOrganisationId: builder.query<
       InvitedAudiencesByOrganisationIdResponse[],
@@ -28,6 +30,7 @@ const People = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),
       transformResponse: (data) => data,
+      providesTags: [APITags.GET_PEOPLE_INVITATIONS],
     }),
 
     postInviteAudiencesByOrganisationId: builder.mutation<
@@ -39,6 +42,7 @@ const People = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: body,
       }),
+      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS],
     }),
     patchChangeAudienceRoleInOrganization: builder.mutation<void, PatchChangeAudienceRoleInOrganizationType>({
       query: ({ organizationId, body }) => ({
@@ -46,6 +50,7 @@ const People = baseApi.injectEndpoints({
         method: REQUEST_TYPES.PATCH,
         body: body,
       }),
+      invalidatesTags: [APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     deleteAudienceFromOrganizationAccess: builder.mutation<void, DeleteAudienceFromOrganizationAccessType>({
       query: ({ organizationId, body }) => ({
@@ -53,6 +58,7 @@ const People = baseApi.injectEndpoints({
         method: REQUEST_TYPES.DELETE,
         body: body,
       }),
+      invalidatesTags: [APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     getMembershipRequestsByOrganizationId: builder.query<
       GetMembershipRequestsByOrganizationIdResponse,

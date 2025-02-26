@@ -14,7 +14,10 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData }) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId, refetchOnMountOrArgChange: false },
+  );
   const hasData = (teamMembersData?.length ?? 0) > 0;
 
   return hasData || isLoadingTeamMembersData ? (

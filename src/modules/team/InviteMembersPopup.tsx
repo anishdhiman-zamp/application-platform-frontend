@@ -32,7 +32,10 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
     usePostInviteAudiencesByOrganisationIdMutation();
   const { data: invitedTeamMembersData, refetch: refetchAudiencesByOrganizationId } =
-    useGetInvitedAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+    useGetInvitedAudiencesByOrganisationIdQuery(
+      { organizationId },
+      { skip: !organizationId, refetchOnMountOrArgChange: false },
+    );
 
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorText, setValidationErrorText] = useState<string>('');

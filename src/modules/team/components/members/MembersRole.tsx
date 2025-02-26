@@ -33,7 +33,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
-    { skip: !organizationId },
+    { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
   const checkPermission = accessPermissionForPeople() && member;
