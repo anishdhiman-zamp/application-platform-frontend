@@ -91,7 +91,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
         className,
       )}
     >
-      <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 px-2.5'>
+      <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 px-2.5'>
         <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>

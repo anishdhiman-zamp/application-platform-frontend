@@ -90,7 +90,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     <div
       className={`px-2.5 py-2 w-[250px] min-w-[250px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
     >
-      <div className='flex text-GRAY_600 items-center gap-[2px] w-full z-80 mb-2'>
+      <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
         <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
           {camelCaseToNormalText(columnId)}
         </div>

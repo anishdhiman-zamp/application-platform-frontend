@@ -91,9 +91,10 @@ export const DATA_TABLE_THEME_PARAMS = {
   rowHoverColor: '#FBFBFB',
   columnBorder: { width: 0 },
   cellHorizontalPadding: 24,
+  rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
 };
 
-export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: 'cursor-pointer' };
+export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: 'cursor-pointer content-center' };
 
 export const OperatorMap: Record<string, CONDITION_OPERATOR_TYPE> = {
   contains: CONDITION_OPERATOR_TYPE.CONTAINS,
