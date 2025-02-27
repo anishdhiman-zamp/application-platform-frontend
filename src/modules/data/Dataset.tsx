@@ -6,6 +6,7 @@ import {
   FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
+  IServerSideGetRowsRequest,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import {
@@ -34,7 +35,11 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
-import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
+import {
+  DatasetActionStatusResponseType,
+  DatasetDataResponseType,
+  DatasetUpdateResponseType,
+} from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
@@ -87,6 +92,9 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
+  const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
+
+  const firstLoadDone = useRef(false); // Track if first load is done
 
   const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
     open: boolean;
@@ -112,39 +120,50 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         const queryConfig = getEncodedRequest(parameters.request, fxCurrency?.[0], zampIds);
 
+        parameters.api.clearCellSelection();
+        parameters.api.clearFocusedCell();
         setExportsDatasetQuery(queryConfig);
-        getDatasetData({
-          datasetId: id as string,
-          query_config: queryConfig,
-        })
-          .unwrap()
-          .then((response) => {
-            if (parameters.request.startRow === 0) {
-              setDatasetTitle(response?.title);
-              setTotalRows(response?.data?.total_count);
-              setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
-              dispatch({
-                type: filtersContextActions.SET_TOTAL_ROWS,
-                payload: { totalRows: response?.data?.total_count },
-              });
-            }
-            parameters.success({
-              rowData: response?.data?.rows,
-              ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
-            });
-          })
-          .catch(() => {
-            parameters.fail();
+        if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
+          // Use Cached Data for First Load
+          firstLoadDone.current = true; // Mark first load as done
+          parameters.success({
+            rowData: cachedDatasetData?.data?.rows,
+            ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
           });
+        } else {
+          getDatasetData({
+            datasetId: id as string,
+            query_config: queryConfig,
+          })
+            .unwrap()
+            .then((response) => {
+              if (parameters.request.startRow === 0) {
+                setDatasetTitle(response?.title);
+                setTotalRows(response?.data?.total_count);
+                setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
+                dispatch({
+                  type: filtersContextActions.SET_TOTAL_ROWS,
+                  payload: { totalRows: response?.data?.total_count },
+                });
+              }
+              parameters.success({
+                rowData: response?.data?.rows,
+                ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
+              });
+            })
+            .catch(() => {
+              parameters.fail();
+            });
+        }
       },
     };
-  }, [getDatasetData, id, zampIds, fxCurrency]);
+  }, [getDatasetData, id, zampIds, fxCurrency, cachedDatasetData]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
 
-  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType) => {
-    setIsPolling(true);
+  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType, showPolling = true) => {
+    if (showPolling) setIsPolling(true);
     setInitiatedActionIds((prev) => [...prev, data.action_id]);
     startPolling({
       fn: () =>
@@ -193,12 +212,16 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       },
     })
       .unwrap()
-      .then(handleSuccessfulUpdate);
+      .then((response) => handleSuccessfulUpdate(response, false));
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
-    const { colDef, newValue, data, source } = event;
+    const { colDef, newValue, data, source, node } = event;
     const { field } = colDef;
+    const updatedRow = { ...event.data, [field as string]: newValue };
+
+    // Optimistic update
+    node.setData(updatedRow);
 
     if (source === 'edit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
   };
@@ -284,7 +307,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           });
       }
     }
-  }, [filterConfig, isPolling, filters, id]);
+  }, [filterConfig, filters, id]);
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
@@ -356,6 +379,27 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       JSON.stringify({ ...currentColumnOrderingVisibility, [id]: finalList }),
     );
   };
+
+  useEffect(() => {
+    if (filters) return;
+    const queryConfig = getEncodedRequest({} as IServerSideGetRowsRequest, fxCurrency?.[0], zampIds);
+
+    getDatasetData({
+      datasetId: id as string,
+      query_config: queryConfig,
+    })
+      .unwrap()
+      .then((response) => {
+        setDatasetTitle(response?.title);
+        setTotalRows(response?.data?.total_count);
+        setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
+        setCachedDatasetData(response);
+        dispatch({
+          type: filtersContextActions.SET_TOTAL_ROWS,
+          payload: { totalRows: response?.data?.total_count },
+        });
+      });
+  }, [filters]);
 
   return (
     <>

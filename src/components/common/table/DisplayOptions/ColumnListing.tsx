@@ -29,8 +29,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
   // State for grid layout
   const [layout, setLayout] = useState(
-    columns.map((column, index) => ({
-      i: column.getColId(),
+    columns?.map((column, index) => ({
+      i: column?.getColId(),
       x: 0,
       y: index,
       w: 1,
@@ -84,7 +84,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     const orderedItems: Column[] = newLayout
       .slice()
       .sort((a: any, b: any) => a.y - b.y)
-      .map((l: any) => columns.find((column) => column.getColId() === l.i)!);
+      .map((l: any) => columns.find((column) => column?.getColId() === l.i)!);
 
     setColumns(orderedItems);
     tableRef?.current?.api?.moveColumns(orderedItems, 0);
@@ -181,7 +181,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           draggableHandle='.drag-handle' // Restrict drag to the handle
         >
           {columns?.map((column) => (
-            <div key={column.getColId()} className='flex items-center gap-2.5 p-2'>
+            <div key={column?.getColId()} className='flex items-center gap-2.5 p-2'>
               <div className='drag-handle cursor-grab min-w-[14px]'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
               </div>

@@ -137,7 +137,7 @@ const AddTag = ({
                 ))}
               </div>
               <CreateTag value={searchValue} handleCreateTag={handleCreateTag} existingList={tagList} />
-              <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2'>
+              <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2 rounded-b-md'>
                 <span>💡</span>
                 <span className='text-GRAY_900 f-11-400'>Use “ / “ to create hierarchy</span>
               </div>

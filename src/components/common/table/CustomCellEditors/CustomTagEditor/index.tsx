@@ -14,7 +14,7 @@ const CustomTagEditor = (props: MapAny) => {
 
     if (value?.includes('.')) return;
     setSearchValue(value);
-    setSearchResults(values.filter((tag: string) => tag.includes(value)));
+    setSearchResults(values.filter((tag: string) => tag?.toLowerCase()?.includes(value?.toLowerCase())));
   };
 
   const handleTagClick = (tag: string) => {
@@ -50,7 +50,7 @@ const CustomTagEditor = (props: MapAny) => {
           ))}
         </div>
         <CreateTag value={searchValue} handleCreateTag={handleCreateTag} existingList={values} />
-        <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2'>
+        <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2 rounded-b-md'>
           <span>💡</span>
           <span className='text-GRAY_900 f-11-400'>Use “ / “ to create hierarchy</span>
         </div>

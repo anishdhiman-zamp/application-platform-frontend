@@ -221,6 +221,8 @@ const Table: React.FC<TableProps> = ({
       editable: false,
       suppressFillHandle: true,
       cellClass: 'p-0 f-11-400 text-GRAY_1000 content-center',
+      suppressMovable: true,
+      lockPinned: true,
     }),
     [],
   );
