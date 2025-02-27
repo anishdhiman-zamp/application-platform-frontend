@@ -25,12 +25,12 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
           { active: loading },
         )}
       ></div>
-      <div className='absolute -top-1 right-40 text-white'>
+      <div className='absolute -top-[6px] right-40 text-white'>
         <span
           className={cn(
-            'translate-y-4 flex justify-center items-center gap-1.5 f-14-500',
+            '!translate-y-5 flex justify-center items-center gap-1.5 f-14-500',
             loading
-              ? 'login-btn-scale-100 opacity-100 login-btn-opacity-300-easeInOut'
+              ? '!login-btn-scale-100 !opacity-100 !login-btn-opacity-300-easeInOut '
               : 'login-btn-scale-20 opacity-0 login-btn-opacity-300-easeInOut',
           )}
         >
