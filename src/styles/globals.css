@@ -169,6 +169,15 @@
   border-right: none !important;
 }
 
+.pivot .ag-body-viewport {
+  overflow: auto !important;
+  max-height: 500px !important;
+}
+
+.pivot .ag-center-cols-viewport {
+  min-height: unset !important;
+}
+
 .ag-charts-tooltip {
   font-family: 'Inter';
   border: 1px solid #ebebeb;

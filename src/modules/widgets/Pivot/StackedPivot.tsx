@@ -160,7 +160,10 @@ const StackedPivot = ({
       minWidth: PINNED_COL_WIDTH,
       resizable: false,
       pinned: 'left',
+      lockPinned: true,
+      lockPosition: 'left',
       headerComponent: WidgetTitle,
+      suppressMovable: true,
       headerComponentParams: {
         title: title,
         isSingleHeader,
@@ -303,11 +306,12 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className='h-full w-full relative pivot group'>
+    <div className='h-fit w-full relative pivot group'>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}
         theme={customTheme ?? myTheme}
+        domLayout='autoHeight'
         context={pivotContext}
         rowData={rowData}
         columnDefs={colDef}

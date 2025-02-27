@@ -28,24 +28,26 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   operatorOptions = MULTI_SELECT_FILTER_OPTIONS,
   isOpen = false,
 }) => {
-  const ref = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
-  const currentOperator = operatorOptions.find((option) => option.value === selectedFilters[columnId]?.type);
+
+  const currentOperator =
+    operatorOptions.find((option) => option.value === selectedFilters[columnId]?.type) || operatorOptions[0];
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedFilters[columnId]?.values || []);
   const [inputValue, setInputValue] = useState('');
   const [isConditionOpen, setIsConditionOpen] = useState(false);
-  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator ?? operatorOptions[0]);
-  const onSearchChange = (value: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(value.target.value);
-  };
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator);
+  const [isSelectAll, setIsSelectAll] = useState(false);
 
-  const setFilter = (operator: string, updatedValues: string[]) => {
-    if (operator === CONDITION_OPERATOR_TYPE.IS_NULL || updatedValues.length >= 0) {
+  const setFilter = useCallback(
+    (operator: string, updatedValues: string[]) => {
       dispatch({
         type: filtersContextActions.SET_SELECTED_FILTERS,
         payload: {
@@ -58,54 +60,77 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           },
         },
       });
-    }
-  };
+    },
+    [dispatch, columnId],
+  );
 
   const handleSetValues = useCallback(
     debounce((operator: string, updatedValues: string[]) => {
       setFilter(operator, updatedValues);
     }, 800),
-    [],
+    [setFilter],
   );
 
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
   const onChange = (value: string) => {
-    const updatedValues = selectedValues?.includes(value)
+    const updatedValues = selectedValues.includes(value)
       ? selectedValues.filter((item) => item !== value)
       : [...selectedValues, value];
 
     setSelectedValues(updatedValues);
-    handleSetValues(selectedOperator?.value as string, updatedValues);
+    handleSetValues(selectedOperator.value as string, updatedValues);
   };
 
   const onReset = () => {
     setSelectedValues([]);
     setInputValue('');
-    setFilter(selectedOperator?.value as string, []);
+    setIsSelectAll(false);
+    setFilter(selectedOperator.value as string, []);
   };
 
   const onOperatorChange = (option: OptionsType) => {
     setSelectedOperator(option);
-    if (option?.value === CONDITION_OPERATOR_TYPE.IS_NULL) {
-      setSelectedValues([]);
-      handleSetValues(option?.value as string, []);
-    } else {
-      handleSetValues(option?.value as string, selectedValues);
+    const newValues = option.value === CONDITION_OPERATOR_TYPE.IS_NULL ? [] : selectedValues;
+
+    setSelectedValues(newValues);
+    handleSetValues(option.value as string, newValues);
+  };
+
+  const handleScroll = () => {
+    if (listRef.current) {
+      setHasScrolled(listRef.current.scrollTop > 0);
     }
   };
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && isOpen) {
       inputRef.current.focus();
     }
   }, [isOpen]);
 
-  const filteredValues = useMemo(
-    () =>
-      values?.filter(
-        (item) => item !== null && String(item)?.toLowerCase()?.includes(String(inputValue)?.toLowerCase()),
-      ),
-    [values, inputValue],
-  );
+  const filteredValues = useMemo(() => {
+    const lowerCasedInput = inputValue.toLowerCase();
+
+    return values.filter((item) => item && item.toLowerCase().includes(lowerCasedInput));
+  }, [values, inputValue]);
+
+  useEffect(() => {
+    setIsSelectAll(filteredValues.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
+  }, [filteredValues, selectedValues]);
+
+  const onSelectAll = () => {
+    const newSelectedValues = isSelectAll
+      ? selectedValues.filter((val) => !filteredValues.includes(val))
+      : Array.from(new Set([...selectedValues, ...filteredValues]));
+
+    setSelectedValues(newSelectedValues);
+    handleSetValues(selectedOperator.value as string, newSelectedValues);
+  };
+
+  console.log(hasScrolled);
 
   return (
     <div
@@ -135,10 +160,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
             width={12}
           />
           {isConditionOpen && (
-            <div
-              ref={ref}
-              className='p-1 z-10 absolute top-full left-0 bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
-            >
+            <div className='p-1 z-10 absolute top-full left-0 bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'>
               {operatorOptions.map((option) => (
                 <div
                   className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
@@ -170,7 +192,23 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           onChange={onSearchChange}
         />
       </div>
-      <div className='flex flex-col h-full overflow-y-auto overflow-x-hidden px-1 [&::-webkit-scrollbar]:hidden'>
+      <div
+        onClick={() => onSelectAll()}
+        className='flex items-center gap-2 justify-between mx-1 py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+      >
+        <div className='f-12-400 text-GRAY_1000'>Select All</div>
+        <div className='min-w-[14px]'>
+          <CheckBox checked={isSelectAll} id='checkbox-1' />
+        </div>
+      </div>
+      <div
+        className={cn(
+          'flex flex-col h-full overflow-y-auto overflow-x-hidden px-1 [&::-webkit-scrollbar]:hidden',
+          hasScrolled && 'border-t border-GRAY_400',
+        )}
+        ref={listRef}
+        onScroll={handleScroll}
+      >
         {!!filteredValues?.length &&
           filteredValues.map((item) => (
             <div

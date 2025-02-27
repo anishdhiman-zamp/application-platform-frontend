@@ -56,7 +56,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         'h-full w-full flex items-center gap-2 border-b-0.5 border-r-0.5 border-GRAY_400 z-10',
         allowExpanding && 'cursor-pointer',
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
-        isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1',
+        isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1 border-b-0',
       )}
       style={{ paddingLeft, willChange: 'transform' }}
       onClick={() => allowExpanding && node.setExpanded(!expanded)}

@@ -125,6 +125,7 @@ export const PIVOT_GRID_OPTIONS = {
   suppressCellFocus: true,
   maintainColumnOrder: true,
   scrollbarWidth: 0,
+  suppressDragLeaveHidesColumns: true,
   groupMaintainOrder: true,
   animateRows: false,
   suppressGroupRowsSticky: true,
