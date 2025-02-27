@@ -1,16 +1,13 @@
 import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery } from 'apis/pages';
-import { ZAMP_LOADER } from 'constants/icons';
 import { useAppDispatch } from 'hooks/toolkit';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
 import CommonWrapper from 'components/commonWrapper';
-import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 import 'ag-charts-enterprise';
 
@@ -51,19 +48,9 @@ const Page = () => {
   }, [pageDetails]);
 
   return (
-    <CommonWrapper
-      isLoading={isLoading}
-      skeletonType={SkeletonTypes.CUSTOM}
-      isError={isError}
-      refetchFunction={refetch}
-      loader={
-        <div className='flex justify-center items-center h-[calc(100vh-140px)] ml-1 w-full z-1000 bg-white mt-6 overflow-scroll'>
-          <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
-        </div>
-      }
-    >
+    <CommonWrapper isError={isError} refetchFunction={refetch}>
       <div className='relative h-full rounded-tl-md w-full'>
-        <Sheets pageId={id as string} sheetId={currentSheetId as string} />
+        <Sheets pageId={id as string} sheetId={currentSheetId as string} isPageLoading={isLoading} />
         <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
       </div>
     </CommonWrapper>

@@ -18,11 +18,12 @@ import 'react-resizable/css/styles.css'; // Include resizable styles
 interface SheetsProps {
   pageId: string;
   sheetId: string;
+  isPageLoading: boolean;
 }
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-const Sheets = ({ pageId, sheetId }: SheetsProps) => {
+const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
   const {
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
@@ -51,7 +52,7 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
       <div className='relative h-[calc(100vh-94px)] overflow-scroll py-6 pl-3 pr-0'>
         <CommonWrapper
-          isLoading={isSheetLoading}
+          isLoading={isSheetLoading || isPageLoading}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isSheetDetailsError}
           className='h-full'

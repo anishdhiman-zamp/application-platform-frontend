@@ -354,7 +354,7 @@ export const getChartOptions = (
               color: COLORS.GRAY_950,
             },
             calloutLine: {
-              length: 35,
+              length: 20,
               strokeWidth: 1,
               colors: [COLORS.GRAY_400],
             },

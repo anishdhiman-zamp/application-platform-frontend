@@ -31,6 +31,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   const containerRef = useRef<HTMLDivElement>(null);
   const previousRoute = useRef<string>(router.pathname);
   const [isFadingOutEffect, setIsFadingOutEffect] = useState(false);
+  const [isShowDashboardLoader, setIsShowDashboardLoader] = useState(false);
   const showDashboardLoader = useSelector((state: RootState) => state.user.dashboardLoader);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
@@ -68,7 +69,12 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   }, [dispatch]);
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+
     if (showDashboardLoader) {
+      timer = setTimeout(() => {
+        setIsShowDashboardLoader(isShowDashboardLoader);
+      }, 300);
       setIsFadingOutEffect(false);
 
       const fadeTimeout = setTimeout(() => setIsFadingOutEffect(true), minLoaderDuration - fadeOutOffsetTimeDifference);
@@ -78,7 +84,18 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
         clearTimeout(fadeTimeout);
         clearTimeout(hideTimeout);
       };
+    } else {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      setIsShowDashboardLoader(false);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [showDashboardLoader, hideLoader]);
 
   return (
@@ -102,7 +119,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
           </div>
         </div>
 
-        {showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
+        {isShowDashboardLoader && showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
       </div>
     </Provider>
   );
