@@ -49,14 +49,15 @@ const Sheets = ({ pageId, sheetId }: SheetsProps) => {
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
-      <div className='relative'>
+      <div className='relative h-[calc(100vh-94px)] overflow-scroll py-6 pl-3 pr-0'>
         <CommonWrapper
           isLoading={isSheetLoading}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isSheetDetailsError}
+          className='h-full'
           refetchFunction={refetchSheetDetails}
           loader={
-            <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+            <div className='flex justify-center items-center w-full h-full z-1000 bg-white'>
               <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
             </div>
           }

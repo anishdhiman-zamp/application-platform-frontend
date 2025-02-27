@@ -57,12 +57,12 @@ const Page = () => {
       isError={isError}
       refetchFunction={refetch}
       loader={
-        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-1000 bg-white mt-6'>
+        <div className='flex justify-center items-center h-[calc(100vh-140px)] ml-1 w-full z-1000 bg-white mt-6 overflow-scroll'>
           <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
         </div>
       }
     >
-      <div className='relative h-full rounded-tl-md py-6 pl-3 pr-0 overflow-scroll pb-16 w-full'>
+      <div className='relative h-full rounded-tl-md w-full'>
         <Sheets pageId={id as string} sheetId={currentSheetId as string} />
         <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
       </div>

@@ -29,7 +29,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
   return (
     <div
       className={cn(
-        'flex items-center fixed overflow-auto z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-pageBottomBar px-8 gap-3 transition-all duration-300',
+        'flex items-center fixed  z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-pageBottomBar px-8 gap-3 transition-all duration-300',
         !isSidebarOpen ? 'w-full' : 'w-[calc(100%-240px)]',
       )}
     >

@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { defaultFnType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 
 interface ClearFiltersConfirmationPopupProps {
   className?: string;
@@ -17,7 +18,7 @@ const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`p-4 z-30 bg-white border-DIVIDER_SAIL_2 border ${className} top-[calc(100%+8px)]`}
+      className={cn('p-4 z-30 bg-white border-0.5 border-GRAY_400 rounded-md top-full mt-1', className)}
     >
       <div className='mb-3'>Remove all filters?</div>
 
