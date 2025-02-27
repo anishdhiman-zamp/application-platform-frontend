@@ -8,7 +8,8 @@ export enum SkeletonTypes {
 }
 
 export enum ErrorCardTypes {
-  API_FAIL,
+  GENERAL_API_FAIL = 'GENERAL_API_FAIL',
+  KPI_API_FAIL = 'KPI_API_FAIL',
 }
 
 export interface CommonWrapperPropsTypes {

@@ -241,6 +241,7 @@ module.exports = {
         width: 'position 1.5s linear infinite',
         slide: 'slide 1.5s linear infinite',
         slideInOut: 'slideInOut 5s cubic-bezier(0.85, 0, 0.15, 1) forwards',
+        'slide-in': 'slideIn 0.5s ease-in-out',
       },
       keyframes: {
         'reverse-spin': {
@@ -313,6 +314,10 @@ module.exports = {
           '10%': { transform: 'translateX(0)', opacity: '1' },
           '90%': { transform: 'translateX(0)', opacity: '1' },
           '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+        slideIn: {
+          '0%': { transform: 'translateY(-100%)', opactiy: 0 },
+          '100%': { transform: 'translateY(0%)', opactiy: 1 },
         },
       },
       transitionProperty: {

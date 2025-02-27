@@ -28,15 +28,20 @@ const WidgetTitle = ({
   isPortalNeeded = false,
 }: WidgetTitleProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const [isGroupWidget, setIsGroupWidget] = useState(false);
   const isGroupWidgetOptions = groupWidgetsOptions.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
 
-  useOnClickOutside(dropdownRef, () => setIsGroupWidget(false));
+  useOnClickOutside(dropdownRef, (event) => {
+    if (titleRef?.current && titleRef.current.contains(event?.target as Node)) return;
+    setIsGroupWidget(false);
+  });
 
-  const handleToggle = (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    if (isGroupWidgetOptions) setIsGroupWidget((prev) => !prev);
+    if (!isGroupWidgetOptions) return;
+    setIsGroupWidget((prev) => !prev);
   };
 
   return (
@@ -47,6 +52,7 @@ const WidgetTitle = ({
       )}
     >
       <div
+        ref={titleRef}
         className={cn(
           'px-6 flex flex-col items-start w-fit select-none cursor-pointer',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) && 'mb-10',
@@ -56,22 +62,16 @@ const WidgetTitle = ({
         onClick={handleToggle}
       >
         <div className='flex items-center gap-1'>
-          <span
-            className={cn(
-              'f-18-450 text-GRAY_1000',
-              isPivotTable &&
-                isGroupWidgetOptions &&
-                'group-hover:underline decoration-GRAY_500 underline-offset-[5px]',
-            )}
-          >
-            {title}
-          </span>
+          <span className='f-18-450 text-GRAY_1000'>{title}</span>
           {isGroupWidgetOptions && (
             <SvgSpriteLoader
               id='chevron-down'
               width={18}
               height={18}
-              className={isPivotTable ? 'transform transition-transform opacity-0 group-hover:opacity-100' : ''}
+              className={cn(
+                'text-GRAY_900 transition-transform duration-300',
+                isGroupWidget ? 'rotate-180' : 'rotate-0',
+              )}
             />
           )}
         </div>
