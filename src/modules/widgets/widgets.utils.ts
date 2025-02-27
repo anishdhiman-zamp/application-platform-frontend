@@ -14,6 +14,7 @@ import {
   startOfWeek,
   startOfYear,
 } from 'date-fns';
+import { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import {
   AG_CHART_TYPES,
   CHART_NUMBER_AXES,
@@ -24,8 +25,11 @@ import {
   WidgetDataValueType,
 } from 'modules/widgets/widgets.constant';
 import {
+  BarLineChartWidgetMapping,
   FieldsMappingType,
+  KPITagWidgetMapping,
   PieDonutChartWidgetMapping,
+  PivotTableWidgetMapping,
   WIDGET_TYPES,
   WidgetDataType,
   WidgetInstanceType,
@@ -43,9 +47,10 @@ export function groupTransactionsByDate(
 ): { data: MapAny[]; groupValues: string[] } {
   if (!data?.length) return { data: [], groupValues: [] };
 
-  const groupBy = fields?.group_by?.[0]?.column ?? '';
-  const xAxis = fields?.x_axis?.[0]?.column ?? '';
-  const yAxis = fields?.y_axis?.[0]?.column ?? '';
+  const mappingVariable = fields?.group_by?.[0]?.alias ?? fields?.group_by?.[0]?.column;
+  const groupBy = mappingVariable ?? '';
+  const xAxis = mappingVariable ?? '';
+  const yAxis = mappingVariable ?? '';
 
   const grouped: MapAny = {};
   const groupValues = new Set<string>();
@@ -221,7 +226,7 @@ export const getChartOptions = (
   switch (widgetDetails.widget_type) {
     case WIDGET_TYPES.BAR_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
-      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
+      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? (mappings?.[0]?.fields?.x_axis?.[0]?.column || '');
       const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
@@ -235,7 +240,7 @@ export const getChartOptions = (
           type: chartType,
           xKey: xAxis,
           cornerRadius: 2,
-          yKey: `${axis?.column}`,
+          yKey: `${axis.alias ?? axis.column}`,
           yName: axis?.column || '',
           stacked: true,
           listeners: {
@@ -258,7 +263,7 @@ export const getChartOptions = (
     }
     case WIDGET_TYPES.LINE_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
-      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.column || '';
+      const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? mappings?.[0]?.fields?.x_axis?.[0]?.column;
       const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
@@ -268,7 +273,7 @@ export const getChartOptions = (
         series: yAxis.map((axis) => ({
           type: chartType,
           xKey: xAxis,
-          yKey: `${axis?.column}`,
+          yKey: `${axis?.alias ?? axis?.column}`,
           yName: axis?.column || '',
           stacked: true,
           marker: {
@@ -295,10 +300,10 @@ export const getChartOptions = (
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
-      const sliceKey = mappings?.[0]?.fields?.values?.[0]?.column;
+      const sliceKey = mappings?.[0]?.fields?.values?.[0]?.alias ?? mappings?.[0]?.fields?.values?.[0]?.column;
       const totalNumber = baseOptions?.data?.reduce((acc, curr) => acc + curr[sliceKey ?? ''], 0);
       const chartConfig = getDonutChartSeriesConfig(dataLength ?? 0);
-      const sliceColumn = mappings?.[0]?.fields?.slices?.[0]?.column;
+      const sliceColumn = mappings?.[0]?.fields?.slices?.[0]?.alias ?? mappings?.[0]?.fields?.slices?.[0]?.column;
 
       return {
         ...baseOptions,
@@ -419,8 +424,8 @@ export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selecte
 };
 
 export const getGroupedDonutChartData = (data: MapAny[], mappings: PieDonutChartWidgetMapping[]) => {
-  const sliceKey = mappings?.[0]?.fields?.slices?.[0]?.column;
-  const valueKey = mappings?.[0]?.fields?.values?.[0]?.column;
+  const sliceKey = mappings?.[0]?.fields?.slices?.[0]?.alias ?? mappings?.[0]?.fields?.slices?.[0]?.column;
+  const valueKey = mappings?.[0]?.fields?.values?.[0]?.alias ?? mappings?.[0]?.fields?.values?.[0]?.column;
   const sortedData = data[0]?.sort((a: MapAny, b: MapAny) => b[valueKey as keyof MapAny] - a[valueKey as keyof MapAny]);
   const slicedData = sortedData?.slice(0, MAX_DONUT_CHART_SLICE_COUNT);
   const remainingData = sortedData?.slice(MAX_DONUT_CHART_SLICE_COUNT);
@@ -483,4 +488,49 @@ export const getDateRangeWithPeriodicity = (
     default:
       return [format(currentDate, DATE_FORMATS.d_MMM_yyyy), format(currentDate, DATE_FORMATS.d_MMM_yyyy)];
   }
+};
+
+export const getDefaultFilterByDatasetId = (
+  mappings:
+    | PivotTableWidgetMapping[]
+    | BarLineChartWidgetMapping[]
+    | PieDonutChartWidgetMapping[]
+    | KPITagWidgetMapping[],
+  datasetId?: string,
+) => {
+  const defaultFilters: ParentFilters = {};
+
+  mappings?.forEach((mapping) => {
+    if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
+      mapping?.default_filters?.conditions?.forEach((condition) => {
+        defaultFilters[condition?.column] = {
+          filterType: condition?.type,
+          type: condition?.operator,
+          values: [...condition.value],
+        };
+      });
+    }
+  });
+
+  return defaultFilters;
+};
+
+export const mergeFilters = (currentFilters: ParentFilters, defaultFilters: ParentFilters) => {
+  const mergedFilters: ParentFilters = {};
+
+  Object.keys({ ...currentFilters, ...defaultFilters }).forEach((key) => {
+    const currentValues = currentFilters[key]?.values || [];
+    const defaultValues = defaultFilters[key]?.values || [];
+
+    if (currentFilters[key] && defaultFilters[key]) {
+      mergedFilters[key] = {
+        ...currentFilters[key],
+        values: currentValues.filter((value: string) => defaultValues.includes(value)),
+      };
+    } else {
+      mergedFilters[key] = currentFilters[key] || defaultFilters[key];
+    }
+  });
+
+  return mergedFilters;
 };

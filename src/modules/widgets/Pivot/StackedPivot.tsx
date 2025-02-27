@@ -45,7 +45,6 @@ import { ColumnFilterConfig, ParentFilters, PivotContext } from 'modules/widgets
 import {
   concatTagFilters,
   getColumnLevelFilters,
-  getDefaultFilterByDatasetId,
   getFilterContext,
   getPivotColDefs,
   getPivotColumns,
@@ -54,6 +53,7 @@ import {
   getTopNode,
   getWidgetMappingDatasets,
 } from 'modules/widgets/Pivot/pivot.utils';
+import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
@@ -210,12 +210,31 @@ const StackedPivot = ({
     };
   }, [isSingleHeader]);
 
+  const mergeFilters = (currentFilters: ParentFilters, defaultFilters: ParentFilters) => {
+    const mergedFilters: ParentFilters = {};
+
+    Object.keys({ ...currentFilters, ...defaultFilters }).forEach((key) => {
+      const currentValues = currentFilters[key]?.values || [];
+      const defaultValues = defaultFilters[key]?.values || [];
+
+      if (currentFilters[key] && defaultFilters[key]) {
+        mergedFilters[key] = {
+          ...currentFilters[key],
+          values: currentValues.filter((value: string) => defaultValues.includes(value)),
+        };
+      } else {
+        mergedFilters[key] = currentFilters[key] || defaultFilters[key];
+      }
+    });
+
+    return mergedFilters;
+  };
+
   const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
     const defaultFilters = getDefaultFilterByDatasetId(widgetInstanceDetails?.data_mappings?.mappings, datasetId ?? '');
 
     const query = {
-      ...currentWidgetSelectedFilter,
-      ...defaultFilters,
+      ...mergeFilters(currentWidgetSelectedFilter, defaultFilters),
       ...filters,
     };
 

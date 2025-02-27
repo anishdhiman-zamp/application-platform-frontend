@@ -1,5 +1,6 @@
 import { FC, memo, useMemo, useRef, useState } from 'react';
 import { Column, GridApi, IRowNode } from 'ag-grid-community';
+import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 
@@ -26,12 +27,14 @@ const PivotCell: FC<PivotCellProps> = ({
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const formattedValue = useMemo(() => {
-    const numericValue =
-      typeof value === 'number' ? value : parseFloat(value?.toString().replace(/[^0-9.-]/g, '') || '0');
+    const parsedValue = parseFloat(value?.toString().replace(/[^0-9.-]/g, '') || '0');
+    const numericValue = typeof value === 'number' ? value : parsedValue;
 
     if (isNaN(numericValue)) return '-';
 
-    return `${currency || 'USD'} ${getCommaSeparatedNumber(numericValue, 2)}`;
+    const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
+
+    return `${currencySymbol} ${getCommaSeparatedNumber(numericValue, 2)}`;
   }, [currency, value]);
 
   const { isLastNode, isTopNode, isRootLevel } = useMemo(

@@ -70,6 +70,7 @@ export type KPITagWidgetMapping = {
       aggregation?: AGGREGATION_TYPES;
     }[];
   };
+  default_filters?: Partial<DefaultFilterType>;
 };
 
 export type PivotTableWidgetMapping = {
@@ -126,6 +127,7 @@ export type FieldsMappingType = {
 export type BarLineChartWidgetMapping = {
   dataset_id: string;
   fields: FieldsMappingType;
+  default_filters?: Partial<DefaultFilterType>;
 };
 
 export interface PieDonutChartWidgetMapping {
@@ -134,12 +136,14 @@ export interface PieDonutChartWidgetMapping {
     slices?: AxisMappingType[];
     values?: AxisMappingType[];
   };
+  default_filters?: Partial<DefaultFilterType>;
 }
 
 export interface AxisMappingType {
   type: string;
   column: string;
   field_type: FIELD_TYPES;
+  alias?: string;
   aggregation?: AGGREGATION_TYPES;
   drilldown_filter_type?: string;
   drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;

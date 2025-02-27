@@ -4,7 +4,12 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
-import { getCurrentPageFilters, getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
+import {
+  getCurrentPageFilters,
+  getDateRangeWithPeriodicity,
+  getDefaultFilterByDatasetId,
+  mergeFilters,
+} from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
 import { FieldsMappingType, WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
@@ -95,7 +100,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
     const datasetId = widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id;
+    const xAxisColumnName = (fields as FieldsMappingType)?.x_axis?.[0]?.column;
     const clickFilter: MapAny = {};
+    const defaultFilters = getDefaultFilterByDatasetId(widgetDetails?.data_mappings?.mappings, datasetId);
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
       const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
@@ -105,14 +112,14 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
         currentWidgetSelectedFilters[xAxis]?.dateTo ?? '',
       );
 
-      clickFilter[xAxis] = {
+      clickFilter[xAxisColumnName] = {
         filterType: FILTER_TYPES.DATE_RANGE,
         type: filterOperator,
         dateFrom,
         dateTo,
       };
     } else if (filterType === FILTER_TYPES.MULTI_SELECT) {
-      clickFilter[xAxis] = {
+      clickFilter[xAxisColumnName] = {
         filterType: FILTER_TYPES.MULTI_SELECT,
         type: filterOperator,
         values: [clickedNode[xAxis]],
@@ -121,7 +128,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
     router.push(
       `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({
-        ...currentWidgetSelectedFilters,
+        ...mergeFilters(currentWidgetSelectedFilters, defaultFilters),
         ...clickFilter,
       })}&currency=${currency}`,
     );

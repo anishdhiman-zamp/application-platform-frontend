@@ -130,8 +130,6 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
     handleSetValues(selectedOperator.value as string, newSelectedValues);
   };
 
-  console.log(hasScrolled);
-
   return (
     <div
       className={cn(

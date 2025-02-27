@@ -1,21 +1,15 @@
 import { ColDef, IRowNode, RowStyle } from 'ag-grid-community';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { isValid, parse } from 'date-fns';
+import { DATE_FORMATS, PERIODICITY_TYPES } from 'constants/date.constants';
+import { format, isValid, parse } from 'date-fns';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import {
-  ColumnFilterConfig,
-  FilterConfig,
-  PIVOT_DATA_TYPES,
-  PivotColumnMetadata,
-} from 'modules/widgets/Pivot/pivot.types';
+import { ColumnFilterConfig, PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
 import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import {
   AGGREGATION_TYPES,
   PivotTableWidgetInstanceType,
-  PivotTableWidgetMapping,
   WIDGET_TYPES,
   WidgetDataResponseType,
   WidgetInstanceType,
@@ -662,24 +656,6 @@ export const concatTagFilters = (filters: Record<string, any>) => {
   return concatenatedFilters;
 };
 
-export const getDefaultFilterByDatasetId = (mappings: PivotTableWidgetMapping[], datasetId?: string) => {
-  const defaultFilters: Record<string, FilterConfig> = {};
-
-  mappings?.forEach((mapping) => {
-    if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
-      mapping?.default_filters?.conditions?.forEach((condition) => {
-        defaultFilters[condition?.column] = {
-          filterType: condition.type,
-          type: condition.operator,
-          values: [...condition.value],
-        };
-      });
-    }
-  });
-
-  return defaultFilters;
-};
-
 export const formatRowTitleValue = (value: string): string => {
   if (!isNaN(Date.parse(value))) {
     return getFormattedDateWithPeriodicity(PERIODICITY_TYPES.DAILY, value);
@@ -695,21 +671,50 @@ export const formatRowTitleValue = (value: string): string => {
 const parseDate = (dateStr: string): Date | null => {
   if (!dateStr) return null;
 
-  // Handle ranges like "1-7 Jan 2025" by extracting the first date
+  // Handle date ranges like "1-7 Jan 2025" by extracting the first date
   const rangeMatch = dateStr?.match(/^(\d+)-\d+\s([A-Za-z]+)\s(\d{4})$/);
 
   if (rangeMatch) {
     dateStr = `${rangeMatch[1]} ${rangeMatch[2]} ${rangeMatch[3]}`;
   }
 
-  const formats = ['d MMM yyyy', 'MMM yyyy', "'Q'q yyyy", 'yyyy']; // DATE_FORMATS.ddMMMyyyy, DATE_FORMATS.MMM_yyyy, DATE_FORMATS.QQ_yyyy, DATE_FORMATS.YYYY
+  const formats = [DATE_FORMATS.d_MMM_yyyy, DATE_FORMATS.MMM_yyyy, DATE_FORMATS.QQ_yyyy, DATE_FORMATS.YYYY];
 
-  return formats.map((format) => parse(dateStr, format, new Date()))?.find((date) => isValid(date)) || null;
+  for (const format of formats) {
+    const parsedDate = parse(dateStr, format, new Date());
+
+    if (isValid(parsedDate)) {
+      return parsedDate;
+    }
+  }
+
+  return null;
 };
 
-const pivotComparator = (a: string, b: string): number => {
-  const dateA = parseDate(a);
-  const dateB = parseDate(b);
+const pivotComparator = (str1: string, str2: string): number => {
+  const dateA = parseDate(str1);
+  const dateB = parseDate(str2);
 
-  return dateA && dateB ? dateA.getTime() - dateB.getTime() : dateA ? -1 : dateB ? 1 : a.localeCompare(b);
+  return dateA && dateB ? dateA.getTime() - dateB.getTime() : dateA ? -1 : dateB ? 1 : str1.localeCompare(str2);
+};
+
+export const formatColGroupHeaderDisplayName = (displayName: string) => {
+  const match = displayName?.match(/^(\d{1,2} \w{3} \d{4})$/);
+
+  if (match) {
+    const dateString = match[1];
+    const parsedDate = parse(dateString, DATE_FORMATS.d_MMM_yyyy, new Date());
+
+    if (isValid(parsedDate)) {
+      const dayOfWeek = format(parsedDate, DATE_FORMATS.EEE);
+
+      return { mainText: dateString, suffix: dayOfWeek };
+    }
+  }
+
+  const formattedText = displayName?.includes('_')
+    ? snakeCaseToSentenceCase(displayName)
+    : capitalizeFirstLetter(displayName);
+
+  return { mainText: formattedText, suffix: '' };
 };

@@ -21,6 +21,7 @@ export const DATE_FORMATS = {
   YYYY: 'yyyy',
   DD: 'dd',
   QQ_yyyy: `'Q'Q yyyy`,
+  EEE: 'EEE',
   ddMMyyyyHHmmss: 'dd/MM/yyyy, HH:mm:ss',
 };
 
