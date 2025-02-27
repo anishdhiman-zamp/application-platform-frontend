@@ -67,7 +67,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   const {
-    data: filterConfig,
+    data: filterConfigData,
     refetch: refetchFilterConfig,
     isLoading,
     isError,
@@ -79,6 +79,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       skip: !id,
     },
   );
+  const filterConfig = filterConfigData?.data;
+  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
   const [updateDatasetData] = useUpdateDatasetDataMutation();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [columns, setColumns] = useState<ColDef[]>([]);
@@ -432,10 +434,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
               datasetId={id as string}
               hasFilters={!!Object.keys(selectedFilters)?.length}
             />
-            <ImportDataset
-              onRefetch={handleRefetchDataset}
-              setShowAiTransformationStatus={setShowAiTransformationStatus}
-            />
+            {showFileImports && (
+              <ImportDataset
+                onRefetch={handleRefetchDataset}
+                setShowAiTransformationStatus={setShowAiTransformationStatus}
+              />
+            )}
             <DatasetHistory />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
             <div className='flex items-center gap-2'>

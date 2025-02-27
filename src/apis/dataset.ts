@@ -39,11 +39,13 @@ import { formRequestUrlWithParams } from 'utils/common';
 
 const Dataset = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], { datasetId: string }>({
+    getDatasetFilterConfig: builder.query<
+      { config: { is_file_import_enabled: boolean }; data: DatasetFilterConfigResponseType[] },
+      { datasetId: string }
+    >({
       query: ({ datasetId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILTER_CONFIG_GET, { datasetId }),
       }),
-      transformResponse: ({ data }) => data,
     }),
     getDatasetData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
       query: ({ datasetId, query_config }) => ({
