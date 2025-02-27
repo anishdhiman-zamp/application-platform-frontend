@@ -60,6 +60,29 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
     }
     //TODO: to be removed and enabled with type base
 
+    case FILTER_TYPES.ARRAY_SEARCH: {
+      const filter = selectedFilters[key];
+      const operatorLabel = SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label;
+
+      const count = filter?.descriptionTags?.length;
+      let title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
+
+      if (count > 1) {
+        title = `${filter?.descriptionTags[0]?.label} ${`+${count - 1}`}`;
+      } else {
+        title = filter?.value;
+      }
+
+      if (!filter) {
+        title = '';
+      }
+
+      return {
+        ...config,
+        title,
+      };
+    }
+
     case FILTER_TYPES.DATE_RANGE: {
       try {
         const current = selectedFilters[key];

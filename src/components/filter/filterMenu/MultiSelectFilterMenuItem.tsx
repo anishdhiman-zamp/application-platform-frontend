@@ -137,7 +137,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           {isConditionOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
+              className='p-1 z-10 absolute top-full left-0 bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
             >
               {operatorOptions.map((option) => (
                 <div

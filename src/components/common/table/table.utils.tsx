@@ -94,6 +94,12 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
         operator: condition.type,
         value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
       };
+    case FILTER_TYPES.ARRAY_SEARCH:
+      return {
+        column: condition?.colId,
+        operator: condition?.type,
+        value: condition?.value?.split(','),
+      };
     default:
       return null;
   }

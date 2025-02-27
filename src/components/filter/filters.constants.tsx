@@ -1,6 +1,7 @@
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import AmountRangeFilterMenuItem from 'components/filter/filterMenu/AmountRangeFilterMenuItem';
 import DateRangeFilterMenuItem from 'components/filter/filterMenu/DateRangeFilterMenuItem';
+import MultiSearchFilterMenuItem from 'components/filter/filterMenu/MultiSearchFilterMenuItem';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import SearchFilterMenuItem from 'components/filter/filterMenu/SearchFilterMenuItem';
 import SingleSelectFilterMenuItem from 'components/filter/filterMenu/SingleSelectFilterMenuItem';
@@ -11,6 +12,7 @@ export enum CONDITION_OPERATOR_TYPE {
   NOT_IN = 'nin',
   CONTAINS = 'contains',
   ARRAY_CONTAINS = 'array_contains',
+  ARRAY_IN = 'array_in',
   IS_NULL = 'is_null',
   NOT_CONTAINS = 'ncontains',
   EQUAL = 'eq',
@@ -52,6 +54,7 @@ export const AMOUNT_RANGE_TYPE_SYMBOL_MAP = {
 
 export const AG_GRID_FILTER_TYPES = {
   [FILTER_TYPES.SEARCH]: SearchFilterMenuItem,
+  [FILTER_TYPES.ARRAY_SEARCH]: MultiSearchFilterMenuItem,
   [FILTER_TYPES.DATE_RANGE]: DateRangeFilterMenuItem,
   [FILTER_TYPES.AMOUNT_RANGE]: AmountRangeFilterMenuItem,
   [FILTER_TYPES.SINGLE_SELECT]: SingleSelectFilterMenuItem,
@@ -128,3 +131,26 @@ export const CONDITION_OPERATOR_TYPE_LABEL_MAP = {
   [CONDITION_OPERATOR_TYPE.CREDIT]: 'is credit',
   [CONDITION_OPERATOR_TYPE.ANY]: 'is any',
 };
+
+export const OPERATOR = {
+  InOperator: { label: 'equals', value: CONDITION_OPERATOR_TYPE.IN },
+  EqualOperator: { label: 'equals', value: CONDITION_OPERATOR_TYPE.EQUAL },
+  NotInOperator: { label: 'is not equal', value: CONDITION_OPERATOR_TYPE.NOT_IN },
+  GreaterThanOperator: { label: 'is greater than', value: CONDITION_OPERATOR_TYPE.GREATER_THAN },
+  GreaterThanOrEqualOperator: { label: 'is greater than or equal', value: CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL },
+  LessThanOperator: { label: 'is less than', value: CONDITION_OPERATOR_TYPE.LESS_THAN },
+  LessThanOrEqualOperator: { label: 'is less than or equal', value: CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL },
+  ContainsOperator: { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
+  NotContainsOperator: { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
+  OneOfOperator: { label: 'is one of', value: CONDITION_OPERATOR_TYPE.ONE_OF },
+  Debit: { label: 'Debit', value: CONDITION_OPERATOR_TYPE.DEBIT },
+  Credit: { label: 'Credit', value: CONDITION_OPERATOR_TYPE.CREDIT },
+  Any: { label: 'Any', value: CONDITION_OPERATOR_TYPE.ANY },
+  StartsWithOperator: { label: 'starts with', value: CONDITION_OPERATOR_TYPE.STARTS_WITH },
+  EndsWithOperator: { label: 'ends with', value: CONDITION_OPERATOR_TYPE.ENDS_WITH },
+  InBetween: { label: 'is in between', value: CONDITION_OPERATOR_TYPE.IN_BETWEEN },
+  ArrayContains: { label: 'contains', value: CONDITION_OPERATOR_TYPE.ARRAY_CONTAINS },
+  ArrayIn: { label: 'is in', value: CONDITION_OPERATOR_TYPE.ARRAY_IN },
+};
+
+export const DESCRIPTION_OPERATORS = [OPERATOR.ArrayContains, OPERATOR.ArrayIn];
