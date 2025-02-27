@@ -74,7 +74,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                 filterConfig={filtersConfig ?? []}
                 isPeriodicityEnabled
               />
-              {isFilterInitialized && currency && (
+              {isFilterInitialized && !sheetDetails?.sheet_config?.currency?.hide_currency_filter && currency && (
                 <div className='flex items-center gap-2'>
                   {!!filtersConfig?.length && <div className='border-r border-GRAY_400 h-7'></div>}
                   <SingleSelectFilter
@@ -111,7 +111,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                   <div key={widgetConfig?.default_widget} className='h-full w-full'>
                     <WidgetSwitcher
                       widgetConfig={widgetConfig}
-                      currency={currency}
+                      currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                     />
                   </div>

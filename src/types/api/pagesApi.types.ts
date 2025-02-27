@@ -60,6 +60,9 @@ export interface WidgetType {
 export interface SheetConfigType {
   version: string;
   sheet_layout: WidgetType[];
+  currency: {
+    hide_currency_filter: true;
+  };
 }
 
 export type SheetDetailsRequestType = {

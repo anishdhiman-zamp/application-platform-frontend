@@ -144,7 +144,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           onWidgetChange={onWidgetChange}
           activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
-          currency={currency?.[0]}
+          currency={currency?.[0] ?? undefined}
         />
       );
     case WIDGET_TYPES.KPI: {
