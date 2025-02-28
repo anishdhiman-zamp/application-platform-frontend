@@ -3,6 +3,7 @@ import { captureException } from '@sentry/browser';
 import { Mutex } from 'async-mutex';
 import { ABORT_ERROR, API_DOMAIN, API_TAGS } from 'constants/api.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 
 const mutex = new Mutex();
 
@@ -11,6 +12,10 @@ const baseQuery = fetchBaseQuery({
   credentials: 'include',
   prepareHeaders: (headers) => {
     headers.set('Accept', 'application/json');
+    headers.set(
+      LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
+      getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
+    );
 
     return headers;
   },
