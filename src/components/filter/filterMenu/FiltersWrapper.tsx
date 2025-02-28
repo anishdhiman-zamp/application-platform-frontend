@@ -26,6 +26,7 @@ interface FiltersContainerProps {
   label?: string;
   showResetFilters?: boolean;
   isPeriodicityEnabled?: boolean;
+  isRightAligned?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
@@ -39,6 +40,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   allowClear = true,
   label = 'Add Filters',
   isPeriodicityEnabled = false,
+  isRightAligned = false,
 }) => {
   const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
   const {
@@ -138,6 +140,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
           controlClassName={controlClassName}
           allowClear={allowClear}
           isPeriodicityEnabled={isPeriodicityEnabled}
+          isRightAligned={isRightAligned}
         />
       ))}
 

@@ -73,6 +73,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                 allowActions={false}
                 filterConfig={filtersConfig ?? []}
                 isPeriodicityEnabled
+                isRightAligned
               />
               {isFilterInitialized && !sheetDetails?.sheet_config?.currency?.hide_currency_filter && currency && (
                 <div className='flex items-center gap-2'>

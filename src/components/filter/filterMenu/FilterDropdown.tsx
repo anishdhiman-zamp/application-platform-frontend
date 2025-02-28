@@ -18,6 +18,7 @@ interface FilterDropdownProps {
   isPeriodicityEnabled?: boolean;
   onFilterChange?: (value: string[]) => void;
   closeOnSelect?: boolean;
+  isRightAligned?: boolean;
 }
 
 const FilterDropdown: FC<FilterDropdownProps> = ({
@@ -32,6 +33,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   isPeriodicityEnabled = false,
   onFilterChange,
   closeOnSelect = false,
+  isRightAligned = false,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
   const controlRef = useRef<HTMLDivElement>(null);
@@ -82,7 +84,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
         className={cn(
           `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50 min-w-[218px]`,
           controlClassName,
-          getMenuPlacement ? 'right-0' : 'left-0',
+          isRightAligned ? 'right-0' : getMenuPlacement ? 'right-0' : 'left-0',
           isOpen ? '' : 'max-h-0 overflow-hidden border-0',
         )}
       >
