@@ -52,7 +52,7 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
                             {maskString(historyItem?.file_name, 8, 8, 16)}
                           </span>
                         </div>
-                        <StatusIndicator status={historyItem?.file_upload_status as LOADER_STATUS} />
+                        <StatusIndicator status={historyItem?.status as LOADER_STATUS} />
                       </div>
                       <span className='f-10-400 text-GRAY_700 mt-1'>{`${formattedDate(historyItem?.file_upload_created_at)} by ${getUserNameFromEmail(historyItem?.uploaded_by_user?.email)}`}</span>
                     </div>

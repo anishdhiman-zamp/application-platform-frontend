@@ -24,8 +24,12 @@ import { cn, getUserNameFromEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import CopyToClipboardBrowserUrl from 'components/CopyToClipboardBrowserUrl';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
+import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
@@ -37,11 +41,15 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
-  const { data: audiencesDataByPageId, refetch: refetchAudiencesDataByPageId } = useGetAudiencesByPageIdQuery(
-    { pageId },
-    { skip: !pageId, refetchOnMountOrArgChange: false },
+  const { data: teamMembersData, isLoading: isLoadingTeamMembersData } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId },
   );
+  const {
+    data: audiencesDataByPageId,
+    isLoading: isLoadingAudiencesDataByPageId,
+    refetch: refetchAudiencesDataByPageId,
+  } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId, refetchOnMountOrArgChange: false });
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostPagesToAudiencesByPageIdMutation();
   const userAccessToPageList = audiencesDataByPageId ?? [];
   const placeholderText = 'Share with people and teams';
@@ -151,7 +159,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     return { isValid: true, resource_audience_type, resource_audience_id };
   };
 
-  const handleValidateAndAdd = (value: string) => {
+  const handleValidateAndAdd = ({ value, label }: { value: string; label: string }) => {
     const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value);
 
     setSelectedItems((prev) => {
@@ -159,6 +167,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
         ...prev,
         {
           value,
+          label,
           valid: isValid,
           role: selectedRoleRef?.current?.value,
           color: isValid ? COLORS.WHITE : COLORS.RED_100,
@@ -184,6 +193,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       const updatedItems = [
         ...prev,
         {
+          label: option.label,
           value: option.value,
           valid: isValid,
           color: isValid ? COLORS.WHITE : COLORS.RED_100,
@@ -203,18 +213,26 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   };
 
-  const filteredOptionListsData = [
+  const combinedOptionListsData = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
-    ...(teamMembersData
+    ...(teamMembersData?.map((member) => ({
+      label: getUserNameFromEmail(member?.user?.email) ?? '',
+      value: member?.user?.email ?? '',
+      type: member?.resource_audience_type ?? '',
+    })) || []),
+  ];
+
+  const filteredOptionListsData = [
+    ...(combinedOptionListsData
       ?.filter(
         (item) =>
-          !selectedItems.some((selected) => selected.value === item?.user?.email) &&
-          !audiencesDataByPageId?.some((audience) => audience?.user?.email === item?.user?.email),
+          !selectedItems.some((selected) => selected?.value === item?.value) &&
+          !audiencesDataByPageId?.some((audience) => audience?.user?.email === item?.value),
       )
       .map((member) => ({
-        label: member?.user?.email ?? '',
-        value: member?.user?.email ?? '',
-        type: member?.resource_audience_type ?? '',
+        label: member?.label ?? '',
+        value: member?.value ?? '',
+        type: member?.type ?? '',
       })) || []),
   ];
 
@@ -232,8 +250,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       </div>
       <div className='relative'>
         {openSharePagePopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 backdrop-blur-sm rounded-2xl'>
-            <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 bg-faded-white rounded-2xl'>
+            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>Share this page</span>
                 <div className='p-1 cursor-pointer' onClick={handleCloseSharePagePopup}>
@@ -263,21 +281,22 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                     setShowValidationError={setShowValidationError}
                     onValidateAndAdd={handleValidateAndAdd}
                     optionsList={filteredOptionListsData}
+                    isLoadingOptionsList={isLoadingTeamMembersData}
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     selectOnlyFromList
                   />
                 </div>
-                <div className='flex items-center justify-between w-full py-4 px-5 border-t border-GRAY_400'>
+                <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
                   <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
                     <SvgSpriteLoader
                       id='link-03'
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
                       width={12}
                       height={12}
-                      color={COLORS.GRAY_600}
+                      color={COLORS.GRAY_1000}
                     />
-                    <span className='f-11-500 text-GRAY_600'>Copy link</span>
+                    <CopyToClipboardBrowserUrl />
                   </span>
                   <Button
                     type={BUTTON_TYPES.PRIMARY}
@@ -292,10 +311,14 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                 </div>
               </div>
             </div>
-            {userAccessToPageList?.length > 0 && (
-              <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
-                <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
+              <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
+              <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+                <CommonWrapper
+                  skeletonType={SkeletonTypes.CUSTOM}
+                  isLoading={isLoadingAudiencesDataByPageId}
+                  loader={<WhoHasAccessSkeletonLoader />}
+                >
                   {userAccessToPageList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
@@ -310,9 +333,9 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                       customerName={orgName}
                     />
                   ))}
-                </div>
+                </CommonWrapper>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

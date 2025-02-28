@@ -16,7 +16,7 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
   const router = useRouter();
   const datasetId = router?.query?.id as string;
   const { data } = useGetFileImportHistoryQuery({ datasetId });
-  const fileImportHistoryData = data?.file_uploads ?? [];
+  const fileImportHistoryData = data?.file_uploads || [];
 
   useOnClickOutside(importFileHistoryRef, onClose);
 

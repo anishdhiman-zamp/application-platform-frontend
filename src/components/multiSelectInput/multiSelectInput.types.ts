@@ -2,6 +2,7 @@ export type ArrayListOption = {
   value: string;
   resource_audience_type?: string;
   resource_audience_id?: string;
+  label: string;
   valid: boolean;
   role?: string;
   color?: string;
@@ -21,11 +22,12 @@ export type MultiSelectInputPropsType = {
   showValidationError: boolean;
   setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>;
   validationErrorText?: string;
-  onValidateAndAdd: (value: string) => void;
+  onValidateAndAdd: ({ value, label }: { value: string; label: string }) => void;
   optionsList?: { value: string; label: string; color?: string }[];
   onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
   selectOnlyFromList?: boolean;
   transformLabel?: (label: string) => string;
+  isLoadingOptionsList?: boolean;
 };
 
 export const KEY_CODES = {

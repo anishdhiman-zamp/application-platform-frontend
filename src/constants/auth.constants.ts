@@ -8,6 +8,6 @@ export enum LOGIN_PROVIDERS {
 
 export enum ERROR_BUTTON_TEXT {
   RELOAD = 'Reload',
-  WIFI_ONLY = "Oh, it's the WiFi only",
+  WIFI_ONLY = "Oh, it's the Wifi only",
   WIFI_ONLY_EMOJI = '😏',
 }

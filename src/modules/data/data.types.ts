@@ -46,6 +46,7 @@ export type DatasetColumnRequest = {
 };
 
 export enum LOADER_STATUS {
+  ALIGNMENT_PENDING = 'allignment_pending',
   INITIATED = 'initiated',
   LOADING = 'loading',
   SUCCESS = 'success',

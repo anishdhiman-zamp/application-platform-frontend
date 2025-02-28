@@ -20,7 +20,7 @@ const DatasetHistory = () => {
       {isFileImportHistoryOpen && <ImportFileHistory onClose={handleCloseFileImportHistory} />}
       <div className='relative'>
         <Tooltip
-          tooltipBody='activity'
+          tooltipBody='Activity'
           tooltipBodyClassName='f-10-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
           position={TooltipPositions.BOTTOM}
           className='!cursor-text'

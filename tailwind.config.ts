@@ -229,6 +229,10 @@ module.exports = {
       zIndex: {
         1000: 1000,
       },
+      backgroundImage: {
+        'faded-white':
+          'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.8) 5%, white 10%, white 80%, white 90%, rgba(255,255,255,0.8) 95%, transparent 100%)',
+      },
       animation: {
         opacity: 'opacity 0.3s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',

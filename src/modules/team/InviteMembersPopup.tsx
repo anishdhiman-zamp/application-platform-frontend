@@ -81,7 +81,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
     }
   };
 
-  const handleValidateAndAdd = (value: string) => {
+  const handleValidateAndAdd = ({ value, label }: { value: string; label: string }) => {
     let isValid = validateEmail(value);
     const resource_audience_id = '';
     const resource_audience_type = '';
@@ -107,6 +107,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose }
       ...prevEmails,
       {
         value: value,
+        label: label,
         valid: isValid,
         role: selectedRoleRef?.current?.value,
         color: isValid ? COLORS.WHITE : COLORS.RED_100,

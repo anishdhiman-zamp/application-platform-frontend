@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
+import { LOADER_STATUS } from 'modules/data/data.types';
 import { DatasetBulkLoadersType } from 'store/slices/user';
 import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';
 import { defaultFnType } from 'types/commonTypes';
@@ -55,6 +56,7 @@ export type FileHistoryDataType = {
   file_id: string;
   file_name: string;
   file_upload_status: string;
+  status?: LOADER_STATUS;
   file_upload_created_at: string;
   uploaded_by_user: {
     email: string;

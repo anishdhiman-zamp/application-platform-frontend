@@ -15,7 +15,7 @@ import { accessPermissionForDataset } from 'utils/accessPermission/accessPermiss
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
-import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
 import { toast } from 'components/common/toast/Toast';
@@ -51,6 +51,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   const customAvatarWord =
     (resource_audience_type === ResourceAudienceType.ORGANIZATION ? customerName : userName) || 'Unknown';
   const checkPermission = accessPermissionForDataset(userPrivilege);
+  const showRoleChangeDropdown = checkPermission && !(resource_audience_type === ResourceAudienceType.ORGANIZATION);
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -157,7 +158,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
             )}
           </div>
         </div>
-        {checkPermission ? (
+        {showRoleChangeDropdown ? (
           <AsyncDropdown
             onOpen={handleOpenChangeRoleDropdown}
             onClose={handleCloseChangeRoleDropdown}
@@ -174,7 +175,14 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
             isOverflowStyle
           />
         ) : (
-          <span className='flex justify-between items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2'>{role?.label}</span>
+          <span
+            className={cn(
+              'flex justify-between items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2',
+              !showRoleChangeDropdown && 'pr-4 text-GRAY_600',
+            )}
+          >
+            {role?.label}
+          </span>
         )}
       </div>
       <RemoveFromTeamPopup

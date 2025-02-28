@@ -22,8 +22,12 @@ import { cn, getUserNameFromEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import CopyToClipboardBrowserUrl from 'components/CopyToClipboardBrowserUrl';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
+import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
@@ -36,10 +40,11 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const [openShareDatasetPopup, setOpenShareDatasetPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
-  const { data: audiencesDataByDatasetId, refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery(
-    { datasetId },
-    { skip: !datasetId },
-  );
+  const {
+    data: audiencesDataByDatasetId,
+    isLoading: isLoadingAudiencesDataByDatasetId,
+    refetch: refetchAudiencesByDatasetId,
+  } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
     usePostShareDatasetToAudiencesByDatasetIdMutation();
   const userAccessToDatasetList = audiencesDataByDatasetId ?? [];
@@ -152,7 +157,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     return { isValid: true, resource_audience_type, resource_audience_id };
   };
 
-  const handleValidateAndAdd = (value: string) => {
+  const handleValidateAndAdd = ({ value, label }: { value: string; label: string }) => {
     const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value);
 
     setSelectedItems((prev) => {
@@ -160,6 +165,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
         ...prev,
         {
           value,
+          label,
           valid: isValid,
           role: selectedRoleRef?.current?.value,
           color: isValid ? COLORS.WHITE : COLORS.RED_100,
@@ -186,6 +192,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
         ...prev,
         {
           value: option.value,
+          label: option.label,
           valid: isValid,
           color: isValid ? COLORS.WHITE : COLORS.RED_100,
           role: selectedRoleRef?.current?.value,
@@ -204,18 +211,26 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
     }
   };
 
-  const filteredOptionListsData = [
+  const combinedOptionListsData = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
-    ...(teamMembersData
+    ...(teamMembersData?.map((member) => ({
+      label: getUserNameFromEmail(member?.user?.email) ?? '',
+      value: member?.user?.email ?? '',
+      type: member?.resource_audience_type ?? '',
+    })) || []),
+  ];
+
+  const filteredOptionListsData = [
+    ...(combinedOptionListsData
       ?.filter(
         (item) =>
-          !selectedItems.some((selected) => selected.value === item?.user?.email) &&
-          !audiencesDataByDatasetId?.some((audience) => audience?.user?.email === item?.user?.email),
+          !selectedItems.some((selected) => selected?.value === item?.value) &&
+          !audiencesDataByDatasetId?.some((audience) => audience?.user?.email === item?.value),
       )
       .map((member) => ({
-        label: member?.user?.email ?? '',
-        value: member?.user?.email ?? '',
-        type: member?.resource_audience_type ?? '',
+        label: member?.label ?? '',
+        value: member?.value ?? '',
+        type: member?.type ?? '',
       })) || []),
   ];
 
@@ -233,7 +248,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
       </div>
       <div className='relative'>
         {openShareDatasetPopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 rounded-2xl'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 bg-faded-white rounded-2xl'>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>Share this dataset</span>
@@ -276,9 +291,9 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
                       width={12}
                       height={12}
-                      color={COLORS.GRAY_600}
+                      color={COLORS.GRAY_1000}
                     />
-                    <span className='f-11-500 text-GRAY_600'>Copy link</span>
+                    <CopyToClipboardBrowserUrl />
                   </span>
                   <Button
                     type={BUTTON_TYPES.PRIMARY}
@@ -293,10 +308,14 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                 </div>
               </div>
             </div>
-            {userAccessToDatasetList?.length > 0 && (
-              <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
-                <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
+              <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
+              <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+                <CommonWrapper
+                  skeletonType={SkeletonTypes.CUSTOM}
+                  isLoading={isLoadingAudiencesDataByDatasetId}
+                  loader={<WhoHasAccessSkeletonLoader />}
+                >
                   {userAccessToDatasetList?.map((audience, index) => (
                     <DatasetAccessToAudiences
                       key={index}
@@ -311,9 +330,9 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
                       customerName={orgName}
                     />
                   ))}
-                </div>
+                </CommonWrapper>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

@@ -5,7 +5,10 @@ import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import { KEY_CODES, MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
+import OptionsListSkeletonLoader from 'components/multiSelectInput/OptionsListSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
@@ -26,25 +29,27 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   onSelectOption,
   selectOnlyFromList = false,
   transformLabel,
+  isLoadingOptionsList,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
-  const [openDropdownOptions, setOpenDropdownOptions] = useState<boolean>(false);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(0);
-  const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
+  const [openDropdownOptions, setOpenDropdownOptions] = useState<boolean>(false);
 
   const handleSetInputFocus = () => {
     setIsInputFocused(true);
-    inputRef.current?.focus();
+    inputRef?.current?.focus();
     setOpenDropdownOptions(true);
   };
 
   const handleSetInputBlur = () => {
     setIsInputFocused(false);
-    inputRef.current?.blur();
+    inputRef?.current?.blur();
     setOpenDropdownOptions(false);
   };
 
@@ -58,8 +63,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     const keyEvent = e.key;
 
     if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
-      if (inputArrayList.length > 0) {
-        handleRemoveItem(inputArrayList.length - 1);
+      if (inputArrayList?.length > 0) {
+        handleRemoveItem(inputArrayList?.length - 1);
       }
 
       return;
@@ -72,40 +77,56 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         const selectedOption = filteredDropdownOptions[hoveredOptionIndex ?? 0];
 
         if (selectedOption) {
-          onValidateAndAdd(selectedOption.value);
+          onValidateAndAdd({ value: selectedOption?.value, label: selectedOption?.label });
           setSearch('');
         }
       } else if (keyEvent === KEY_CODES.ARROW_DOWN || keyEvent === KEY_CODES.ARROW_UP) {
         handleKeyDown(e);
       }
     } else {
-      const trimmedSearch = search.trim();
+      const trimmedSearch = search?.trim();
 
       if (
         (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) &&
         trimmedSearch
       ) {
         e.preventDefault();
-        onValidateAndAdd(trimmedSearch);
+        onValidateAndAdd({ value: trimmedSearch, label: trimmedSearch });
         setSearch('');
       }
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!filteredDropdownOptions.length) return;
+    const keyEvent = e.key;
 
-    if (e.key === KEY_CODES.ARROW_DOWN) {
+    if (!filteredDropdownOptions?.length) return;
+
+    if (keyEvent === KEY_CODES.ARROW_DOWN) {
       e.preventDefault();
-      setHoveredOptionIndex((prevIndex) =>
-        prevIndex === null || prevIndex === filteredDropdownOptions.length - 1 ? 0 : prevIndex + 1,
-      );
-    } else if (e.key === KEY_CODES.ARROW_UP) {
+      setHoveredOptionIndex((prevIndex) => {
+        const newIndex = prevIndex === null || prevIndex === filteredDropdownOptions?.length - 1 ? 0 : prevIndex + 1;
+
+        optionRefs?.current[newIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+
+        return newIndex;
+      });
+    } else if (keyEvent === KEY_CODES.ARROW_UP) {
       e.preventDefault();
-      setHoveredOptionIndex((prevIndex) =>
-        prevIndex === null || prevIndex === 0 ? filteredDropdownOptions.length - 1 : prevIndex - 1,
-      );
-    } else if (e.key === KEY_CODES.ENTER && hoveredOptionIndex !== null) {
+      setHoveredOptionIndex((prevIndex) => {
+        const newIndex = prevIndex === null || prevIndex === 0 ? filteredDropdownOptions?.length - 1 : prevIndex - 1;
+
+        optionRefs?.current[newIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+
+        return newIndex;
+      });
+    } else if (keyEvent === KEY_CODES.ENTER && hoveredOptionIndex !== null) {
       e.preventDefault();
       handleSelectDropdownOption(filteredDropdownOptions[hoveredOptionIndex]);
     }
@@ -120,7 +141,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
         return updatedItems;
       });
-      inputRef.current?.focus();
+      inputRef?.current?.focus();
     },
     [setInputArrayList, setShowValidationError, inputRef],
   );
@@ -128,8 +149,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   const handleClickOutside = useCallback(
     (event: MouseEvent) => {
       if (
-        containerRef.current?.contains(event.target as Node) ||
-        dropdownOptionsRef.current?.contains(event.target as Node)
+        containerRef?.current?.contains(event.target as Node) ||
+        dropdownOptionsRef?.current?.contains(event.target as Node)
       ) {
         return;
       }
@@ -163,7 +184,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     if (!combinedOptions) return [];
     if (!debouncedSearch.trim()) return combinedOptions;
 
-    const filteredOptions = combinedOptions.filter((option) =>
+    const filteredOptions = combinedOptions?.filter((option) =>
       option?.value.toLowerCase().startsWith(debouncedSearch.toLowerCase()),
     );
 
@@ -173,9 +194,9 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   }, [combinedOptions, debouncedSearch]);
 
   useEffect(() => {
-    if (debouncedSearch.trim()) {
+    if (debouncedSearch?.trim()) {
       setOpenDropdownOptions((prev) =>
-        prev !== filteredDropdownOptions.length > 0 ? filteredDropdownOptions.length > 0 : prev,
+        prev !== filteredDropdownOptions?.length > 0 ? filteredDropdownOptions?.length > 0 : prev,
       );
     }
     setHoveredOptionIndex(0);
@@ -186,7 +207,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       onSelectOption?.(option);
       setSearch('');
       setIsInputFocused(true);
-      inputRef.current?.focus();
+      inputRef?.current?.focus();
     },
     [onSelectOption, setSearch, inputRef, showValidationError],
   );
@@ -222,7 +243,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
               }}
             >
-              <span className='f-12-500 text-GRAY_1000'>{item?.value}</span>
+              <span className='f-12-500 text-GRAY_1000'>{item?.label}</span>
               <SvgSpriteLoader
                 id='x-close'
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -284,35 +305,45 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           <div
             ref={dropdownOptionsRef}
             onClick={(e) => e.stopPropagation()}
-            className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10'
+            className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
             <div
               className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
               tabIndex={0}
             >
-              {filteredDropdownOptions?.map((option, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer',
-                    hoveredOptionIndex === null && index === 0 ? 'bg-GRAY_50' : '',
-                    hoveredOptionIndex === index ? 'bg-GRAY_50' : '',
-                  )}
-                  onMouseEnter={() => setHoveredOptionIndex(index)}
-                  onClick={() => handleSelectDropdownOption(option)}
-                >
-                  <span
-                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize'
-                    style={{
-                      backgroundColor: option?.color ?? COLORS.WHITE,
-                      border: `1px solid ${COLORS.GRAY_400}`,
+              <CommonWrapper
+                skeletonType={SkeletonTypes.CUSTOM}
+                isLoading={isLoadingOptionsList}
+                loader={<OptionsListSkeletonLoader />}
+              >
+                {filteredDropdownOptions?.map((option, index) => (
+                  <div
+                    key={index}
+                    ref={(el) => {
+                      if (optionRefs?.current) {
+                        optionRefs.current[index] = el;
+                      }
                     }}
+                    className={cn(
+                      'w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer',
+                      hoveredOptionIndex === null && index === 0 ? 'bg-GRAY_50' : '',
+                      hoveredOptionIndex === index ? 'bg-GRAY_50' : '',
+                    )}
+                    onMouseEnter={() => setHoveredOptionIndex(index)}
+                    onClick={() => handleSelectDropdownOption(option)}
                   >
-                    {transformLabel ? transformLabel(option?.label) : option?.label}
-                  </span>
-                </div>
-              ))}
+                    <span
+                      className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border border-GRAY_400'
+                      style={{
+                        backgroundColor: option?.color ?? COLORS.WHITE,
+                      }}
+                    >
+                      {transformLabel ? transformLabel(option?.label) : option?.label}
+                    </span>
+                  </div>
+                ))}
+              </CommonWrapper>
             </div>
           </div>
         </div>

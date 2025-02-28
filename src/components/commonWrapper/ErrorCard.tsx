@@ -17,7 +17,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
   isLoading = false,
   height,
   title = 'Something went wrong',
-  subtitle = "We wish we could blame WiFi, but this one's on us.",
+  subtitle = "We wish we could blame the WiFi, but this one's on us.",
   refetchButtonId = '',
   contentClassName = '',
 }) => {
@@ -70,7 +70,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
               </div>
             </div>
             <div className='flex justify-center items-center text-wrap max-w-[182px] text-center'>
-              <span className='text-GRAY_700 f-11-400'>Our team has been notified and we are working on this</span>
+              <span className='text-GRAY_700 f-11-400'>Also, our team has been notified and is working on it!</span>
             </div>
           </div>
         </div>

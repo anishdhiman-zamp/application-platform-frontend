@@ -8,8 +8,10 @@ type StatusIndicatorPropsType = {
   status: LOADER_STATUS;
 };
 
+const LOADING_STATES = [LOADER_STATUS.LOADING, LOADER_STATUS.INITIATED, LOADER_STATUS.ALIGNMENT_PENDING];
+
 const StatusIndicator: FC<StatusIndicatorPropsType> = ({ status }) => {
-  if (status === LOADER_STATUS.LOADING || status === LOADER_STATUS.INITIATED) {
+  if (LOADING_STATES.includes(status)) {
     return (
       <ProgressBar
         trackColor={COLORS.GRAY_400}
