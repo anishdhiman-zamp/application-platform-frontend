@@ -70,7 +70,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
               </div>
             </div>
             <div className='flex justify-center items-center text-wrap max-w-[182px] text-center'>
-              <span className='text-GRAY_700 f-11-400'>Our team have been notified and we are working on this</span>
+              <span className='text-GRAY_700 f-11-400'>Our team has been notified and we are working on this</span>
             </div>
           </div>
         </div>

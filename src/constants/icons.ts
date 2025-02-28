@@ -27,6 +27,8 @@ export const GREEN_CHECK_ICON = IMAGE_PREFIX + '/icons/green-check-circle.svg';
 export const ZAMP_LOGO = IMAGE_PREFIX + '/icons/zampBlack.svg';
 export const SCREEN_SUPPORT = IMAGE_PREFIX + '/images/screen-support.svg';
 export const DATASET_ICON = IMAGE_PREFIX + '/icons/dataset.svg';
+export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
+export const GROUP_COLLAPSE_ICON = IMAGE_PREFIX + '/icons/group-collapse.svg';
 
 // Bank Icons
 export const ADCB_SVG = IMAGE_PREFIX + '/icons/bank-icons/adcb.svg';

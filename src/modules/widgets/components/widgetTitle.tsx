@@ -45,12 +45,7 @@ const WidgetTitle = ({
   };
 
   return (
-    <div
-      className={cn(
-        className,
-        isPivotTable && 'bg-white w-full flex h-full p-6 border-b-0.5 border-r-0.5 border-GRAY_400',
-      )}
-    >
+    <div className={className}>
       <div
         ref={titleRef}
         className={cn(

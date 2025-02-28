@@ -21,11 +21,7 @@ const Sidebar = () => {
   const pathname = router?.pathname;
   const pageId = router?.query?.id;
   const { logout } = useLogout();
-  const {
-    data: pages,
-    isLoading: isLoadingPages,
-    isError,
-  } = useGetPagesQuery(undefined, {
+  const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
@@ -57,7 +53,6 @@ const Sidebar = () => {
             isLoading={isLoadingPages}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderSidebarPages />}
-            isError={isError}
           >
             {pages?.map((item) => (
               <PageNavTab

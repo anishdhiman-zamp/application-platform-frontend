@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
+  ClientSideRowModelApiModule,
   ClientSideRowModelModule,
   ColDef,
   ColGroupDef,
@@ -26,11 +27,11 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
+import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
 import {
   COL_MIN_WIDTH,
   GRAND_ROW_TOTAL_POSITION,
@@ -69,6 +70,7 @@ ModuleRegistry.registerModules([
   ScrollApiModule,
   PivotModule,
   ColumnApiModule,
+  ClientSideRowModelApiModule,
   FiltersToolPanelModule,
   RowGroupingPanelModule,
   CellStyleModule,
@@ -102,12 +104,24 @@ const StackedPivot = ({
   const router = useRouter();
   const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
+  const { title, display_config } = widgetInstanceDetails;
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
   };
 
-  const { title, display_config } = widgetInstanceDetails;
+  const handleExpandAll = useCallback(() => {
+    if (gridApi.current) {
+      gridApi.current?.expandAll();
+    }
+  }, []);
+
+  const handleCollapseAll = useCallback(() => {
+    if (gridApi.current) {
+      gridApi.current?.collapseAll();
+    }
+  }, []);
+
   const { colDef, rowData, columnContextMapping } = useMemo(() => {
     const pivotCols = getPivotColumns(widgetInstanceDetails, widgetData);
     const { coldefs, columnContextMapping } = getPivotColDefs(pivotCols);
@@ -162,16 +176,18 @@ const StackedPivot = ({
       pinned: 'left',
       lockPinned: true,
       lockPosition: 'left',
-      headerComponent: WidgetTitle,
+      headerComponent: PinnedColHeader,
       suppressMovable: true,
       headerComponentParams: {
-        title: title,
+        title,
         isSingleHeader,
         groupWidgetsOptions,
         onWidgetChange,
         widgetType: WIDGET_TYPES.PIVOT_TABLE,
         activeWidget,
         isPortalNeeded: true,
+        handleCollapseAll,
+        handleExpandAll,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
@@ -198,6 +214,8 @@ const StackedPivot = ({
       display_config,
       activeWidget,
       handleExportAgGridData,
+      handleCollapseAll,
+      handleExpandAll,
     ],
   );
 
@@ -342,6 +360,7 @@ const StackedPivot = ({
         processPivotResultColGroupDef={processPivotResultColGroupDef}
         onCellDoubleClicked={handleDrilldown}
         enableStrictPivotColumnOrder
+        suppressStickyTotalRow
         {...PIVOT_GRID_OPTIONS}
       />
     </div>
