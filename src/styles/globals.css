@@ -237,8 +237,9 @@
   scrollbar-color: #e2e2da #fff0;
 }
 
-.react-grid-item.cssTransforms {
-  background: none !important; /* Remove red background */
+/* Change the dragging placeholder color */
+.react-grid-item.react-grid-placeholder {
+  background: white !important;
 }
 
 .ag-cell-focus:before {

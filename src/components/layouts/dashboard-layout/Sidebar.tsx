@@ -37,7 +37,7 @@ const Sidebar = () => {
   }, [pages]);
 
   return (
-    <div className={cn('relative transition-all duration-300', isSidebarOpen ? 'w-60' : 'w-0')}>
+    <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
         <div className='px-2 border-b border-GRAY_400 pb-4'>
           {SIDEBAR_ITEMS.map((item) => (

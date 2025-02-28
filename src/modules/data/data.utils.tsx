@@ -206,17 +206,31 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   const filters = JSON.parse(filtersString);
   const filterKeys = Object.keys(filters);
 
-  const requiredFilterConfigs = filterConfig.filter(
+  const requiredTagFilterConfigs = filterConfig.filter(
     (item) => item.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG && filterKeys.includes(item.column),
   );
 
-  requiredFilterConfigs.forEach((item) => {
+  requiredTagFilterConfigs.forEach((item) => {
     const startsWithValues: string = filters[item.column]?.values?.[0];
 
     filters[item.column] = {
       filterType: FILTER_TYPES.MULTI_SELECT,
       type: CONDITION_OPERATOR_TYPE.CONTAINS,
       values: item.options.filter((option) => option && option.startsWith(startsWithValues)),
+    };
+  });
+
+  const requiredSearchFilterConfigs = filterConfig.filter(
+    (item) => item.type === FILTER_TYPES.SEARCH && filterKeys.includes(item.column),
+  );
+
+  requiredSearchFilterConfigs.forEach((item) => {
+    const filterValue = filters[item.column];
+
+    filters[item.column] = {
+      filterType: filterValue?.filterType,
+      type: filterValue?.type,
+      filter: filterValue?.values?.[0],
     };
   });
 

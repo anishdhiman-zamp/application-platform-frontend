@@ -275,7 +275,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
                 className='flex items-center gap-1'
               >
                 <div className='drag-handle cursor-grab min-w-[14px]'>
-                  <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' className='rotate-90' />
+                  <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' className='rotate-90' priority />
                 </div>
                 <RuleCard
                   filters={rule?.filters}

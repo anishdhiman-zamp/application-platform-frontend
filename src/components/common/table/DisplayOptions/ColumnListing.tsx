@@ -6,7 +6,7 @@ import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
 import { getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType, MapAny } from 'types/commonTypes';
+import { defaultFnType, MapAny, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
@@ -28,15 +28,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   const [searchTerm, setSearchTerm] = useState('');
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
   // State for grid layout
-  const [layout, setLayout] = useState(
-    columns?.map((column, index) => ({
-      i: column?.getColId(),
-      x: 0,
-      y: index,
-      w: 1,
-      h: 1,
-    })),
-  );
+  const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
 
   const updateLocalStorage = (columnOrderingVisibility: MapAny[]) => {
     const currentColumnOrderingVisibility = JSON.parse(
@@ -49,7 +41,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     );
   };
 
-  const handleCheckBoxClick = (column: Column) => {
+  const handleCheckBoxClick = (column?: Column) => {
+    if (!column) return;
     tableRef?.current?.api?.setColumnsVisible([column.getColId()], !column.isVisible());
 
     const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map(
@@ -112,6 +105,11 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     setColumnsChecked(columnOrderingVisibility);
   };
 
+  const handleColumnClick = (e: React.MouseEvent<HTMLDivElement>, column?: Column) => {
+    e.stopPropagation();
+    handleCheckBoxClick(column);
+  };
+
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
     // re-order columns based on the columnOrderingVisibilityForCurrentDataset
@@ -141,35 +139,37 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   return (
     <MenuWrapper
       id='display-options'
-      className='!absolute z-10 p-1 right-0 mt-1 w-fit min-w-[250px]'
-      childrenWrapperClassName='!overflow-visible max-h-[422px]'
+      className='!absolute z-10 right-0 mt-1 min-w-[250px] w-fit !overflow-visible'
+      childrenWrapperClassName='!overflow-visible max-h-[422px] w-full'
     >
-      <div className='flex items-center gap-1.5 p-2'>
-        <SvgSpriteLoader
-          id='arrow-narrow-left'
-          iconCategory={ICON_SPRITE_TYPES.ARROWS}
-          width={12}
-          height={12}
-          className='cursor-pointer'
-          onClick={onClose}
-        />
-        <div className='f-12-500 text-GRAY_1000 flex justify-between w-full'>
-          <div>Columns</div>
-          <div className='cursor-pointer' onClick={handleSelectAll}>
-            Select All
+      <div className='pt-1 px-1'>
+        <div className='flex items-center gap-1.5 p-2'>
+          <SvgSpriteLoader
+            id='arrow-narrow-left'
+            iconCategory={ICON_SPRITE_TYPES.ARROWS}
+            width={12}
+            height={12}
+            className='cursor-pointer'
+            onClick={onClose}
+          />
+          <div className='f-12-500 text-GRAY_1000 flex justify-between w-full'>
+            <div>Columns</div>
+            <div className='cursor-pointer' onClick={handleSelectAll}>
+              Select All
+            </div>
           </div>
         </div>
+        <Input
+          placeholder='Search columns...'
+          size={SIZE_TYPES.XSMALL}
+          noBorders
+          focusClassNames='mt-2 mb-2.5'
+          onChange={handleSearch}
+          value={searchTerm}
+          autoFocus
+        />
       </div>
-      <Input
-        placeholder='Search Columns...'
-        size={SIZE_TYPES.XSMALL}
-        noBorders
-        focusClassNames='mt-2 mb-2.5'
-        onChange={handleSearch}
-        value={searchTerm}
-        autoFocus
-      />
-      <div className='text-GRAY_900 !overflow-y-auto max-h-[340px]'>
+      <div className='text-GRAY_900 overflow-auto max-h-[330px] [&::-webkit-scrollbar]:hidden !overflow-x-visible'>
         <ResponsiveGridLayout
           className='layout'
           layouts={{ lg: layout }}
@@ -181,19 +181,21 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           draggableHandle='.drag-handle' // Restrict drag to the handle
         >
           {columns?.map((column) => (
-            <div key={column?.getColId()} className='flex items-center gap-2.5 p-2'>
+            <div
+              key={column?.getColId()}
+              className='flex items-center gap-2.5 p-2 select-none bg-white hover:!bg-GRAY_100 rounded-md w-full'
+            >
               <div className='drag-handle cursor-grab min-w-[14px]'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
               </div>
-              <CheckBox
-                checked={columnsChecked?.find((col) => col?.colId === column?.getColId())?.isVisible ?? false}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleCheckBoxClick(column);
-                }}
-                id={column?.getColId() ?? ''}
-              />
-              <div className='f-12-400 text-GRAY_1000'>{column?.getColId()}</div>
+              <div className='flex items-center gap-2.5 cursor-pointer' onClick={(e) => handleColumnClick(e, column)}>
+                <CheckBox
+                  checked={columnsChecked?.find((col) => col?.colId === column?.getColId())?.isVisible ?? false}
+                  onPress={(e) => handleColumnClick(e, column)}
+                  id={column?.getColId() ?? ''}
+                />
+                <div className='f-12-400 text-GRAY_1000 break-all'>{column?.getColId()}</div>
+              </div>
             </div>
           ))}
         </ResponsiveGridLayout>

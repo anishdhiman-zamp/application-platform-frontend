@@ -45,16 +45,11 @@ const Topbar = () => {
     <div className='h-12 flex items-center justify-between'>
       <div
         className={cn(
-          'py-4 h-12 flex items-center justify-between text-GRAY_700 transition-all duration-300',
+          'py-4 h-12 flex items-center justify-between text-GRAY_700 transition-all',
           isSidebarOpen ? 'w-[240px]' : 'w-[48px]',
         )}
       >
-        <div
-          className={cn(
-            'flex-1 transition-all duration-300 pl-4',
-            isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0',
-          )}
-        >
+        <div className={cn('flex-1 transition-all pl-4', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
           <Image
             width={16}
             height={16}
@@ -76,16 +71,20 @@ const Topbar = () => {
         </div>
       </div>
       <div
-        className={cn('flex items-center gap-2 w-full h-full transition-all duration-300', !isSidebarOpen && 'pl-8')}
+        className={cn('flex items-center gap-2 w-full h-full transition-all', !isSidebarOpen && 'pl-8', {
+          'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
+        })}
       >
-        <SvgSpriteLoader
-          id='arrow-left'
-          iconCategory={ICON_SPRITE_TYPES.ARROWS}
-          height={16}
-          width={16}
-          onClick={handleBackClick}
-          className='cursor-pointer'
-        />
+        {breadcrumbStack?.length > 1 && (
+          <SvgSpriteLoader
+            id='arrow-left'
+            iconCategory={ICON_SPRITE_TYPES.ARROWS}
+            height={16}
+            width={16}
+            onClick={handleBackClick}
+            className='cursor-pointer'
+          />
+        )}
         <BreadCrumb breadcrumbStack={breadcrumbStack} />
       </div>
       <Input

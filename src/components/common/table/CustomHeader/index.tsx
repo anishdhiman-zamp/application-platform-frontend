@@ -140,6 +140,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Function to open menu and set position
   const toggleMenu = () => {
+    tableRef.current?.api?.clearCellSelection();
+    tableRef.current?.api?.clearFocusedCell();
     if (filterType === FILTER_TYPES.AMOUNT_RANGE && !isMenuOpen) {
       dispatch({
         type: filtersContextActions.SET_STATUS_BAR,

@@ -37,3 +37,11 @@ export type DashboardLayoutProps = {
 export type ChildrenLayoutPropsType = {
   children: React.ReactNode;
 };
+
+export type ResponsiveGridLayoutType = {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};

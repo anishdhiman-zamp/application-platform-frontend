@@ -17,6 +17,7 @@ import {
 } from 'apis/dataset';
 import { ZAMP_LOADER } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
@@ -69,7 +70,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const {
     data: filterConfigData,
     refetch: refetchFilterConfig,
-    isLoading,
+    isFetching,
     isError,
   } = useGetDatasetFilterConfigQuery(
     {
@@ -122,8 +123,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         const queryConfig = getEncodedRequest(parameters.request, fxCurrency?.[0], zampIds);
 
-        parameters.api.clearCellSelection();
-        parameters.api.clearFocusedCell();
+        removeCellFocus();
         setExportsDatasetQuery(queryConfig);
         if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
           // Use Cached Data for First Load
@@ -163,6 +163,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
+  const datasetTableRef = useRef<HTMLDivElement>(null);
+
+  const removeCellFocus = () => {
+    tableRef.current?.api?.clearCellSelection();
+    tableRef.current?.api?.clearFocusedCell();
+  };
 
   const handleSuccessfulUpdate = (data: DatasetUpdateResponseType, showPolling = true) => {
     if (showPolling) setIsPolling(true);
@@ -403,13 +409,15 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
       });
   }, [filters]);
 
+  useOnClickOutside(datasetTableRef, removeCellFocus);
+
   return (
     <>
       <CommonWrapper
         className={cn('h-full', {
-          'flex flex-col items-center justify-center': isLoading,
+          'flex flex-col items-center justify-center': isFetching,
         })}
-        isLoading={isLoading}
+        isLoading={isFetching}
         isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
@@ -455,7 +463,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           </div>
         </div>
 
-        <div className='z-10 w-full h-full'>
+        <div className='z-10 w-full h-full' ref={datasetTableRef}>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}
