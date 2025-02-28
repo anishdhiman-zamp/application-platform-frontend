@@ -90,7 +90,6 @@ export const PAYPAL = IMAGE_PREFIX + '/icons/bank-icons/paypal.svg';
 export const PASHA = IMAGE_PREFIX + '/icons/bank-icons/pasha.png';
 export const QNB_QAT = IMAGE_PREFIX + '/icons/bank-icons/qatar_national_bank.png';
 export const RAIFFEISEN = IMAGE_PREFIX + '/icons/bank-icons/raiffeisen.svg';
-export const SAB_KSA = IMAGE_PREFIX + '/icons/bank-icons/hsbc.svg';
 export const SBI_IN = IMAGE_PREFIX + '/icons/bank-icons/sbi-bank.svg';
 export const SALLA = IMAGE_PREFIX + '/icons/bank-icons/salla.svg';
 export const SNB_KSA = IMAGE_PREFIX + '/icons/bank-icons/saudi-national-bank.jpg';
