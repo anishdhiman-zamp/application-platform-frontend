@@ -12,7 +12,7 @@ const CustomDateTimeEditor = (props: MapAny) => {
   };
 
   return (
-    <div className='fixed my-5'>
+    <div className='fixed top-[210px]'>
       <DateRangeFilter
         onChange={onChange}
         value={{

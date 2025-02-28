@@ -36,7 +36,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, tea
   const getValue = (column: ColDef, value: any) => {
     if (column.cellRenderer) {
       if (column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
-        const sourceColumnId = `_zamp_source_${column?.field}`;
+        const sourceColumnId = `_zamp_source_json_${column?.field}`;
         const sourceValue = JSON.parse(data[sourceColumnId] ?? '{}');
 
         let tooltipTitle: string = '';
@@ -56,8 +56,15 @@ const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, tea
 
         return (
           <Tooltip
-            tooltipBody={<Label title={tooltipTitle} description={tooltipDescription} />}
-            tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+            tooltipBody={
+              <Label
+                title={tooltipTitle}
+                description={tooltipDescription}
+                titleClassName='f-10-400 text-white mb-[4px]'
+                descriptionClassName='f-10-400 text-GRAY_700 text-wrap break-keep'
+              />
+            }
+            tooltipBodyClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-white w-[102px]'
             className='z-1'
           >
             <div

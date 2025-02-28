@@ -50,11 +50,11 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
     );
 
     tagColumns.forEach((column) => {
-      const sourceColumnId = `_zamp_source_${column.field}`;
+      const sourceColumnId = `_zamp_source_json_${column?.field}`;
       const sourceValue = JSON.parse(data[sourceColumnId] ?? '{}');
 
-      if (sourceValue.source_type === TAG_SOURCE_TYPES.RULE) {
-        ruleIds.push(sourceValue.source_id);
+      if (sourceValue?.source_type === TAG_SOURCE_TYPES.RULE) {
+        ruleIds.push(sourceValue?.source_id);
       }
     });
 

@@ -35,10 +35,16 @@ const CustomTagEditor = (props: MapAny) => {
 
   return (
     <div>
-      <input type='text' value={searchValue} onChange={handleChange} className='h-8 -my-1 w-full outline-none' />
+      <input
+        type='text'
+        value={searchValue}
+        onChange={handleChange}
+        className='h-6 -my-1 w-full outline-none'
+        autoFocus
+      />
       <MenuWrapper
         id='custom-tag-editor-menu'
-        className='!fixed mt-1 w-64'
+        className='!fixed mt-1 w-64 top-7'
         childrenWrapperClassName='!overflow-y-visible !max-h-fit'
       >
         <div className='text-GRAY_700 f-11-500 p-2'>Select an option or create one</div>
