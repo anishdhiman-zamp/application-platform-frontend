@@ -34,7 +34,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<SkeletonLoaderListing />}
       >
-        <div className='overflow-y-auto h-[calc(100vh-270px)] pb-10' style={{ scrollbarWidth: 'none' }}>
+        <div className='overflow-y-auto h-[calc(100vh-270px)] pb-10 [&::-webkit-scrollbar]:hidden'>
           {data.map((row, index) => (
             <div key={index} className='grid grid-cols-3 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
               <MembersName value={row?.user?.email} member />

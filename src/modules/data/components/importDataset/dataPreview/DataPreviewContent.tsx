@@ -52,7 +52,7 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
       </div>
 
       <div className='relative w-full h-full overflow-hidden'>
-        <div className='h-full overflow-y-auto' style={{ scrollbarWidth: 'none' }}>
+        <div className='h-full overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           <div>{renderTable()}</div>
         </div>
       </div>

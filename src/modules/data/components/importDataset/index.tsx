@@ -15,6 +15,7 @@ import { useRouter } from 'next/router';
 import { addDatasetBulkLoaders, removeDatasetBulkLoader } from 'store/slices/user';
 import { DatasetActionStatusResponseType, RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { cn } from 'utils/common';
+import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
   const router = useRouter();
@@ -104,7 +105,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
   }, [startPollingPreview]);
 
   return (
-    <div className={cn('p-1 hover:bg-GRAY_100 rounded', isImportFilePopupOpen && 'bg-GRAY_100')}>
+    <div>
       {isImportFilePopupOpen && !startAiTransformation ? (
         <ImportFileWrapper
           fileName={fileName}
@@ -127,14 +128,23 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
           onRefetch={onRefetch}
         />
       ) : null}
-      <Image
-        src={COINS_STACKED_05}
-        alt='coins-stacked-05'
-        width={14}
-        height={14}
-        className='text-GRAY_900 cursor-pointer'
-        onClick={handleOpenImportFilePopup}
-      />
+      <Tooltip
+        tooltipBody='Import Data'
+        tooltipBodyClassName='f-10-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+        position={TooltipPositions.BOTTOM}
+        className='!cursor-text'
+      >
+        <div className={cn('p-1 hover:bg-GRAY_100 !rounded cursor-pointer', isImportFilePopupOpen && 'bg-GRAY_100')}>
+          <Image
+            src={COINS_STACKED_05}
+            alt='coins-stacked-05'
+            width={14}
+            height={14}
+            className='text-GRAY_900'
+            onClick={handleOpenImportFilePopup}
+          />
+        </div>
+      </Tooltip>
     </div>
   );
 };

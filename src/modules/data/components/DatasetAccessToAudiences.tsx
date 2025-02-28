@@ -10,6 +10,7 @@ import { useOnClickOutside } from 'hooks';
 import { CHANGE_ACCESS_PRIVILEGES_LIST, DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType, DatasetAccessToAudiencesPropsType } from 'modules/data/data.types';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
+import { ResourceAudienceType } from 'types/api/auth.types';
 import { accessPermissionForDataset } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
@@ -29,6 +30,8 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   resource_audience_type,
   user,
   userPrivilege,
+  orgName,
+  customerName,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
@@ -41,7 +44,12 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
 
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
-  const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
+  const userName =
+    resource_audience_type === ResourceAudienceType.ORGANIZATION
+      ? orgName
+      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
+  const customAvatarWord =
+    (resource_audience_type === ResourceAudienceType.ORGANIZATION ? customerName : userName) || 'Unknown';
   const checkPermission = accessPermissionForDataset(userPrivilege);
 
   const handleOpenChangeRoleDropdown = () => {
@@ -122,7 +130,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
             <>
               <div className='w-fit'>
                 <Avatar
-                  name={userName}
+                  name={customAvatarWord}
                   backgroundColor={COLORS.GRAY_1000}
                   className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
                 />

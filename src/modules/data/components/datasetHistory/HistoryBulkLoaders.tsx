@@ -1,17 +1,19 @@
 import React, { FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { COLORS } from 'constants/colors';
 import { HistoryBulkLoadersPropsType } from 'modules/data/components/importDataset/importData.types';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import { RootState } from 'store';
 import { removeDatasetBulkLoader } from 'store/slices/user';
 import { cn } from 'utils/common';
 import StatusIndicator from 'components/common/StatusIndicator';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({ isHoveredLoaders, setIsHoveredLoaders }) => {
+const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
+  isHoveredLoaders,
+  setIsHoveredLoaders,
+  datasetBulkLoaders,
+}) => {
   const dispatch = useDispatch();
-  const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
 
   const handleRemoveLoader = (id: string) => dispatch(removeDatasetBulkLoader(id));
 

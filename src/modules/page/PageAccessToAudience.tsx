@@ -11,6 +11,7 @@ import { CHANGE_PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants
 import { PageAccessPrivilegesType, PageAccessToAudiencesPropsType } from 'modules/page/pages.types';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
+import { ResourceAudienceType } from 'types/api/auth.types';
 import { accessPermissionForPage } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
@@ -29,6 +30,8 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   user,
   userPrivilege,
   resource_audience_type,
+  orgName,
+  customerName,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = CHANGE_PAGE_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
@@ -43,7 +46,12 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
   const [changeRole] = usePatchChangeAudienceRoleInPageMutation();
   const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromPageAccessMutation();
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
-  const userName = convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type));
+  const userName =
+    resource_audience_type === ResourceAudienceType.ORGANIZATION
+      ? orgName
+      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
+  const customAvatarWord =
+    (resource_audience_type === ResourceAudienceType.ORGANIZATION ? customerName : userName) || 'Unknown';
   const checkPermission = accessPermissionForPage(userPrivilege);
 
   const handleOpenChangeRoleDropdown = () => {
@@ -124,7 +132,7 @@ const PageAccessToAudiences: FC<PageAccessToAudiencesPropsType> = ({
             <>
               <div className='w-fit'>
                 <Avatar
-                  name={userName}
+                  name={customAvatarWord}
                   backgroundColor={COLORS.GRAY_1000}
                   className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
                 />

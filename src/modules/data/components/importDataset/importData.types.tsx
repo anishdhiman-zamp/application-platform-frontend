@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { LOADER_STATUS } from 'modules/data/data.types';
+import { DatasetBulkLoadersType } from 'store/slices/user';
 import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';
 import { defaultFnType } from 'types/commonTypes';
 
@@ -39,20 +39,27 @@ export enum FILE_MIME {
 }
 
 export type HistoryListPropsType = {
+  fileImportHistoryData: FileHistoryDataType[];
   isHoveredLoaders: boolean;
 };
 
 export type HistoryBulkLoadersPropsType = {
   isHoveredLoaders: boolean;
+  datasetBulkLoaders: DatasetBulkLoadersType[];
   setIsHoveredLoaders: (isHoveredLoaders: boolean) => void;
 };
 
 export type FileHistoryDataType = {
   id: string;
+  dataset_id: string;
+  file_id: string;
   file_name: string;
-  status: LOADER_STATUS;
-  created_at: string;
-  created_by: string;
+  file_upload_status: string;
+  file_upload_created_at: string;
+  uploaded_by_user: {
+    email: string;
+    name?: string;
+  };
 };
 
 export type ImportFileHistoryPropsType = {

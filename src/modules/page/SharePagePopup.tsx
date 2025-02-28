@@ -38,12 +38,12 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const [openSharePagePopup, setOpenSharePagePopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
-  const { data: getAudiencesByPageId, refetch: refetchAudiencesByPageId } = useGetAudiencesByPageIdQuery(
+  const { data: audiencesDataByPageId, refetch: refetchAudiencesDataByPageId } = useGetAudiencesByPageIdQuery(
     { pageId },
     { skip: !pageId, refetchOnMountOrArgChange: false },
   );
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostPagesToAudiencesByPageIdMutation();
-  const userAccessToPageList = getAudiencesByPageId ?? [];
+  const userAccessToPageList = audiencesDataByPageId ?? [];
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_role = getUserPrivilege();
@@ -93,7 +93,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
         .unwrap()
         .then(() => {
           setSelectedItems([]);
-          refetchAudiencesByPageId();
+          refetchAudiencesDataByPageId();
           toast.success(TOAST_MESSAGES.SUCCESS_PAGE_SHARED);
         })
         .catch((err) => {
@@ -101,15 +101,6 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
         });
     }
   };
-
-  const customizedTeamMembersData = [
-    { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
-    ...(teamMembersData?.map((member) => ({
-      label: member?.user?.email ?? '',
-      value: member?.user?.email ?? '',
-      type: member?.resource_audience_type ?? '',
-    })) || []),
-  ];
 
   const validateAndGetUserDetails = (value: string) => {
     const isValid = validateEmail(value);
@@ -212,6 +203,21 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   };
 
+  const filteredOptionListsData = [
+    { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
+    ...(teamMembersData
+      ?.filter(
+        (item) =>
+          !selectedItems.some((selected) => selected.value === item?.user?.email) &&
+          !audiencesDataByPageId?.some((audience) => audience?.user?.email === item?.user?.email),
+      )
+      .map((member) => ({
+        label: member?.user?.email ?? '',
+        value: member?.user?.email ?? '',
+        type: member?.resource_audience_type ?? '',
+      })) || []),
+  ];
+
   return (
     <div ref={sharePagePopupRef} className='flex w-fit'>
       <div
@@ -226,7 +232,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       </div>
       <div className='relative'>
         {openSharePagePopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 backdrop-blur-sm rounded-2xl'>
             <div className='border border-GRAY_400 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>Share this page</span>
@@ -256,7 +262,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                     showValidationError={showValidationError}
                     setShowValidationError={setShowValidationError}
                     onValidateAndAdd={handleValidateAndAdd}
-                    optionsList={customizedTeamMembersData}
+                    optionsList={filteredOptionListsData}
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     selectOnlyFromList
@@ -289,10 +295,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
             {userAccessToPageList?.length > 0 && (
               <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border border-GRAY_400 bg-white shadow-tableFilterMenu'>
                 <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-                <div
-                  className='flex flex-col w-full mt-2 max-h-[200px] overflow-y-auto'
-                  style={{ scrollbarWidth: 'none' }}
-                >
+                <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                   {userAccessToPageList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
@@ -303,6 +306,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                       pageId={pageId}
                       resource_audience_type={audience?.resource_audience_type}
                       userPrivilege={userPrivilege}
+                      orgName={orgLabel}
+                      customerName={orgName}
                     />
                   ))}
                 </div>

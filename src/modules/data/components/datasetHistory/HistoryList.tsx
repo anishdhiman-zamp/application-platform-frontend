@@ -1,12 +1,10 @@
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
-import { useGetFileImportHistoryQuery } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { HistoryListPropsType } from 'modules/data/components/importDataset/importData.types';
 import { formattedDate, maskString } from 'modules/data/components/importDataset/importData.utils';
 import SkeletonLoaderFileHistory from 'modules/data/components/SkeletonLoaderFileHistory';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { cn, getUserNameFromEmail } from 'utils/common';
 import StatusIndicator from 'components/common/StatusIndicator';
@@ -14,12 +12,8 @@ import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders }) => {
-  const router = useRouter();
-  const datasetId = router?.query?.id as string;
-  const { data } = useGetFileImportHistoryQuery({ datasetId });
+const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHistoryData }) => {
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
-  const fileImportHistoryData = data?.file_uploads;
   const baseTranslateY = Math.min(datasetBulkLoaders?.length, 3) * 10;
   const dynamicTranslateY =
     datasetBulkLoaders?.length === 0 ? 0 : isHoveredLoaders ? (datasetBulkLoaders?.length >= 3 ? -30 : -9) : 50;

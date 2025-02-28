@@ -4,6 +4,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
 import { AsyncDropdownPropsType } from 'components/asyncDropdown/asyncDropdown.types';
+import { KEY_CODES } from 'components/multiSelectInput/multiSelectInput.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
@@ -44,6 +45,20 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
       setDropdownTop(rect.bottom - 40);
     }
   }, [isOpen, options.length]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const keyEvent = e.key;
+
+      if (keyEvent === KEY_CODES.ESCAPE && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <div

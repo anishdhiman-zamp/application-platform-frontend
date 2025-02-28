@@ -14,6 +14,8 @@ export type PageAccessToAudiencesPropsType = {
     name?: string;
   };
   userPrivilege: string;
+  orgName?: string;
+  customerName?: string;
 };
 
 export enum PAGE_ACCESS_PRIVILEGES {

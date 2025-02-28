@@ -3,6 +3,8 @@ import { LOADER_STATUS } from 'modules/data/data.types';
 import { Session, Workspace } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 
+export type DatasetBulkLoadersType = { id: string; status: LOADER_STATUS; title: string; description: string };
+
 export type UserState = {
   user: Session | null;
   userAccessFlags: any;
@@ -13,7 +15,7 @@ export type UserState = {
   merchantDetails?: MapAny;
   roles?: { id: string; name: string }[];
   dashboardLoader: boolean;
-  datasetBulkLoaders?: { id: string; status: LOADER_STATUS; title: string; description: string }[];
+  datasetBulkLoaders?: DatasetBulkLoadersType[];
 };
 
 const initialState: UserState = {

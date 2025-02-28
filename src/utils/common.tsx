@@ -184,6 +184,8 @@ export const getDomainFromEmail = (email: string) => {
  * @returns string admin
  */
 export const getUserNameFromEmail = (email: string) => {
+  if (!email) return '';
+
   return email.split('@')[0];
 };
 

@@ -36,6 +36,8 @@ export type DatasetAccessToAudiencesPropsType = {
     name?: string;
   };
   userPrivilege: string;
+  orgName?: string;
+  customerName?: string;
 };
 
 export type DatasetColumnRequest = {

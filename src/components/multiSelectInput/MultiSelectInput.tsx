@@ -42,14 +42,28 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     setOpenDropdownOptions(true);
   };
 
+  const handleSetInputBlur = () => {
+    setIsInputFocused(false);
+    inputRef.current?.blur();
+    setOpenDropdownOptions(false);
+  };
+
   useEffect(() => {
     if (isOpen) {
-      setIsInputFocused(true);
+      handleSetInputFocus();
     }
   }, [isOpen, inputRef]);
 
   const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const keyEvent = e.key;
+
+    if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
+      if (inputArrayList.length > 0) {
+        handleRemoveItem(inputArrayList.length - 1);
+      }
+
+      return;
+    }
 
     if (selectOnlyFromList) {
       if (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) {
@@ -61,7 +75,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           onValidateAndAdd(selectedOption.value);
           setSearch('');
         }
-      } else if (keyEvent === 'ArrowDown' || keyEvent === 'ArrowUp') {
+      } else if (keyEvent === KEY_CODES.ARROW_DOWN || keyEvent === KEY_CODES.ARROW_UP) {
         handleKeyDown(e);
       }
     } else {
@@ -91,7 +105,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       setHoveredOptionIndex((prevIndex) =>
         prevIndex === null || prevIndex === 0 ? filteredDropdownOptions.length - 1 : prevIndex - 1,
       );
-    } else if (e.key === 'Enter' && hoveredOptionIndex !== null) {
+    } else if (e.key === KEY_CODES.ENTER && hoveredOptionIndex !== null) {
       e.preventDefault();
       handleSelectDropdownOption(filteredDropdownOptions[hoveredOptionIndex]);
     }
@@ -177,6 +191,20 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     [onSelectOption, setSearch, inputRef, showValidationError],
   );
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const keyEvent = e.key;
+
+      if (keyEvent === KEY_CODES.ESCAPE && isOpen) {
+        handleSetInputBlur();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
     <div className='flex flex-col items-center'>
       <div
@@ -260,8 +288,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           >
             <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
             <div
-              className='flex flex-col w-full max-h-[200px] overflow-y-auto'
-              style={{ scrollbarWidth: 'none' }}
+              className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
               tabIndex={0}
             >
               {filteredDropdownOptions?.map((option, index) => (

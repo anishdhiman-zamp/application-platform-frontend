@@ -28,10 +28,12 @@ export type MultiSelectInputPropsType = {
   transformLabel?: (label: string) => string;
 };
 
-export enum KEY_CODES {
-  ENTER = 'Enter',
-  COMMA = ',',
-  SPACE = ' ',
-  ARROW_DOWN = 'ArrowDown',
-  ARROW_UP = 'ArrowUp',
-}
+export const KEY_CODES = {
+  BACKSPACE: 'Backspace',
+  ENTER: 'Enter',
+  ESCAPE: 'Escape',
+  SPACE: ' ',
+  COMMA: ',',
+  ARROW_UP: 'ArrowUp',
+  ARROW_DOWN: 'ArrowDown',
+};
