@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -90,6 +90,7 @@ type StackedPivotProps = {
   currentWidgetSelectedFilter: MapAny;
   periodicity: PERIODICITY_TYPES;
   activeWidget: string;
+  handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
 };
 
 const StackedPivot = ({
@@ -100,11 +101,13 @@ const StackedPivot = ({
   currentWidgetSelectedFilter,
   periodicity,
   activeWidget,
+  handleWidgetHeightChange,
 }: StackedPivotProps) => {
   const router = useRouter();
   const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
+  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
@@ -342,8 +345,24 @@ const StackedPivot = ({
     }, 0);
   }, []);
 
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      if (gridContainerRef?.current) {
+        handleWidgetHeightChange(gridContainerRef.current.clientHeight, isSingleHeader);
+      }
+    });
+
+    if (gridContainerRef?.current) {
+      observer.observe(gridContainerRef?.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className='h-fit w-full relative pivot group'>
+    <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}

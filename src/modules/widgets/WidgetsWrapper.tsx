@@ -21,6 +21,7 @@ interface WidgetsWrapperProps {
   onWidgetChange: (widgetId: string) => void;
   currency: string[];
   activeWidget: string;
+  handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
 }
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
@@ -29,6 +30,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   onWidgetChange,
   currency,
   activeWidget,
+  handleWidgetHeightChange,
 }) => {
   const router = useRouter();
   const { widget_type } = widgetDetails;
@@ -181,6 +183,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
+          handleWidgetHeightChange={handleWidgetHeightChange}
         />
       );
     }

@@ -171,7 +171,7 @@
 
 .pivot .ag-body-viewport {
   overflow: auto !important;
-  max-height: 500px !important;
+  max-height: var(--pivot-max-height) !important;
 }
 
 .pivot .ag-center-cols-viewport {

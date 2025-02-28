@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { ZAMP_LOADER } from 'constants/icons';
@@ -8,6 +8,7 @@ import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import Image from 'next/image';
+import { WIDGET_TYPES } from 'types/api/widgets.types';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
@@ -28,6 +29,20 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
   const [currency, setCurrency] = useState<string[]>(['USD']);
+  const [widgetDetails, setWidgetDetails] = useState<{
+    height: number;
+    isSingleHeader: boolean;
+  }>({
+    height: 0,
+    isSingleHeader: true,
+  });
+
+  const handleWidgetHeightChange = (height: number, isSingleHeader: boolean) => {
+    setWidgetDetails({
+      height,
+      isSingleHeader,
+    });
+  };
 
   const {
     data: sheetDetails,
@@ -39,14 +54,49 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
     { skip: !pageId || !sheetId, refetchOnMountOrArgChange: false },
   );
 
+  //converts the pixel height from pivot-table into grid-layout height
+  const getHfromWidgetHeight = (widgetHeight: number): number => {
+    return (widgetHeight + 20) / 76;
+  };
+
   const sheetLayout = useMemo(() => {
     return sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => {
+      const widgetType = sheetDetails?.widget_instances?.find(
+        (widget) => widget?.widget_instance_id === widgetConfig?.default_widget,
+      )?.widget_type;
+
       return {
         i: widgetConfig?.default_widget,
         ...widgetConfig?.layout,
+        h:
+          widgetType === WIDGET_TYPES.PIVOT_TABLE && widgetDetails?.height > 0
+            ? Math.min(getHfromWidgetHeight(widgetDetails?.height), widgetConfig?.layout?.h)
+            : widgetConfig?.layout?.h,
       };
     });
-  }, [sheetDetails?.sheet_config?.sheet_layout]);
+  }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId]);
+
+  //Add the max-height on pivot table based on sheet layout height for pivot and current actual height of the grid
+  useEffect(() => {
+    if (typeof document !== 'undefined' && sheetLayout) {
+      if (sheetLayout && sheetDetails?.sheet_config?.sheet_layout[0]?.layout?.h == sheetLayout[0].h) {
+        const substractedHeight = widgetDetails?.isSingleHeader ? 93 : 135;
+
+        document.documentElement.style.setProperty(
+          '--pivot-max-height',
+          `${sheetLayout[0]?.h * 56 + (sheetLayout[0]?.h - 1) * 20 - substractedHeight}px`,
+        );
+      }
+    }
+  }, [sheetDetails, sheetLayout]);
+
+  //To reset the widget details on switch of page or sheet
+  useEffect(() => {
+    setWidgetDetails({
+      height: 0,
+      isSingleHeader: true,
+    });
+  }, [pageId, sheetId]);
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
@@ -114,6 +164,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                       widgetConfig={widgetConfig}
                       currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
+                      handleWidgetHeightChange={handleWidgetHeightChange}
                     />
                   </div>
                 </div>

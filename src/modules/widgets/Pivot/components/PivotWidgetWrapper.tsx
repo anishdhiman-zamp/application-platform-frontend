@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import NoPivotData from 'modules/widgets/Pivot/loader/NoPivotData';
@@ -21,6 +21,7 @@ export type PivotTableWidgetPropsType = {
   currency: string;
   currentWidgetSelectedFilter: MapAny;
   activeWidget: string;
+  handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -35,6 +36,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   currency,
   currentWidgetSelectedFilter,
   activeWidget,
+  handleWidgetHeightChange,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -51,6 +53,12 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       skip: !isFilterInitialized,
     },
   );
+
+  useEffect(() => {
+    if (isFetching) {
+      handleWidgetHeightChange(0, true);
+    }
+  }, [isFetching]);
 
   return (
     <CommonWrapper
@@ -79,6 +87,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           activeWidget={activeWidget}
           periodicity={periodicity}
           currentWidgetSelectedFilter={currentWidgetSelectedFilter}
+          handleWidgetHeightChange={handleWidgetHeightChange}
         />
       )}
     </CommonWrapper>
