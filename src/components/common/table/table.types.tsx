@@ -5,6 +5,7 @@ export enum CUSTOM_COLUMNS_TYPE {
 export enum DISPLAY_OPTIONS {
   COLUMNS = 'columns',
   GROUP_BY = 'group_by',
+  CURRENCY = 'currency',
 }
 
 export enum VALUE_FORMAT_TYPE {

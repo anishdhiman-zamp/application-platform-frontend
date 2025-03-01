@@ -31,6 +31,7 @@ const DataTable: FC<DataTableProps> = ({
       onRowClicked={onRowClicked}
       serverSideDatasource={serverSideDatasource}
       suppressCellFocus
+      gridStyle={{ height: 'calc(100vh - 50px)', width: '100%' }}
     />
   );
 };

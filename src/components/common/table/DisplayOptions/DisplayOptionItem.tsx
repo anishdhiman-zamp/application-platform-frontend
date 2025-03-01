@@ -1,16 +1,17 @@
 import React, { FC } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export type DisplayOptionItemProps = {
-  id: string;
+  id: DISPLAY_OPTIONS;
   label: string;
   iconId: string;
-  iconCategory: ICON_SPRITE_TYPES;
-  onClick?: (id: string) => void;
+  onClick?: (id: DISPLAY_OPTIONS) => void;
+  value?: string;
 };
 
-const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, iconCategory, onClick }) => {
+const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, onClick, value }) => {
   return (
     <div
       key={id}
@@ -18,16 +19,19 @@ const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, icon
       onClick={() => onClick?.(id)}
     >
       <div className='flex items-center gap-1.5'>
-        <SvgSpriteLoader id={iconId} iconCategory={iconCategory} width={12} height={12} />
+        <SvgSpriteLoader id={iconId} width={12} height={12} />
         <div className='f-12-500'>{label}</div>
       </div>
-      <SvgSpriteLoader
-        id='arrow-narrow-right'
-        iconCategory={ICON_SPRITE_TYPES.ARROWS}
-        width={12}
-        height={12}
-        className='group-hover:opacity-100 opacity-0'
-      />
+      <div className='flex items-center gap-1.5'>
+        {value && <span className='text-GRAY_700 f-12-400'>{value}</span>}
+        <SvgSpriteLoader
+          id='arrow-narrow-right'
+          iconCategory={ICON_SPRITE_TYPES.ARROWS}
+          width={12}
+          height={12}
+          className='group-hover:opacity-100 opacity-0'
+        />
+      </div>
     </div>
   );
 };

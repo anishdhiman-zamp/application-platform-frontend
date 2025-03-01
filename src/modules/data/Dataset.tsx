@@ -25,7 +25,13 @@ import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import { formatColumns, getColumnOrderingVisibilityForCurrentDataset, getFilters } from 'modules/data/data.utils';
+import {
+  formatColumnLevelStats,
+  formatColumns,
+  getColumnOrderingVisibilityForCurrentDataset,
+  getEncodedRequestWithAggregations,
+  getFilters,
+} from 'modules/data/data.utils';
 import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
@@ -45,6 +51,7 @@ import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
@@ -52,6 +59,7 @@ import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -96,6 +104,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
+  const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -115,7 +124,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
 
   const {
     dispatch,
-    state: { selectedFilters, filtersConfig, statusBar },
+    state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
@@ -313,6 +322,24 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
           });
+        const amountRangeColumns = columns
+          ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
+          ?.map((column) => column?.field)
+          ?.filter((column) => column !== undefined);
+
+        if (amountRangeColumns?.length > 0) {
+          getDatasetData({
+            datasetId: id as string,
+            query_config: getEncodedRequestWithAggregations(amountRangeColumns),
+          })
+            .unwrap()
+            .then((response) => {
+              setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
+            })
+            .catch(() => {
+              setColumnLevelStats(undefined);
+            });
+        }
       }
     }
   }, [filterConfig, filters, id]);
@@ -468,13 +495,13 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
             tableRef={tableRef}
             columns={columns}
             serverSideDatasource={serverSideDatasource}
-            columnConfig={{ enableRowGroup: true, enableValue: true }}
+            columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
             totalRows={totalRows}
             onCellEditRequest={onCellEditRequest}
             onFillEnd={onFillEnd}
             onRowPropertiesClick={handleRowPropertiesClick}
-            statusBarValues={statusBar}
             onColumnMoved={handleColumnMoved}
+            columnLevelStats={columnLevelStats}
             {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
           />
         </div>

@@ -1,7 +1,6 @@
-import { FC, useMemo, useRef, useState } from 'react';
-import { ColDef } from 'ag-grid-community';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { useGetDatasetDataQuery } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
@@ -13,15 +12,12 @@ import { OrderType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
-import {
-  CustomHeaderMenuOptions,
-  getEncodedRequestWithAggregations,
-} from 'components/common/table/CustomHeader/customHeader.constants';
+import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
-import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
+import { useFiltersContextStore } from 'components/filter/filters.context';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type CustomHeaderProps = {
@@ -57,20 +53,13 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   const {
     state: { selectedFilters },
-    dispatch,
   } = useFiltersContextStore();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddTagOpen, setIsAddTagOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const { data } = useGetDatasetDataQuery(
-    {
-      datasetId,
-      query_config: getEncodedRequestWithAggregations(colId),
-    },
-    { skip: !(datasetId && colId && filterType === FILTER_TYPES.AMOUNT_RANGE) },
-  );
+  const lastResizedTimeRef = useRef<number | null>(null); // Track last resize time
 
   const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
@@ -139,50 +128,86 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   };
 
   // Function to open menu and set position
-  const toggleMenu = () => {
-    tableRef.current?.api?.clearCellSelection();
-    tableRef.current?.api?.clearFocusedCell();
-    if (filterType === FILTER_TYPES.AMOUNT_RANGE && !isMenuOpen) {
-      dispatch({
-        type: filtersContextActions.SET_STATUS_BAR,
-        payload: { statusBar: data?.data?.rows?.[0] },
-      });
-    } else {
-      dispatch({
-        type: filtersContextActions.SET_STATUS_BAR,
-        payload: { statusBar: null },
-      });
-    }
-    updateMenuPosition();
-    setIsMenuOpen((prev) => !prev);
-  };
+  const toggleMenu = useCallback(
+    (event: ColumnHeaderClickedEvent) => {
+      if (event.column?.getId() !== colId) return;
+      const currentTime = Date.now();
+      const lastResizedTime = lastResizedTimeRef.current;
+
+      if (lastResizedTime !== null) {
+        const timeDifference = currentTime - lastResizedTime;
+
+        if (timeDifference <= 100) {
+          return; // Suppress further handling
+        }
+      }
+
+      tableRef.current?.api?.clearCellSelection();
+      tableRef.current?.api?.clearFocusedCell();
+
+      updateMenuPosition();
+      setIsMenuOpen((prev) => !prev);
+    },
+    [colId, filterType],
+  );
 
   const handleFilterClose = () => {
     setIsFilterOpen(false);
   };
 
+  const handleColumnResizing = useCallback(
+    (event: ColumnResizedEvent) => {
+      if (event.column?.getId() !== colId) return;
+      lastResizedTimeRef.current = Date.now(); // Update the timestamp
+    },
+    [colId],
+  );
+
+  // Track column resize
+  useEffect(() => {
+    tableRef.current?.api?.addEventListener('columnResized', handleColumnResizing);
+
+    return () => {
+      tableRef.current?.api?.removeEventListener('columnResized', handleColumnResizing);
+    };
+  }, [colId, tableRef, handleColumnResizing]);
+
+  // Track column header clicked
+  useEffect(() => {
+    tableRef.current?.api?.addEventListener('columnHeaderClicked', toggleMenu);
+
+    return () => {
+      tableRef.current?.api?.removeEventListener('columnHeaderClicked', toggleMenu);
+    };
+  }, [colId, tableRef, toggleMenu]);
+
   return (
     <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
       <div
         className={cn(
-          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1 gap-x-2.5',
+          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
         )}
-        onClick={toggleMenu}
       >
-        <div className='flex items-center gap-1'>
-          <div>{colDef?.headerName ?? colId}</div>
+        <div className='flex items-center gap-1 truncate self-stretch flex-auto'>
+          <span className='truncate'>{colDef?.headerName ?? colId}</span>
           {!!sortState && (
-            <SvgSpriteLoader
-              id={sortState === OrderType.ASC ? 'arrow-narrow-up' : 'arrow-narrow-down'}
-              width={12}
-              height={12}
-              color={COLORS.BLUE_700}
-            />
+            <span>
+              <SvgSpriteLoader
+                id={sortState === OrderType.ASC ? 'arrow-narrow-up' : 'arrow-narrow-down'}
+                width={12}
+                height={12}
+                color={COLORS.BLUE_700}
+              />
+            </span>
           )}
-          {isFilterActive && <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />}
+          {isFilterActive && (
+            <span>
+              <SvgSpriteLoader id='filter-lines' width={12} height={12} color={COLORS.BLUE_700} />
+            </span>
+          )}
         </div>
-        <SvgSpriteLoader id='chevron-down' width={12} height={12} className='hidden group-hover:block' />
+        <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />
       </div>
       {isMenuOpen && (
         <PositionedMenuWrapper

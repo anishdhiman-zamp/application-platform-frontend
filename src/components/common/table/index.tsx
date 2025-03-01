@@ -12,6 +12,7 @@ import {
   CustomEditorModule,
   CustomFilterModule,
   DateFilterModule,
+  EventApiModule,
   FillEndEvent,
   GetContextMenuItemsParams,
   IServerSideDatasource,
@@ -94,6 +95,7 @@ ModuleRegistry.registerModules([
   NumberEditorModule,
   RowApiModule,
   ColumnAutoSizeModule,
+  EventApiModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -122,8 +124,8 @@ interface TableProps {
     | SizeColumnsToFitGridStrategy
     | SizeColumnsToFitProvidedWidthStrategy
     | SizeColumnsToContentStrategy;
-  statusBarValues?: MapAny;
   onColumnMoved?: (event: ColumnMovedEvent) => void;
+  columnLevelStats?: MapAny;
 }
 
 export type TableColumnType = {
@@ -158,8 +160,8 @@ const Table: React.FC<TableProps> = ({
   onDrilldownClick,
   onRowPropertiesClick,
   autoSizeStrategy,
-  statusBarValues,
   onColumnMoved,
+  columnLevelStats,
 }) => {
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
@@ -173,6 +175,7 @@ const Table: React.FC<TableProps> = ({
       headerClass: 'f-12-600 text-GRAY_1000',
       cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
+      suppressSizeToFit: true,
       cellStyle: (params: MapAny) => {
         if (!params.node?.__hasChildren && params.node?.parent?.key) {
           return { backgroundColor: COLORS.BACKGROUND_GRAY_2 };
@@ -203,14 +206,14 @@ const Table: React.FC<TableProps> = ({
           statusPanels: [
             {
               statusPanel: (props: CustomStatusPanelProps) => (
-                <CustomStatusBar {...props} totalRows={totalRows} statusBarValues={statusBarValues} />
+                <CustomStatusBar {...props} totalRows={totalRows} columnLevelStats={columnLevelStats} />
               ),
             },
             { statusPanel: 'agAggregationComponent' },
           ],
         }
       : undefined;
-  }, [totalRows, showStatusBar, statusBarValues]);
+  }, [totalRows, showStatusBar, columnLevelStats]);
 
   const cellSelection = useMemo(() => (enableCellSelection ? cellSelectionConfig : undefined), [enableCellSelection]);
 

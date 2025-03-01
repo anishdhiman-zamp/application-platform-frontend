@@ -25,8 +25,8 @@ interface DatasetTableProps {
   onFillEnd?: (event: FillEndEvent) => void;
   onDrilldownClick?: (data: MapAny) => void;
   onRowPropertiesClick?: (data: MapAny) => void;
-  statusBarValues?: MapAny;
   onColumnMoved?: (event: ColumnMovedEvent) => void;
+  columnLevelStats?: MapAny;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -42,8 +42,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
   onFillEnd,
   onDrilldownClick,
   onRowPropertiesClick,
-  statusBarValues,
   onColumnMoved,
+  columnLevelStats,
 }) => {
   return (
     <div id='dataset-table'>
@@ -62,11 +62,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
         onFillEnd={onFillEnd}
         onDrilldownClick={onDrilldownClick}
         onRowPropertiesClick={onRowPropertiesClick}
-        autoSizeStrategy={{
-          type: 'fitCellContents',
-        }}
-        statusBarValues={statusBarValues}
         onColumnMoved={onColumnMoved}
+        columnLevelStats={columnLevelStats}
       />
     </div>
   );

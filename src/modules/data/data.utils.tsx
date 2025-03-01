@@ -1,4 +1,4 @@
-import { ColDef, ValueFormatterParams } from 'ag-grid-community';
+import { ColDef, IServerSideGetRowsRequest, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
@@ -18,13 +18,13 @@ import {
   ValueFormatType,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
+import { AggregationFunctionType, FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { createDateObjectFromUTCString, formatPlural, getChipColor, getCommaSeparatedNumber } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
-import CustomHeader from 'components/common/table/CustomHeader';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
+import { getEncodedRequest } from 'components/common/table/table.utils';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -74,43 +74,44 @@ export const formatColumns = (
   const columns: ColDef[] = [];
 
   filterConfig?.forEach((column: DatasetFilterConfigResponseType) => {
+    const columnNameLength = column?.alias?.length ?? column?.column?.length;
     let formattedColumn: ColDef = {
-      field: column.column,
+      field: column?.column,
       flex: 1,
-      hide: column.metadata?.is_hidden,
-      cellRendererParams: column.metadata,
-      editable: column.metadata?.is_editable && !isInitiatedAction,
-      suppressFillHandle: !column.metadata?.is_editable,
+      hide: column?.metadata?.is_hidden,
+      cellRendererParams: column?.metadata,
+      editable: column?.metadata?.is_editable && !isInitiatedAction,
+      suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       filterParams: {
-        values: column.options,
+        values: column?.options,
       },
-      headerName: column.alias,
+      headerName: column?.alias,
+      minWidth: columnNameLength > 17 ? 150 + 7 * (columnNameLength - 17) : 150,
     };
 
     formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
-    formattedColumn.headerComponent = CustomHeader;
     formattedColumn.headerComponentParams = {
       metadata: column?.metadata,
       datasetId,
-      options: column.options?.filter((option) => option !== null),
+      options: column?.options?.filter((option) => option !== null),
       handleSuccessfulUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,
       zampIds,
-      filterType: column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column.type,
+      filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
     };
 
-    if (column.metadata?.config?.value_format) {
+    if (column?.metadata?.config?.value_format) {
       formattedColumn = { ...formattedColumn, valueFormatter: getValueFormatter(column) };
     }
 
-    if (column.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
+    if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
       const tagColorMap: MapAny = {};
 
-      column.options.forEach((option) => {
+      column?.options?.forEach((option) => {
         if (option) tagColorMap[option] = getChipColor();
       });
       formattedColumn.cellRendererParams = { ...formattedColumn.cellRendererParams, tagColorMap };
@@ -124,7 +125,7 @@ export const formatColumns = (
       };
     }
 
-    if (!column.metadata?.is_hidden) {
+    if (!column?.metadata?.is_hidden) {
       columns.push(formattedColumn);
     }
   });
@@ -313,4 +314,56 @@ export const convertFilterModelToRuleFilters = (filterModel: FilterModelType | n
   });
 
   return ruleFilters;
+};
+
+const getAggregations = (colIds: string[]): MapAny => {
+  const valueCols: MapAny[] = [];
+
+  colIds.forEach((colId) => {
+    const valueCol = [
+      {
+        id: colId,
+        aggFunc: AggregationFunctionType.AggregationFunctionSum.toLowerCase(),
+        displayName: `${colId} ${AggregationFunctionType.AggregationFunctionSum}`,
+      },
+      {
+        id: colId,
+        aggFunc: AggregationFunctionType.AggregationFunctionAvg.toLowerCase(),
+        displayName: `${colId} ${AggregationFunctionType.AggregationFunctionAvg}`,
+      },
+      {
+        id: colId,
+        aggFunc: AggregationFunctionType.AggregationFunctionMin.toLowerCase(),
+        displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMin}`,
+      },
+      {
+        id: colId,
+        aggFunc: AggregationFunctionType.AggregationFunctionMax.toLowerCase(),
+        displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMax}`,
+      },
+    ];
+
+    valueCols.push(...valueCol);
+  });
+
+  return { valueCols };
+};
+
+export const getEncodedRequestWithAggregations = (colIds: string[]) =>
+  getEncodedRequest(getAggregations(colIds) as IServerSideGetRowsRequest, '', [], true, true);
+
+export const formatColumnLevelStats = (columnLevelStatsData?: MapAny): MapAny => {
+  if (!columnLevelStatsData) return {};
+  const columnLevelStats: MapAny = {};
+
+  Object.entries(columnLevelStatsData).forEach(([key, value]) => {
+    const [column, aggFunction] = key.split(' ');
+
+    columnLevelStats[column] = {
+      ...columnLevelStats[column],
+      [aggFunction]: value,
+    };
+  });
+
+  return columnLevelStats;
 };

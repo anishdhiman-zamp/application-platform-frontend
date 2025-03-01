@@ -10,7 +10,6 @@ import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { Tooltip } from 'components/common/tooltip';
-import CopiedTooltip from 'components/copied-tooltip/CopiedTooltip';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 type PropertyRowProps = {
@@ -85,15 +84,13 @@ const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, tea
 
     return (
       <Tooltip
-        tooltipBody='Click to copy'
+        tooltipBody={showCopyTooltip ? 'Copied' : 'Click to copy'}
         tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
         className='z-1'
-        disabled={showCopyTooltip}
       >
         <div className='hover:bg-GRAY_100 p-1 rounded-md' onClick={handleCopy}>
           {value}
         </div>
-        {showCopyTooltip && <CopiedTooltip show={showCopyTooltip} className='!top-6' />}
       </Tooltip>
     );
   };

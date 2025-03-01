@@ -21,19 +21,31 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
   const [isGroupByOpen, setIsGroupByOpen] = useState(false);
+  // TODO: Implement fx later
+  // const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  // const [currency, setCurrency] = useState<string>('');
 
   useOnClickOutside(menuRef, () => {
     setIsOpen(false);
     setIsColumnListingOpen(false);
     setIsGroupByOpen(false);
+    // TODO: Implement fx later
+    // setIsCurrencyOpen(false);
   });
 
-  const handleClick = (id: string) => {
+  const handleClick = (id: DISPLAY_OPTIONS) => {
     setIsOpen(false);
-    if (id === DISPLAY_OPTIONS.COLUMNS) {
-      setIsColumnListingOpen(true);
-    } else if (id === DISPLAY_OPTIONS.GROUP_BY) {
-      setIsGroupByOpen(true);
+    switch (id) {
+      case DISPLAY_OPTIONS.COLUMNS:
+        setIsColumnListingOpen(true);
+        break;
+      case DISPLAY_OPTIONS.GROUP_BY:
+        setIsGroupByOpen(true);
+        break;
+      case DISPLAY_OPTIONS.CURRENCY:
+        // TODO: Implement fx later
+        // setIsCurrencyOpen(true);
+        break;
     }
   };
 
