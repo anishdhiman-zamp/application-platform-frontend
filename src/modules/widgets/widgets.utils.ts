@@ -137,8 +137,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
       const mappings = widgetDetails?.data_mappings?.mappings[0];
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
-      const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.column]);
-
+      const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.alias ?? axis?.column]);
       const yAxisTitle = `${axis?.column} (${axis?.aggregation}), ${currency} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
