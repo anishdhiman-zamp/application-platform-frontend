@@ -1,3 +1,4 @@
+import { GridOptions } from 'ag-grid-community';
 import {
   ADCB_SVG,
   ADYEN,
@@ -115,7 +116,7 @@ export const PIVOT_TABLE_THEME_PARAMS = {
   rowHeight: ROW_HEIGHT,
 };
 
-export const PIVOT_GRID_OPTIONS = {
+export const PIVOT_GRID_OPTIONS: GridOptions = {
   pivotMode: true,
   suppressContextMenu: true,
   suppressMenuHide: false,
@@ -123,11 +124,19 @@ export const PIVOT_GRID_OPTIONS = {
   suppressMovableColumns: true,
   suppressCellFocus: true,
   maintainColumnOrder: true,
-  scrollbarWidth: 0,
   suppressDragLeaveHidesColumns: true,
   groupMaintainOrder: true,
+  scrollbarWidth: 0,
   animateRows: false,
   suppressGroupRowsSticky: true,
+  enableStrictPivotColumnOrder: true,
+  suppressStickyTotalRow: true,
+  suppressHeaderFocus: true,
+  suppressAggFuncInHeader: true,
+  suppressRowTransform: true,
+  autoSizeStrategy: {
+    type: 'fitGridWidth',
+  },
 };
 
 export const BANK_NAME_ICON_MAPPING: Record<string, { name: string; icon: string }> = {

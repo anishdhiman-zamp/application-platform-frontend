@@ -20,6 +20,7 @@ import {
   PivotModule,
   RowApiModule,
   RowGroupingPanelModule,
+  RowGroupOpenedEvent,
   RowStyleModule,
   ScrollApiModule,
   ValidationModule,
@@ -175,7 +176,7 @@ const StackedPivot = ({
   const autoGroupColumnDef = useMemo<ColDef>(
     () => ({
       minWidth: PINNED_COL_WIDTH,
-      resizable: false,
+      resizable: true,
       pinned: 'left',
       lockPinned: true,
       lockPosition: 'left',
@@ -332,7 +333,7 @@ const StackedPivot = ({
       if (allColumns?.length > 0) {
         const lastColumn = allColumns[allColumns?.length - 1];
 
-        gridApi.current?.ensureColumnVisible(lastColumn, 'end');
+        gridApi.current?.ensureColumnVisible(lastColumn, 'auto');
       }
     }
   };
@@ -361,6 +362,16 @@ const StackedPivot = ({
     };
   }, []);
 
+  const onRowGroupOpened = useCallback((event: RowGroupOpenedEvent<MapAny, PivotContext>) => {
+    if (event?.expanded && gridApi.current) {
+      const rowNodeIndex = event?.node?.rowIndex ?? 0;
+      const childCount = event?.node?.childrenAfterSort ? event?.node?.childrenAfterSort?.length : 0;
+      const newIndex = rowNodeIndex + childCount;
+
+      gridApi.current?.ensureIndexVisible(newIndex);
+    }
+  }, []);
+
   return (
     <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
@@ -378,8 +389,7 @@ const StackedPivot = ({
         grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
         processPivotResultColGroupDef={processPivotResultColGroupDef}
         onCellDoubleClicked={handleDrilldown}
-        enableStrictPivotColumnOrder
-        suppressStickyTotalRow
+        onRowGroupOpened={onRowGroupOpened}
         {...PIVOT_GRID_OPTIONS}
       />
     </div>

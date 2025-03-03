@@ -161,8 +161,9 @@
   height: 100% !important;
 }
 
-.pivot .ag-header-cell-resize {
-  display: none !important;
+.pivot .ag-header-cell-resize::after {
+  width: 0px !important;
+  background-color: white !important;
 }
 
 .pivot .ag-horizontal-left-spacer {
