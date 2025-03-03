@@ -18,9 +18,9 @@ import {
   GroupCellRendererParams,
   ModuleRegistry,
   PivotModule,
+  RenderApiModule,
   RowApiModule,
   RowGroupingPanelModule,
-  RowGroupOpenedEvent,
   RowStyleModule,
   ScrollApiModule,
   ValidationModule,
@@ -54,6 +54,7 @@ import {
   getRowLevelFilters,
   getTopNode,
   getWidgetMappingDatasets,
+  shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/navigation';
@@ -69,6 +70,7 @@ ModuleRegistry.registerModules([
   ColumnMenuModule,
   ContextMenuModule,
   ScrollApiModule,
+  RenderApiModule,
   PivotModule,
   ColumnApiModule,
   ClientSideRowModelApiModule,
@@ -116,7 +118,11 @@ const StackedPivot = ({
 
   const handleExpandAll = useCallback(() => {
     if (gridApi.current) {
-      gridApi.current?.expandAll();
+      gridApi.current?.forEachNode((node) => {
+        if (node?.group && shouldAllowExpandingRow(node)) {
+          node?.setExpanded(true);
+        }
+      });
     }
   }, []);
 
@@ -362,16 +368,6 @@ const StackedPivot = ({
     };
   }, []);
 
-  const onRowGroupOpened = useCallback((event: RowGroupOpenedEvent<MapAny, PivotContext>) => {
-    if (event?.expanded && gridApi.current) {
-      const rowNodeIndex = event?.node?.rowIndex ?? 0;
-      const childCount = event?.node?.childrenAfterSort ? event?.node?.childrenAfterSort?.length : 0;
-      const newIndex = rowNodeIndex + childCount;
-
-      gridApi.current?.ensureIndexVisible(newIndex);
-    }
-  }, []);
-
   return (
     <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
@@ -389,7 +385,6 @@ const StackedPivot = ({
         grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
         processPivotResultColGroupDef={processPivotResultColGroupDef}
         onCellDoubleClicked={handleDrilldown}
-        onRowGroupOpened={onRowGroupOpened}
         {...PIVOT_GRID_OPTIONS}
       />
     </div>
