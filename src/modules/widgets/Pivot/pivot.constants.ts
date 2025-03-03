@@ -66,7 +66,7 @@ export enum PIVOT_REF_TYPES {
   TAGS = 'Tag',
 }
 
-export const COL_MIN_WIDTH = 170;
+export const COL_MIN_WIDTH = 210;
 export const PINNED_COL_WIDTH = 380;
 export const PIVOT_HEADER_HEIGHT = 93;
 export const PIVOT_GROUP_HEADER_HEIGHT = 42;
