@@ -7,7 +7,7 @@ import { WIDGET_LOADER } from 'constants/icons';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
-import { AG_CHART_LEGEND_CONFIG } from 'modules/widgets/widgets.constant';
+import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widgets/widgets.constant';
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
 import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
@@ -47,6 +47,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   activeWidget,
 }) => {
   const widgetType = widgetDetails?.widget_type;
+
   const {
     data: widgetData,
     isLoading,
@@ -65,10 +66,10 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
     { refetchOnMountOrArgChange: false, skip: !isFilterInitialized },
   );
 
-  const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength } = useMemo(() => {
+  const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength, showCurrency } = useMemo(() => {
     return widgetData?.result
       ? getTransformedData(widgetData?.result, widgetDetails, widgetData?.currency)
-      : { transformedData: [], stackedValues: [], donutOthersData: [], yAxisTitle: '', maxValueLength: 0 };
+      : DEFAULT_TRANSFORMED_DATA;
   }, [widgetData]);
 
   const chartOptions = useMemo(() => {
@@ -83,7 +84,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       widgetDetails,
       onNodeClick,
       baseOptions,
-      currency,
+      showCurrency ? currency : '',
       stackedValues,
       transformedData?.length,
       donutOthersData,

@@ -14,6 +14,7 @@ import {
   startOfWeek,
   startOfYear,
 } from 'date-fns';
+import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import {
   AG_CHART_TYPES,
@@ -25,6 +26,7 @@ import {
   WidgetDataValueType,
 } from 'modules/widgets/widgets.constant';
 import {
+  AGGREGATION_TYPES,
   BarLineChartWidgetMapping,
   FieldsMappingType,
   KPITagWidgetMapping,
@@ -135,10 +137,12 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
     case WIDGET_TYPES.BAR_CHART:
     case WIDGET_TYPES.LINE_CHART: {
       const axis = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.y_axis?.[0];
+      const axisKey = axis?.alias ?? axis?.column;
       const mappings = widgetDetails?.data_mappings?.mappings[0];
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
-      const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.alias ?? axis?.column]);
-      const yAxisTitle = `${axis?.alias ?? axis?.column} (${axis?.aggregation}), ${currency} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
+      const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axisKey]);
+      const aggregation = axis?.aggregation !== AGGREGATION_TYPES.COUNT;
+      const yAxisTitle = `${axisKey} (${axis?.aggregation}), ${aggregation ? currency : ''} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
@@ -150,6 +154,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
           stackedValues,
           yAxisTitle,
           maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+          showCurrency: aggregation,
         };
       }
 
@@ -158,23 +163,27 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
         stackedValues,
         yAxisTitle,
         maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+        showCurrency: aggregation,
       };
     }
     case WIDGET_TYPES.DONUT_CHART:
     case WIDGET_TYPES.PIE_CHART: {
+      const aggregation =
+        widgetDetails?.data_mappings?.mappings?.[0]?.fields?.values?.[0]?.aggregation !== AGGREGATION_TYPES.COUNT;
+
       if (dataWithDataType?.[0]?.length > 5) {
         const { slicedData, remainingData } = getGroupedDonutChartData(
           dataWithDataType,
           widgetDetails?.data_mappings?.mappings,
         );
 
-        return { transformedData: slicedData ?? [], donutOthersData: remainingData ?? [] };
+        return { transformedData: slicedData ?? [], donutOthersData: remainingData ?? [], showCurrency: aggregation };
       }
 
-      return { transformedData: dataWithDataType?.[0], stackedValues };
+      return { transformedData: dataWithDataType?.[0], stackedValues, showCurrency: aggregation };
     }
     default:
-      return { transformedData: dataWithDataType?.[0], stackedValues };
+      return { transformedData: dataWithDataType?.[0], stackedValues, showCurrency: false };
   }
 };
 
@@ -251,7 +260,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: yName,
-                  value: `${currency} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
+                  value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
                 },
               ],
             }),
@@ -287,7 +296,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: yName,
-                  value: getCommaSeparatedNumber(datum[yKey], 2),
+                  value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
                 },
               ],
             }),
@@ -326,7 +335,7 @@ export const getChartOptions = (
                     data: [
                       {
                         label: datum[sliceColumn ?? ''],
-                        value: getCommaSeparatedNumber(datum[sliceKey ?? ''], 2),
+                        value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[sliceKey ?? ''], 2)}`,
                       },
                     ],
                   };
@@ -337,7 +346,7 @@ export const getChartOptions = (
                   data: donutOthersData?.length
                     ? donutOthersData.map((item) => ({
                         label: item[sliceColumn ?? ''],
-                        value: getCommaSeparatedNumber(item[sliceKey ?? ''], 2),
+                        value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(item[sliceKey ?? ''], 2)}`,
                       }))
                     : [],
                 };
@@ -348,7 +357,7 @@ export const getChartOptions = (
             },
             calloutLabel: {
               formatter: (params: MapAny) => {
-                return formatNumber(params.datum[sliceKey ?? ''], 2);
+                return `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${formatNumber(params.datum[sliceKey ?? ''], 2)}`;
               },
               offset: 8,
               enabled: true,
@@ -364,7 +373,7 @@ export const getChartOptions = (
             },
             innerLabels: [
               {
-                text: formatNumber(totalNumber),
+                text: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${formatNumber(totalNumber)}`,
                 fontWeight: '900',
                 fontFamily: 'Inter',
                 pixelSize: 30,

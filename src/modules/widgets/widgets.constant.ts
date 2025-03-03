@@ -179,3 +179,12 @@ export const getDonutChartSeriesConfig = (dataLength: number) => {
     },
   };
 };
+
+export const DEFAULT_TRANSFORMED_DATA = {
+  transformedData: [],
+  stackedValues: [],
+  donutOthersData: [],
+  yAxisTitle: '',
+  maxValueLength: 0,
+  showCurrency: false,
+};
