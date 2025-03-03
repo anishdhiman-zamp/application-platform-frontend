@@ -1,3 +1,5 @@
+import { RowClickedEvent } from 'ag-grid-community';
+
 export enum DATASET_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
@@ -52,3 +54,7 @@ export enum LOADER_STATUS {
   SUCCESS = 'success',
   ERROR = 'error',
 }
+
+export type ListingPropsType = {
+  onRowClicked: (event: RowClickedEvent) => void;
+};

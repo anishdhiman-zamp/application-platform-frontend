@@ -27,6 +27,10 @@ export const API_ENDPOINTS = {
   DATASET_RULES_LISTING_GET: `datasets/rules/listing`,
   DATASET_FILE_IMPORT_HISTORY_GET: `datasets/{{datasetId}}/file-imports/history`,
 
+  // admin
+  ADMIN_DATASET_DISPLAY_CONFIG_GET: `datasets/{{datasetId}}/display-config`,
+  ADMIN_DATASET_DISPLAY_CONFIG_POST: `datasets/{{datasetId}}/display-config`,
+
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,
   DATASET_FILE_IMPORTS_ACTION_ID: `datasets/file-imports/{{file_upload_id}}`,

@@ -15,4 +15,5 @@ export const LAUNCH_DARKLY_CLIENT_SIDE_ID = getClientSideId(ENVIRONMENT);
 
 export enum FEATURE_FLAGS {
   PEOPLE_MEMBERSHIP_REQUESTS = 'people-membership-requests',
+  ADMIN_PAGE = 'admin-page',
 }

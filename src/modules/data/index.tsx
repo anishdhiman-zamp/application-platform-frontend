@@ -1,26 +1,16 @@
-import React, { useMemo } from 'react';
-import { IServerSideDatasource, IServerSideGetRowsParams, RowClickedEvent } from 'ag-grid-community';
+import React, { FC, useMemo } from 'react';
+import { IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
-import { getDatasetRouteById } from 'constants/routeConfig';
-import { useAppDispatch } from 'hooks/toolkit';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
+import { ListingPropsType } from 'modules/data/data.types';
 import { formatData } from 'modules/data/data.utils';
-import { useRouter } from 'next/router';
-import { addBreadcrumb } from 'store/slices/layout-configs';
 import { OrderType } from 'types/components/table.type';
 import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
-const Listing = () => {
-  const router = useRouter();
-  const appDispatch = useAppDispatch();
+const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
   const [getDatasetListing] = useLazyGetDatasetListingQuery();
   const columns = useMemo(() => LISTING_COLUMNS, []);
-
-  const onRowClicked = (event: RowClickedEvent) => {
-    router.push(getDatasetRouteById(event?.data?.id));
-    appDispatch(addBreadcrumb(event?.data?.title));
-  };
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {

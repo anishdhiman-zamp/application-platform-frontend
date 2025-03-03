@@ -10,6 +10,7 @@ export const ROUTES_PATH = {
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages/',
   NO_ACCESS: '/no-access',
+  ADMIN: '/admin',
 };
 
 export const getPageRouteById = (pageId: string) => {
