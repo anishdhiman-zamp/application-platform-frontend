@@ -101,9 +101,9 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
               break;
             case WidgetDataValueType.DATE:
             case WidgetDataValueType.TIMESTAMP:
-            case WidgetDataValueType.LONG:
               formattedRow[column_name] = new Date(value as string);
               break;
+            case WidgetDataValueType.LONG:
             case WidgetDataValueType.DECIMAL:
             case WidgetDataValueType.NUMBER:
             case WidgetDataValueType.BIGINT:
