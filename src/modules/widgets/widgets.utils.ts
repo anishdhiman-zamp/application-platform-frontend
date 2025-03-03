@@ -138,7 +138,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const mappings = widgetDetails?.data_mappings?.mappings[0];
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
       const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axis?.alias ?? axis?.column]);
-      const yAxisTitle = `${axis?.column} (${axis?.aggregation}), ${currency} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
+      const yAxisTitle = `${axis?.alias ?? axis?.column} (${axis?.aggregation}), ${currency} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
@@ -240,7 +240,7 @@ export const getChartOptions = (
           xKey: xAxis,
           cornerRadius: 2,
           yKey: `${axis.alias ?? axis.column}`,
-          yName: axis?.column || '',
+          yName: (axis?.alias ?? axis?.column) || '',
           stacked: true,
           listeners: {
             nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
@@ -273,7 +273,7 @@ export const getChartOptions = (
           type: chartType,
           xKey: xAxis,
           yKey: `${axis?.alias ?? axis?.column}`,
-          yName: axis?.column || '',
+          yName: (axis?.alias ?? axis?.column) || '',
           stacked: true,
           marker: {
             enabled: false,

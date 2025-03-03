@@ -29,10 +29,13 @@ const Page = () => {
 
   const tabs = useMemo(
     () =>
-      pageDetails?.sheets?.map((sheet) => ({
-        value: sheet.sheet_id,
-        label: sheet.name,
-      })) ?? [],
+      pageDetails?.sheets
+        ?.map((sheet) => ({
+          value: sheet?.sheet_id,
+          label: sheet?.name,
+          fractionalIndex: sheet?.fractional_index,
+        }))
+        .sort((sheet1, sheet2) => sheet1?.fractionalIndex - sheet2?.fractionalIndex) ?? [],
     [pageDetails],
   );
 
