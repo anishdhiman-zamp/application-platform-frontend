@@ -29,19 +29,24 @@ const WidgetTitle = ({
 }: WidgetTitleProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
-  const [isGroupWidget, setIsGroupWidget] = useState(false);
+  const [isGroupWidgetOptionsOpen, setIsGroupWidgetOptionsOpen] = useState(false);
   const isGroupWidgetOptions = groupWidgetsOptions.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
 
   useOnClickOutside(dropdownRef, (event) => {
     if (titleRef?.current && titleRef.current.contains(event?.target as Node)) return;
-    setIsGroupWidget(false);
+    setIsGroupWidgetOptionsOpen(false);
   });
 
   const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (!isGroupWidgetOptions) return;
-    setIsGroupWidget((prev) => !prev);
+    setIsGroupWidgetOptionsOpen((prev) => !prev);
+  };
+
+  const handleWidgetChange = (widgetId: string) => {
+    onWidgetChange(widgetId);
+    setIsGroupWidgetOptionsOpen(false);
   };
 
   return (
@@ -65,7 +70,7 @@ const WidgetTitle = ({
               height={18}
               className={cn(
                 'text-GRAY_900 transition-transform duration-300',
-                isGroupWidget ? 'rotate-180' : 'rotate-0',
+                isGroupWidgetOptionsOpen ? 'rotate-180' : 'rotate-0',
               )}
             />
           )}
@@ -75,12 +80,12 @@ const WidgetTitle = ({
           <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions.length} Variants`}</span>
         )}
       </div>
-      {isGroupWidget &&
+      {isGroupWidgetOptionsOpen &&
         (isPivotTable && isPortalNeeded ? (
           ReactDOM?.createPortal(
             <WidgetOptionDropdown
               options={groupWidgetsOptions}
-              onSelect={onWidgetChange}
+              onSelect={handleWidgetChange}
               activeWidget={activeWidget}
               className='top-14 left-5'
               dropdownRef={dropdownRef}
@@ -90,7 +95,7 @@ const WidgetTitle = ({
         ) : (
           <WidgetOptionDropdown
             options={groupWidgetsOptions}
-            onSelect={onWidgetChange}
+            onSelect={handleWidgetChange}
             activeWidget={activeWidget}
             className='top-12 left-6'
             dropdownRef={dropdownRef}
