@@ -64,7 +64,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
     <CommonWrapper
       isLoading={isFetching || !isFilterInitialized || isFilterLoading}
       skeletonType={SkeletonTypes.CUSTOM}
-      isNoData={data?.result.every((res) => res.rowcount === 0)}
+      isNoData={data?.result?.every((res) => res?.rowcount === 0)}
       refetchFunction={refetch}
       isError={isError}
       className='h-full w-full'

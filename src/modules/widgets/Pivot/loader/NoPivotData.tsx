@@ -14,7 +14,7 @@ interface NoPivotDataProps {
 const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange, title, activeWidget }) => {
   return (
     <div className='overflow-x-auto flex flex-col w-full h-full border border-GRAY_400 rounded-xl overflow-hidden group'>
-      <div className='w-full h-[80px] border-b bg-red-500 border-GRAY_400'>
+      <div className='bg-white w-full flex justify-between items-start h-[110px] p-6 border-b-0.5'>
         <WidgetTitle
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
