@@ -7,6 +7,12 @@ export const inter = Inter({
   display: 'swap', // Controls font-display behavior.
 });
 
+export enum ENVIRONMENT_TYPES {
+  PRODUCTION = 'production',
+  DEVELOPMENT = 'development',
+  STAGING = 'staging',
+}
+
 export enum SIZE {
   XSMALL = 'xsmall',
   SMALL = 'small',

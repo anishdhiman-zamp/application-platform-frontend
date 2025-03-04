@@ -1,6 +1,7 @@
 import { FC, useEffect } from 'react';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
+import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
 import { FEATURE_FLAGS } from 'constants/featureFlags';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useFeatureFlags } from 'hooks/useFeatureFlags';
@@ -69,7 +70,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
 
   const breakpoint = checkScreenBreakpoint(width, height);
 
-  if (breakpoint) return <ScreenSupport />;
+  if (breakpoint && ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION) return <ScreenSupport />;
 
   return props.children;
 };

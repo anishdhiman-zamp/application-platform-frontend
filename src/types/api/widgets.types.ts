@@ -130,12 +130,14 @@ export type BarLineChartWidgetMapping = {
   default_filters?: Partial<DefaultFilterType>;
 };
 
+export type PieDonutChartFieldsMappingType = {
+  slices?: AxisMappingType[];
+  values?: AxisMappingType[];
+};
+
 export interface PieDonutChartWidgetMapping {
   dataset_id: string;
-  fields: {
-    slices?: AxisMappingType[];
-    values?: AxisMappingType[];
-  };
+  fields: PieDonutChartFieldsMappingType;
   default_filters?: Partial<DefaultFilterType>;
 }
 

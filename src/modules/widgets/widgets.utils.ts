@@ -284,6 +284,7 @@ export const getChartOptions = (
           yKey: `${axis?.alias ?? axis?.column}`,
           yName: (axis?.alias ?? axis?.column) || '',
           stacked: true,
+          nodeClickRange: 'nearest',
           marker: {
             enabled: false,
           },

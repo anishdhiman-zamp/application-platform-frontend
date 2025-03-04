@@ -11,7 +11,12 @@ import {
   mergeFilters,
 } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/router';
-import { FieldsMappingType, WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import {
+  FieldsMappingType,
+  PieDonutChartFieldsMappingType,
+  WIDGET_TYPES,
+  WidgetInstanceType,
+} from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { useFiltersContextStore } from 'components/filter/filters.context';
@@ -102,7 +107,9 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
     const datasetId = widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id;
-    const xAxisColumnName = (fields as FieldsMappingType)?.x_axis?.[0]?.column;
+    const xAxisColumnName =
+      (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
+      (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
     const clickFilter: MapAny = {};
     const defaultFilters = getDefaultFilterByDatasetId(widgetDetails?.data_mappings?.mappings, datasetId);
 
