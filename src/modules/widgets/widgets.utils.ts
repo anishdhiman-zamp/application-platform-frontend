@@ -199,6 +199,7 @@ export const getChartOptions = (
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
   const categoryAxis = getCategoryAxis(periodicity);
+  const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
 
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5
@@ -260,7 +261,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: yName,
-                  value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
+                  value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
                 },
               ],
             }),
@@ -297,7 +298,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: yName,
-                  value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
+                  value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], 2)}`,
                 },
               ],
             }),
@@ -336,7 +337,7 @@ export const getChartOptions = (
                     data: [
                       {
                         label: datum[sliceColumn ?? ''],
-                        value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(datum[sliceKey ?? ''], 2)}`,
+                        value: `${currencySymbol} ${getCommaSeparatedNumber(datum[sliceKey ?? ''], 2)}`,
                       },
                     ],
                   };
@@ -347,7 +348,7 @@ export const getChartOptions = (
                   data: donutOthersData?.length
                     ? donutOthersData.map((item) => ({
                         label: item[sliceColumn ?? ''],
-                        value: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${getCommaSeparatedNumber(item[sliceKey ?? ''], 2)}`,
+                        value: `${currencySymbol} ${getCommaSeparatedNumber(item[sliceKey ?? ''], 2)}`,
                       }))
                     : [],
                 };
@@ -358,7 +359,7 @@ export const getChartOptions = (
             },
             calloutLabel: {
               formatter: (params: MapAny) => {
-                return `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${formatNumber(params.datum[sliceKey ?? ''], 2)}`;
+                return `${currencySymbol} ${formatNumber(params.datum[sliceKey ?? ''], 2)}`;
               },
               offset: 8,
               enabled: true,
@@ -374,7 +375,7 @@ export const getChartOptions = (
             },
             innerLabels: [
               {
-                text: `${CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS]} ${formatNumber(totalNumber)}`,
+                text: `${currencySymbol} ${formatNumber(totalNumber)}`,
                 fontWeight: '900',
                 fontFamily: 'Inter',
                 pixelSize: 30,
