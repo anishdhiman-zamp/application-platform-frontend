@@ -1,7 +1,8 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
-import { DRAG_ICON, ZAMP_LOADER } from 'constants/icons';
+import { DRAG_ICON } from 'constants/icons';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { DatasetColumnRequest } from 'modules/data/data.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
@@ -18,6 +19,7 @@ import Popup from 'components/common/popup/Popup';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import { getTagLabel } from 'components/filter/filter.utils';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -252,7 +254,13 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           skeletonType={SkeletonTypes.CUSTOM}
           loader={
             <div className='flex justify-center items-center h-full'>
-              <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+              <DynamicLottiePlayer
+                src={ZAMP_LOGO_LOADER}
+                className='lottie-player h-[140px]'
+                autoplay
+                loop
+                keepLastFrame
+              />
             </div>
           }
         >

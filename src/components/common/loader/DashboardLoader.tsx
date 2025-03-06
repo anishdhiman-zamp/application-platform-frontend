@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { DASHBOARD_LOADER } from 'constants/lottie/dashboard_loader';
 import { cn } from 'utils/common';
 import SkeletonElement from 'components/common/skeletons/SkeletonElement';
-import Player from 'components/DynamicLottiePlayer';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 type DashboardLoaderPropsType = {
   isFadingOut: boolean;
@@ -29,7 +29,13 @@ const DashboardLoader: FC<DashboardLoaderPropsType> = ({ isFadingOut }) => {
         </div>
       </div>
       <div className={cn('transition-transform duration-500 delay-150', isFadingOut ? 'scale-150' : 'scale-100')}>
-        <Player src={DASHBOARD_LOADER} className='lottie-player' autoplay keepLastFrame style={{ height: '400px' }} />
+        <DynamicLottiePlayer
+          src={DASHBOARD_LOADER}
+          className='lottie-player'
+          autoplay
+          keepLastFrame
+          style={{ height: '400px' }}
+        />
       </div>
       <div></div>
     </div>

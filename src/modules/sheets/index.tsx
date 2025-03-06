@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
-import { ZAMP_LOADER } from 'constants/icons';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
-import Image from 'next/image';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 import 'react-grid-layout/css/styles.css'; // Include default styles
@@ -109,7 +109,13 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
           refetchFunction={refetchSheetDetails}
           loader={
             <div className='flex justify-center items-center w-full h-full z-1000 bg-white'>
-              <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+              <DynamicLottiePlayer
+                src={ZAMP_LOGO_LOADER}
+                className='lottie-player h-[140px]'
+                autoplay
+                loop
+                keepLastFrame
+              />
             </div>
           }
         >

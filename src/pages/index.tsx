@@ -1,8 +1,8 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useGetPagesQuery } from 'apis/pages';
-import { ZAMP_LOADER } from 'constants/icons';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
-import Image from 'next/image';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
 const Home = () => {
@@ -22,7 +22,7 @@ const Home = () => {
     <div className='flex justify-center items-center h-full'>
       {isLoading || (pages || []).length > 0 ? (
         <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
-          <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       ) : (
         <p>No Pages Found</p>

@@ -1,15 +1,15 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useGetDatasetDisplayConfigQuery } from 'apis/admin';
-import { ZAMP_LOADER } from 'constants/icons';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { DisplayConfigHeadersList } from 'modules/admin/admin.constants';
 import { AdminDatasetByIdPropsType, DISPLAY_CONFIG_HEADERS } from 'modules/admin/admin.types';
 import AdminHeader from 'modules/admin/AdminHeader';
 import EditableConfigField from 'modules/admin/components/previewSidebar/EditConfig';
-import Image from 'next/image';
 import { cn } from 'utils/common';
 import ToggleSwitch from 'components/common/toggleSwitch';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
   const { data, isLoading, isError } = useGetDatasetDisplayConfigQuery({ datasetId: id });
@@ -47,7 +47,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
         <div className='flex justify-center items-center h-full overflow-y-auto w-full z-1000 bg-white'>
-          <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
     >

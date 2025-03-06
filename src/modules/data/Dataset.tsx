@@ -15,7 +15,7 @@ import {
   useLazyGetDatasetDataQuery,
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
-import { ZAMP_LOADER } from 'constants/icons';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
@@ -37,7 +37,6 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -59,11 +58,11 @@ import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
-
 type DatasetByIdProps = {
   id: string;
   zampIds?: string[];
@@ -450,7 +449,13 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         refetchFunction={refetchFilterConfig}
         loader={
           <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
-            <Image unoptimized src={ZAMP_LOADER} alt='widget-loader' width={140} height={140} />
+            <DynamicLottiePlayer
+              src={ZAMP_LOGO_LOADER}
+              className='lottie-player h-[140px]'
+              autoplay
+              loop
+              keepLastFrame
+            />
           </div>
         }
       >

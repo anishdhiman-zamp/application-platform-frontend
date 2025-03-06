@@ -8,7 +8,7 @@ import { cn } from 'utils/common';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import Player from 'components/DynamicLottiePlayer';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const DrilldownByDatasetAndRowId = () => {
   const { datasetId, rowId } = useParams();
@@ -48,7 +48,15 @@ const DrilldownByDatasetAndRowId = () => {
       isError={isError}
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={<Player src={PAGE_LOADER} className='lottie-player' autoplay keepLastFrame style={{ height: '200px' }} />}
+      loader={
+        <DynamicLottiePlayer
+          src={PAGE_LOADER}
+          className='lottie-player'
+          autoplay
+          keepLastFrame
+          style={{ height: '200px' }}
+        />
+      }
     >
       <div className='h-full'>
         <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400'>

@@ -3,17 +3,17 @@ import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { WIDGET_LOADER } from 'constants/icons';
+import { WIDGET_LOADER } from 'constants/lottie/widget-loader';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widgets/widgets.constant';
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
-import Image from 'next/image';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 interface WidgetsWrapperProps {
   widgetDetails: Extract<
     WidgetInstanceType,
@@ -112,7 +112,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         refetchFunction={refetch}
         loader={
           <div className='absolute top-0 left-0 h-full w-full flex justify-center items-center z-100 '>
-            <Image src={WIDGET_LOADER} unoptimized alt='widget-loader' width={150} height={150} />
+            <DynamicLottiePlayer src={WIDGET_LOADER} className='lottie-player h-[150px]' autoplay loop keepLastFrame />
           </div>
         }
       >
