@@ -32,4 +32,5 @@ export const {
   useInitiateLogoutFlowQuery,
   useGetErrorDetailsQuery,
   useWhoAmIQuery,
+  useLazyWhoAmIQuery,
 } = Teams;
