@@ -8,7 +8,6 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TeamMembersPrivilegeType } from 'modules/team/people.types';
-import { validateEmail } from 'modules/team/people.utils';
 import { RootState } from 'store';
 import { PostAudiencesInviteData } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -17,6 +16,7 @@ import { accessPermissionForPeople } from 'utils/accessPermission/accessPermissi
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
+import { validateEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
 import { toast } from 'components/common/toast/Toast';

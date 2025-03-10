@@ -10,7 +10,6 @@ import { DatasetAccessPrivilegesType } from 'modules/data/data.types';
 import PageAccessToAudiences from 'modules/page/PageAccessToAudience';
 import { PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
 import { SharePagePopupPropsType } from 'modules/page/pages.types';
-import { validateEmail } from 'modules/team/people.utils';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
@@ -20,7 +19,7 @@ import { accessPermissionForPage } from 'utils/accessPermission/accessPermission
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { cn, getUserNameFromEmail } from 'utils/common';
+import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';

@@ -72,3 +72,31 @@ export const PEOPLE_TABS_LIST = [
   { label: capitalizeFirstLetter(PeopleTabs.TEAM_MEMBERS), value: PeopleTabs.TEAM_MEMBERS },
   { label: capitalizeFirstLetter(PeopleTabs.INVITED), value: PeopleTabs.INVITED },
 ];
+
+export const TEAMS_LIST_DUMMY_DATA = [
+  {
+    value: 'engg',
+    label: 'Engg',
+    color: '#E3E5FB',
+  },
+  {
+    value: 'design',
+    label: 'Design',
+    color: '#FBE3E5',
+  },
+  {
+    value: 'product',
+    label: 'Product',
+    color: '#FBE3E5',
+  },
+  {
+    value: 'marketing',
+    label: 'Marketing',
+    color: '#E2F1E0',
+  },
+  {
+    value: 'sales',
+    label: 'Sales',
+    color: '#E2F1E0',
+  },
+];

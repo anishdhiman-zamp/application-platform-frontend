@@ -1,6 +1,5 @@
 import { MouseEventHandler } from 'react';
 import clsx, { ClassValue } from 'clsx';
-import { CHIP_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
@@ -291,9 +290,10 @@ export const cyclicIterator = (arr: any[]) => {
 
 /**
  * Get a color from the predefined list of colors using a cyclic iterator
- * @returns string color
+ * @param colorArray
+ * @returns a new iterator instance each time
  */
-export const getChipColor: () => string = cyclicIterator(CHIP_COLORS);
+export const getChipColor = (colorArray: string[]) => cyclicIterator(colorArray);
 
 /**
  * Get the leading path after the '/' from the current URL.
@@ -464,3 +464,14 @@ export const formatPlural = (count: number, word: string, pluralWord?: string) =
 
 export const checkScreenBreakpoint = (width: number, height: number) =>
   width && height ? width < SCREEN_BREAKPOINTS.MIN_WIDTH || height < SCREEN_BREAKPOINTS.MIN_HEIGHT : false;
+
+/**
+ * Validates email
+ * @param email
+ * @returns boolean
+ */
+export const validateEmail = (email: string): boolean => {
+  const testEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return testEmailRegex.test(email);
+};

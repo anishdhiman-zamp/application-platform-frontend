@@ -69,3 +69,18 @@ export type TeamMembersListingPropsType = {
   isLoadingTeamMembersData: boolean;
   data: AudiencesByOrganisationIdResponse[];
 };
+
+export type CustomTeamsDropdownPropsType = {
+  search?: string;
+  optionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  optionList: { value: string; label: string; color?: string }[];
+  isLoadingOptionsList: boolean;
+  hoveredOptionIndex: number;
+  setHoveredOptionIndex: (index: number) => void;
+  onSelectOption: (option: { value: string; label: string; color?: string }) => void;
+  transformLabel?: (label: string) => string;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  randomColor: string | null;
+  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onCloseDropdown: defaultFnType;
+};

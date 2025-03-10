@@ -30,6 +30,11 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   selectOnlyFromList = false,
   transformLabel,
   isLoadingOptionsList,
+  wrapperClassName,
+  inputWrapperClassName,
+  multiSelectInputClassName,
+  setIsCustomInputFocused,
+  customOptionsListDropdown,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,18 +48,21 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
   const handleSetInputFocus = () => {
     setIsInputFocused(true);
+    setIsCustomInputFocused?.(true);
     inputRef?.current?.focus();
     setOpenDropdownOptions(true);
   };
 
   const handleSetInputBlur = () => {
     setIsInputFocused(false);
+    setIsCustomInputFocused?.(false);
     inputRef?.current?.blur();
     setOpenDropdownOptions(false);
   };
 
   useEffect(() => {
     if (isOpen) {
+      setHoveredOptionIndex(0);
       handleSetInputFocus();
     }
   }, [isOpen, inputRef]);
@@ -66,6 +74,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       if (inputArrayList?.length > 0) {
         handleRemoveItem(inputArrayList?.length - 1);
       }
+      handleSetInputFocus();
 
       return;
     }
@@ -74,10 +83,15 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       if (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) {
         e.preventDefault();
 
-        const selectedOption = filteredDropdownOptions[hoveredOptionIndex ?? 0];
+        const selectedOption = (filteredDropdownOptions ?? [])[hoveredOptionIndex ?? 0];
 
         if (selectedOption) {
-          onValidateAndAdd({ value: selectedOption?.value, label: selectedOption?.label });
+          onValidateAndAdd({
+            value: selectedOption?.value,
+            label: selectedOption?.label,
+            color: selectedOption?.color,
+          });
+
           setSearch('');
         }
       } else if (keyEvent === KEY_CODES.ARROW_DOWN || keyEvent === KEY_CODES.ARROW_UP) {
@@ -129,6 +143,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     } else if (keyEvent === KEY_CODES.ENTER && hoveredOptionIndex !== null) {
       e.preventDefault();
       handleSelectDropdownOption(filteredDropdownOptions[hoveredOptionIndex]);
+      handleSetInputFocus();
     }
   };
 
@@ -137,11 +152,13 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       setInputArrayList((prev) => {
         const updatedItems = prev.filter((_, i) => i !== index);
 
-        setShowValidationError(updatedItems.some((item) => !item?.valid));
+        if (setShowValidationError) {
+          setShowValidationError(updatedItems?.some((item) => !item?.valid));
+        }
 
         return updatedItems;
       });
-      inputRef?.current?.focus();
+      handleSetInputFocus();
     },
     [setInputArrayList, setShowValidationError, inputRef],
   );
@@ -206,8 +223,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     (option: { value: string; label: string; color?: string }) => {
       onSelectOption?.(option);
       setSearch('');
-      setIsInputFocused(true);
-      inputRef?.current?.focus();
+      handleSetInputFocus();
     },
     [onSelectOption, setSearch, inputRef, showValidationError],
   );
@@ -218,6 +234,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
       if (keyEvent === KEY_CODES.ESCAPE && isOpen) {
         handleSetInputBlur();
+      } else if (keyEvent === KEY_CODES.ENTER && isOpen) {
+        handleSetInputFocus();
       }
     };
 
@@ -230,10 +248,16 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     <div className='flex flex-col items-center'>
       <div
         className={cn(
-          `flex justify-between items-start w-full rounded-md gap-1.5 border ${isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400'}`,
+          'flex justify-between items-start w-full rounded-md gap-1.5 border',
+          isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400',
+          wrapperClassName,
         )}
       >
-        <div className='flex flex-wrap gap-1.5 py-3 pl-3 w-full' ref={containerRef} onClick={handleSetInputFocus}>
+        <div
+          className={cn('flex flex-wrap gap-1.5 py-3 pl-3 w-full', inputWrapperClassName)}
+          ref={containerRef}
+          onClick={handleSetInputFocus}
+        >
           {inputArrayList.map((item, index) => (
             <div
               key={index}
@@ -262,11 +286,14 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleClickKeyDown}
-            className='w-full h-fit mt-[2px]'
+            className='flex-1 min-w-[20px] h-fit mt-[2px]'
             customPaddingClassName='p-0'
             focusClassNames='focus:outline-none focus:border-none focus:shadow-none'
             cursorClassname='cursor-default'
-            inputFontClassName='f-13-400 py-0 !rounded-none'
+            inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 !rounded-none'}
+            style={{
+              maxWidth: '100%',
+            }}
           />
         </div>
         {roleOptions && (
@@ -276,12 +303,14 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
               id={`${id}-multi-select-input-dropdown`}
               eventCallback={defaultFn}
               onChange={(selectedOption) => {
-                selectedRoleRef.current = selectedOption;
+                if (selectedRoleRef) {
+                  selectedRoleRef.current = selectedOption;
+                }
                 inputRef.current?.focus();
                 setIsInputFocused(true);
               }}
               defaultValue={roleOptions[0]}
-              value={selectedRoleRef.current}
+              value={selectedRoleRef?.current}
               placeholder='Member'
               isSearchable={false}
               customClass={{
@@ -300,51 +329,68 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           </div>
         )}
       </div>
-      {!!combinedOptions?.length && openDropdownOptions && (
+      {openDropdownOptions && (
         <div className='w-full relative'>
-          <div
-            ref={dropdownOptionsRef}
-            onClick={(e) => e.stopPropagation()}
-            className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'
-          >
-            <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
-            <div
-              className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
-              tabIndex={0}
-            >
-              <CommonWrapper
-                skeletonType={SkeletonTypes.CUSTOM}
-                isLoading={isLoadingOptionsList}
-                loader={<OptionsListSkeletonLoader />}
-              >
-                {filteredDropdownOptions?.map((option, index) => (
-                  <div
-                    key={index}
-                    ref={(el) => {
-                      if (optionRefs?.current) {
-                        optionRefs.current[index] = el;
-                      }
-                    }}
-                    className={cn(
-                      'w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer',
-                      hoveredOptionIndex === null && index === 0 ? 'bg-GRAY_50' : '',
-                      hoveredOptionIndex === index ? 'bg-GRAY_50' : '',
-                    )}
-                    onMouseEnter={() => setHoveredOptionIndex(index)}
-                    onClick={() => handleSelectDropdownOption(option)}
-                  >
-                    <span
-                      className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border border-GRAY_400'
-                      style={{
-                        backgroundColor: option?.color ?? COLORS.WHITE,
-                      }}
+          <div ref={dropdownOptionsRef} onClick={(e) => e.stopPropagation()}>
+            {customOptionsListDropdown
+              ? React.createElement(
+                  customOptionsListDropdown as React.ElementType,
+                  {
+                    search,
+                    optionRefs,
+                    transformLabel,
+                    hoveredOptionIndex,
+                    isLoadingOptionsList,
+                    setHoveredOptionIndex,
+                    onKeyDown: handleKeyDown,
+                    onCloseDropdown: handleSetInputBlur,
+                    optionList: filteredDropdownOptions,
+                    onSelectOption: handleSelectDropdownOption,
+                    isDropdownOpenOnZeroLength: !!filteredDropdownOptions?.length,
+                  } as Record<string, unknown>,
+                )
+              : !!combinedOptions?.length && (
+                  <div className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'>
+                    <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
+                    <div
+                      className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+                      tabIndex={0}
                     >
-                      {transformLabel ? transformLabel(option?.label) : option?.label}
-                    </span>
+                      <CommonWrapper
+                        skeletonType={SkeletonTypes.CUSTOM}
+                        isLoading={isLoadingOptionsList}
+                        loader={<OptionsListSkeletonLoader />}
+                      >
+                        {filteredDropdownOptions?.map((option, index) => (
+                          <div
+                            key={index}
+                            ref={(el) => {
+                              if (optionRefs?.current) {
+                                optionRefs.current[index] = el;
+                              }
+                            }}
+                            className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                              'bg-GRAY_50':
+                                (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
+                            })}
+                            onMouseEnter={() => setHoveredOptionIndex(index)}
+                            onClick={() => handleSelectDropdownOption(option)}
+                            onKeyDown={handleKeyDown}
+                          >
+                            <span
+                              className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border border-GRAY_400'
+                              style={{
+                                backgroundColor: option?.color ?? COLORS.WHITE,
+                              }}
+                            >
+                              {transformLabel ? transformLabel(option?.label) : option?.label}
+                            </span>
+                          </div>
+                        ))}
+                      </CommonWrapper>
+                    </div>
                   </div>
-                ))}
-              </CommonWrapper>
-            </div>
+                )}
           </div>
         </div>
       )}

@@ -12,7 +12,7 @@ const MembersName: FC<MembersNamePropsType> = ({ value = '', member = false }) =
 
   return (
     !!value && (
-      <div className='flex items-center justify-start gap-1 w-full h-full text-left py-3 px-2'>
+      <div className='flex items-start justify-start gap-1 w-full h-full text-left py-3 px-2'>
         <Avatar
           name={value}
           backgroundColor={COLORS.GRAY_1000}

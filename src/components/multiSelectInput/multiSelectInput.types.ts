@@ -6,6 +6,7 @@ export type ArrayListOption = {
   valid: boolean;
   role?: string;
   color?: string;
+  isNew?: boolean;
 };
 
 export type MultiSelectInputPropsType = {
@@ -13,21 +14,26 @@ export type MultiSelectInputPropsType = {
   checkAudiencePresentInOrg?: boolean;
   search: string;
   setSearch: (value: string) => void;
-  selectedRoleRef: React.MutableRefObject<any>;
+  selectedRoleRef?: React.MutableRefObject<any>;
   isOpen: boolean;
   placeholderText: string;
   roleOptions?: Array<{ label: string; value: string }>;
   inputArrayList: ArrayListOption[];
   setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
-  showValidationError: boolean;
-  setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>;
+  showValidationError?: boolean;
+  setShowValidationError?: React.Dispatch<React.SetStateAction<boolean>>;
   validationErrorText?: string;
-  onValidateAndAdd: ({ value, label }: { value: string; label: string }) => void;
+  onValidateAndAdd: ({ value, label, color }: { value: string; label: string; color?: string }) => void;
   optionsList?: { value: string; label: string; color?: string }[];
   onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
   selectOnlyFromList?: boolean;
   transformLabel?: (label: string) => string;
   isLoadingOptionsList?: boolean;
+  wrapperClassName?: string;
+  inputWrapperClassName?: string;
+  multiSelectInputClassName?: string;
+  setIsCustomInputFocused?: React.Dispatch<React.SetStateAction<boolean>>;
+  customOptionsListDropdown?: React.ElementType;
 };
 
 export const KEY_CODES = {

@@ -1,5 +1,6 @@
 import { ColDef, IServerSideGetRowsRequest, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { CHIP_COLORS } from 'constants/colors';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
   differenceInDays,
@@ -112,7 +113,11 @@ export const formatColumns = (
       const tagColorMap: MapAny = {};
 
       column?.options?.forEach((option) => {
-        if (option) tagColorMap[option] = getChipColor();
+        if (option) {
+          if (!tagColorMap[option]) {
+            tagColorMap[option] = getChipColor(CHIP_COLORS);
+          }
+        }
       });
       formattedColumn.cellRendererParams = { ...formattedColumn.cellRendererParams, tagColorMap };
       formattedColumn.headerComponentParams = {

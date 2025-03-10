@@ -1,4 +1,5 @@
 import { FC, useMemo } from 'react';
+import { CHIP_COLORS } from 'constants/colors';
 import { cn, getChipColor } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -6,7 +7,12 @@ type TagChipProps = { item: string; existingList?: string[]; showIcon?: boolean;
 
 const TagChip: FC<TagChipProps> = ({ item, existingList, showIcon = false, externalColor }) => {
   const isExisting = useMemo(() => existingList?.includes(item), [existingList, item]);
-  const backgroundColor = useMemo(() => getChipColor(), [item]);
+
+  const backgroundColor = useMemo(() => {
+    const iterator = getChipColor(CHIP_COLORS);
+
+    return iterator();
+  }, [item]);
 
   return (
     <span
