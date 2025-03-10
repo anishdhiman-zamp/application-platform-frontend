@@ -180,10 +180,10 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
         return { transformedData: slicedData ?? [], donutOthersData: remainingData ?? [], showCurrency: aggregation };
       }
 
-      return { transformedData: dataWithDataType?.[0], stackedValues, showCurrency: aggregation };
+      return { transformedData: dataWithDataType?.[0] ?? [], stackedValues, showCurrency: aggregation };
     }
     default:
-      return { transformedData: dataWithDataType?.[0], stackedValues, showCurrency: false };
+      return { transformedData: dataWithDataType?.[0] ?? [], stackedValues, showCurrency: false };
   }
 };
 
@@ -318,7 +318,7 @@ export const getChartOptions = (
       return {
         ...baseOptions,
         width: 500,
-        height: 350,
+        height: 335,
         series: [
           {
             ...chartConfig,
@@ -361,8 +361,9 @@ export const getChartOptions = (
               formatter: (params: MapAny) => {
                 return `${currencySymbol} ${formatNumber(params.datum[sliceKey ?? ''], 2)}`;
               },
+              avoidCollisions: false,
+              enabled: false,
               offset: 8,
-              enabled: true,
               fontSize: 11,
               fontWeight: 400,
               fontFamily: 'Inter',

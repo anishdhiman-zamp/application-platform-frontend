@@ -162,7 +162,7 @@ export const AG_CHART_LEGEND_CONFIG = {
 export const getDonutChartSeriesConfig = (dataLength: number) => {
   return {
     innerRadiusRatio: 0.75,
-    sectorSpacing: dataLength > 1 ? 5 : 0,
+    sectorSpacing: dataLength > 1 ? 3 : 0,
     cornerRadius: dataLength > 1 ? 2 : 0,
     label: {
       color: COLORS.GRAY_950,

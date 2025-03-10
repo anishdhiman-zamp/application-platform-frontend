@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { ENVIRONMENT } from 'constants/common.constants';
 import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from 'constants/featureFlags';
 import { LDProvider } from 'launchdarkly-react-client-sdk';
 import { RootState } from 'store';
@@ -9,6 +10,8 @@ type Props = {
 
 export const FeatureFlagsProvider = ({ children }: Props) => {
   const user = useSelector((state: RootState) => state.user.user);
+
+  if (ENVIRONMENT === 'local') return children;
 
   return (
     <LDProvider
