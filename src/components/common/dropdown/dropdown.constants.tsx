@@ -12,7 +12,7 @@ export const DROPDOWN_SIZE_STYLES = {
   [SIZE_TYPES.XLARGE]: {
     customStyles: {
       control: {
-        borderRadius: '0px',
+        borderRadius: '6px',
         padding: '21px 24px',
         minHeight: '72px',
         width: 'fit-content',
@@ -144,39 +144,39 @@ export const DROPDOWN_SIZE_STYLES = {
   [SIZE_TYPES.XSMALL]: {
     customStyles: {
       control: {
-        borderRadius: '0px',
+        borderRadius: '6px',
         padding: '0px 8px',
-        minHeight: '27px',
+        minHeight: '28px',
+        width: 'fit-content',
+        cursor: 'pointer',
       },
       option: {
-        height: '30px',
+        fontSize: '13px',
       },
       menu: {
-        borderRadius: '0px',
+        borderRadius: '6px',
+        padding: '4px',
       },
       input: {
-        fontSize: 12,
-        fontWeight: 300,
+        fontSize: '13px',
+        fontWeight: '300',
       },
-      valueContainer: {
-        minHeight: '25px',
-      },
+      valueContainer: {},
       noOptionsMessage: {
         fontSize: '13px',
-        lineHeight: '16px',
       },
     },
     dropdownIndicatorProps: {
-      width: 12,
-      height: 12,
+      width: 20,
+      height: 20,
     },
     menuOptionClasses: {
-      wrapperClass: 'h-[30px]',
-      labelOverrideClassName: 'f-12-300',
-      contentWrapper: '!p-2 w-full',
+      wrapperClass: 'h-full overflow-y-scroll',
+      labelOverrideClassName: 'f-12-500',
+      contentWrapper: 'pl-2 py-3 w-full',
     },
     customClassNames: {
-      placeholder: 'f-12-300',
+      placeholder: 'f-13-300 text-GRAY_700',
     },
   },
 };

@@ -213,6 +213,7 @@ export const Button: React.FC<ButtonProps> = ({
                   width={iconProps?.width ?? iconSize}
                   iconCategory={iconProps?.iconCategory}
                   color={iconProps?.color}
+                  size={iconProps?.size}
                 />
               )}
             </div>

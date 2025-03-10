@@ -255,7 +255,6 @@ export const Dropdown: FC<DropdownProps> = ({
       <div
         data-testid={`dropdown-wrapper-${id}`}
         className={cn(
-          'flex justify-end items-end',
           selectFieldWrapperClass,
           disabled ? 'cursor-not-allowed' : '',
           readOnly ? 'pointer-events-none' : '',

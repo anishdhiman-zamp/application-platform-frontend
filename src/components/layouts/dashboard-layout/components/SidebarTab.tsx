@@ -1,12 +1,10 @@
 import React, { memo, ReactNode } from 'react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import Link from 'next/link';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type SidebarTabProps = {
   isSelected: boolean;
   iconId?: string;
-  iconCategory: ICON_SPRITE_TYPES;
   iconColor?: string;
   name: string;
   isNew?: boolean;
@@ -20,7 +18,6 @@ type SidebarTabProps = {
 const SidebarTab: React.FC<SidebarTabProps> = ({
   isSelected,
   iconId,
-  iconCategory,
   iconColor,
   name,
   expanded = true,
@@ -38,16 +35,7 @@ const SidebarTab: React.FC<SidebarTabProps> = ({
           role='presentation'
         >
           {icon}
-          {iconId && (
-            <SvgSpriteLoader
-              id={iconId}
-              iconCategory={iconCategory}
-              width={14}
-              height={14}
-              className='min-w-4'
-              color={iconColor}
-            />
-          )}
+          {iconId && <SvgSpriteLoader id={iconId} size={14} className='min-w-4' color={iconColor} />}
           <div className='whitespace-nowrap select-none f-13-500 truncate'>{name}</div>
         </div>
       </div>

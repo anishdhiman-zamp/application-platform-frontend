@@ -1,12 +1,13 @@
 import React, { memo, MouseEventHandler } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import dynamic from 'next/dynamic';
-import { defaultFn } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { SPRITE_CATEGORY_BY_ID } from 'components/SvgSpriteLoader/svgSpriteLoader.constants';
 import 'external-svg-loader';
 
 export interface SvgSpriteLoaderProps {
   width?: number;
+  size?: number;
   height?: number;
   fillColor?: string;
   color?: string;
@@ -22,6 +23,7 @@ export interface SvgSpriteLoaderProps {
 }
 
 const SvgSpriteLoader: React.FC<SvgSpriteLoaderProps> = ({
+  size,
   width = 20,
   height = 20,
   viewBox = '0 0 24 24',
@@ -33,18 +35,22 @@ const SvgSpriteLoader: React.FC<SvgSpriteLoaderProps> = ({
   domain = 'https://assets.zamp.finance',
   dataCache = '',
   className = '',
-  onClick = defaultFn,
+  onClick,
   customSpriteUrl,
 }) => {
   const category = iconCategory ?? SPRITE_CATEGORY_BY_ID[id];
 
   return (
-    <div onClick={onClick} className={className} data-testid={`svg-sprite-loader-${id}`}>
+    <div
+      onClick={onClick}
+      className={cn(className, onClick && 'cursor-pointer')}
+      data-testid={`svg-sprite-loader-${id}`}
+    >
       <svg
         id={id}
         viewBox={viewBox}
-        width={width}
-        height={height}
+        width={size ?? width}
+        height={size ?? height}
         fill={fillColor}
         color={color}
         data-src={customSpriteUrl ?? `${domain}/sprites/v${version}/${category}.svg#${id}`}

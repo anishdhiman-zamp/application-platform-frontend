@@ -32,17 +32,18 @@ const Sidebar = () => {
     }
   }, [pages]);
 
+  const filteredSidebarItems = SIDEBAR_ITEMS.filter((item) => !item.isHidden);
+
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
         <div className='px-2 border-b border-GRAY_400 pb-4'>
-          {SIDEBAR_ITEMS.map((item) => (
+          {filteredSidebarItems.map((item) => (
             <SidebarTab
               key={item.label}
               name={item.label}
               path={item.path}
               iconId={item.iconId}
-              iconCategory={item.iconCategory}
               isSelected={pathname === item?.path}
             />
           ))}
