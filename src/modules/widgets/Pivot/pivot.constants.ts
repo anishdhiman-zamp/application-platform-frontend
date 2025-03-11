@@ -2,7 +2,10 @@ import { GridOptions } from 'ag-grid-community';
 import {
   ADCB_SVG,
   ADYEN,
+  AFTERPAY,
   ALRAJI_SVG,
+  AMERICAN_EXPRESS,
+  APPLE_PAY,
   ARB_SA,
   ASPIRE_PNG,
   AXIS_IND,
@@ -16,6 +19,7 @@ import {
   BNY_PNG,
   BOB_IRQ,
   BOP_PSE,
+  CASH_APP,
   CHASE_SVG,
   CHECKOUT,
   CIB_EG,
@@ -24,6 +28,8 @@ import {
   CROSSRIVER,
   DANSKE,
   DEFAULT_BANK,
+  DINERS_CLUB,
+  DISCOVER,
   ENBD_SVG,
   FAB_SVG,
   GIB_SVG,
@@ -31,14 +37,17 @@ import {
   HDFC_SVG,
   HSBC_SVG,
   ICICI_IN,
+  JCB,
   JSB_PAK,
   LEAD_BANK,
   M_AND_T_BANK,
   MASHREQ_SVG,
+  MASTERCARD,
   MERCURY,
   NBI_KUR,
   NBK_KWT,
   PASHA,
+  PAYPAL,
   QNB_QAT,
   RAIFFEISEN,
   RED_ALERT_ICON,
@@ -49,6 +58,8 @@ import {
   TRUIST,
   TURKIYE_IS_BANKASI,
   UNICREDIT,
+  UNION_PAY,
+  VISA,
   WILMINGTON_TRUST,
 } from 'constants/icons';
 
@@ -84,10 +95,25 @@ export enum RECON_STATUS_TYPES {
   MISSING_FROM_NETSUITE = 'missing_from_netsuite',
 }
 
-export enum RECON_PAYMENT_GATEWAY_TYPES {
+export enum RECON_BANK_ICONS {
   CHECKOUT = 'checkout',
   ADYEN = 'adyen',
+  APPLE_PAY_AMERICAN_EXPRESS = 'Apple Pay - American Express',
+  APPLE_PAY_DISCOVER = 'Apple Pay - Discover',
+  APPLE_PAY_MASTERCARD = 'Apple Pay - MasterCard',
+  APPLE_PAY_VISA = 'Apple Pay - Visa',
+  DISCOVER = 'Discover',
+  MASTERCARD = 'MasterCard',
+  PAYPAL = 'PayPal',
+  VISA = 'Visa',
+  AMERICAN_EXPRESS = 'American Express',
+  DINERS_CLUB = 'Diners Club',
+  JCB = 'JCB',
+  AFTERPAY = 'Afterpay',
+  UNION_PAY = 'UnionPay',
+  CASHAPP = 'Cashapp',
 }
+
 export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
   switch (status) {
     case RECON_STATUS_TYPES.SETTLED:
@@ -105,9 +131,23 @@ export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
   }
 };
 
-export const RECON_PAYMENT_ICONS: Record<RECON_PAYMENT_GATEWAY_TYPES, string> = {
-  [RECON_PAYMENT_GATEWAY_TYPES.CHECKOUT]: CHECKOUT,
-  [RECON_PAYMENT_GATEWAY_TYPES.ADYEN]: ADYEN,
+export const RECON_BANK_ICONS_MAPPING: Record<RECON_BANK_ICONS, string> = {
+  [RECON_BANK_ICONS.CHECKOUT]: CHECKOUT,
+  [RECON_BANK_ICONS.ADYEN]: ADYEN,
+  [RECON_BANK_ICONS.APPLE_PAY_AMERICAN_EXPRESS]: APPLE_PAY,
+  [RECON_BANK_ICONS.APPLE_PAY_DISCOVER]: APPLE_PAY,
+  [RECON_BANK_ICONS.APPLE_PAY_MASTERCARD]: APPLE_PAY,
+  [RECON_BANK_ICONS.APPLE_PAY_VISA]: APPLE_PAY,
+  [RECON_BANK_ICONS.DISCOVER]: DISCOVER,
+  [RECON_BANK_ICONS.MASTERCARD]: MASTERCARD,
+  [RECON_BANK_ICONS.PAYPAL]: PAYPAL,
+  [RECON_BANK_ICONS.VISA]: VISA,
+  [RECON_BANK_ICONS.AMERICAN_EXPRESS]: AMERICAN_EXPRESS,
+  [RECON_BANK_ICONS.DINERS_CLUB]: DINERS_CLUB,
+  [RECON_BANK_ICONS.JCB]: JCB,
+  [RECON_BANK_ICONS.AFTERPAY]: AFTERPAY,
+  [RECON_BANK_ICONS.UNION_PAY]: UNION_PAY,
+  [RECON_BANK_ICONS.CASHAPP]: CASH_APP,
 };
 
 export const PIVOT_TABLE_THEME_PARAMS = {
@@ -283,6 +323,7 @@ export const BANK_NAME_ICON_MAPPING: Record<string, { name: string; icon: string
   DBS_HK: { name: 'DBS HONGKONG', icon: DEFAULT_BANK },
   JPMC_KSA: { name: 'JP Morgan Chase Bank N.A. Riyadh Branch', icon: CHASE_SVG },
 };
+
 export enum PIVOT_DATA_EXPORT_FORMAT {
   CSV = 'csv',
   EXCEL = 'excel',

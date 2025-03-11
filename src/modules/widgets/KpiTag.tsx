@@ -17,7 +17,7 @@ interface KpiTagProps {
   periodicity: string;
   timeColumns: string;
   isFilterLoading?: boolean;
-  currency: string;
+  currency?: string;
 }
 
 const KpiTag: FC<KpiTagProps> = ({
@@ -57,7 +57,7 @@ const KpiTag: FC<KpiTagProps> = ({
 
     if (isNaN(Number(data?.[key]))) return data?.[key];
 
-    return `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}`;
+    return currency ? `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}` : Number(data?.[key]);
   }, [widgetData]);
 
   useEffect(() => {

@@ -11,7 +11,7 @@ import {
 import {
   BANK_NAME_ICON_MAPPING,
   getReconStatusIcon,
-  RECON_PAYMENT_ICONS,
+  RECON_BANK_ICONS_MAPPING,
   RECON_STATUS_TYPES,
   ROOT_LEVEL_TITLE,
 } from 'modules/widgets/Pivot/pivot.constants';
@@ -93,8 +93,8 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
 
       {show_recon_icons && isLowestLevel && (
         <Image
-          src={RECON_PAYMENT_ICONS[value as keyof typeof RECON_PAYMENT_ICONS] ?? OTHER_GATEWAY}
-          alt={value ?? 'Bank'}
+          src={RECON_BANK_ICONS_MAPPING[value as keyof typeof RECON_BANK_ICONS_MAPPING] ?? OTHER_GATEWAY}
+          alt={value ?? 'other'}
           width={18}
           height={18}
           priority

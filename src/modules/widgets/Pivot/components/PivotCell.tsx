@@ -14,15 +14,7 @@ interface PivotCellProps {
   currency?: string;
 }
 
-const PivotCell: FC<PivotCellProps> = ({
-  node,
-  value,
-  maxGroupingLevel,
-  showPercentage,
-  api,
-  column,
-  currency = 'USD',
-}) => {
+const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPercentage, api, column, currency }) => {
   const [toggledRows, setToggledRows] = useState<Record<string, boolean>>({});
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -34,7 +26,7 @@ const PivotCell: FC<PivotCellProps> = ({
 
     const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
 
-    return `${currencySymbol} ${getCommaSeparatedNumber(numericValue, 2)}`;
+    return currency ? `${currencySymbol}${getCommaSeparatedNumber(numericValue, 2)}` : numericValue;
   }, [currency, value]);
 
   const { isLastNode, isTopNode, isRootLevel } = useMemo(
