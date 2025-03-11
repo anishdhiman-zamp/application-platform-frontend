@@ -7,9 +7,15 @@ import {
   DeleteAudienceFromOrganizationAccessType,
   GetMembershipRequestsByOrganizationIdRequest,
   GetMembershipRequestsByOrganizationIdResponse,
+  GetTeamsByOrganizationIdRequestType,
+  GetTeamsByOrganizationIdResponseType,
   InvitedAudiencesByOrganisationIdResponse,
   PatchChangeAudienceRoleInOrganizationType,
+  PostAddTeamToAudienceRequestType,
   PostAudiencesInviteData,
+  PostTeamsByOrganizationIdRequestType,
+  PostTeamsByOrganizationIdResponseType,
+  RemoveTeamFromAudienceRequestType,
 } from 'types/api/people.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -71,6 +77,39 @@ const People = baseApi.injectEndpoints({
     getOrganizationMembershipRequestsAll: builder.query<GetMembershipRequestsByOrganizationIdResponse, void>({
       query: () => ({ url: API_ENDPOINTS.MEMBERSHIP_REQUESTS_ALL_GET }),
     }),
+    getTeamsByOrganizationId: builder.query<GetTeamsByOrganizationIdResponseType, GetTeamsByOrganizationIdRequestType>({
+      query: ({ organizationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_GET, { organizationId }),
+      }),
+      providesTags: [APITags.GET_ALL_TEAMS],
+    }),
+    postAddTeamToOrganization: builder.mutation<
+      PostTeamsByOrganizationIdResponseType,
+      PostTeamsByOrganizationIdRequestType
+    >({
+      query: ({ organizationId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_POST, { organizationId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+      invalidatesTags: [APITags.GET_ALL_TEAMS],
+    }),
+    postAddTeamToAudience: builder.mutation<void, PostAddTeamToAudienceRequestType>({
+      query: ({ organizationId, teamId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ADD_TEAMS_TO_AUDIENCE_POST, { organizationId, teamId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+      invalidatesTags: [APITags.GET_ALL_TEAMS],
+    }),
+    removeTeamFromAudience: builder.mutation<void, RemoveTeamFromAudienceRequestType>({
+      query: ({ organizationId, teamId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.REMOVE_TEAMS_FROM_AUDIENCE_POST, { organizationId, teamId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+      invalidatesTags: [APITags.GET_ALL_TEAMS],
+    }),
   }),
 });
 
@@ -82,4 +121,8 @@ export const {
   useDeleteAudienceFromOrganizationAccessMutation,
   useGetMembershipRequestsByOrganizationIdQuery,
   useGetOrganizationMembershipRequestsAllQuery,
+  useGetTeamsByOrganizationIdQuery,
+  usePostAddTeamToOrganizationMutation,
+  usePostAddTeamToAudienceMutation,
+  useRemoveTeamFromAudienceMutation,
 } = People;

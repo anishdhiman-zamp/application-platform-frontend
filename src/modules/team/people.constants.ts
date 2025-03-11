@@ -26,6 +26,10 @@ export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
     }),
     cellRenderer: MembersRole,
   },
+  {
+    headerName: 'Team',
+    field: 'team',
+  },
 ];
 
 export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
@@ -73,30 +77,11 @@ export const PEOPLE_TABS_LIST = [
   { label: capitalizeFirstLetter(PeopleTabs.INVITED), value: PeopleTabs.INVITED },
 ];
 
-export const TEAMS_LIST_DUMMY_DATA = [
-  {
-    value: 'engg',
-    label: 'Engg',
-    color: '#E3E5FB',
-  },
-  {
-    value: 'design',
-    label: 'Design',
-    color: '#FBE3E5',
-  },
-  {
-    value: 'product',
-    label: 'Product',
-    color: '#FBE3E5',
-  },
-  {
-    value: 'marketing',
-    label: 'Marketing',
-    color: '#E2F1E0',
-  },
-  {
-    value: 'sales',
-    label: 'Sales',
-    color: '#E2F1E0',
-  },
-];
+export enum TEAM_PERMISSION_TOAST_MSG {
+  TEAM_ASSIGN_SUCCESS = 'Team assigned successfully',
+  TEAM_ASSIGN_ERROR = 'Failed to assign team',
+  TEAM_CREATE_ERROR = 'Failed to create team',
+  INVALID_TEAM_ERROR = 'Invalid team',
+  TEAM_REMOVE_SUCCESS = 'Team removed successfully',
+  TEAM_REMOVE_ERROR = 'Failed to remove team',
+}

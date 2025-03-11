@@ -84,7 +84,7 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                 </div>
               ) : (
                 <span
-                  className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize'
+                  className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
                   style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
                 >
                   {transformLabel ? transformLabel(option?.label) : option?.label}

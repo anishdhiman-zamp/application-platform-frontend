@@ -1,3 +1,5 @@
+import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from 'modules/team/people.types';
+
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
 };
@@ -44,3 +46,44 @@ export type GetMembershipRequestsByOrganizationIdResponse = {
   deleted_at: string;
   status: string;
 }[];
+
+export type GetTeamsByOrganizationIdResponseType = {
+  team_id: string;
+  organization_id: string;
+  name: string;
+  description: string;
+  metadata: {
+    color_hex_code: string;
+  };
+  team_memberships: [
+    {
+      team_membership_id: string;
+      team_id: string;
+      user_id: string;
+    },
+  ];
+}[];
+export type GetTeamsByOrganizationIdRequestType = {
+  organizationId: string;
+};
+
+export type PostTeamsByOrganizationIdRequestType = {
+  organizationId: string;
+  payload: PostTeamsByOrganizationIdPayload;
+};
+
+export type PostTeamsByOrganizationIdResponseType = {
+  team_id: string;
+};
+
+export type PostAddTeamToAudienceRequestType = {
+  organizationId: string;
+  teamId: string;
+  payload: PostAddTeamToAudiencePayload;
+};
+
+export type RemoveTeamFromAudienceRequestType = {
+  organizationId: string;
+  teamId: string;
+  payload: { team_id: string; team_membership_id: string };
+};

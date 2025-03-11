@@ -1,7 +1,11 @@
+import { MapAny } from 'types/commonTypes';
+
 export type ArrayListOption = {
   value: string;
   resource_audience_type?: string;
   resource_audience_id?: string;
+  team_membership_id?: string;
+  team_id?: string;
   label: string;
   valid: boolean;
   role?: string;
@@ -34,6 +38,7 @@ export type MultiSelectInputPropsType = {
   multiSelectInputClassName?: string;
   setIsCustomInputFocused?: React.Dispatch<React.SetStateAction<boolean>>;
   customOptionsListDropdown?: React.ElementType;
+  onCustomDeleteFn?: (item: MapAny) => void;
 };
 
 export const KEY_CODES = {

@@ -11,6 +11,11 @@ export const API_ENDPOINTS = {
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
+  TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
+  TEAMS_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/teams`,
+  ALL_TEAMS_BY_TEAM_ID_GET: `organizations/{{organizationId}}/teams/{{teamId}}`,
+  ADD_TEAMS_TO_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/add`,
+  REMOVE_TEAMS_FROM_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/remove`,
 
   DATASET_FILTER_CONFIG_GET: `datasets/{{datasetId}}/filter-config`,
   DATASET_DATA_GET: `datasets/{{datasetId}}/data`,

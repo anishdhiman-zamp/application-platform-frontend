@@ -84,3 +84,34 @@ export type CustomTeamsDropdownPropsType = {
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onCloseDropdown: defaultFnType;
 };
+
+export type MembersTeamPropsType = {
+  organizationId: string;
+  userId: string;
+  teamsData: {
+    team_id: string;
+    name: string;
+    description: string;
+    metadata: { color_hex_code: string };
+  }[];
+  userMappedTeams: {
+    value: string;
+    label: string;
+    valid: boolean;
+    color?: string;
+    isNew?: boolean;
+    teamId?: string;
+    teamMembershipId?: string;
+  }[];
+};
+
+export type PostTeamsByOrganizationIdPayload = {
+  name: string;
+  description: string;
+  color_hex_code: string;
+};
+
+export type PostAddTeamToAudiencePayload = {
+  user_id: string;
+  team_id: string;
+};

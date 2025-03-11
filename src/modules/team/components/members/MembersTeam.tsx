@@ -1,25 +1,116 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { TEAMS_COLORS } from 'constants/colors';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  usePostAddTeamToAudienceMutation,
+  usePostAddTeamToOrganizationMutation,
+  useRemoveTeamFromAudienceMutation,
+} from 'apis/people';
+import { COLORS, TEAMS_COLORS } from 'constants/colors';
+import { useOnClickOutside } from 'hooks';
 import CustomTeamsDropdown from 'modules/team/components/members/CustomTeamsDropdown';
-import { TEAMS_LIST_DUMMY_DATA } from 'modules/team/people.constants';
-import { CustomTeamsDropdownPropsType } from 'modules/team/people.types';
+import { TEAM_PERMISSION_TOAST_MSG } from 'modules/team/people.constants';
+import {
+  CustomTeamsDropdownPropsType,
+  MembersTeamPropsType,
+  PostAddTeamToAudiencePayload,
+  PostTeamsByOrganizationIdPayload,
+} from 'modules/team/people.types';
+import { MapAny } from 'types/commonTypes';
+import { checkIfCurrentUserIsMember } from 'utils/accessPermission/accessPermission.utils';
 import { cn, cyclicIterator } from 'utils/common';
+import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
-import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 
-const MembersTeam = () => {
-  const combinedOptionListsData = TEAMS_LIST_DUMMY_DATA;
+const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, userId, userMappedTeams }) => {
+  const isMember = checkIfCurrentUserIsMember();
+  const teamsRowRef = useRef<HTMLDivElement>(null);
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
-
-  const [search, setSearch] = useState('');
+  const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();
+  const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
+  const [removeTeamFromAudience] = useRemoveTeamFromAudienceMutation();
+  const [search, setSearch] = useState<string>('');
+  const [isCustomInputFocused, setIsCustomInputFocused] = useState<boolean>(false);
+  const [openFullViewTeamTags, setOpenFullViewTeamTags] = useState<boolean>(false);
   const [randomColor, setRandomColor] = useState(() => teamsRandomColorRef.current());
+  const [selectedItems, setSelectedItems] = useState<
+    {
+      value: string;
+      label: string;
+      valid: boolean;
+      color?: string;
+      isNew?: boolean;
+      teamId?: string;
+      teamMembershipId?: string;
+    }[]
+  >(userMappedTeams);
 
-  const [isCustomInputFocused, setIsCustomInputFocused] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
+  const handleAddTeamToOrg = async (payload: PostTeamsByOrganizationIdPayload) => {
+    postAddTeamToOrganization({ organizationId, payload })
+      .unwrap()
+      .then((res) => {
+        const teamId = res?.team_id;
+
+        handleAddTeamToAudience({ user_id: userId, team_id: teamId });
+      })
+      .catch(() => {
+        toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_CREATE_ERROR);
+      });
+  };
+
+  const handleAddTeamToAudience = async (payload: PostAddTeamToAudiencePayload) => {
+    postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
+      .unwrap()
+      .then(() => {
+        toast.success(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
+      })
+      .catch(() => {
+        toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_ERROR);
+      });
+  };
+
+  const handleCheckIfTeamExists = (teamInfo: PostTeamsByOrganizationIdPayload) => {
+    const teamId = teamsData.find(
+      (team) => team?.name === teamInfo?.name && team?.metadata?.color_hex_code === teamInfo?.color_hex_code,
+    )?.team_id;
+
+    const updatedTeamInfo = {
+      user_id: userId,
+      team_id: teamId ?? '',
+    };
+
+    if (teamId) {
+      handleAddTeamToAudience(updatedTeamInfo);
+    } else {
+      handleAddTeamToOrg(teamInfo);
+    }
+  };
+
+  const handleRemoveAudienceFromTeam = (item: MapAny) => {
+    const membershipId = item?.teamMembershipId;
+    const teamId = item?.teamId;
+
+    if (!teamId || !membershipId) {
+      toast.error(TEAM_PERMISSION_TOAST_MSG.INVALID_TEAM_ERROR);
+
+      return;
+    }
+
+    const payload = {
+      team_id: teamId,
+      team_membership_id: membershipId,
+    };
+
+    removeTeamFromAudience({ organizationId, teamId, payload })
+      .unwrap()
+      .then(() => {
+        toast.success(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
+      })
+      .catch(() => {
+        toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_ERROR);
+      });
+  };
 
   const handleValidateAndAdd = ({
     value,
-    label,
     color,
   }: {
     value: string;
@@ -29,48 +120,34 @@ const MembersTeam = () => {
   }) => {
     if (!value) return;
 
-    setSelectedItems((prev) => {
-      const updatedItems = [
-        ...prev,
-        {
-          value,
-          label,
-          color: color ?? randomColor,
-          valid: true,
-          isNew: false,
-        },
-      ];
+    const payload = {
+      name: value,
+      description: '',
+      color_hex_code: color ?? randomColor,
+    };
 
-      return updatedItems;
-    });
+    handleCheckIfTeamExists(payload);
   };
 
   const handleOptionSelection = (option: { value: string; label: string; color?: string; isNew?: boolean }) => {
-    setSelectedItems((prev) => {
-      const updatedItems = [
-        ...prev,
-        {
-          label: option?.label,
-          value: option?.value,
-          valid: true,
-          color: option?.color,
-          isNew: false,
-        },
-      ];
+    const payload = {
+      name: option?.value,
+      description: '',
+      color_hex_code: option?.color ?? randomColor,
+    };
 
-      return updatedItems;
-    });
+    handleCheckIfTeamExists(payload);
   };
 
   const filteredOptionListsData = [
-    ...(combinedOptionListsData
-      ?.filter((item) => !selectedItems.some((selected) => selected?.value === item?.value))
+    ...(teamsData
+      ?.filter((item) => !selectedItems.some((selected) => selected?.value === item?.name))
       .map((member) => ({
-        label: member?.label ?? '',
-        value: member?.value ?? '',
-        color: member?.color ?? randomColor,
+        label: member?.name ?? '',
+        value: member?.name ?? '',
+        color: member?.metadata?.color_hex_code ?? randomColor,
         isNew: false,
-      })) || []),
+      })) ?? []),
     ...[
       {
         label: search,
@@ -80,6 +157,10 @@ const MembersTeam = () => {
       },
     ],
   ];
+
+  useEffect(() => {
+    setSelectedItems(userMappedTeams);
+  }, [userMappedTeams]);
 
   useEffect(() => {
     if (!search) {
@@ -94,33 +175,60 @@ const MembersTeam = () => {
       <CustomTeamsDropdown {...props} randomColor={randomColor} />
     );
 
-    MemoizedDropdownComponent.displayName = 'MemoizedDropdownComponent';
+    MemoizedDropdownComponent.displayName = 'memoized-teams-dropdown-component';
 
     return MemoizedDropdownComponent;
   }, [randomColor]);
 
-  return (
-    <div className='f-12-400 text-GRAY_1000 h-full flex items-center justify-start text-left py-2 px-2'>
-      <MultiSelectInput
-        id='select-team'
-        search={search}
-        setSearch={setSearch}
-        inputArrayList={selectedItems}
-        setInputArrayList={setSelectedItems}
-        optionsList={filteredOptionListsData}
-        customOptionsListDropdown={memoizedDropdown}
-        onValidateAndAdd={handleValidateAndAdd}
-        onSelectOption={handleOptionSelection}
-        placeholderText='Add team'
-        isOpen={false}
-        wrapperClassName='border-none rounded-none shadow-none f-12-400'
-        inputWrapperClassName={cn(isCustomInputFocused ? 'flex-wrap' : 'flex-nowrap', 'p-0')}
-        multiSelectInputClassName='f-12-400 !rounded-none'
-        setIsCustomInputFocused={setIsCustomInputFocused}
-        selectOnlyFromList
-      />
+  const handleCloseFullViewTeamTags = () => {
+    setOpenFullViewTeamTags(false);
+  };
 
-      <span className='border-none rounded-none shadow-none cursor-text flex-nowrap whitespace-pre-wrap'></span>
+  const handleToggleFullViewTeamTags = () => {
+    setOpenFullViewTeamTags((prev) => !prev);
+  };
+
+  useOnClickOutside(teamsRowRef, handleCloseFullViewTeamTags);
+
+  return (
+    <div
+      className='relative f-12-400 text-GRAY_1000 h-full flex items-center justify-start text-left py-2 px-2 overflow-visible'
+      ref={teamsRowRef}
+      onClick={handleToggleFullViewTeamTags}
+    >
+      {isMember ? (
+        <div className={cn('flex flex-nowrap overflow-hidden gap-1.5', openFullViewTeamTags && 'flex-wrap')}>
+          {selectedItems.map((item, index) => (
+            <span
+              key={index}
+              className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize'
+              style={{ backgroundColor: item?.color ?? COLORS.WHITE }}
+            >
+              {item?.label}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <MultiSelectInput
+          id='select-team'
+          search={search}
+          setSearch={setSearch}
+          inputArrayList={selectedItems}
+          setInputArrayList={setSelectedItems}
+          optionsList={filteredOptionListsData}
+          customOptionsListDropdown={memoizedDropdown}
+          onValidateAndAdd={handleValidateAndAdd}
+          onSelectOption={handleOptionSelection}
+          placeholderText='Add team'
+          isOpen={false}
+          wrapperClassName='border-none rounded-none shadow-none f-12-400'
+          inputWrapperClassName={cn(isCustomInputFocused ? 'flex-wrap' : 'flex-nowrap', 'p-0')}
+          multiSelectInputClassName='f-12-400 !rounded-none'
+          setIsCustomInputFocused={setIsCustomInputFocused}
+          selectOnlyFromList
+          onCustomDeleteFn={handleRemoveAudienceFromTeam}
+        />
+      )}
     </div>
   );
 };

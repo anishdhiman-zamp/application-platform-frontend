@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { defaultFn } from 'types/commonTypes';
+import { defaultFn, MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
@@ -35,6 +35,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   multiSelectInputClassName,
   setIsCustomInputFocused,
   customOptionsListDropdown,
+  onCustomDeleteFn,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +73,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
     if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
       if (inputArrayList?.length > 0) {
-        handleRemoveItem(inputArrayList?.length - 1);
+        handleRemoveItem(inputArrayList[inputArrayList.length - 1], inputArrayList.length - 1);
       }
       handleSetInputFocus();
 
@@ -148,7 +149,13 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   };
 
   const handleRemoveItem = useCallback(
-    (index: number) => {
+    (item: MapAny, index: number) => {
+      if (onCustomDeleteFn) {
+        onCustomDeleteFn(item);
+
+        return;
+      }
+
       setInputArrayList((prev) => {
         const updatedItems = prev.filter((_, i) => i !== index);
 
@@ -174,6 +181,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       setTimeout(() => {
         setIsInputFocused(false);
         setOpenDropdownOptions(false);
+        setIsCustomInputFocused?.(false);
       }, 0);
     },
     [containerRef, dropdownOptionsRef],
@@ -273,7 +281,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 width={10}
                 height={10}
-                onClick={() => handleRemoveItem(index)}
+                onClick={() => handleRemoveItem(item, index)}
                 color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
                 className='cursor-pointer'
               />
