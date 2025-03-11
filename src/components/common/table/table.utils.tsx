@@ -237,6 +237,7 @@ const formatRequest = (
   zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
+  disableTotalCount?: boolean,
 ): RequestType => {
   const { endRow } = request;
 
@@ -249,7 +250,7 @@ const formatRequest = (
       page: endRow ? Math.ceil(endRow / PAGE_SIZE) : 1,
       page_size: PAGE_SIZE,
     },
-    get_total_records: true,
+    get_total_records: !disableTotalCount,
     fx_currency: !fx_currency || fx_currency === 'local' ? undefined : fx_currency,
   };
 };
@@ -266,8 +267,9 @@ export const getEncodedRequest = (
   zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
+  disableTotalCount?: boolean,
 ): string => {
-  const formattedRequest = formatRequest(request, fx_currency, zampIds, useAlias, ignoreGroupCheck);
+  const formattedRequest = formatRequest(request, fx_currency, zampIds, useAlias, ignoreGroupCheck, disableTotalCount);
   const encodedRequest = encodeRequest(formattedRequest);
 
   return encodedRequest;

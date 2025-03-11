@@ -355,7 +355,7 @@ const getAggregations = (colIds: string[]): MapAny => {
 };
 
 export const getEncodedRequestWithAggregations = (colIds: string[]) =>
-  getEncodedRequest(getAggregations(colIds) as IServerSideGetRowsRequest, '', [], true, true);
+  getEncodedRequest(getAggregations(colIds) as IServerSideGetRowsRequest, '', [], true, true, true);
 
 export const formatColumnLevelStats = (columnLevelStatsData?: MapAny): MapAny => {
   if (!columnLevelStatsData) return {};
