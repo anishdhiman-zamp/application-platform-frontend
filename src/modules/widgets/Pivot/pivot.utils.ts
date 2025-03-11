@@ -106,19 +106,11 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
   return {}; // Default cell style
 };
 
-const resetToMidnight = (isoString: string) => {
-  const date = new Date(isoString);
-
-  date?.setUTCHours(0, 0, 0, 0);
-
-  return date?.toISOString();
-};
-
 export const parseType = (type: PIVOT_DATA_TYPES, value: string | number | boolean, periodicity: PERIODICITY_TYPES) => {
   switch (type) {
     case PIVOT_DATA_TYPES.DATE:
     case PIVOT_DATA_TYPES.TIMESTAMP:
-      return getFormattedDateWithPeriodicity(periodicity, resetToMidnight(value as string));
+      return getFormattedDateWithPeriodicity(periodicity, value as string);
     case PIVOT_DATA_TYPES.NUMBER:
     case PIVOT_DATA_TYPES.AMOUNT: {
       const number = Number(value);
