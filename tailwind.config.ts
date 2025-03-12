@@ -34,6 +34,7 @@ module.exports = {
         BG_GRAY_5: 'var(--BG_GRAY_5)',
         BORDER_GRAY_400: 'var(--BORDER_GRAY_400)',
 
+        BLUE_50: 'var(--BLUE_50)',
         BLUE_100: 'var(--BLUE_100)',
         BLUE_200: 'var(--BLUE_200)',
         BLUE_300: 'var(--BLUE_300)',

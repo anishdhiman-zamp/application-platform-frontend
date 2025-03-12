@@ -19,7 +19,7 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   );
 
   useEffect(() => {
-    if (sheetFilterConfig?.native_filter_config?.length) {
+    if (!isFetching && sheetFilterConfig?.native_filter_config?.length) {
       const filtersConfig = sheetFilterConfig?.native_filter_config;
       const defaultFilterValues = getDefaultFilterValues(filtersConfig);
 
@@ -62,7 +62,7 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
           type: filtersContextActions.SET_INITIALISED,
         });
     }
-  }, [sheetFilterConfig]);
+  }, [sheetFilterConfig, sheetId]);
 
   useEffect(() => {
     if (isFetching) {

@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useMemo } from 'react';
-import { useGetPageDetailsQuery } from 'apis/pages';
+import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
 import { useAppDispatch } from 'hooks/toolkit';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
@@ -12,10 +12,13 @@ import DashboardLayout from 'components/layouts/dashboard-layout';
 import 'ag-charts-enterprise';
 
 const Page = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const { id } = router.query;
   const { data: pageDetails, isLoading, isError, refetch } = useGetPageDetailsQuery(id as string, { skip: !id });
-  const dispatch = useAppDispatch();
+  const { data: pages } = useGetPagesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
   const currentSheetId = useMemo(
     () => getSheetIdFromPath(router.asPath, id as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
     [pageDetails, router.asPath],
@@ -40,15 +43,15 @@ const Page = () => {
   );
 
   useEffect(() => {
-    if (pageDetails) {
-      persistLastVisitedPage(pageDetails.page_id);
-      dispatch(resetBreadcrumb([pageDetails.name]));
-    }
+    const currentPageTitle = pages?.find((page) => page.page_id === id)?.name ?? 'Loading...';
+
+    persistLastVisitedPage(id as string);
+    dispatch(resetBreadcrumb([currentPageTitle]));
 
     return () => {
       dispatch(resetBreadcrumb([]));
     };
-  }, [pageDetails]);
+  }, [id, pages]);
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>

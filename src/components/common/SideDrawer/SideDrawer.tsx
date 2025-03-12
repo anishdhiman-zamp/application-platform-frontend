@@ -31,8 +31,7 @@ const SIDE_DRAWER_TYPES_CLASSNAMES: Record<SIDE_DRAWER_TYPES, { wrapper: string;
   },
   [SIDE_DRAWER_TYPES.SECONDARY]: {
     wrapper: 'p-2.5 backdrop-blur-sm',
-    children:
-      'rounded-xl bg-white w-full h-full sideDrawerInner border-l-[0.5px] border-GRAY_500 shadow-sideDrawerInner',
+    children: 'rounded-xl bg-white w-full h-full sideDrawerInner border-[0.5px] border-GRAY_500 shadow-sideDrawerInner',
   },
 };
 
