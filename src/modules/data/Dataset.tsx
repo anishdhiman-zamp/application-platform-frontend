@@ -459,7 +459,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8'>
+        <div className='flex items-center justify-between pr-8 z-1000'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>

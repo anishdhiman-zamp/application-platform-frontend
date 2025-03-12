@@ -4,6 +4,11 @@ import { defaultFnType } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
+export enum SIDE_DRAWER_TYPES {
+  PRIMARY = 'PRIMARY',
+  SECONDARY = 'SECONDARY',
+}
+
 export interface OverlayTitleProps {
   topBar?: ReactElement | string;
   subtitle?: string | ReactElement;
@@ -50,4 +55,5 @@ export interface SideDrawerProps extends OverlayTitleProps, OverlayFooterProps {
   titleClassName?: string;
   subtitleClassName?: string;
   position?: POSITION_TYPES;
+  type?: SIDE_DRAWER_TYPES;
 }

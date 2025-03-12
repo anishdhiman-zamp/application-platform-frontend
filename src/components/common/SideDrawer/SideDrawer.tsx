@@ -5,7 +5,7 @@ import { POSITION_TYPES, SIZE_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import OverlayFooter from 'components/common/SideDrawer/OverlayFooter';
 import OverlayTitle from 'components/common/SideDrawer/OverlayTitle';
-import { SideDrawerProps } from 'components/common/SideDrawer/sideDrawer.types';
+import { SIDE_DRAWER_TYPES, SideDrawerProps } from 'components/common/SideDrawer/sideDrawer.types';
 
 const stackedClassNames: Record<number, string> = {
   0: '',
@@ -22,6 +22,18 @@ const SIZE_CLASSNAMES: Record<SIZE_TYPES, string> = {
   [SIZE_TYPES.MEDIUM]: 'w-sideDrawerMedium',
   [SIZE_TYPES.LARGE]: 'w-sideDrawerLarge',
   [SIZE_TYPES.XLARGE]: 'w-sideDrawerLarge',
+};
+
+const SIDE_DRAWER_TYPES_CLASSNAMES: Record<SIDE_DRAWER_TYPES, { wrapper: string; children: string }> = {
+  [SIDE_DRAWER_TYPES.PRIMARY]: {
+    wrapper: 'shadow-sideDrawer bg-white',
+    children: 'bg-white',
+  },
+  [SIDE_DRAWER_TYPES.SECONDARY]: {
+    wrapper: 'p-2.5 backdrop-blur-sm',
+    children:
+      'rounded-xl bg-white w-full h-full sideDrawerInner border-l-[0.5px] border-GRAY_500 shadow-sideDrawerInner',
+  },
 };
 
 const POSITION_CLASSNAMES = {
@@ -41,6 +53,7 @@ const POSITION_CLASSNAMES = {
 
 const SideDrawer: FC<SideDrawerProps> = ({
   isOpen = false,
+  type = SIDE_DRAWER_TYPES.PRIMARY,
   size = SIZE_TYPES.SMALL,
   position = POSITION_TYPES.RIGHT,
   onClose,
@@ -103,7 +116,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
   return (
     <div
       className={cn(
-        'h-full fixed w-screen z-1000 top-0 left-0 items-center',
+        'h-full fixed w-screen z-1000 top-0 left-0 items-center animate-opacity',
         isOpen ? '' : 'hidden',
         backdropClassName,
       )}
@@ -115,44 +128,47 @@ const SideDrawer: FC<SideDrawerProps> = ({
         className={cn(
           isMount ? mountClassName : unmountClassName,
           common,
-          ' -right-[100vw] w-screen flex flex-col absolute transition-all shadow-sideDrawer  h-screen bg-white',
+          ' -right-[100vw] w-screen flex flex-col absolute transition-all h-screen',
           stackedClassNames[stackPosition],
           sidebarWidthClasses,
           className,
+          SIDE_DRAWER_TYPES_CLASSNAMES[type].wrapper,
         )}
         role='presentation'
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
-        <OverlayTitle
-          closeButtonDimensions={closeButtonDimensions}
-          topBar={topBar}
-          title={title}
-          hideCloseButton={hideCloseButton}
-          step={step}
-          subtitle={subtitle}
-          onClose={handleClose}
-          headerClassName={headerClassName}
-          closeButtonClassName={closeButtonClassName}
-          titleClassName={titleClassName}
-          subtitleClassName={subtitleClassName}
-        />
-        <div className={cn('p-4 h-full', childrenWrapperClassName)}>{children}</div>
-        <OverlayFooter
-          onBack={onBack}
-          onNext={onNext}
-          nextButtonClassName={nextButtonClassName}
-          backButtonClassName={backButtonClassName}
-          nextButtonTitle={nextButtonTitle}
-          backButtonTitle={backButtonTitle}
-          bottomBar={bottomBar}
-          isNextButtonLoading={isNextButtonLoading}
-          isNextButtonDisabled={isNextButtonDisabled}
-          nextButtonIconProps={nextButtonIconProps}
-          nextButtonIconPosition={nextButtonIconPosition}
-          footerClassName={footerClassName}
-          nextButtonSize={nextButtonSize}
-          backButtonSize={backButtonSize}
-        />
+        <div className={cn(' bg-white w-full h-full', SIDE_DRAWER_TYPES_CLASSNAMES[type].children)}>
+          <OverlayTitle
+            closeButtonDimensions={closeButtonDimensions}
+            topBar={topBar}
+            title={title}
+            hideCloseButton={hideCloseButton}
+            step={step}
+            subtitle={subtitle}
+            onClose={handleClose}
+            headerClassName={headerClassName}
+            closeButtonClassName={closeButtonClassName}
+            titleClassName={titleClassName}
+            subtitleClassName={subtitleClassName}
+          />
+          <div className={cn('p-4 h-full', childrenWrapperClassName)}>{children}</div>
+          <OverlayFooter
+            onBack={onBack}
+            onNext={onNext}
+            nextButtonClassName={nextButtonClassName}
+            backButtonClassName={backButtonClassName}
+            nextButtonTitle={nextButtonTitle}
+            backButtonTitle={backButtonTitle}
+            bottomBar={bottomBar}
+            isNextButtonLoading={isNextButtonLoading}
+            isNextButtonDisabled={isNextButtonDisabled}
+            nextButtonIconProps={nextButtonIconProps}
+            nextButtonIconPosition={nextButtonIconPosition}
+            footerClassName={footerClassName}
+            nextButtonSize={nextButtonSize}
+            backButtonSize={backButtonSize}
+          />
+        </div>
       </div>
     </div>
   );

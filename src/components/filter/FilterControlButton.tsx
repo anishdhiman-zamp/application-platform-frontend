@@ -49,7 +49,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     <Tooltip
       tooltipBody={tooltipText}
       color='{TMS_COLORS.GRAY_200}'
-      tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
+      tooltipBodyClassName='f-12-450 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
       className='z-1'
       disabled={disabled}
       position={tooltipPosition}

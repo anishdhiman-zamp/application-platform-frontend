@@ -74,11 +74,10 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
   };
 
   return (
-    <div className='relative  cursor-pointer w-5.5 h-5.5 rounded' onClick={downloadCsv}>
+    <div className='relative z-1000 cursor-pointer w-5.5 h-5.5 rounded' onClick={downloadCsv}>
       <Tooltip
         tooltipBody={hasFilters ? 'Export filtered' : 'Export all'}
-        color='{TMS_COLORS.GRAY_200}'
-        tooltipBodyClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
+        tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
         className='z-1 h-full w-full'
         tooltipBodystyle='f-10-400'
         disabled={isPolling}

@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
+import { cn } from 'utils/common';
 
 const TOOLTIP_COLORS: Record<string, string> = {
   TEXT_PRIMARY: COLORS.BLACK,
@@ -37,7 +38,7 @@ export interface TooltipProps {
 }
 
 const TOOLTIP_BODY_COLOR_CLASSNAME_MAP = {
-  [TOOLTIP_COLORS.TEXT_PRIMARY]: 'bg-TEXT_PRIMARY text-white',
+  [TOOLTIP_COLORS.TEXT_PRIMARY]: 'bg-black text-white',
   [TOOLTIP_COLORS.SECONDARY]: 'text-TEXT_SECONDARY bg-ZAMP_SECONDARY',
 };
 
@@ -165,9 +166,13 @@ export const Tooltip: FC<TooltipProps> = ({
       {!!tooltipBody && (
         <div
           ref={ref}
-          className={`${wrapperClassName} ${wrapperStyle} ${wrapperPositionStyle[position]} ${
-            !disabled && 'group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto'
-          }`}
+          className={cn(
+            wrapperClassName,
+            wrapperStyle,
+            wrapperPositionStyle[position],
+            !disabled &&
+              'z-1000 group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto f-12-450 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200',
+          )}
           style={style ? style : { ...tooltipPosition }}
           data-testid={`tooltip-${id}`}
         >

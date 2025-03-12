@@ -78,7 +78,8 @@ module.exports = {
         RED_900: 'var(--RED_900)',
         RED_1000: 'var(--RED_1000)',
 
-        BACKGROUND_GRAY_1: '#FBFBFB',
+        BACKGROUND_GRAY_1: 'var(--BG_GRAY_1)',
+        BACKGROUND_GRAY_2: 'var(--BG_GRAY_2)',
       },
       height: {
         0.25: '1px',
@@ -210,6 +211,7 @@ module.exports = {
         tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
         pageBottomBar: '0px -4px 0px 0px #00000005',
         sideDrawer: '-3px 0px 0px 0px #00000005',
+        sideDrawerInner: '10px 0px 50px 0px #0000000d',
         menuList: '1px 2px 20px 0px #0000001A',
       },
       borderRadius: {

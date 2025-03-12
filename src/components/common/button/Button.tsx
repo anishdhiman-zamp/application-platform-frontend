@@ -92,7 +92,7 @@ const BUTTON_SIZE_STYLES = {
     textClassWithoutTrailingIcon: 'pl-2',
   },
   [SIZE_TYPES.XSMALL]: {
-    wrapperClassBySize: 'h-[26px] py-2.5 px-1.5 gap-1.5',
+    wrapperClassBySize: 'h-[26px] py-1.5 px-2 gap-1',
     wrapperWithOnlySingleIcon: 'h-7 w-7 p-[6.5px]',
     textClassDefaultBySize: 'f-11-500',
     textClassWithLeftIcons: 'pr-1',
@@ -207,7 +207,7 @@ export const Button: React.FC<ButtonProps> = ({
                 customLeadingIcon
               ) : (
                 <SvgSpriteLoader
-                  className={`${iconProps?.className} mt-0.5`}
+                  className={`${iconProps?.className} `}
                   id={iconProps?.id ?? ''}
                   height={iconProps?.height ?? iconSize}
                   width={iconProps?.width ?? iconSize}

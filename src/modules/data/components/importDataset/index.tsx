@@ -105,7 +105,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
   }, [startPollingPreview]);
 
   return (
-    <div>
+    <div className='z-1000'>
       {isImportFilePopupOpen && !startAiTransformation ? (
         <ImportFileWrapper
           fileName={fileName}
@@ -130,8 +130,8 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
       ) : null}
       <Tooltip
         tooltipBody='Import Data'
-        tooltipBodyClassName='f-10-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
-        position={TooltipPositions.BOTTOM}
+        tooltipBodyClassName='f-10-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-1000 bg-black text-white'
+        position={TooltipPositions.TOP}
         className='!cursor-text'
       >
         <div className={cn('p-1 hover:bg-GRAY_100 !rounded cursor-pointer', isImportFilePopupOpen && 'bg-GRAY_100')}>
