@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useAppDispatch } from 'hooks/toolkit';
-import ConnectAccount from 'modules/payments/connect-account/ConnectAccount';
+import PaymentsHome from 'modules/payments/PaymentsHome';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 const Payments = () => {
@@ -10,7 +10,7 @@ const Payments = () => {
     appDispatch(resetBreadcrumb(['Payments']));
   }, []);
 
-  return <ConnectAccount />;
+  return <PaymentsHome />;
 };
 
 Payments.getLayout = function getLayout(page: ReactElement) {
