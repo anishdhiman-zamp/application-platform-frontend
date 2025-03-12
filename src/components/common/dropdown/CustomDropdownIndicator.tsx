@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { components } from 'react-select';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -13,24 +13,27 @@ export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => 
   // @ts-ignore selectProps contains all props passed to react select. It's passed to each child component of react-select and takes custom props as well.
   const { size, menuIsOpen } = selectProps;
 
-  const ChevronIcon = (
-    <div className='ml-1'>
-      <SvgSpriteLoader
-        id={menuIsOpen ? 'chevron-up' : 'chevron-down'}
-        iconCategory={ICON_SPRITE_TYPES.ARROWS}
-        width={
-          customDropdownIndicatorSize
-            ? customDropdownIndicatorSize
-            : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.width
-        }
-        height={
-          customDropdownIndicatorSize
-            ? customDropdownIndicatorSize
-            : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.height
-        }
-        color={COLORS.GRAY_900}
-      />
-    </div>
+  const ChevronIcon = useMemo(
+    () => (
+      <div className='ml-1'>
+        <SvgSpriteLoader
+          id={menuIsOpen ? 'chevron-up' : 'chevron-down'}
+          iconCategory={ICON_SPRITE_TYPES.ARROWS}
+          width={
+            customDropdownIndicatorSize
+              ? customDropdownIndicatorSize
+              : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.width
+          }
+          height={
+            customDropdownIndicatorSize
+              ? customDropdownIndicatorSize
+              : DROPDOWN_SIZE_STYLES[size as SIZE_TYPES].dropdownIndicatorProps.height
+          }
+          color={COLORS.GRAY_900}
+        />
+      </div>
+    ),
+    [menuIsOpen, customDropdownIndicatorSize, size],
   );
 
   return (

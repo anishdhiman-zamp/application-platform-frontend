@@ -1,8 +1,11 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import Select from 'react-select';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
-import { CustomReactSelectPropsType } from 'types/common/components/dropdown/dropdown.types';
+import {
+  CustomDropdownIndicatorProps,
+  CustomReactSelectPropsType,
+} from 'types/common/components/dropdown/dropdown.types';
 import { cn } from 'utils/common';
 import { CustomDropdownIndicator } from 'components/common/dropdown/CustomDropdownIndicator';
 import { CustomMultivalueRemove } from 'components/common/dropdown/CustomMultivalueRemove';
@@ -50,6 +53,20 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
   showSelectedIcon,
   customDropdownIndicatorSize,
 }) => {
+  const memoizedDropdownIndicator = useMemo(() => {
+    const Component = (props: CustomDropdownIndicatorProps) => (
+      <CustomDropdownIndicator
+        {...props}
+        customDropdownIndicatorSize={customDropdownIndicatorSize}
+        isHoveredDropdown={isHoveredDropdown}
+      />
+    );
+
+    Component.displayName = 'memoized-react-select-dropdown-indicator';
+
+    return Component;
+  }, [customDropdownIndicatorSize, isHoveredDropdown]);
+
   return (
     <Select
       name='select'
@@ -65,13 +82,7 @@ const CustomReactSelect: FC<CustomReactSelectPropsType> = ({
       hideSelectedOptions={false}
       components={{
         Option: CustomOption,
-        DropdownIndicator: (props) => (
-          <CustomDropdownIndicator
-            {...props}
-            customDropdownIndicatorSize={customDropdownIndicatorSize}
-            isHoveredDropdown={isHoveredDropdown}
-          />
-        ),
+        DropdownIndicator: memoizedDropdownIndicator,
         MultiValueRemove: CustomMultivalueRemove,
         SingleValue: CustomSingleValue,
         ...(enableReset ? { MenuList } : {}),
