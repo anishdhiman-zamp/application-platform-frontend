@@ -97,7 +97,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
         .then(() => {
           handleCloseRemoveFromTeamPopup();
           refetchAudiencesByOrganizationId();
-          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_DELETED);
+          toast.success(`Removed ${userName} successfully`);
         })
         .catch((err) => {
           handleCloseRemoveFromTeamPopup();

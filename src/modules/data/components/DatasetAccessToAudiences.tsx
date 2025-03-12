@@ -112,7 +112,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
         .then(() => {
           handleCloseRemoveFromTeamPopup();
           refetchAudiencesByDatasetId();
-          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_DELETED);
+          toast.success(`Removed ${userName} successfully`);
         })
         .catch((err) => {
           handleCloseRemoveFromTeamPopup();
