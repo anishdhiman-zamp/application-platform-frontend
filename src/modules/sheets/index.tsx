@@ -169,7 +169,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                     <WidgetSwitcher
                       widgetConfig={widgetConfig}
                       currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
-                      defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency ?? ''}
+                      defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                       handleWidgetHeightChange={handleWidgetHeightChange}
                     />
