@@ -4,9 +4,8 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { browserTracingIntegration, replayIntegration } from '@sentry/nextjs';
+import { SENTRY_DSN } from 'constants/common.constants';
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
-
-const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 
 if (ENVIRONMENT === 'production') {
   Sentry.init({

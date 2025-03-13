@@ -7,6 +7,9 @@ export const inter = Inter({
   display: 'swap', // Controls font-display behavior.
 });
 
+export const SENTRY_DSN =
+  'https://3129cf83b7bf9bd6c715ba81823cd0db@o4504767438520320.ingest.us.sentry.io/4508794285129728';
+
 export enum ENVIRONMENT_TYPES {
   PRODUCTION = 'production',
   DEVELOPMENT = 'development',
