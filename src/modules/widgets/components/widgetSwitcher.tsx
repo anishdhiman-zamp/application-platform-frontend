@@ -7,6 +7,7 @@ interface WidgetSwitcherProps {
   widgetConfig: WidgetType;
   widgetInstances: WidgetInstanceType[];
   currency: string[];
+  defaultCurrency: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
 }
 
@@ -14,6 +15,7 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
   widgetConfig,
   widgetInstances,
   currency,
+  defaultCurrency,
   handleWidgetHeightChange,
 }) => {
   const [activeWidget, setActiveWidget] = useState<string>(widgetConfig?.default_widget);
@@ -39,6 +41,7 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
       groupWidgetsOptions={groupWidgetsOptions}
       onWidgetChange={onWidgetChange}
       currency={currency}
+      defaultCurrency={defaultCurrency}
       activeWidget={activeWidget}
       handleWidgetHeightChange={handleWidgetHeightChange}
     />

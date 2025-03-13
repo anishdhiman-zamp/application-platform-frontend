@@ -18,6 +18,7 @@ interface KpiTagProps {
   timeColumns: string;
   isFilterLoading?: boolean;
   currency?: string;
+  defaultCurrency: string;
 }
 
 const KpiTag: FC<KpiTagProps> = ({
@@ -28,6 +29,7 @@ const KpiTag: FC<KpiTagProps> = ({
   timeColumns,
   isFilterLoading,
   currency,
+  defaultCurrency,
 }) => {
   const valueContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,8 +54,10 @@ const KpiTag: FC<KpiTagProps> = ({
     const data = widgetData?.result?.[0]?.data[0] as Record<string, any>;
 
     const currency =
-      widgetData?.currency &&
-      (CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ?? widgetData?.currency);
+      (defaultCurrency || widgetData?.currency) &&
+      (CURRENCY_SYMBOLS[defaultCurrency as keyof typeof CURRENCY_SYMBOLS] ??
+        CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ??
+        widgetData?.currency);
 
     if (isNaN(Number(data?.[key]))) return data?.[key];
 

@@ -94,6 +94,7 @@ type StackedPivotProps = {
   periodicity: PERIODICITY_TYPES;
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
+  defaultCurrency: string;
 };
 
 const StackedPivot = ({
@@ -105,6 +106,7 @@ const StackedPivot = ({
   periodicity,
   activeWidget,
   handleWidgetHeightChange,
+  defaultCurrency,
 }: StackedPivotProps) => {
   const router = useRouter();
   const gridApi = useRef<GridApi | null>(null);
@@ -169,7 +171,7 @@ const StackedPivot = ({
             column={column}
             api={api}
             node={node}
-            currency={widgetData?.currency}
+            currency={defaultCurrency ?? widgetData?.currency}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
             showPercentage={display_config?.show_percentages}
           />

@@ -22,6 +22,7 @@ export type PivotTableWidgetPropsType = {
   currentWidgetSelectedFilter: MapAny;
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
+  defaultCurrency: string;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -37,6 +38,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   currentWidgetSelectedFilter,
   activeWidget,
   handleWidgetHeightChange,
+  defaultCurrency,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -88,6 +90,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           periodicity={periodicity}
           currentWidgetSelectedFilter={currentWidgetSelectedFilter}
           handleWidgetHeightChange={handleWidgetHeightChange}
+          defaultCurrency={defaultCurrency}
         />
       )}
     </CommonWrapper>

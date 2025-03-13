@@ -62,6 +62,7 @@ export interface SheetConfigType {
   sheet_layout: WidgetType[];
   currency: {
     hide_currency_filter: true;
+    default_currency: string;
   };
 }
 

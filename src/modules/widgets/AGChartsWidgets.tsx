@@ -30,6 +30,7 @@ interface WidgetsWrapperProps {
   onWidgetChange: (widgetId: string) => void;
   isFilterLoading?: boolean;
   currency: string;
+  defaultCurrency: string;
   activeWidget: string;
 }
 
@@ -45,6 +46,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   isFilterLoading,
   currency,
   activeWidget,
+  defaultCurrency,
 }) => {
   const widgetType = widgetDetails?.widget_type;
 
@@ -68,7 +70,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength, showCurrency } = useMemo(() => {
     return widgetData?.result
-      ? getTransformedData(widgetData?.result, widgetDetails, widgetData?.currency)
+      ? getTransformedData(widgetData?.result, widgetDetails, defaultCurrency ?? widgetData?.currency)
       : DEFAULT_TRANSFORMED_DATA;
   }, [widgetData]);
 

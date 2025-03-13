@@ -26,7 +26,7 @@ const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPerc
 
     const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
 
-    return currency ? `${currencySymbol}${getCommaSeparatedNumber(numericValue, 2)}` : numericValue;
+    return currency ? `${currencySymbol} ${getCommaSeparatedNumber(numericValue, 2)}` : numericValue;
   }, [currency, value]);
 
   const { isLastNode, isTopNode, isRootLevel } = useMemo(

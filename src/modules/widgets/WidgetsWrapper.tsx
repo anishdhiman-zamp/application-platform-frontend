@@ -26,6 +26,7 @@ interface WidgetsWrapperProps {
   onWidgetChange: (widgetId: string) => void;
   currency: string[];
   activeWidget: string;
+  defaultCurrency: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
 }
 
@@ -35,6 +36,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   onWidgetChange,
   currency,
   activeWidget,
+  defaultCurrency,
   handleWidgetHeightChange,
 }) => {
   const router = useRouter();
@@ -161,6 +163,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0] ?? undefined}
+          defaultCurrency={defaultCurrency}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -173,6 +176,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           timeColumns={periodicity?.timeColumn ?? ''}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
+          defaultCurrency={defaultCurrency}
         />
       );
     }
@@ -190,6 +194,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           activeWidget={activeWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
+          defaultCurrency={defaultCurrency}
           handleWidgetHeightChange={handleWidgetHeightChange}
         />
       );
