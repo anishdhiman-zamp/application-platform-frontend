@@ -12,6 +12,7 @@ import {
   OrderType,
   RequestType,
 } from 'types/components/table.type';
+import { checkIsObjectEmpty } from 'utils/common';
 import {
   AggregationFunctionMap,
   ArrayFilters,
@@ -60,7 +61,7 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
         };
       } else return null;
     case FILTER_TYPES.MULTI_SELECT:
-      if (condition.values.length) {
+      if (condition?.values?.length) {
         return {
           column: condition.colId,
           operator: condition.type,
@@ -108,7 +109,7 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
 const parseCondition = (condition: MapAny): FilterType | null => {
   if (condition.conditions) {
     return {
-      logicalOperator: LogicalOperatorMap[condition.type] || LogicalOperatorType.OperatorLogicalAnd,
+      logical_operator: LogicalOperatorMap[condition.type] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: condition.conditions.map((cond: MapAny) => parseCondition(cond)),
     };
   } else {
@@ -156,36 +157,24 @@ export const convertToFilterModel = (input: MapAny | null): FilterModelType | nu
 
 export const getFilterModelFromGroupAndFilterModel = (
   request: IServerSideGetRowsRequest,
-  zampIds?: string[],
+  hiddenColumnFilters?: MapAny,
 ): FilterModelType | null => {
   const filtersFromGroup = getFiltersFromGroupKeys(request);
-  const filtersFromFilterModel = convertToFilterModel(request.filterModel);
-  const filtersFromZampIds = {
-    column: '_zamp_id',
-    operator: CONDITION_OPERATOR_TYPE.IN,
-    value: zampIds,
-  };
+  const filterModel = checkIsObjectEmpty(hiddenColumnFilters ?? {})
+    ? request.filterModel
+    : checkIsObjectEmpty(request.filterModel ?? {})
+      ? (hiddenColumnFilters ?? null)
+      : { ...request.filterModel, ...hiddenColumnFilters };
+  const filtersFromFilterModel = convertToFilterModel(filterModel);
 
   if (filtersFromGroup.length) {
-    return zampIds?.length
-      ? {
-          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-          conditions: filtersFromFilterModel
-            ? [...filtersFromGroup, filtersFromFilterModel, filtersFromZampIds]
-            : [...filtersFromGroup, filtersFromZampIds],
-        }
-      : {
-          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-          conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
-        };
+    return {
+      logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+      conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
+    };
   }
 
-  return zampIds?.length
-    ? {
-        logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-        conditions: filtersFromFilterModel ? [filtersFromFilterModel, filtersFromZampIds] : [filtersFromZampIds],
-      }
-    : filtersFromFilterModel;
+  return filtersFromFilterModel;
 };
 
 const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] => {
@@ -234,15 +223,16 @@ const getOrderByColumns = (request: IServerSideGetRowsRequest): OrderByType[] =>
 const formatRequest = (
   request: IServerSideGetRowsRequest,
   fx_currency?: string | undefined,
-  zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
   disableTotalCount?: boolean,
+  hiddenColumnFilters?: MapAny,
+  drilldownFilters?: MapAny,
 ): RequestType => {
   const { endRow } = request;
 
   return {
-    filters: getFilterModelFromGroupAndFilterModel(request, zampIds),
+    filters: drilldownFilters ?? getFilterModelFromGroupAndFilterModel(request, hiddenColumnFilters),
     aggregations: getAggregations(request, useAlias, ignoreGroupCheck),
     group_by: getGroupByColumns(request),
     order_by: getOrderByColumns(request),
@@ -264,12 +254,21 @@ export const encodeRequest = (request: RequestType): string => {
 export const getEncodedRequest = (
   request: IServerSideGetRowsRequest,
   fx_currency?: string,
-  zampIds?: string[],
   useAlias?: boolean,
   ignoreGroupCheck?: boolean,
   disableTotalCount?: boolean,
+  hiddenColumnFilters?: MapAny,
+  drilldownFilters?: MapAny,
 ): string => {
-  const formattedRequest = formatRequest(request, fx_currency, zampIds, useAlias, ignoreGroupCheck, disableTotalCount);
+  const formattedRequest = formatRequest(
+    request,
+    fx_currency,
+    useAlias,
+    ignoreGroupCheck,
+    disableTotalCount,
+    hiddenColumnFilters,
+    drilldownFilters,
+  );
   const encodedRequest = encodeRequest(formattedRequest);
 
   return encodedRequest;

@@ -1,6 +1,5 @@
 import { ColDef, IServerSideGetRowsRequest, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { CHIP_COLORS } from 'constants/colors';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
   differenceInDays,
@@ -19,16 +18,16 @@ import {
   ValueFormatType,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { AggregationFunctionType, FilterModelType, LogicalOperatorType } from 'types/components/table.type';
-import { createDateObjectFromUTCString, formatPlural, getChipColor, getCommaSeparatedNumber } from 'utils/common';
+import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
+import { createDateObjectFromUTCString, formatPlural, getCommaSeparatedNumber, getTagColor } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
+import { ArrayFilters } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/table.types';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
-
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
   const lastUpdatedTime = createDateObjectFromUTCString(updated_at);
@@ -70,7 +69,6 @@ export const formatColumns = (
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
   tableRef: React.RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (columnId: string) => void,
-  zampIds?: string[],
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -101,7 +99,6 @@ export const formatColumns = (
       handleSuccessfulUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,
-      zampIds,
       filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
     };
 
@@ -115,7 +112,7 @@ export const formatColumns = (
       column?.options?.forEach((option) => {
         if (option) {
           if (!tagColorMap[option]) {
-            tagColorMap[option] = getChipColor(CHIP_COLORS);
+            tagColorMap[option] = getTagColor();
           }
         }
       });
@@ -209,7 +206,7 @@ export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string) 
 };
 
 export const getFilters = (filtersString: string, filterConfig: DatasetFilterConfigResponseType[]) => {
-  const filters = JSON.parse(filtersString);
+  const filters: MapAny = JSON.parse(filtersString);
   const filterKeys = Object.keys(filters);
 
   const requiredTagFilterConfigs = filterConfig.filter(
@@ -240,7 +237,13 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
     };
   });
 
-  return filters;
+  const defaultFilters: MapAny = {};
+
+  Object.entries(filters).forEach(([key, value]) => {
+    defaultFilters[key] = { ...value, isDefault: true };
+  });
+
+  return defaultFilters;
 };
 
 export const getValueFormatter = (
@@ -306,7 +309,7 @@ export const convertFilterModelToRuleFilters = (filterModel: FilterModelType | n
 
   filterModel.conditions?.forEach((condition) => {
     ruleFilters.conditions.push({
-      logical_operator: condition.logicalOperator ?? LogicalOperatorType.OperatorLogicalAnd,
+      logical_operator: condition.logical_operator ?? LogicalOperatorType.OperatorLogicalAnd,
       column: {
         column: condition.column as string,
         datatype: '',
@@ -355,7 +358,7 @@ const getAggregations = (colIds: string[]): MapAny => {
 };
 
 export const getEncodedRequestWithAggregations = (colIds: string[]) =>
-  getEncodedRequest(getAggregations(colIds) as IServerSideGetRowsRequest, '', [], true, true, true);
+  getEncodedRequest(getAggregations(colIds) as IServerSideGetRowsRequest, '', true, true, true);
 
 export const formatColumnLevelStats = (columnLevelStatsData?: MapAny): MapAny => {
   if (!columnLevelStatsData) return {};
@@ -371,4 +374,151 @@ export const formatColumnLevelStats = (columnLevelStatsData?: MapAny): MapAny =>
   });
 
   return columnLevelStats;
+};
+
+export const formatDrilldownFilters = (
+  drilldownFilters: FilterModelType,
+  filterConfig: DatasetFilterConfigResponseType[],
+) => {
+  const selectedDrilldownFilters: MapAny = {};
+  const hiddenDrilldownFilters: MapAny = {};
+
+  drilldownFilters.conditions?.forEach((condition) => {
+    const columnName = condition.column ?? '';
+    const filterConfigItem = filterConfig.find((item) => item.column === columnName);
+    const filterType = filterConfigItem?.type;
+    const isHiddenColumn = filterConfigItem?.metadata?.is_hidden;
+
+    switch (filterType) {
+      case FILTER_TYPES.AMOUNT_RANGE:
+        if (isHiddenColumn) {
+          hiddenDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            filter: condition.value,
+          };
+        } else {
+          selectedDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            filter: condition.value,
+          };
+        }
+        break;
+      case FILTER_TYPES.MULTI_SELECT:
+        if (isHiddenColumn) {
+          hiddenDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            values: condition.value,
+          };
+        } else {
+          selectedDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            values: condition.value,
+          };
+        }
+        break;
+      case FILTER_TYPES.DATE_RANGE:
+        if (isHiddenColumn) {
+          hiddenDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            dateFrom: condition.value?.[0],
+            dateTo: condition.value?.[1],
+          };
+        } else {
+          selectedDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            dateFrom: condition.value?.[0],
+            dateTo: condition.value?.[1],
+          };
+        }
+        break;
+      case FILTER_TYPES.SEARCH:
+        if (isHiddenColumn) {
+          hiddenDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            filter: condition.value,
+          };
+        } else {
+          selectedDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            filter: condition.value,
+          };
+        }
+        break;
+      case FILTER_TYPES.ARRAY_SEARCH:
+        if (isHiddenColumn) {
+          hiddenDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            value: condition.value,
+          };
+        } else {
+          selectedDrilldownFilters[columnName] = {
+            filterType: filterType,
+            type: condition.operator,
+            value: condition.value,
+          };
+        }
+        break;
+    }
+  });
+
+  const defaultSelectedDrilldownFilters: MapAny = {};
+
+  Object.entries(selectedDrilldownFilters).forEach(([key, value]) => {
+    defaultSelectedDrilldownFilters[key] = { ...value, isDefault: true };
+  });
+
+  return { selectedDrilldownFilters: defaultSelectedDrilldownFilters, hiddenDrilldownFilters };
+};
+
+export const formatUrlFilters = (filters: string): FilterModelType | null => {
+  if (!filters) return null;
+  const urlFilters: FilterModelType = {
+    logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+    conditions: [],
+  };
+
+  const filtersObject: MapAny = JSON.parse(filters);
+  const urlFiltersConditions: FilterType[] = [];
+
+  Object.entries(filtersObject).forEach(([key, value]) => {
+    const filterType = value?.filterType;
+    let startDate;
+    let endDate;
+
+    switch (filterType) {
+      case FILTER_TYPES.DATE_RANGE:
+        startDate = new Date(value?.dateFrom);
+
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(value?.dateTo);
+
+        endDate.setHours(23, 59, 59, 999);
+        urlFiltersConditions.push({
+          column: key,
+          operator: value?.type,
+          value: [format(startDate, DATE_FORMATS.YYYYMMDD_HHMMSS), format(endDate, DATE_FORMATS.YYYYMMDD_HHMMSS)],
+        });
+        break;
+      default:
+        urlFiltersConditions.push({
+          column: key,
+          operator: value?.type,
+          value: ArrayFilters.includes(value?.type) ? value?.values : value?.values?.[0],
+        });
+        break;
+    }
+  });
+
+  urlFilters.conditions = urlFiltersConditions;
+
+  return urlFilters;
 };

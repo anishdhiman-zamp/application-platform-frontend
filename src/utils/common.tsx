@@ -1,5 +1,6 @@
 import { MouseEventHandler } from 'react';
 import clsx, { ClassValue } from 'clsx';
+import { CHIP_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
@@ -294,6 +295,12 @@ export const cyclicIterator = (arr: any[]) => {
  * @returns a new iterator instance each time
  */
 export const getChipColor = (colorArray: string[]) => cyclicIterator(colorArray);
+
+/**
+ * Get a color from CHIP_COLORS using a cyclic iterator
+ * @returns a new iterator instance each time
+ */
+export const getTagColor: () => string = cyclicIterator(CHIP_COLORS);
 
 /**
  * Get the leading path after the '/' from the current URL.

@@ -28,6 +28,8 @@ import { LOADER_STATUS } from 'modules/data/data.types';
 import {
   formatColumnLevelStats,
   formatColumns,
+  formatDrilldownFilters,
+  formatUrlFilters,
   getColumnOrderingVisibilityForCurrentDataset,
   getEncodedRequestWithAggregations,
   getFilters,
@@ -47,8 +49,8 @@ import {
   DatasetUpdateResponseType,
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { LogicalOperatorType } from 'types/components/table.type';
-import { cn } from 'utils/common';
+import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
+import { checkIsObjectEmpty, cn } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -65,10 +67,10 @@ import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 type DatasetByIdProps = {
   id: string;
-  zampIds?: string[];
+  drilldownFilters?: FilterModelType;
 };
 
-const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
+const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
   const filters = useSearchParams().get('filters');
   const currency = useSearchParams().get('currency') ?? 'local';
   const appDispatch = useAppDispatch();
@@ -79,15 +81,16 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
     refetch: refetchFilterConfig,
     isFetching,
     isError,
+    isUninitialized,
   } = useGetDatasetFilterConfigQuery(
     {
       datasetId: id as string,
     },
     {
       skip: !id,
+      refetchOnMountOrArgChange: true,
     },
   );
-  const filterConfig = filterConfigData?.data;
   const showFileImports = filterConfigData?.config?.is_file_import_enabled;
   const [updateDatasetData] = useUpdateDatasetDataMutation();
   const [getActionStatus] = useLazyGetActionStatusQuery();
@@ -104,6 +107,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
+  const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -129,17 +133,37 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        const queryConfig = getEncodedRequest(parameters.request, fxCurrency?.[0], zampIds);
+        const queryConfig = getEncodedRequest(
+          parameters.request,
+          fxCurrency?.[0],
+          false,
+          false,
+          false,
+          hiddenColumnFilters,
+        );
+
+        const filterModel = parameters?.request?.filterModel;
+        const isDefaultFilters = checkIsObjectEmpty(filterModel ?? {})
+          ? false
+          : Object.values(filterModel ?? {}).every((filter) => filter?.isDefault);
 
         removeCellFocus();
         setExportsDatasetQuery(queryConfig);
-        if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
+        if (!firstLoadDone.current || isDefaultFilters) {
           // Use Cached Data for First Load
           firstLoadDone.current = true; // Mark first load as done
-          parameters.success({
-            rowData: cachedDatasetData?.data?.rows,
-            ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
-          });
+          if (drilldownFilters?.conditions === null) {
+            setIsNoRowsOverlayVisible(true);
+            parameters.success({
+              rowData: [],
+              rowCount: 0,
+            });
+          } else if (cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
+            parameters.success({
+              rowData: cachedDatasetData?.data?.rows,
+              ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
+            });
+          }
         } else {
           getDatasetData({
             datasetId: id as string,
@@ -167,7 +191,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         }
       },
     };
-  }, [getDatasetData, id, zampIds, fxCurrency, cachedDatasetData]);
+  }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
@@ -290,15 +314,14 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   };
 
   useEffect(() => {
-    if (filterConfig?.length) {
+    if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
       const columns = formatColumns(
-        filterConfig,
+        filterConfigData?.data,
         false,
         id as string,
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
-        zampIds,
       );
 
       if (columns?.length > 0) {
@@ -306,7 +329,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
           payload: {
-            filtersConfig: filterConfig
+            filtersConfig: filterConfigData?.data
               ?.filter((item) => !item?.metadata?.is_hidden)
               ?.map((column) => ({
                 key: column.column,
@@ -316,11 +339,28 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
               })),
           },
         });
-        if (filters)
+        if (filters) {
+          firstLoadDone.current = false;
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
+            payload: { selectedFilters: getFilters(filters, filterConfigData.data) ?? {} },
           });
+        }
+
+        if (drilldownFilters) {
+          firstLoadDone.current = false;
+          const { selectedDrilldownFilters, hiddenDrilldownFilters } = formatDrilldownFilters(
+            drilldownFilters,
+            filterConfigData?.data,
+          );
+
+          if (!checkIsObjectEmpty(hiddenDrilldownFilters)) setHiddenColumnFilters(hiddenDrilldownFilters);
+          if (!checkIsObjectEmpty(selectedDrilldownFilters))
+            dispatch({
+              type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+              payload: { selectedFilters: selectedDrilldownFilters },
+            });
+        }
         const amountRangeColumns = columns
           ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
           ?.map((column) => column?.field)
@@ -341,7 +381,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
         }
       }
     }
-  }, [filterConfig, filters, id]);
+  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
@@ -415,8 +455,18 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
   };
 
   useEffect(() => {
-    if (filters) return;
-    const queryConfig = getEncodedRequest({} as IServerSideGetRowsRequest, fxCurrency?.[0], zampIds);
+    firstLoadDone.current = false;
+    if (drilldownFilters?.conditions === null) return;
+    const urlFilters = formatUrlFilters(filters ?? '');
+    const queryConfig = getEncodedRequest(
+      {} as IServerSideGetRowsRequest,
+      fxCurrency?.[0],
+      false,
+      false,
+      false,
+      hiddenColumnFilters,
+      urlFilters ?? drilldownFilters,
+    );
 
     getDatasetData({
       datasetId: id as string,
@@ -433,7 +483,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, zampIds }) => {
           payload: { totalRows: response?.data?.total_count },
         });
       });
-  }, [filters]);
+  }, [filters, drilldownFilters, id]);
 
   useOnClickOutside(datasetTableRef, removeCellFocus);
 

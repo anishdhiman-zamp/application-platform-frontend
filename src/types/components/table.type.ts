@@ -19,7 +19,7 @@ export enum AggregationFunctionType {
 }
 
 export type FilterType = {
-  logicalOperator?: LogicalOperatorType;
+  logical_operator?: LogicalOperatorType;
   column?: string;
   operator?: CONDITION_OPERATOR_TYPE;
   value?: any;

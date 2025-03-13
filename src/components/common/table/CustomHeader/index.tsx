@@ -32,7 +32,6 @@ type CustomHeaderProps = {
     colId: string;
     colDef: ColDef;
   };
-  zampIds?: string[];
   filterComponentProps?: MapAny;
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
@@ -44,7 +43,6 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   filterType,
   options,
   column,
-  zampIds,
   filterComponentProps,
 }) => {
   const { colId, colDef } = column;
@@ -63,8 +61,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   const filtersCount = selectedFilters ? Object.keys(selectedFilters)?.length : 0;
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
-  const sortState = tableRef.current?.api?.getColumn(colId)?.getSort();
-  const isFilterActive = tableRef.current?.api?.getColumn(colId)?.isFilterActive();
+  const sortState = tableRef?.current?.api?.getColumn(colId)?.getSort();
+  const isFilterActive = tableRef?.current?.api?.getColumn(colId)?.isFilterActive();
 
   const filteredMenuOptions = useMemo(
     () =>
@@ -91,12 +89,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         setIsAddTagOpen(true);
         break;
       case CustomHeaderMenuOptionTypes.SORT_ASC:
-        tableRef.current?.api?.applyColumnState({
+        tableRef?.current?.api?.applyColumnState({
           state: [{ colId: colId, sort: OrderType.ASC }],
         });
         break;
       case CustomHeaderMenuOptionTypes.SORT_DESC:
-        tableRef.current?.api?.applyColumnState({
+        tableRef?.current?.api?.applyColumnState({
           state: [{ colId: colId, sort: OrderType.DESC }],
         });
         break;
@@ -104,7 +102,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         setIsFilterOpen(true);
         break;
       case CustomHeaderMenuOptionTypes.REMOVE_SORT:
-        tableRef.current?.api?.applyColumnState({
+        tableRef?.current?.api?.applyColumnState({
           state: [{ colId: colId, sort: null }],
         });
         break;
@@ -142,8 +140,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         }
       }
 
-      tableRef.current?.api?.clearCellSelection();
-      tableRef.current?.api?.clearFocusedCell();
+      tableRef?.current?.api?.clearCellSelection();
+      tableRef?.current?.api?.clearFocusedCell();
 
       updateMenuPosition();
       setIsMenuOpen((prev) => !prev);
@@ -165,19 +163,19 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Track column resize
   useEffect(() => {
-    tableRef.current?.api?.addEventListener('columnResized', handleColumnResizing);
+    tableRef?.current?.api?.addEventListener('columnResized', handleColumnResizing);
 
     return () => {
-      tableRef.current?.api?.removeEventListener('columnResized', handleColumnResizing);
+      tableRef?.current?.api?.removeEventListener('columnResized', handleColumnResizing);
     };
   }, [colId, tableRef, handleColumnResizing]);
 
   // Track column header clicked
   useEffect(() => {
-    tableRef.current?.api?.addEventListener('columnHeaderClicked', toggleMenu);
+    tableRef?.current?.api?.addEventListener('columnHeaderClicked', toggleMenu);
 
     return () => {
-      tableRef.current?.api?.removeEventListener('columnHeaderClicked', toggleMenu);
+      tableRef?.current?.api?.removeEventListener('columnHeaderClicked', toggleMenu);
     };
   }, [colId, tableRef, toggleMenu]);
 
@@ -264,7 +262,6 @@ const CustomHeader: FC<CustomHeaderProps> = ({
             handleSuccessfulUpdate={handleSuccessfulUpdate}
             column={colId}
             onClose={handleAddTagClose}
-            zampIds={zampIds}
           />
         </PositionedMenuWrapper>
       )}

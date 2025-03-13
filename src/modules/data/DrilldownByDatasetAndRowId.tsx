@@ -49,13 +49,7 @@ const DrilldownByDatasetAndRowId = () => {
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <DynamicLottiePlayer
-          src={PAGE_LOADER}
-          className='lottie-player'
-          autoplay
-          keepLastFrame
-          style={{ height: '200px' }}
-        />
+        <DynamicLottiePlayer src={PAGE_LOADER} className='lottie-player' autoplay style={{ height: '200px' }} loop />
       }
     >
       <div className='h-full'>
@@ -72,7 +66,10 @@ const DrilldownByDatasetAndRowId = () => {
           )}
         </div>
         {selectedTab && (
-          <DatasetById id={selectedTab} zampIds={data?.tabs.find((tab) => tab.dataset_id === selectedTab)?.zamp_ids} />
+          <DatasetById
+            id={selectedTab}
+            drilldownFilters={data?.tabs.find((tab) => tab.dataset_id === selectedTab)?.filters}
+          />
         )}
       </div>
     </CommonWrapper>

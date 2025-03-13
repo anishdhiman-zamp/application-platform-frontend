@@ -123,7 +123,19 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        const queryConfig = getEncodedRequest(parameters.request, '', zampIds);
+        const filtersFromZampIds = {
+          column: '_zamp_id',
+          operator: CONDITION_OPERATOR_TYPE.IN,
+          value: zampIds,
+        };
+        const queryConfig = getEncodedRequest(
+          parameters.request,
+          '',
+          false,
+          false,
+          false,
+          zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
+        );
 
         removeCellFocus();
         if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
@@ -277,15 +289,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(
-        filterConfig,
-        false,
-        id as string,
-        handleSuccessfulUpdate,
-        tableRef,
-        defaultFn,
-        zampIds,
-      );
+      const columns = formatColumns(filterConfig, false, id as string, handleSuccessfulUpdate, tableRef, defaultFn);
 
       if (columns?.length > 0) {
         setColumns(columns);
@@ -391,7 +395,19 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
 
   useEffect(() => {
     if (filters) return;
-    const queryConfig = getEncodedRequest({} as IServerSideGetRowsRequest, '', zampIds);
+    const filtersFromZampIds = {
+      column: '_zamp_id',
+      operator: CONDITION_OPERATOR_TYPE.IN,
+      value: zampIds,
+    };
+    const queryConfig = getEncodedRequest(
+      {} as IServerSideGetRowsRequest,
+      '',
+      false,
+      false,
+      false,
+      zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
+    );
 
     getDatasetData({
       datasetId: id as string,

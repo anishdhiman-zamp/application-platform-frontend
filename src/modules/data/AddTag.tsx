@@ -21,14 +21,12 @@ const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
 
 const AddTag = ({
   datasetId,
-  zampIds,
   handleSuccessfulUpdate,
   tagList,
   column,
   onClose,
 }: {
   datasetId: string;
-  zampIds?: string[];
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   tagList: string[];
   column: string;
@@ -54,10 +52,7 @@ const AddTag = ({
     updateDatasetData({
       datasetId: datasetId,
       data: {
-        filters: getFilterModelFromGroupAndFilterModel(
-          { filterModel: selectedFilters } as IServerSideGetRowsRequest,
-          zampIds,
-        ),
+        filters: getFilterModelFromGroupAndFilterModel({ filterModel: selectedFilters } as IServerSideGetRowsRequest),
         update: {
           column: column,
           value: selectedTag
