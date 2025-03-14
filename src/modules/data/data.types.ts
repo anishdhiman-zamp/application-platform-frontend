@@ -40,6 +40,10 @@ export type DatasetAccessToAudiencesPropsType = {
   userPrivilege: string;
   orgName?: string;
   customerName?: string;
+  teamInfo?: {
+    name?: string;
+    color?: string;
+  };
 };
 
 export type DatasetColumnRequest = {

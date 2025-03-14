@@ -91,6 +91,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             value: selectedOption?.value,
             label: selectedOption?.label,
             color: selectedOption?.color,
+            type: selectedOption?.type,
+            team_id: selectedOption?.team_id,
           });
 
           setSearch('');
@@ -106,7 +108,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         trimmedSearch
       ) {
         e.preventDefault();
-        onValidateAndAdd({ value: trimmedSearch, label: trimmedSearch });
+        onValidateAndAdd({
+          value: trimmedSearch,
+          label: trimmedSearch,
+        });
         setSearch('');
       }
     }
@@ -228,7 +233,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   }, [filteredDropdownOptions, debouncedSearch]);
 
   const handleSelectDropdownOption = useCallback(
-    (option: { value: string; label: string; color?: string }) => {
+    (option: { value: string; label: string; color?: string; type?: string; team_id?: string }) => {
       onSelectOption?.(option);
       setSearch('');
       handleSetInputFocus();
@@ -386,9 +391,12 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                             onKeyDown={handleKeyDown}
                           >
                             <span
-                              className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border border-GRAY_400'
+                              className={cn(
+                                'f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border',
+                              )}
                               style={{
-                                backgroundColor: option?.color ?? COLORS.WHITE,
+                                backgroundColor: option?.color || COLORS.WHITE,
+                                borderColor: option?.color ? 'transparent' : COLORS.GRAY_400,
                               }}
                             >
                               {transformLabel ? transformLabel(option?.label) : option?.label}

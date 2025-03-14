@@ -1,6 +1,6 @@
 import { FC, useCallback, useRef, useState } from 'react';
 import { useGetAudiencesByPageIdQuery, usePostPagesToAudiencesByPageIdMutation } from 'apis/pages';
-import { useGetAudiencesByOrganisationIdQuery } from 'apis/people';
+import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
@@ -9,7 +9,7 @@ import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import { DatasetAccessPrivilegesType } from 'modules/data/data.types';
 import PageAccessToAudiences from 'modules/page/PageAccessToAudience';
 import { PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
-import { SharePagePopupPropsType } from 'modules/page/pages.types';
+import { CombinedOptionListDataType, SharePagePopupPropsType } from 'modules/page/pages.types';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
@@ -61,6 +61,18 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
 
+  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+
+  const updatedUserAccessList = userAccessToPageList?.map((audience) => {
+    const matchingTeam = allTeamsData?.find((team) => team.team_id === audience.resource_audience_id);
+
+    return {
+      ...audience,
+      team_name: matchingTeam?.name ?? '',
+      team_color: matchingTeam?.metadata?.color_hex_code ?? '',
+    };
+  });
+
   const handleOpenSharePagePopup = () => {
     setOpenSharePagePopup(true);
   };
@@ -85,7 +97,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const AudiencesSharePageData: AudiencesDatasetShareData = {
     audiences: selectedItems.map((item) => ({
       audience_type: item?.resource_audience_type ?? '',
-      audience_id: item?.resource_audience_id ?? '',
+      audience_id: (item?.resource_audience_id || item?.team_id) ?? '',
       role: item?.role ?? '',
     })),
   };
@@ -109,10 +121,14 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   };
 
-  const validateAndGetUserDetails = (value: string) => {
+  const validateAndGetUserDetails = (value: string, type?: string) => {
     const isValid = validateEmail(value);
     let resource_audience_id = '';
     let resource_audience_type = '';
+
+    if (type === ResourceAudienceType.TEAM) {
+      return { isValid: true, resource_audience_type: ResourceAudienceType.TEAM };
+    }
 
     const isOrgAlreadyInvited = userAccessToPageList?.some(
       (item) => item?.resource_audience_type === ResourceAudienceType.ORGANIZATION,
@@ -158,8 +174,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     return { isValid: true, resource_audience_type, resource_audience_id };
   };
 
-  const handleValidateAndAdd = ({ value, label }: { value: string; label: string }) => {
-    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value);
+  const handleValidateAndAdd = ({ value, label, type, color, team_id }: CombinedOptionListDataType) => {
+    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(value, type);
 
     setSelectedItems((prev) => {
       const updatedItems = [
@@ -169,7 +185,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
           label,
           valid: isValid,
           role: selectedRoleRef?.current?.value,
-          color: isValid ? COLORS.WHITE : COLORS.RED_100,
+          color: isValid ? (color ? color : COLORS.WHITE) : COLORS.RED_100,
+          team_id,
           resource_audience_type,
           resource_audience_id,
         },
@@ -185,18 +202,22 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   };
 
-  const handleOptionSelection = (option: { value: string; label: string }) => {
-    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(option?.value);
+  const handleOptionSelection = (option: CombinedOptionListDataType) => {
+    const { isValid, message, resource_audience_type, resource_audience_id } = validateAndGetUserDetails(
+      option?.value,
+      option?.type,
+    );
 
     setSelectedItems((prev) => {
       const updatedItems = [
         ...prev,
         {
-          label: option.label,
-          value: option.value,
+          label: option?.label,
+          value: option?.value,
           valid: isValid,
-          color: isValid ? COLORS.WHITE : COLORS.RED_100,
+          color: isValid ? (option.color ? option?.color : COLORS.WHITE) : COLORS.RED_100,
           role: selectedRoleRef?.current?.value,
+          team_id: option?.team_id,
           resource_audience_type,
           resource_audience_id,
         },
@@ -212,12 +233,19 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   };
 
-  const combinedOptionListsData = [
-    { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION },
+  const combinedOptionListsData: CombinedOptionListDataType[] = [
+    { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION, color: '' },
     ...(teamMembersData?.map((member) => ({
       label: getUserNameFromEmail(member?.user?.email) ?? '',
       value: member?.user?.email ?? '',
       type: member?.resource_audience_type ?? '',
+    })) || []),
+    ...(allTeamsData?.map((item) => ({
+      label: item?.name ?? '',
+      value: item?.name ?? '',
+      type: ResourceAudienceType.TEAM,
+      color: item?.metadata?.color_hex_code,
+      team_id: item?.team_id,
     })) || []),
   ];
 
@@ -225,13 +253,16 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     ...(combinedOptionListsData
       ?.filter(
         (item) =>
-          !selectedItems.some((selected) => selected?.value === item?.value) &&
-          !audiencesDataByPageId?.some((audience) => audience?.user?.email === item?.value),
+          !selectedItems?.some((selected) => selected?.value === item?.value) &&
+          !audiencesDataByPageId?.some((audience) => audience?.user?.email === item?.value) &&
+          !updatedUserAccessList?.some((team) => team?.resource_audience_id === item?.team_id),
       )
       .map((member) => ({
         label: member?.label ?? '',
         value: member?.value ?? '',
         type: member?.type ?? '',
+        color: member?.color ?? '',
+        team_id: member?.team_id ?? '',
       })) || []),
   ];
 
@@ -318,7 +349,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                   isLoading={isLoadingAudiencesDataByPageId}
                   loader={<WhoHasAccessSkeletonLoader />}
                 >
-                  {userAccessToPageList?.map((audience, index) => (
+                  {updatedUserAccessList?.map((audience, index) => (
                     <PageAccessToAudiences
                       key={index}
                       resource_type={audience?.resource_type}
@@ -330,6 +361,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                       userPrivilege={userPrivilege}
                       orgName={orgLabel}
                       customerName={orgName}
+                      teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
                     />
                   ))}
                 </CommonWrapper>

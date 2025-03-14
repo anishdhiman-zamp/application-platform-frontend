@@ -77,6 +77,7 @@ export type Organization = {
 export enum ResourceAudienceType {
   ORGANIZATION = 'organization',
   USER = 'user',
+  TEAM = 'team',
 }
 
 export type Session = {

@@ -32,6 +32,7 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   userPrivilege,
   orgName,
   customerName,
+  teamInfo,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
@@ -42,16 +43,17 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
   const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
   const [changeRole] = usePatchChangeAudienceRoleInDatasetMutation();
   const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
-
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
-  const userName =
-    resource_audience_type === ResourceAudienceType.ORGANIZATION
-      ? orgName
+  const checkIfResourceTypeOrg = resource_audience_type === ResourceAudienceType.ORGANIZATION;
+  const checkIfResourceTypeTeam = resource_audience_type === ResourceAudienceType.TEAM;
+  const userName = checkIfResourceTypeOrg
+    ? orgName
+    : checkIfResourceTypeTeam
+      ? teamInfo?.name
       : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
-  const customAvatarWord =
-    (resource_audience_type === ResourceAudienceType.ORGANIZATION ? customerName : userName) || 'Unknown';
+  const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
   const checkPermission = accessPermissionForDataset(userPrivilege);
-  const showRoleChangeDropdown = checkPermission && !(resource_audience_type === ResourceAudienceType.ORGANIZATION);
+  const showRoleChangeDropdown = checkPermission && !checkIfResourceTypeOrg;
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -128,19 +130,33 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
       <div className='f-12-400 pl-2 bg-white flex justify-between items-center'>
         <div className='flex items-center justify-start'>
           <div className='flex items-start justify-start gap-x-1 w-[140px]'>
-            <>
-              <div className='w-fit'>
-                <Avatar
-                  name={customAvatarWord}
-                  backgroundColor={COLORS.GRAY_1000}
-                  className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
-                />
-              </div>
-              <div className='flex justify-center items-center gap-1'>
+            <div className='flex items-center gap-1'>
+              {checkIfResourceTypeTeam ? (
+                <div>
+                  <SvgSpriteLoader id='users-02' width={14} height={14} color={COLORS.GRAY_1000} className='mr-0.5' />
+                </div>
+              ) : (
+                <div className='w-fit'>
+                  <Avatar
+                    name={customAvatarWord}
+                    backgroundColor={COLORS.GRAY_1000}
+                    className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
+                  />
+                </div>
+              )}
+              <div
+                className={cn(
+                  'flex justify-center items-center gap-1',
+                  checkIfResourceTypeTeam && 'px-1.5 py-0.5 rounded',
+                )}
+                style={{
+                  backgroundColor: checkIfResourceTypeTeam ? teamInfo?.color : 'transparent',
+                }}
+              >
                 {userName}
                 <span className='f-12-400 text-GRAY_700'>{checkIfUser && '(You)'}</span>
               </div>
-            </>
+            </div>
           </div>
           <div className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
             {checkPermission && (

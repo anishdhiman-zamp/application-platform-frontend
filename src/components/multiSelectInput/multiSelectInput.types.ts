@@ -27,9 +27,21 @@ export type MultiSelectInputPropsType = {
   showValidationError?: boolean;
   setShowValidationError?: React.Dispatch<React.SetStateAction<boolean>>;
   validationErrorText?: string;
-  onValidateAndAdd: ({ value, label, color }: { value: string; label: string; color?: string }) => void;
-  optionsList?: { value: string; label: string; color?: string }[];
-  onSelectOption?: (option: { value: string; label: string; color?: string }) => void;
+  onValidateAndAdd: ({
+    value,
+    label,
+    color,
+    type,
+    team_id,
+  }: {
+    value: string;
+    label: string;
+    color?: string;
+    type?: string;
+    team_id?: string;
+  }) => void;
+  optionsList?: { value: string; label: string; color?: string; type?: string; team_id?: string }[];
+  onSelectOption?: (option: { value: string; label: string; color?: string; type?: string; team_id?: string }) => void;
   selectOnlyFromList?: boolean;
   transformLabel?: (label: string) => string;
   isLoadingOptionsList?: boolean;
