@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import InviteMembersPopup from 'modules/team/InviteMembersPopup';
+import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
@@ -11,9 +12,10 @@ import Input from 'components/common/input';
 type PeopleHeaderPropsType = {
   search: string;
   setSearch: (value: string) => void;
+  teamMembersData: AudiencesByOrganisationIdResponse[];
 };
 
-const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch }) => {
+const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMembersData }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
   const userPrivilege = getUserPrivilege();
@@ -53,7 +55,11 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch }) => {
         >
           Invite members
         </Button>
-        <InviteMembersPopup isOpen={isInviteMembersPopupOpen} onClose={handleCloseInviteMembersPopup} />
+        <InviteMembersPopup
+          isOpen={isInviteMembersPopupOpen}
+          onClose={handleCloseInviteMembersPopup}
+          teamMembersData={teamMembersData}
+        />
       </div>
     </>
   );

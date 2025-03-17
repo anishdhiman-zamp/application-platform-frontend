@@ -14,6 +14,7 @@ export const TeamTabsList = [
 export type InviteMembersPopupPropsType = {
   isOpen: boolean;
   onClose?: defaultFnType;
+  teamMembersData: AudiencesByOrganisationIdResponse[];
 };
 
 export type TeamMembersPrivilegeType = {
@@ -83,6 +84,17 @@ export type CustomTeamsDropdownPropsType = {
   randomColor: string | null;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
   onCloseDropdown: defaultFnType;
+};
+
+export type SelectedItemsType = {
+  value: string;
+  label: string;
+  valid: boolean;
+  role?: string;
+  color: string;
+  resource_audience_type?: string;
+  resource_audience_id?: string;
+  validationMessage?: string;
 };
 
 export type MembersTeamPropsType = {

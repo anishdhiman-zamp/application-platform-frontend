@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFn, MapAny } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { checkObjOrArrType, cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
 import CommonWrapper from 'components/commonWrapper';
@@ -15,7 +15,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   id,
   search,
   setSearch,
-  selectedRoleRef,
   isOpen,
   placeholderText,
   roleOptions,
@@ -30,50 +29,59 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   selectOnlyFromList = false,
   transformLabel,
   isLoadingOptionsList,
+  optionalOpenDropdownOptions = true,
   wrapperClassName,
   inputWrapperClassName,
   multiSelectInputClassName,
   setIsCustomInputFocused,
   customOptionsListDropdown,
+  selectedRole,
+  setSelectedRole,
   onCustomDeleteFn,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownOptionsRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const inputPlaceholderText = inputArrayList.length > 0 ? '' : placeholderText;
+  const inputPlaceholderText = inputArrayList?.length > 0 ? '' : placeholderText;
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const [debouncedSearch, setDebouncedSearch] = useState<string>(search);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number>(0);
   const [openDropdownOptions, setOpenDropdownOptions] = useState<boolean>(false);
 
-  const handleSetInputFocus = () => {
+  const handleSetInputFocus = useCallback(() => {
     setIsInputFocused(true);
     setIsCustomInputFocused?.(true);
     inputRef?.current?.focus();
     setOpenDropdownOptions(true);
-  };
+  }, [setIsInputFocused, setIsCustomInputFocused, inputRef, setOpenDropdownOptions]);
 
-  const handleSetInputBlur = () => {
+  const handleSetInputBlur = useCallback(() => {
     setIsInputFocused(false);
     setIsCustomInputFocused?.(false);
     inputRef?.current?.blur();
     setOpenDropdownOptions(false);
-  };
+  }, [setIsInputFocused, setIsCustomInputFocused, inputRef, setOpenDropdownOptions]);
 
   useEffect(() => {
     if (isOpen) {
       setHoveredOptionIndex(0);
-      handleSetInputFocus();
+      if (optionalOpenDropdownOptions) {
+        handleSetInputFocus();
+      } else {
+        setIsInputFocused(true);
+        setIsCustomInputFocused?.(true);
+        inputRef?.current?.focus();
+      }
     }
-  }, [isOpen, inputRef]);
+  }, [isOpen, handleSetInputFocus, optionalOpenDropdownOptions]);
 
   const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const keyEvent = e.key;
 
     if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
       if (inputArrayList?.length > 0) {
-        handleRemoveItem(inputArrayList[inputArrayList.length - 1], inputArrayList.length - 1);
+        handleRemoveItem(inputArrayList[inputArrayList?.length - 1], inputArrayList?.length - 1);
       }
       handleSetInputFocus();
 
@@ -161,18 +169,17 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         return;
       }
 
-      setInputArrayList((prev) => {
-        const updatedItems = prev.filter((_, i) => i !== index);
+      const updatedItems = inputArrayList?.filter((_, i) => i !== index);
 
-        if (setShowValidationError) {
-          setShowValidationError(updatedItems?.some((item) => !item?.valid));
-        }
+      if (setShowValidationError) {
+        setShowValidationError(updatedItems?.some((item) => !item.valid));
+      }
 
-        return updatedItems;
-      });
+      setInputArrayList(updatedItems);
+
       handleSetInputFocus();
     },
-    [setInputArrayList, setShowValidationError, inputRef],
+    [inputArrayList, setInputArrayList, setShowValidationError, handleSetInputFocus],
   );
 
   const handleClickOutside = useCallback(
@@ -212,7 +219,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
 
   const filteredDropdownOptions = useMemo(() => {
     if (!combinedOptions) return [];
-    if (!debouncedSearch.trim()) return combinedOptions;
+    if (!debouncedSearch?.trim()) return combinedOptions;
 
     const filteredOptions = combinedOptions?.filter((option) =>
       option?.value.toLowerCase().startsWith(debouncedSearch.toLowerCase()),
@@ -223,15 +230,6 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     return filteredOptions;
   }, [combinedOptions, debouncedSearch]);
 
-  useEffect(() => {
-    if (debouncedSearch?.trim()) {
-      setOpenDropdownOptions((prev) =>
-        prev !== filteredDropdownOptions?.length > 0 ? filteredDropdownOptions?.length > 0 : prev,
-      );
-    }
-    setHoveredOptionIndex(0);
-  }, [filteredDropdownOptions, debouncedSearch]);
-
   const handleSelectDropdownOption = useCallback(
     (option: { value: string; label: string; color?: string; type?: string; team_id?: string }) => {
       onSelectOption?.(option);
@@ -240,6 +238,24 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     },
     [onSelectOption, setSearch, inputRef, showValidationError],
   );
+
+  // if selectedRole is not object, finds the option from roleOptions, if yes, converts into { label, value } with a stringified version
+  const selectedRoleValue = useMemo(() => {
+    if (checkObjOrArrType(selectedRole, 'object')) {
+      return { label: JSON.stringify(selectedRole), value: JSON.stringify(selectedRole) };
+    }
+
+    return (roleOptions ?? [])?.find((option) => option?.value === selectedRole) ?? roleOptions?.[0];
+  }, [selectedRole, roleOptions]);
+
+  useEffect(() => {
+    if (debouncedSearch?.trim()) {
+      setOpenDropdownOptions((prev) =>
+        prev !== filteredDropdownOptions?.length > 0 ? filteredDropdownOptions?.length > 0 : prev,
+      );
+    }
+    setHoveredOptionIndex(0);
+  }, [filteredDropdownOptions, debouncedSearch]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -271,27 +287,29 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           ref={containerRef}
           onClick={handleSetInputFocus}
         >
-          {inputArrayList.map((item, index) => (
-            <div
-              key={index}
-              className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit cursor-default'
-              style={{
-                backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
-                border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
-              }}
-            >
-              <span className='f-12-500 text-GRAY_1000'>{item?.label}</span>
-              <SvgSpriteLoader
-                id='x-close'
-                iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                width={10}
-                height={10}
-                onClick={() => handleRemoveItem(item, index)}
-                color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
-                className='cursor-pointer'
-              />
-            </div>
-          ))}
+          {Array.isArray(inputArrayList) &&
+            inputArrayList?.length > 0 &&
+            inputArrayList?.map((item, index) => (
+              <div
+                key={index}
+                className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit cursor-default'
+                style={{
+                  backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
+                  border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
+                }}
+              >
+                <span className='f-12-500 text-GRAY_1000'>{item?.label}</span>
+                <SvgSpriteLoader
+                  id='x-close'
+                  iconCategory={ICON_SPRITE_TYPES.GENERAL}
+                  width={10}
+                  height={10}
+                  onClick={() => handleRemoveItem(item, index)}
+                  color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
+                  className='cursor-pointer'
+                />
+              </div>
+            ))}
           <Input
             placeholder={inputPlaceholderText}
             type='email'
@@ -316,14 +334,12 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
               id={`${id}-multi-select-input-dropdown`}
               eventCallback={defaultFn}
               onChange={(selectedOption) => {
-                if (selectedRoleRef) {
-                  selectedRoleRef.current = selectedOption;
-                }
+                setSelectedRole?.(selectedOption?.value);
                 inputRef.current?.focus();
                 setIsInputFocused(true);
               }}
+              value={selectedRoleValue}
               defaultValue={roleOptions[0]}
-              value={selectedRoleRef?.current}
               placeholder='Member'
               isSearchable={false}
               customClass={{

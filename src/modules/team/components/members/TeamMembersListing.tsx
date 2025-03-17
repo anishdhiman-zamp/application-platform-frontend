@@ -64,7 +64,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
       <CommonWrapper
         isLoading={isLoadingTeamMembersData}
         skeletonType={SkeletonTypes.CUSTOM}
-        loader={<SkeletonLoaderListing />}
+        loader={<SkeletonLoaderListing columns={4} />}
       >
         <div className='overflow-y-auto h-[calc(100vh-270px)] [&::-webkit-scrollbar]:hidden'>
           {data?.map((row, index) => {

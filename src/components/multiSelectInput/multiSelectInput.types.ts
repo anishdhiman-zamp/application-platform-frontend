@@ -4,6 +4,7 @@ export type ArrayListOption = {
   value: string;
   resource_audience_type?: string;
   resource_audience_id?: string;
+  validationMessage?: string;
   team_membership_id?: string;
   team_id?: string;
   label: string;
@@ -50,7 +51,10 @@ export type MultiSelectInputPropsType = {
   multiSelectInputClassName?: string;
   setIsCustomInputFocused?: React.Dispatch<React.SetStateAction<boolean>>;
   customOptionsListDropdown?: React.ElementType;
+  selectedRole?: string;
+  setSelectedRole?: React.Dispatch<React.SetStateAction<Record<number, string> | string>>;
   onCustomDeleteFn?: (item: MapAny) => void;
+  optionalOpenDropdownOptions?: boolean;
 };
 
 export const KEY_CODES = {

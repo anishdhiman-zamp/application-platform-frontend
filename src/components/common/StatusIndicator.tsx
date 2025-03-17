@@ -9,6 +9,7 @@ type StatusIndicatorPropsType = {
 };
 
 const LOADING_STATES = [LOADER_STATUS.LOADING, LOADER_STATUS.INITIATED, LOADER_STATUS.ALIGNMENT_PENDING];
+const SUCCESS_STATES = [LOADER_STATUS.SUCCESS, LOADER_STATUS.ALIGNMENT_COMPLETED];
 
 const StatusIndicator: FC<StatusIndicatorPropsType> = ({ status }) => {
   if (LOADING_STATES.includes(status)) {
@@ -25,7 +26,7 @@ const StatusIndicator: FC<StatusIndicatorPropsType> = ({ status }) => {
     );
   }
 
-  if (status === LOADER_STATUS.SUCCESS) {
+  if (SUCCESS_STATES.includes(status)) {
     return <SvgSpriteLoader id='check-circle' width={16} height={16} color={COLORS.GREEN_PRIMARY} className='mt-0.5' />;
   }
 

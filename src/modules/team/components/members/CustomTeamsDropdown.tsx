@@ -59,9 +59,6 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                   optionRefs.current[index] = el;
                 }
               }}
-              className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
-                'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
-              })}
               onMouseEnter={() => setHoveredOptionIndex(index)}
               onClick={() => {
                 const optionWithNew = option as ArrayListOption & { isNew?: boolean };
@@ -70,26 +67,51 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                 onSelectOption(option);
               }}
             >
-              {(option as ArrayListOption & { isNew?: boolean })?.isNew ? (
-                <div className='f-12-400 flex flex-wrap items-center text-GRAY_1000 gap-1 rounded-md cursor-pointer min-h-5 px-1.5'>
-                  <span> Create team :</span>
-                  {search && (
-                    <span
-                      className='px-1.5 py-0.5 rounded cursor-pointer text-black w-fit h-fit text-wrap'
-                      style={{ backgroundColor: randomColor ?? COLORS.WHITE }}
-                    >
-                      {option?.label}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <span
-                  className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
-                  style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
+              {(option as ArrayListOption & { isNew?: boolean })?.isNew && !!search?.length ? (
+                <div
+                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                    'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
+                  })}
                 >
-                  {transformLabel ? transformLabel(option?.label) : option?.label}
-                </span>
-              )}
+                  <div className='f-12-400 flex flex-wrap items-center text-GRAY_1000 gap-1 rounded-md cursor-pointer min-h-5 px-1.5'>
+                    <span> Create team :</span>
+                    {search && (
+                      <span
+                        className='px-1.5 py-0.5 rounded cursor-pointer text-black w-fit h-fit text-wrap'
+                        style={{ backgroundColor: randomColor ?? COLORS.WHITE }}
+                      >
+                        {option?.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : search?.length === 0 && !(option as ArrayListOption & { isNew?: boolean })?.isNew ? (
+                <div
+                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                    'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
+                  })}
+                >
+                  <span
+                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
+                    style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
+                  >
+                    {transformLabel ? transformLabel(option?.label) : option?.label}
+                  </span>
+                </div>
+              ) : search?.length !== 0 && !(option as ArrayListOption & { isNew?: boolean })?.isNew ? (
+                <div
+                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                    'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
+                  })}
+                >
+                  <span
+                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
+                    style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
+                  >
+                    {transformLabel ? transformLabel(option?.label) : option?.label}
+                  </span>
+                </div>
+              ) : null}
             </div>
           ))}
         </CommonWrapper>

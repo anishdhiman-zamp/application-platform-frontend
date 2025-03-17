@@ -54,7 +54,7 @@ const PeoplePage = () => {
 
   return (
     <div className='p-10 w-full h-full'>
-      <PeopleHeader search={search} setSearch={setSearch} />
+      <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
       <PeopleTabs
         filteredTeamMembers={filteredTeamMembers ?? []}
         isLoadingTeamMembersData={isLoadingTeamMembersData}

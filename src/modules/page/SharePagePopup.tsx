@@ -6,7 +6,6 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
-import { DatasetAccessPrivilegesType } from 'modules/data/data.types';
 import PageAccessToAudiences from 'modules/page/PageAccessToAudience';
 import { PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
 import { CombinedOptionListDataType, SharePagePopupPropsType } from 'modules/page/pages.types';
@@ -33,7 +32,10 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const sharePagePopupRef = useRef<HTMLDivElement>(null);
-  const selectedRoleRef = useRef<DatasetAccessPrivilegesType>(DATASET_ACCESS_PRIVILEGES_LIST[0]);
+  const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
+    DATASET_ACCESS_PRIVILEGES_LIST[0].value,
+  );
+
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
@@ -51,6 +53,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   } = useGetAudiencesByPageIdQuery({ pageId }, { skip: !pageId, refetchOnMountOrArgChange: false });
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostPagesToAudiencesByPageIdMutation();
   const userAccessToPageList = audiencesDataByPageId ?? [];
+  const showInitialDropdownOptions = !isLoadingAudiencesDataByPageId && !!(userAccessToPageList?.length <= 1);
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_role = getUserPrivilege();
@@ -64,7 +67,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
 
   const updatedUserAccessList = userAccessToPageList?.map((audience) => {
-    const matchingTeam = allTeamsData?.find((team) => team.team_id === audience.resource_audience_id);
+    const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
 
     return {
       ...audience,
@@ -94,31 +97,31 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
     }
   }, [openSharePagePopup]);
 
-  const AudiencesSharePageData: AudiencesDatasetShareData = {
-    audiences: selectedItems.map((item) => ({
-      audience_type: item?.resource_audience_type ?? '',
-      audience_id: (item?.resource_audience_id || item?.team_id) ?? '',
-      role: item?.role ?? '',
-    })),
-  };
-
   const handleSharePagePopup = () => {
     if (!checkPermission) {
       toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.ROLE_CHANGE]);
 
       return;
-    } else {
-      postInviteAudiences({ pageId, body: AudiencesSharePageData })
-        .unwrap()
-        .then(() => {
-          setSelectedItems([]);
-          refetchAudiencesDataByPageId();
-          toast.success(TOAST_MESSAGES.SUCCESS_PAGE_SHARED);
-        })
-        .catch((err) => {
-          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_PAGE_SHARED);
-        });
     }
+
+    const AudiencesSharePageData: AudiencesDatasetShareData = {
+      audiences: selectedItems?.map((item) => ({
+        audience_type: item?.resource_audience_type ?? '',
+        audience_id: (item?.resource_audience_id || item?.team_id) ?? '',
+        role: (selectedRole as string) ?? item?.role,
+      })),
+    };
+
+    postInviteAudiences({ pageId, body: AudiencesSharePageData })
+      .unwrap()
+      .then(() => {
+        setSelectedItems([]);
+        refetchAudiencesDataByPageId();
+        toast.success(TOAST_MESSAGES.SUCCESS_PAGE_SHARED);
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_PAGE_SHARED);
+      });
   };
 
   const validateAndGetUserDetails = (value: string, type?: string) => {
@@ -184,7 +187,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
           value,
           label,
           valid: isValid,
-          role: selectedRoleRef?.current?.value,
+          role: selectedRole as string,
           color: isValid ? (color ? color : COLORS.WHITE) : COLORS.RED_100,
           team_id,
           resource_audience_type,
@@ -192,7 +195,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
         },
       ];
 
-      setShowValidationError(updatedItems.some((item) => !item.valid));
+      setShowValidationError(updatedItems?.some((item) => !item?.valid));
 
       return updatedItems;
     });
@@ -216,14 +219,14 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
           value: option?.value,
           valid: isValid,
           color: isValid ? (option.color ? option?.color : COLORS.WHITE) : COLORS.RED_100,
-          role: selectedRoleRef?.current?.value,
+          role: selectedRole as string,
           team_id: option?.team_id,
           resource_audience_type,
           resource_audience_id,
         },
       ];
 
-      setShowValidationError(updatedItems.some((item) => !item.valid));
+      setShowValidationError(updatedItems.some((item) => !item?.valid));
 
       return updatedItems;
     });
@@ -280,7 +283,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
       </div>
       <div className='relative'>
         {openSharePagePopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1000 bg-faded-white rounded-2xl'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>Share this page</span>
@@ -300,7 +303,8 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                     id='share-page'
                     search={search}
                     setSearch={setSearch}
-                    selectedRoleRef={selectedRoleRef}
+                    selectedRole={selectedRole as string}
+                    setSelectedRole={setSelectedRole}
                     isOpen={openSharePagePopup}
                     placeholderText={placeholderText}
                     roleOptions={PAGE_ACCESS_PRIVILEGES_LIST}
@@ -314,6 +318,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
                     isLoadingOptionsList={isLoadingTeamMembersData}
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
+                    optionalOpenDropdownOptions={showInitialDropdownOptions}
                     selectOnlyFromList
                   />
                 </div>

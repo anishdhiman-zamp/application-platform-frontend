@@ -5,7 +5,9 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const Popup: FC<PopupProps> = ({
   title,
+  subTitle,
   titleClassName,
+  subTitleClassName,
   popupWrapperClassName,
   showIcon,
   iconCategory,
@@ -44,7 +46,10 @@ const Popup: FC<PopupProps> = ({
           onClick={stopPropagationAction}
         >
           <div className={cn('flex w-full justify-between items-center px-5 pt-5 pb-0', popupWrapperClassName)}>
-            {title && <span className={titleClassName}>{title}</span>}
+            <div className='flex flex-col'>
+              {title && <span className={cn('f-16-600 text-GRAY_950', titleClassName)}>{title}</span>}
+              {subTitle && <span className={cn('f-12-400 text-GRAY_700 mt-1', subTitleClassName)}>{subTitle}</span>}
+            </div>
             {showIcon && (
               <div className='p-1 cursor-pointer' onClick={onClose}>
                 <SvgSpriteLoader id={iconId} iconCategory={iconCategory} width={16} height={16} color={iconColor} />

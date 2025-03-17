@@ -482,3 +482,16 @@ export const validateEmail = (email: string): boolean => {
 
   return testEmailRegex.test(email);
 };
+
+/*
+ * Check if the value is of type object or array or both
+ * @param value
+ * @param type
+ * @returns boolean
+ */
+export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'both'): boolean => {
+  if (type === 'object') return typeof value === 'object' && value !== null && !Array.isArray(value);
+  if (type === 'array') return Array.isArray(value);
+
+  return typeof value === 'object' && value !== null; // 'both' case (checks for object or array)
+};

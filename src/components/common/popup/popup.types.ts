@@ -3,7 +3,9 @@ import { defaultFnType } from 'types/commonTypes';
 
 export type PopupProps = {
   title?: string;
+  subTitle?: string;
   titleClassName?: string;
+  subTitleClassName?: string;
   popupWrapperClassName?: string;
   showIcon?: boolean;
   iconCategory?: ICON_SPRITE_TYPES;
