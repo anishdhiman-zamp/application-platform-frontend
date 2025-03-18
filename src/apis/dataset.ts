@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
+import { APITags } from 'constants/api.constants';
 import baseApi from 'services/api';
 import {
   AudiencesByDatasetIdRequestType,
@@ -71,6 +72,8 @@ const Dataset = baseApi.injectEndpoints({
     }),
     getDatasetListing: builder.query<DatasetListingResponseType, DatasetListingRequestType>({
       query: (params) => ({ url: API_ENDPOINTS.DATASET_LISTING_GET, params }),
+      keepUnusedDataFor: 6000,
+      providesTags: [APITags.GET_DATASET_LISTING]
     }),
     updateDatasetData: builder.mutation<DatasetUpdateResponseType, DatasetUpdateRequestType>({
       query: ({ datasetId, data }) => ({
@@ -180,6 +183,7 @@ export const {
   useLazyGetDatasetExportsSignedUrlQuery,
   useGetDatasetDrilldownQuery,
   useLazyGetDatasetListingQuery,
+  useGetDatasetListingQuery,
   useUpdateDatasetDataMutation,
   useLazyGetActionStatusQuery,
   useGetActionStatusQuery,

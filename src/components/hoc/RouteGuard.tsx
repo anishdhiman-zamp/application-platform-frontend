@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useLazyGetDatasetListingQuery } from 'apis/dataset';
+import { useGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
 import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
 import { FEATURE_FLAGS } from 'constants/featureFlags';
@@ -25,24 +25,26 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const isAdminRoute = router.pathname.startsWith(ROUTES_PATH.ADMIN);
   const { evaluate } = useFeatureFlags();
   const { width, height } = useWindowDimensions();
-  const [getDatasetListing] = useLazyGetDatasetListingQuery();
+  const { data: datasetListingData, isLoading: isDatasetListingLoading } = useGetDatasetListingQuery(
+    { page: 1, pageSize: PAGE_SIZE },
+    {
+      skip: currentPathName !== DATASETS || id === undefined,
+      refetchOnMountOrArgChange: false,
+    },
+  );
   const { data: pages, isLoading: isPagesLoading } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-
+  
   useEffect(() => {
-    if (currentPathName === DATASETS && id !== undefined) {
-      getDatasetListing({ page: 1, pageSize: PAGE_SIZE })
-        .unwrap()
-        .then((data) => {
-          const pageExists = data?.datasets?.some((dataset) => dataset?.id === id);
+    if (currentPathName === DATASETS && id !== undefined && !isDatasetListingLoading) {
+      const pageExists = datasetListingData?.datasets?.some((dataset) => dataset?.id === id);
 
-          if (!pageExists) {
-            router.push(ROUTES_PATH.NO_ACCESS);
-          }
-        });
+      if (!pageExists) {
+        router.push(ROUTES_PATH.NO_ACCESS);
+      }
     }
-  }, [currentPathName, id, getDatasetListing, router]);
+  }, [currentPathName, id, isDatasetListingLoading, datasetListingData]);
 
   useEffect(() => {
     if (currentPathName === PAGES && !isPagesLoading && id && pages) {
