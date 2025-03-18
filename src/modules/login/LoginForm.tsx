@@ -5,7 +5,7 @@ import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_GROUPS } from 'modules/login/login.constants';
+import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
 import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
@@ -43,7 +43,9 @@ export const LoginForm = () => {
       });
       const respJson = await resp.json();
 
-      if (resp.status === 422 || resp.status === 200) {
+      const validSessionMsg = respJson?.ui?.messages?.[0]?.text.includes(VALID_SESSION_DETECTED_ERROR_MSG);
+
+      if (resp.status === 422 || resp.status === 200 || (resp.status === 400 && validSessionMsg)) {
         setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
         const redirectUrl = respJson.redirect_browser_to;
