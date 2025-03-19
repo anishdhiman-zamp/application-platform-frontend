@@ -183,7 +183,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           {columns?.map((column) => (
             <div
               key={column?.getColId()}
-              className='flex items-center gap-2.5 p-2 select-none bg-white hover:!bg-GRAY_100 rounded-md w-full'
+              className='flex items-center gap-2.5 p-2 bg-white hover:!bg-GRAY_100 rounded-md w-full'
             >
               <div className='drag-handle cursor-grab min-w-[14px]'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
@@ -194,7 +194,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
                   onPress={(e) => handleColumnClick(e, column)}
                   id={column?.getColId() ?? ''}
                 />
-                <div className='f-12-400 text-GRAY_1000 break-all'>{column?.getColId()}</div>
+                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColId()}</div>
               </div>
             </div>
           ))}
