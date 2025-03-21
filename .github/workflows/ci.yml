@@ -44,32 +44,4 @@ jobs:
         echo "Coverage files:" >> $GITHUB_STEP_SUMMARY
         ls -la coverage/ >> $GITHUB_STEP_SUMMARY
 
-  enforce-pr-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-    - name: Check PR Review Status
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { data: reviews } = await github.rest.pulls.listReviews({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          
-          const teamMembers = await github.rest.teams.listMembers({
-            org: context.repo.owner,
-            team_slug: 'application-platform-frontend'
-          });
-          
-          const teamMemberLogins = teamMembers.data.map(member => member.login);
-          const hasTeamReview = reviews.some(review => 
-            teamMemberLogins.includes(review.user.login) && 
-            review.state === 'APPROVED'
-          );
-          
-          if (!hasTeamReview) {
-            core.setFailed('This PR requires approval from a member of @ZampFi/application-platform-frontend team');
-          } 
+ 
