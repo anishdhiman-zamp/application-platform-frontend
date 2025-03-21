@@ -73,7 +73,7 @@ const Dataset = baseApi.injectEndpoints({
     getDatasetListing: builder.query<DatasetListingResponseType, DatasetListingRequestType>({
       query: (params) => ({ url: API_ENDPOINTS.DATASET_LISTING_GET, params }),
       keepUnusedDataFor: 6000,
-      providesTags: [APITags.GET_DATASET_LISTING]
+      providesTags: [APITags.GET_DATASET_LISTING],
     }),
     updateDatasetData: builder.mutation<DatasetUpdateResponseType, DatasetUpdateRequestType>({
       query: ({ datasetId, data }) => ({

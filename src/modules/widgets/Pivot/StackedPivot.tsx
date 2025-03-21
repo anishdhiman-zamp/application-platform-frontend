@@ -243,17 +243,23 @@ const StackedPivot = ({
   const mergeFilters = (currentFilters: ParentFilters, defaultFilters: ParentFilters) => {
     const mergedFilters: ParentFilters = {};
 
-    Object.keys({ ...currentFilters, ...defaultFilters }).forEach((key) => {
+    Object?.keys({ ...currentFilters, ...defaultFilters })?.forEach((key) => {
       const currentValues = currentFilters[key]?.values || [];
       const defaultValues = defaultFilters[key]?.values || [];
 
-      if (currentFilters[key] && defaultFilters[key]) {
+      const updatedCurrentFilter = currentFilters[key] ? { ...currentFilters[key] } : undefined;
+
+      if (updatedCurrentFilter?.targets) {
+        delete updatedCurrentFilter?.targets;
+      }
+
+      if (updatedCurrentFilter && defaultFilters[key]) {
         mergedFilters[key] = {
-          ...currentFilters[key],
-          values: currentValues.filter((value: string) => defaultValues.includes(value)),
+          ...updatedCurrentFilter,
+          values: currentValues?.filter((value: string) => defaultValues?.includes(value)),
         };
       } else {
-        mergedFilters[key] = currentFilters[key] || defaultFilters[key];
+        mergedFilters[key] = updatedCurrentFilter || defaultFilters[key];
       }
     });
 
@@ -262,6 +268,18 @@ const StackedPivot = ({
 
   const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
     const defaultFilters = getDefaultFilterByDatasetId(widgetInstanceDetails?.data_mappings?.mappings, datasetId ?? '');
+
+    const currentColumnName = Object.keys(currentWidgetSelectedFilter)?.[0];
+
+    const targetDatasetIdColumnName = currentWidgetSelectedFilter[currentColumnName]?.targets?.find(
+      (item: MapAny) => item?.dataset_id === datasetId,
+    )?.column;
+
+    if (currentColumnName !== targetDatasetIdColumnName) {
+      const firstKey = Object.keys(currentWidgetSelectedFilter)?.[0];
+
+      currentWidgetSelectedFilter = { [targetDatasetIdColumnName]: currentWidgetSelectedFilter[firstKey] };
+    }
 
     const query = {
       ...mergeFilters(currentWidgetSelectedFilter, defaultFilters),

@@ -94,7 +94,10 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
         selectedFilters[filter?.key]?.dateTo ||
         selectedFilters[filter?.key]?.filter
       ) {
-        currentWidgetSelectedFilters[filter?.key] = selectedFilters[filter?.key];
+        currentWidgetSelectedFilters[filter?.key] = {
+          ...selectedFilters[filter?.key],
+          targets: filtersConfig?.find((f) => f?.key === filter?.key)?.targets,
+        };
       }
     });
 
