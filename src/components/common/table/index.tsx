@@ -286,7 +286,7 @@ const Table: React.FC<TableProps> = ({
           getContextMenuItems={getContextMenuItems}
           autoSizeStrategy={autoSizeStrategy}
           suppressServerSideFullWidthLoadingRow
-          serverSideInitialRowCount={10}
+          serverSideInitialRowCount={100}
           autoGroupColumnDef={autoGroupColumnDef}
           enableCellTextSelection
           noRowsOverlayComponent={CustomNoRowsOverlay}

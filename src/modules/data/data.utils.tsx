@@ -20,7 +20,7 @@ import {
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
 import { createDateObjectFromUTCString, formatPlural, getCommaSeparatedNumber, getTagColor } from 'utils/common';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
 import { ArrayFilters } from 'components/common/table/table.constants';
@@ -137,6 +137,20 @@ export const formatColumns = (
     getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) => {
       return { ...columns.find((col) => col.field === column.colId), hide: !column.isVisible };
     }) ?? [];
+
+  if (orderedColumns?.length < columns?.length) {
+    const missingColumns = columns?.filter(
+      (col) => !orderedColumns?.some((orderedCol) => orderedCol?.field === col?.field),
+    );
+
+    orderedColumns?.push(...missingColumns);
+    const columnOrderingVisibility = orderedColumns?.map((column) => ({
+      colId: column?.field,
+      isVisible: !column?.hide,
+    }));
+
+    updateLocalStorage(columnOrderingVisibility, datasetId);
+  }
 
   return orderedColumns?.length ? orderedColumns : columns;
 };
@@ -521,4 +535,15 @@ export const formatUrlFilters = (filters: string): FilterModelType | null => {
   urlFilters.conditions = urlFiltersConditions;
 
   return urlFilters;
+};
+
+const updateLocalStorage = (columnOrderingVisibility: MapAny[], datasetId: string) => {
+  const currentColumnOrderingVisibility = JSON.parse(
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
+  );
+
+  setToLocalStorage(
+    LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
+    JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: columnOrderingVisibility }),
+  );
 };

@@ -9,7 +9,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
-import { cn } from 'utils/common';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
@@ -188,7 +188,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         )}
       >
         <div className='flex items-center gap-1 truncate self-stretch flex-auto'>
-          <span className='truncate'>{colDef?.headerName ?? colId}</span>
+          <span className='truncate'>{colDef?.headerName ?? snakeCaseToSentenceCase(colId)}</span>
           {!!sortState && (
             <span>
               <SvgSpriteLoader
