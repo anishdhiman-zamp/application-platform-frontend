@@ -166,7 +166,6 @@ const Table: React.FC<TableProps> = ({
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
-      flex: 1,
       minWidth: 150,
       filter: 'agTextColumnFilter',
       suppressHeaderMenuButton: true,

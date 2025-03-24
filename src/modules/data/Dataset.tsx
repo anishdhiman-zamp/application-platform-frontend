@@ -403,8 +403,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
   };
 
   useEffect(() => {
-    if (datasetTitle && breadcrumbStack?.length === 0) {
-      appDispatch(addBreadcrumb([datasetTitle]));
+    if (datasetTitle && (breadcrumbStack?.length === 0 || !breadcrumbStack?.includes(datasetTitle))) {
+      appDispatch(addBreadcrumb(datasetTitle));
     }
   }, [datasetTitle, breadcrumbStack]);
 

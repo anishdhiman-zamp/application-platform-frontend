@@ -4,12 +4,13 @@ import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
+import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
@@ -156,6 +157,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const handleColumnResizing = useCallback(
     (event: ColumnResizedEvent) => {
       if (event.column?.getId() !== colId) return;
+      const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+      const columnOrderingVisibilityIndex = columnOrderingVisibility.findIndex((column) => column.colId === colId);
+
+      columnOrderingVisibility[columnOrderingVisibilityIndex].width = event.column?.getActualWidth();
+      updateLocalStorage(columnOrderingVisibility, datasetId);
       lastResizedTimeRef.current = Date.now(); // Update the timestamp
     },
     [colId],
@@ -188,7 +194,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         )}
       >
         <div className='flex items-center gap-1 truncate self-stretch flex-auto'>
-          <span className='truncate'>{colDef?.headerName ?? snakeCaseToSentenceCase(colId)}</span>
+          <span className='truncate'>{colDef?.headerName ?? colId}</span>
           {!!sortState && (
             <span>
               <SvgSpriteLoader
