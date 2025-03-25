@@ -190,6 +190,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           value={inputValue}
           placeholder='type a value...'
           onChange={onSearchChange}
+          autoFocus
         />
       </div>
       {showSelectAll && (
