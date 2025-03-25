@@ -8,14 +8,17 @@ import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface SheetsTabsProps {
   tabs: MenuItem[];
   currentSheetId: string;
+  isPageLoading: boolean;
 }
 
-const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
+const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
   const router = useRouter();
   const { id } = router.query;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
@@ -33,21 +36,28 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
         !isSidebarOpen ? 'w-full' : 'w-[calc(100%-240px)]',
       )}
     >
-      {tabs?.map((tab) => (
-        <Button
-          key={tab?.value}
-          id='sheets-tabs'
-          onClick={() => handleTabSelect(tab)}
-          type={BUTTON_TYPES.SECONDARY}
-          className={cn(
-            'w-fit !rounded-lg',
-            currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : 'bg-white !border-GRAY_400',
-          )}
-          size={SIZE_TYPES.MEDIUM}
-        >
-          <div className={`transition-all duration-100 f-12-450 whitespace-nowrap`}>{tab?.label}</div>
-        </Button>
-      ))}
+      <CommonWrapper
+        skeletonType={SkeletonTypes.CUSTOM}
+        isLoading={isPageLoading}
+        className='flex items-center gap-3'
+        loader={<div className='w-25 rounded-md block animate-pulse bg-GRAY_50 h-8' />}
+      >
+        {tabs?.map((tab) => (
+          <Button
+            key={tab?.value}
+            id='sheets-tabs'
+            onClick={() => handleTabSelect(tab)}
+            type={BUTTON_TYPES.SECONDARY}
+            className={cn(
+              'w-fit !rounded-lg',
+              currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : 'bg-white !border-GRAY_400',
+            )}
+            size={SIZE_TYPES.MEDIUM}
+          >
+            <div className={`transition-all duration-100 f-12-450 whitespace-nowrap`}>{tab?.label}</div>
+          </Button>
+        ))}
+      </CommonWrapper>
 
       <Tooltip
         tooltipBody='Coming soon'

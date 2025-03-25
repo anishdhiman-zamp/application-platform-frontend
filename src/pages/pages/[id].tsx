@@ -15,7 +15,13 @@ const Page = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { id } = router.query;
-  const { data: pageDetails, isLoading, isError, refetch } = useGetPageDetailsQuery(id as string, { skip: !id });
+  const {
+    data: pageDetails,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetPageDetailsQuery(id as string, { refetchOnMountOrArgChange: false, skip: !id });
   const { data: pages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -53,7 +59,7 @@ const Page = () => {
     <CommonWrapper isError={isError} refetchFunction={refetch}>
       <div className='relative h-full rounded-tl-md w-full'>
         <Sheets pageId={id as string} sheetId={currentSheetId as string} isPageLoading={isLoading} />
-        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
+        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} />
       </div>
     </CommonWrapper>
   );
