@@ -96,7 +96,7 @@ export const DATA_TABLE_THEME_PARAMS = {
 export const DATA_TABLE_CONFIG = {
   filter: undefined,
   headerClass: '',
-  cellClass: 'cursor-pointer content-center',
+  cellClass: 'f-12-400 cursor-pointer content-center',
   flex: 1,
 };
 

@@ -260,3 +260,11 @@
 #dataset-table .ag-menu {
   border-radius: 6px;
 }
+
+.hidden-cell {
+  opacity: 0 !important; /* Hide cell when row is not hovered */
+}
+
+.ag-row-hover .hidden-cell {
+  opacity: 1 !important; /* Show when row is hovered */
+}
