@@ -94,6 +94,9 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
       return;
     }
 
+    // optimistic delete
+    setSelectedItems((prev) => prev?.filter((selected) => selected?.teamId !== teamId));
+
     const payload = {
       team_id: teamId,
       team_membership_id: membershipId,
@@ -120,6 +123,18 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
   }) => {
     if (!value) return;
 
+    // optimistic update
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        value,
+        label: value,
+        valid: true,
+        color: color ?? randomColor,
+        isNew: true,
+      },
+    ]);
+
     const payload = {
       name: value,
       description: '',
@@ -130,6 +145,18 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
   };
 
   const handleOptionSelection = (option: { value: string; label: string; color?: string; isNew?: boolean }) => {
+    // optimistic update
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        value: option?.value,
+        label: option?.value,
+        valid: true,
+        color: option?.color ?? randomColor,
+        isNew: option?.isNew,
+      },
+    ]);
+
     const payload = {
       name: option?.value,
       description: '',
