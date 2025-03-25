@@ -179,7 +179,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
                   onPress={(e) => handleColumnClick(e, column)}
                   id={column?.getColId() ?? ''}
                 />
-                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColId()}</div>
+                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColDef()?.headerName}</div>
               </div>
             </div>
           ))}
