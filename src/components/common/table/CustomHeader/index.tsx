@@ -4,6 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
+import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
@@ -156,6 +157,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const handleColumnResizing = useCallback(
     (event: ColumnResizedEvent) => {
       if (event.column?.getId() !== colId) return;
+      const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+      const columnOrderingVisibilityIndex = columnOrderingVisibility.findIndex((column) => column.colId === colId);
+
+      columnOrderingVisibility[columnOrderingVisibilityIndex].width = event.column?.getActualWidth();
+      updateLocalStorage(columnOrderingVisibility, datasetId);
       lastResizedTimeRef.current = Date.now(); // Update the timestamp
     },
     [colId],

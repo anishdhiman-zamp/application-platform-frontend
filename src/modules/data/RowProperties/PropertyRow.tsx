@@ -13,7 +13,6 @@ import { Tooltip } from 'components/common/tooltip';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 type PropertyRowProps = {
-  columnKey: string;
   value: any;
   column: ColDef;
   data: MapAny;
@@ -21,7 +20,7 @@ type PropertyRowProps = {
   onRuleClick: (ruleId: string) => void;
 };
 
-const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, teamMembersData, onRuleClick }) => {
+const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersData, onRuleClick }) => {
   const [showCopyTooltip, setShowCopyTooltip] = useState(false);
 
   const handleCopy = () => {
@@ -98,7 +97,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ columnKey, value, column, data, tea
   return (
     <>
       <div className='f-12-400 text-GRAY_700 h-6 flex items-center'>
-        <p>{columnKey}</p>
+        <p>{column?.headerName ?? column?.field}</p>
       </div>
       <div className='f-11-400 text-GRAY_1000 min-h-6 h-fit flex items-center break-all'>{getValue(column, value)}</div>
     </>

@@ -38,7 +38,7 @@ import {
 } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
-import { formatNumber, getCommaSeparatedNumber, getMaxValue } from 'utils/common';
+import { formatNumber, getCommaSeparatedNumber, getMaxValue, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
@@ -261,7 +261,7 @@ export const getChartOptions = (
             renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
               data: [
                 {
-                  label: yName,
+                  label: snakeCaseToSentenceCase(yName ?? ''),
                   value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
                 },
               ],
@@ -298,7 +298,7 @@ export const getChartOptions = (
             renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
               data: [
                 {
-                  label: yName,
+                  label: snakeCaseToSentenceCase(yName ?? ''),
                   value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
                 },
               ],
@@ -334,10 +334,10 @@ export const getChartOptions = (
 
                 if (sliceValue !== CHART_SLICE_TYPES.OTHERS)
                   return {
-                    heading: sliceKey,
+                    heading: snakeCaseToSentenceCase(sliceKey ?? ''),
                     data: [
                       {
-                        label: datum[sliceColumn ?? ''],
+                        label: snakeCaseToSentenceCase(datum[sliceColumn ?? '']),
                         value: `${currencySymbol} ${getCommaSeparatedNumber(datum[sliceKey ?? ''], currencyDecimalPlaces)}`,
                       },
                     ],
@@ -345,7 +345,7 @@ export const getChartOptions = (
 
                 return {
                   heading: `${mappings?.[0]?.fields?.values?.[0]?.column.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
-                  title: datum[sliceColumn ?? ''],
+                  title: snakeCaseToSentenceCase(datum[sliceColumn ?? '']),
                   data: donutOthersData?.length
                     ? donutOthersData.map((item) => ({
                         label: item[sliceColumn ?? ''],
@@ -385,7 +385,7 @@ export const getChartOptions = (
                 color: COLORS.GRAY_950,
               },
               {
-                text: `${mappings?.[0]?.fields?.values?.[0]?.column?.slice(0, 10)} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
+                text: `${snakeCaseToSentenceCase(mappings?.[0]?.fields?.values?.[0]?.column ?? '')} (${mappings?.[0]?.fields?.values?.[0]?.aggregation})`,
                 fontWeight: '500',
                 fontFamily: 'Inter',
                 fontSize: 11,

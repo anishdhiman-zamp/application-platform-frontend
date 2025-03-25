@@ -142,6 +142,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
             placeholder='type a value...'
             onChange={(e) => onChange(true, e.target.value)}
             disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
+            autoFocus
           />
         </Tooltip>
         {selectedOperator?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (

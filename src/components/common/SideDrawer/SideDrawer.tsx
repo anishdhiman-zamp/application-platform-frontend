@@ -24,14 +24,19 @@ const SIZE_CLASSNAMES: Record<SIZE_TYPES, string> = {
   [SIZE_TYPES.XLARGE]: 'w-sideDrawerLarge',
 };
 
-const SIDE_DRAWER_TYPES_CLASSNAMES: Record<SIDE_DRAWER_TYPES, { wrapper: string; children: string }> = {
+const SIDE_DRAWER_TYPES_CLASSNAMES: Record<
+  SIDE_DRAWER_TYPES,
+  { wrapper: string; children: string; backdropClassName: string }
+> = {
   [SIDE_DRAWER_TYPES.PRIMARY]: {
-    wrapper: 'shadow-sideDrawer bg-white',
+    wrapper: 'shadow-sideDrawer bg-white border',
     children: 'bg-white',
+    backdropClassName: 'pt-12',
   },
   [SIDE_DRAWER_TYPES.SECONDARY]: {
     wrapper: 'p-2.5 backdrop-blur-sm',
     children: 'rounded-xl bg-white w-full h-full sideDrawerInner border-[0.5px] border-GRAY_500 shadow-sideDrawerInner',
+    backdropClassName: '',
   },
 };
 
@@ -118,6 +123,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
         'h-full fixed w-screen z-1000 top-0 left-0 items-center animate-opacity',
         isOpen ? '' : 'hidden',
         backdropClassName,
+        SIDE_DRAWER_TYPES_CLASSNAMES[type].backdropClassName,
       )}
       role='presentation'
       onClick={(e: MouseEvent<HTMLDivElement>) => handleClickOutside(e)}

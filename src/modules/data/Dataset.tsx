@@ -158,10 +158,13 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
               rowData: [],
               rowCount: 0,
             });
-          } else if (cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
+          } else if (!checkIsObjectEmpty(cachedDatasetData)) {
+            const totalCount = cachedDatasetData?.data?.total_count ?? 0;
+
+            setIsNoRowsOverlayVisible(totalCount === 0);
             parameters.success({
-              rowData: cachedDatasetData?.data?.rows,
-              ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
+              rowData: cachedDatasetData?.data?.rows ?? [],
+              ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
             });
           }
         } else {
@@ -400,8 +403,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
   };
 
   useEffect(() => {
-    if (datasetTitle && breadcrumbStack?.length === 0) {
-      appDispatch(addBreadcrumb([datasetTitle]));
+    if (datasetTitle && (breadcrumbStack?.length === 0 || !breadcrumbStack?.includes(datasetTitle))) {
+      appDispatch(addBreadcrumb(datasetTitle));
     }
   }, [datasetTitle, breadcrumbStack]);
 
@@ -476,7 +479,6 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
       .then((response) => {
         setDatasetTitle(response?.title);
         setTotalRows(response?.data?.total_count);
-        setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
         setCachedDatasetData(response);
         dispatch({
           type: filtersContextActions.SET_TOTAL_ROWS,
