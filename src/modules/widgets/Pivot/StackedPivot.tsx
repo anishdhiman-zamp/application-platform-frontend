@@ -43,7 +43,12 @@ import {
   PIVOT_HEADER_HEIGHT,
   PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { ColumnFilterConfig, ParentFilters, PivotContext, UNTAGGED_TAGS } from 'modules/widgets/Pivot/pivot.types';
+import {
+  ColumnFilterConfig,
+  ParentFilters,
+  PivotContext,
+  UNTAGGED_TAGS_FRONTEND_MAPPING,
+} from 'modules/widgets/Pivot/pivot.types';
 import {
   concatTagFilters,
   getColumnLevelFilters,
@@ -282,21 +287,10 @@ const StackedPivot = ({
       currentWidgetSelectedFilter = { [targetDatasetIdColumnName]: currentWidgetSelectedFilter[firstKey] };
     }
 
-    let query = {
+    const query = {
       ...mergeFilters(currentWidgetSelectedFilter, defaultFilters),
       ...filters,
     };
-
-    if (query?.tags?.values?.includes(UNTAGGED_TAGS.UNTAGGED)) {
-      query = {
-        ...query,
-        tags: {
-          ...query?.tags,
-          type: CONDITION_OPERATOR_TYPE.IS_NULL,
-          values: query?.tags?.values?.map((item) => (item === UNTAGGED_TAGS.UNTAGGED ? '' : item)),
-        },
-      };
-    }
 
     const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
 
@@ -350,7 +344,7 @@ const StackedPivot = ({
     );
 
     // merge the row level and column level filters
-    const widgetFilter: ParentFilters = concatTagFilters({
+    let widgetFilter: ParentFilters = concatTagFilters({
       ...rowLevelFilters,
       ...columnLevelFilters,
     });
@@ -359,6 +353,19 @@ const StackedPivot = ({
     const datasetId = context?.widgetMappingDatasets?.[currentRef];
 
     if (!datasetId) return;
+
+    if (widgetFilter?.tags?.values?.includes(UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED)) {
+      widgetFilter = {
+        ...widgetFilter,
+        tags: {
+          ...widgetFilter?.tags,
+          type: CONDITION_OPERATOR_TYPE.IS_NULL,
+          values: widgetFilter?.tags?.values?.map((item) =>
+            item === UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED ? '' : item,
+          ),
+        },
+      };
+    }
 
     // navigate to the dataset
     navigateToDataset(datasetId, widgetFilter);

@@ -58,6 +58,10 @@ export type ParentMappingDetail = {
 };
 
 export enum UNTAGGED_TAGS {
+  UNTAGGED = '__UNTAGGED__',
+}
+
+export enum UNTAGGED_TAGS_FRONTEND_MAPPING {
   UNTAGGED = 'Untagged',
 }
 
