@@ -119,6 +119,7 @@ export const parseType = (type: PIVOT_DATA_TYPES, value: string | number | boole
     }
     case PIVOT_DATA_TYPES.BANK:
     case PIVOT_DATA_TYPES.TAG:
+      return value === '' ? 'Untagged' : value;
     case PIVOT_DATA_TYPES.COUNTRY:
     case PIVOT_DATA_TYPES.STATUS:
       return value;

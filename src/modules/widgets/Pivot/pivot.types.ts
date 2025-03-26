@@ -57,6 +57,10 @@ export type ParentMappingDetail = {
   mappingDetails: MappingDetails | null;
 };
 
+export enum UNTAGGED_TAGS {
+  UNTAGGED = 'Untagged',
+}
+
 export type FilterConfig = {
   filterType?: string;
   type?: string;

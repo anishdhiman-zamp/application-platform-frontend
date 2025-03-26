@@ -43,7 +43,7 @@ import {
   PIVOT_HEADER_HEIGHT,
   PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { ColumnFilterConfig, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
+import { ColumnFilterConfig, ParentFilters, PivotContext, UNTAGGED_TAGS } from 'modules/widgets/Pivot/pivot.types';
 import {
   concatTagFilters,
   getColumnLevelFilters,
@@ -62,6 +62,7 @@ import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { myTheme } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 ModuleRegistry.registerModules([CellStyleModule]);
 ModuleRegistry.registerModules([
@@ -281,10 +282,21 @@ const StackedPivot = ({
       currentWidgetSelectedFilter = { [targetDatasetIdColumnName]: currentWidgetSelectedFilter[firstKey] };
     }
 
-    const query = {
+    let query = {
       ...mergeFilters(currentWidgetSelectedFilter, defaultFilters),
       ...filters,
     };
+
+    if (query?.tags?.values?.includes(UNTAGGED_TAGS.UNTAGGED)) {
+      query = {
+        ...query,
+        tags: {
+          ...query?.tags,
+          type: CONDITION_OPERATOR_TYPE.IS_NULL,
+          values: query?.tags?.values?.map((item) => (item === UNTAGGED_TAGS.UNTAGGED ? '' : item)),
+        },
+      };
+    }
 
     const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
 

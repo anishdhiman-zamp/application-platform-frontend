@@ -241,12 +241,14 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   );
 
   requiredTagFilterConfigs.forEach((item) => {
+    const operator = filters[item.column]?.type;
     const startsWithValues: string = filters[item.column]?.values?.[0];
+    const isNull = operator === CONDITION_OPERATOR_TYPE.IS_NULL;
 
     filters[item.column] = {
       filterType: FILTER_TYPES.MULTI_SELECT,
-      type: CONDITION_OPERATOR_TYPE.CONTAINS,
-      values: item.options.filter((option) => option && option.startsWith(startsWithValues)),
+      type: isNull ? CONDITION_OPERATOR_TYPE.IS_NULL : CONDITION_OPERATOR_TYPE.CONTAINS,
+      values: isNull ? [] : (item?.options || [])?.filter((option) => option?.startsWith(startsWithValues)),
     };
   });
 
