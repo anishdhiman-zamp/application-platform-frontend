@@ -32,6 +32,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
   isPeriodicityEnabled = false,
   onFilterChange,
   isOpen,
+  label,
 }) => {
   const {
     state: { filtersConfig },
@@ -50,6 +51,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
       isPeriodicityEnabled={isPeriodicityEnabled}
       onFilterChange={onFilterChange}
       isOpen={isOpen}
+      label={label}
       {...filterComponentProps}
     />
   ) : null;

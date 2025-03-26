@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGetDatasetDrilldownQuery } from 'apis/dataset';
-import { PAGE_LOADER } from 'constants/lottie/page_loader';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
@@ -49,11 +49,13 @@ const DrilldownByDatasetAndRowId = () => {
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <DynamicLottiePlayer src={PAGE_LOADER} className='lottie-player' autoplay style={{ height: '200px' }} loop />
+        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+        </div>
       }
     >
       <div className='h-full'>
-        <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400'>
+        <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400 rounded-tl-xl'>
           {tabs.length > 1 && (
             <Tabs
               list={tabs}

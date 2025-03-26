@@ -50,7 +50,7 @@ import {
 } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
-import { checkIsObjectEmpty, cn } from 'utils/common';
+import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -336,7 +336,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
               ?.filter((item) => !item?.metadata?.is_hidden)
               ?.map((column) => ({
                 key: column.column,
-                label: column.column,
+                label: column.alias ?? snakeCaseToSentenceCase(column?.column),
                 values: column.options,
                 type: column.type,
               })),
