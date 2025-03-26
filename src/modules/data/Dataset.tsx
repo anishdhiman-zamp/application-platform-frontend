@@ -539,7 +539,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
               <SingleSelectFilter
                 onFilterChange={handleFilterChange}
                 value={fxCurrency}
-                key='fx_currency'
+                filterKey='fx_currency'
                 label='Currency'
                 options={PAGE_CURRENCY_OPTIONS}
               />

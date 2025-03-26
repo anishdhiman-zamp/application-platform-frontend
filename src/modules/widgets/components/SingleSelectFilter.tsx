@@ -3,21 +3,20 @@ import FilterDropdown from 'components/filter/filterMenu/FilterDropdown';
 
 interface SingleSelectFilterProps {
   value: string[];
-  key: string;
+  filterKey: string;
   label: string;
   onFilterChange: (value: string[]) => void;
   options?: string[];
 }
 
-const SingleSelectFilter = ({ value, key, label, onFilterChange, options }: SingleSelectFilterProps) => {
+const SingleSelectFilter = ({ value, filterKey, label, onFilterChange, options }: SingleSelectFilterProps) => {
   return (
     <FilterDropdown
-      key={key}
       index={0}
       onFilterChange={onFilterChange}
       closeOnSelect={true}
       filter={{
-        key: key,
+        key: filterKey,
         title: value?.[0],
         label: label,
         values: value,
