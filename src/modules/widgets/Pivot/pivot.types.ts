@@ -64,6 +64,7 @@ export type FilterConfig = {
   dateFrom?: string;
   dateTo?: string;
   column?: string;
+  targets?: string[];
 };
 
 export type ParentFilters = Record<string, FilterConfig>;

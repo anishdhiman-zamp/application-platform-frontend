@@ -24,7 +24,6 @@ const Properties: FC<PropertiesProps> = ({ data, columns, onRuleClick }) => {
         return value && column ? (
           <Fragment key={key}>
             <PropertyRow
-              columnKey={key}
               value={value}
               column={column}
               data={data}

@@ -93,7 +93,12 @@ export const DATA_TABLE_THEME_PARAMS = {
   rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
 };
 
-export const DATA_TABLE_CONFIG = { filter: undefined, headerClass: '', cellClass: 'cursor-pointer content-center' };
+export const DATA_TABLE_CONFIG = {
+  filter: undefined,
+  headerClass: '',
+  cellClass: 'f-12-400 cursor-pointer content-center',
+  flex: 1,
+};
 
 export const OperatorMap: Record<string, CONDITION_OPERATOR_TYPE> = {
   contains: CONDITION_OPERATOR_TYPE.CONTAINS,

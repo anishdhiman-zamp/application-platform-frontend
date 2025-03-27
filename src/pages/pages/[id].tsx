@@ -47,10 +47,6 @@ const Page = () => {
 
     persistLastVisitedPage(id as string);
     dispatch(resetBreadcrumb([currentPageTitle]));
-
-    return () => {
-      dispatch(resetBreadcrumb([]));
-    };
   }, [id, pages]);
 
   return (

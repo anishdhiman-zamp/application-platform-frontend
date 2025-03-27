@@ -249,6 +249,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
           onChange={onDescriptionInputChange}
           inputClassName='w-full !min-w-[160px] flex-1 outline-none border-none focus:!shadow-none !shadow-none'
           inputSizeClassName='p-0'
+          autoFocus
         />
       </div>
     </div>

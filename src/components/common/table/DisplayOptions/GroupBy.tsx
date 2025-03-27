@@ -26,11 +26,13 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
   const handleDropOnGroup = (event: React.DragEvent) => {
     const data = event.dataTransfer.getData('text/plain');
     const column: string = data;
+    const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
+    const currentColumn = latestColumns.find((col) => col.getColDef()?.headerName === column);
 
     setGroupedColumns((prev) => (prev?.includes(column) ? prev : [...(prev ?? []), column]));
     setAvailableColumns((prev) => prev?.filter((col) => col !== column));
     tableRef?.current?.api?.applyColumnState({
-      state: [{ colId: column, rowGroup: true, hide: true }],
+      state: [{ colId: currentColumn?.getColId() ?? '', rowGroup: true, hide: true }],
     });
   };
 
@@ -38,55 +40,71 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     const data = event.dataTransfer.getData('text/plain');
 
     const column: string = data;
+    const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
+    const currentColumn = latestColumns.find((col) => col.getColDef()?.headerName === column);
 
     setAvailableColumns((prev) => (prev?.includes(column) ? prev : [...(prev ?? []), column]));
     setGroupedColumns((prev) => prev?.filter((col) => col !== column));
     tableRef?.current?.api?.applyColumnState({
-      state: [{ colId: column, rowGroup: false }],
+      state: [{ colId: currentColumn?.getColId() ?? '', rowGroup: false }],
     });
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
-    const columnIds = latestColumns.map((col) => col.getColId());
+    const columnNames = latestColumns
+      .map((col) => col.getColDef()?.headerName)
+      .filter((column) => column !== undefined);
 
     setSearchTerm(value);
     if (value) {
-      const filteredColumns = columnIds?.filter((column) => column?.includes(value));
+      const filteredColumns = columnNames
+        ?.filter((column) => column?.toLowerCase().includes(value.toLowerCase()))
+        .filter((column) => column !== undefined);
 
       setAvailableColumns(filteredColumns);
     } else {
-      setAvailableColumns(columnIds);
+      setAvailableColumns(columnNames);
     }
   };
 
   const handleReset = () => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
-    const columnIds = latestColumns.map((col) => col.getColId());
+    const columnNames = latestColumns
+      .map((col) => col.getColDef()?.headerName)
+      .filter((column) => column !== undefined);
 
     setGroupedColumns([]);
-    setAvailableColumns(columnIds);
+    setAvailableColumns(columnNames);
     tableRef?.current?.api?.setRowGroupColumns([]);
   };
 
   const handleRemoveGroupedColumn = (column: string) => {
     setGroupedColumns((prev) => prev?.filter((col) => col !== column));
     setAvailableColumns((prev) => [...(prev ?? []), column]);
+    const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
+    const currentColumn = latestColumns.find((col) => col.getColDef()?.headerName === column);
+
     tableRef?.current?.api?.applyColumnState({
-      state: [{ colId: column, rowGroup: false, hide: false }],
+      state: [{ colId: currentColumn?.getColId() ?? '', rowGroup: false, hide: false }],
     });
   };
 
   useEffect(() => {
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
     const groupedColumns = tableRef?.current?.api?.getRowGroupColumns() ?? [];
-    const groupedColumnIds = groupedColumns.map((col) => col.getColId());
+    const groupedColumnNames = groupedColumns
+      .map((col) => col.getColDef()?.headerName)
+      .filter((column) => column !== undefined);
 
-    const columnIds = latestColumns.map((col) => col.getColId())?.filter((col) => !groupedColumnIds.includes(col));
+    const columnNames = latestColumns
+      .map((col) => col.getColDef()?.headerName)
+      .filter((column) => column !== undefined)
+      ?.filter((col) => !groupedColumnNames.includes(col));
 
-    setGroupedColumns(groupedColumnIds);
-    setAvailableColumns(columnIds);
+    setGroupedColumns(groupedColumnNames);
+    setAvailableColumns(columnNames);
   }, [tableRef]);
 
   return (

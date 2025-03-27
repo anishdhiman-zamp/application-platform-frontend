@@ -63,3 +63,9 @@ export enum LOADER_STATUS {
 export type ListingPropsType = {
   onRowClicked: (event: RowClickedEvent) => void;
 };
+
+export type ColumnOrderingVisibilityType = {
+  colId: string;
+  isVisible: boolean;
+  width: number;
+};

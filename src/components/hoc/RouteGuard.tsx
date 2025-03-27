@@ -35,7 +35,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const { data: pages, isLoading: isPagesLoading } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  
+
   useEffect(() => {
     if (currentPathName === DATASETS && id !== undefined && !isDatasetListingLoading) {
       const pageExists = datasetListingData?.datasets?.some((dataset) => dataset?.id === id);
