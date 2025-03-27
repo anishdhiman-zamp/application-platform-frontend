@@ -130,9 +130,10 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
       ) : null}
       <Tooltip
         tooltipBody='Import Data'
-        tooltipBodyClassName='f-10-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-1000 bg-black text-white'
-        position={TooltipPositions.TOP}
-        className='!cursor-text'
+        position={TooltipPositions.BOTTOM}
+        tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
+        className='z-1 h-full w-full'
+        tooltipBodystyle='f-10-400'
       >
         <div className={cn('p-1 hover:bg-GRAY_100 !rounded cursor-pointer', isImportFilePopupOpen && 'bg-GRAY_100')}>
           <Image
