@@ -13,7 +13,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const checkIsObjectEmpty = (obj: MapAny, ignoreKeys?: string[]) => {
+export const checkIsObjectEmpty = (obj?: MapAny, ignoreKeys?: string[]) => {
   if (!obj) return true;
 
   if (typeof obj === 'object' && !Object.keys(obj).length) return true;

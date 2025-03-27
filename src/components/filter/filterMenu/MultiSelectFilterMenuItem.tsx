@@ -18,6 +18,7 @@ interface MultiSelectFilterMenuItemProps {
   LabelComponent?: (item: string) => React.ReactNode;
   operatorOptions?: OptionsType[];
   isOpen?: boolean;
+  showSelectAll?: boolean;
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -27,6 +28,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   LabelComponent,
   operatorOptions = MULTI_SELECT_FILTER_OPTIONS,
   isOpen = false,
+  showSelectAll = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -188,17 +190,20 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           value={inputValue}
           placeholder='type a value...'
           onChange={onSearchChange}
+          autoFocus
         />
       </div>
-      <div
-        onClick={() => onSelectAll()}
-        className='flex items-center gap-2 justify-between mx-1 py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
-      >
-        <div className='f-12-400 text-GRAY_1000'>Select All</div>
-        <div className='min-w-[14px]'>
-          <CheckBox checked={isSelectAll} id='checkbox-1' />
+      {showSelectAll && (
+        <div
+          onClick={() => onSelectAll()}
+          className='flex items-center gap-2 justify-between mx-1 py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
+        >
+          <div className='f-12-400 text-GRAY_1000'>Select All</div>
+          <div className='min-w-[14px]'>
+            <CheckBox checked={isSelectAll} id='checkbox-1' />
+          </div>
         </div>
-      </div>
+      )}
       <div
         className={cn(
           'flex flex-col h-full overflow-y-auto overflow-x-hidden px-1 [&::-webkit-scrollbar]:hidden',

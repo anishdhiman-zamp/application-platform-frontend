@@ -93,7 +93,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
           const endDate = format(new Date(current?.dateTo), DATE_FORMATS.dd_MMM_yyyy);
           const periodicity = PERIODICITY_OPTIONS.find((p) => p.value === current?.periodicity)?.label ?? '';
 
-          title = `${startDate} - ${endDate} ${periodicity ? `, ${periodicity} ` : ''}`;
+          title = `${startDate} - ${endDate}${periodicity ? `, ${periodicity} ` : ''}`;
         }
 
         return {

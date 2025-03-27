@@ -3,11 +3,10 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
-import { getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
+import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType, MapAny, ResponsiveGridLayoutType } from 'types/commonTypes';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { defaultFnType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
@@ -30,29 +29,16 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   // State for grid layout
   const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
 
-  const updateLocalStorage = (columnOrderingVisibility: MapAny[]) => {
-    const currentColumnOrderingVisibility = JSON.parse(
-      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-    );
-
-    setToLocalStorage(
-      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-      JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: columnOrderingVisibility }),
-    );
-  };
-
   const handleCheckBoxClick = (column?: Column) => {
     if (!column) return;
     tableRef?.current?.api?.setColumnsVisible([column.getColId()], !column.isVisible());
 
-    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map(
-      (columnItem: MapAny) => ({
-        colId: columnItem.colId,
-        isVisible: columnItem.colId === column.getColId() ? !columnItem.isVisible : columnItem.isVisible,
-      }),
-    );
+    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
+      ...columnItem,
+      isVisible: columnItem.colId === column.getColId() ? !columnItem.isVisible : columnItem.isVisible,
+    }));
 
-    updateLocalStorage(columnOrderingVisibility);
+    updateLocalStorage(columnOrderingVisibility, datasetId);
     setColumnsChecked(columnOrderingVisibility);
   };
 
@@ -84,9 +70,10 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     const columnOrderingVisibility = orderedItems.map((column) => ({
       colId: column.getColId(),
       isVisible: column.isVisible(),
+      width: column.getActualWidth(),
     }));
 
-    updateLocalStorage(columnOrderingVisibility);
+    updateLocalStorage(columnOrderingVisibility, datasetId);
   };
 
   const handleSelectAll = () => {
@@ -94,14 +81,12 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
       columns.map((column) => column.getColId()),
       true,
     );
-    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map(
-      (columnItem: MapAny) => ({
-        colId: columnItem.colId,
-        isVisible: true,
-      }),
-    );
+    const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
+      ...columnItem,
+      isVisible: true,
+    }));
 
-    updateLocalStorage(columnOrderingVisibility);
+    updateLocalStorage(columnOrderingVisibility, datasetId);
     setColumnsChecked(columnOrderingVisibility);
   };
 
@@ -114,9 +99,9 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
     // re-order columns based on the columnOrderingVisibilityForCurrentDataset
     const orderedColumns: Column[] =
-      getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((column: MapAny) =>
-        latestColumns?.find((col) => col.getColId() === column.colId),
-      ) ?? [];
+      getColumnOrderingVisibilityForCurrentDataset(datasetId)
+        ?.map((column) => latestColumns?.find((col) => col.getColId() === column.colId))
+        .filter((col): col is Column => col !== undefined) ?? [];
 
     const finalColumns = orderedColumns?.length ? orderedColumns : latestColumns;
 
@@ -194,7 +179,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
                   onPress={(e) => handleColumnClick(e, column)}
                   id={column?.getColId() ?? ''}
                 />
-                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColId()}</div>
+                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColDef()?.headerName}</div>
               </div>
             </div>
           ))}

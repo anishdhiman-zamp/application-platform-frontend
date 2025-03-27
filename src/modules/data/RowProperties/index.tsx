@@ -108,7 +108,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
                 height: 12,
               }}
               iconPosition={ICON_POSITION_TYPES.LEFT}
-              size={SIZE_TYPES.XSMALL}
+              size={SIZE_TYPES.SMALL}
               onClick={handleSourceDrillDownClick}
             >
               Source drill down

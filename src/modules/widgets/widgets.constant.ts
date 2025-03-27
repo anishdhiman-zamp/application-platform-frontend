@@ -4,7 +4,7 @@ import { DATE_FORMATS, PERIODICITY_TYPES } from 'constants/date.constants';
 import { endOfWeek, format, startOfWeek } from 'date-fns';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { MapAny } from 'types/commonTypes';
-import { formatNumber, isValidDate, trimString } from 'utils/common';
+import { formatNumber, isValidDate, snakeCaseToSentenceCase, trimString } from 'utils/common';
 
 export enum SCREEN_BREAKPOINTS_NAMES {
   SM = 'sm',
@@ -154,7 +154,7 @@ export const AG_CHART_LEGEND_CONFIG = {
       fontWeight: 450,
       fontSize: 12,
       color: COLORS.GRAY_900,
-      formatter: ({ value = '' }) => trimString(value, 20),
+      formatter: ({ value = '' }) => trimString(snakeCaseToSentenceCase(value), 20),
     },
   },
 };
