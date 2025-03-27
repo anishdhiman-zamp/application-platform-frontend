@@ -3,7 +3,7 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
-import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
+import TreeTable from 'modules/widgets/TreeTable';
 import {
   getCurrentPageFilters,
   getDateRangeWithPeriodicity,
@@ -182,7 +182,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     }
     case WIDGET_TYPES.PIVOT_TABLE: {
       return (
-        <PivotTableWidgetWrapper
+        <TreeTable
           widgetInstanceDetails={widgetDetails}
           isFilterInitialized={isFilterInitialized}
           currentPageFilters={currentPageFilters}
