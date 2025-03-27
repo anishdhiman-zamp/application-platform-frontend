@@ -48,9 +48,9 @@ const TreeCell: FC<TreeCellProps> = ({ node, value, showPercentage, api, column,
 
   // Calculate percentage based on parent node's value
   const parentValue = node.parent?.data
-    ? Object.values(node.parent.data).find(
+    ? (Object.values(node.parent.data).find(
         (val) => typeof val === 'number' && val !== node.data[column?.getColId() || ''],
-      )
+      ) as number)
     : 0;
 
   const percentageValue = useMemo(() => {
