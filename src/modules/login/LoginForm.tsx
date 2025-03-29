@@ -94,6 +94,7 @@ export const LoginForm = () => {
         method: REQUEST_TYPES.POST,
         body: JSON.stringify({
           email,
+          return_to_url: window.location.href,
         }),
         headers: {
           'Content-Type': 'application/json',
