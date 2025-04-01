@@ -27,7 +27,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
@@ -62,7 +62,7 @@ import {
   shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { myTheme } from 'components/common/table/table.constants';
@@ -115,6 +115,8 @@ const StackedPivot = ({
   defaultCurrency,
 }: StackedPivotProps) => {
   const router = useRouter();
+  const { pageId } = useParams();
+
   const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
@@ -292,9 +294,15 @@ const StackedPivot = ({
       ...filters,
     };
 
-    const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
+    if (datasetId) {
+      let path = getDatasetRouteById(datasetId);
 
-    router.push(`${path}?filters=${JSON.stringify(query)}`);
+      if (pageId) {
+        path = getPageDatasetRoute(pageId as string, datasetId);
+      }
+
+      router.push(`${path}?filters=${JSON.stringify(query)}`);
+    }
   };
 
   const handleDrilldown = (params: CellDoubleClickedEvent<MapAny[], PivotContext>) => {

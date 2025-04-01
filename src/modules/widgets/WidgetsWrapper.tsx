@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
@@ -10,6 +10,7 @@ import {
   getDefaultFilterByDatasetId,
   mergeFilters,
 } from 'modules/widgets/widgets.utils';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import {
   FieldsMappingType,
@@ -40,6 +41,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   handleWidgetHeightChange,
 }) => {
   const router = useRouter();
+  const { pageId } = useParams();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
   const {
@@ -140,8 +142,14 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
       };
     }
 
+    let path = getDatasetRouteById(datasetId);
+
+    if (pageId) {
+      path = getPageDatasetRoute(pageId as string, datasetId);
+    }
+
     router.push(
-      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({
+      `${path}?filters=${JSON.stringify({
         ...mergeFilters(currentWidgetSelectedFilters, defaultFilters),
         ...clickFilter,
       })}&currency=${currency}`,

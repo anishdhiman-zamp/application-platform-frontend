@@ -16,7 +16,7 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute, getDatasetRouteById, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
@@ -39,10 +39,10 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
-import { addBreadcrumb } from 'store/slices/layout-configs';
+import { addBreadcrumb, updateUrlForLastBreadcrumb } from 'store/slices/layout-configs';
 import {
   DatasetActionStatusResponseType,
   DatasetDataResponseType,
@@ -68,11 +68,13 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
+  isDrilldown?: boolean;
 };
 
-const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
+const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown = false }) => {
   const filters = useSearchParams().get('filters');
   const currency = useSearchParams().get('currency') ?? 'local';
+  const { pageId } = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
@@ -303,8 +305,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(addBreadcrumb('Drilldown'));
-    router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', data?._zamp_id as string));
+    appDispatch(updateUrlForLastBreadcrumb(router.asPath));
+    if (pageId) {
+      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
+    } else {
+      router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
+    }
   };
 
   const handleRowPropertiesClick = (data: MapAny) => {
@@ -364,6 +370,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
               payload: { selectedFilters: selectedDrilldownFilters },
             });
         }
+        if (isNoRowsOverlayVisible || datasetData?.data?.total_count === 0) return;
         const amountRangeColumns = columns
           ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
           ?.map((column) => column?.field)
@@ -376,10 +383,14 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
           })
             .unwrap()
             .then((response) => {
-              setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
+              if (!isNoRowsOverlayVisible) {
+                setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
+              }
             })
             .catch(() => {
-              setColumnLevelStats(undefined);
+              if (!isNoRowsOverlayVisible) {
+                setColumnLevelStats(undefined);
+              }
             });
         }
       }
@@ -403,10 +414,10 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters }) => {
   };
 
   useEffect(() => {
-    if (datasetTitle && (breadcrumbStack?.length === 0 || !breadcrumbStack?.includes(datasetTitle))) {
-      appDispatch(addBreadcrumb(datasetTitle));
+    if (!isDrilldown && datasetTitle && !breadcrumbStack?.some((item) => item.title === datasetTitle)) {
+      appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
     }
-  }, [datasetTitle, breadcrumbStack]);
+  }, [datasetTitle, breadcrumbStack, isDrilldown]);
 
   const handleRefetchDataset = () => {
     getDatasetData({
