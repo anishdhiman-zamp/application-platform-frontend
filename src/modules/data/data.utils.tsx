@@ -360,22 +360,22 @@ const getAggregations = (colIds: string[]): MapAny => {
     const valueCol = [
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionSum.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionSum?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionSum}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionAvg.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionAvg?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionAvg}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionMin.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionMin?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMin}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionMax.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionMax?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMax}`,
       },
     ];

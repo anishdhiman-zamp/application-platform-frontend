@@ -21,8 +21,8 @@ const highlightDifferences = (
   const highlightSearch = (text: string, query: string) => {
     if (!query) return text;
 
-    const lowerText = text.toLowerCase();
-    const lowerQuery = query.toLowerCase();
+    const lowerText = text?.toLowerCase();
+    const lowerQuery = query?.toLowerCase();
 
     const parts = lowerText.split(lowerQuery);
 

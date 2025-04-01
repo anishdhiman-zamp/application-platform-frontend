@@ -5,10 +5,13 @@ import {
   DateRangeValue,
   DaysConfig,
   MonthsConfig,
+  PERIODICITY_REGEX,
+  PERIODICITY_TYPES,
   QuartersConfig,
   RangeType,
 } from 'constants/date.constants';
 import { endOfMonth, endOfQuarter, endOfYear, startOfMonth, startOfQuarter, startOfYear, sub } from 'date-fns';
+import { DAY_TYPES, DIRECTION_TYPES, OFFSET_TYPES } from 'types/common/components/date';
 import { OptionsType } from 'types/commonTypes';
 import { getStartOfYear, isUserInUS } from 'utils/common';
 
@@ -40,9 +43,9 @@ export function searchDateRange(input: string): DateRangeValue | null {
 
     const isNegativeDirection = direction ? negativeDirectionPatters.test(direction) : true;
 
-    switch (unit.toLowerCase()) {
-      case 'day':
-      case 'days':
+    switch (unit?.toLowerCase()) {
+      case PERIODICITY_TYPES.DAILY:
+      case PERIODICITY_TYPES.DAYS:
         date.setDate(today.getDate() + (isNegativeDirection ? -parsedOffset : parsedOffset));
 
         return {
@@ -51,8 +54,8 @@ export function searchDateRange(input: string): DateRangeValue | null {
           year: date.getFullYear(),
           label: date.toDateString(),
         };
-      case 'month':
-      case 'months':
+      case PERIODICITY_TYPES.MONTHLY:
+      case PERIODICITY_TYPES.MONTHS:
         date.setMonth(today.getMonth() + (isNegativeDirection ? -parsedOffset : parsedOffset));
 
         return {
@@ -61,8 +64,8 @@ export function searchDateRange(input: string): DateRangeValue | null {
           year: date.getFullYear(),
           label: MonthsConfig[date.getMonth()].label,
         };
-      case 'quarter':
-      case 'quarters':
+      case PERIODICITY_TYPES.QUARTERLY:
+      case PERIODICITY_TYPES.QUARTERS:
         date.setMonth(today.getMonth() + (isNegativeDirection ? -parsedOffset * 3 : parsedOffset * 3));
 
         return {
@@ -71,8 +74,8 @@ export function searchDateRange(input: string): DateRangeValue | null {
           year: date.getFullYear(),
           label: QuartersConfig[Math.floor(date.getMonth() / 3)].short,
         };
-      case 'year':
-      case 'years':
+      case PERIODICITY_TYPES.YEARLY:
+      case PERIODICITY_TYPES.YEARS:
         date.setFullYear(today.getFullYear() + (isNegativeDirection ? -parsedOffset : parsedOffset));
 
         return {
@@ -113,39 +116,39 @@ function parseRelativeDatePhrase(phrase: string): {
   const directionMatch = phrase.match(directionPattern);
 
   if (directionMatch) {
-    direction = lastPattern.test(directionMatch[0]) ? 'last' : thisPattern.test(directionMatch[0]) ? 'this' : 'next';
+    direction = lastPattern.test(directionMatch[0]) ? DIRECTION_TYPES.LAST : thisPattern.test(directionMatch[0]) ? 'this' : DIRECTION_TYPES.NEXT;
     phrase = phrase.replace(directionPattern, '').trim();
   }
 
-  if (phrase.toLowerCase() === 'tomorrow') {
-    return { direction: 'next', unit: 'day', offset: 1 };
-  } else if (phrase.toLowerCase() === 'yesterday') {
-    return { direction: 'last', unit: 'day', offset: 1 };
-  } else if (phrase.toLowerCase() === 'today') {
-    return { direction: 'next', unit: 'day', offset: 0 };
+  if (phrase?.toLowerCase() === DAY_TYPES.TOMORROW) {
+    return { direction: DIRECTION_TYPES.NEXT, unit: PERIODICITY_TYPES.DAILY, offset: 1 };
+  } else if (phrase?.toLowerCase() === DAY_TYPES.YESTERDAY) {
+    return { direction: DIRECTION_TYPES.LAST, unit: PERIODICITY_TYPES.DAILY, offset: 1 };
+  } else if (phrase?.toLowerCase() === DAY_TYPES.TODAY) {
+    return { direction: DIRECTION_TYPES.NEXT, unit: PERIODICITY_TYPES.DAILY, offset: 0 };
   }
 
   // Handle "this" phrases
-  if (direction && direction.toLowerCase() === 'this') {
+  if (direction && direction?.toLowerCase() === 'this') {
     // Check for "this year", "this month", or "this quarter"
-    const thisYearMatch = phrase.match(/\b(?:this\s+)?year\b/i);
-    const thisMonthMatch = phrase.match(/\b(?:this\s+)?month\b/i);
-    const thisQuarterMatch = phrase.match(/\b(?:this\s+)?quarter\b/i);
+    const thisYearMatch = phrase.match(PERIODICITY_REGEX[PERIODICITY_TYPES.YEARLY]);
+    const thisMonthMatch = phrase.match(PERIODICITY_REGEX[PERIODICITY_TYPES.MONTHLY]);
+    const thisQuarterMatch = phrase.match(PERIODICITY_REGEX[PERIODICITY_TYPES.QUARTERLY]);
 
     if (thisYearMatch) {
-      unit = 'year';
+      unit = PERIODICITY_TYPES.YEARLY;
       offset = 0;
       direction = null;
 
       return { direction, unit, offset };
     } else if (thisMonthMatch) {
-      unit = 'month';
+      unit = PERIODICITY_TYPES.MONTHLY;
       offset = 0;
       direction = null;
 
       return { direction, unit, offset };
     } else if (thisQuarterMatch) {
-      unit = 'quarter';
+      unit = PERIODICITY_TYPES.QUARTERLY;
       offset = 0;
       direction = null;
 
@@ -172,9 +175,9 @@ function parseRelativeDatePhrase(phrase: string): {
 
     offset = Math.floor((parsedDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    direction = offset >= 0 ? 'next' : 'last';
+    direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
-    unit = 'day';
+    unit = PERIODICITY_TYPES.DAILY;
 
     return { direction, unit, offset: Math.abs(offset) - 1 };
   }
@@ -198,7 +201,7 @@ function parseRelativeDatePhrase(phrase: string): {
 
     offset = (year - currentYear) * 4 + (quarter - currentQuarter);
     // Set appropriate direction based on offset
-    direction = offset >= 0 ? 'next' : 'last';
+    direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
     return { direction, unit: 'quarter', offset: Math.abs(offset) };
   }
@@ -211,8 +214,8 @@ function parseRelativeDatePhrase(phrase: string): {
   if (monthMatch) {
     const monthIndex = MonthsConfig.findIndex(
       (month) =>
-        month.label.toLowerCase() === monthMatch[1].toLowerCase() ||
-        month?.short?.toLowerCase() === monthMatch[1].toLowerCase(),
+        month.label?.toLowerCase() === monthMatch[1]?.toLowerCase() ||
+        month?.short?.toLowerCase() === monthMatch[1]?.toLowerCase(),
     );
     let year: number | null = null;
 
@@ -228,7 +231,7 @@ function parseRelativeDatePhrase(phrase: string): {
     let offset = (year - currentYear) * 12 + (monthIndex - currentMonth);
 
     // Set appropriate direction based on offset
-    direction = offset >= 0 ? 'next' : 'last';
+    direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
     if (!digits || digits[0].length > 2) {
       return { direction, unit: 'month', offset: Math.abs(offset) };
@@ -238,11 +241,11 @@ function parseRelativeDatePhrase(phrase: string): {
 
       offset = Math.floor((parsedDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
 
-      direction = offset >= 0 ? 'next' : 'last';
+      direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
-      unit = 'day';
+      unit = PERIODICITY_TYPES.DAILY;
 
-      return { direction, unit, offset: Math.abs(offset) - (direction === 'next' ? -1 : 1) };
+      return { direction, unit, offset: Math.abs(offset) - (direction === DIRECTION_TYPES.NEXT ? -1 : 1) };
     }
   }
 
@@ -253,7 +256,7 @@ function parseRelativeDatePhrase(phrase: string): {
     unit = 'year';
     offset = parseInt(yearMatch[0]) - new Date().getFullYear();
 
-    direction = offset >= 0 ? 'next' : 'last';
+    direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
     return { direction, unit, offset: Math.abs(offset) };
   }
@@ -262,17 +265,17 @@ function parseRelativeDatePhrase(phrase: string): {
   const dayMatch = phrase.match(dayPattern);
 
   if (dayMatch) {
-    const targetDay = dayMatch[0].toLowerCase();
+    const targetDay = dayMatch[0]?.toLowerCase();
     const today = new Date();
     let currentDayIndex = today.getDay(); // Sunday is 0, Monday is 1, ..., Saturday is 6
     const targetDayIndex = DaysConfig.findIndex(
-      (day) => day.short.toLowerCase() === targetDay || day.label.toLowerCase() === targetDay,
+      (day) => day.short?.toLowerCase() === targetDay || day.label?.toLowerCase() === targetDay,
     );
 
     let finalOffset = 0; // Start with 0 offset
 
-    direction = !direction ? 'last' : direction;
-    if (direction && direction.toLowerCase() === 'last') {
+    direction = !direction ? DIRECTION_TYPES.LAST : direction;
+    if (direction && direction?.toLowerCase() === DIRECTION_TYPES.LAST) {
       if (currentDayIndex === targetDayIndex) {
         finalOffset = 7;
       } else {
@@ -282,7 +285,7 @@ function parseRelativeDatePhrase(phrase: string): {
           finalOffset++;
         }
       }
-    } else if (direction && direction.toLowerCase() === 'next') {
+    } else if (direction && direction?.toLowerCase() === DIRECTION_TYPES.NEXT) {
       if (currentDayIndex === targetDayIndex) {
         finalOffset = 7;
       } else {
@@ -294,7 +297,7 @@ function parseRelativeDatePhrase(phrase: string): {
       }
     }
 
-    unit = 'day';
+    unit = PERIODICITY_TYPES.DAILY;
 
     return { direction, unit, offset: finalOffset };
   }
@@ -313,31 +316,31 @@ function parseRelativeDatePhrase(phrase: string): {
     offset = parseInt(digits[0]);
     const isWeekUnit = unit && /weeks?/i.test(unit);
 
-    if (unit && (unit.toLowerCase() === 'year' || isWeekUnit)) {
-      if (unit.toLowerCase() === 'year') {
+    if (unit && (unit?.toLowerCase() === PERIODICITY_TYPES.YEARLY || isWeekUnit)) {
+      if (unit?.toLowerCase() === PERIODICITY_TYPES.YEARLY) {
         offset *= 365; // Assuming a year has 365 days
       } else if (isWeekUnit) {
         // If unit is 'week' and offset is provided, treat it as days
         offset *= 7;
       }
-      unit = 'day';
+      unit = PERIODICITY_TYPES.DAILY;
     }
-  } else if (phrase.toLowerCase().includes('later') || phrase.toLowerCase().includes('after')) {
+  } else if (phrase?.toLowerCase().includes(OFFSET_TYPES.LATER) || phrase?.toLowerCase().includes(OFFSET_TYPES.AFTER)) {
     offset = 1;
   } else if (unit && /weeks?/i.test(unit)) {
     // If unit is 'week' and offset is not provided, set offset to 1 week (7 days)
     offset = 7;
-    unit = 'day';
+    unit = PERIODICITY_TYPES.DAILY;
   }
 
   // If unit is 'year' and offset is not provided, set offset to 1
-  if (unit && unit.toLowerCase() === 'year' && offset === null) {
+  if (unit && unit?.toLowerCase() === PERIODICITY_TYPES.YEARLY && offset === null) {
     offset = 1;
   }
 
   // Set appropriate direction based on offset
   if (offset !== null) {
-    direction = direction ? direction : offset >= 0 ? 'next' : 'last';
+    direction = direction ? direction : offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
   }
 
   return { direction, unit, offset };

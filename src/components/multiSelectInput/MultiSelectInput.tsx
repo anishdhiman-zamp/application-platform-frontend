@@ -222,7 +222,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     if (!debouncedSearch?.trim()) return combinedOptions;
 
     const filteredOptions = combinedOptions?.filter((option) =>
-      option?.value.toLowerCase().startsWith(debouncedSearch.toLowerCase()),
+      option?.value?.toLowerCase().startsWith(debouncedSearch?.toLowerCase()),
     );
 
     setOpenDropdownOptions(filteredOptions?.length > 0);

@@ -116,9 +116,9 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   }, [isOpen]);
 
   const filteredValues = useMemo(() => {
-    const lowerCasedInput = inputValue.toLowerCase();
+    const lowerCasedInput = inputValue?.toLowerCase();
 
-    return values.filter((item) => item && item.toLowerCase().includes(lowerCasedInput));
+    return values.filter((item) => item && item?.toLowerCase().includes(lowerCasedInput));
   }, [values, inputValue]);
 
   useEffect(() => {

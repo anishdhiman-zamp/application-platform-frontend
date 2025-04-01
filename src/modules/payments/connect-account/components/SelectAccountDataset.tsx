@@ -12,7 +12,7 @@ const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) =>
   const [search, setSearch] = useState('');
 
   const filteredDatasetOptions = useMemo(() => {
-    return ACCOUNT_DATASET_OPTIONS.filter((item) => item.label.toLowerCase().includes(search.toLowerCase()));
+    return ACCOUNT_DATASET_OPTIONS.filter((item) => item.label?.toLowerCase().includes(search?.toLowerCase()));
   }, [search]);
 
   return (

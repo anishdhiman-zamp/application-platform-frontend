@@ -60,7 +60,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     setSearchTerm(value);
     if (value) {
       const filteredColumns = columnNames
-        ?.filter((column) => column?.toLowerCase().includes(value.toLowerCase()))
+        ?.filter((column) => column?.toLowerCase().includes(value?.toLowerCase()))
         .filter((column) => column !== undefined);
 
       setAvailableColumns(filteredColumns);
