@@ -502,3 +502,5 @@ export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'bo
 
   return typeof value === 'object' && value !== null; // 'both' case (checks for object or array)
 };
+
+export const getCommaSeparatedNumberForInput = (num: string) => num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
