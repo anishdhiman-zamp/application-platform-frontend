@@ -370,7 +370,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
               payload: { selectedFilters: selectedDrilldownFilters },
             });
         }
-        if (isNoRowsOverlayVisible || datasetData?.data?.total_count === 0) return;
+        if (isNoRowsOverlayVisible || datasetData?.data?.total_count === 0 || drilldownFilters?.conditions === null)
+          return;
         const amountRangeColumns = columns
           ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
           ?.map((column) => column?.field)
