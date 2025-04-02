@@ -26,10 +26,10 @@ export const LISTING_COLUMNS: ColDef[] = [
     field: 'description',
     headerName: 'Description',
   },
-  {
-    field: 'updated_at',
-    headerName: 'Last Updated',
-  },
+  // {
+  //   field: 'updated_at',
+  //   headerName: 'Last Updated',
+  // },
   {
     field: '',
     headerName: '',
