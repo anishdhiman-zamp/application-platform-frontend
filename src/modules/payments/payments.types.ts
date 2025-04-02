@@ -3,3 +3,8 @@ export enum CONNECT_ACCOUNT_STEPS {
   SELECT_DATASET,
   COLUMN_MAPPING,
 }
+
+export type ContactType = {
+  contact_id: string;
+  name: string;
+};
