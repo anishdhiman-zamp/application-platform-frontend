@@ -518,7 +518,7 @@ export const getDefaultFilterByDatasetId = (
         defaultFilters[condition?.column] = {
           filterType: condition?.type,
           type: condition?.operator,
-          values: [...condition.value],
+          values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
         };
       });
     }
