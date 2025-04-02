@@ -90,7 +90,12 @@ export const LoginForm = () => {
     }
 
     try {
-      const response = await fetch(`${API_DOMAIN}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`, {
+      const isVercelDomain = window.location.hostname.includes('vercel.app');
+      const apiUrl = isVercelDomain
+        ? `/api/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`
+        : `${API_DOMAIN}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+
+      const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,
         body: JSON.stringify({
           email,

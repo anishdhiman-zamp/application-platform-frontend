@@ -1,0 +1,14 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://api-dev.zamp.ai/:path*",
+            "has": [
+                {
+                    "type": "host",
+                    "value": ".*vercel.app"
+                }
+            ]
+        }
+    ]
+}
