@@ -14,12 +14,11 @@ export const initializePostHog = () => {
     } catch (error) {
       console.error('Error initializing PostHog:', error);
     }
+    window.addEventListener('beforeunload', function () {
+      // Stop the session recording before the user leaves the page
+      posthog.stopSessionRecording();
+    });
   }
-
-  window.addEventListener('beforeunload', function () {
-    // Stop the session recording before the user leaves the page
-    posthog.stopSessionRecording();
-  });
 };
 
 export const identifyPostHogUser = (userId: string, merchantName?: string) => {
