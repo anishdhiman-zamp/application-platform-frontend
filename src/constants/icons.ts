@@ -27,6 +27,8 @@ export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
 export const GROUP_COLLAPSE_ICON = IMAGE_PREFIX + '/icons/group-collapse.svg';
 export const CONNECT_ACCOUNT = IMAGE_PREFIX + '/images/connect-account.svg';
 export const DATASET_TABLE = IMAGE_PREFIX + '/icons/dataset-table.svg';
+export const CHECK_GREEN = IMAGE_PREFIX + '/icons/check-green.svg';
+
 // Bank Icons
 export const ADCB_SVG = IMAGE_PREFIX + '/icons/bank-icons/adcb.svg';
 export const ADYEN = IMAGE_PREFIX + '/icons/bank-icons/adyen.png';

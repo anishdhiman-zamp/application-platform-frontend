@@ -72,9 +72,9 @@ export const defaultAccountData = {
   nick_name: '',
   bank_name: '',
   bank_identifier: '',
-  balance: '',
+  balance: null,
   account_name: '',
-  account_balance: '',
+  account_balance: null,
 };
 
 export const defaultContactDetails = { label: '', value: '' };
