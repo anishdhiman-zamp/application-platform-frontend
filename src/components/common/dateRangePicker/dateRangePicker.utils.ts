@@ -116,7 +116,11 @@ function parseRelativeDatePhrase(phrase: string): {
   const directionMatch = phrase.match(directionPattern);
 
   if (directionMatch) {
-    direction = lastPattern.test(directionMatch[0]) ? DIRECTION_TYPES.LAST : thisPattern.test(directionMatch[0]) ? 'this' : DIRECTION_TYPES.NEXT;
+    direction = lastPattern.test(directionMatch[0])
+      ? DIRECTION_TYPES.LAST
+      : thisPattern.test(directionMatch[0])
+        ? 'this'
+        : DIRECTION_TYPES.NEXT;
     phrase = phrase.replace(directionPattern, '').trim();
   }
 

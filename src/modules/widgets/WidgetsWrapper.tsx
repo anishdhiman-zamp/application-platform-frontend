@@ -29,6 +29,8 @@ interface WidgetsWrapperProps {
   activeWidget: string;
   defaultCurrency: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
+  sheetId: string;
+  setActiveWidget?: (widgetId: string) => void;
 }
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
@@ -37,8 +39,10 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   onWidgetChange,
   currency,
   activeWidget,
+  setActiveWidget,
   defaultCurrency,
   handleWidgetHeightChange,
+  sheetId,
 }) => {
   const router = useRouter();
   const { pageId } = useParams();
@@ -203,10 +207,12 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           activeWidget={activeWidget}
+          setActiveWidget={setActiveWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
           defaultCurrency={defaultCurrency}
           handleWidgetHeightChange={handleWidgetHeightChange}
+          sheetId={sheetId}
         />
       );
     }

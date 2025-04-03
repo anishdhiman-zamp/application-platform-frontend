@@ -101,6 +101,7 @@ type StackedPivotProps = {
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
+  sheetId: string;
 };
 
 const StackedPivot = ({
@@ -113,6 +114,7 @@ const StackedPivot = ({
   activeWidget,
   handleWidgetHeightChange,
   defaultCurrency,
+  sheetId,
 }: StackedPivotProps) => {
   const router = useRouter();
   const { pageId } = useParams();
@@ -121,6 +123,8 @@ const StackedPivot = ({
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
   const gridContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
@@ -208,6 +212,7 @@ const StackedPivot = ({
         isPortalNeeded: true,
         handleCollapseAll,
         handleExpandAll,
+        sheetId,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
@@ -236,6 +241,8 @@ const StackedPivot = ({
       handleExportAgGridData,
       handleCollapseAll,
       handleExpandAll,
+      sheetId,
+      currentWidgetInstanceId,
     ],
   );
 

@@ -172,6 +172,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                       defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                       handleWidgetHeightChange={handleWidgetHeightChange}
+                      sheetId={sheetId}
                     />
                   </div>
                 </div>

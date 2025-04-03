@@ -19,6 +19,7 @@ interface PinnedColHeaderPropsType {
   isSingleValue?: boolean;
   className?: string;
   isPortalNeeded?: boolean;
+  sheetId?: string;
 }
 
 const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
@@ -31,6 +32,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
   isPortalNeeded = false,
   handleExpandAll,
   handleCollapseAll,
+  sheetId,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -53,6 +55,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
         activeWidget={activeWidget}
         className={className}
         isPortalNeeded={isPortalNeeded}
+        sheetId={sheetId}
       />
 
       <TooltipButton

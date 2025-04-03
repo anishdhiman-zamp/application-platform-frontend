@@ -5,7 +5,7 @@ import { RootState } from 'store';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
-import { LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { Button } from 'components/common/button/Button';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
@@ -20,13 +20,24 @@ interface SheetsTabsProps {
 
 const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
   const router = useRouter();
-  const { id } = router.query;
+  const pageId = router?.query?.pageId ?? router?.query?.id;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   const handleTabSelect = (selected?: MenuItem) => {
     if (!selected?.value) return;
     router.push(`#${selected?.value}`);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.DATA_SHEET_ID, JSON.stringify({ [id as string]: selected?.value }));
+
+    const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) || '{}');
+
+    if (pageId) {
+      const validPageId = Array.isArray(pageId) ? pageId[0] : pageId;
+
+      if (validPageId) {
+        storedData[validPageId] = String(selected?.value);
+      }
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_KEYS.DATA_SHEET_ID, JSON.stringify(storedData));
   };
 
   return (
