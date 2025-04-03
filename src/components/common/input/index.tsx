@@ -11,7 +11,7 @@ const Input: FC<InputProps> = ({
   label = '',
   description = '',
   labelClassName = '',
-  labelOverrideClassName = 'f-12-500 text-GRAY_900 mb-2 select-none px-1.5',
+  labelOverrideClassName = 'f-12-500 text-GRAY_900 mb-2 select-none',
   required,
   ...rest
 }) => (

@@ -18,8 +18,8 @@ export interface AccountDetailsType {
   nick_name: string;
   bank_name: string;
   bank_identifier: string;
-  balance?: string;
-  account_balance: string;
+  balance?: number | null;
+  account_balance?: number | null;
 }
 
 export enum MOVE_MONEY_TYPE {
