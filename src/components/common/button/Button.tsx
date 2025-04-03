@@ -167,7 +167,6 @@ export const Button: React.FC<ButtonProps> = ({
       onClick={debouncedClick}
       disabled={disabled}
       className={cn(
-        className,
         wrapperAlignmentClass,
         wrapperSizeClass,
         BUTTON_DEFAULT_STYLES,
@@ -177,6 +176,7 @@ export const Button: React.FC<ButtonProps> = ({
         BUTTON_STATE_STYLES[type as BUTTON_TYPES]?.[BUTTON_STATE_TYPES.PRESSED],
         BUTTON_STATE_STYLES[type as BUTTON_TYPES]?.[BUTTON_STATE_TYPES.DISABLED],
         isLoading ? BUTTON_STATE_STYLES[type]?.[BUTTON_STATE_TYPES.LOADING] : '',
+        className,
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

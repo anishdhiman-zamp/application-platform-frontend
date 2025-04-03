@@ -109,7 +109,7 @@ export const getDynamicCellStyle = (cellStyles: MapAny[], field: string, groupin
     }
   }
 
-  return {}; // Default cell style
+  return {};
 };
 
 export const parseType = (type: PIVOT_DATA_TYPES, value: string | number | boolean, periodicity: PERIODICITY_TYPES) => {

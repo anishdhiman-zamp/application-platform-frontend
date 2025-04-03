@@ -22,6 +22,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
   fileName,
   setFileName,
   indexKey,
+  showUploadButton = true,
 }) => {
   const errorTitle = error ?? FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR;
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -76,15 +77,17 @@ const FileUploader: FC<FileUploaderPropsType> = ({
 
     return (
       <div key={indexKey} className='relative flex flex-col justify-center items-center w-full'>
-        <Button
-          id='UPLOAD_FILE_BUTTON'
-          className='mt-4 h-fit'
-          size={SIZE_TYPES.SMALL}
-          type={BUTTON_TYPES.SECONDARY}
-          isLoading={false}
-        >
-          Browse files
-        </Button>
+        {showUploadButton && (
+          <Button
+            id='UPLOAD_FILE_BUTTON'
+            className='mt-4 h-fit'
+            size={SIZE_TYPES.SMALL}
+            type={BUTTON_TYPES.SECONDARY}
+            isLoading={false}
+          >
+            Browse files
+          </Button>
+        )}
         <span className='f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'>
           {footer ?? 'Or drag and drop .csv, .xslx files here'}
         </span>

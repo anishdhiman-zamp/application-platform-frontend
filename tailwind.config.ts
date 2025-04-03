@@ -214,6 +214,7 @@ module.exports = {
         sideDrawer: '-3px 0px 0px 0px #00000005',
         sideDrawerInner: '10px 0px 50px 0px #0000000d',
         menuList: '1px 2px 20px 0px #0000001A',
+        selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
       },
       borderRadius: {
         2.5: '10px',

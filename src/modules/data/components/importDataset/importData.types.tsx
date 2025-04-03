@@ -99,10 +99,13 @@ export type FileUploaderPropsType = {
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
   indexKey?: number;
+  showUploadButton?: boolean;
 };
 
 export type FileUploaderWrapperPropsType = {
   acceptedFormats: string;
+  disableNext?: (value: boolean) => void;
+  footer?: string;
   filesSelected?: string;
   isFileUploading?: boolean;
   maxSize?: number;
