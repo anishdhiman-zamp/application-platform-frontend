@@ -109,7 +109,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   const currentPageFilters = useMemo(() => {
     const datasetFilters = getCurrentPageFilters(currentPageFiltersConfig ?? [], selectedFilters);
 
-    return JSON.stringify(datasetFilters.length > 0 ? datasetFilters : []);
+    return JSON.stringify(datasetFilters?.length > 0 ? datasetFilters : []);
   }, [currentPageFiltersConfig, selectedFilters]);
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {

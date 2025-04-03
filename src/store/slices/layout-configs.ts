@@ -69,7 +69,7 @@ export const layoutConfigsSlice = createSlice({
       return state;
     },
     updateUrlForLastBreadcrumb: (state, action) => {
-      state.breadcrumbStack[state.breadcrumbStack.length - 1].href = action.payload;
+      state.breadcrumbStack[state.breadcrumbStack?.length - 1].href = action.payload;
 
       return state;
     },

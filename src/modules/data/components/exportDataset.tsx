@@ -43,7 +43,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
     startPolling({
       fn: () => getActionStatus({ datasetId, params: { action_ids: [workflowId] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed).length === 0;
+        return data.filter((item) => !item.is_completed)?.length === 0;
       },
       interval: 3000,
       maxAttempts: 50,

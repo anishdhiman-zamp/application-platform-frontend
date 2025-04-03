@@ -162,7 +162,7 @@ const StackedPivot = ({
     [widgetInstanceDetails, columnContextMapping],
   );
 
-  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col).length === 1, [colDef]);
+  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col)?.length === 1, [colDef]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -180,7 +180,7 @@ const StackedPivot = ({
             api={api}
             node={node}
             currency={defaultCurrency ?? widgetData?.currency}
-            maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+            maxGroupingLevel={colDef?.filter((col) => col.rowGroup)?.length - 1}
             showPercentage={display_config?.show_percentages}
           />
         );
@@ -317,7 +317,7 @@ const StackedPivot = ({
     let currentRef = currentColDef?.context?.mappingName;
 
     // if there are more than one mappings, then the current ref is the top node
-    if (Object.keys(context?.columnContextMapping).length > 1) {
+    if (Object.keys(context?.columnContextMapping)?.length > 1) {
       currentRef = getTopNode(node)?.key;
     }
     if (!currentRef) return;

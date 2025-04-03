@@ -29,12 +29,12 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
     return {
       firstBreadCrumb: breadcrumbStack[0],
       lastTwoBreadCrumbs:
-        breadcrumbStack.length === 2
+        breadcrumbStack?.length === 2
           ? breadcrumbStack.slice(-1)
-          : breadcrumbStack.length >= 2
+          : breadcrumbStack?.length >= 2
             ? breadcrumbStack.slice(-2)
             : [],
-      middleBreadCrumbs: breadcrumbStack.length > 3 ? breadcrumbStack.slice(1, -2) : [],
+      middleBreadCrumbs: breadcrumbStack?.length > 3 ? breadcrumbStack.slice(1, -2) : [],
     };
   }, [breadcrumbStack]);
 

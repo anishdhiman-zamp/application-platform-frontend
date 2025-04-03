@@ -122,7 +122,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   }, [values, inputValue]);
 
   useEffect(() => {
-    setIsSelectAll(filteredValues.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
+    setIsSelectAll(filteredValues?.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
   }, [filteredValues, selectedValues]);
 
   const onSelectAll = () => {

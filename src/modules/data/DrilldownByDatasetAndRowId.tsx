@@ -46,7 +46,7 @@ const DrilldownByDatasetAndRowId = () => {
       if (!hasCommonValue) {
         appDispatch(addBreadcrumb({ title: finalLabel as string }));
       } else {
-        const newBreadcrumbStack = [...breadcrumbStack.slice(0, breadcrumbStack.length - 1), { title: finalLabel }];
+        const newBreadcrumbStack = [...breadcrumbStack.slice(0, breadcrumbStack?.length - 1), { title: finalLabel }];
 
         appDispatch(resetBreadcrumb(newBreadcrumbStack));
       }
@@ -62,7 +62,7 @@ const DrilldownByDatasetAndRowId = () => {
       if (!hasCommonValue) {
         appDispatch(addBreadcrumb({ title: tabs[0]?.label as string }));
       } else {
-        const newBreadcrumbStack = [...breadcrumbStack.slice(0, breadcrumbStack.length - 1), { title: finalLabel }];
+        const newBreadcrumbStack = [...breadcrumbStack.slice(0, breadcrumbStack?.length - 1), { title: finalLabel }];
 
         appDispatch(resetBreadcrumb(newBreadcrumbStack));
       }
@@ -71,7 +71,7 @@ const DrilldownByDatasetAndRowId = () => {
   };
 
   useEffect(() => {
-    if (tabs.length > 0) updateInitialTab(tabs);
+    if (tabs?.length > 0) updateInitialTab(tabs);
   }, [tabs]);
 
   return (
@@ -91,7 +91,7 @@ const DrilldownByDatasetAndRowId = () => {
     >
       <div className='h-full'>
         <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400 rounded-tl-xl'>
-          {tabs.length > 1 && (
+          {tabs?.length > 1 && (
             <Tabs
               list={tabs}
               id='drilldown-tabs'

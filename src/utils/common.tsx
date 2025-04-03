@@ -16,9 +16,9 @@ export function cn(...inputs: ClassValue[]) {
 export const checkIsObjectEmpty = (obj?: MapAny, ignoreKeys?: string[]) => {
   if (!obj) return true;
 
-  if (typeof obj === 'object' && !Object.keys(obj).length) return true;
+  if (typeof obj === 'object' && !Object.keys(obj)?.length) return true;
 
-  if (!ignoreKeys?.length && typeof obj === 'object' && !Object.keys(obj).length) return true;
+  if (!ignoreKeys?.length && typeof obj === 'object' && !Object.keys(obj)?.length) return true;
 
   if (ignoreKeys?.length && typeof obj === 'object') {
     const keys = Object.keys(obj);
@@ -153,7 +153,7 @@ export const getFirstLetters = (str: string) =>
   str
     ?.split(' ')
     .map((word, index) => {
-      if (index > 1 || !word.length) return null;
+      if (index > 1 || !word?.length) return null;
       else return word[0].toUpperCase();
     })
     .join('');
@@ -215,7 +215,7 @@ export function isValidDate(dateString: string) {
  * @returns
  */
 export function shuffleArray(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = array?.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1)); // Random index between 0 and i
 
     [array[i], array[j]] = [array[j], array[i]]; // Swap elements
@@ -283,7 +283,7 @@ export const cyclicIterator = (arr: any[]) => {
   return () => {
     const value = arr[index];
 
-    index = (index + 1) % arr.length;
+    index = (index + 1) % arr?.length;
 
     return value;
   };
@@ -316,7 +316,7 @@ export const getLeadingPathFromURL = (path: string) => {
 };
 
 export function trimString(str: string, maxLength: number) {
-  if (str.length > maxLength) {
+  if (str?.length > maxLength) {
     return str.slice(0, maxLength - 3) + '...'; // Slice the string to maxLength minus 3 for the ellipsis
   }
 

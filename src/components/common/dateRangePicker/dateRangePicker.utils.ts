@@ -233,7 +233,7 @@ function parseRelativeDatePhrase(phrase: string): {
     // Set appropriate direction based on offset
     direction = offset >= 0 ? DIRECTION_TYPES.NEXT : DIRECTION_TYPES.LAST;
 
-    if (!digits || digits[0].length > 2) {
+    if (!digits || digits[0]?.length > 2) {
       return { direction, unit: 'month', offset: Math.abs(offset) };
     } else {
       const parsedDate = new Date(year, monthIndex, Number(digits[0]));

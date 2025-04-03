@@ -152,7 +152,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
                     className='cursor-pointer'
                   />
                 </div>
-                {index < groupedColumns.length - 1 && (
+                {index < groupedColumns?.length - 1 && (
                   <SvgSpriteLoader id='chevron-right' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={12} height={12} />
                 )}
               </div>

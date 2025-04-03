@@ -30,7 +30,7 @@ const WidgetTitle = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const [isGroupWidgetOptionsOpen, setIsGroupWidgetOptionsOpen] = useState(false);
-  const isGroupWidgetOptions = groupWidgetsOptions.length > 1;
+  const isGroupWidgetOptions = groupWidgetsOptions?.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
 
   useOnClickOutside(dropdownRef, (event) => {
@@ -77,7 +77,7 @@ const WidgetTitle = ({
         </div>
 
         {isGroupWidgetOptions && (
-          <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions.length} Variants`}</span>
+          <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions?.length} Variants`}</span>
         )}
       </div>
       {isGroupWidgetOptionsOpen &&

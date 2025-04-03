@@ -194,7 +194,7 @@ export const getPivotColumns = (
     // if the mapping has no rows, we create a default row with the mapping name; the mapping name becomes the row group name (eg: Closing Balance)
     const mappingRows = [];
 
-    if (data_mappings.mappings.length === 1) {
+    if (data_mappings.mappings?.length === 1) {
       if (fields?.rows) {
         mappingRows.push(...fields.rows);
       } else {

@@ -53,7 +53,7 @@ export const Tabs: FC<TabsPropsType> = ({
           <div className={`flex w-full ${wrapperClassName} ${wrapperStyle}`}>
             {list?.map((tabItem, index) => {
               const selected = index === selectedIndex;
-              const last = index === list.length - 1;
+              const last = index === list?.length - 1;
 
               return (
                 !tabItem.isHidden && (

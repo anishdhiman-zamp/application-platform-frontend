@@ -32,8 +32,8 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
         return getFormattedSheetsFiltersConfig(filter);
       });
 
-      if (filters.length) {
-        if (Object.keys(defaultFilterValues).length)
+      if (filters?.length) {
+        if (Object.keys(defaultFilterValues)?.length)
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: {

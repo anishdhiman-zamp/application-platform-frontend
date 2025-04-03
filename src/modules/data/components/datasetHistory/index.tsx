@@ -33,7 +33,7 @@ const DatasetHistory = () => {
             <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />
           </div>
         </Tooltip>
-        {!!datasetBulkLoaders.length && (
+        {!!datasetBulkLoaders?.length && (
           <div className='absolute bottom-px left-[3px]'>
             <LoadingWidthAnimation />
           </div>
