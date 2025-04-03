@@ -44,7 +44,7 @@ export interface ActionType {
 }
 
 const initialState: InitialStateType = {
-  currentStep: 4,
+  currentStep: 0,
   destinationAccountDetails: defaultAccountData,
   moreDetails: {
     note: '',
