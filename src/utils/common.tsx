@@ -149,14 +149,21 @@ export const getColorValue = () => Math.floor(Math.random() * 64) + 80;
 
 export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()}, ${getColorValue()}`;
 
-export const getFirstLetters = (str: string) =>
+/**
+ * function to return the initials of string is SB for Siddharth Bagal
+ * @param string
+ * @param number
+ * @returns string
+ */
+export const getFirstLetters = (str: string, length = 2) =>
   str
     ?.split(' ')
-    .map((word, index) => {
-      if (index > 1 || !word.length) return null;
+    .map((word) => {
+      if (!word.length) return null;
       else return word[0].toUpperCase();
     })
-    .join('');
+    .join('')
+    .slice(0, length); // Ensure only the first 2 characters are returned;
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -495,3 +502,5 @@ export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'bo
 
   return typeof value === 'object' && value !== null; // 'both' case (checks for object or array)
 };
+
+export const getCommaSeparatedNumberForInput = (num: string) => num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
