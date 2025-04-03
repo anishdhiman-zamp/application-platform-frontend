@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
@@ -10,6 +10,7 @@ import {
   getDefaultFilterByDatasetId,
   mergeFilters,
 } from 'modules/widgets/widgets.utils';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import {
   FieldsMappingType,
@@ -28,6 +29,8 @@ interface WidgetsWrapperProps {
   activeWidget: string;
   defaultCurrency: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
+  sheetId: string;
+  setActiveWidget?: (widgetId: string) => void;
 }
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
@@ -36,10 +39,13 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   onWidgetChange,
   currency,
   activeWidget,
+  setActiveWidget,
   defaultCurrency,
   handleWidgetHeightChange,
+  sheetId,
 }) => {
   const router = useRouter();
+  const { pageId } = useParams();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
   const {
@@ -107,7 +113,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   const currentPageFilters = useMemo(() => {
     const datasetFilters = getCurrentPageFilters(currentPageFiltersConfig ?? [], selectedFilters);
 
-    return JSON.stringify(datasetFilters.length > 0 ? datasetFilters : []);
+    return JSON.stringify(datasetFilters?.length > 0 ? datasetFilters : []);
   }, [currentPageFiltersConfig, selectedFilters]);
 
   const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
@@ -140,8 +146,14 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
       };
     }
 
+    let path = getDatasetRouteById(datasetId);
+
+    if (pageId) {
+      path = getPageDatasetRoute(pageId as string, datasetId);
+    }
+
     router.push(
-      `${ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '')}?filters=${JSON.stringify({
+      `${path}?filters=${JSON.stringify({
         ...mergeFilters(currentWidgetSelectedFilters, defaultFilters),
         ...clickFilter,
       })}&currency=${currency}`,
@@ -195,10 +207,12 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           activeWidget={activeWidget}
+          setActiveWidget={setActiveWidget}
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
           defaultCurrency={defaultCurrency}
           handleWidgetHeightChange={handleWidgetHeightChange}
+          sheetId={sheetId}
         />
       );
     }

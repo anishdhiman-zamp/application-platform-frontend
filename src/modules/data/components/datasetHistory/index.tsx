@@ -18,12 +18,13 @@ const DatasetHistory = () => {
   return (
     <div>
       {isFileImportHistoryOpen && <ImportFileHistory onClose={handleCloseFileImportHistory} />}
-      <div className='relative z-1000'>
+      <div className='relative z-[800]'>
         <Tooltip
           tooltipBody='Activity'
-          tooltipBodyClassName='f-10-300 ml-2 rounded-md whitespace-nowrap z-1000 bg-black text-white'
           position={TooltipPositions.BOTTOM}
-          className='!cursor-text'
+          tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
+          className='z-1 h-full w-full'
+          tooltipBodystyle='f-10-400'
         >
           <div
             className={cn('p-1 hover:bg-GRAY_100 rounded cursor-pointer', isFileImportHistoryOpen && 'bg-GRAY_100')}
@@ -32,7 +33,7 @@ const DatasetHistory = () => {
             <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />
           </div>
         </Tooltip>
-        {!!datasetBulkLoaders.length && (
+        {!!datasetBulkLoaders?.length && (
           <div className='absolute bottom-px left-[3px]'>
             <LoadingWidthAnimation />
           </div>

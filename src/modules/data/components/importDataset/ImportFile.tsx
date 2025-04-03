@@ -48,7 +48,7 @@ const ImportFile: FC<ImportFilePropsType> = ({
         return;
       }
 
-      const columns = sheet[0].map((col: any) => col.toLowerCase().trim());
+      const columns = sheet[0].map((col: any) => col?.toLowerCase().trim());
 
       const rows = sheet
         .slice(1)

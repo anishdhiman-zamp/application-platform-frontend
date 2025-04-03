@@ -137,7 +137,7 @@ export const Dropdown: FC<DropdownProps> = ({
     const selectAll = value?.[0]?.value === SELECT_ALL_OPTION.value;
 
     return index === 0 ? (
-      <div className='f-16-300'>{`${selectAll ? options.length : value.length} ${countSelectedSuffix}`}</div>
+      <div className='f-16-300'>{`${selectAll ? options?.length : value?.length} ${countSelectedSuffix}`}</div>
     ) : (
       <div />
     );
@@ -240,7 +240,7 @@ export const Dropdown: FC<DropdownProps> = ({
 
   const addSelectAllInOptions = (): OptionsType[] => [SELECT_ALL_OPTION, ...options];
 
-  const isSelectAllSelected = () => Array.isArray(valueRef?.current) && valueRef?.current?.length === options.length;
+  const isSelectAllSelected = () => Array.isArray(valueRef?.current) && valueRef?.current?.length === options?.length;
 
   const getValue: () => OptionsType[] = () =>
     enableSelectAll && isSelectAllSelected() ? [SELECT_ALL_OPTION] : Array.isArray(value) ? value : [];

@@ -153,7 +153,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
           transformedData: groupedData?.data,
           stackedValues,
           yAxisTitle,
-          maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+          maxValueLength: formatNumber(maxValue, 0, false).split('')?.length,
           showCurrency: aggregation,
         };
       }
@@ -162,7 +162,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
         transformedData: dataWithDataType?.[0],
         stackedValues,
         yAxisTitle,
-        maxValueLength: formatNumber(maxValue, 0, false).split('').length,
+        maxValueLength: formatNumber(maxValue, 0, false).split('')?.length,
         showCurrency: aggregation,
       };
     }
@@ -430,7 +430,7 @@ export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selecte
         },
       };
     })
-    .filter((filter) => !!filter?.filters?.conditions.length && filter?.filters?.conditions[0] !== null);
+    .filter((filter) => !!filter?.filters?.conditions?.length && filter?.filters?.conditions[0] !== null);
 
   return appliedFilters;
 };
@@ -518,7 +518,7 @@ export const getDefaultFilterByDatasetId = (
         defaultFilters[condition?.column] = {
           filterType: condition?.type,
           type: condition?.operator,
-          values: [...condition.value],
+          values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
         };
       });
     }

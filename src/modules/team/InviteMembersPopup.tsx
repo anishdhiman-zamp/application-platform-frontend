@@ -43,7 +43,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
     [selectedItemsByInstance],
   );
   const disableAddBtn = useMemo(
-    () => multiSelectInstances?.length === TEAM_MEMBERS_PRIVILEGES_LIST.length,
+    () => multiSelectInstances?.length === TEAM_MEMBERS_PRIVILEGES_LIST?.length,
     [multiSelectInstances],
   );
   const isInvitable = useMemo(() => {
