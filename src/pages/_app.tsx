@@ -8,8 +8,11 @@ import { FeatureFlagsProvider } from 'modules/feature-flags/provider';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import ErrorBoundary from 'pages/ErrorBoundary';
+import posthog from 'posthog-js';
+import { PostHogProvider } from 'posthog-js/react';
 import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
+import { initializePostHog } from 'utils/postHog';
 import { AG_CHART_KEY, AG_GRID_KEY } from 'components/common/agGridTable/agGridTable.constants';
 import { AuthGuard } from 'components/hoc/AuthGuard';
 import { RouteGuard } from 'components/hoc/RouteGuard';
@@ -37,6 +40,8 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     return <div>{getLayout(<Component {...pageProps} />)}</div>;
   };
 
+  initializePostHog();
+
   return (
     <>
       <Head>
@@ -48,14 +53,16 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <NetworkStatus />
         <ErrorBoundary>
           <Provider store={store}>
-            <AuthGuard loginRoute='/login'>
-              <FeatureFlagsProvider>
-                <ToastContainer />
-                <RouteGuard>
-                  <div className={'h-screen light-mode'}>{getComponent()}</div>
-                </RouteGuard>
-              </FeatureFlagsProvider>
-            </AuthGuard>
+            <PostHogProvider client={posthog}>
+              <AuthGuard loginRoute='/login'>
+                <FeatureFlagsProvider>
+                  <ToastContainer />
+                  <RouteGuard>
+                    <div className={'h-screen light-mode'}>{getComponent()}</div>
+                  </RouteGuard>
+                </FeatureFlagsProvider>
+              </AuthGuard>
+            </PostHogProvider>
           </Provider>
         </ErrorBoundary>
       </div>
