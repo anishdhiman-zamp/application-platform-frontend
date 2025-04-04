@@ -121,8 +121,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
                   id='x-close'
                   className='cursor-pointer'
                   onClick={() => handleRemoveFile(idx)}
-                  width={20}
-                  height={20}
+                  size={20}
                 />
               </div>
             ))}
@@ -132,7 +131,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         <div className='mt-5'>
           <div className='text-GRAY_900 f-12-500 mb-2'>Notes</div>
           <Textarea
-            id='SELF_TRANSFER_NOTE_TEXTAREA'
+            id='SINGLE_TRANSFER_NOTE_TEXTAREA'
             name='text'
             tabIndex={isActiveStep ? 0 : -1}
             value={transferNote}
