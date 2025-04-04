@@ -4,7 +4,13 @@ import { format, isValid, parse } from 'date-fns';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
 import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
-import { ColumnFilterConfig, PIVOT_DATA_TYPES, PivotColumnMetadata } from 'modules/widgets/Pivot/pivot.types';
+import {
+  ColumnFilterConfig,
+  PIVOT_DATA_TYPES,
+  PivotColumnMetadata,
+  UNTAGGED_TAGS,
+  UNTAGGED_TAGS_FRONTEND_MAPPING,
+} from 'modules/widgets/Pivot/pivot.types';
 import { getFormattedDateWithPeriodicity } from 'modules/widgets/widgets.constant';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import {
@@ -119,6 +125,7 @@ export const parseType = (type: PIVOT_DATA_TYPES, value: string | number | boole
     }
     case PIVOT_DATA_TYPES.BANK:
     case PIVOT_DATA_TYPES.TAG:
+      return value === UNTAGGED_TAGS.UNTAGGED ? UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED : value;
     case PIVOT_DATA_TYPES.COUNTRY:
     case PIVOT_DATA_TYPES.STATUS:
       return value;
@@ -187,7 +194,7 @@ export const getPivotColumns = (
     // if the mapping has no rows, we create a default row with the mapping name; the mapping name becomes the row group name (eg: Closing Balance)
     const mappingRows = [];
 
-    if (data_mappings.mappings.length === 1) {
+    if (data_mappings.mappings?.length === 1) {
       if (fields?.rows) {
         mappingRows.push(...fields.rows);
       } else {

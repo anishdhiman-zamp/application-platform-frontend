@@ -138,7 +138,7 @@ const AddTag = ({
               </div>
             </MenuWrapper>
           )}
-          {filterStatement.length > 0 && (
+          {filterStatement?.length > 0 && (
             <>
               <div
                 className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-[140px] overflow-y-auto flex flex-wrap gap-y-2 items-center'
@@ -149,7 +149,7 @@ const AddTag = ({
                   <RuleStatement
                     index={index}
                     filterStatement={value}
-                    numberOfFilters={filterStatement.length}
+                    numberOfFilters={filterStatement?.length}
                     key={`filter-statement-${index}`}
                   />
                 ))}

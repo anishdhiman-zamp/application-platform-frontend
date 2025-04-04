@@ -5,6 +5,7 @@ import {
 } from 'modules/data/components/importDataset/importData.constants';
 import { DataPreviewContentPropsType } from 'modules/data/components/importDataset/importData.types';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
+import HtmlTable from 'components/common/htmlTable/HtmlTable';
 import DatasetTable from 'components/common/table/DatasetTable';
 import { Tabs } from 'components/common/tabs/Tabs';
 
@@ -26,9 +27,12 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
         );
       case DATA_PREVIEW_TABS_TYPES.ORIGINAL:
         return (
-          <DatasetTable
-            columns={rawData?.columns?.map((headerName) => ({ field: headerName })) || []}
-            rows={rawData?.rows?.map((item) => ({ ...item }))}
+          <HtmlTable
+            columns={rawData?.columns || []}
+            rows={rawData?.rows || []}
+            wrapperClassName='pb-3'
+            colCellClassName='border-l-0'
+            rowCellClassName='border-l-0'
           />
         );
       default:
@@ -52,9 +56,7 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
       </div>
 
       <div className='relative w-full h-full overflow-hidden'>
-        <div className='h-full overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          <div>{renderTable()}</div>
-        </div>
+        <div className='h-full overflow-y-auto [&::-webkit-scrollbar]:hidden'>{renderTable()}</div>
       </div>
     </div>
   );

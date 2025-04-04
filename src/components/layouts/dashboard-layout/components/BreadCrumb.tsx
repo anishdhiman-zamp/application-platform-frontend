@@ -1,31 +1,40 @@
 import { FC, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
+import { useAppDispatch } from 'hooks/toolkit';
+import Link from 'next/link';
+import { BreadcrumbItem, resetBreadcrumb } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
 interface BreadCrumbProps {
-  breadcrumbStack: string[];
+  breadcrumbStack: BreadcrumbItem[];
 }
 
 const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const appDispatch = useAppDispatch();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
 
   const { firstBreadCrumb, lastTwoBreadCrumbs, middleBreadCrumbs } = useMemo(() => {
-    if (!breadcrumbStack?.length) return { firstBreadCrumb: '', lastTwoBreadCrumbs: [], middleBreadCrumbs: [] };
+    if (!breadcrumbStack?.length)
+      return {
+        firstBreadCrumb: { href: '', title: '' },
+        lastTwoBreadCrumbs: [],
+        middleBreadCrumbs: [],
+      };
 
     return {
       firstBreadCrumb: breadcrumbStack[0],
       lastTwoBreadCrumbs:
-        breadcrumbStack.length === 2
+        breadcrumbStack?.length === 2
           ? breadcrumbStack.slice(-1)
-          : breadcrumbStack.length >= 2
+          : breadcrumbStack?.length >= 2
             ? breadcrumbStack.slice(-2)
             : [],
-      middleBreadCrumbs: breadcrumbStack.length > 3 ? breadcrumbStack.slice(1, -2) : [],
+      middleBreadCrumbs: breadcrumbStack?.length > 3 ? breadcrumbStack.slice(1, -2) : [],
     };
   }, [breadcrumbStack]);
 
@@ -33,10 +42,20 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const handleBreadcrumbClick = (index: number) => {
+    appDispatch(resetBreadcrumb(breadcrumbStack.slice(0, index + 1)));
+  };
+
   return (
     <div className='flex items-center f-13-400 text-GRAY_700 gap-1'>
       {firstBreadCrumb && (
-        <div className={cn({ 'f-13-500 text-GRAY_1000': !lastTwoBreadCrumbs?.length })}>{`${firstBreadCrumb}`}</div>
+        <Link
+          href={firstBreadCrumb.href ?? ''}
+          className={cn({ 'f-13-500 text-GRAY_1000': !lastTwoBreadCrumbs?.length })}
+          onClick={() => handleBreadcrumbClick(0)}
+        >
+          {`${firstBreadCrumb.title}`}
+        </Link>
       )}
       {lastTwoBreadCrumbs?.length > 0 && <div>/</div>}
       {middleBreadCrumbs?.length > 0 && (
@@ -52,21 +71,28 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
               childrenWrapperClassName='!overflow-y-auto'
             >
               {middleBreadCrumbs?.map((item) => (
-                <div
-                  key={item}
+                <Link
+                  key={item.title}
                   className='hover:bg-GRAY_200 rounded-md py-2 px-2.5 f-12-500 cursor-pointer text-nowrap'
+                  href={item.href ?? ''}
+                  onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}
                 >
-                  {item}
-                </div>
+                  {item.title}
+                </Link>
               ))}
             </MenuWrapper>
           )}
         </div>
       )}
       {lastTwoBreadCrumbs?.map((item, index) => (
-        <div key={item} className={cn({ 'f-13-500 text-GRAY_1000': index == lastTwoBreadCrumbs?.length - 1 })}>
-          {`${item}${index < lastTwoBreadCrumbs?.length - 1 ? ' / ' : ''}`}
-        </div>
+        <Link
+          key={item.title}
+          href={item.href ?? ''}
+          className={cn({ 'f-13-500 text-GRAY_1000': index == lastTwoBreadCrumbs?.length - 1 })}
+          onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}
+        >
+          {`${item.title}${index < lastTwoBreadCrumbs?.length - 1 ? ' / ' : ''}`}
+        </Link>
       ))}
     </div>
   );

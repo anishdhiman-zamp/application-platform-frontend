@@ -166,7 +166,7 @@ export const getTagLabel = (tag?: string) => {
 export const getTagParents = (tag: string) => {
   const parents = tag?.split('.').slice(0, -1) ?? [];
 
-  return parents.length ? parents.join(' / ') : null;
+  return parents?.length ? parents.join(' / ') : null;
 };
 
 const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';

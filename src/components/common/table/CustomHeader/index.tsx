@@ -281,6 +281,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         >
           <FilterDropdownMenu
             filterKey={colId}
+            label={colDef?.headerName}
             filterType={filterType}
             {...(filterType === FILTER_TYPES.TAGS
               ? {

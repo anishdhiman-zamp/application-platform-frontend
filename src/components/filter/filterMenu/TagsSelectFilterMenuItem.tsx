@@ -11,15 +11,17 @@ interface TagsProps {
   values: string[];
   className?: string;
   tagColorMap?: MapAny;
+  label?: string;
 }
 
-const Tags: FC<TagsProps> = ({ column, values, className, tagColorMap }) => {
+const Tags: FC<TagsProps> = ({ column, values, className, tagColorMap, label }) => {
   return (
     <MultiSelectFilterMenuItem
       column={column}
       values={values}
       className={className}
       operatorOptions={TAGS_SELECT_FILTER_OPTIONS}
+      label={label}
       LabelComponent={(item: string) => (
         <Label
           title={<TagChip item={getTagLabel(item)} externalColor={tagColorMap?.[item]} />}

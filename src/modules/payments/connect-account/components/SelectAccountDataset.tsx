@@ -12,7 +12,7 @@ const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) =>
   const [search, setSearch] = useState('');
 
   const filteredDatasetOptions = useMemo(() => {
-    return ACCOUNT_DATASET_OPTIONS.filter((item) => item.label.toLowerCase().includes(search.toLowerCase()));
+    return ACCOUNT_DATASET_OPTIONS.filter((item) => item.label?.toLowerCase().includes(search?.toLowerCase()));
   }, [search]);
 
   return (
@@ -47,7 +47,7 @@ const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) =>
           <div className='f-13-500'>{item.label}</div>
         </div>
       ))}
-      {filteredDatasetOptions.length === 0 && (
+      {filteredDatasetOptions?.length === 0 && (
         <div className='f-12-450 text-GRAY_700 mb-6.5 block animate-pulse'>No results found</div>
       )}
     </div>

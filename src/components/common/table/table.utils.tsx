@@ -137,13 +137,13 @@ export const convertToFilterModel = (input: MapAny | null): FilterModelType | nu
   } else {
     const keys = Object.keys(input);
 
-    if (keys.length) {
+    if (keys?.length) {
       const formattedConditions = keys.map((key) => ({ colId: key, ...input?.[key] }));
       const conditions = formattedConditions
         .map((condition: MapAny) => parseCondition(condition))
         .filter((condition: MapAny | null) => condition !== null);
 
-      if (conditions.length) {
+      if (conditions?.length) {
         return {
           logical_operator: LogicalOperatorType.OperatorLogicalAnd,
           conditions,
@@ -167,7 +167,7 @@ export const getFilterModelFromGroupAndFilterModel = (
       : { ...request.filterModel, ...hiddenColumnFilters };
   const filtersFromFilterModel = convertToFilterModel(filterModel);
 
-  if (filtersFromGroup.length) {
+  if (filtersFromGroup?.length) {
     return {
       logical_operator: LogicalOperatorType.OperatorLogicalAnd,
       conditions: filtersFromFilterModel ? [...filtersFromGroup, filtersFromFilterModel] : filtersFromGroup,
@@ -179,7 +179,7 @@ export const getFilterModelFromGroupAndFilterModel = (
 
 const getGroupByColumns = (request: IServerSideGetRowsRequest): GroupByType[] => {
   const { rowGroupCols, groupKeys } = request;
-  const rowGroupsToBeUsed = groupKeys?.length ? rowGroupCols.slice(groupKeys.length) : rowGroupCols;
+  const rowGroupsToBeUsed = groupKeys?.length ? rowGroupCols.slice(groupKeys?.length) : rowGroupCols;
 
   if (rowGroupsToBeUsed?.length) {
     return [

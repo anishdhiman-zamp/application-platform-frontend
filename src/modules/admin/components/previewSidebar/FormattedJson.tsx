@@ -21,12 +21,12 @@ const highlightDifferences = (
   const highlightSearch = (text: string, query: string) => {
     if (!query) return text;
 
-    const lowerText = text.toLowerCase();
-    const lowerQuery = query.toLowerCase();
+    const lowerText = text?.toLowerCase();
+    const lowerQuery = query?.toLowerCase();
 
     const parts = lowerText.split(lowerQuery);
 
-    if (parts.length === 1) return text;
+    if (parts?.length === 1) return text;
 
     let lastIndex = 0;
     const highlighted: (string | JSX.Element)[] = [];
@@ -35,16 +35,16 @@ const highlightDifferences = (
       if (index > 0) {
         highlighted.push(
           <span key={index} className='bg-RED_300 text-black'>
-            {text.slice(lastIndex, lastIndex + query.length)}
+            {text.slice(lastIndex, lastIndex + query?.length)}
           </span>,
         );
-        lastIndex += query.length;
+        lastIndex += query?.length;
       }
       highlighted.push(part);
-      lastIndex += part.length;
+      lastIndex += part?.length;
     });
 
-    searchCount += parts.length - 1;
+    searchCount += parts?.length - 1;
 
     return highlighted;
   };
@@ -65,7 +65,7 @@ const highlightDifferences = (
       }
 
       if (searchQuery) {
-        if (searchQuery.length > 50) {
+        if (searchQuery?.length > 50) {
           toast.error('Search query is too long, please try a shorter query.');
 
           return <span key={index}>{line + '\n'}</span>;

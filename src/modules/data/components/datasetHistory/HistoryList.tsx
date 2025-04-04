@@ -21,7 +21,7 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
   return (
     <div
       className={cn(
-        !!datasetBulkLoaders.length && 'mt-1.5',
+        !!datasetBulkLoaders?.length && 'mt-1.5',
         'w-96 mr-4 mb-4 rounded-2.5 shadow-tableFilterMenu h-full max-h-fit bg-white',
       )}
       style={{
@@ -29,7 +29,7 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
         transform: `translateY(${baseTranslateY + dynamicTranslateY}px)`,
       }}
     >
-      {!!fileImportHistoryData && !!fileImportHistoryData.length && (
+      {!!fileImportHistoryData && !!fileImportHistoryData?.length && (
         <div className='flex flex-col justify-start items-start p-3.5 border-[0.5px] border-GRAY_500 rounded-2.5 w-full overflow-y-scroll'>
           <div className='flex flex-col justify-start items-start w-full'>
             <span className='f-14-600'>Import History</span>

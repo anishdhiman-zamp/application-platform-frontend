@@ -60,7 +60,7 @@ function useOnClickOutside(ref: any, handler: (event?: MouseEvent) => void, igno
       event?.stopPropagation();
       //Pass a list of refs you want to ignore
       if (ignoreRefs?.length) {
-        for (let i = 0; i < ignoreRefs.length; i++) {
+        for (let i = 0; i < ignoreRefs?.length; i++) {
           if (ignoreRefs[i]?.current?.contains(event.target)) {
             return;
           }

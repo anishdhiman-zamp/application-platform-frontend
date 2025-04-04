@@ -15,9 +15,10 @@ interface AmountRangeFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
+  label?: string;
 }
 
-const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column, className }) => {
+const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column, className, label }) => {
   const ref = useRef(null);
   const columnId = column?.colId;
   const {
@@ -92,7 +93,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
         <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
-          {camelCaseToNormalText(columnId)}
+          {label || camelCaseToNormalText(columnId)}
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-4'

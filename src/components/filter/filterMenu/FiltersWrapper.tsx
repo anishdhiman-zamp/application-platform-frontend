@@ -65,7 +65,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   const onRemoveFiltersWithoutKeys = (list: FilterConfigType[], selectedFiltersInUI: MapAny) => {
     const keys = Object.keys(selectedFiltersInUI);
 
-    for (let i = list.length - 1; i >= 0; i--) {
+    for (let i = list?.length - 1; i >= 0; i--) {
       const filter = list[i];
 
       if (!keys?.includes(filter?.key)) {
@@ -86,7 +86,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
     }
 
     onRemoveFiltersWithoutKeys(list, selectedFiltersInUI);
-    onSetTotalSelectedFilters?.(list.length);
+    onSetTotalSelectedFilters?.(list?.length);
 
     setFiltersList(list);
   }, [selectedFiltersInUI, selectedFilters]);
