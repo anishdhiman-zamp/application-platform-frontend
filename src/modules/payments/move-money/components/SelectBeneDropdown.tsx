@@ -7,6 +7,7 @@ import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.const
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
+import { cn } from 'utils/common';
 import Input from 'components/common/input';
 import { Tabs } from 'components/common/tabs/Tabs';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
@@ -99,7 +100,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, 
 
   return (
     <div
-      className='rounded-md border border-GRAY_500 bg-white overflow-hidden shadow-selectAccountDropdown'
+      className={cn('rounded-md border border-GRAY_500 bg-white overflow-hidden shadow-selectAccountDropdown', {
+        'border-GRAY_400': !isShowMenu,
+        'border-GRAY_500': isShowMenu,
+      })}
       ref={containerRef}
     >
       <div className='flex items-center gap-1.5 pr-3 w-full'>
@@ -112,11 +116,11 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, 
           value={isSearchActive ? searchValue : selectedRecipient?.label}
           disabled={!!contact_id}
           onChange={handleSearch}
-          className=' f-13-450 grow'
-          inputFontClassName=' !border-none !px-3 placeholder:text-base focus:!shadow-none focus:!border-none bg-white placeholder:!text-GRAY_500 placeholder:text-xs'
+          focusClassNames=''
           placeholder='Search recipient or template'
           inputWrapperClassName='tw-w-full'
         />
+
         <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
       </div>
       <div

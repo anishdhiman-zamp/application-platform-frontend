@@ -61,16 +61,46 @@ const FileUploaderWrapperV2: FC<FileUploaderWrapperProps> = ({
 
   const [getSignedUrl] = useGetSignedUrlMutation({});
 
-  useEffect(() => {
-    if (filesSelected && isLoading) {
-      setIsLoading(false);
-    }
-  }, [filesSelected]);
-
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
 
     handleUpload(filesToUpload);
+  };
+
+  const uploadFileToSignedUrl = async (uploadUrl: any, filesToUpload: File, fileExtension: string) => {
+    if (uploadUrl) {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(REQUEST_TYPES.PUT, uploadUrl.url, true);
+      xhr.setRequestHeader('Content-Type', getFileType(filesToUpload) || FileExtensionToTypeMap[fileExtension]);
+
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+
+          setUploadProgress(Math.floor(percentComplete));
+          onUploadProgress?.(Math.floor(percentComplete));
+        }
+      };
+
+      xhr.onload = function () {
+        setIsLoading(false);
+        if (xhr.status === 200) {
+          onFilesSelect({ ...uploadUrl, fileName: filesToUpload?.name, rawFile: filesToUpload });
+          disableNext?.(false);
+        } else {
+          setError('Uploading failed!');
+          setParentError?.('Uploading failed!');
+        }
+      };
+
+      xhr.onerror = function () {
+        setError('Uploading failed!');
+        setParentError?.('Uploading failed!');
+      };
+
+      xhr.send(filesToUpload);
+    }
   };
 
   const handleUpload = (filesToUpload: File | null) => {
@@ -106,44 +136,7 @@ const FileUploaderWrapperV2: FC<FileUploaderWrapperProps> = ({
           disableNext?.(true);
           getSignedUrl(payload)
             .unwrap()
-            .then(async (uploadUrl: any) => {
-              if (uploadUrl) {
-                const xhr = new XMLHttpRequest();
-
-                xhr.open(REQUEST_TYPES.PUT, uploadUrl.url, true);
-                xhr.setRequestHeader(
-                  'Content-Type',
-                  getFileType(filesToUpload) || FileExtensionToTypeMap[fileExtension],
-                );
-
-                xhr.upload.onprogress = function (event) {
-                  if (event.lengthComputable) {
-                    const percentComplete = (event.loaded / event.total) * 100;
-
-                    setUploadProgress(Math.floor(percentComplete));
-                    onUploadProgress?.(Math.floor(percentComplete));
-                  }
-                };
-
-                xhr.onload = function () {
-                  setIsLoading(false);
-                  if (xhr.status === 200) {
-                    onFilesSelect({ ...uploadUrl, fileName: filesToUpload?.name, rawFile: filesToUpload });
-                    disableNext?.(false);
-                  } else {
-                    setError('Uploading failed!');
-                    setParentError?.('Uploading failed!');
-                  }
-                };
-
-                xhr.onerror = function () {
-                  setError('Uploading failed!');
-                  setParentError?.('Uploading failed!');
-                };
-
-                xhr.send(filesToUpload);
-              }
-            })
+            .then((uploadUrl: any) => uploadFileToSignedUrl(uploadUrl, filesToUpload, fileExtension))
             .catch(() => {
               setError('Uploading failed!');
               setParentError?.('Uploading failed!');
@@ -160,6 +153,12 @@ const FileUploaderWrapperV2: FC<FileUploaderWrapperProps> = ({
   const handleClick = () => {
     hiddenFileInput?.current?.click();
   };
+
+  useEffect(() => {
+    if (filesSelected && isLoading) {
+      setIsLoading(false);
+    }
+  }, [filesSelected]);
 
   return (
     <Component

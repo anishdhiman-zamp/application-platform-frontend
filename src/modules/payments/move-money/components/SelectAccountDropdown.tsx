@@ -6,7 +6,7 @@ import DropdownToggle from 'modules/payments/move-money/components/DropdownToggl
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
-import { snakeCaseToSentenceCase } from 'utils/common';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import Input from 'components/common/input';
 
 type SelectBeneDropdownProps = {
@@ -92,7 +92,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   return (
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
-      <div className='rounded-md border border-GRAY_500 bg-white overflow-hidden' ref={containerRef}>
+      <div
+        className={cn('rounded-md border border-GRAY_500 bg-white overflow-hidden', {
+          'border-GRAY_400': !isShowMenu,
+          'border-GRAY_500': isShowMenu,
+        })}
+        ref={containerRef}
+      >
         {!accountDetails?.account_name || isSearchActive ? (
           <div className='flex items-center gap-1.5 px-3'>
             <Input
@@ -105,9 +111,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               disabled={!!contact_id}
               onChange={handleSearch}
               className='f-13-450 grow'
-              inputFontClassName='focus:!shadow-none border-none !px-3 placeholder:text-base focus:!border-none bg-white placeholder:!text-GRAY_500 placeholder:text-xs !px-0 w-full'
+              focusClassNames='!px-0'
               placeholder='Search account name, number'
-              inputWrapperClassName='tw-w-full'
             />
             <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
           </div>
