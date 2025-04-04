@@ -236,25 +236,27 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
           ))}
         </div>
       ) : (
-        <MultiSelectInput
-          id='select-team'
-          search={search}
-          setSearch={setSearch}
-          inputArrayList={selectedItems}
-          setInputArrayList={setSelectedItems}
-          optionsList={filteredOptionListsData}
-          customOptionsListDropdown={memoizedDropdown}
-          onValidateAndAdd={handleValidateAndAdd}
-          onSelectOption={handleOptionSelection}
-          placeholderText='Add team'
-          isOpen={false}
-          wrapperClassName='border-none rounded-none shadow-none f-12-400'
-          inputWrapperClassName={cn(isCustomInputFocused ? 'flex-wrap' : 'flex-nowrap', 'p-0')}
-          multiSelectInputClassName='f-12-400 !rounded-none'
-          setIsCustomInputFocused={setIsCustomInputFocused}
-          selectOnlyFromList
-          onCustomDeleteFn={handleRemoveAudienceFromTeam}
-        />
+        <div className='overflow-hidden'>
+          <MultiSelectInput
+            id='select-team'
+            search={search}
+            setSearch={setSearch}
+            inputArrayList={selectedItems}
+            setInputArrayList={setSelectedItems}
+            optionsList={filteredOptionListsData}
+            customOptionsListDropdown={memoizedDropdown}
+            onValidateAndAdd={handleValidateAndAdd}
+            onSelectOption={handleOptionSelection}
+            placeholderText='Add team'
+            isOpen={false}
+            wrapperClassName='border-none rounded-none shadow-none f-12-400'
+            inputWrapperClassName={cn(isCustomInputFocused ? 'flex-wrap' : 'flex-nowrap', 'p-0')}
+            multiSelectInputClassName='f-12-400 !rounded-none'
+            setIsCustomInputFocused={setIsCustomInputFocused}
+            selectOnlyFromList
+            onCustomDeleteFn={handleRemoveAudienceFromTeam}
+          />
+        </div>
       )}
     </div>
   );
