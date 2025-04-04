@@ -5,9 +5,11 @@ export const ROUTES_PATH = {
   LOGIN: '/login',
   DATA: '/datasets',
   TEAM: '/team',
-  DRILLDOWN: '/drilldown/:datasetId/:rowId',
+  DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages/',
+  PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
+  PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   NO_ACCESS: '/no-access',
   ADMIN: '/admin',
   PAYMENTS: '/payments',
@@ -20,6 +22,18 @@ export const getPageRouteById = (pageId: string) => {
 
 export const getDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.DATA}/${datasetId}`;
+};
+
+export const getPageDatasetRoute = (pageId: string, datasetId: string) => {
+  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}`;
+};
+
+export const getPageDatasetDrilldownRoute = (pageId: string, datasetId: string, rowId: string) => {
+  return `${ROUTES_PATH.PAGE_DATASET_DRILLDOWN.replace(':pageId', pageId).replace(':datasetId', datasetId).replace(':rowId', rowId)}`;
+};
+
+export const getDatasetDrilldownRoute = (datasetId: string, rowId: string) => {
+  return `${ROUTES_PATH.DATASET_DRILLDOWN.replace(':datasetId', datasetId).replace(':rowId', rowId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

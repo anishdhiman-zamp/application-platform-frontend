@@ -6,6 +6,7 @@ import PivotTableLoader from 'modules/widgets/Pivot/loader/PivotTableLoader';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -23,6 +24,8 @@ export type PivotTableWidgetPropsType = {
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
+  sheetId: string;
+  setActiveWidget?: (widgetId: string) => void;
 };
 
 const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
@@ -37,8 +40,10 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   currency,
   currentWidgetSelectedFilter,
   activeWidget,
+  setActiveWidget,
   handleWidgetHeightChange,
   defaultCurrency,
+  sheetId,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -55,6 +60,27 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       skip: !isFilterInitialized,
     },
   );
+
+  const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID) || '{}');
+  const currentActiveWidget = storedData[sheetId]?.widget_instance_id ?? activeWidget;
+
+  const initializeSheetData = () => {
+    if (!sheetId || typeof sheetId !== 'string') return;
+
+    if (storedData[sheetId]?.widget_instance_id && setActiveWidget) {
+      setActiveWidget(storedData[sheetId]?.widget_instance_id);
+    }
+
+    if (!storedData[sheetId]) {
+      storedData[sheetId] = {};
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID, JSON.stringify(storedData));
+  };
+
+  useEffect(() => {
+    initializeSheetData();
+  }, [sheetId, storedData, setActiveWidget]);
 
   useEffect(() => {
     if (isFetching) {
@@ -86,11 +112,12 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           widgetInstanceDetails={widgetInstanceDetails}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
-          activeWidget={activeWidget}
+          activeWidget={currentActiveWidget}
           periodicity={periodicity}
           currentWidgetSelectedFilter={currentWidgetSelectedFilter}
           handleWidgetHeightChange={handleWidgetHeightChange}
           defaultCurrency={defaultCurrency}
+          sheetId={sheetId}
         />
       )}
     </CommonWrapper>

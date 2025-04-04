@@ -27,7 +27,7 @@ const SelectFilterMenuItem = ({
   const [menuWidth, setMenuWidth] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const filteredMenuItems = useMemo(
-    () => filtersConfig?.filter((filter) => filter?.key?.includes(search)),
+    () => filtersConfig?.filter((filter) => filter?.label?.toLowerCase()?.includes(search?.toLowerCase())),
     [filtersConfig, search],
   );
 
@@ -85,11 +85,11 @@ const SelectFilterMenuItem = ({
               )}
               onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddFilter(filter?.key)}
             >
-              <div className='f-12-450 text-GRAY_1000'>{filter.key}</div>
+              <div className='f-12-450 text-GRAY_1000 whitespace-nowrap'>{filter.label}</div>
             </div>
           ))
         ) : (
-          <div className='flex justify-center items-center p-2 f-14-450 text-GRAY_1000'>No results found</div>
+          <div className='flex justify-center items-center p-2 f-12-450 text-GRAY_700'>No results found</div>
         )}
       </div>
     </div>

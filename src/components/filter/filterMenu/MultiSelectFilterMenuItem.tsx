@@ -19,6 +19,7 @@ interface MultiSelectFilterMenuItemProps {
   operatorOptions?: OptionsType[];
   isOpen?: boolean;
   showSelectAll?: boolean;
+  label?: string;
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -29,6 +30,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   operatorOptions = MULTI_SELECT_FILTER_OPTIONS,
   isOpen = false,
   showSelectAll = false,
+  label,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -114,13 +116,13 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   }, [isOpen]);
 
   const filteredValues = useMemo(() => {
-    const lowerCasedInput = inputValue.toLowerCase();
+    const lowerCasedInput = inputValue?.toLowerCase();
 
-    return values.filter((item) => item && item.toLowerCase().includes(lowerCasedInput));
+    return values.filter((item) => item && item?.toLowerCase().includes(lowerCasedInput));
   }, [values, inputValue]);
 
   useEffect(() => {
-    setIsSelectAll(filteredValues.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
+    setIsSelectAll(filteredValues?.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
   }, [filteredValues, selectedValues]);
 
   const onSelectAll = () => {
@@ -141,7 +143,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 px-2.5'>
         <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
-          {camelCaseToNormalText(columnId)}
+          {label || camelCaseToNormalText(columnId)}
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow'

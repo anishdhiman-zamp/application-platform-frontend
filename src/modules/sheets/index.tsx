@@ -135,7 +135,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                 <div className='flex items-center gap-2'>
                   {!!filtersConfig?.length && <div className='border-r border-GRAY_400 h-7'></div>}
                   <SingleSelectFilter
-                    key='currency'
+                    filterKey='currency'
                     options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== 'local')}
                     onFilterChange={(value) => setCurrency(value)}
                     value={currency}
@@ -172,6 +172,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                       defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                       handleWidgetHeightChange={handleWidgetHeightChange}
+                      sheetId={sheetId}
                     />
                   </div>
                 </div>

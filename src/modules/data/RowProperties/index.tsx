@@ -1,7 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import { ColDef } from 'ag-grid-community';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute } from 'constants/routeConfig';
 import Properties from 'modules/data/RowProperties/Properties';
 import { ROW_PROPERTIES_TABS } from 'modules/data/RowProperties/rowProperties.constants';
 import { ROW_PROPERTIES_TABS_TYPES, TAG_SOURCE_TYPES } from 'modules/data/RowProperties/rowProperties.types';
@@ -36,7 +36,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
   const [selectedRuleId, setSelectedRuleId] = useState<string>('');
 
   const handleSourceDrillDownClick = () => {
-    router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', datasetId).replace(':rowId', data?._zamp_id as string));
+    router.push(getDatasetDrilldownRoute(datasetId, data?._zamp_id as string));
   };
 
   const handleTabChange = (item?: MenuItem) => {

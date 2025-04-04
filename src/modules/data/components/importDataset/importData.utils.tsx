@@ -36,7 +36,7 @@ export const maskString = (str: string, start: number, end: number, limit?: numb
   const name = parts.join('.');
 
   limit = limit ?? 16;
-  if (name.length > limit) {
+  if (name?.length > limit) {
     return `${name.slice(0, start)}...${name.slice(-end)}.${extension}`;
   }
 
@@ -56,7 +56,7 @@ export const generateUniqueId = (length: number) => {
 
   crypto.getRandomValues(array);
 
-  return Array.from(array, (x) => chars[x % chars.length]).join('');
+  return Array.from(array, (x) => chars[x % chars?.length]).join('');
 };
 
 /**

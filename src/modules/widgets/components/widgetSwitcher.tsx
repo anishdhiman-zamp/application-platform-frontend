@@ -9,6 +9,7 @@ interface WidgetSwitcherProps {
   currency: string[];
   defaultCurrency: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
+  sheetId: string;
 }
 
 const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
@@ -17,6 +18,7 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
   currency,
   defaultCurrency,
   handleWidgetHeightChange,
+  sheetId,
 }) => {
   const [activeWidget, setActiveWidget] = useState<string>(widgetConfig?.default_widget);
 
@@ -43,7 +45,9 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
       currency={currency}
       defaultCurrency={defaultCurrency}
       activeWidget={activeWidget}
+      setActiveWidget={setActiveWidget}
       handleWidgetHeightChange={handleWidgetHeightChange}
+      sheetId={sheetId}
     />
   ) : (
     <div>No widget found</div>

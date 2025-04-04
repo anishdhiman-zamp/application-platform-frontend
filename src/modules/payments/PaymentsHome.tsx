@@ -17,7 +17,7 @@ import {
 } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
@@ -33,7 +33,7 @@ import {
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
@@ -68,6 +68,8 @@ type PaymentsListProps = {
 };
 
 const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
+  const { pageId } = useParams();
+
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -188,7 +190,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
       fn: () =>
         getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed).length === 0;
+        return data.filter((item) => !item.is_completed)?.length === 0;
       },
       interval: 30000,
       maxAttempts: 50,
@@ -278,8 +280,11 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(addBreadcrumb('Drilldown'));
-    router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', data?._zamp_id as string));
+    if (pageId) {
+      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
+    } else {
+      router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
+    }
   };
 
   const handleRowPropertiesClick = (data: MapAny) => {

@@ -86,7 +86,7 @@ const KpiTag: FC<KpiTagProps> = ({
   }, [containerRef, valueContainerRef, widgetData, isFetching, windowWidth]);
 
   return (
-    <div className='bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5' ref={containerRef}>
+    <div className='bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 z-[9999]' ref={containerRef}>
       <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
@@ -96,7 +96,7 @@ const KpiTag: FC<KpiTagProps> = ({
         <Tooltip
           tooltipBody={value}
           disabled={isFetching || !showTooltip}
-          tooltipBodyClassName='f-14-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+          tooltipBodyClassName='absolute -left-2 top-0 f-12-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
           position={TooltipPositions.BOTTOM_LEFT}
           className='!cursor-text'
         >

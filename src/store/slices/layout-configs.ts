@@ -1,9 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+export type BreadcrumbItem = {
+  title: string;
+  href?: string;
+};
+
 export type LayoutConfigState = {
   modalStack: string[];
   fullPageLayoutStack: string[];
-  breadcrumbStack: string[];
+  breadcrumbStack: BreadcrumbItem[];
   isSidebarOpen: boolean;
 };
 
@@ -63,6 +68,11 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
+    updateUrlForLastBreadcrumb: (state, action) => {
+      state.breadcrumbStack[state.breadcrumbStack?.length - 1].href = action.payload;
+
+      return state;
+    },
   },
 });
 
@@ -76,6 +86,7 @@ export const {
   resetBreadcrumb,
   removeLastBreadcrumb,
   toggleSidebar,
+  updateUrlForLastBreadcrumb,
 } = layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

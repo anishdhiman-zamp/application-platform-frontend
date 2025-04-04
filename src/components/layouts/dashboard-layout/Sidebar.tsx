@@ -5,6 +5,7 @@ import { SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
@@ -14,12 +15,11 @@ import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTa
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
 const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const { pageId } = useParams();
   const router = useRouter();
   const pathname = router?.pathname;
-  const pageId = router?.query?.id;
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -44,7 +44,7 @@ const Sidebar = () => {
               name={item.label}
               path={item.path}
               iconId={item.iconId}
-              isSelected={pathname === item?.path}
+              isSelected={!pageId && pathname.includes(item?.path)}
             />
           ))}
         </div>

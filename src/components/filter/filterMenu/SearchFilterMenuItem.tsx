@@ -15,9 +15,10 @@ interface SearchFilterMenuItemProps {
   values: string[];
   className?: string;
   isOpen?: boolean;
+  label?: string;
 }
 
-const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className, isOpen = false }) => {
+const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className, isOpen = false, label }) => {
   const ref = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
@@ -83,7 +84,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
       className={`px-2.5 py-2 min-w-[218px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
-        <div className='f-11-400 text-GRAY_700  whitespace-nowrap'>{camelCaseToNormalText(columnId)}</div>
+        <div className='f-11-400 text-GRAY_700  whitespace-nowrap'>{label || camelCaseToNormalText(columnId)}</div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-2'
           onClick={() => setIsConditionOptionsOpen(!isOpen)}

@@ -162,6 +162,10 @@ export enum PERIODICITY_TYPES {
   MONTHLY = 'month',
   QUARTERLY = 'quarter',
   YEARLY = 'year',
+  DAYS = 'days',
+  MONTHS = 'months',
+  QUARTERS = 'quarters',
+  YEARS = 'years',
 }
 
 export const PERIODICITY_OPTIONS: OptionsType[] = [
@@ -171,3 +175,9 @@ export const PERIODICITY_OPTIONS: OptionsType[] = [
   { label: 'Quarterly', value: PERIODICITY_TYPES.QUARTERLY },
   { label: 'Yearly', value: PERIODICITY_TYPES.YEARLY },
 ];
+
+export const PERIODICITY_REGEX = {
+  [PERIODICITY_TYPES.YEARLY]: /\b(?:this\s+)?year\b/i,
+  [PERIODICITY_TYPES.MONTHLY]: /\b(?:this\s+)?month\b/i,
+  [PERIODICITY_TYPES.QUARTERLY]: /\b(?:this\s+)?quarter\b/i,
+};

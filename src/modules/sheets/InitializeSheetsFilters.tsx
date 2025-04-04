@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useEffect } from 'react';
 import { useGetSheetFilterConfigQuery } from 'apis/pages';
 import { getDefaultFilterValues, getFormattedSheetsFiltersConfig } from 'modules/sheets/sheets.utils';
+import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId: string }> = ({
@@ -17,12 +18,38 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
     { pageId: pageId as string, sheetId: sheetId as string },
     { skip: !sheetId, refetchOnMountOrArgChange: false },
   );
+  const {
+    state: { selectedFiltersInUI },
+  } = useFiltersContextStore();
+  const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID) || '{}');
+  const currentSheetLSFilters = storedData[sheetId]?.filters;
+  const defaultFilterValues = getDefaultFilterValues(sheetFilterConfig?.native_filter_config || []);
 
-  useEffect(() => {
+  const storeUiFiltersToLocalStorage = () => {
+    if (!sheetId || typeof sheetId !== 'string') return;
+
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID,
+      JSON.stringify({
+        ...storedData,
+        [sheetId]: {
+          ...(storedData[sheetId] || {}),
+          filters: selectedFiltersInUI,
+        },
+      }),
+    );
+  };
+
+  const initializeFilters = () => {
+    const updatedFilters =
+      currentSheetLSFilters && Object.keys(currentSheetLSFilters || {})?.length > 0
+        ? currentSheetLSFilters
+        : defaultFilterValues;
+
     if (!isFetching && sheetFilterConfig?.native_filter_config?.length) {
       const filtersConfig = sheetFilterConfig?.native_filter_config;
-      const defaultFilterValues = getDefaultFilterValues(filtersConfig);
 
+      // get filters from localStorage for the current sheetId
       const filters = filtersConfig.map((filter) => {
         dispatch({
           type: filtersContextActions.ADD_EMPTY_STATE_FILTER,
@@ -32,14 +59,15 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
         return getFormattedSheetsFiltersConfig(filter);
       });
 
-      if (filters.length) {
-        if (Object.keys(defaultFilterValues).length)
+      if (filters?.length) {
+        if (Object.keys(defaultFilterValues)?.length) {
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: {
-              selectedFilters: defaultFilterValues ?? {},
+              selectedFilters: updatedFilters,
             },
           });
+        }
 
         dispatch({
           type: filtersContextActions.SET_INITIALISED,
@@ -57,10 +85,23 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
         });
       }
     } else {
-      if (isSuccess)
+      if (isSuccess) {
         dispatch({
           type: filtersContextActions.SET_INITIALISED,
         });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (Object.keys(selectedFiltersInUI).length > 0) {
+      storeUiFiltersToLocalStorage();
+    }
+  }, [selectedFiltersInUI]);
+
+  useEffect(() => {
+    if (sheetId && sheetFilterConfig) {
+      initializeFilters();
     }
   }, [sheetFilterConfig, sheetId]);
 

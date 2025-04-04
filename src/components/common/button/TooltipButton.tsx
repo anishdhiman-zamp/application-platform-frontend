@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { COLORS } from 'constants/colors';
+import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -24,6 +25,7 @@ interface TooltipButtonPropsType {
   isLoading?: boolean;
   disabled?: boolean;
   buttonDisabled?: boolean;
+  imageIconSrc?: string;
 }
 
 const TooltipButton: FC<TooltipButtonPropsType> = ({
@@ -42,6 +44,7 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   isLoading = false,
   disabled = false,
   buttonDisabled = false,
+  imageIconSrc,
 }) => {
   return (
     <Tooltip
@@ -61,6 +64,7 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
         isLoading={isLoading}
         disabled={buttonDisabled}
       >
+        {imageIconSrc && <Image alt='' src={imageIconSrc} width={14} height={14} />}
         {buttonTitle}
       </Button>
     </Tooltip>

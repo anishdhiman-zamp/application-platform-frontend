@@ -66,6 +66,8 @@ export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, 
       return format(new Date(date), DATE_FORMATS.QQ_yyyy);
     case PERIODICITY_TYPES.YEARLY:
       return format(new Date(date), DATE_FORMATS.YYYY);
+    default:
+      return date;
   }
 };
 

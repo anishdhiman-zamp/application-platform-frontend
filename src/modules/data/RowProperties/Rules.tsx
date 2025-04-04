@@ -16,7 +16,7 @@ const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
     data: rulesData,
     isLoading,
     isError,
-  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleIds }, { skip: !ruleIds.length });
+  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleIds }, { skip: !ruleIds?.length });
 
   const listOfFilters: RuleCardProps[] = useMemo(
     () =>
@@ -35,8 +35,8 @@ const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
     <CommonWrapper
       isLoading={isLoading}
       isError={isError}
-      isNoData={!ruleIds.length}
-      className={cn({ 'h-full': !ruleIds.length })}
+      isNoData={!ruleIds?.length}
+      className={cn({ 'h-full': !ruleIds?.length })}
       noDataBanner={
         <div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'>
           <SvgSpriteLoader id='lightning-01' width={24} height={24} />

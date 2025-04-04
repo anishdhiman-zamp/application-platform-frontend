@@ -69,7 +69,7 @@ export const DateSearch: React.FC<DateSearchProps> = ({
       trailingIconProps={{
         iconCategory: ICON_SPRITE_TYPES.GENERAL,
         id: 'x-close',
-        className: `absolute bottom-5 ${value.length ? '' : 'hidden'}`,
+        className: `absolute bottom-5 ${value?.length ? '' : 'hidden'}`,
         width: 14,
         height: 14,
         color: COLORS.GRAY_400,

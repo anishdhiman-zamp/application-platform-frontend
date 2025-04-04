@@ -19,7 +19,7 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
 
   return (
     <div>
-      {!!datasetBulkLoaders.length && (
+      {!!datasetBulkLoaders?.length && (
         <div className='w-full' onMouseEnter={() => setIsHoveredLoaders(true)}>
           <div className='relative flex flex-col gap-1.5'>
             {datasetBulkLoaders
@@ -36,7 +36,7 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                     transform: isHoveredLoaders
                       ? ''
                       : `translateZ(-${index * 10}px) translateY(${index * 10}px) scale(${1 - index * 0.05})`,
-                    zIndex: isHoveredLoaders ? '' : datasetBulkLoaders.length - index,
+                    zIndex: isHoveredLoaders ? '' : datasetBulkLoaders?.length - index,
                   }}
                 >
                   <div className='flex gap-3 items-start'>

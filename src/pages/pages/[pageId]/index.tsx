@@ -1,10 +1,12 @@
 import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
+import { getPageRouteById } from 'constants/routeConfig';
 import { useAppDispatch } from 'hooks/toolkit';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
 import CommonWrapper from 'components/commonWrapper';
@@ -14,14 +16,20 @@ import 'ag-charts-enterprise';
 const Page = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { id } = router.query;
-  const { data: pageDetails, isLoading, isError, refetch } = useGetPageDetailsQuery(id as string, { skip: !id });
+  const { pageId } = useParams();
+  const {
+    data: pageDetails,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetPageDetailsQuery(pageId as string, { refetchOnMountOrArgChange: false, skip: !pageId });
   const { data: pages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const currentSheetId = useMemo(
-    () => getSheetIdFromPath(router.asPath, id as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
-    [pageDetails, router.asPath],
+    () => getSheetIdFromPath(router.asPath, pageId as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
+    [pageDetails, router.asPath, pageId],
   );
 
   useEffect(() => {
@@ -43,17 +51,17 @@ const Page = () => {
   );
 
   useEffect(() => {
-    const currentPageTitle = pages?.find((page) => page.page_id === id)?.name ?? 'Loading...';
+    const currentPageTitle = pages?.find((page) => page.page_id === pageId)?.name ?? 'Loading...';
 
-    persistLastVisitedPage(id as string);
-    dispatch(resetBreadcrumb([currentPageTitle]));
-  }, [id, pages]);
+    persistLastVisitedPage(pageId as string);
+    dispatch(resetBreadcrumb([{ title: currentPageTitle, href: getPageRouteById(pageId as string) }]));
+  }, [pageId, pages]);
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
       <div className='relative h-full rounded-tl-md w-full'>
-        <Sheets pageId={id as string} sheetId={currentSheetId as string} isPageLoading={isLoading} />
-        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} />
+        <Sheets pageId={pageId as string} sheetId={currentSheetId as string} isPageLoading={isLoading} />
+        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} />
       </div>
     </CommonWrapper>
   );

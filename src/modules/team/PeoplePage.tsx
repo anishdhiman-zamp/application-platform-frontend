@@ -25,8 +25,8 @@ const PeoplePage = () => {
         setFilteredTeamMembers(
           teamMembersData?.filter((member) =>
             convertEmailUsernameToName(getUserNameFromEmail(member?.user?.email))
-              .toLowerCase()
-              .startsWith(searchValue.toLowerCase()),
+              ?.toLowerCase()
+              .startsWith(searchValue?.toLowerCase()),
           ),
         );
       }, 300),
@@ -39,8 +39,8 @@ const PeoplePage = () => {
         setFilteredInvitedMembers(
           invitedTeamMembersData?.filter((member) =>
             convertEmailUsernameToName(getUserNameFromEmail(member?.email))
-              .toLowerCase()
-              .startsWith(searchValue.toLowerCase()),
+              ?.toLowerCase()
+              .startsWith(searchValue?.toLowerCase()),
           ),
         );
       }, 300),

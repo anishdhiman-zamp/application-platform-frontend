@@ -59,7 +59,7 @@ const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
   const user_role = getUserPrivilege();
   const userPrivilege =
     userAccessToPageList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
-  const isPageSharable = !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
+  const isPageSharable = !showValidationError && selectedItems?.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
   const checkPermission = accessPermissionForPage(userPrivilege);
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;

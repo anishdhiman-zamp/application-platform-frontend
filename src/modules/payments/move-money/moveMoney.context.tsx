@@ -17,7 +17,6 @@ enum moveMoneyContextActions {
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
 }
-
 interface InitialStateType {
   currentStep: number;
   destinationAccountDetails: AccountDetailsType;

@@ -241,12 +241,14 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   );
 
   requiredTagFilterConfigs.forEach((item) => {
+    const operator = filters[item.column]?.type;
     const startsWithValues: string = filters[item.column]?.values?.[0];
+    const isNull = operator === CONDITION_OPERATOR_TYPE.IS_NULL;
 
     filters[item.column] = {
       filterType: FILTER_TYPES.MULTI_SELECT,
-      type: CONDITION_OPERATOR_TYPE.CONTAINS,
-      values: item.options.filter((option) => option && option.startsWith(startsWithValues)),
+      type: isNull ? CONDITION_OPERATOR_TYPE.IS_NULL : CONDITION_OPERATOR_TYPE.CONTAINS,
+      values: isNull ? [] : (item?.options || [])?.filter((option) => option?.startsWith(startsWithValues)),
     };
   });
 
@@ -358,22 +360,22 @@ const getAggregations = (colIds: string[]): MapAny => {
     const valueCol = [
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionSum.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionSum?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionSum}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionAvg.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionAvg?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionAvg}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionMin.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionMin?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMin}`,
       },
       {
         id: colId,
-        aggFunc: AggregationFunctionType.AggregationFunctionMax.toLowerCase(),
+        aggFunc: AggregationFunctionType.AggregationFunctionMax?.toLowerCase(),
         displayName: `${colId} ${AggregationFunctionType.AggregationFunctionMax}`,
       },
     ];

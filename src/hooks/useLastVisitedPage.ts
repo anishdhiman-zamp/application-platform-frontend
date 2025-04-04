@@ -38,7 +38,7 @@ export const usePersistedPageNavigation = (pagesList: PageResponseType[]) => {
       }
 
       // if the user has no last visited page, navigate to the first page in the list if it exists
-      if (pagesList.length > 0) {
+      if (pagesList?.length > 0) {
         router.push(getPageRouteById(pagesList[0].page_id));
       }
     }
