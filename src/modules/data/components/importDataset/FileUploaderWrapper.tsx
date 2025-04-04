@@ -18,6 +18,7 @@ import { toast } from 'components/common/toast/Toast';
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   acceptedFormats,
   fileName,
+  disableNext,
   setFileName,
   isFileUploading = false,
   maxSize = FILE_SIZE.TWO_MB,
@@ -69,7 +70,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           setError(null);
           setIsLoading(true);
           onFileSelect(null);
-
+          disableNext?.(true);
           getSignedUrl(signedUrlPayload)
             .unwrap()
             .then(async (data: any) => {
@@ -94,6 +95,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
                       fileName: filesToUpload.name,
                       downloadableUrl: upload_url,
                     });
+                    disableNext?.(false);
                     triggerPreviewTransformation(file_upload_id);
                   } else {
                     setIsLoading(false);
