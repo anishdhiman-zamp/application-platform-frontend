@@ -20,7 +20,7 @@ interface SheetsTabsProps {
 
 const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
   const router = useRouter();
-  const pageId = router?.query?.pageId ?? router?.query?.id;
+  const pageId = router?.query?.pageId as string;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   const handleTabSelect = (selected?: MenuItem) => {

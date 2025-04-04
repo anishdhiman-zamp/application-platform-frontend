@@ -21,7 +21,7 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
   setShowAiTransformationStatus,
 }) => {
   const router = useRouter();
-  const datasetId = router?.query?.id as string;
+  const datasetId = router?.query?.datasetId as string;
   const [postAiTransformationConfirm, { isLoading: isLoadingPostAiTransformationConfirm }] =
     usePostAiTransformationConfirmMutation();
 
