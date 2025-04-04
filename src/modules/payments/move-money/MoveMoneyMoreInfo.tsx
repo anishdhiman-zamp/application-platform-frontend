@@ -1,9 +1,9 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
+import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.constant';
 import { UploadFileResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { INPUT_FILE_FORMATS } from 'types/common/mime';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
 import Textarea from 'components/common/Textarea';
@@ -106,7 +106,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           footer='Click to upload or drag & drop here'
           onFilesSelect={handleFileUpload}
           disableNext={(value: boolean) => setIsFileUploading(value)}
-          acceptedFormats={`${INPUT_FILE_FORMATS.PNG}, ${INPUT_FILE_FORMATS.JPEG}, ${INPUT_FILE_FORMATS.JPG}, ${INPUT_FILE_FORMATS.PDF}, ${INPUT_FILE_FORMATS.BMP}`}
+          acceptedFormats={MOVE_MONEY_ATTACHMENTS_FILE_FORMATS.join(', ')}
         />
         {uploadedFiles.length > 0 && (
           <div className='-z-10 -mt-px  border border-BORDER_7 divide-y divide-BORDER_7'>
@@ -146,14 +146,14 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_AMOUNT_DETAILS_BACK'
+            id='SINGLE_PAYMENT_MORE_INFO_BACK'
             onClick={onBackClick}
           >
             Back
           </Button>
           <Button
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_AMOUNT_DETAILS_NEXT'
+            id='SINGLE_PAYMENT_MORE_INFO_NEXT'
             onClick={onNextClick}
             isLoading={isFileUploading}
           >

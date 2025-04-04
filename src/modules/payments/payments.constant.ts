@@ -1,5 +1,6 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
+import { INPUT_FILE_FORMATS } from 'types/common/mime';
 
 export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';
 export const CONNECT_ACCOUNT_DESCRIPTION =
@@ -78,3 +79,11 @@ export const defaultAccountData = {
 };
 
 export const defaultContactDetails = { label: '', value: '' };
+
+export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
+  INPUT_FILE_FORMATS.PNG,
+  INPUT_FILE_FORMATS.JPEG,
+  INPUT_FILE_FORMATS.JPG,
+  INPUT_FILE_FORMATS.PDF,
+  INPUT_FILE_FORMATS.BMP,
+];

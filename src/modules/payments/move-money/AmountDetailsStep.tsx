@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
-import {
-  accountsListWithBalance,
-  currencyList,
-  PAYMENT_PROCESSING_MODES,
-} from 'modules/payments/move-money/move-money.dummy';
+import { accountsListWithBalance, PAYMENT_PROCESSING_MODES } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -24,7 +20,6 @@ const AmountDetailsStep = () => {
   } = useMoveMoneyContextStore();
   const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
   const [amount, setAmount] = useState(amountDetails?.amount);
-  const [currency, setCurrency] = useState(currencyList[0]);
   const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
   const [accountDetails, setAccountDetails] = useState<AccountDetailsType>(amountDetails?.sourceAccountDetails);
 
@@ -52,7 +47,6 @@ const AmountDetailsStep = () => {
         payload: {
           amountDetails: {
             amount,
-            currency,
             sourceAccountDetails: accountDetails,
             processingMode: paymentProcessingMode,
           },
@@ -84,32 +78,16 @@ const AmountDetailsStep = () => {
             onChange={handleAmountChange}
             className='f-16-300 grow'
             placeholder='Amount'
+            inputFontClassName='!px-3 placeholder:text-base bg-white placeholder:!text-GRAY_500 placeholder:text-[13px] w-full'
             inputWrapperClassName='w-full '
           />
-          <div>
-            <Dropdown
-              options={currencyList}
-              id='currency-dropdown'
-              eventCallback={defaultFn}
-              onChange={(selectedOption) => {
-                setCurrency(selectedOption);
-              }}
-              value={currency}
-              defaultValue={currency}
-              placeholder='Currency'
-              isSearchable={false}
-              customClassNames={{
-                placeholder: 'f-13-450',
-              }}
-              customDropdownIndicatorSize={14}
-            />
-          </div>
+          <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>USD</div>
         </div>
         <SelectAccountDropdown
+          autoFocus
+          hasSubtitle
           accountsList={accountsListWithBalance}
           shouldReset={false}
-          autoFocus={true}
-          hasSubtitle={true}
           accountDetails={accountDetails}
           onAccountSelect={handleAccountSelect}
           label='Send from'
@@ -120,9 +98,7 @@ const AmountDetailsStep = () => {
             options={PAYMENT_PROCESSING_MODES}
             id={`payment-processing-mode-dropdown`}
             eventCallback={defaultFn}
-            onChange={(selectedOption) => {
-              setPaymentProcessingMode(selectedOption);
-            }}
+            onChange={setPaymentProcessingMode}
             value={paymentProcessingMode}
             defaultValue={paymentProcessingMode}
             placeholder='Payment processing mode'

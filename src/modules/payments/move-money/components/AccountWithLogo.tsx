@@ -56,7 +56,7 @@ const AccountWithLogo: FC<AccountWithLogoCardProps> = ({
           {!currencyCode ? (
             <Image src={logo ?? DEFAULT_BANK} height={iconSize} width={iconSize} alt='bank icon' />
           ) : (
-            <SvgSpriteLoader id={currencyCode} width={32} height={32} />
+            <SvgSpriteLoader id={currencyCode} size={iconSize ?? 32} />
           )}
         </div>
       )}

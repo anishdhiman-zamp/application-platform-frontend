@@ -68,21 +68,6 @@ export const accountsListWithBalance = Array.from({ length: 10 }, () => {
   };
 });
 
-export const currencyList = [
-  {
-    label: 'USD',
-    value: 'usd',
-  },
-  {
-    label: 'AED',
-    value: 'aed',
-  },
-  {
-    label: 'INR',
-    value: 'inr',
-  },
-];
-
 export const PAYMENT_PROCESSING_MODES = [
   {
     label: 'WIRE',
