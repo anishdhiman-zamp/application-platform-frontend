@@ -30,7 +30,8 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   setRawData,
 }) => {
   const router = useRouter();
-  const isDatasetRoute = !!router?.query?.id;
+  const isDatasetRoute = !!router?.query?.datasetId;
+  const datasetId = router?.query?.datasetId as string;
   const hiddenFileInput = useRef<HTMLInputElement>(null);
   const user_id = useAppSelector((state: RootState) => state?.user)?.user?.user_id;
   const [getSignedUrl] = useGetSignedUrlMutation();
@@ -124,12 +125,12 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
     }
   };
 
-  const triggerPreviewTransformation = async (file_upload_id: string) => {
+  const triggerPreviewTransformation = async (fileUploadId: string) => {
     const oldDatasetImportPayload = {
-      file_upload_id,
-      dataset_id: router?.query?.id as string,
+      file_upload_id: fileUploadId,
+      dataset_id: datasetId,
     };
-    const newDatasetImportPayload = { file_upload_id };
+    const newDatasetImportPayload = { file_upload_id: fileUploadId };
     const payload = isDatasetRoute ? oldDatasetImportPayload : newDatasetImportPayload;
 
     getPreviewTransformation(payload)
@@ -137,7 +138,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
       .then((data) => {
         if (data?.dataset_action_id) {
           setIsLoading(false);
-          setStartPollingPreview({ check: true, actionId: data?.dataset_action_id, fileUploadId: file_upload_id });
+          setStartPollingPreview({ check: true, actionId: data?.dataset_action_id, fileUploadId });
 
           setTimeout(() => {
             onClosePopup();

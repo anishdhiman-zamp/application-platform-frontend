@@ -24,13 +24,13 @@ const Topbar = () => {
 
   const renderShareButton = useMemo(() => {
     if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES)) {
-      return <SharePagePopup pageId={router.query.id as string} />;
+      return <SharePagePopup pageId={router?.query?.pageId as string} />;
     } else if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS)) {
-      return <ShareDatasetPopup datasetId={router.query.id as string} />;
+      return <ShareDatasetPopup datasetId={router?.query?.datasetId as string} />;
     } else if (currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET) {
       return null;
     }
-  }, [currentRoute, router.query.id]);
+  }, [currentRoute, router?.query?.pageId, router?.query?.datasetId]);
 
   const handleBackClick = () => {
     dispatch(removeLastBreadcrumb());

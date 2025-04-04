@@ -20,7 +20,7 @@ import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const datasetId = router?.query?.id as string;
+  const datasetId = router?.query?.datasetId as string;
   const { startPolling } = usePolling();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getAiTransformation] = useLazyGetAiTransformationQuery();
