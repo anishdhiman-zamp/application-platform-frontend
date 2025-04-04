@@ -559,7 +559,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
           </div>
         </div>
 
-        <div className='z-10 w-full h-full' ref={datasetTableRef}>
+        <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}
