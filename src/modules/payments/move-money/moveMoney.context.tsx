@@ -17,7 +17,6 @@ enum moveMoneyContextActions {
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
 }
-
 interface InitialStateType {
   currentStep: number;
   destinationAccountDetails: AccountDetailsType;
@@ -44,7 +43,7 @@ export interface ActionType {
 }
 
 const initialState: InitialStateType = {
-  currentStep: 4,
+  currentStep: 0,
   destinationAccountDetails: defaultAccountData,
   moreDetails: {
     note: '',

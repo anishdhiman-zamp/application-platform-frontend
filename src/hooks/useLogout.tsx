@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useRouter } from 'next/router';
+import { resetPostHog } from 'utils/postHog';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -14,6 +15,7 @@ export const useLogout = () => {
       .then(() => {
         whoAmI()
           .then(() => {
+            resetPostHog();
             router.push(ROUTES_PATH.LOGIN);
           })
           .catch(() => {
