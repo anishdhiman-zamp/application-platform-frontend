@@ -16,9 +16,9 @@ export function cn(...inputs: ClassValue[]) {
 export const checkIsObjectEmpty = (obj?: MapAny, ignoreKeys?: string[]) => {
   if (!obj) return true;
 
-  if (typeof obj === 'object' && !Object.keys(obj).length) return true;
+  if (typeof obj === 'object' && !Object.keys(obj)?.length) return true;
 
-  if (!ignoreKeys?.length && typeof obj === 'object' && !Object.keys(obj).length) return true;
+  if (!ignoreKeys?.length && typeof obj === 'object' && !Object.keys(obj)?.length) return true;
 
   if (ignoreKeys?.length && typeof obj === 'object') {
     const keys = Object.keys(obj);
@@ -149,14 +149,21 @@ export const getColorValue = () => Math.floor(Math.random() * 64) + 80;
 
 export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()}, ${getColorValue()}`;
 
-export const getFirstLetters = (str: string) =>
+/**
+ * function to return the initials of string is SB for Siddharth Bagal
+ * @param string
+ * @param number
+ * @returns string
+ */
+export const getFirstLetters = (str: string, length = 2) =>
   str
     ?.split(' ')
     .map((word, index) => {
-      if (index > 1 || !word.length) return null;
+      if (index > 1 || !word?.length) return null;
       else return word[0].toUpperCase();
     })
-    .join('');
+    .join('')
+    .slice(0, length); // Ensure only the first 2 characters are returned;
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -215,7 +222,7 @@ export function isValidDate(dateString: string) {
  * @returns
  */
 export function shuffleArray(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = array?.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1)); // Random index between 0 and i
 
     [array[i], array[j]] = [array[j], array[i]]; // Swap elements
@@ -283,7 +290,7 @@ export const cyclicIterator = (arr: any[]) => {
   return () => {
     const value = arr[index];
 
-    index = (index + 1) % arr.length;
+    index = (index + 1) % arr?.length;
 
     return value;
   };
@@ -316,7 +323,7 @@ export const getLeadingPathFromURL = (path: string) => {
 };
 
 export function trimString(str: string, maxLength: number) {
-  if (str.length > maxLength) {
+  if (str?.length > maxLength) {
     return str.slice(0, maxLength - 3) + '...'; // Slice the string to maxLength minus 3 for the ellipsis
   }
 
@@ -495,3 +502,5 @@ export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'bo
 
   return typeof value === 'object' && value !== null; // 'both' case (checks for object or array)
 };
+
+export const getCommaSeparatedNumberForInput = (num: string) => num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');

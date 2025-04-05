@@ -14,7 +14,7 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
   const [isHoveredLoaders, setIsHoveredLoaders] = useState(false);
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
   const router = useRouter();
-  const datasetId = router?.query?.id as string;
+  const datasetId = router?.query?.datasetId as string;
   const { data } = useGetFileImportHistoryQuery({ datasetId });
   const fileImportHistoryData = data?.file_uploads || [];
 

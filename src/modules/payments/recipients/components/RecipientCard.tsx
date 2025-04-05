@@ -29,7 +29,7 @@ const RecipientCard: FC = () => {
             tooltipColor={COLORS.BLACK}
             buttonSize={SIZE_TYPES.XSMALL}
             tooltipPosition={
-              index === RECIPIENT_CARD_ACTION_ITEMS.length - 1 ? TooltipPositions.LEFT : TooltipPositions.BOTTOM
+              index === RECIPIENT_CARD_ACTION_ITEMS?.length - 1 ? TooltipPositions.LEFT : TooltipPositions.BOTTOM
             }
             buttonIcon={item.icon}
           />

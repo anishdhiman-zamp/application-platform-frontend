@@ -17,7 +17,7 @@ import {
 } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
@@ -31,8 +31,9 @@ import {
   getFilters,
 } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
+import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
@@ -43,11 +44,9 @@ import {
 } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn, MapAny } from 'types/commonTypes';
-import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
-import { Button } from 'components/common/button/Button';
 import TooltipButton from 'components/common/button/TooltipButton';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -69,6 +68,8 @@ type PaymentsListProps = {
 };
 
 const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
+  const { pageId } = useParams();
+
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -97,7 +98,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
-  const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(true);
+  const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -189,7 +190,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
       fn: () =>
         getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed).length === 0;
+        return data.filter((item) => !item.is_completed)?.length === 0;
       },
       interval: 30000,
       maxAttempts: 50,
@@ -279,8 +280,11 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(addBreadcrumb('Drilldown'));
-    router.push(ROUTES_PATH.DRILLDOWN.replace(':datasetId', id as string).replace(':rowId', data?._zamp_id as string));
+    if (pageId) {
+      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
+    } else {
+      router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
+    }
   };
 
   const handleRowPropertiesClick = (data: MapAny) => {
@@ -473,19 +477,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
               setShowAiTransformationStatus={setShowAiTransformationStatus}
             />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-            <Button
-              id='export-dataset'
-              onClick={() => {}}
-              className='!px-3'
-              iconPosition={ICON_POSITION_TYPES.LEFT}
-              iconProps={{
-                id: 'send-03',
-                size: 14,
-              }}
-              size={SIZE_TYPES.XSMALL}
-            >
-              Move money
-            </Button>
+            <MoveMoneyButton />
           </div>
         </div>
 

@@ -41,7 +41,7 @@ const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPerc
   const isLastCell = useMemo(() => {
     const displayedColumns = api?.getAllDisplayedColumns();
 
-    return displayedColumns?.[displayedColumns.length - 1] === column;
+    return displayedColumns?.[displayedColumns?.length - 1] === column;
   }, [column, api]);
 
   const numericValue = useMemo(() => {

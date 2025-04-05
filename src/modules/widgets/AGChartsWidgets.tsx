@@ -11,6 +11,7 @@ import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widget
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { snakeCaseToSentenceCase } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -122,7 +123,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           <div className='h-full w-full relative'>
             {yAxisTitle && (
               <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
-                {yAxisTitle}
+                {snakeCaseToSentenceCase(yAxisTitle)}
                 <div
                   className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'
                   style={{ marginRight: `${maxValueLength * 5.5}px` }}

@@ -57,7 +57,7 @@ const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
   const userPrivilege =
     userAccessToDatasetList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const isDatasetSharable =
-    !showValidationError && selectedItems.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
+    !showValidationError && selectedItems?.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
   const checkPermission = accessPermissionForDataset(userPrivilege);
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;

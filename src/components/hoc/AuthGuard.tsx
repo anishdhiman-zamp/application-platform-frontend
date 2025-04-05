@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
+import { identifyPostHogUser } from 'utils/postHog';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -28,6 +29,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
       const user_role = session?.orgs[0]?.resource_audience_policies[0]?.privilege;
 
       dispatch(setRoles([{ id: UserRoleIdType.USER, name: user_role }]));
+      identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
 
       dispatch(setWorkspace(defaultWorkspace));
     }

@@ -9,7 +9,7 @@ const SelectedCountTooltip: FC<SelectedCountTooltipPropsType> = ({ value, toolti
         style={{ right: '-34px' }}
         caratClassName='border-b-GRAY_700 left-[calc(100%-50px)]'
         position={TooltipPositions.BOTTOM}
-        disabled={value.length === 0}
+        disabled={value?.length === 0}
         tooltipBody={
           <div className='flex flex-col gap-2'>
             {value?.map((item) => (
@@ -21,8 +21,8 @@ const SelectedCountTooltip: FC<SelectedCountTooltipPropsType> = ({ value, toolti
         }
         tooltipBodystyle={`bg-GRAY_700 text-white f-12-300 !px-3 !py-2  ${tooltipBodyClassName}`}
       >
-        {!!value.length && (
-          <div className='bg-BASE_PRIMARY f-10-600 h-4 w-5 flex items-center justify-center'>{value.length}</div>
+        {!!value?.length && (
+          <div className='bg-BASE_PRIMARY f-10-600 h-4 w-5 flex items-center justify-center'>{value?.length}</div>
         )}
       </Tooltip>
     </div>

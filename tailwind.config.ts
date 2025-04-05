@@ -127,6 +127,7 @@ module.exports = {
         64.5: '258px',
         65: '260px',
         69.5: '278px',
+        75: '300px',
         87.5: '350px',
         100: '400px',
         104: '416px',
@@ -201,6 +202,7 @@ module.exports = {
         6.5: '26px',
         8.5: '34px',
         18: '72px',
+        34: '136px',
       },
       marginTop: {
         5.5: '22px',
@@ -214,6 +216,7 @@ module.exports = {
         sideDrawer: '-3px 0px 0px 0px #00000005',
         sideDrawerInner: '10px 0px 50px 0px #0000000d',
         menuList: '1px 2px 20px 0px #0000001A',
+        selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
       },
       borderRadius: {
         2.5: '10px',

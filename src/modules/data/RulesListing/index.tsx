@@ -137,7 +137,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
     // check if  order of orderedItems are not same as list of rules
     const isOrderSame = rules.every(
       (rule, index) =>
-        rule?.id === listOfRules[prioritySorting === OrderType.DESC ? index : listOfRules.length - index]?.id,
+        rule?.id === listOfRules[prioritySorting === OrderType.DESC ? index : listOfRules?.length - index]?.id,
     );
 
     if (!isOrderSame) {
@@ -148,7 +148,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           updated_by: getUserId(),
           rule_priority: rules.map((rule, index) => ({
             rule_id: rule?.id ?? '',
-            priority: prioritySorting === OrderType.ASC ? index + 1 : listOfRules.length - index,
+            priority: prioritySorting === OrderType.ASC ? index + 1 : listOfRules?.length - index,
           })),
         },
       }).then((res) => {

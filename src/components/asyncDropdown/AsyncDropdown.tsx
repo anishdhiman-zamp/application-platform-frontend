@@ -44,7 +44,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
 
       setDropdownTop(rect.bottom - 40);
     }
-  }, [isOpen, options.length]);
+  }, [isOpen, options?.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -184,7 +184,7 @@ export const Tooltip: FC<TooltipProps> = ({
               className={`${caratOverrideClassName} ${caratPostionStyle[position]} ${CARET_COLOR_CLASSNAME_MAP[color]?.[position]} ${caratClassName}`}
               data-testid={`tooltip-carat-${id}`}
             ></div>
-            <div className='' data-testid={`tooltip-body-${id}`}>
+            <div className='cursor-text' data-testid={`tooltip-body-${id}`}>
               {tooltipBody}
             </div>
           </div>

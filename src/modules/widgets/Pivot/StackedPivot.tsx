@@ -27,7 +27,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
@@ -43,7 +43,12 @@ import {
   PIVOT_HEADER_HEIGHT,
   PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { ColumnFilterConfig, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
+import {
+  ColumnFilterConfig,
+  ParentFilters,
+  PivotContext,
+  UNTAGGED_TAGS_FRONTEND_MAPPING,
+} from 'modules/widgets/Pivot/pivot.types';
 import {
   concatTagFilters,
   getColumnLevelFilters,
@@ -57,11 +62,12 @@ import {
   shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { myTheme } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 ModuleRegistry.registerModules([CellStyleModule]);
 ModuleRegistry.registerModules([
@@ -95,6 +101,7 @@ type StackedPivotProps = {
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
+  sheetId: string;
 };
 
 const StackedPivot = ({
@@ -107,12 +114,17 @@ const StackedPivot = ({
   activeWidget,
   handleWidgetHeightChange,
   defaultCurrency,
+  sheetId,
 }: StackedPivotProps) => {
   const router = useRouter();
+  const { pageId } = useParams();
+
   const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
   const gridContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
@@ -154,7 +166,7 @@ const StackedPivot = ({
     [widgetInstanceDetails, columnContextMapping],
   );
 
-  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col).length === 1, [colDef]);
+  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col)?.length === 1, [colDef]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -172,7 +184,7 @@ const StackedPivot = ({
             api={api}
             node={node}
             currency={defaultCurrency ?? widgetData?.currency}
-            maxGroupingLevel={colDef?.filter((col) => col.rowGroup).length - 1}
+            maxGroupingLevel={colDef?.filter((col) => col.rowGroup)?.length - 1}
             showPercentage={display_config?.show_percentages}
           />
         );
@@ -200,6 +212,7 @@ const StackedPivot = ({
         isPortalNeeded: true,
         handleCollapseAll,
         handleExpandAll,
+        sheetId,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
         return (
@@ -228,6 +241,8 @@ const StackedPivot = ({
       handleExportAgGridData,
       handleCollapseAll,
       handleExpandAll,
+      sheetId,
+      currentWidgetInstanceId,
     ],
   );
 
@@ -286,9 +301,15 @@ const StackedPivot = ({
       ...filters,
     };
 
-    const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
+    if (datasetId) {
+      let path = getDatasetRouteById(datasetId);
 
-    router.push(`${path}?filters=${JSON.stringify(query)}`);
+      if (pageId) {
+        path = getPageDatasetRoute(pageId as string, datasetId);
+      }
+
+      router.push(`${path}?filters=${JSON.stringify(query)}`);
+    }
   };
 
   const handleDrilldown = (params: CellDoubleClickedEvent<MapAny[], PivotContext>) => {
@@ -303,7 +324,7 @@ const StackedPivot = ({
     let currentRef = currentColDef?.context?.mappingName;
 
     // if there are more than one mappings, then the current ref is the top node
-    if (Object.keys(context?.columnContextMapping).length > 1) {
+    if (Object.keys(context?.columnContextMapping)?.length > 1) {
       currentRef = getTopNode(node)?.key;
     }
     if (!currentRef) return;
@@ -338,7 +359,7 @@ const StackedPivot = ({
     );
 
     // merge the row level and column level filters
-    const widgetFilter: ParentFilters = concatTagFilters({
+    let widgetFilter: ParentFilters = concatTagFilters({
       ...rowLevelFilters,
       ...columnLevelFilters,
     });
@@ -347,6 +368,19 @@ const StackedPivot = ({
     const datasetId = context?.widgetMappingDatasets?.[currentRef];
 
     if (!datasetId) return;
+
+    if (widgetFilter?.tags?.values?.includes(UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED)) {
+      widgetFilter = {
+        ...widgetFilter,
+        tags: {
+          ...widgetFilter?.tags,
+          type: CONDITION_OPERATOR_TYPE.IS_NULL,
+          values: widgetFilter?.tags?.values?.map((item) =>
+            item === UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED ? '' : item,
+          ),
+        },
+      };
+    }
 
     // navigate to the dataset
     navigateToDataset(datasetId, widgetFilter);
