@@ -1,20 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "baseUrl": "src/"
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

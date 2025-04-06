@@ -1,5 +1,5 @@
-import { withSentryConfig } from "@sentry/nextjs";
-import type { NextConfig } from "next";
+import { withSentryConfig } from '@sentry/nextjs';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -10,8 +10,8 @@ module.exports = withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
-  org: "varni-labs-pte-ltd",
-  project: "application-platform-dashboard",
+  org: 'varni-labs-pte-ltd',
+  project: 'application-platform-dashboard',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -36,7 +36,7 @@ module.exports = withSentryConfig(nextConfig, {
   // Hides source maps from generated client bundles
   sourcemaps: {
     disable: false,
-    deleteSourcemapsAfterUpload: true
+    deleteSourcemapsAfterUpload: true,
   },
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
