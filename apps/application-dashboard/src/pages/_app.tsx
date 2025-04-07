@@ -1,5 +1,6 @@
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { LicenseManager as LicenseManagerCharts } from 'ag-charts-enterprise';
 import { LicenseManager } from 'ag-grid-enterprise';
 import { inter } from 'constants/common.constants';
@@ -44,6 +45,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <>
+      <SpeedInsights />
       <Head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <title>Zamp</title>
