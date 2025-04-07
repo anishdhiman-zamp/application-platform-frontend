@@ -54,7 +54,7 @@ module.exports = {
       version: 'detect',
     },
   },
-  ignorePatterns: ['*.webp', '*.png', '*.svg', 'fonts.css', 'eslint.js'],
+  ignorePatterns: ['*.webp', '*.png', '*.svg', 'fonts.css', 'eslint.js', '**/next.config.js'],
   rules: {
     '@typescript-eslint/ban-ts-comment': [
       'error',
@@ -64,6 +64,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-inferrable-types': 'warn',
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -72,6 +73,7 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-require-imports': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
     'absolute-imports/only-absolute-imports': 'error',
     'import/extensions': [
       'error',
@@ -83,7 +85,14 @@ module.exports = {
         tsx: 'never',
       },
     ],
-    'import/no-extraneous-dependencies': 'error',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true,
+        peerDependencies: true,
+        packageDir: ['.', './apps/*', './packages/*'],
+      },
+    ],
     'padding-line-between-statements': [
       'error',
       {

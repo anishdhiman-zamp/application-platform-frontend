@@ -1,9 +1,20 @@
-import { withSentryConfig } from '@sentry/nextjs';
-import type { NextConfig } from 'next';
+const { withSentryConfig } = require('@sentry/nextjs');
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
+  experimental: {
+    serverActions: true,
+  },
+  webpack: (config) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
+
+    return config;
+  },
 };
 
 module.exports = withSentryConfig(nextConfig, {

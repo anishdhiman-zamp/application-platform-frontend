@@ -37,8 +37,8 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
         const sourceColumnId = `_zamp_source_json_${column?.field}`;
         const sourceValue = JSON.parse(data[sourceColumnId] ?? '{}');
 
-        let tooltipTitle: string = '';
-        let tooltipDescription: string = '';
+        let tooltipTitle = '';
+        let tooltipDescription = '';
 
         if (sourceValue?.source_type === TAG_SOURCE_TYPES.USER) {
           const teamMember = teamMembersData?.find((member) => member.user?.user_id === sourceValue?.source_id);

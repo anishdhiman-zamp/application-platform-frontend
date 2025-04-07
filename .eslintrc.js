@@ -38,6 +38,11 @@ module.exports = {
     react: {
       version: 'detect',
     },
+    'import/resolver': {
+      typescript: {
+        project: ['tsconfig.json', 'apps/*/tsconfig.json', 'packages/*/tsconfig.json'],
+      },
+    },
   },
   ignorePatterns: ['*.webp', '*.png', '*.svg', 'fonts.css'],
   rules: {
@@ -67,7 +72,14 @@ module.exports = {
         tsx: 'never',
       },
     ],
-    'import/no-extraneous-dependencies': 'error',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true,
+        peerDependencies: true,
+        packageDir: ['./', './apps/*', './packages/*'],
+      },
+    ],
     'padding-line-between-statements': [
       'error',
       {
