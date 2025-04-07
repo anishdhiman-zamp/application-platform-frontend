@@ -17,8 +17,8 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange })
     state: { contactDetails, destinationAccountDetails, amountDetails, moreDetails, currentStep },
   } = useMoveMoneyContextStore();
 
-  const onBackClick = () => handleStepChange(currentStep - 1);
-  const onNextClick = () => handleStepChange(currentStep + 1);
+  const handleBackClick = () => handleStepChange(currentStep - 1);
+  const handleNextClick = () => handleStepChange(currentStep + 1);
 
   return (
     <div className='h-screen overflow-y-scroll py-[136px]'>
@@ -86,11 +86,16 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange })
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_REVIEW_BACK'
-            onClick={onBackClick}
+            onClick={handleBackClick}
           >
             Back
           </Button>
-          <Button size={SIZE_TYPES.MEDIUM} id='MOVE_MONEY_REVIEW_SEND_PAYMENT' onClick={onNextClick}>
+          <Button
+            type={BUTTON_TYPES.PRIMARY}
+            size={SIZE_TYPES.MEDIUM}
+            id='MOVE_MONEY_REVIEW_SEND_PAYMENT'
+            onClick={handleNextClick}
+          >
             Send Payment
           </Button>
         </div>
