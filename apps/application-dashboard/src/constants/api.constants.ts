@@ -22,7 +22,7 @@ export enum APITags {
 }
 export const API_TAGS = Object.values(APITags);
 
-const getApiDomain = (environment: string = '') => {
+const getApiDomain = (environment = '') => {
   switch (environment) {
     case 'production':
       return 'https://api.zamp.ai';

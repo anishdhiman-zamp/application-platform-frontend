@@ -236,12 +236,7 @@ export function shuffleArray(array: any[]) {
  * @param number
  * @returns string number with suffix
  */
-export function formatNumber(
-  value = 0,
-  precision: number = 1,
-  allowSuffix: boolean = true,
-  getSuffix: boolean = false,
-): string {
+export function formatNumber(value = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
   const suffixes = [
     { threshold: 1000000000, suffix: 'B', valueString: 'Billions' },
     { threshold: 1000000, suffix: 'M', valueString: 'Millions' },

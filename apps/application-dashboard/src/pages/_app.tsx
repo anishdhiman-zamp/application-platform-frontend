@@ -45,7 +45,6 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <>
-      <SpeedInsights />
       <Head>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <title>Zamp</title>
@@ -54,6 +53,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       <div className={inter.className}>
         <NetworkStatus />
         <ErrorBoundary>
+          <SpeedInsights />
           <Provider store={store}>
             <PostHogProvider client={posthog}>
               <AuthGuard loginRoute='/login'>
