@@ -5,7 +5,6 @@ import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import {
   PivotTableWidgetInstanceType,
   WIDGET_TYPES,
-  WidgetColumnType,
   WidgetDataResponseType,
   WidgetInstanceType,
 } from 'types/api/widgets.types';
@@ -47,71 +46,53 @@ export const getTreeData = (
   return rows;
 };
 
-const sortingOrder = [
-  '__REF',
-  'account_tag',
-  'account_name',
-  'account_type',
-  'entity_tag',
-  'entity_name',
-  'entity_type',
-  'account_number',
-];
-
 export const getTransformedTreeData = (
   data: WidgetDataResponseType,
   periodicity: PERIODICITY_TYPES,
   widgetInstanceDetails: PivotTableWidgetInstanceType,
 ): {
-  dates: { field: unknown }[];
+  columnsHeaders: { field: unknown }[];
   transformedData: any[];
   mappingDatasets: Record<string, string>;
   pathColumns: string[];
 } => {
+  console.log(widgetInstanceDetails);
+
   // Merge all results' columns and data
-  const mergedColumns = data.result.reduce<WidgetColumnType[]>((acc, curr) => {
-    return [
-      ...acc,
-      ...curr.columns.filter(
-        (col) =>
-          col.column_name !== 'value' &&
-          col.column_name !== 'date' &&
-          !acc.some((existingCol) => existingCol.column_name === col.column_name),
-      ),
-    ];
-  }, []);
+  const dataResult = data.result[0];
 
-  // Sort mergedColumns based on sortingOrder
-  const sortedColumns = [...mergedColumns].sort((a, b) => {
-    const indexA = sortingOrder.indexOf(a.column_name);
-    const indexB = sortingOrder.indexOf(b.column_name);
+  const pathColumns = dataResult.columns.map((col) => col.column_name);
 
-    // If both columns are in sortingOrder, sort by their position
-    if (indexA !== -1 && indexB !== -1) {
-      return indexA - indexB;
-    }
-    // If only one column is in sortingOrder, it should come first
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
+  console.log(pathColumns);
 
-    // If neither column is in sortingOrder, maintain original order
-    return 0;
-  });
-
-  const pathColumns = sortedColumns.map((col) => col.column_name);
-  const datesSet = new Set();
+  const columnsHeadersSet = new Set();
 
   // Merge all data from different results
-  const mergedData = data.result.reduce<MapAny[]>((acc, curr) => {
-    return [...acc, ...curr.data];
-  }, []);
+  const mergedData = dataResult.data;
 
   // Create a map to group items by their path
   const groupedByPath = mergedData.reduce((acc, item) => {
-    // Add date to the set
-    const readableDate = parseType(PIVOT_DATA_TYPES.DATE, item.date, periodicity);
+    //find the ref from the item
+    const ref = item['__REF'];
 
-    datesSet.add(readableDate);
+    //find the mapping from the ref
+    const mapping = widgetInstanceDetails.data_mappings.mappings.find((mapping) => mapping.ref === ref);
+
+    //find the columns from the mapping
+    const columns = mapping?.fields?.columns;
+
+    //find the values from the mapping
+    const values = mapping?.fields?.values;
+
+    // for each column, parseType and add it the columnsHeadersSet
+    if (!columns?.[0] || !values?.[0]) return acc;
+    const parsedValue = parseType(
+      columns[0].type as PIVOT_DATA_TYPES,
+      item[columns[0].alias || columns[0].column],
+      periodicity,
+    );
+
+    columnsHeadersSet.add(parsedValue);
 
     // Create path string for grouping
     const path = pathColumns.map((columnName) => item[columnName]).filter(Boolean);
@@ -135,19 +116,19 @@ export const getTransformedTreeData = (
 
       acc[pathKey] = {
         path: pathWithKeys,
-        [readableDate.toString()]: item.value,
+        [parsedValue.toString()]: item[values?.[0]?.alias || values?.[0]?.column],
         data_keys: widgetInstanceDetails.data_mappings.mappings.find((mapping) => mapping.ref === item['__REF'])?.fields
           .columns,
       };
     } else {
-      acc[pathKey][readableDate.toString()] = item.value;
+      acc[pathKey][parsedValue.toString()] = item[values?.[0]?.alias || values?.[0]?.column];
     }
 
     return acc;
   }, {});
 
   // Convert dates set to array of objects
-  const dates = Array.from(datesSet).map((date) => ({ field: date }));
+  const columnsHeaders = Array.from(columnsHeadersSet).map((header) => ({ field: header }));
 
   // Convert the grouped data map back to array
   const transformedData = Object.values(groupedByPath);
@@ -155,23 +136,24 @@ export const getTransformedTreeData = (
   const mappingDatasets = getWidgetMappingDatasets(widgetInstanceDetails);
 
   return {
-    dates,
+    columnsHeaders,
     transformedData,
     mappingDatasets,
     pathColumns,
   };
 };
 
-export const getColDefs = (dates: any[], currency: string) => {
-  return dates.map((item) => {
+export const getColDefs = (headers: any[], currency: string) => {
+  return headers.map((item) => {
     return {
       field: item.field,
       aggFunc: 'sum',
       valueFormatter: (params: { value: number }) => {
         if (params.value) {
           return new Intl.NumberFormat('en-US', {
-            style: 'currency',
+            style: currency ? 'currency' : 'decimal',
             currency: currency,
+            maximumSignificantDigits: 3,
           }).format(params.value);
         }
 
@@ -273,4 +255,16 @@ export const getColumnLevelFilters = (
   });
 
   return columnLevelFilters;
+};
+
+export const extractKey = (key: string) => {
+  if (key.startsWith('__') && key.includes('_LEVEL_')) {
+    const parts = key.split('_');
+
+    if (parts.length >= 4) {
+      return parts[2];
+    }
+  }
+
+  return key;
 };

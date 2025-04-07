@@ -44,6 +44,7 @@ import {
 } from 'modules/widgets/TreeTable/constants';
 import { TableInterface } from 'modules/widgets/TreeTable/types';
 import {
+  extractKey,
   getColDefs,
   getColumnLevelFilters,
   getFilterContext,
@@ -116,12 +117,10 @@ const TreeTableComponent = ({
 
   const { colDef, rowData, mappingDatasets } = useMemo(() => {
     const transformWidgetData = getTransformedTreeData(widgetData, periodicity, widgetInstanceDetails);
-    const coldefs = getColDefs(transformWidgetData.dates, defaultCurrency ?? widgetData?.currency);
+    const coldefs = getColDefs(transformWidgetData.columnsHeaders, defaultCurrency ?? widgetData?.currency);
     const treeData = transformWidgetData.transformedData;
     const mappingDatasets = transformWidgetData.mappingDatasets;
     const pathColumns = transformWidgetData.pathColumns;
-
-    console.log('mappingDatasets', mappingDatasets);
 
     return {
       colDef: coldefs,
@@ -247,8 +246,6 @@ const TreeTableComponent = ({
 
     const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
 
-    console.log('query', query);
-
     router.push(`${path}?filters=${JSON.stringify(query)}`);
   };
 
@@ -268,9 +265,10 @@ const TreeTableComponent = ({
     if (node.data?.path) {
       selectedNodeData = node.data;
       selectedNodeData.path
-        .filter((item: { value: string; key: string }) => item.key !== '__REF')
+        .filter((item: { key: string }) => item.key !== '__REF')
         .forEach((item: { value: string; key: string }) => {
-          const currentFilterContextValue = currentRefContext[item.key.includes('tags') ? 'tags' : item.key];
+          const key = extractKey(item.key);
+          const currentFilterContextValue = currentRefContext[key];
 
           treeFilters[item.key] = {
             filterType: currentFilterContextValue.filterType,
@@ -291,8 +289,10 @@ const TreeTableComponent = ({
         for (let i = node.level; i >= 0; i--) {
           const levelData = selectedNodeData.path[i];
 
-          if (levelData) {
-            const currentFilterContextValue = currentRefContext[levelData.key];
+          const key = extractKey(levelData.key);
+
+          if (key) {
+            const currentFilterContextValue = currentRefContext[key];
 
             treeFilters[levelData.key] = {
               filterType: currentFilterContextValue.filterType,
@@ -318,8 +318,6 @@ const TreeTableComponent = ({
       currentColDef.field,
     );
 
-    console.log(columnLevelFilters);
-
     const widgetFilter = concatTagFilters({
       ...treeFilters,
       ...columnLevelFilters,
@@ -344,8 +342,6 @@ const TreeTableComponent = ({
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     gridApi.current = params.api;
-
-    console.log(gridApi);
 
     setTimeout(() => {
       handleScrollToRightEnd();
