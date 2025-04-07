@@ -17,6 +17,8 @@ export interface TreeTableComponentInterface {
   activeWidget: string;
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
+  setActiveWidget?: (widgetId: string) => void;
+  sheetId: string;
 }
 
 export interface TableInterface {

@@ -5,6 +5,7 @@ import NoPivotData from 'modules/widgets/Pivot/loader/NoPivotData';
 import PivotTableLoader from 'modules/widgets/Pivot/loader/PivotTableLoader';
 import TreeTableComponent from 'modules/widgets/TreeTable/components/Table';
 import { TreeTableComponentInterface } from 'modules/widgets/TreeTable/types';
+import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -20,8 +21,10 @@ const TreeTable: FC<TreeTableComponentInterface> = ({
   currency,
   currentWidgetSelectedFilter,
   activeWidget,
+  setActiveWidget,
   handleWidgetHeightChange,
   defaultCurrency,
+  sheetId,
 }) => {
   const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
@@ -38,6 +41,27 @@ const TreeTable: FC<TreeTableComponentInterface> = ({
       skip: !isFilterInitialized,
     },
   );
+
+  const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID) || '{}');
+  const currentActiveWidget = storedData[sheetId]?.widget_instance_id ?? activeWidget;
+
+  const initializeSheetData = () => {
+    if (!sheetId || typeof sheetId !== 'string') return;
+
+    if (storedData[sheetId]?.widget_instance_id && setActiveWidget) {
+      setActiveWidget(storedData[sheetId]?.widget_instance_id);
+    }
+
+    if (!storedData[sheetId]) {
+      storedData[sheetId] = {};
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_KEYS.WIDGET_INSTANCE_ID, JSON.stringify(storedData));
+  };
+
+  useEffect(() => {
+    initializeSheetData();
+  }, [sheetId, storedData, setActiveWidget]);
 
   useEffect(() => {
     if (isFetching) {
@@ -58,7 +82,7 @@ const TreeTable: FC<TreeTableComponentInterface> = ({
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
           title={widgetInstanceDetails?.title}
-          activeWidget={activeWidget}
+          activeWidget={currentActiveWidget}
         />
       }
       loader={<PivotTableLoader />}
@@ -69,7 +93,7 @@ const TreeTable: FC<TreeTableComponentInterface> = ({
           widgetInstanceDetails={widgetInstanceDetails}
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
-          activeWidget={activeWidget}
+          activeWidget={currentActiveWidget}
           periodicity={periodicity}
           currentWidgetSelectedFilter={currentWidgetSelectedFilter}
           handleWidgetHeightChange={handleWidgetHeightChange}
