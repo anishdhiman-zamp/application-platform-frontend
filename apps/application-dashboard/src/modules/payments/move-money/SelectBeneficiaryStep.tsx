@@ -10,12 +10,12 @@ import { snakeCaseToSentenceCase } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
-  shouldReset: boolean;
+  handleStepChange: (step: number) => void;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange }) => {
   const {
-    state: { contactDetails, destinationAccountDetails },
+    state: { contactDetails, destinationAccountDetails, currentStep },
     dispatch,
   } = useMoveMoneyContextStore();
 
@@ -37,15 +37,6 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
     });
   };
 
-  const handleNextClick = () => {
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: {
-        currentStep: 1,
-      },
-    });
-  };
-
   return (
     <div className='h-screen overflow-y-scroll pt-34'>
       <div className='max-w-75 m-auto'>
@@ -54,6 +45,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
           <SelectBeneDropdown autoFocus={true} onSelect={handleBeneficiarySelect} shouldReset={false} />
           {contactDetails?.value && (
             <SelectAccountDropdown
+              autoFocus
               accountsList={accountsList}
               shouldReset={false}
               accountDetails={destinationAccountDetails}
@@ -83,7 +75,11 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
           >
             Back
           </Button>
-          <Button size={SIZE_TYPES.MEDIUM} id='SELF_TRANSFER_SELECT_BENEFICIARY_NEXT' onClick={handleNextClick}>
+          <Button
+            size={SIZE_TYPES.MEDIUM}
+            id='SELF_TRANSFER_SELECT_BENEFICIARY_NEXT'
+            onClick={() => handleStepChange(currentStep + 1)}
+          >
             Next
           </Button>
         </div>

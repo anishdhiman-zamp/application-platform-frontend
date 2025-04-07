@@ -12,9 +12,10 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoneyTransferMoreDetailsStepProps {
   shouldReset: boolean;
+  handleStepChange: (step: number) => void;
 }
 
-const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ shouldReset }) => {
+const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ shouldReset, handleStepChange }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
     dispatch,
@@ -38,10 +39,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         },
       },
     });
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 3 },
-    });
+    handleStepChange(currentStep + 1);
   };
 
   const onBackClick = () => {
@@ -55,10 +53,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         },
       },
     });
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 1 },
-    });
+    handleStepChange(currentStep - 1);
   };
 
   const handleFileUpload = (file: UploadFileResponseType | null) => file && setUploadedFiles((prev) => [...prev, file]);
