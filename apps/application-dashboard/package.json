@@ -17,6 +17,8 @@
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^9.1.0",
     "@sentry/nextjs": "^9.5.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "@zamp-platform/config": "*",
     "ag-charts-community": "^11.0.0",
     "ag-charts-enterprise": "^11.0.0",
     "ag-charts-react": "^11.0.0",
@@ -40,9 +42,7 @@
     "react-toastify": "^11.0.3",
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.5.5",
-    "xlsx": "0.18.5",
-    "@zamp-platform/config": "*",
-    "@vercel/speed-insights": "^1.2.0"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "peerDependencies": {
     "next": "^15",
