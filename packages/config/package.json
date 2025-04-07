@@ -1,0 +1,17 @@
+{
+  "name": "@zamp-platform/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "eslint.js",
+    "tsconfig.json"
+  ],
+  "devDependencies": {
+    "eslint-config-next": "14.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "prettier": "latest"
+  }
+}
