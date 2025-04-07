@@ -1,7 +1,7 @@
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
-import { MapAny , OptionsType } from 'types/commonTypes';
+import { MapAny, OptionsType } from 'types/commonTypes';
 
 export interface TreeTableComponentInterface {
   widgetInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>;

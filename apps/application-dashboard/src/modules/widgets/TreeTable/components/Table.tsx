@@ -43,7 +43,12 @@ import {
   ROW_HEIGHT,
 } from 'modules/widgets/TreeTable/constants';
 import { TableInterface } from 'modules/widgets/TreeTable/types';
-import { getColDefs, getColumnLevelFilters, getFilterContext,getTransformedTreeData } from 'modules/widgets/TreeTable/utils';
+import {
+  getColDefs,
+  getColumnLevelFilters,
+  getFilterContext,
+  getTransformedTreeData,
+} from 'modules/widgets/TreeTable/utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
