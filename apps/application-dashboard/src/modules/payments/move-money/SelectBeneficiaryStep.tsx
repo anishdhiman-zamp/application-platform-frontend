@@ -71,13 +71,13 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
             disabled
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_SELECT_BENEFICIARY_BACK'
+            id='MOVE_MONEY_SELECT_BENEFICIARY_BACK'
           >
             Back
           </Button>
           <Button
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_SELECT_BENEFICIARY_NEXT'
+            id='MOVE_MONEY_SELECT_BENEFICIARY_NEXT'
             onClick={() => handleStepChange(currentStep + 1)}
           >
             Next

@@ -116,7 +116,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
           <div className='f-12-500 text-GRAY_900 mb-2'>Payment processing mode</div>
           <Dropdown
             options={PAYMENT_PROCESSING_MODES}
-            id={`payment-processing-mode-dropdown`}
+            id='payment-processing-mode-dropdown'
             eventCallback={defaultFn}
             onChange={setPaymentProcessingMode}
             value={paymentProcessingMode}
@@ -137,7 +137,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
         <Button
           type={BUTTON_TYPES.SECONDARY}
           size={SIZE_TYPES.MEDIUM}
-          id='SELF_TRANSFER_AMOUNT_DETAILS_BACK'
+          id='MOVE_MONEY_AMOUNT_DETAILS_BACK'
           onClick={() => handleStepChange(currentStep - 1)}
           disabled={isSelfTransfer}
         >
@@ -145,7 +145,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
         </Button>
         <Button
           size={SIZE_TYPES.MEDIUM}
-          id='SELF_TRANSFER_AMOUNT_DETAILS_NEXT'
+          id='MOVE_MONEY_AMOUNT_DETAILS_NEXT'
           onClick={onNextClick}
           disabled={!amount || !accountDetails}
         >

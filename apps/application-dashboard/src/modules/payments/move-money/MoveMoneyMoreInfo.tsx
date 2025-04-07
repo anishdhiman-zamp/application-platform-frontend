@@ -140,14 +140,14 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SINGLE_PAYMENT_MORE_INFO_BACK'
+            id='MOVE_MONEY_MORE_INFO_BACK'
             onClick={onBackClick}
           >
             Back
           </Button>
           <Button
             size={SIZE_TYPES.MEDIUM}
-            id='SINGLE_PAYMENT_MORE_INFO_NEXT'
+            id='MOVE_MONEY_MORE_INFO_NEXT'
             onClick={onNextClick}
             isLoading={isFileUploading}
           >

@@ -85,12 +85,12 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange })
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_REVIEW_BACK'
+            id='MOVE_MONEY_REVIEW_BACK'
             onClick={onBackClick}
           >
             Back
           </Button>
-          <Button size={SIZE_TYPES.MEDIUM} id='SELF_TRANSFER_REVIEW_SEND_PAYMENT' onClick={onNextClick}>
+          <Button size={SIZE_TYPES.MEDIUM} id='MOVE_MONEY_REVIEW_SEND_PAYMENT' onClick={onNextClick}>
             Send Payment
           </Button>
         </div>

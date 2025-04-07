@@ -15,14 +15,12 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MoneyTransferHome = () => {
   const router = useRouter();
-
   const { type } = router.query;
+  const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
   const {
     state: { currentStep },
     dispatch,
   } = useMoveMoneyContextStore();
-
-  const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
 
   const handleStepChange = (step: number) => {
     dispatch({

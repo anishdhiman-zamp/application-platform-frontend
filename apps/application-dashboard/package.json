@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 2000 ",
+    "dev": "next dev -p 2000 --experimental-https -H local.zamp.ai",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix . --ext .ts,.tsx,.js,.jsx",
