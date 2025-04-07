@@ -1,0 +1,21 @@
+{
+  "extends": "@zamp-platform/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src/",
+    "paths": {
+      "@/*": [
+        "*"
+      ]
+    },
+    "incremental": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
