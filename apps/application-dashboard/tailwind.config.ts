@@ -133,6 +133,8 @@ module.exports = {
         104: '416px',
         content: 'calc(100vw - 272px)',
         sideDrawer: '480px',
+        sideDrawerMedium: '500px',
+        sideDrawerLarge: '600px',
       },
       maxWidth: {
         formLayout: '438px',
