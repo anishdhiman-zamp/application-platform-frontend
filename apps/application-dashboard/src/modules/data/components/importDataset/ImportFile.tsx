@@ -13,9 +13,10 @@ const ImportFile: FC<ImportFilePropsType> = ({
   setFileName,
   filesSelected,
   className,
-  setStartPollingPreview,
-  onClosePopup,
   setRawData,
+  setFileUploadId,
+  keepLoadingFlow,
+  isFileUploading,
 }) => {
   const handleFileUpload = (file: UploadFileResponseType | null) => {
     if (!file?.rawFile) return;
@@ -77,8 +78,9 @@ const ImportFile: FC<ImportFilePropsType> = ({
       filesSelected={filesSelected}
       className={className}
       setRawData={setRawData}
-      setStartPollingPreview={setStartPollingPreview}
-      onClosePopup={onClosePopup}
+      setFileUploadId={setFileUploadId}
+      keepLoadingFlow={keepLoadingFlow}
+      isFileUploading={isFileUploading}
     />
   );
 };
