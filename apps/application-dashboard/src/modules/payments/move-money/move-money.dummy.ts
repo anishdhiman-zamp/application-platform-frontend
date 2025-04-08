@@ -36,6 +36,21 @@ export const RECIPIENT_LIST = [
   },
 ];
 
+export const TEMPLATES = [
+  {
+    id: '1',
+    name: 'Template 1',
+  },
+  {
+    id: '2',
+    name: 'Template 2',
+  },
+  {
+    id: '3',
+    name: 'Template 3',
+  },
+];
+
 export const accountsList = Array.from({ length: 10 }, () => {
   const randomNumber = Math.floor(Math.random() * 10000);
 

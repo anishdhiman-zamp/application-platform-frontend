@@ -13,7 +13,7 @@ export const ROUTES_PATH = {
   NO_ACCESS: '/no-access',
   ADMIN: '/admin',
   PAYMENTS: '/payments',
-  MONEY_TRANSFER: '/payments/single-transfer',
+  MONEY_TRANSFER: '/payments/money-transfer',
 };
 
 export const getPageRouteById = (pageId: string) => {
