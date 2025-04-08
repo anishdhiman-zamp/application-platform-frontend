@@ -47,6 +47,7 @@ import { defaultFn, MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import TemplateListSideDrawer from '@/modules/payments/templates/TemplateListSideDrawer';
 import TooltipButton from 'components/common/button/TooltipButton';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -62,6 +63,7 @@ import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+
 type PaymentsListProps = {
   id: string;
   zampIds?: string[];
@@ -99,6 +101,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
+  const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(true);
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -464,6 +467,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
               onClick={() => setIsRecipientsSideDrawerOpen(true)}
               tooltipBody='Recipients'
               className='border-none'
+              tooltipClassName='!z-1000'
               tooltipColor={COLORS.BLACK}
               buttonSize={SIZE_TYPES.XSMALL}
               tooltipPosition={TooltipPositions.TOP}
@@ -472,6 +476,22 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
                 size: 14,
               }}
             />
+
+            <TooltipButton
+              id='payment-templates'
+              onClick={() => setIsPaymentTemplatesSideDrawerOpen(true)}
+              tooltipBody='Payment Templates'
+              className='border-none !z-1000'
+              tooltipClassName='!z-1000'
+              tooltipColor={COLORS.BLACK}
+              buttonSize={SIZE_TYPES.XSMALL}
+              tooltipPosition={TooltipPositions.TOP}
+              buttonIcon={{
+                id: 'file-05',
+                size: 14,
+              }}
+            />
+
             <TableSchemaAlignmentStatus
               showAiTransformationStatus={showAiTransformationStatus}
               setShowAiTransformationStatus={setShowAiTransformationStatus}
@@ -511,6 +531,12 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
         <RecipientsSideDrawer
           isOpen={isRecipientsSideDrawerOpen}
           onClose={() => setIsRecipientsSideDrawerOpen(false)}
+        />
+      )}
+      {isPaymentTemplatesSideDrawerOpen && (
+        <TemplateListSideDrawer
+          isOpen={isPaymentTemplatesSideDrawerOpen}
+          onClose={() => setIsPaymentTemplatesSideDrawerOpen(false)}
         />
       )}
     </>

@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { COLORS } from 'constants/colors';
-import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -17,7 +16,6 @@ interface TooltipButtonPropsType {
   tooltipColor?: string;
   tooltipPosition?: TooltipPositions;
   buttonIcon?: SvgSpriteLoaderProps;
-  buttonTitle?: string;
   buttonType?: BUTTON_TYPES;
   buttonSize?: SIZE_TYPES;
   id: string;
@@ -25,7 +23,8 @@ interface TooltipButtonPropsType {
   isLoading?: boolean;
   disabled?: boolean;
   buttonDisabled?: boolean;
-  imageIconSrc?: string;
+  tooltipClassName?: string;
+  children?: React.ReactNode;
 }
 
 const TooltipButton: FC<TooltipButtonPropsType> = ({
@@ -36,7 +35,6 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   tooltipColor = COLORS.BLACK,
   tooltipPosition = TooltipPositions.BOTTOM,
   buttonIcon,
-  buttonTitle = '',
   buttonType = BUTTON_TYPES.SECONDARY,
   buttonSize = SIZE_TYPES.SMALL,
   id = '',
@@ -44,13 +42,15 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   isLoading = false,
   disabled = false,
   buttonDisabled = false,
-  imageIconSrc,
+  tooltipClassName,
+  children,
 }) => {
   return (
     <Tooltip
       tooltipBody={tooltipBody}
       position={tooltipPosition}
       color={tooltipColor}
+      className={tooltipClassName}
       disabled={disabled}
       tooltipBodyClassName={cn(tooltipBodyOverrideClassName, tooltipBodyClassName)}
     >
@@ -64,8 +64,7 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
         isLoading={isLoading}
         disabled={buttonDisabled}
       >
-        {imageIconSrc && <Image alt='' src={imageIconSrc} width={14} height={14} />}
-        {buttonTitle}
+        {children}
       </Button>
     </Tooltip>
   );
