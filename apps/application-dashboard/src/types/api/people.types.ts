@@ -87,3 +87,23 @@ export type RemoveTeamFromAudienceRequestType = {
   teamId: string;
   payload: { team_id: string; team_membership_id: string };
 };
+
+export type GetMyInvitationsResponseType = {
+  invitations: {
+    organization_invitation_id: string;
+    organization_id: string;
+    email: string;
+    privilege: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string;
+  }[];
+};
+
+export type AcceptInvitationRequestType = {
+  invitationId: string;
+};
+
+export type AcceptInvitationResponseType = {
+  message: string;
+};

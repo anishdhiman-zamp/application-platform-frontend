@@ -13,6 +13,7 @@ export const ROUTES_PATH = {
   NO_ACCESS: '/no-access',
   ADMIN: '/admin',
   PAYMENTS: '/payments',
+  INVITATIONS: '/invitations',
   MONEY_TRANSFER: '/payments/money-transfer',
 };
 
