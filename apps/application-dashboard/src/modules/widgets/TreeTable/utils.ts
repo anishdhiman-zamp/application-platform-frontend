@@ -2,49 +2,9 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ColumnFilterConfig, PIVOT_DATA_TYPES } from 'modules/widgets/Pivot/pivot.types';
 import { parseType } from 'modules/widgets/Pivot/pivot.utils';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
-import {
-  PivotTableWidgetInstanceType,
-  WIDGET_TYPES,
-  WidgetDataResponseType,
-  WidgetInstanceType,
-} from 'types/api/widgets.types';
-import { MapAny } from 'types/commonTypes';
+import { PivotTableWidgetInstanceType, WidgetDataResponseType } from 'types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
-
-export const getTreeData = (
-  wInstanceDetails: Extract<WidgetInstanceType, { widget_type: WIDGET_TYPES.PIVOT_TABLE }>,
-  wInstanceData: WidgetDataResponseType,
-  periodicity: PERIODICITY_TYPES,
-) => {
-  const rows: MapAny[] = [];
-  const { data_mappings } = wInstanceDetails;
-
-  wInstanceData.result.forEach((resultSet) => {
-    const resultRows = resultSet?.data;
-
-    resultRows.forEach((row) => {
-      const transformedRow = { ...row };
-      const mapping = data_mappings.mappings[0];
-      const { fields } = mapping;
-
-      // Add tree path
-      transformedRow.treePath = fields?.rows?.map((row) => row.column).map((col) => transformedRow[col]);
-
-      // Add dataset ID for drilldown
-      transformedRow.datasetId = mapping.dataset_id;
-
-      // Transform values
-      fields.values.forEach((val) => {
-        transformedRow[val.alias || val.column] = parseType(val.type as PIVOT_DATA_TYPES, row[val.column], periodicity);
-      });
-
-      rows.push(transformedRow);
-    });
-  });
-
-  return rows;
-};
 
 export const getTransformedTreeData = (
   data: WidgetDataResponseType,
@@ -86,13 +46,20 @@ export const getTransformedTreeData = (
 
     // for each column, parseType and add it the columnsHeadersSet
     if (!columns?.[0] || !values?.[0]) return acc;
-    const parsedValue = parseType(
-      columns[0].type as PIVOT_DATA_TYPES,
-      item[columns[0].alias || columns[0].column],
-      periodicity,
-    );
+    let parsedValue;
 
-    columnsHeadersSet.add(parsedValue);
+    try {
+      parsedValue = parseType(
+        columns[0].type as PIVOT_DATA_TYPES,
+        item[columns[0].alias || columns[0].column],
+        periodicity,
+      );
+      columnsHeadersSet.add(parsedValue);
+    } catch (error) {
+      console.log('error', error);
+      console.log('columns', columns[0]);
+      console.log('item', item);
+    }
 
     // Create path string for grouping
     const path = pathColumns.map((columnName) => item[columnName]).filter(Boolean);
@@ -116,12 +83,12 @@ export const getTransformedTreeData = (
 
       acc[pathKey] = {
         path: pathWithKeys,
-        [parsedValue.toString()]: item[values?.[0]?.alias || values?.[0]?.column],
+        [parsedValue?.toString() || '']: item[values?.[0]?.alias || values?.[0]?.column],
         data_keys: widgetInstanceDetails.data_mappings.mappings.find((mapping) => mapping.ref === item['__REF'])?.fields
           .columns,
       };
     } else {
-      acc[pathKey][parsedValue.toString()] = item[values?.[0]?.alias || values?.[0]?.column];
+      acc[pathKey][parsedValue?.toString() || ''] = item[values?.[0]?.alias || values?.[0]?.column];
     }
 
     return acc;
