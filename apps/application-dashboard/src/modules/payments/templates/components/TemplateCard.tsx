@@ -32,7 +32,7 @@ const TemplateCard: FC<TemplateCardProps> = ({ title, source }) => {
           ))}
         </div>
       </div>
-      {<SvgSpriteLoader id='edit-03' onClick={defaultFn} size={14} />}
+      <SvgSpriteLoader id='edit-03' onClick={defaultFn} size={14} />
       <SvgSpriteLoader id='send-03' onClick={defaultFn} size={14} />
     </div>
   );
