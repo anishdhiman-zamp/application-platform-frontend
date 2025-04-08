@@ -112,7 +112,6 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
   };
 
   const triggerPreviewTransformation = async (fileUploadId: string) => {
-    console.log('inside triggerPreviewTransformation function');
     const oldDatasetImportPayload = {
       file_upload_id: fileUploadId,
       dataset_id: datasetId,
@@ -162,7 +161,6 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
           onReset={handleReset}
           onClose={handleCloseImportFilePopup}
           setFileUploadId={setFileUploadId}
-          // isSuccess={isSuccessPreviewTransformation}
           keepLoadingFlow={isSuccessPreviewTransformation}
           isFileUploading={isLoading}
         />
