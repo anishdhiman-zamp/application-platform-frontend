@@ -117,8 +117,6 @@ export type FileUploaderWrapperPropsType = {
   onFileSelect?: (arg: UploadFileResponseType | null) => void;
   onUploadProgress?: (percent: number) => void;
   showProgress?: boolean;
-
-  //////////////
   setFileUploadId?: (fileUploadId: string) => void;
   keepLoadingFlow?: boolean;
   showUploadButton?: boolean;
@@ -133,8 +131,6 @@ export type ImportFilePropsType = {
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
-
-  ///////////////
   setFileUploadId?: (fileUploadId: string) => void;
   keepLoadingFlow?: boolean;
   isFileUploading?: boolean;
@@ -147,8 +143,6 @@ export type ImportFileWrapperPropsType = {
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
-
-  ////////////////////
   setFileUploadId?: (fileUploadId: string) => void;
   keepLoadingFlow?: boolean;
   isFileUploading?: boolean;

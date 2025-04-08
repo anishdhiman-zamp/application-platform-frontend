@@ -24,8 +24,6 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   className,
   onFileSelect,
   setRawData,
-
-  ///////////////////
   setFileUploadId,
   isFileUploading = false,
   keepLoadingFlow,
