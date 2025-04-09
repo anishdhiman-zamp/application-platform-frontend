@@ -1,8 +1,9 @@
 import { Dispatch, SetStateAction } from 'react';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { DatasetBulkLoadersType } from 'store/slices/user';
-import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';
+import { RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { defaultFnType } from 'types/commonTypes';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 export enum INPUT_FILE_FORMATS {
   PNG = 'image/png',

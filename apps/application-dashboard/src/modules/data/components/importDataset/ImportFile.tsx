@@ -2,10 +2,10 @@ import React, { FC } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
 import { FILE_SIZE } from 'modules/data/components/importDataset/importData.constants';
 import { FILE_MIME, ImportFilePropsType } from 'modules/data/components/importDataset/importData.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import * as XLSX from 'xlsx';
 import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 const ImportFile: FC<ImportFilePropsType> = ({
   acceptedFormats,
