@@ -13,7 +13,7 @@ export enum ErrorCardTypes {
 }
 
 export interface CommonWrapperPropsTypes {
-  children: React.ReactNode;
+  children: ReactNode;
   isNoData?: boolean;
   isLoading?: boolean;
   isSuccess?: boolean;
@@ -25,8 +25,8 @@ export interface CommonWrapperPropsTypes {
   refetchFunction?: defaultFnType;
   errorCardStyle?: string;
   skeletonType?: SkeletonTypes;
-  noDataBanner?: React.ReactNode;
-  successCard?: React.ReactNode;
+  noDataBanner?: ReactNode;
+  successCard?: ReactNode;
   loaderClassName?: string;
   errorCardProps?: any;
   skeleton?: any;

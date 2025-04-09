@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { cn } from 'utils/common';
 
 type CardsListProps = {
   cards: any[]; // Array of data for each card
-  CardComponent: React.FC<any>; // Custom component to render each card
+  CardComponent: FC<any>; // Custom component to render each card
   gridClassName?: string; // CSS Grid template for columns
 };
 
-const CardsList: React.FC<CardsListProps> = ({
+const CardsList: FC<CardsListProps> = ({
   cards,
   CardComponent,
   gridClassName = 'grid-cols-[repeat(auto-fill,_minmax(100px,_1fr))] gap-4',

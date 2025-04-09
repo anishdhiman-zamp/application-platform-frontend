@@ -1,4 +1,4 @@
-import React, { DragEventHandler, FC, useState } from 'react';
+import React, { DragEventHandler, FC, KeyboardEvent, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
@@ -41,7 +41,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
     onFileDrop(files);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === KEYBOARD_KEYS.ENTER) onClick();
   };
 

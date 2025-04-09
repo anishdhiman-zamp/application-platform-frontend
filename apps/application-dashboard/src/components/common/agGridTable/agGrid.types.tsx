@@ -1,3 +1,4 @@
+import { ElementType } from 'react';
 import { MapAny } from 'types/commonTypes';
 
 export enum DataAlign {
@@ -41,5 +42,5 @@ export interface WorkspaceDisplayColumns {
     key: string;
     value: string;
   }[];
-  Component?: React.ElementType;
+  Component?: ElementType;
 }

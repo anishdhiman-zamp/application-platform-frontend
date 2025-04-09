@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
 import {
   DATE_RANGE_TYPES,
@@ -20,7 +20,7 @@ interface MonthOrQuarterPickerProps {
   focusedInput?: DateRangeKeys;
 }
 
-export const MonthOrQuarterPicker: React.FC<MonthOrQuarterPickerProps> = ({
+export const MonthOrQuarterPicker: FC<MonthOrQuarterPickerProps> = ({
   onSelect,
   currentValueStart,
   currentValueEnd,
@@ -30,7 +30,7 @@ export const MonthOrQuarterPicker: React.FC<MonthOrQuarterPickerProps> = ({
   focusedInput,
 }) => {
   const yearsList = getYearList();
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!searchValue) return;

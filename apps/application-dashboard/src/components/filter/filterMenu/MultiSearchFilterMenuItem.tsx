@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
@@ -120,7 +120,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
     }
   };
 
-  const handleDescriptionInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleDescriptionInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
 
     if (event.key !== 'Backspace' || !isContainsOperator) {
@@ -132,7 +132,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
     }
   };
 
-  const handleDescriptionInputKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleDescriptionInputKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     const currentValue = (event?.target as HTMLInputElement)?.value.trim();
 
     if (
@@ -198,7 +198,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
     updateConditionForValue(value);
   };
 
-  const onDescriptionInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onDescriptionInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
 
     handleDescriptionValueSearch(e?.target?.value);

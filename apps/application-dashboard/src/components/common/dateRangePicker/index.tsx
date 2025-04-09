@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
 import {
   DATE_FILTER_CATEGORIES,
@@ -47,7 +47,7 @@ export interface DateRangeComponentProps {
   dateFormat?: string;
 }
 
-const DateRangePicker: React.FC<DateFilterProps> = ({
+const DateRangePicker: FC<DateFilterProps> = ({
   onChange,
   defaultValue,
   id,

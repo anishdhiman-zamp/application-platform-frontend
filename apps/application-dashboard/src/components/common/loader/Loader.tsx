@@ -1,5 +1,5 @@
 /**Temp file not part of design system */
-import React from 'react';
+import React, { FC } from 'react';
 import { SIZE } from 'constants/common.constants';
 
 interface LoaderProps {
@@ -20,6 +20,6 @@ export const SIZE_CLASSNAMES = {
     'w-12 h-12 border-[5px] border-transparent border-t-[5px] border-r-[5px] border-l-[5px] border-t-blue-500 border-r-blue-500 border-l-blue-500 rounded-full',
 };
 
-export const Loader: React.FC<LoaderProps> = ({ className = '', size = SIZE.MEDIUM }) => {
+export const Loader: FC<LoaderProps> = ({ className = '', size = SIZE.MEDIUM }) => {
   return <div className={`loader ${SIZE_CLASSNAMES[size]} animate-spin ${className}`}></div>;
 };
