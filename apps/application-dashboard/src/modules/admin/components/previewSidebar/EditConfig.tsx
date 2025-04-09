@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';
 import Input from 'components/common/input';
@@ -24,7 +24,7 @@ const EditableConfigField = ({
   value: string;
   isEditing: boolean;
   onEditToggle: () => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   firstColumn?: boolean;
 }) => {
   return (

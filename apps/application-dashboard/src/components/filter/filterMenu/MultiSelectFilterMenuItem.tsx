@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';
@@ -15,7 +15,7 @@ interface MultiSelectFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
-  LabelComponent?: (item: string) => React.ReactNode;
+  LabelComponent?: (item: string) => ReactNode;
   operatorOptions?: OptionsType[];
   isOpen?: boolean;
   showSelectAll?: boolean;

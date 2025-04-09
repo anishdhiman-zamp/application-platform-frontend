@@ -1,12 +1,12 @@
+import { RefObject } from 'react';
 import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-
 interface DropdownProps {
   options: OptionsType[];
   onSelect: (widgetId: string) => void;
   activeWidget: string;
   className?: string;
-  dropdownRef: React.RefObject<HTMLDivElement>;
+  dropdownRef: RefObject<HTMLDivElement>;
 }
 
 export const WidgetOptionDropdown = ({ options, onSelect, activeWidget, className, dropdownRef }: DropdownProps) => {

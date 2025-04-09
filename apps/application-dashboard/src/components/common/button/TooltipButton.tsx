@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
@@ -24,7 +24,7 @@ interface TooltipButtonPropsType {
   disabled?: boolean;
   buttonDisabled?: boolean;
   tooltipClassName?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 const TooltipButton: FC<TooltipButtonPropsType> = ({

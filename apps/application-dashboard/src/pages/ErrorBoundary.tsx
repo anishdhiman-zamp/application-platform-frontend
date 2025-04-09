@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { captureException } from '@sentry/browser';
 import { ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 import ErrorCard from 'components/commonWrapper/ErrorCard';
 
-class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
     super(props);
 

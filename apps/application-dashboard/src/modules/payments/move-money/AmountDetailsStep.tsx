@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import {
   accountsList,
@@ -41,7 +41,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
     });
   };
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (parseFloat(e?.target?.value.replaceAll(',', '')) < 0 || !e?.target?.value.match(COMMA_SEPARATED_NUMBER_REGEX))
       return;
     setAmount(e?.target?.value.replaceAll(',', '') || '');

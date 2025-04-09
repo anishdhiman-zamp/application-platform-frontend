@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { FC, ReactNode, useEffect } from 'react';
 import { useWhoAmIQuery } from 'apis/auth';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -13,10 +13,10 @@ import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
   loginRoute: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export const AuthGuard: React.FC<Props> = (props) => {
+export const AuthGuard: FC<Props> = (props) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 

@@ -1,3 +1,4 @@
+import { Dispatch, ElementType, MutableRefObject, SetStateAction } from 'react';
 import { MapAny } from 'types/commonTypes';
 
 export type ArrayListOption = {
@@ -19,14 +20,14 @@ export type MultiSelectInputPropsType = {
   checkAudiencePresentInOrg?: boolean;
   search: string;
   setSearch: (value: string) => void;
-  selectedRoleRef?: React.MutableRefObject<any>;
+  selectedRoleRef?: MutableRefObject<any>;
   isOpen: boolean;
   placeholderText: string;
   roleOptions?: Array<{ label: string; value: string }>;
   inputArrayList: ArrayListOption[];
-  setInputArrayList: React.Dispatch<React.SetStateAction<ArrayListOption[]>>;
+  setInputArrayList: Dispatch<SetStateAction<ArrayListOption[]>>;
   showValidationError?: boolean;
-  setShowValidationError?: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowValidationError?: Dispatch<SetStateAction<boolean>>;
   validationErrorText?: string;
   onValidateAndAdd: ({
     value,
@@ -49,10 +50,10 @@ export type MultiSelectInputPropsType = {
   wrapperClassName?: string;
   inputWrapperClassName?: string;
   multiSelectInputClassName?: string;
-  setIsCustomInputFocused?: React.Dispatch<React.SetStateAction<boolean>>;
-  customOptionsListDropdown?: React.ElementType;
+  setIsCustomInputFocused?: Dispatch<SetStateAction<boolean>>;
+  customOptionsListDropdown?: ElementType;
   selectedRole?: string;
-  setSelectedRole?: React.Dispatch<React.SetStateAction<Record<number, string> | string>>;
+  setSelectedRole?: Dispatch<SetStateAction<Record<number, string> | string>>;
   onCustomDeleteFn?: (item: MapAny) => void;
   optionalOpenDropdownOptions?: boolean;
 };

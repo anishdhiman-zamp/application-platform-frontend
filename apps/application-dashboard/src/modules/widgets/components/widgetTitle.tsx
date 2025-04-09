@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useOnClickOutside } from 'hooks';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
@@ -47,7 +47,7 @@ const WidgetTitle = ({
     setIsGroupWidgetOptionsOpen(false);
   });
 
-  const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleToggle = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (!isGroupWidgetOptions) return;
     setIsGroupWidgetOptionsOpen((prev) => !prev);

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -207,8 +207,8 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   const validateSearchAndSelectedItems = (
     searchValues: { [key: number]: string },
     selectedItemsByInstance: { [key: number]: ArrayListOption[] },
-    setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>,
-    setValidationErrorText: React.Dispatch<React.SetStateAction<string>>,
+    setShowValidationError: Dispatch<SetStateAction<boolean>>,
+    setValidationErrorText: Dispatch<SetStateAction<string>>,
   ) => {
     let hasInvalidEntry = false;
     let firstErrorMessage = '';
