@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { POSITION_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
@@ -6,7 +6,7 @@ import Input from 'components/common/input';
 import { FilterConfigType } from 'components/filter/filter.types';
 
 interface SelectFilterMenuItemProps {
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: RefObject<HTMLDivElement>;
   isOpen: boolean;
   getMenuPlacement: () => string;
   filtersConfig: FilterConfigType[];

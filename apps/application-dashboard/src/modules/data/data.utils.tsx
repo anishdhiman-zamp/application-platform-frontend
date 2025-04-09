@@ -1,3 +1,4 @@
+import { RefObject } from 'react';
 import { ColDef, IServerSideGetRowsRequest, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
@@ -35,6 +36,7 @@ import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from 'components/common/table/
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
   const lastUpdatedTime = createDateObjectFromUTCString(updated_at);
@@ -74,7 +76,7 @@ export const formatColumns = (
   isInitiatedAction: boolean,
   datasetId: string,
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
-  tableRef: React.RefObject<AgGridReact>,
+  tableRef: RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (columnId: string) => void,
 ): ColDef[] => {
   const columns: ColDef[] = [];

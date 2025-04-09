@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, memo } from 'react';
+import { ChangeEvent, CSSProperties, FC, FocusEvent, KeyboardEvent, memo, RefObject } from 'react';
 import { cn } from 'utils/common';
 
 export type TextareaPropsType = {
@@ -13,16 +13,16 @@ export type TextareaPropsType = {
   error?: string;
   maxLength?: number;
   isDisabled?: boolean;
-  style?: React.CSSProperties;
-  onChange: (evt: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onKeyPress?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
-  onBlur?: (evt: React.FocusEvent<HTMLInputElement>) => void;
+  style?: CSSProperties;
+  onChange: (evt: ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyPress?: (evt: KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (evt: FocusEvent<HTMLInputElement>) => void;
   onClear?: () => void;
   autoFocus?: boolean;
   errBorderClassName?: string;
   errClassName?: string;
   textAreaStyle?: string;
-  textAreaRef?: React.RefObject<HTMLTextAreaElement>;
+  textAreaRef?: RefObject<HTMLTextAreaElement>;
   tabIndex?: number;
 };
 

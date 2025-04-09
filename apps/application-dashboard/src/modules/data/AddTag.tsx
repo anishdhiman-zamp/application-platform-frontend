@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { useUpdateDatasetDataMutation } from 'apis/dataset';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -89,7 +89,7 @@ const AddTag = ({
     setIsOpen(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (value?.includes('.')) return;

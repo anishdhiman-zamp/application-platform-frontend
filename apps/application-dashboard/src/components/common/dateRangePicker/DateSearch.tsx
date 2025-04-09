@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { ChangeEvent, FC, KeyboardEvent, useEffect, useRef } from 'react';
 import { COLORS } from 'constants/colors';
 import { DateRangeKeys } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -10,7 +10,7 @@ import Input from 'components/common/input';
 
 interface DateSearchProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onApply: () => void;
   onClear: defaultFnType;
   id: DateRangeKeys;
@@ -19,7 +19,7 @@ interface DateSearchProps {
   shouldShowInfo?: boolean;
 }
 
-export const DateSearch: React.FC<DateSearchProps> = ({
+export const DateSearch: FC<DateSearchProps> = ({
   value,
   onChange,
   onApply,
@@ -28,9 +28,9 @@ export const DateSearch: React.FC<DateSearchProps> = ({
   shouldShowInfo = false,
   onClear,
 }) => {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEYBOARD_KEYS.ENTER) {
       e.preventDefault();
       e.stopPropagation();

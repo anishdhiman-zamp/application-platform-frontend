@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { FC, ReactNode, RefObject, useCallback, useMemo } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -100,7 +100,7 @@ ModuleRegistry.registerModules([
 ]);
 
 interface TableProps {
-  tableRef?: React.RefObject<AgGridReact>;
+  tableRef?: RefObject<AgGridReact>;
   rows?: MapAny[];
   columns: MapAny[];
   columnConfig?: ColDef;
@@ -138,7 +138,7 @@ export type TableColumnType = {
   flex: number;
 };
 
-const Table: React.FC<TableProps> = ({
+const Table: FC<TableProps> = ({
   tableRef,
   rows = [],
   columns,

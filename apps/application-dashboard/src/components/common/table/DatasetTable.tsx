@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, RefObject } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -13,7 +13,7 @@ import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
 
 interface DatasetTableProps {
-  tableRef?: React.RefObject<AgGridReact>;
+  tableRef?: RefObject<AgGridReact>;
   columns: MapAny[];
   serverSideDatasource?: IServerSideDatasource;
   columnConfig?: ColDef;
