@@ -9,8 +9,8 @@ import { OverlayFooterProps } from 'components/common/SideDrawer/sideDrawer.type
 const OverlayFooter: FC<OverlayFooterProps> = ({
   onBack,
   onNext,
-  nextButtonClassName = 'tw-min-w-[106px]',
-  backButtonClassName = 'tw-min-w-[106px]',
+  nextButtonClassName = 'min-w-[106px]',
+  backButtonClassName = 'min-w-[106px]',
   nextButtonTitle = 'Next',
   backButtonTitle = 'Back',
   bottomBar,
@@ -26,7 +26,7 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
   (bottomBar || onBack || onNext) && (
     <div
       className={cn(
-        'tw-border-t tw-px-4 tw-py-6 tw-border-ORANGE_100 tw-flex tw-justify-end tw-items-center tw-gap-3 tw-min-h-[86px] tw-bg-white',
+        'border-t p-4 flex justify-end items-center gap-3 bg-white absolute bottom-12 w-full',
         footerClassName,
       )}
     >
