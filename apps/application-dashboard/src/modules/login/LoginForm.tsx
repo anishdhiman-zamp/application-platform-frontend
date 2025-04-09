@@ -45,7 +45,8 @@ export const LoginForm = () => {
       const respJson = await resp.json();
 
       switch (resp.status) {
-        case API_STATUS_CODES.UNPROCESSABLE_ENTITY || API_STATUS_CODES.OK: {
+        case API_STATUS_CODES.UNPROCESSABLE_ENTITY:
+        case API_STATUS_CODES.OK: {
           setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
           try {
