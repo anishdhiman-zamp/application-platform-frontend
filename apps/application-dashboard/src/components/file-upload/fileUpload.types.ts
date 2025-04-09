@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
-import { RawMetadata, UploadFileResponseType } from '@/types/api/dataset.types';
+import { RawMetadata } from '@/types/api/dataset.types';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 export type FileUploaderWrapperPropsType = {
   acceptedFormats: string;

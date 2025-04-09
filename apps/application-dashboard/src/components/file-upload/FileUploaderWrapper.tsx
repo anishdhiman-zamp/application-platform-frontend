@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import { useGetSignedUrlMutation } from 'apis/dataset';
 import { useAppSelector } from 'hooks/toolkit';
 import {
   FILE_IMPORT_STATUS_MSG,
@@ -11,6 +10,7 @@ import {
 } from 'modules/data/components/importDataset/importData.constants';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
 import { RootState } from 'store';
+import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
 
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
