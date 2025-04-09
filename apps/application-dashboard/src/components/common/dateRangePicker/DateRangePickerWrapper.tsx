@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { DateRangePicker, RangeFocus } from 'react-date-range';
 import { DATE_RANGE_TYPES, DateRangeValue, RangeType } from 'constants/date.constants';
 import { DateRangePickerNavigator } from 'components/common/dateRangePicker/DateRangePickerNavigator';
@@ -13,7 +13,7 @@ interface DateRangePickerWrapperProps {
   disableFutureDate?: boolean;
 }
 
-export const DateRangePickerWrapper: React.FC<DateRangePickerWrapperProps> = ({
+export const DateRangePickerWrapper: FC<DateRangePickerWrapperProps> = ({
   searchValue,
   disabled,
   id,

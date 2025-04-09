@@ -17,11 +17,11 @@ export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
 };
 
 export interface OptionsType {
-  label?: React.ReactNode;
+  label?: ReactNode;
   value: string | number;
   id?: string;
   spriteIcon?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   isDisabled?: boolean;
   metadata?: MapAny;
   options?: OptionsType[];
@@ -30,12 +30,12 @@ export interface OptionsType {
 
 export type DashboardLayoutProps = {
   pageType?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   containerStyle?: string;
   contentWrapperClassName?: string;
 };
 export type ChildrenLayoutPropsType = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export type ResponsiveGridLayoutType = {

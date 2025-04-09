@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { FC, MouseEventHandler, ReactElement } from 'react';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { CHECKBOX_STATE_TYPES, CHECKBOX_TYPES } from 'components/common/Checkbox/checkbox.constant';
@@ -19,7 +19,7 @@ const CHECKBOX_STATE_STYLES = {
 
 export interface CheckBoxProps {
   checked: boolean;
-  onPress?: React.MouseEventHandler<HTMLInputElement>;
+  onPress?: MouseEventHandler<HTMLInputElement>;
   disabled?: boolean;
   id: string;
   className?: string;
@@ -29,7 +29,7 @@ export interface CheckBoxProps {
   customCheckMark?: ReactElement;
 }
 
-export const CheckBox: React.FC<CheckBoxProps> = ({
+export const CheckBox: FC<CheckBoxProps> = ({
   checked,
   id,
   onPress,
@@ -40,7 +40,7 @@ export const CheckBox: React.FC<CheckBoxProps> = ({
   customCheckMarkClassName = '',
   customCheckMark,
 }) => {
-  const handlePress: React.MouseEventHandler<HTMLInputElement> = (e) => {
+  const handlePress: MouseEventHandler<HTMLInputElement> = (e) => {
     onPress?.(e);
   };
 

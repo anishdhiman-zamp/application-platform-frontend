@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
@@ -108,7 +108,7 @@ const BUTTON_ALIGN_STYLES = {
 
 const BUTTON_DEFAULT_STYLES = 'cursor-pointer disabled:cursor-not-allowed overflow-clip rounded-md';
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: FC<ButtonProps> = ({
   type = BUTTON_TYPES.PRIMARY,
   className = '',
   disabled = false,
@@ -151,7 +151,7 @@ export const Button: React.FC<ButtonProps> = ({
     iconProps ? (iconPosition === ICON_POSITION_TYPES.RIGHT ? textClassWithRightIcons : textClassWithLeftIcons) : ''
   }`;
 
-  const handleButtonClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
+  const handleButtonClick = (e?: MouseEvent<HTMLButtonElement>) => {
     if (!isLoading && !disabled) {
       onClick(e);
     }
