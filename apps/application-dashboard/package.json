@@ -14,9 +14,12 @@
   },
   "dependencies": {
     "@lottiefiles/react-lottie-player": "^3.6.0",
+    "@radix-ui/react-slot": "^1.2.0",
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^9.1.0",
     "@sentry/nextjs": "^9.5.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "@zamp-platform/config": "*",
     "ag-charts-community": "^11.0.0",
     "ag-charts-enterprise": "^11.0.0",
     "ag-charts-react": "^11.0.0",
@@ -41,8 +44,7 @@
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.5.5",
     "xlsx": "0.18.5",
-    "@zamp-platform/config": "*",
-    "@vercel/speed-insights": "^1.2.0"
+    "@zamp-platform/ui": "*"
   },
   "peerDependencies": {
     "next": "^15",

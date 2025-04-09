@@ -1,0 +1,11 @@
+{
+  "extends": "@zamp-platform/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@zamp-platform/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "tailwind.config.ts", ".eslintrc.js"],
+  "exclude": ["node_modules"]
+}
