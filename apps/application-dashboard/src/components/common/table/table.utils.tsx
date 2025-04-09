@@ -228,6 +228,7 @@ const formatRequest = (
   disableTotalCount?: boolean,
   hiddenColumnFilters?: MapAny,
   drilldownFilters?: MapAny,
+  pageSize?: number,
 ): RequestType => {
   const { endRow } = request;
 
@@ -238,7 +239,7 @@ const formatRequest = (
     order_by: getOrderByColumns(request),
     pagination: {
       page: endRow ? Math.ceil(endRow / PAGE_SIZE) : 1,
-      page_size: PAGE_SIZE,
+      page_size: pageSize ?? PAGE_SIZE,
     },
     get_total_records: !disableTotalCount,
     fx_currency: !fx_currency || fx_currency === 'local' ? undefined : fx_currency,
@@ -259,6 +260,7 @@ export const getEncodedRequest = (
   disableTotalCount?: boolean,
   hiddenColumnFilters?: MapAny,
   drilldownFilters?: MapAny,
+  pageSize?: number,
 ): string => {
   const formattedRequest = formatRequest(
     request,
@@ -268,6 +270,7 @@ export const getEncodedRequest = (
     disableTotalCount,
     hiddenColumnFilters,
     drilldownFilters,
+    pageSize,
   );
   const encodedRequest = encodeRequest(formattedRequest);
 

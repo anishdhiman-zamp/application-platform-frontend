@@ -69,9 +69,21 @@ type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
   isDrilldown?: boolean;
+  pageSize?: number;
+  isReadOnly?: boolean;
+  containerStyle?: MapAny;
+  gridStyle?: MapAny;
 };
 
-const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown = false }) => {
+const DatasetById: FC<DatasetByIdProps> = ({
+  id,
+  drilldownFilters,
+  isDrilldown = false,
+  pageSize,
+  isReadOnly = false,
+  containerStyle,
+  gridStyle,
+}) => {
   const filters = useSearchParams().get('filters');
   const currency = useSearchParams().get('currency') ?? 'local';
   const { pageId } = useParams();
@@ -142,6 +154,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
           false,
           false,
           hiddenColumnFilters,
+          undefined,
+          pageSize,
         );
 
         const filterModel = parameters?.request?.filterModel;
@@ -176,18 +190,22 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
           })
             .unwrap()
             .then((response) => {
+              const totalCount = response?.data?.total_count;
+
               if (parameters.request.startRow === 0) {
                 setDatasetTitle(response?.title);
-                setTotalRows(response?.data?.total_count);
-                setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
+                setTotalRows(totalCount);
+                setIsNoRowsOverlayVisible(totalCount === 0);
                 dispatch({
                   type: filtersContextActions.SET_TOTAL_ROWS,
-                  payload: { totalRows: response?.data?.total_count },
+                  payload: { totalRows: totalCount },
                 });
               }
               parameters.success({
                 rowData: response?.data?.rows,
-                ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
+                ...(parameters.request.startRow === 0
+                  ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
+                  : {}),
               });
             })
             .catch(() => {
@@ -370,7 +388,12 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
               payload: { selectedFilters: selectedDrilldownFilters },
             });
         }
-        if (isNoRowsOverlayVisible || datasetData?.data?.total_count === 0 || drilldownFilters?.conditions === null)
+        if (
+          isNoRowsOverlayVisible ||
+          datasetData?.data?.total_count === 0 ||
+          drilldownFilters?.conditions === null ||
+          isReadOnly
+        )
           return;
         const amountRangeColumns = columns
           ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
@@ -415,10 +438,10 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
   };
 
   useEffect(() => {
-    if (!isDrilldown && datasetTitle && !breadcrumbStack?.some((item) => item.title === datasetTitle)) {
+    if (!isReadOnly && !isDrilldown && datasetTitle && !breadcrumbStack?.some((item) => item.title === datasetTitle)) {
       appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
     }
-  }, [datasetTitle, breadcrumbStack, isDrilldown]);
+  }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);
 
   const handleRefetchDataset = () => {
     getDatasetData({
@@ -481,6 +504,7 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
       false,
       hiddenColumnFilters,
       urlFilters ?? drilldownFilters,
+      pageSize,
     );
 
     getDatasetData({
@@ -528,23 +552,27 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
           <div className='relative flex items-center gap-2.5'>
-            <Notification isPolling={isPolling} />
-            <TableSchemaAlignmentStatus
-              showAiTransformationStatus={showAiTransformationStatus}
-              setShowAiTransformationStatus={setShowAiTransformationStatus}
-            />
-            <ExportDataset
-              query={exportsDatasetQuery}
-              datasetId={id as string}
-              hasFilters={!!Object.keys(selectedFilters)?.length}
-            />
-            {showFileImports && (
+            {!isReadOnly && <Notification isPolling={isPolling} />}
+            {!isReadOnly && (
+              <TableSchemaAlignmentStatus
+                showAiTransformationStatus={showAiTransformationStatus}
+                setShowAiTransformationStatus={setShowAiTransformationStatus}
+              />
+            )}
+            {!isReadOnly && (
+              <ExportDataset
+                query={exportsDatasetQuery}
+                datasetId={id as string}
+                hasFilters={!!Object.keys(selectedFilters)?.length}
+              />
+            )}
+            {!isReadOnly && showFileImports && (
               <ImportDataset
                 onRefetch={handleRefetchDataset}
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
               />
             )}
-            <DatasetHistory />
+            {!isReadOnly && <DatasetHistory />}
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
             <div className='flex items-center gap-2'>
               <div className='border-r border-GRAY_400 h-7'></div>
@@ -571,6 +599,8 @@ const DatasetById: FC<DatasetByIdProps> = ({ id, drilldownFilters, isDrilldown =
             onRowPropertiesClick={handleRowPropertiesClick}
             onColumnMoved={handleColumnMoved}
             columnLevelStats={columnLevelStats}
+            containerStyle={containerStyle}
+            gridStyle={gridStyle}
             {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
           />
         </div>
