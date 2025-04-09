@@ -1,5 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
+import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
 import { defaultFnType } from 'types/commonTypes';
@@ -13,14 +14,12 @@ import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types
 type TemplateListSideDrawerProps = {
   onClose: defaultFnType;
   isOpen: boolean;
+  onTemplateClick: (paymentType: MOVE_MONEY_TYPE) => void;
 };
 
-const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen }) => {
+const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen, onTemplateClick }) => {
   const [currentTab, setCurrentTab] = useState<MenuItem>(TEMPLATE_LIST_TABS[0]);
-  const [isCreateTemplate, setIsCreateTemplate] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
-
-  console.log(isCreateTemplate); // to be replace with create template pop over
 
   const handleTabSelect = (option?: MenuItem) => {
     if (option) setCurrentTab(option);
@@ -64,7 +63,7 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
             />
             <div
               className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
-              onClick={() => setIsCreateTemplate(true)}
+              onClick={() => onTemplateClick(currentTab.value as MOVE_MONEY_TYPE)}
             >
               <SvgSpriteLoader id='plus' size={14} />
               Create Template

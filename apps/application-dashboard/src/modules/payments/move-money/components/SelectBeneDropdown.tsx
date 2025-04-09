@@ -17,9 +17,17 @@ type SelectBeneDropdownProps = {
   autoFocus?: boolean;
   onSelect: (recipient: MenuItem) => void;
   shouldReset?: boolean;
+  label?: string;
+  showTemplate?: boolean;
 };
 
-const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, shouldReset = false }) => {
+const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
+  autoFocus,
+  onSelect,
+  shouldReset = false,
+  label,
+  showTemplate = true,
+}) => {
   const counterParties = RECIPIENT_LIST;
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -106,56 +114,61 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, 
   }, [shouldReset]);
 
   return (
-    <div
-      className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
-        'border-GRAY_400 overflow-hidden': !isShowMenu,
-        'border-GRAY_500': isShowMenu,
-      })}
-      ref={containerRef}
-    >
-      <div className='flex items-center gap-1.5 pr-3 w-full'>
-        <Input
-          tabIndex={0}
-          id='ADD_ACCOUNT_SEARCH_BANK'
-          onFocus={() => setIsShowMenu(true)}
-          size={SIZE_TYPES.MEDIUM}
-          autoFocus={autoFocus}
-          value={isSearchActive ? searchValue : selectedRecipient?.label}
-          disabled={!!contact_id}
-          onChange={handleSearch}
-          focusClassNames=''
-          placeholder='Search recipient or template'
-          inputWrapperClassName='tw-w-full'
-        />
-
-        <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
-      </div>
+    <div>
+      {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        style={{
-          height: dropdownHeight,
-        }}
-        className='transition-all duration-200'
+        className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
+          'border-GRAY_400 overflow-hidden': !isShowMenu,
+          'border-GRAY_500': isShowMenu,
+        })}
+        ref={containerRef}
       >
-        <div className='px-3 pt-3'>
-          <Tabs
-            list={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
-            onSelect={handleTabSelect}
-            wrapperStyle='border-white !w-auto'
-            tabItemWrapperStyle='!w-auto'
-            id='ACCOUNTS_TABS'
-            scrollWrapperClassName='pb-0'
-            type={TAB_TYPES.OUTLINE}
+        <div className='flex items-center gap-1.5 pr-3 w-full'>
+          <Input
+            tabIndex={0}
+            id='ADD_ACCOUNT_SEARCH_BANK'
+            onFocus={() => setIsShowMenu(true)}
+            size={SIZE_TYPES.MEDIUM}
+            autoFocus={autoFocus}
+            value={isSearchActive ? searchValue : selectedRecipient?.label}
+            disabled={!!contact_id}
+            onChange={handleSearch}
+            focusClassNames=''
+            placeholder='Search recipient or template'
+            inputWrapperClassName='tw-w-full'
           />
+
+          <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
         </div>
-        {getDropdownBody()}
-        <div className='border-t border-GRAY_400 p-1 '>
-          <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
-            <SvgSpriteLoader size={12} id='plus' />
-            New recipient
-          </div>
-          <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer hover:bg-GRAY_100 rounded-md'>
-            <SvgSpriteLoader size={12} id='plus' />
-            Create template
+        <div
+          style={{
+            height: dropdownHeight,
+          }}
+          className='transition-all duration-200'
+        >
+          {showTemplate && (
+            <div className='px-3 pt-3'>
+              <Tabs
+                list={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
+                onSelect={handleTabSelect}
+                wrapperStyle='border-white !w-auto'
+                tabItemWrapperStyle='!w-auto'
+                id='ACCOUNTS_TABS'
+                scrollWrapperClassName='pb-0'
+                type={TAB_TYPES.OUTLINE}
+              />
+            </div>
+          )}
+          {getDropdownBody()}
+          <div className='border-t border-GRAY_400 p-1 '>
+            <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
+              <SvgSpriteLoader size={12} id='plus' />
+              New recipient
+            </div>
+            <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer hover:bg-GRAY_100 rounded-md'>
+              <SvgSpriteLoader size={12} id='plus' />
+              Create template
+            </div>
           </div>
         </div>
       </div>
