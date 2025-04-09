@@ -183,6 +183,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
       tabIndex={tabIndex}
       footer={footer}
       showUploadButton={showUploadButton}
+      isSuccess={keepLoadingFlow ?? false}
     >
       {!filesSelected && (
         <input
