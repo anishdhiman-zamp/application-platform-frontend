@@ -5,7 +5,7 @@ import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
+import { LOGIN_GROUPS } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
 import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
@@ -44,14 +44,8 @@ export const LoginForm = () => {
       });
       const respJson = await resp.json();
 
-      const validSessionMsg = respJson?.ui?.messages?.[0]?.text.includes(VALID_SESSION_DETECTED_ERROR_MSG);
-      const isSuccessStatus = [API_STATUS_CODES.UNPROCESSABLE_ENTITY, API_STATUS_CODES.OK];
-      const invalidLoginStatus = resp.status === API_STATUS_CODES.BAD_REQUEST;
-      const validLoginStatus =
-        isSuccessStatus.includes(resp.status) || (resp.status === API_STATUS_CODES.BAD_REQUEST && validSessionMsg);
-
-      switch (true) {
-        case validLoginStatus: {
+      switch (resp.status) {
+        case API_STATUS_CODES.UNPROCESSABLE_ENTITY || API_STATUS_CODES.OK: {
           setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
           try {
@@ -71,7 +65,7 @@ export const LoginForm = () => {
           break;
         }
 
-        case invalidLoginStatus: {
+        case API_STATUS_CODES.BAD_REQUEST: {
           setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
           setHasError(true);
           break;
