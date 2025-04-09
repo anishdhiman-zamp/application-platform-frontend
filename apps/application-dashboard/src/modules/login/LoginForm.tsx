@@ -12,6 +12,7 @@ import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
+import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import Input from 'components/common/input';
 
 export const LoginForm = () => {
@@ -45,7 +46,11 @@ export const LoginForm = () => {
 
       const validSessionMsg = respJson?.ui?.messages?.[0]?.text.includes(VALID_SESSION_DETECTED_ERROR_MSG);
 
-      if (resp.status === 422 || resp.status === 200 || (resp.status === 400 && validSessionMsg)) {
+      if (
+        resp.status === API_STATUS_CODES.UNPROCESSABLE_ENTITY ||
+        resp.status === API_STATUS_CODES.OK ||
+        (resp.status === API_STATUS_CODES.BAD_REQUEST && validSessionMsg)
+      ) {
         setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
         const redirectUrl = respJson.redirect_browser_to;
@@ -62,7 +67,7 @@ export const LoginForm = () => {
           console.error(error);
           setHasError(true);
         }
-      } else if (resp.status === 400) {
+      } else if (resp.status === API_STATUS_CODES.BAD_REQUEST) {
         setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
         setHasError(true);
       } else {
@@ -108,7 +113,7 @@ export const LoginForm = () => {
 
       setHasError(false);
 
-      if (response.status !== 200) {
+      if (response.status !== API_STATUS_CODES.OK) {
         setError(respJson.error);
         removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
         setHasError(true);

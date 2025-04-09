@@ -12,6 +12,7 @@ import { getFileType } from 'modules/data/components/importDataset/importData.ut
 import { RootState } from 'store';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
+import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   acceptedFormats,
@@ -73,7 +74,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           setIsLoading(false);
         }
 
-        if (xhr.status === 200) {
+        if (xhr.status === API_STATUS_CODES.OK) {
           onFileSelect?.({
             ...upload_url,
             fileName: filesToUpload?.name,
