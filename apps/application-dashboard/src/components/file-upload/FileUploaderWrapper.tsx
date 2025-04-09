@@ -20,7 +20,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   fileName,
   disableNext,
   setFileName,
-  maxSize = FILE_SIZE.TWO_MB,
+  maxSize = FILE_SIZE.TWENTY_MB,
   filesSelected,
   Component,
   className,
@@ -87,6 +87,8 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           setFileUploadId?.(fileUploadId);
         } else {
           setIsLoading(false);
+          setRawData?.(null);
+
           setError(FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR);
         }
       };
@@ -101,6 +103,9 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   };
 
   const handleUpload = (filesToUpload: File | null) => {
+    if (isLoading) return;
+    if (hiddenFileInput?.current) hiddenFileInput.current.value = '';
+
     if (filesToUpload) {
       if (filesToUpload?.size > maxSize) {
         const err = `${FILE_IMPORT_STATUS_MSG.FILE_SIZE_EXCEEDED} ${maxSize / FILE_SIZE.ONE_MB}MB`;
@@ -173,11 +178,10 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
       error={error}
       onFileDrop={handleUpload}
       filesSelected={filesSelected}
-      supportedFile={acceptedFormats}
+      supportedFiles={acceptedFormats}
       className={className}
       fileName={fileName}
       setFileName={setFileName}
-      handleChange={handleChange}
       indexKey={fileUploaderKey}
       uploadProgress={showProgress ? uploadProgress : null}
       tabIndex={tabIndex}

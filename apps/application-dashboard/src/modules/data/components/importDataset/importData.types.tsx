@@ -101,6 +101,7 @@ export type FileUploaderPropsType = {
   setFileName: (fileName: string | null) => void;
   indexKey?: number;
   showUploadButton?: boolean;
+  supportedFiles?: string[];
 };
 
 export type ImportFilePropsType = {
