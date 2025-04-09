@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, ElementType, ReactNode, SetStateAction } from 'react';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { DatasetBulkLoadersType } from 'store/slices/user';
 import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';
@@ -92,7 +92,7 @@ export type FileUploaderPropsType = {
   error: string | null;
   onFileDrop: (file: File | null) => void;
   onClick: defaultFnType;
-  children?: React.ReactNode;
+  children?: ReactNode;
   errorClassName?: string;
   footer?: string;
   className?: string;
@@ -109,7 +109,7 @@ export type FileUploaderWrapperPropsType = {
   filesSelected?: string;
   isFileUploading?: boolean;
   maxSize?: number;
-  Component: React.ElementType;
+  Component: ElementType;
   className?: string;
   onClosePopup: defaultFnType;
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;

@@ -1,4 +1,4 @@
-import React, { ComponentType, CSSProperties, ReactElement, ReactNode, RefCallback } from 'react';
+import { ComponentType, CSSProperties, FocusEvent, KeyboardEvent, ReactElement, ReactNode, RefCallback } from 'react';
 import {
   ActionMeta,
   CSSObjectWithLabel,
@@ -19,8 +19,8 @@ import { SupporterInfoProps } from 'components/common/SupporterInfo';
 
 export type DropdownProps = {
   options: OptionsType[];
-  dropdownIndicator?: React.ReactNode;
-  closeIcon?: React.ReactNode;
+  dropdownIndicator?: ReactNode;
+  closeIcon?: ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (selected: any) => void;
   showLabel?: boolean;
@@ -31,11 +31,11 @@ export type DropdownProps = {
   error?: boolean;
   errorColor?: string;
   placeholder?: string;
-  noOptionsText?: React.ReactNode;
+  noOptionsText?: ReactNode;
   isMulti?: boolean;
   autoFocus?: boolean;
   spriteSelectedIcon?: string;
-  selectedIcon?: React.ReactNode;
+  selectedIcon?: ReactNode;
   isSearchable?: boolean;
   spriteSelectedIconColor?: string;
   spriteCloseIcon?: string;
@@ -47,8 +47,8 @@ export type DropdownProps = {
   menuOptionClasses?: MenuOptionClassesProps;
   defaultValue?: OptionsType | OptionsType[] | null;
   handleInputChange?: (inputValue: string) => void;
-  handleKeyDown?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
-  onFocus?: (evt: React.FocusEvent<HTMLInputElement>) => void;
+  handleKeyDown?: (evt: KeyboardEvent<HTMLInputElement>) => void;
+  onFocus?: (evt: FocusEvent<HTMLInputElement>) => void;
   controlled?: boolean;
   value?: OptionsType | OptionsType[] | null;
   enableSelectAll?: boolean;
@@ -125,7 +125,7 @@ export interface MenuOptionProps extends MenuOptionClassesProps {
   isMulti?: boolean;
   data?: OptionsType;
   spriteSelectedIcon?: string;
-  selectedIcon?: React.ReactNode;
+  selectedIcon?: ReactNode;
   spriteSelectedIconColor?: string;
   onClick?: defaultFnType;
   eventCallback: EventCallbackType;
@@ -149,11 +149,11 @@ export interface MenuOptionClassesProps {
 }
 
 export interface OptionsType {
-  label?: React.ReactNode;
+  label?: ReactNode;
   value: string | number;
   id?: string;
   spriteIcon?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   isDisabled?: boolean;
   metadata?: MapAny;
   options?: OptionsType[];
@@ -163,7 +163,7 @@ export interface OptionsType {
 export interface ChipProps {
   value: string | number;
   label?: string | ReactElement;
-  closeIcon?: React.ReactNode;
+  closeIcon?: ReactNode;
   onClick?: defaultFnType;
   handleRemoveValue?: defaultFnType;
   className?: string;
@@ -172,12 +172,12 @@ export interface ChipProps {
 
 export interface SelectedOptionsProps {
   optionSelected: OptionsType[];
-  closeIcon: React.ReactNode;
+  closeIcon: ReactNode;
   handleRemoveValue: defaultFnType;
 }
 
 export type MenuSingleValuePropsType = {
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   label?: string;
   spriteIcon?: string;
   value?: string | number;
@@ -194,8 +194,8 @@ export type SelectedCountTooltipPropsType = {
 };
 
 export type CustomReactSelectPropsType = DropdownProps & {
-  CustomOption: React.ComponentType<OptionProps<OptionsType>>;
-  CustomSingleValue: React.ComponentType<SingleValueProps<OptionsType>>;
+  CustomOption: ComponentType<OptionProps<OptionsType>>;
+  CustomSingleValue: ComponentType<SingleValueProps<OptionsType>>;
   handleChange: (
     selected: MultiValue<OptionsType> | SingleValue<OptionsType>,
     actionMeta: ActionMeta<OptionsType>,

@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, RefObject, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
@@ -12,7 +12,7 @@ import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 
 type DisplayOptionsProps = {
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact>;
   datasetId: string;
 };
 

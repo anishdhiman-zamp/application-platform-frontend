@@ -1,6 +1,6 @@
+import { KeyboardEvent, MutableRefObject } from 'react';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { defaultFnType } from 'types/commonTypes';
-
 export enum TEAM_TABS_TYPES {
   TEAM_MEMBERS = 'team_members',
   INVITED_MEMBERS = 'invited_members',
@@ -73,16 +73,16 @@ export type TeamMembersListingPropsType = {
 
 export type CustomTeamsDropdownPropsType = {
   search?: string;
-  optionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  optionRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   optionList: { value: string; label: string; color?: string }[];
   isLoadingOptionsList: boolean;
   hoveredOptionIndex: number;
   setHoveredOptionIndex: (index: number) => void;
   onSelectOption: (option: { value: string; label: string; color?: string }) => void;
   transformLabel?: (label: string) => string;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  handleKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
   randomColor: string | null;
-  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
   onCloseDropdown: defaultFnType;
 };
 
