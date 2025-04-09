@@ -3,6 +3,7 @@ import React, {
   cloneElement,
   FC,
   isValidElement,
+  ReactElement,
   ReactNode,
   useCallback,
   useEffect,
@@ -49,7 +50,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children, containerStyle, c
   const renderChildrenWithProps = (children: ReactNode) => {
     const childrenWithProps = Children.map(children, (child) => {
       if (isValidElement(child))
-        return cloneElement(child as React.ReactElement<CommonPageLayoutProps>, {
+        return cloneElement(child as ReactElement<CommonPageLayoutProps>, {
           scrollToTop: scrollToTop,
           rootContainerRef: containerRef,
         });

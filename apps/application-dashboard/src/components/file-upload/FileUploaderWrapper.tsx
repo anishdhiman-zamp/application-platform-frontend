@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
 import { REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { useAppSelector } from 'hooks/toolkit';
 import {
@@ -43,7 +43,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   const [fileUploaderKey, setFileUploaderKey] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
 
     setFileName?.(filesToUpload?.name ?? null);

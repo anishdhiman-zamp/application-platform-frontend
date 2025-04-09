@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -17,7 +17,7 @@ import 'react-grid-layout/css/styles.css';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 type ColumnListingProps = {
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact>;
   onClose: defaultFnType;
   datasetId: string;
 };
@@ -42,7 +42,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     setColumnsChecked(columnOrderingVisibility);
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
 
@@ -90,7 +90,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     setColumnsChecked(columnOrderingVisibility);
   };
 
-  const handleColumnClick = (e: React.MouseEvent<HTMLDivElement>, column?: Column) => {
+  const handleColumnClick = (e: MouseEvent<HTMLDivElement>, column?: Column) => {
     e.stopPropagation();
     handleCheckBoxClick(column);
   };

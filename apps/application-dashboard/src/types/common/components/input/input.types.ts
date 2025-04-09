@@ -1,4 +1,13 @@
-import React, { HTMLInputTypeAttribute, ReactNode } from 'react';
+import {
+  ChangeEvent,
+  CSSProperties,
+  FocusEvent,
+  HTMLInputTypeAttribute,
+  KeyboardEvent,
+  KeyboardEventHandler,
+  ReactNode,
+  RefObject,
+} from 'react';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, EventCallbackType } from 'types/commonTypes';
 import { SupporterInfoProps } from 'components/common/SupporterInfo';
@@ -19,18 +28,18 @@ export interface InputTagProps {
   maxLength?: number;
   disabled?: boolean;
   readOnly?: boolean;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   autocomplete?: string;
   inputTagWrapperClassName?: string;
   inputClassName?: string;
   inputSizeClassName?: string;
   errorClass?: string;
-  inputRef?: React.RefObject<HTMLInputElement>;
-  onChange?: (evt: React.ChangeEvent<HTMLInputElement>) => void;
-  onKeyPress?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
-  onKeyDown?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
-  onBlur?: (evt: React.FocusEvent<HTMLInputElement>) => void;
-  onFocus?: (evt: React.FocusEvent<HTMLInputElement>) => void;
+  inputRef?: RefObject<HTMLInputElement>;
+  onChange?: (evt: ChangeEvent<HTMLInputElement>) => void;
+  onKeyPress?: (evt: KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (evt: KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (evt: FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (evt: FocusEvent<HTMLInputElement>) => void;
   onDeleteTag?: (index: number) => void;
   eventId?: string;
   eventCallback?: EventCallbackType;
@@ -38,7 +47,7 @@ export interface InputTagProps {
   inputFontClassName?: string;
   autoFocus?: boolean;
   tabIndex?: number;
-  onKeyUp?: React.KeyboardEventHandler<HTMLInputElement>;
+  onKeyUp?: KeyboardEventHandler<HTMLInputElement>;
   noBorders?: boolean;
   overrideInputBgClassName?: string;
   inputRoundedClassName?: string;
@@ -46,7 +55,7 @@ export interface InputTagProps {
   isMulti?: boolean;
   tags?: string[];
   customTags?: ReactNode;
-  onEnterKey?: (evt: React.KeyboardEvent<HTMLInputElement>) => void;
+  onEnterKey?: (evt: KeyboardEvent<HTMLInputElement>) => void;
   inputPillsWrapperClasses?: string;
   focusClassNames?: string;
   cursorClassname?: string;

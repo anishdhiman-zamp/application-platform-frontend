@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -26,7 +26,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   allowClear,
   isOpen,
 }) => {
-  const handleRemoveFilter = (e: React.MouseEvent) => {
+  const handleRemoveFilter = (e: MouseEvent) => {
     if (allowClear) {
       e.stopPropagation();
       onClear?.(filterConfig.key);

@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { SIZE } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { cn } from 'utils/common';
@@ -7,12 +7,12 @@ import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface FilterControlButtonProps extends PropsWithChildren {
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
   tooltipText?: string;
   icon?: string;
   iconCategory?: ICON_SPRITE_TYPES;
   iconColor?: string;
-  buttonRef?: React.RefObject<HTMLButtonElement>;
+  buttonRef?: RefObject<HTMLButtonElement>;
   isSelected?: boolean;
   childrenWrapperClassName?: string;
   className?: string;
@@ -37,7 +37,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   id = '',
   disabled = false,
 }) => {
-  const onButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const onButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (disabled || isLoading) {
       return;
     }

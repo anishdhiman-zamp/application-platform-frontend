@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { ENVIRONMENT } from 'constants/common.constants';
 import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from 'constants/featureFlags';
@@ -5,7 +6,7 @@ import { LDProvider } from 'launchdarkly-react-client-sdk';
 import { RootState } from 'store';
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export const FeatureFlagsProvider = ({ children }: Props) => {

@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
@@ -26,7 +26,7 @@ type CustomHeaderProps = {
   handleRulesListingSideDrawerOpen: (colId: string) => void;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   datasetId: string;
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact>;
   filterType: FILTER_TYPES;
   options: string[];
   column: {

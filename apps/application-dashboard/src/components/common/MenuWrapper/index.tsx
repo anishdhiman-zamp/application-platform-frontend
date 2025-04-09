@@ -1,11 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export interface MenuWrapperProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   resetText?: string;
   resetClassName?: string;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
@@ -16,13 +16,13 @@ import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import Input from 'components/common/input';
 
 export const LoginForm = () => {
-  const [email, setEmail] = React.useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
-  const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [hasError, setHasError] = React.useState<boolean>(false);
+  const [email, setEmail] = useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
+  const [loginFlow, setLoginFlow] = useState<LoginFlow | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
       setEmail(e.target.value);
     }
@@ -92,7 +92,7 @@ export const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setError(null);
     setLoading(true);
