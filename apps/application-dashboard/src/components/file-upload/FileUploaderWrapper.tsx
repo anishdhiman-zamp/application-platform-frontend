@@ -9,9 +9,9 @@ import {
   FileExtensionToTypeMap,
   FileMimeType,
 } from 'modules/data/components/importDataset/importData.constants';
-import { FileUploaderWrapperPropsType } from 'modules/data/components/importDataset/importData.types';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
 import { RootState } from 'store';
+import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
 
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   acceptedFormats,

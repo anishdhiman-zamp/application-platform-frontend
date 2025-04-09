@@ -5,7 +5,7 @@ import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.c
 import { UploadFileResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import FileUploaderWrapper from '@/modules/data/components/importDataset/FileUploaderWrapper';
+import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
 import { Button } from 'components/common/button/Button';
 import Textarea from 'components/common/Textarea';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
