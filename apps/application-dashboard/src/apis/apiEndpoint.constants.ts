@@ -55,6 +55,9 @@ export const API_ENDPOINTS = {
   SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST: `pages/{{pageId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
+
+  USER_INVITATIONS_GET: `/organizations/invitations`,
+  ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
 };
 
 export const enum REQUEST_TYPES {
