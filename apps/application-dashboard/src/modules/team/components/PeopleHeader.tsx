@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
@@ -16,7 +16,7 @@ type PeopleHeaderPropsType = {
 };
 
 const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMembersData }) => {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
   const userPrivilege = getUserPrivilege();
   const checkIfMember = userPrivilege === PERMISSION_ROLES.MEMBER;

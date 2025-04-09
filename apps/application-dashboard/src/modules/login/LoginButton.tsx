@@ -1,11 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { GOOGLE_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 
 type LoginButtonPropsType = {
   loading: boolean;
-  onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
 };
 
 const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {

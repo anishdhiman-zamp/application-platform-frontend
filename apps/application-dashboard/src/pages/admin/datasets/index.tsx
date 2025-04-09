@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Listing from 'modules/data';
 import { useRouter } from 'next/router';
@@ -13,7 +14,7 @@ const AdminDataset = () => {
   return <Listing onRowClicked={onRowClicked} />;
 };
 
-AdminDataset.getLayout = function getLayout(page: React.ReactElement) {
+AdminDataset.getLayout = function getLayout(page: ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 

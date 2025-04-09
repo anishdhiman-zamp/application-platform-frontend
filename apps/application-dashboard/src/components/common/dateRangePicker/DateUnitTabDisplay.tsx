@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { RangeFocus } from 'react-date-range';
 import { DATE_RANGE_TYPES, DateRangeKeys, DateRangeValue, RangeType } from 'constants/date.constants';
 import { DateRangePickerWrapper } from 'components/common/dateRangePicker/DateRangePickerWrapper';
@@ -20,7 +20,7 @@ interface DateUnitTabDisplayProps {
   disableFutureDate?: boolean;
 }
 
-export const DateUnitTabDisplay: React.FC<DateUnitTabDisplayProps> = ({
+export const DateUnitTabDisplay: FC<DateUnitTabDisplayProps> = ({
   currentValueStart,
   currentValueEnd,
   onSetCurrentValue,

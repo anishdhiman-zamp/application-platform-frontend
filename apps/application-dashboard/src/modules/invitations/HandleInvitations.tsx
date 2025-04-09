@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
@@ -9,7 +9,7 @@ import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
-export const HandleInvitations: React.FC = () => {
+export const HandleInvitations: FC = () => {
   const router = useRouter();
 
   const { data: invitationsData, isLoading: loadingInvitations } = useGetMyInvitationsQuery();
