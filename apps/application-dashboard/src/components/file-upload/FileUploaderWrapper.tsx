@@ -87,8 +87,6 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           setFileUploadId?.(fileUploadId);
         } else {
           setIsLoading(false);
-          setRawData?.(null);
-
           setError(FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR);
         }
       };
