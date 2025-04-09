@@ -45,36 +45,45 @@ export const LoginForm = () => {
       const respJson = await resp.json();
 
       const validSessionMsg = respJson?.ui?.messages?.[0]?.text.includes(VALID_SESSION_DETECTED_ERROR_MSG);
+      const isSuccessStatus = [API_STATUS_CODES.UNPROCESSABLE_ENTITY, API_STATUS_CODES.OK];
+      const invalidLoginStatus = resp.status === API_STATUS_CODES.BAD_REQUEST;
+      const validLoginStatus =
+        isSuccessStatus.includes(resp.status) || (resp.status === API_STATUS_CODES.BAD_REQUEST && validSessionMsg);
 
-      if (
-        resp.status === API_STATUS_CODES.UNPROCESSABLE_ENTITY ||
-        resp.status === API_STATUS_CODES.OK ||
-        (resp.status === API_STATUS_CODES.BAD_REQUEST && validSessionMsg)
-      ) {
-        setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
+      switch (true) {
+        case validLoginStatus: {
+          setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
-        const redirectUrl = respJson.redirect_browser_to;
+          try {
+            const redirectUrl = respJson.redirect_browser_to;
+            const emailDomain = getDomainFromEmail(email);
 
-        try {
-          const url = new URL(redirectUrl);
-          const emailDomain = getDomainFromEmail(email);
+            const urlObj = new URL(redirectUrl);
 
-          setHasError(false);
-          url.searchParams.set('hd', emailDomain);
-          window.location.href = url.toString();
-        } catch (error) {
-          setLoading(false);
-          console.error(error);
-          setHasError(true);
+            urlObj.searchParams.set('hd', emailDomain);
+            setHasError(false);
+            window.location.href = urlObj.toString();
+          } catch (error) {
+            console.error(error);
+            setLoading(false);
+            setHasError(true);
+          }
+          break;
         }
-      } else if (resp.status === API_STATUS_CODES.BAD_REQUEST) {
-        setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
-        setHasError(true);
-      } else {
-        setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
-        setHasError(true);
-        setLoading(false);
-        setLoginFlow(respJson);
+
+        case invalidLoginStatus: {
+          setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
+          setHasError(true);
+          break;
+        }
+
+        default: {
+          setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
+          setHasError(true);
+          setLoading(false);
+          setLoginFlow(respJson);
+          break;
+        }
       }
     } catch (error) {
       setLoading(false);

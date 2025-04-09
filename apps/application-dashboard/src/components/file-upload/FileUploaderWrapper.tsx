@@ -12,6 +12,7 @@ import { getFileType } from 'modules/data/components/importDataset/importData.ut
 import { RootState } from 'store';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
+import { SignedUrlResponseType } from '@/types/api/fileUpload.types';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
@@ -31,7 +32,6 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   onUploadProgress,
   showProgress = false,
   tabIndex = 0,
-
   footer,
   showUploadButton,
 }) => {
@@ -50,14 +50,14 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
     handleUpload(filesToUpload);
   };
 
-  const uploadFileToSignedUrl = async (data: any, filesToUpload: File, fileExtension: string) => {
-    const upload_url = data?.upload_url;
-    const file_upload_id = data?.file_upload_id;
+  const uploadFileToSignedUrl = async (data: SignedUrlResponseType, filesToUpload: File, fileExtension: string) => {
+    const uploadUrl = data?.upload_url;
+    const fileUploadId = data?.file_upload_id;
 
-    if (upload_url) {
+    if (uploadUrl) {
       const xhr = new XMLHttpRequest();
 
-      xhr.open(REQUEST_TYPES.PUT, upload_url, true);
+      xhr.open(REQUEST_TYPES.PUT, uploadUrl, true);
       xhr.setRequestHeader('Content-Type', getFileType(filesToUpload) || FileExtensionToTypeMap[fileExtension]);
 
       xhr.upload.onprogress = function (event) {
@@ -76,13 +76,15 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
 
         if (xhr.status === API_STATUS_CODES.OK) {
           onFileSelect?.({
-            ...upload_url,
+            identifier: fileUploadId,
+            url: uploadUrl,
             fileName: filesToUpload?.name,
-            downloadableUrl: upload_url,
+            downloadableUrl: uploadUrl,
+            rawFile: filesToUpload ?? null,
           });
           disableNext?.(false);
 
-          setFileUploadId?.(file_upload_id);
+          setFileUploadId?.(fileUploadId);
         } else {
           setIsLoading(false);
           setError(FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR);
@@ -123,7 +125,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           disableNext?.(true);
           getSignedUrl(signedUrlPayload)
             .unwrap()
-            .then((data: any) => {
+            .then((data: SignedUrlResponseType) => {
               uploadFileToSignedUrl(data, filesToUpload, fileExtension);
             })
             .catch(() => {

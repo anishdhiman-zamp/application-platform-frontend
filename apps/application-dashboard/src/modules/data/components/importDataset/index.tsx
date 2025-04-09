@@ -123,7 +123,6 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
       .unwrap()
       .then((data) => {
         if (data?.dataset_action_id) {
-          setIsLoading(false);
           setStartPollingPreview({ check: true, actionId: data?.dataset_action_id, fileUploadId });
 
           setTimeout(() => {
@@ -132,9 +131,11 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
         }
       })
       .catch(() => {
-        setIsLoading(false);
         setRawData(null);
         toast.error(FILE_IMPORT_STATUS_MSG.PREVIEW_DATA_FAILED);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
