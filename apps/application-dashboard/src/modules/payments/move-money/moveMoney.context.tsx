@@ -1,9 +1,9 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
 import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 enum moveMoneyContextActions {
   CURRENT_STEP = 'CURRENT_STEP',

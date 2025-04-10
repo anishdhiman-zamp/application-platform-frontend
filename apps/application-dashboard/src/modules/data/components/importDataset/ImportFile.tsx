@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
-import FileUploaderWrapper from 'modules/data/components/importDataset/FileUploaderWrapper';
 import { FILE_SIZE } from 'modules/data/components/importDataset/importData.constants';
 import { FILE_MIME, ImportFilePropsType } from 'modules/data/components/importDataset/importData.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { read, utils } from 'xlsx';
+import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 const ImportFile: FC<ImportFilePropsType> = ({
   acceptedFormats,
@@ -13,9 +13,10 @@ const ImportFile: FC<ImportFilePropsType> = ({
   setFileName,
   filesSelected,
   className,
-  setStartPollingPreview,
-  onClosePopup,
   setRawData,
+  setFileUploadId,
+  keepLoadingFlow,
+  isFileUploading,
 }) => {
   const handleFileUpload = (file: UploadFileResponseType | null) => {
     if (!file?.rawFile) return;
@@ -77,8 +78,9 @@ const ImportFile: FC<ImportFilePropsType> = ({
       filesSelected={filesSelected}
       className={className}
       setRawData={setRawData}
-      setStartPollingPreview={setStartPollingPreview}
-      onClosePopup={onClosePopup}
+      setFileUploadId={setFileUploadId}
+      keepLoadingFlow={keepLoadingFlow}
+      isFileUploading={isFileUploading}
     />
   );
 };
