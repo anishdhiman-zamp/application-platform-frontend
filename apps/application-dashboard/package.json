@@ -13,11 +13,14 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
     "@lottiefiles/react-lottie-player": "^3.6.0",
+    "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^9.1.0",
     "@sentry/nextjs": "^9.5.0",
     "@vercel/speed-insights": "^1.2.0",
+    "@xyflow/react": "^12.5.5",
     "@zamp-platform/config": "*",
     "ag-charts-community": "^11.0.0",
     "ag-charts-enterprise": "^11.0.0",
@@ -30,6 +33,7 @@
     "date-fns": "2.30.0",
     "external-svg-loader": "^1.7.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
+    "monaco-editor": "^0.52.2",
     "posthog-js": "^1.234.6",
     "prop-types": "^15.8.1",
     "react-date-range": "1.4.0",

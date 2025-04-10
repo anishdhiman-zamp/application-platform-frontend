@@ -11,6 +11,7 @@ interface DataTableProps {
   onRowClicked?: (event: RowClickedEvent) => void;
   serverSideDatasource?: IServerSideDatasource;
   overrideThemeParams?: MapAny;
+  gridStyle?: MapAny;
 }
 
 const DataTable: FC<DataTableProps> = ({
@@ -19,6 +20,7 @@ const DataTable: FC<DataTableProps> = ({
   onRowClicked,
   serverSideDatasource,
   overrideThemeParams = {},
+  gridStyle = { height: 'calc(100vh - 50px)', width: '100%' },
 }) => {
   const customTheme = getDataTableTheme({ ...DATA_TABLE_THEME_PARAMS, ...overrideThemeParams });
 
@@ -31,7 +33,7 @@ const DataTable: FC<DataTableProps> = ({
       onRowClicked={onRowClicked}
       serverSideDatasource={serverSideDatasource}
       suppressCellFocus
-      gridStyle={{ height: 'calc(100vh - 50px)', width: '100%' }}
+      gridStyle={gridStyle}
     />
   );
 };
