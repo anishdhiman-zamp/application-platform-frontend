@@ -103,7 +103,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
-  const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(true);
+  const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(false);
   const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
 
   const firstLoadDone = useRef(false); // Track if first load is done

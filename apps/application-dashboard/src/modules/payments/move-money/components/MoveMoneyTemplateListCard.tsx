@@ -1,16 +1,15 @@
 import { FC } from 'react';
 import { COLORS } from 'constants/colors';
+import { TemplateDetailsType } from 'modules/payments/payments.types';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoveMoneyTemplateListCardProps {
-  template: {
-    id: string;
-    name: string;
-  };
+  template: TemplateDetailsType;
+  onSelect: (template: TemplateDetailsType) => void;
 }
 
-const MoveMoneyTemplateListCard: FC<MoveMoneyTemplateListCardProps> = ({ template }) => {
+const MoveMoneyTemplateListCard: FC<MoveMoneyTemplateListCardProps> = ({ template, onSelect }) => {
   return (
     <Tooltip
       position={TooltipPositions.RIGHT}
@@ -22,21 +21,26 @@ const MoveMoneyTemplateListCard: FC<MoveMoneyTemplateListCardProps> = ({ templat
         <div className='flex flex-col gap-3 min-w-[185px]'>
           <div>
             <div className='f-11-400 text-GRAY_700 mb-0.5'>Source Account</div>
-            <div className='f-12-500 text-GRAY_950'>Account Name 39748</div>
+            <div className='f-12-500 text-GRAY_950'>{`${template?.details?.[0]?.source_account?.account_name}  •• ${template?.details?.[0]?.source_account?.account_number.slice(-4)}`}</div>
           </div>
           <div>
-            <div className='f-11-400 text-GRAY_700 mb-0.5'>Source Account</div>
-            <div className='f-12-500 text-GRAY_950'>Account Name 39748</div>
+            <div className='f-11-400 text-GRAY_700 mb-0.5'>Recipient</div>
+            <div className='f-12-500 text-GRAY_950'>{template?.created_by}</div>
           </div>
           <div>
-            <div className='f-11-400 text-GRAY_700 mb-0.5'>Source Account</div>
-            <div className='f-12-500 text-GRAY_950'>Account Name 39748</div>
+            <div className='f-11-400 text-GRAY_700 mb-0.5'>Recipient Account</div>
+            <div className='f-12-500 text-GRAY_950'>{`${template?.details?.[0]?.beneficiary_account?.account_name}  •• ${template?.details?.[0]?.beneficiary_account?.account_number.slice(-4)}`}</div>
           </div>
-          <div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'>Created by Hardik Singh</div>
+          <div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'>
+            Created by {template?.created_by}
+          </div>
         </div>
       }
     >
-      <div className='flex items-center gap-1.5 text-GRAY_900 px-2.5 py-2 rounded-md hover:bg-GRAY_100 cursor-pointer'>
+      <div
+        onClick={() => onSelect(template)}
+        className='flex items-center gap-1.5 text-GRAY_900 px-2.5 py-2 rounded-md hover:bg-GRAY_100 cursor-pointer'
+      >
         <SvgSpriteLoader id='file-06' size={14} />
         <div className='f-12-500 text-GRAY_950 grow'>{template?.name}</div>
         <SvgSpriteLoader id='send-03' size={14} />

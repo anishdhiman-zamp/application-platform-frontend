@@ -1,12 +1,8 @@
 import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
-import {
-  accountsList,
-  accountsListWithBalance,
-  PAYMENT_PROCESSING_MODES,
-} from 'modules/payments/move-money/move-money.dummy';
+import { accountsList, PAYMENT_PROCESSING_MODES } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, TemplateDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -19,18 +15,25 @@ import Input from 'components/common/input';
 interface AmountDetailsStepProps {
   isSelfTransfer: boolean;
   handleStepChange: (step: number) => void;
+  templateDetails?: TemplateDetailsType;
 }
 
-const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleStepChange }) => {
+const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
+  isSelfTransfer,
+  handleStepChange,
+  templateDetails: defaultTemplate,
+}) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     dispatch,
-    state: { amountDetails, currentStep, destinationAccountDetails },
+    state: { amountDetails, currentStep, destinationAccountDetails, templateDetails },
   } = useMoveMoneyContextStore();
   const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
   const [amount, setAmount] = useState(amountDetails?.amount);
   const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
-  const [accountDetails, setAccountDetails] = useState<AccountDetailsType>(amountDetails?.sourceAccountDetails);
+  const [accountDetails, setAccountDetails] = useState<AccountDetailsType | undefined>(
+    amountDetails?.sourceAccountDetails,
+  );
 
   const handleDestinationAccountSelect = (account: AccountDetailsType) => {
     dispatch({
@@ -105,13 +108,25 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
           <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>USD</div>
         </div>
         <SelectAccountDropdown
-          hasSubtitle
-          accountsList={accountsListWithBalance}
+          accountsList={accountsList}
           shouldReset={false}
-          accountDetails={accountDetails}
+          accountDetails={defaultTemplate?.details[0]?.source_account ?? accountDetails}
           onAccountSelect={handleAccountSelect}
           label='Send from'
+          disabled={!!templateDetails}
         />
+        {defaultTemplate && (
+          <SelectAccountDropdown
+            hasSubtitle
+            accountsList={accountsList}
+            shouldReset={false}
+            accountDetails={defaultTemplate?.details[0]?.beneficiary_account}
+            onAccountSelect={handleAccountSelect}
+            label='Recipient'
+            disabled={!!templateDetails}
+          />
+        )}
+
         <div className='w-full'>
           <div className='f-12-500 text-GRAY_900 mb-2'>Payment processing mode</div>
           <Dropdown

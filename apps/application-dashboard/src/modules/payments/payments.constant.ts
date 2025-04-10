@@ -66,7 +66,7 @@ export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [
 ];
 
 export const defaultAccountData = {
-  account_id: '',
+  id: '',
   currency_code: '',
   account_number: '',
   account_type: '',

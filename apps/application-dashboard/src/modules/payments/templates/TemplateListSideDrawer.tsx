@@ -1,12 +1,14 @@
 import React, { FC, useMemo, useState } from 'react';
 import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
-import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
+import { useRouter } from 'next/router';
 import { defaultFnType } from 'types/commonTypes';
 import Input from '@/components/common/input';
 import { Tabs } from '@/components/common/tabs/Tabs';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from '@/types/common/components';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types';
@@ -18,6 +20,7 @@ type TemplateListSideDrawerProps = {
 };
 
 const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen, onTemplateClick }) => {
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState<MenuItem>(TEMPLATE_LIST_TABS[0]);
   const [search, setSearch] = useState<string>('');
 
@@ -28,6 +31,10 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
   const templates = useMemo(() => {
     return TEMPLATES.filter((template) => template.type === currentTab.value);
   }, [currentTab]);
+
+  const handleTemplateSendClick = (template: TemplateDetailsType) => {
+    router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template.type}&templateId=${template.id}`);
+  };
 
   return (
     <SideDrawer
@@ -73,7 +80,7 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
         <div className='px-4.5 py-2 h-[calc(100vh-220px)] overflow-y-auto'>
           <div>
             {templates.map((template, index) => (
-              <TemplateCard key={index} title={template.name} source={[template?.source, template?.destination]} />
+              <TemplateCard key={index} template={template} handleSendClick={() => handleTemplateSendClick(template)} />
             ))}
           </div>
         </div>
