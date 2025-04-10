@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
 import { AccountDetailsType, ContactType, TemplateDetailsType } from 'modules/payments/payments.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
+import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
 
