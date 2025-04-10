@@ -151,7 +151,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_MORE_INFO_NEXT'
             onClick={onNextClick}
-            isLoading={isFileUploading}
+            disabled={isFileUploading}
           >
             Next
           </Button>

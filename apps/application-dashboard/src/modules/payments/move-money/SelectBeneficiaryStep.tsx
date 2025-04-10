@@ -3,7 +3,7 @@ import SelectAccountDropdown from 'modules/payments/move-money/components/Select
 import SelectBeneDropdown from 'modules/payments/move-money/components/SelectBeneDropdown';
 import { accountsList } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { snakeCaseToSentenceCase } from 'utils/common';
@@ -11,21 +11,37 @@ import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
   handleStepChange: (step: number) => void;
+  setCreateTemplateType: (type: MOVE_MONEY_TYPE | null) => void;
+  defaultTemplate?: TemplateDetailsType;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange }) => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
+  handleStepChange,
+  setCreateTemplateType,
+  defaultTemplate,
+}) => {
   const {
-    state: { contactDetails, destinationAccountDetails, currentStep },
+    state: { contactDetails, destinationAccountDetails, currentStep, templateDetails },
     dispatch,
   } = useMoveMoneyContextStore();
 
-  const handleBeneficiarySelect = (account: MenuItem) => {
-    dispatch({
-      type: moveMoneyContextActions.CONTACT_DETAILS,
-      payload: {
-        contactDetails: account,
-      },
-    });
+  const handleBeneficiarySelect = (beneficiary: MenuItem | TemplateDetailsType, isTemplate = false) => {
+    if (isTemplate) {
+      dispatch({
+        type: moveMoneyContextActions.TEMPLATE_DETAILS,
+        payload: {
+          templateDetails: beneficiary,
+        },
+      });
+      handleStepChange(currentStep + 1);
+    } else {
+      dispatch({
+        type: moveMoneyContextActions.CONTACT_DETAILS,
+        payload: {
+          contactDetails: beneficiary,
+        },
+      });
+    }
   };
 
   const handleAccountSelect = (account: AccountDetailsType) => {
@@ -42,8 +58,14 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
-          <SelectBeneDropdown autoFocus={true} onSelect={handleBeneficiarySelect} shouldReset={false} />
-          {contactDetails?.value && (
+          <SelectBeneDropdown
+            autoFocus={true}
+            onSelect={handleBeneficiarySelect}
+            shouldReset={false}
+            templateDetails={defaultTemplate}
+            setCreateTemplateType={setCreateTemplateType}
+          />
+          {!templateDetails && contactDetails?.value && (
             <SelectAccountDropdown
               autoFocus
               accountsList={accountsList}
@@ -53,7 +75,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
               label='Recipient account'
             />
           )}
-          {destinationAccountDetails?.account_name && (
+          {!templateDetails && destinationAccountDetails?.account_name && (
             <div className='flex flex-col gap-4'>
               {Object.keys(destinationAccountDetails).map((key, index) => (
                 <div key={index} className='grid grid-cols-2'>
