@@ -33,7 +33,7 @@ const AdminHeader: FC<AdminHeaderPropsType> = ({ displayConfigInitialData, displ
     <div className='flex justify-between items-center px-10'>
       <CommonWrapper isLoading={isDatasetListingLoading}>
         <div className='f-20-600'>
-          Edit:- {datasetListing?.datasets?.find((dataset) => dataset.ID === datasetId)?.Title}
+          Edit {datasetListing?.datasets?.find((dataset) => dataset.ID === datasetId)?.Title}
         </div>
       </CommonWrapper>
       <div className='py-3 px-10 flex justify-end gap-2'>
