@@ -1,4 +1,14 @@
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createElement,
+  ElementType,
+  FC,
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFn, MapAny } from 'types/commonTypes';
@@ -76,7 +86,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
   }, [isOpen, handleSetInputFocus, optionalOpenDropdownOptions]);
 
-  const handleClickKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleClickKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const keyEvent = e.key;
 
     if (keyEvent === KEY_CODES.BACKSPACE && search.trim() === '') {
@@ -125,7 +135,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const keyEvent = e.key;
 
     if (!filteredDropdownOptions?.length) return;
@@ -258,7 +268,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   }, [filteredDropdownOptions, debouncedSearch]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleDocumentKeyDown = (e: globalThis.KeyboardEvent) => {
       const keyEvent = e.key;
 
       if (keyEvent === KEY_CODES.ESCAPE && isOpen) {
@@ -268,9 +278,9 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleDocumentKeyDown);
 
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleDocumentKeyDown);
   }, [isOpen]);
 
   return (
@@ -362,8 +372,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         <div className='w-full relative'>
           <div ref={dropdownOptionsRef} onClick={(e) => e.stopPropagation()}>
             {customOptionsListDropdown
-              ? React.createElement(
-                  customOptionsListDropdown as React.ElementType,
+              ? createElement(
+                  customOptionsListDropdown as ElementType,
                   {
                     search,
                     optionRefs,

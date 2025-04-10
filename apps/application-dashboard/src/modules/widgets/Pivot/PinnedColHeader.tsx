@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { GROUP_COLLAPSE_ICON, GROUP_EXPAND_ICON } from 'constants/icons';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
+import Image from 'next/image';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, OptionsType } from 'types/commonTypes';
@@ -66,8 +67,9 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
         buttonSize={SIZE_TYPES.XSMALL}
         tooltipPosition={TooltipPositions.BOTTOM_RIGHT}
         className='!text-xs !p-1.5 !bg-BG_GRAY_2 !rounded'
-        imageIconSrc={isExpanded ? GROUP_COLLAPSE_ICON : GROUP_EXPAND_ICON}
-      />
+      >
+        <Image alt='' src={isExpanded ? GROUP_COLLAPSE_ICON : GROUP_EXPAND_ICON} width={14} height={14} />
+      </TooltipButton>
     </div>
   );
 };

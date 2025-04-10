@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 import { useGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
 import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
@@ -12,7 +12,7 @@ import { checkScreenBreakpoint, getLeadingPathFromURL } from 'utils/common';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 type AuthGuardPropsType = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export const RouteGuard: FC<AuthGuardPropsType> = (props) => {

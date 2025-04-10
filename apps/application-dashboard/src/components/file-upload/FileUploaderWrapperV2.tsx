@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ElementType, FC, useEffect, useRef, useState } from 'react';
 import { REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { useGetSignedUrlMutation } from 'apis/dataset';
 import { useAppSelector } from 'hooks/toolkit';
@@ -20,7 +20,7 @@ interface FileUploaderWrapperProps {
   maxSize?: number;
   filesSelected?: string;
   setParentError?: (arg: string | null) => void;
-  Component: React.ElementType;
+  Component: ElementType;
   tabIndex?: number;
   onUploadProgress?: (percent: number) => void;
   bucket?: string;
@@ -61,7 +61,7 @@ const FileUploaderWrapperV2: FC<FileUploaderWrapperProps> = ({
 
   const [getSignedUrl] = useGetSignedUrlMutation({});
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
 
     handleUpload(filesToUpload);

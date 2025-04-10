@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react';
+import React, { FC, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { inter } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -8,7 +8,7 @@ import { cn } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export interface PositionedMenuWrapperProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   resetText?: string;
   resetClassName?: string;

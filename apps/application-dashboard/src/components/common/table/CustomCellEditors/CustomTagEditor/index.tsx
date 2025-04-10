@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';
@@ -9,7 +9,7 @@ const CustomTagEditor = (props: MapAny) => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchResults, setSearchResults] = useState<string[]>(values);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (value?.includes('.')) return;

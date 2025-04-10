@@ -2,11 +2,14 @@ import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { APITags } from 'constants/api.constants';
 import baseApi from 'services/api';
 import {
+  AcceptInvitationRequestType,
+  AcceptInvitationResponseType,
   AudiencesByOrganisationIdRequest,
   AudiencesByOrganisationIdResponse,
   DeleteAudienceFromOrganizationAccessType,
   GetMembershipRequestsByOrganizationIdRequest,
   GetMembershipRequestsByOrganizationIdResponse,
+  GetMyInvitationsResponseType,
   GetTeamsByOrganizationIdRequestType,
   GetTeamsByOrganizationIdResponseType,
   InvitedAudiencesByOrganisationIdResponse,
@@ -110,6 +113,19 @@ const People = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_ALL_TEAMS],
     }),
+    getMyInvitations: builder.query<GetMyInvitationsResponseType, void>({
+      query: () => ({
+        url: API_ENDPOINTS.USER_INVITATIONS_GET,
+      }),
+      providesTags: [APITags.GET_USER_INVITATIONS],
+    }),
+    acceptInvitation: builder.mutation<AcceptInvitationResponseType, AcceptInvitationRequestType>({
+      query: ({ invitationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACCEPT_INVITATION_POST, { invitationId }),
+        method: REQUEST_TYPES.POST,
+      }),
+      invalidatesTags: [APITags.GET_USER_INVITATIONS],
+    }),
   }),
 });
 
@@ -125,4 +141,6 @@ export const {
   usePostAddTeamToOrganizationMutation,
   usePostAddTeamToAudienceMutation,
   useRemoveTeamFromAudienceMutation,
+  useGetMyInvitationsQuery,
+  useAcceptInvitationMutation,
 } = People;

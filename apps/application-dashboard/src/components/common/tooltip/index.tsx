@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';
 
@@ -21,8 +21,8 @@ export enum TooltipPositions {
 }
 
 export interface TooltipProps {
-  children: React.ReactNode;
-  tooltipBody?: string | React.ReactNode;
+  children: ReactNode;
+  tooltipBody?: string | ReactNode;
   position?: TooltipPositions;
   style?: Record<string, string | number>;
   wrapperClassName?: string;

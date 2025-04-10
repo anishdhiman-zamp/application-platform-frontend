@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
 import { DATE_RANGE_TYPES, DateRangeKeys, DateRangeValue } from 'constants/date.constants';
 import { MapAny } from 'types/commonTypes';
@@ -14,7 +14,7 @@ interface YearPickerProps {
   focusedInput?: DateRangeKeys;
 }
 
-export const YearPicker: React.FC<YearPickerProps> = ({
+export const YearPicker: FC<YearPickerProps> = ({
   onSelect,
   currentValueStart,
   currentValueEnd,
@@ -22,7 +22,7 @@ export const YearPicker: React.FC<YearPickerProps> = ({
   focusedRange,
   focusedInput,
 }) => {
-  const yearListRef = React.useRef<HTMLDivElement>(null);
+  const yearListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!searchValue) return;

@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { FC, ReactNode, useEffect } from 'react';
 import { useWhoAmIQuery } from 'apis/auth';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
+import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 import { useRouter } from 'next/router';
@@ -12,10 +13,10 @@ import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
   loginRoute: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export const AuthGuard: React.FC<Props> = (props) => {
+export const AuthGuard: FC<Props> = (props) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -68,7 +69,7 @@ export const AuthGuard: React.FC<Props> = (props) => {
     }
   }
 
-  if (session?.orgs?.length === 0) {
+  if (session?.orgs?.length === 0 && !router.pathname.includes(ROUTES_PATH.INVITATIONS)) {
     return <OrgMembershipPending />;
   }
 
