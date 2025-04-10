@@ -3,7 +3,7 @@ import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBe
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { accountsList } from 'modules/payments/move-money/move-money.dummy';
 import { defaultAccountData } from 'modules/payments/payments.constant';
-import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import { TITLE_MAP } from 'modules/payments/templates/templates.constant';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
@@ -21,7 +21,7 @@ type CreateTemplatePopoverProps = {
 const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose, paymentType }) => {
   const [destinationAccountDetails, setDestinationAccountDetails] = useState<AccountDetailsType>(defaultAccountData);
   const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType>(defaultAccountData);
-  const [recipientDetails, setRecipientDetails] = useState<MenuItem>();
+  const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
   const [templateName, setTemplateName] = useState<string>('');
 
   const handleSubmit = () => {
@@ -62,7 +62,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
           </div>
           {isSingleTransfer && (
             <SelectBeneDropdown
-              onSelect={(recipient: MenuItem) => setRecipientDetails(recipient)}
+              onSelect={(recipient: MenuItem | TemplateDetailsType) => setRecipientDetails(recipient)}
               shouldReset={false}
               label='Recipient'
               showTemplate={false}

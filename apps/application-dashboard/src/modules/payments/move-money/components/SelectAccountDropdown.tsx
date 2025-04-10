@@ -3,6 +3,7 @@ import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
+import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
@@ -145,7 +146,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               <AccountWithLogo
                 key={`${account.account_number}_${index}`}
                 className='hover:bg-GRAY_100 rounded-md !p-2.5'
-                name={`${snakeCaseToSentenceCase(account.account_name)}  •• ${account.account_number.slice(-4)}`}
+                name={`${snakeCaseToSentenceCase(account.account_name)}   ${MASK_DOTS}  ${account.account_number.slice(-4)}`}
                 onClick={() => handleAccountSelect(account)}
                 logo={DEFAULT_BANK}
               />
