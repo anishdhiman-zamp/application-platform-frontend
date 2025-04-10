@@ -23,7 +23,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const PAGES = getLeadingPathFromURL(ROUTES_PATH.PAGES);
   const DATASETS = getLeadingPathFromURL(ROUTES_PATH.DATASET);
   const isAdminRoute = router.pathname.startsWith(ROUTES_PATH.ADMIN);
-  const { evaluate } = useFeatureFlags();
+  const { evaluate, ldClient } = useFeatureFlags();
   const { width, height } = useWindowDimensions();
   const { data: datasetListingData, isLoading: isDatasetListingLoading } = useGetDatasetListingQuery(
     { page: 1, pageSize: PAGE_SIZE },
@@ -57,18 +57,14 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   }, [currentPathName, id, pages, isPagesLoading, router]);
 
   useEffect(() => {
-    const checkAdminAccess = async () => {
-      if (isAdminRoute) {
-        const isAdminFeatureEnabled = await evaluate(FEATURE_FLAGS.ADMIN_PAGE);
-
+    if (isAdminRoute && ldClient) {
+      evaluate(FEATURE_FLAGS.ADMIN_PAGE).then((isAdminFeatureEnabled) => {
         if (!isAdminFeatureEnabled) {
           router.push(ROUTES_PATH.NO_ACCESS);
         }
-      }
-    };
-
-    checkAdminAccess();
-  }, [isAdminRoute]);
+      });
+    }
+  }, [isAdminRoute, evaluate, ldClient]);
 
   const breakpoint = checkScreenBreakpoint(width, height);
 
