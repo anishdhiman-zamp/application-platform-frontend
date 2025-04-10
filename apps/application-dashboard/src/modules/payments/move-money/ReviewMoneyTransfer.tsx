@@ -1,31 +1,24 @@
+import { FC } from 'react';
 import { DEFAULT_BANK } from 'constants/icons';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
-import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
+import { useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const ReviewMoneyTransfer = () => {
+interface ReviewMoneyTransferProps {
+  handleStepChange: (step: number) => void;
+}
+
+const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange }) => {
   const {
-    state: { contactDetails, destinationAccountDetails, amountDetails, moreDetails },
-    dispatch,
+    state: { contactDetails, destinationAccountDetails, amountDetails, moreDetails, currentStep },
   } = useMoveMoneyContextStore();
 
-  const onBackClick = () => {
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 2 },
-    });
-  };
-
-  const onNextClick = () => {
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 4 },
-    });
-  };
+  const handleBackClick = () => handleStepChange(currentStep - 1);
+  const handleNextClick = () => handleStepChange(currentStep + 1);
 
   return (
     <div className='h-screen overflow-y-scroll py-[136px]'>
@@ -92,12 +85,17 @@ const ReviewMoneyTransfer = () => {
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_REVIEW_BACK'
-            onClick={onBackClick}
+            id='MOVE_MONEY_REVIEW_BACK'
+            onClick={handleBackClick}
           >
             Back
           </Button>
-          <Button size={SIZE_TYPES.MEDIUM} id='SELF_TRANSFER_REVIEW_SEND_PAYMENT' onClick={onNextClick}>
+          <Button
+            type={BUTTON_TYPES.PRIMARY}
+            size={SIZE_TYPES.MEDIUM}
+            id='MOVE_MONEY_REVIEW_SEND_PAYMENT'
+            onClick={handleNextClick}
+          >
             Send Payment
           </Button>
         </div>

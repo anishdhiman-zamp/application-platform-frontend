@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
+import { MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { INPUT_FILE_FORMATS } from 'types/common/mime';
 
 export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';
@@ -37,27 +37,27 @@ export const MOVE_MONEY_ACTION_ITEMS = [
   {
     id: 'single-payment',
     label: 'Single payment',
-    url: ROUTES_PATH.MONEY_TRANSFER,
+    url: `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SINGLE_TRANSFER}`,
     icon: {
       id: 'arrow-narrow-right',
     },
   },
   {
-    id: 'bulk-payment',
-    label: 'Bulk payment',
-    url: ROUTES_PATH.MONEY_TRANSFER, //to be update
-    icon: {
-      id: 'arrows-right',
-    },
-  },
-  {
     id: 'self-transfer',
     label: 'Self transfer',
-    url: ROUTES_PATH.MONEY_TRANSFER, //to be update
+    url: `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SELF_TRANSFER}`,
     icon: {
       id: 'refresh-ccw-02',
     },
   },
+  // {
+  //   id: 'bulk-payment',
+  //   label: 'Bulk payment',
+  //   url: ROUTES_PATH.MONEY_TRANSFER, //to be update
+  //   icon: {
+  //     id: 'arrows-right',
+  //   },
+  // }
 ];
 
 export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [

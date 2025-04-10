@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, RefObject } from 'react';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 
@@ -6,7 +6,7 @@ interface ClearFiltersConfirmationPopupProps {
   className?: string;
   onClick: defaultFnType;
   onCancel: defaultFnType;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement>;
 }
 
 const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({

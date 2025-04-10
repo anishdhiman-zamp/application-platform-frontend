@@ -38,7 +38,8 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className='mb-4'
-        inputClassName='border-none !px-0'
+        inputClassName='!border-none !px-0 focus:outline-none'
+        focusClassNames=''
       />
       <div className='flex flex-col gap-2'>
         {Array.from({ length: 10 }).map((_, index) => (

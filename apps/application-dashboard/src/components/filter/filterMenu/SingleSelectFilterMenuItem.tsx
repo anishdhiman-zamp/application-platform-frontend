@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
@@ -12,7 +12,7 @@ interface SingleSelectFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
-  LabelComponent?: (item: string) => React.ReactNode;
+  LabelComponent?: (item: string) => ReactNode;
   allowClear?: boolean;
   allowSearch?: boolean;
   onFilterChange?: (value: string[]) => void;

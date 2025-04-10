@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, DragEvent, FC, RefObject, useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
 import Image from 'next/image';
@@ -10,20 +10,20 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type GroupByProps = {
   onClose: defaultFnType;
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact>;
 };
 
-const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
+const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
   // State to manage grouped and available columns
   const [searchTerm, setSearchTerm] = useState('');
   const [groupedColumns, setGroupedColumns] = useState<string[]>([]);
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
 
-  const handleDragStart = (column: string) => (event: React.DragEvent) => {
+  const handleDragStart = (column: string) => (event: DragEvent) => {
     event.dataTransfer.setData('text/plain', column);
   };
 
-  const handleDropOnGroup = (event: React.DragEvent) => {
+  const handleDropOnGroup = (event: DragEvent) => {
     const data = event.dataTransfer.getData('text/plain');
     const column: string = data;
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
@@ -36,7 +36,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     });
   };
 
-  const handleDropOnAvailable = (event: React.DragEvent) => {
+  const handleDropOnAvailable = (event: DragEvent) => {
     const data = event.dataTransfer.getData('text/plain');
 
     const column: string = data;
@@ -50,7 +50,7 @@ const GroupBy: React.FC<GroupByProps> = ({ tableRef, onClose }) => {
     });
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
     const columnNames = latestColumns

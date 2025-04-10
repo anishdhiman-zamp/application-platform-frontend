@@ -1,8 +1,9 @@
 import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
+import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
-import { RECIPIENT_LIST } from 'modules/payments/move-money/move-money.dummy';
+import { RECIPIENT_LIST, TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
@@ -84,7 +85,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, 
         );
       }
       case MOVE_MONEY_PAYMENT_TYPE.TEMPLATES: {
-        return <div>TEMPLATES</div>;
+        return (
+          <div className='flex flex-col gap-0.5 p-1'>
+            {TEMPLATES.map((template) => (
+              <MoveMoneyTemplateListCard key={template.id} template={template} />
+            ))}
+          </div>
+        );
       }
     }
   };
@@ -100,8 +107,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({ autoFocus, onSelect, 
 
   return (
     <div
-      className={cn('rounded-md border border-GRAY_500 bg-white overflow-hidden shadow-selectAccountDropdown', {
-        'border-GRAY_400': !isShowMenu,
+      className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
+        'border-GRAY_400 overflow-hidden': !isShowMenu,
         'border-GRAY_500': isShowMenu,
       })}
       ref={containerRef}

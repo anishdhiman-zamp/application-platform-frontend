@@ -1,3 +1,5 @@
+import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+
 export const ACCOUNT_DETAILS_MOCK = [
   {
     label: 'Recipient Bank',
@@ -33,6 +35,37 @@ export const RECIPIENT_LIST = [
   {
     label: 'Soham P',
     value: 'Soham P',
+  },
+];
+
+export const TEMPLATES = [
+  {
+    id: '1',
+    name: 'Template 1',
+    source: { label: 'Source', value: 'Account N... 345345' },
+    destination: { label: 'Destination', value: 'Account N... 345345' },
+    type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
+  },
+  {
+    id: '2',
+    name: 'Template 2',
+    source: { label: 'Source', value: 'Account N... 345345' },
+    destination: { label: 'Destination', value: 'Account N... 345345' },
+    type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
+  },
+  {
+    id: '3',
+    name: 'Sel Template 3',
+    source: { label: 'Source', value: 'Account N... 345345' },
+    destination: { label: 'Destination', value: 'Account N... 345345' },
+    type: MOVE_MONEY_TYPE.SELF_TRANSFER,
+  },
+  {
+    id: '3',
+    name: 'Self Template 3',
+    source: { label: 'Source', value: 'Account N... 345345' },
+    destination: { label: 'Destination', value: 'Account N... 345345' },
+    type: MOVE_MONEY_TYPE.SELF_TRANSFER,
   },
 ];
 

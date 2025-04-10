@@ -1,4 +1,4 @@
-import React, { memo, MouseEventHandler } from 'react';
+import React, { FC, memo, MouseEventHandler } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import dynamic from 'next/dynamic';
 import { cn } from 'utils/common';
@@ -22,7 +22,7 @@ export interface SvgSpriteLoaderProps {
   customSpriteUrl?: string;
 }
 
-const SvgSpriteLoader: React.FC<SvgSpriteLoaderProps> = ({
+const SvgSpriteLoader: FC<SvgSpriteLoaderProps> = ({
   size,
   width = 20,
   height = 20,

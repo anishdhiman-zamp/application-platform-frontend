@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useOnClickOutside } from 'hooks';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
@@ -47,7 +47,7 @@ const WidgetTitle = ({
     setIsGroupWidgetOptionsOpen(false);
   });
 
-  const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleToggle = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (!isGroupWidgetOptions) return;
     setIsGroupWidgetOptionsOpen((prev) => !prev);
@@ -105,7 +105,7 @@ const WidgetTitle = ({
       </div>
       {isGroupWidgetOptionsOpen &&
         (isPivotTable && isPortalNeeded ? (
-          ReactDOM?.createPortal(
+          createPortal(
             <WidgetOptionDropdown
               options={groupWidgetsOptions}
               onSelect={handleWidgetChange}

@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { FC, memo, ReactNode } from 'react';
 import Link from 'next/link';
 import { cn } from 'utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
@@ -15,7 +15,7 @@ type SidebarTabProps = {
   path: string;
 };
 
-const SidebarTab: React.FC<SidebarTabProps> = ({
+const SidebarTab: FC<SidebarTabProps> = ({
   isSelected,
   iconId,
   iconColor,

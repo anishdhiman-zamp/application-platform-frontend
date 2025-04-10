@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { getPageRouteById, ROUTES_PATH } from 'constants/routeConfig';
 import { useRouter } from 'next/router';
 import { PageResponseType } from 'types/api/pagesApi.types';
@@ -16,7 +16,7 @@ const clearLastVisitedPage = () => {
 };
 
 export const usePersistedPageNavigation = (pagesList: PageResponseType[]) => {
-  const [firstNavigationDone, setFirstNavigationDone] = React.useState(false);
+  const [firstNavigationDone, setFirstNavigationDone] = useState(false);
 
   const router = useRouter();
 

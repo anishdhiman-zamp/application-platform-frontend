@@ -23,9 +23,9 @@ export interface AccountDetailsType {
 }
 
 export enum MOVE_MONEY_TYPE {
-  SINGLE = 'single',
-  SELF = 'self',
-  BULK = 'bulk',
+  SINGLE_TRANSFER = 'single-transfer',
+  SELF_TRANSFER = 'self-transfer',
+  BULK_TRANSFER = 'bulk-transfer',
 }
 
 export enum MOVE_MONEY_PAYMENT_TYPE {
