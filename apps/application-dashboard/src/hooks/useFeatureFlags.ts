@@ -5,6 +5,17 @@ export const useFeatureFlags = () => {
   const ldClient = useLDClient();
 
   return {
-    evaluate: (flag: FEATURE_FLAGS) => ldClient?.variation(flag, false),
+    evaluate: async (flag: FEATURE_FLAGS) => {
+      try {
+        const isEnabled = ldClient?.variation(flag, false);
+
+        return isEnabled;
+      } catch (error) {
+        console.error('Error evaluating feature flag', error);
+
+        return false;
+      }
+    },
+    ldClient,
   };
 };
