@@ -2,6 +2,10 @@
   "name": "@zamp-platform/ui",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "src"
+  ],
+  "main": "./src/components/index.ts",
   "scripts": {
     "ui": "npm run shadcn@latest",
     "lint": "eslint --fix . --ext .ts,.tsx,.js,.jsx",
