@@ -32,9 +32,7 @@ import {
   PreviewTransformationRequest,
   PreviewTransformationResponse,
   RuleType,
-  SignedUrlBodyType,
   UpdateRulePriorityRequestType,
-  UploadFileResponseType,
 } from 'types/api/dataset.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -120,13 +118,6 @@ const Dataset = baseApi.injectEndpoints({
         params,
       }),
     }),
-    getSignedUrl: builder.mutation<UploadFileResponseType, SignedUrlBodyType>({
-      query: (payload) => ({
-        url: API_ENDPOINTS.DATASET_SIGNED_UPLOAD_URL_POST,
-        method: REQUEST_TYPES.POST,
-        body: payload,
-      }),
-    }),
     getPreviewTransformation: builder.mutation<PreviewTransformationResponse, PreviewTransformationRequest>({
       query: ({ file_upload_id, dataset_id }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORTS_ACTION_ID, { file_upload_id }),
@@ -192,7 +183,6 @@ export const {
   usePatchChangeAudienceRoleInDatasetMutation,
   useDeleteAudienceFromDatasetAccessMutation,
   useGetRulesByDatasetColumnsQuery,
-  useGetSignedUrlMutation,
   useGetPreviewTransformationMutation,
   useGetRulesByRuleIdsQuery,
   useLazyGetRulesByRuleIdsQuery,

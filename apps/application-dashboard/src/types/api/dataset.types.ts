@@ -235,14 +235,6 @@ export type GetRulesByDatasetColumnsResponseType = {
   [datasetId: string]: RulesByDatasetColumnType;
 };
 
-export type UploadFileResponseType = {
-  identifier: string;
-  url: string;
-  fileName: string;
-  downloadableUrl: string;
-  rawFile: File | null;
-};
-
 export type TableData = {
   columns: string[];
   rows: { [key: string]: string | number | boolean | null }[];
@@ -277,10 +269,6 @@ export type UpdateRulePriorityRequestType = {
   rule_priorities: RulePrioritiesType;
 };
 
-export type SignedUrlBodyType = {
-  file_name: string;
-  file_type: string;
-};
 export type PreviewTransformationRequest = {
   file_upload_id: string;
   dataset_id?: string;

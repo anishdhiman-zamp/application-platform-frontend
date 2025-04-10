@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
-import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
+import { AccountDetailsType, ContactType, TemplateDetailsType } from 'modules/payments/payments.types';
+import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
 
@@ -16,10 +16,12 @@ enum moveMoneyContextActions {
   POOLED_FUND_DETAILS = 'POOLED_FUND_DETAILS',
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
+  TEMPLATE_DETAILS = 'TEMPLATE_DETAILS',
 }
 interface InitialStateType {
   currentStep: number;
-  destinationAccountDetails: AccountDetailsType;
+  destinationAccountDetails?: AccountDetailsType;
+  templateDetails: TemplateDetailsType | undefined;
   moreDetails?: {
     note: string;
     externalMemo: string;
@@ -29,7 +31,7 @@ interface InitialStateType {
   amountDetails: {
     amount: string;
     currency: MenuItem | null;
-    sourceAccountDetails: AccountDetailsType;
+    sourceAccountDetails?: AccountDetailsType;
     processingMode?: string;
   };
   contactDetails: MenuItem;
@@ -44,7 +46,8 @@ export interface ActionType {
 
 const initialState: InitialStateType = {
   currentStep: 0,
-  destinationAccountDetails: defaultAccountData,
+  destinationAccountDetails: undefined,
+  templateDetails: undefined,
   moreDetails: {
     note: '',
     externalMemo: '',
@@ -57,7 +60,7 @@ const initialState: InitialStateType = {
   amountDetails: {
     amount: '',
     currency: null,
-    sourceAccountDetails: defaultAccountData,
+    sourceAccountDetails: undefined,
     processingMode: '',
   },
   contactDetails: defaultContactDetails,
@@ -86,11 +89,22 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
       case moveMoneyContextActions.CONTACT_DETAILS:
-        return { ...state, contactDetails: action?.payload?.contactDetails };
+        return {
+          ...state,
+          contactDetails: action?.payload?.contactDetails,
+          templateDetails: undefined,
+          destinationAccountDetails: defaultAccountData,
+        };
       case moveMoneyContextActions.RESET_STATE:
         return initialState;
       case moveMoneyContextActions.AMOUNT_DETAILS:
         return { ...state, amountDetails: action?.payload?.amountDetails };
+      case moveMoneyContextActions.TEMPLATE_DETAILS:
+        return {
+          ...state,
+          templateDetails: action?.payload?.templateDetails,
+          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.beneficiary_account,
+        };
 
       default:
         return state;

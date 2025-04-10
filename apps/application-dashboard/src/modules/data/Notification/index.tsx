@@ -5,9 +5,10 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type NotificationProps = {
   isPolling: boolean;
+  message?: string;
 };
 
-const Notification: FC<NotificationProps> = ({ isPolling }: NotificationProps) => {
+const Notification: FC<NotificationProps> = ({ isPolling, message = 'Tagging in progress' }: NotificationProps) => {
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +45,7 @@ const Notification: FC<NotificationProps> = ({ isPolling }: NotificationProps) =
                 className='animate-spin'
                 progress={20}
               />
-              <div className='grow'>Tagging in progress</div>
+              <div className='grow'>{message}</div>
               <SvgSpriteLoader
                 id='x-close'
                 width={16}
