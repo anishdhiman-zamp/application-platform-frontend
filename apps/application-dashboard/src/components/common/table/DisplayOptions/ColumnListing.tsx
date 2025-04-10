@@ -63,7 +63,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     const orderedItems: Column[] = newLayout
       .slice()
       .sort((a: any, b: any) => a.y - b.y)
-      .map((l: any) => columns.find((column) => column?.getColId() === l.i)!);
+      .map((l: any) => columns.find((column) => column?.getColId() === l.i))
+      .filter((column: Column | undefined): column is Column => column !== undefined);
 
     setColumns(orderedItems);
     tableRef?.current?.api?.moveColumns(orderedItems, 0);
