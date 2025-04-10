@@ -12,4 +12,10 @@ export enum TOAST_MESSAGES {
   FAILED_AUDIENCE_INVITED = 'Failed to send invitation',
 
   SUCCESS_TAGGING_COMPLETED = 'Tagging completed successfully',
+
+  SUCCESS_DATASET_CREATED = 'Dataset created successfully',
+  ERROR_DATASET_CREATION_FAILED = 'Dataset creation failed',
+
+  SUCCESS_TRANSFORMATION_CREATED = 'Transformation created successfully',
+  ERROR_TRANSFORMATION_CREATION_FAILED = 'Transformation creation failed',
 }

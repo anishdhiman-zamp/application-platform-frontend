@@ -35,6 +35,10 @@ export const API_ENDPOINTS = {
   // admin
   ADMIN_DATASET_DISPLAY_CONFIG_GET: `datasets/{{datasetId}}/display-config`,
   ADMIN_DATASET_DISPLAY_CONFIG_POST: `datasets/{{datasetId}}/display-config`,
+  ADMIN_DATASET_DAG_GET: `datasets/ops/dag`,
+  ADMIN_DATASET_CREATE_POST: `datasets/ops/create`,
+  ADMIN_DATASET_TRANSFORM_POST: `datasets/ops/transform`,
+  ADMIN_DATASET_ALL_GET: `/datasets/listing-all`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,
