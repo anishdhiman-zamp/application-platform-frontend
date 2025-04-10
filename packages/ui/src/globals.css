@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  font-family: 'Inter Variable';
+}
+
+* > ::-webkit-scrollbar {
+  width: 12px;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+/* Track */
+* > ::-webkit-scrollbar-track {
+  background: #fff0;
+}
+
+/* Handle */
+* > ::-webkit-scrollbar-thumb {
+  background: #f2f2f2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Handle on hover */
+* > ::-webkit-scrollbar-thumb:hover {
+  background: #ebebeb;
+}
+
 body {
   padding: 0;
   margin: 0;
@@ -17,57 +44,72 @@ body {
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -217,278 +259,6 @@ body {
     @apply transition-opacity duration-300 ease-in-out;
   }
 }
-
-:root {
-  font-family: 'Inter Variable';
-}
-
-* > ::-webkit-scrollbar {
-  width: 12px;
-  border-radius: 100%;
-  overflow: hidden;
-}
-
-/* Track */
-* > ::-webkit-scrollbar-track {
-  background: #fff0;
-}
-
-/* Handle */
-* > ::-webkit-scrollbar-thumb {
-  background: #f2f2f2;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* Handle on hover */
-* > ::-webkit-scrollbar-thumb:hover {
-  background: #ebebeb;
-}
-
-
-
-.ag-cell-wrapper {
-  &:where(.ag-row-group) {
-    align-items: center;
-  }
-}
-
-.ag-filter-active {
-  color: #2546f5;
-  position: relative;
-  outline: none;
-  background-color: #fff;
-  --ag-icon-button-hover-color: none;
-}
-
-.ag-filter-active {
-  :where(.ag-icon-filter) {
-    clip-path: none;
-  }
-}
-
-.ag-filter-active {
-  &:after {
-    content: '';
-    height: 0px;
-    width: 0;
-  }
-}
-/* Handle on hover */
-.custom-scroll-bar::-webkit-scrollbar-thumb:hover {
-  background: #93937b;
-}
-
-.ag-checkbox-input-wrapper {
-  height: 14px;
-  width: 14px;
-}
-
-.ag-column-select-column-label {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.ag-status-name-value {
-  padding: 6px 0px;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 0.875rem;
-  align-content: center;
-}
-
-.ag-charts-proxy-legend-toolbar {
-  width: 100%;
-  left: 0;
-  display: flex !important;
-  justify-content: start !important;
-  align-items: start !important;
-}
-
-:where(.ag-cell-editor) .ag-wrapper {
-  margin-left: -8px;
-  margin-right: -8px;
-}
-
-.ag-rich-select-field-input {
-  :where(.ag-input-field-input) {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-}
-
-.ag-row-group {
-  z-index: 0 !important;
-  overflow: visible !important;
-}
-
-.ag-input-field-input:where(:not([type='checkbox'], [type='radio'])) {
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.pivot .ag-header,
-.pivot .ag-row,
-.pivot .ag-cell,
-.pivot .ag-header-group-cell,
-.pivot .ag-header-cell,
-.pivot .ag-header-cell-comp-wrapper,
-.pivot .ag-pinned-left-header {
-  padding: 0 !important;
-  border: none !important;
-}
-
-.pivot .ag-root-wrapper {
-  border-radius: 12px !important;
-  border: 1px solid #ebebeb !important;
-}
-
-.pivot .ag-header-group-cell {
-  border-right: 0.5px solid #ebebeb !important;
-  border-bottom: 0.5px solid #ebebeb !important;
-}
-
-.pivot .ag-header-group-cell.ag-column-last {
-  border-right: none !important;
-}
-
-.pivot .ag-sticky-bottom {
-  border-top: 0.5px solid #ebebeb !important;
-}
-
-.pivot .ag-header {
-  overflow: visible !important;
-}
-
-.pivot .ag-header .ag-pinned-left-header {
-  overflow: visible !important;
-}
-
-.pivot .ag-header .ag-pinned-left-header .ag-header-cell {
-  overflow: visible !important;
-}
-
-.pivot .ag-header-cell-comp-wrapper {
-  height: 100% !important;
-}
-
-.pivot .ag-header-cell-resize::after {
-  width: 0px !important;
-  background-color: white !important;
-}
-
-.pivot .ag-horizontal-left-spacer {
-  border-right: none !important;
-}
-
-.pivot .ag-body-viewport {
-  overflow: auto !important;
-  max-height: var(--pivot-max-height) !important;
-}
-
-.pivot .ag-center-cols-viewport {
-  min-height: unset !important;
-}
-
-.ag-charts-tooltip {
-  font-family: 'Inter';
-  border: 1px solid #ebebeb;
-  padding: 4px;
-  color: #171717;
-  font-weight: 450;
-  font-size: 12px;
-  border-radius: 8px;
-  box-shadow: 0px 0px 0.86px 0px #00000003;
-  box-shadow: 0px 0px 2.06px 0px #00000004;
-  box-shadow: 0px 0px 3.88px 0px #00000005;
-  box-shadow: 0px 0px 6.92px 0px #00000006;
-  box-shadow: 0px 0px 12.95px 0px #00000007;
-  box-shadow: 0px 0px 31px 0px #0000000a;
-}
-
-.ag-charts-tooltip-heading {
-  font-weight: 450;
-  font-size: 11px;
-  margin-bottom: 4px;
-}
-
-.dataset .ag-root-wrapper {
-  border-left: none;
-}
-
-#dataset-table .ag-header {
-  box-shadow: 0px 3px 0px 0px rgba(0, 0, 0, 0.02);
-  z-index: 2; /* Ensure it stays above the grid rows */
-  position: relative;
-}
-
-.login-btn-scale-100 {
-  transform: scale(1);
-  transition: transform 0.3s ease-out;
-  opacity: 1;
-}
-
-.login-btn-scale-20 {
-  transform: scale(0.2);
-  transition: transform 0.3s ease-in;
-  opacity: 0;
-}
-
-.color-transition::before,
-.color-transition::after {
-  content: '';
-}
-
-.color-transition:not(.active)::after {
-  transition: none;
-  transform: translateX(-150%);
-}
-
-.ag-grid-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #e2e2da #fff0;
-}
-
-/* Change the dragging placeholder color */
-.react-grid-item.react-grid-placeholder {
-  background: white !important;
-}
-
-.ag-cell-focus:before {
-  border-radius: 3px;
-}
-
-.ag-cell-range-single-cell {
-  border-radius: 4px;
-}
-
-.ag-fill-handle {
-  border-radius: 100%;
-  border-width: 1px;
-  border-color: white;
-}
-
-#dataset-table .ag-menu {
-  border-radius: 6px;
-}
-
-.hidden-cell {
-  opacity: 0 !important; /* Hide cell when row is not hovered */
-}
-
-.ag-row-hover .hidden-cell {
-  opacity: 1 !important; /* Show when row is hovered */
-}
-
-.ag-cell-focus::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid #2546f5;
-  pointer-events: none;
-}
-
-
 
 /* Font */
 
