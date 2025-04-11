@@ -161,8 +161,6 @@ const TreeTableComponent = ({
     };
   }, [widgetInstanceDetails, widgetData, periodicity]);
 
-  console.log('display_config =>', widgetInstanceDetails?.display_config);
-
   const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col).length === 1, [colDef]);
 
   const defaultColDef = useMemo<ColDef>(

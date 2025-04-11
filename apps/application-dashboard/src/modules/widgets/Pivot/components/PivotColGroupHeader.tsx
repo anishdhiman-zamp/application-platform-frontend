@@ -22,8 +22,6 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
     colGroupDef: colGroupDef,
   });
 
-  console.log('params =>', params);
-
   return (
     <div
       className={cn(

@@ -20,8 +20,6 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({ handleExportAgGridD
 
   useOnClickOutside(ref, () => setShowDisplayConfig(false));
 
-  console.log('displayConfigToggleData =>', displayConfigToggleData);
-
   return (
     <>
       <div
