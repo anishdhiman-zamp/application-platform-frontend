@@ -1,16 +1,28 @@
 import { FC, memo } from 'react';
+import { ColGroupDef } from 'ag-grid-community';
 import { PIVOT_HEADER_BG } from 'constants/icons';
-import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
+import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
+import { DISPLAY_CONFIG_CELL_TYPE, formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 
 type PivotAutoGroupHeaderProps = {
   displayName: string;
   isSingleHeader: boolean;
+  groupId?: string;
+  colGroupDef?: ColGroupDef;
 };
 
-const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSingleHeader }) => {
+const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
+  const { displayName, isSingleHeader, colGroupDef } = params;
   const { mainText, suffix } = formatColGroupHeaderDisplayName(displayName);
+
+  const resultantConfigStyles = getCellStyle({
+    cellType: DISPLAY_CONFIG_CELL_TYPE.HEADER_CELL,
+    colGroupDef: colGroupDef,
+  });
+
+  console.log('params =>', params);
 
   return (
     <div
@@ -18,6 +30,9 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = ({ displayName, isSin
         'w-full h-full p-3 flex flex-col items-center justify-center bg-white break-words whitespace-normal overflow-hidden',
         isSingleHeader && 'relative flex items-end justify-end',
       )}
+      style={{
+        ...resultantConfigStyles,
+      }}
     >
       {isSingleHeader && (
         <Image

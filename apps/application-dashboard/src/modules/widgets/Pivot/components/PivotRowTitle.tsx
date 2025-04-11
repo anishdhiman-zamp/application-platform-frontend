@@ -8,6 +8,7 @@ import {
   DISABLED_CHEVRON_RIGHT,
   OTHER_GATEWAY,
 } from 'constants/icons';
+import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
 import {
   BANK_NAME_ICON_MAPPING,
   getReconStatusIcon,
@@ -15,7 +16,11 @@ import {
   RECON_STATUS_TYPES,
   ROOT_LEVEL_TITLE,
 } from 'modules/widgets/Pivot/pivot.constants';
-import { formatRowTitleValue, shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
+import {
+  DISPLAY_CONFIG_CELL_TYPE,
+  formatRowTitleValue,
+  shouldAllowExpandingRow,
+} from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -25,9 +30,10 @@ interface PivotRowTitleProps {
   value: string;
   maxGroupingLevel?: number;
   displayConfig?: MapAny;
+  childIndex?: number;
 }
 
-const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, displayConfig }) => {
+const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, displayConfig, childIndex }) => {
   const [expanded, setExpanded] = useState(node?.expanded || false);
   const allowExpanding = shouldAllowExpandingRow(node);
   const { show_recon_icons, show_bank_icons } = displayConfig || {};
@@ -50,6 +56,16 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
 
   const paddingLeft = `${node?.level * (isLowestLevel ? 46 : 28) + 24}px`;
 
+  const resultantConfigStyles = getCellStyle({
+    node: node,
+    level: node?.level,
+    childIndex: childIndex,
+    value: value,
+    rowParentFieldGreaterByOne: node?.parent?.key,
+    rowGroupField: node?.key,
+    cellType: DISPLAY_CONFIG_CELL_TYPE.ROW_TITLE_CELL,
+  });
+
   return (
     <div
       className={cn(
@@ -58,7 +74,11 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
         isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1 border-b-0',
       )}
-      style={{ paddingLeft, willChange: 'transform' }}
+      style={{
+        paddingLeft,
+        willChange: 'transform',
+        ...resultantConfigStyles,
+      }}
       onClick={() => allowExpanding && node.setExpanded(!expanded)}
     >
       {!isRootLevel && !isLowestLevel && (

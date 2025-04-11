@@ -1,6 +1,9 @@
 import { FC, memo, useMemo, useRef, useState } from 'react';
 import { Column, GridApi, IRowNode } from 'ag-grid-community';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
+import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
+import { AllPivotColumnsToHideType, DisplayConfigStyleType } from 'modules/widgets/Pivot/pivot.types';
+import { DISPLAY_CONFIG_CELL_TYPE } from 'modules/widgets/Pivot/pivot.utils';
 import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 
@@ -11,9 +14,27 @@ interface TreeCellProps {
   column?: Column;
   api?: GridApi;
   currency?: string;
+  childIndex?: number;
+  groupData?: MapAny;
+  hiddenColIds?: string[];
+  gridApi?: GridApi;
+  setAllPivotColumnsToHide: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
+  currentWidgetInstanceId?: string;
+  displayConfigStyle?: DisplayConfigStyleType;
 }
 
-const TreeCell: FC<TreeCellProps> = ({ node, value, showPercentage, api, column, currency }) => {
+const TreeCell: FC<TreeCellProps> = ({
+  node,
+  value,
+  showPercentage,
+  api,
+  column,
+  currency,
+  childIndex,
+  setAllPivotColumnsToHide,
+  currentWidgetInstanceId,
+  displayConfigStyle,
+}) => {
   const [toggledRows, setToggledRows] = useState<Record<string, boolean>>({});
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -84,6 +105,45 @@ const TreeCell: FC<TreeCellProps> = ({ node, value, showPercentage, api, column,
     }
   };
 
+  const resultantConfigStyles = getCellStyle({
+    node: node,
+    level: node?.level,
+    childIndex: childIndex,
+    column: column,
+    value: value,
+    rowParentFieldGreaterByOne: node?.parent?.key,
+    rowGroupField: node?.key,
+    columnId: column?.getColId(),
+    columnGroupId: column?.getParent()?.getGroupId(),
+    cellType: DISPLAY_CONFIG_CELL_TYPE.DATA_CELL,
+    setAllPivotColumnsToHide: setAllPivotColumnsToHide,
+    currentWidgetInstanceId: currentWidgetInstanceId,
+    displayConfigStyle: displayConfigStyle,
+  });
+
+  console
+    .log
+    //   'node =>',
+    //   node,
+    //   'level =>',
+    //   node?.level,
+    //   'childIndex =>',
+    //   childIndex,
+    // 'column =>',
+    // column,
+    // 'value =>',
+    // value,
+    //   'rowParentFieldGreaterByOne =>',
+    //   node?.parent?.key,
+    //   'rowGroupField =>',
+    //   node?.key,
+    //   'columnId =>',
+    //   column?.getColId(),
+    //   'columnGroupId =>',
+    //   column?.getParent()?.getGroupId(),
+    //   displayConfigStyle,
+    ();
+
   return (
     <div
       className={cn(
@@ -94,6 +154,9 @@ const TreeCell: FC<TreeCellProps> = ({ node, value, showPercentage, api, column,
           'border-b-0': isRootLevel,
         },
       )}
+      style={{
+        ...resultantConfigStyles,
+      }}
       onClick={handleToggle}
     >
       {displayValue}

@@ -7,13 +7,20 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface PivotConfigDropdownProps {
   handleExportAgGridData: defaultFnType;
+  displayConfigToggleData?: {
+    default: boolean;
+    toggle_field: string;
+    toggle_title: string;
+  }[];
 }
 
-const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({ handleExportAgGridData }) => {
+const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({ handleExportAgGridData, displayConfigToggleData }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [showDisplayConfig, setShowDisplayConfig] = useState(false);
 
   useOnClickOutside(ref, () => setShowDisplayConfig(false));
+
+  console.log('displayConfigToggleData =>', displayConfigToggleData);
 
   return (
     <>
@@ -26,7 +33,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({ handleExportAgGridD
       {showDisplayConfig && (
         <div
           className={cn(
-            'absolute z-[9999] top-[72px] -left-2.5 bg-white flex flex-col gap-2 p-1.5 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',
+            'absolute z-[9999] top-[72px] -left-2.5 bg-white flex flex-col  p-1.5 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',
           )}
           ref={ref}
         >
@@ -38,6 +45,16 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({ handleExportAgGridD
               <span className='f-13-450 text-GRAY_1000'>Export Data</span>
             </div>
           </div>
+
+          {displayConfigToggleData &&
+            displayConfigToggleData?.map((item, index) => (
+              <div
+                key={index}
+                className='flex items-center justify-between gap-2.5 py-1.5 px-2 rounded cursor-pointer hover:bg-GRAY_100'
+              >
+                <span className='f-13-450 text-GRAY_1000'>{item.toggle_title}</span>
+              </div>
+            ))}
         </div>
       )}
     </>
