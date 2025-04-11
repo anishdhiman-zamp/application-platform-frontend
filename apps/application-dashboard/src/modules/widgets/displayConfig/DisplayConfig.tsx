@@ -2,6 +2,7 @@ import {
   DISPLAY_CONFIG_CELL_TYPE,
   DISPLAY_CONFIG_RULES,
   DisplayConfigRulesConditionsAliasType,
+  DisplayConfigRulesConditionsPeriodType,
   DisplayConfigRulesConditionsType,
 } from 'modules/widgets/displayConfig/displayConfig.types';
 import {
@@ -68,11 +69,11 @@ export const getCellStyle = (params: MapAny) => {
     headerName?: string,
     date?: string,
   ): boolean {
-    if (period === 'TODAY') {
+    if (period === DisplayConfigRulesConditionsPeriodType.TODAY) {
       return value === headerName && date !== getTodayFormattedDatePivot();
     }
 
-    if (period === 'WEEKEND') {
+    if (period === DisplayConfigRulesConditionsPeriodType.WEEKEND) {
       const { suffix } = formatColGroupHeaderDisplayName(date ?? '');
 
       return ['Sat', 'Sun'].some((day) => suffix?.includes(day));

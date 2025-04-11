@@ -42,6 +42,10 @@ export enum DisplayConfigRulesConditionsAliasType {
   DATE = 'date',
 }
 
+export enum DisplayConfigRulesConditionsPeriodType {
+  TODAY = 'today',
+  WEEKEND = 'weekend',
+}
 export type DisplayConfigRulesConditionsType = {
   level?: number;
   alternate_cell_number?: number;
@@ -51,11 +55,8 @@ export type DisplayConfigRulesConditionsType = {
   row_group_field?: string;
   operator?: string;
   header_name?: string;
-  period?: string;
-  alias?:
-    | DisplayConfigRulesConditionsAliasType.STRING
-    | DisplayConfigRulesConditionsAliasType.NUMBER
-    | DisplayConfigRulesConditionsAliasType.DATE;
+  period?: DisplayConfigRulesConditionsPeriodType;
+  alias?: DisplayConfigRulesConditionsAliasType;
   hide?: boolean;
   value?: string;
   toggle_field?: string;
