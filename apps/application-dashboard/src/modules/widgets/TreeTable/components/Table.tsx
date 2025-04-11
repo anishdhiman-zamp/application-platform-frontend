@@ -30,8 +30,13 @@ import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDro
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
 import { PIVOT_TABLE_THEME_PARAMS } from 'modules/widgets/Pivot/pivot.constants';
-import { AllPivotColumnsToHideType, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
-import { concatTagFilters } from 'modules/widgets/Pivot/pivot.utils';
+import {
+  AllPivotColumnsToHideType,
+  DisplayConfigRulesConditionsType,
+  ParentFilters,
+  PivotContext,
+} from 'modules/widgets/Pivot/pivot.types';
+import { concatTagFilters, DISPLAY_CONFIG_RULES } from 'modules/widgets/Pivot/pivot.utils';
 import TreeCell from 'modules/widgets/TreeTable/components/Cell';
 import {
   COL_MIN_WIDTH,
@@ -100,6 +105,10 @@ const TreeTableComponent = ({
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const [allPivotColumnsToHide, setAllPivotColumnsToHide] = useState<AllPivotColumnsToHideType[]>([]);
   const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
+  const displayConfigToggleConditions =
+    display_config?.conditional_styles?.data_cell?.rules
+      ?.filter((rule: { type: string }) => rule?.type === DISPLAY_CONFIG_RULES.TOGGLE)
+      ?.flatMap((rule: { conditions: DisplayConfigRulesConditionsType }) => rule?.conditions ?? []) ?? [];
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
@@ -401,9 +410,7 @@ const TreeTableComponent = ({
     <div className='h-fit w-full relative pivot tree-table group' ref={gridContainerRef}>
       <PivotConfigDropdown
         handleExportAgGridData={handleExportAgGridData}
-        displayConfigToggleData={display_config?.conditional_styles?.data_cell?.rules
-          ?.filter((rule) => rule?.type === 'toggle')
-          ?.flatMap((rule) => rule.conditions)}
+        displayConfigToggleData={displayConfigToggleConditions}
       />
       <AgGridReact
         onGridReady={onGridReady}
