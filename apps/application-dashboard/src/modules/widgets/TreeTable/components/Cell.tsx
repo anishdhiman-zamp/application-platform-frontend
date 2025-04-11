@@ -121,29 +121,6 @@ const TreeCell: FC<TreeCellProps> = ({
     displayConfigStyle: displayConfigStyle,
   });
 
-  console
-    .log
-    //   'node =>',
-    //   node,
-    //   'level =>',
-    //   node?.level,
-    //   'childIndex =>',
-    //   childIndex,
-    // 'column =>',
-    // column,
-    // 'value =>',
-    // value,
-    //   'rowParentFieldGreaterByOne =>',
-    //   node?.parent?.key,
-    //   'rowGroupField =>',
-    //   node?.key,
-    //   'columnId =>',
-    //   column?.getColId(),
-    //   'columnGroupId =>',
-    //   column?.getParent()?.getGroupId(),
-    //   displayConfigStyle,
-    ();
-
   return (
     <div
       className={cn(
