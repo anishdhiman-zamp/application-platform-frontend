@@ -63,12 +63,12 @@ export const getCellStyle = (params: MapAny) => {
     });
   };
 
-  function checkPeriodBasedDateColumnToHide(
+  const checkPeriodBasedDateColumnToHide = (
     period: string,
     value: string,
     headerName?: string,
     date?: string,
-  ): boolean {
+  ): boolean => {
     if (period === DisplayConfigRulesConditionsPeriodType.TODAY) {
       return value === headerName && date !== getTodayFormattedDatePivot();
     }
@@ -80,7 +80,7 @@ export const getCellStyle = (params: MapAny) => {
     }
 
     return false;
-  }
+  };
 
   rules.forEach((rule: { type: DISPLAY_CONFIG_RULES; conditions: DisplayConfigRulesConditionsType }) => {
     switch (rule.type as DISPLAY_CONFIG_RULES) {
