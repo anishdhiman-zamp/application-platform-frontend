@@ -20,7 +20,7 @@ interface PivotCellProps {
   groupData?: MapAny;
   hiddenColIds?: string[];
   gridApi?: GridApi;
-  setAllPivotColumnsToHide: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
+  setAllPivotColumnsToHide?: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
   currentWidgetInstanceId?: string;
   displayConfigStyle?: DisplayConfigStyleType;
 }
