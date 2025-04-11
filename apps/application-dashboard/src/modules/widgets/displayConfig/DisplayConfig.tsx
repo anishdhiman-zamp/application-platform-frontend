@@ -1,4 +1,5 @@
 import {
+  CALENDER_DAYS,
   DISPLAY_CONFIG_CELL_TYPE,
   DISPLAY_CONFIG_RULES,
   DisplayConfigRulesConditionsAliasType,
@@ -76,7 +77,7 @@ export const getCellStyle = (params: MapAny) => {
     if (period === DisplayConfigRulesConditionsPeriodType.WEEKEND) {
       const { suffix } = formatColGroupHeaderDisplayName(date ?? '');
 
-      return ['Sat', 'Sun'].some((day) => suffix?.includes(day));
+      return [CALENDER_DAYS.SATURDAY, CALENDER_DAYS.SUNDAY].some((day) => suffix?.includes(day));
     }
 
     return false;

@@ -42,6 +42,16 @@ export enum DisplayConfigRulesConditionsAliasType {
   DATE = 'date',
 }
 
+export enum CALENDER_DAYS {
+  MONDAY = 'Mon',
+  TUESDAY = 'Tue',
+  WEDNESDAY = 'Wed',
+  THURSDAY = 'Thu',
+  FRIDAY = 'Fri',
+  SATURDAY = 'Sat',
+  SUNDAY = 'Sun',
+}
+
 export enum DisplayConfigRulesConditionsPeriodType {
   TODAY = 'today',
   WEEKEND = 'weekend',
