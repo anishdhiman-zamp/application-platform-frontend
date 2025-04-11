@@ -1,4 +1,4 @@
-import { ColumnContext, DISPLAY_CONFIG_CELL_TYPE, DISPLAY_CONFIG_RULES } from 'modules/widgets/Pivot/pivot.utils';
+import { ColumnContext } from 'modules/widgets/Pivot/pivot.utils';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -99,63 +99,6 @@ export type ColumnFilterConfig = {
       type: CONDITION_OPERATOR_TYPE.STARTS_WITH;
     }
 );
-
-export const DISPLAY_CONFIG_OPERATOR_TYPE_SYMBOL_MAP = {
-  [CONDITION_OPERATOR_TYPE.EQUAL]: '===',
-  [CONDITION_OPERATOR_TYPE.NOT_EQUAL]: '!=',
-  [CONDITION_OPERATOR_TYPE.GREATER_THAN]: '>',
-  [CONDITION_OPERATOR_TYPE.LESS_THAN]: '<',
-  [CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL]: '>=',
-  [CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL]: '<=',
-  [CONDITION_OPERATOR_TYPE.STARTS_WITH]: 'startswith',
-  [CONDITION_OPERATOR_TYPE.CONTAINS]: 'contains',
-  [CONDITION_OPERATOR_TYPE.NOT_CONTAINS]: 'ncontains',
-};
-
-export enum DisplayConfigRulesConditionsAliasType {
-  STRING = 'string',
-  NUMBER = 'number',
-  DATE = 'date',
-}
-
-export type DisplayConfigRulesConditionsType = {
-  level?: number;
-  alternate_cell_number?: number;
-  ref?: string;
-  column_id?: string[];
-  column_group_id?: string;
-  row_group_field?: string;
-  operator?: string;
-  header_name?: string;
-  period?: string;
-  alias?:
-    | DisplayConfigRulesConditionsAliasType.STRING
-    | DisplayConfigRulesConditionsAliasType.NUMBER
-    | DisplayConfigRulesConditionsAliasType.DATE;
-  hide?: boolean;
-  value?: string;
-  toggle_field?: string;
-  toggle_title?: string;
-  default?: boolean;
-  style_properties?:
-    | {
-        [key: string]: string;
-      }
-    | {
-        [key: string]: string;
-      }[];
-}[];
-
-export type DisplayConfigRulesType = {
-  type: DISPLAY_CONFIG_RULES;
-  conditions?: DisplayConfigRulesConditionsType;
-}[];
-
-export type DisplayConfigStyleType = {
-  [key in DISPLAY_CONFIG_CELL_TYPE]?: {
-    rules: DisplayConfigRulesType;
-  };
-};
 
 export type ColumnsToHideType = {
   colId?: string;

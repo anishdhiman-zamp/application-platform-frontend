@@ -1,75 +1,19 @@
 import {
-  AllPivotColumnsToHideType,
-  ColumnsToHideType,
-  DisplayConfigRulesConditionsAliasType,
-  DisplayConfigRulesConditionsType,
-} from 'modules/widgets/Pivot/pivot.types';
-import {
   DISPLAY_CONFIG_CELL_TYPE,
   DISPLAY_CONFIG_RULES,
-  extractDateDWDFormat,
-  formatColGroupHeaderDisplayName,
+  DisplayConfigRulesConditionsAliasType,
+  DisplayConfigRulesConditionsType,
+} from 'modules/widgets/displayConfig/displayConfig.types';
+import {
+  compareColumnGroupAliasDate,
+  evaluateOperator,
   getTodayFormattedDatePivot,
-} from 'modules/widgets/Pivot/pivot.utils';
+  handleExtractPartsFromColId,
+  handleMatchRecursiveParentKey,
+} from 'modules/widgets/displayConfig/displayConfig.utils';
+import { AllPivotColumnsToHideType, ColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
+import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import { MapAny } from 'types/commonTypes';
-import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
-
-const evaluateOperator = (value1: string | number, value2: string | number, operator: string): boolean => {
-  switch (operator) {
-    case CONDITION_OPERATOR_TYPE.EQUAL:
-      return value1 === value2;
-    case CONDITION_OPERATOR_TYPE.NOT_EQUAL:
-      return value1 !== value2;
-    case CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL:
-      return value1 >= value2;
-    case CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL:
-      return value1 <= value2;
-    case CONDITION_OPERATOR_TYPE.GREATER_THAN:
-      return value1 > value2;
-    case CONDITION_OPERATOR_TYPE.LESS_THAN:
-      return value1 < value2;
-    case CONDITION_OPERATOR_TYPE.STARTS_WITH:
-      return value1?.toString().startsWith(value2?.toString());
-    case CONDITION_OPERATOR_TYPE.CONTAINS:
-      return value1?.toString().includes(value2?.toString());
-    case CONDITION_OPERATOR_TYPE.NOT_CONTAINS:
-      return !value1?.toString().includes(value2?.toString());
-    default:
-      return false;
-  }
-};
-
-const compareColumnGroupAliasDate = (data_1: string, data_2: string, operator: string): boolean => {
-  const date1 = extractDateDWDFormat(data_1);
-  const date2 = extractDateDWDFormat(data_2);
-
-  if (!date1 || !date2) return false;
-  const timestamp1 = new Date(date1).getTime();
-  const timestamp2 = new Date(date2).getTime();
-
-  return evaluateOperator(timestamp1, timestamp2, operator);
-};
-
-const handleMatchRecursiveParentKey = (
-  level: number,
-  parentRowField: string,
-  node: { parent?: { key: string }; key: string },
-): boolean => {
-  if (!node || level <= 0) return false;
-  if (node?.key === parentRowField) return true;
-
-  return node?.parent ? handleMatchRecursiveParentKey(level - 1, parentRowField, node?.parent) : false;
-};
-
-const handleExtractPartsFromColId = (colId: string) => {
-  const dateFormatRegex = /\d{1,2} \w{3} \d{4}/;
-  const valueAfterDateFormatRegex = /pivot_DATE_\d{1,2} \w{3} \d{4}_/;
-  const date = extractDateDWDFormat(colId)?.match(dateFormatRegex);
-
-  const value = colId?.replace(valueAfterDateFormatRegex, '');
-
-  return { date, value };
-};
 
 export const getCellStyle = (params: MapAny) => {
   const {

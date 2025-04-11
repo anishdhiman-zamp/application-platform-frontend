@@ -8,7 +8,7 @@ import {
   DISABLED_CHEVRON_RIGHT,
   OTHER_GATEWAY,
 } from 'constants/icons';
-import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
+import { DISPLAY_CONFIG_CELL_TYPE } from 'modules/widgets/displayConfig/displayConfig.types';
 import {
   BANK_NAME_ICON_MAPPING,
   getReconStatusIcon,
@@ -16,14 +16,11 @@ import {
   RECON_STATUS_TYPES,
   ROOT_LEVEL_TITLE,
 } from 'modules/widgets/Pivot/pivot.constants';
-import {
-  DISPLAY_CONFIG_CELL_TYPE,
-  formatRowTitleValue,
-  shouldAllowExpandingRow,
-} from 'modules/widgets/Pivot/pivot.utils';
+import { formatRowTitleValue, shouldAllowExpandingRow } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import { getCellStyle } from '@/modules/widgets/displayConfig/DisplayConfig';
 
 interface PivotRowTitleProps {
   node: IRowNode;

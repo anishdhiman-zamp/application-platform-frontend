@@ -1,11 +1,11 @@
 import { FC, memo, useMemo, useRef, useState } from 'react';
 import { Column, GridApi, IRowNode } from 'ag-grid-community';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
-import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
-import { AllPivotColumnsToHideType, DisplayConfigStyleType } from 'modules/widgets/Pivot/pivot.types';
-import { DISPLAY_CONFIG_CELL_TYPE } from 'modules/widgets/Pivot/pivot.utils';
+import { DISPLAY_CONFIG_CELL_TYPE, DisplayConfigStyleType } from 'modules/widgets/displayConfig/displayConfig.types';
+import { AllPivotColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
 import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
+import { getCellStyle } from '@/modules/widgets/displayConfig/DisplayConfig';
 
 interface TreeCellProps {
   node: IRowNode;

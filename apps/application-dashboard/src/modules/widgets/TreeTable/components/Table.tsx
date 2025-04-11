@@ -25,18 +25,17 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import {
+  DISPLAY_CONFIG_RULES,
+  DisplayConfigRulesConditionsType,
+} from 'modules/widgets/displayConfig/displayConfig.types';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
 import { PIVOT_TABLE_THEME_PARAMS } from 'modules/widgets/Pivot/pivot.constants';
-import {
-  AllPivotColumnsToHideType,
-  DisplayConfigRulesConditionsType,
-  ParentFilters,
-  PivotContext,
-} from 'modules/widgets/Pivot/pivot.types';
-import { concatTagFilters, DISPLAY_CONFIG_RULES } from 'modules/widgets/Pivot/pivot.utils';
+import { AllPivotColumnsToHideType, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
+import { concatTagFilters } from 'modules/widgets/Pivot/pivot.utils';
 import TreeCell from 'modules/widgets/TreeTable/components/Cell';
 import {
   COL_MIN_WIDTH,

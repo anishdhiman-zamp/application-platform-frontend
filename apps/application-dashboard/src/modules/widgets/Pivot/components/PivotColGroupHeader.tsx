@@ -1,10 +1,11 @@
 import { FC, memo } from 'react';
 import { ColGroupDef } from 'ag-grid-community';
 import { PIVOT_HEADER_BG } from 'constants/icons';
-import { getCellStyle } from 'modules/widgets/Pivot/components/PivotDisplayConfig';
-import { DISPLAY_CONFIG_CELL_TYPE, formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
+import { DISPLAY_CONFIG_CELL_TYPE } from 'modules/widgets/displayConfig/displayConfig.types';
+import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import Image from 'next/image';
 import { cn } from 'utils/common';
+import { getCellStyle } from '@/modules/widgets/displayConfig/DisplayConfig';
 
 type PivotAutoGroupHeaderProps = {
   displayName: string;

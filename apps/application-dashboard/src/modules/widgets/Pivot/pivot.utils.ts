@@ -25,45 +25,6 @@ import { capitalizeFirstLetter, formatCurrencyValue, snakeCaseToSentenceCase } f
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
-export const enum DISPLAY_CONFIG_CELL_TYPE {
-  ROW_TITLE_CELL = 'row_title_cell',
-  HEADER_CELL = 'header_cell',
-  DATA_CELL = 'data_cell',
-}
-
-export const enum DISPLAY_CONFIG_RULES {
-  LEVEL = 'level',
-  VALUE_MATCH = 'value_match',
-  HIDE = 'hide',
-  TOGGLE = 'toggle',
-}
-
-export const enum LOGICAL_OPERATOR_CONDITIONS {
-  AND = 'AND',
-  OR = 'OR',
-}
-
-export const enum ALTERNATE_TYPE {
-  BOTH = 'both',
-  ODD = 'odd',
-  EVEN = 'even',
-}
-
-export const getTodayFormattedDatePivot = (): string => {
-  return new Date().toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-};
-
-export const extractDateDWDFormat = (str: string): string | null => {
-  const dateRegex = /\d{1,2} \w{3} \d{4}/; // Matches "18 Feb 2025"
-  const match = str?.match(dateRegex);
-
-  return match ? match[0] : null;
-};
-
 export const backendConfig = {
   styleConfig: {
     rowStyles: [
