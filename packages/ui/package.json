@@ -6,6 +6,7 @@
     "src"
   ],
   "main": "./src/components/index.ts",
+  "types": "./src/components/index.ts",
   "scripts": {
     "ui": "npm run shadcn@latest",
     "lint": "eslint --fix . --ext .ts,.tsx,.js,.jsx",
@@ -40,12 +41,16 @@
     "tw-animate-css": "^1.2.5"
   },
   "exports": {
+    ".": {
+      "types": "./src/components/index.ts",
+      "import": "./src/components/index.ts"
+    },
     "./globals.css": "./src/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
-    "./hooks/*": "./src/hooks/*.ts",
-    "./components": "./src/components/index.ts"
+    "./hooks/*": "./src/hooks/*.ts"
+   
   },
   "lint-staged": {
     "*.ts": "eslint --fix",

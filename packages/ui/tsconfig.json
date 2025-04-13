@@ -3,8 +3,17 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@zamp-platform/ui/*": ["./src/*"]
-    }
+      "@zamp-platform/ui/*": ["./src/*"],
+      "@zamp-platform/ui": ["./src/components/index.ts"]
+    },
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "target": "ESNext",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src", "tailwind.config.ts", ".eslintrc.js"],
   "exclude": ["node_modules"]
