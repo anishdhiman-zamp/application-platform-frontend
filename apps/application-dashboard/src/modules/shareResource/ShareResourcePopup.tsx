@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
   useDeleteAudienceFromResourceMutation,
   useGetAudiencesByResourceIdQuery,
@@ -22,11 +22,11 @@ import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { adminAccessPermissionForResource } from '@/utils/accessPermission/accessPermission';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -87,8 +87,20 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
   const user_role = getUserPrivilege();
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
-  const isResourceSharable =
-    !showValidationError && selectedItems?.length > 0 && userPrivilege === PERMISSION_ROLES.ADMIN;
+  const currentUserHasAdminAccess = useMemo(() => {
+    return adminAccessPermissionForResource(
+      userAccessToResourceList,
+      resourceType,
+      organizationId,
+      user_email,
+      allTeamsData
+        ?.map((t) => t.team_memberships)
+        .flat()
+        .filter((tm) => tm.user_id === user_email)
+        .map((tm) => tm.team_id) ?? [],
+    );
+  }, [userAccessToResourceList, organizationId, user_email, allTeamsData]);
+  const isResourceSharable = !showValidationError && selectedItems?.length > 0 && currentUserHasAdminAccess;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
 
@@ -422,6 +434,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
                       resource_audience_type={audience?.resource_audience_type}
                       userPrivilege={userPrivilege}
                       orgName={orgLabel}
+                      currentUserHasAdminAccess={currentUserHasAdminAccess}
                       customerName={orgName ?? ''}
                       teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
                       changeRole={handleRoleChange}

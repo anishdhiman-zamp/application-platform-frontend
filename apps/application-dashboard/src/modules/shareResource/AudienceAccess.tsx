@@ -2,11 +2,10 @@ import React, { FC, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
-import { PageAccessPrivilegesType, ResourcePrivilege, ResourceType } from 'modules/shareResource/share-resource.types';
+import { ResourcePrivilege, ResourceType } from 'modules/shareResource/share-resource.types';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
-import { accessPermissionForPage } from 'utils/accessPermission/accessPermission';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import { OptionsType } from '@/types/commonTypes';
@@ -28,6 +27,7 @@ type AudienceAccessPropsType = {
     email?: string;
   };
   userPrivilege: string;
+  currentUserHasAdminAccess: boolean;
   resource_audience_type: string;
   orgName: string;
   customerName: string;
@@ -47,7 +47,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   privilegeList,
   resource_audience_id,
   user,
-  userPrivilege,
+  currentUserHasAdminAccess,
   resource_audience_type,
   orgName,
   customerName,
@@ -69,8 +69,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
       ? teamInfo?.name
       : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
-  const checkPermission = accessPermissionForPage(userPrivilege);
-  const showRoleChangeDropdown = checkPermission && !checkIfResourceTypeOrg;
+  const showRoleChangeDropdown = currentUserHasAdminAccess && !checkIfResourceTypeOrg;
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -149,7 +148,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             </div>
           </div>
           <span className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
-            {checkPermission && (
+            {currentUserHasAdminAccess && (
               <>
                 <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
                 {resource_type}
@@ -167,7 +166,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             onChange={(role: OptionsType) => handleRoleChange(role)}
             options={privilegeList}
             selectedValue={selectedRole}
-            defaultValue={role as PageAccessPrivilegesType}
+            defaultValue={role as ResourcePrivilege}
             showDelete
             showSelectedIcon
             isHoveredDropdown={isHoveredDropdown}
