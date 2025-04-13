@@ -1,19 +1,21 @@
-import React, { FC, useCallback, useRef, useState } from 'react';
-import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from 'apis/people';
+import { FC, useCallback, useRef, useState } from 'react';
+import { useGetAudiencesByResourceIdQuery, usePostShareResourceToAudiencesMutation } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import { CombinedOptionListDataType } from 'modules/page/pages.types';
+import { ShareResourcePopupProps, ValidationResult } from 'modules/shareResource/share-resource.types';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
+import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
+import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -23,14 +25,8 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-import { ResourceConfig, ResourceType, ShareResourcePopupProps, ValidationResult } from './share-resource.types';
 
-const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
-  resourceId,
-  resourceType,
-  apiHooks,
-  resourceConfig,
-}) => {
+const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceType, resourceConfig }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
     resourceConfig.accessPrivilegesList[0].value,
@@ -41,21 +37,19 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
-    { organizationId },
-    { skip: !organizationId },
+  const { data: teamMembersData } = useGetAudiencesByResourceIdQuery(
+    { resourceType, resourceId },
+    { skip: !resourceId },
   );
-  
-  const resourceParams = { [resourceConfig.idPropName]: resourceId };
-  
+
   const {
     data: audiencesData,
     isLoading: isLoadingAudiencesData,
     refetch: refetchAudiencesData,
-  } = apiHooks.useGetAudiencesQuery(resourceParams, { skip: !resourceId });
-  
-  const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = apiHooks.usePostShareMutation();
-  
+  } = useGetAudiencesByResourceIdQuery({ resourceType, resourceId }, { skip: !resourceId });
+
+  const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostShareResourceToAudiencesMutation();
+
   const userAccessToResourceList = audiencesData ?? [];
   const showInitialDropdownOptions = !isLoadingAudiencesData && !!(userAccessToResourceList?.length <= 1);
   const placeholderText = 'Share with people and teams';
@@ -64,8 +58,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
   const userPrivilege =
     userAccessToResourceList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const isResourceSharable =
-    !showValidationError && selectedItems?.length > 0 && userPrivilege !== PERMISSION_ROLES.VIEWER;
-  const checkPermission = apiHooks.accessPermissionFn(userPrivilege);
+    !showValidationError && selectedItems?.length > 0 && userPrivilege === PERMISSION_ROLES.ADMIN;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
   const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
@@ -102,11 +95,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
   useOnClickOutside(popupRef, handleClosePopup);
 
   const handleShareResource = () => {
-    if (!checkPermission) {
-      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.INVITE]);
-      return;
-    }
-    
     const shareData: AudiencesDatasetShareData = {
       audiences: selectedItems?.map((item) => ({
         audience_type: item?.resource_audience_type ?? '',
@@ -115,12 +103,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
       })),
     };
 
-    const apiParams = {
-      ...resourceParams,
-      body: shareData
-    };
-
-    postInviteAudiences(apiParams)
+    postInviteAudiences({ resourceType, resourceId, body: shareData })
       .unwrap()
       .then(() => {
         setSelectedItems([]);
@@ -247,7 +230,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
   const combinedOptionListsData: CombinedOptionListDataType[] = [
     { label: orgLabel ?? '', value: orgName ?? '', type: ResourceAudienceType.ORGANIZATION, color: '' },
     ...(teamMembersData?.map((member) => ({
-      label: getUserNameFromEmail(member?.user?.email) ?? '',
+      label: getUserNameFromEmail(member?.user?.email ?? '') ?? '',
       value: member?.user?.email ?? '',
       type: member?.resource_audience_type ?? '',
     })) || []),

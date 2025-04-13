@@ -62,6 +62,11 @@ export const API_ENDPOINTS = {
 
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
+
+  AUDIENCES_BY_RESOURCE_ID_GET: `{{resourceType}}/{{resourceId}}/audiences`,
+  SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceType}}/{{resourceId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceType}}/{{resourceId}}/audiences`,
+  DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceType}}/{{resourceId}}/audiences`,
 };
 
 export const enum REQUEST_TYPES {

@@ -5,7 +5,7 @@ import { FC } from 'react';
  */
 export enum ResourceType {
   DATASET = 'dataset',
-  PAGE = 'page'
+  PAGE = 'page',
 }
 
 /**
@@ -34,7 +34,10 @@ export type ResourceAccessComponentProps = {
  * Generic shape of the API hooks used by the component
  */
 export type ResourceApiHooks<T = any> = {
-  useGetAudiencesQuery: (params: { [key: string]: string }, options?: any) => {
+  useGetAudiencesQuery: (
+    params: { [key: string]: string },
+    options?: any,
+  ) => {
     data: T[];
     isLoading: boolean;
     refetch: () => void;
@@ -46,7 +49,7 @@ export type ResourceApiHooks<T = any> = {
 /**
  * Configuration for resource-specific behavior
  */
-export type ResourceConfig = {
+export type ShareResourceConfig = {
   type: ResourceType;
   idPropName: string; // e.g., "datasetId" or "pageId"
   accessComponent: FC<any>;
@@ -64,8 +67,8 @@ export type ResourceConfig = {
 export type ShareResourcePopupProps = {
   resourceId: string;
   resourceType: ResourceType;
-  apiHooks: ResourceApiHooks;
-  resourceConfig: ResourceConfig;
+  resourceAdminPrivilege: string;
+  resourceConfig: ShareResourceConfig;
 };
 
 /**

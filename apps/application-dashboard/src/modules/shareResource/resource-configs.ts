@@ -1,9 +1,9 @@
-import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import DatasetAccessToAudiences from 'modules/data/components/DatasetAccessToAudiences';
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import PageAccessToAudiences from 'modules/page/PageAccessToAudience';
 import { PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
-import { ResourceConfig, ResourceType } from './share-resource.types';
+import { ResourceConfig, ResourceType } from 'modules/shareResource/share-resource.types';
+import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 /**
  * Configuration for dataset resources
