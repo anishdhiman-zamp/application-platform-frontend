@@ -41,7 +41,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData, isLoading: isLoadingTeamMembersData } = useGetAudiencesByOrganisationIdQuery(
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId },
   );
@@ -325,7 +325,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({
                     setShowValidationError={setShowValidationError}
                     onValidateAndAdd={handleValidateAndAdd}
                     optionsList={filteredOptionListsData}
-                    isLoadingOptionsList={isLoadingTeamMembersData}
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     optionalOpenDropdownOptions={showInitialDropdownOptions}
