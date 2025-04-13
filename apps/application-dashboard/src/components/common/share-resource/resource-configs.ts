@@ -3,7 +3,6 @@ import DatasetAccessToAudiences from 'modules/data/components/DatasetAccessToAud
 import { DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
 import PageAccessToAudiences from 'modules/page/PageAccessToAudience';
 import { PAGE_ACCESS_PRIVILEGES_LIST } from 'modules/page/pages.constants';
-import { accessPermissionForDataset, accessPermissionForPage } from 'utils/accessPermission/accessPermission';
 import { ResourceConfig, ResourceType } from './share-resource.types';
 
 /**

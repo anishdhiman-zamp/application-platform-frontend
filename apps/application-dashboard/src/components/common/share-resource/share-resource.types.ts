@@ -1,8 +1,4 @@
 import { FC } from 'react';
-import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
-import { CombinedOptionListDataType } from 'modules/page/pages.types';
-import { ResourceAudienceType } from 'types/api/auth.types';
-import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 
 /**
  * Generic types for different resources (dataset or page)

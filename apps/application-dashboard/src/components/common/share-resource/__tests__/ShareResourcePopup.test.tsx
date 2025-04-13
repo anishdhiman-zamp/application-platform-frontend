@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -6,8 +7,6 @@ import { ShareResourcePopup } from '../index';
 import { ResourceType } from '../share-resource.types';
 import { datasetConfig, pageConfig } from '../resource-configs';
 import { toast } from 'components/common/toast/Toast';
-import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
-import { ResourceAudienceType } from 'types/api/auth.types';
 
 jest.mock('components/common/toast/Toast', () => ({
   toast: {
@@ -90,11 +89,23 @@ jest.mock('components/commonWrapper', () => ({
   ),
 }));
 
-const MockAccessComponent = ({ resourceId, privilege, user }) => (
+const MockAccessComponent = ({ 
+  resourceId, 
+  privilege, 
+  user 
+}) => (
   <div data-testid="access-component">
     {resourceId} - {privilege} - {user.email}
   </div>
 );
+
+MockAccessComponent.propTypes = {
+  resourceId: PropTypes.string.isRequired,
+  privilege: PropTypes.string.isRequired,
+  user: PropTypes.shape({
+    email: PropTypes.string.isRequired
+  }).isRequired
+};
 
 const mockStore = configureStore([]);
 const initialState = {
