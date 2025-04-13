@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { ShareDatasetPopupPropsType } from 'modules/data/data.types';
 import { datasetConfig, ResourceType, ShareResourcePopup } from '@/modules/shareResource';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -7,7 +6,12 @@ import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.type
  * ShareDatasetPopup component
  * Wrapper around the shared ShareResourcePopup component with dataset-specific configuration
  */
-const ShareDatasetPopup: FC<ShareDatasetPopupPropsType> = ({ datasetId }) => {
+
+type ShareDatasetPopupProps = {
+  datasetId: string;
+};
+
+const ShareDatasetPopup: FC<ShareDatasetPopupProps> = ({ datasetId }) => {
   return (
     <ShareResourcePopup
       resourceId={datasetId}

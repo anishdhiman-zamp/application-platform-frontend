@@ -6,10 +6,6 @@ export type UserAccessToDataSetType = {
   resource_type: string;
 }[];
 
-export type ShareDatasetPopupPropsType = {
-  datasetId: string;
-};
-
 export enum DATASET_ACTION_STATUS {
   INITIATED = 'INITIATED',
   SUCCESSFUL = 'SUCCESSFUL',

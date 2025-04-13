@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { SharePagePopupPropsType } from 'modules/page/pages.types';
 import { pageConfig, ResourceType, ShareResourcePopup } from '@/modules/shareResource';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -7,7 +6,12 @@ import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.type
  * SharePagePopup component
  * Wrapper around the shared ShareResourcePopup component with page-specific configuration
  */
-const SharePagePopup: FC<SharePagePopupPropsType> = ({ pageId }) => {
+
+type SharePagePopupProps = {
+  pageId: string;
+};
+
+const SharePagePopup: FC<SharePagePopupProps> = ({ pageId }) => {
   return (
     <ShareResourcePopup
       resourceId={pageId}
