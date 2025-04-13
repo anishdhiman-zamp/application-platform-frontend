@@ -1,11 +1,21 @@
 import { FC, useCallback, useRef, useState } from 'react';
-import { useGetAudiencesByResourceIdQuery, usePostShareResourceToAudiencesMutation } from 'apis/collaboration';
+import {
+  useDeleteAudienceFromResourceMutation,
+  useGetAudiencesByResourceIdQuery,
+  usePatchChangeAudienceRoleInResourceMutation,
+  usePostShareResourceToAudiencesMutation,
+} from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
-import { CombinedOptionListDataType } from 'modules/page/pages.types';
-import { ShareResourcePopupProps, ValidationResult } from 'modules/shareResource/share-resource.types';
+import AudienceAccess from 'modules/shareResource/AudienceAccess';
+import {
+  CombinedOptionListDataType,
+  ResourceType,
+  ShareResourcePopupProps,
+  ValidationResult,
+} from 'modules/shareResource/share-resource.types';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
@@ -15,7 +25,8 @@ import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermissi
 import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
 import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
-import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
+import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -25,6 +36,11 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
+
+const resourceTypeRouteMap = {
+  [ResourceType.DATASET]: 'datasets',
+  [ResourceType.PAGE]: 'pages',
+};
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceType, resourceConfig }) => {
   const popupRef = useRef<HTMLDivElement>(null);
@@ -37,31 +53,44 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData } = useGetAudiencesByResourceIdQuery(
-    { resourceType, resourceId },
-    { skip: !resourceId },
-  );
 
+  // get teams and users data in the organization
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+
+  // get existing audiences for the resource
   const {
     data: audiencesData,
     isLoading: isLoadingAudiencesData,
     refetch: refetchAudiencesData,
-  } = useGetAudiencesByResourceIdQuery({ resourceType, resourceId }, { skip: !resourceId });
+  } = useGetAudiencesByResourceIdQuery(
+    { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
+    { skip: !resourceId },
+  );
 
+  // post invite audiences
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostShareResourceToAudiencesMutation();
 
+  // patch audience role
+  const [changeRole, { isLoading: isChangingRole }] = usePatchChangeAudienceRoleInResourceMutation();
+
+  // delete audience
+  const [deleteAudience, { isLoading: isDeletingAudience }] = useDeleteAudienceFromResourceMutation();
+
+  // get all teams in the organization
+  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+
+  // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
   const showInitialDropdownOptions = !isLoadingAudiencesData && !!(userAccessToResourceList?.length <= 1);
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_role = getUserPrivilege();
   const userPrivilege =
-    userAccessToResourceList?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
+    (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const isResourceSharable =
     !showValidationError && selectedItems?.length > 0 && userPrivilege === PERMISSION_ROLES.ADMIN;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
-  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
 
   const updatedUserAccessList = userAccessToResourceList?.map((audience) => {
     const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
@@ -103,7 +132,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       })),
     };
 
-    postInviteAudiences({ resourceType, resourceId, body: shareData })
+    postInviteAudiences({ resourceRoute: resourceTypeRouteMap[resourceType], resourceId, body: shareData })
       .unwrap()
       .then(() => {
         setSelectedItems([]);
@@ -112,6 +141,45 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       })
       .catch((err) => {
         toast.error(err?.data?.error || resourceConfig.toastMessages.failed);
+      });
+  };
+
+  const handleRoleChange = async (resourceAudienceId: string, role: string) => {
+    await changeRole({
+      resourceRoute: resourceTypeRouteMap[resourceType],
+      resourceId,
+      body: {
+        resourceRoute: resourceTypeRouteMap[resourceType],
+        resourceId,
+        audience_id: resourceAudienceId,
+        role,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        refetchAudiencesData();
+        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
+      });
+  };
+
+  const handleDeleteAudience = async (resourceAudienceId: string, userName: string) => {
+    await deleteAudience({
+      resourceRoute: resourceTypeRouteMap[resourceType],
+      resourceId,
+      body: {
+        audience_id: resourceAudienceId,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        refetchAudiencesData();
+        toast.success(`Removed ${userName} successfully`);
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
       });
   };
 
@@ -260,8 +328,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       })) || []),
   ];
 
-  const AccessComponent = resourceConfig.accessComponent;
-
   return (
     <div ref={popupRef} className='flex w-fit'>
       <div
@@ -347,18 +413,22 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
                   loader={<WhoHasAccessSkeletonLoader />}
                 >
                   {updatedUserAccessList?.map((audience, index) => (
-                    <AccessComponent
+                    <AudienceAccess
                       key={index}
-                      resourceId={resourceId}
-                      resource_type={audience?.resource_type}
+                      resource_type={resourceType}
                       privilege={audience?.privilege}
                       resource_audience_id={audience?.resource_audience_id}
                       user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
                       resource_audience_type={audience?.resource_audience_type}
                       userPrivilege={userPrivilege}
                       orgName={orgLabel}
-                      customerName={orgName}
+                      customerName={orgName ?? ''}
                       teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
+                      changeRole={handleRoleChange}
+                      deleteAudience={handleDeleteAudience}
+                      privilegeList={resourceConfig.accessPrivilegesList}
+                      isDeletingAudience={isDeletingAudience}
+                      isChangingRole={isChangingRole}
                     />
                   ))}
                 </CommonWrapper>

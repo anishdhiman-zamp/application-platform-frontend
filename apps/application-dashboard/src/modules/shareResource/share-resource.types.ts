@@ -1,5 +1,3 @@
-import { FC } from 'react';
-
 /**
  * Generic types for different resources (dataset or page)
  */
@@ -52,8 +50,7 @@ export type ResourceApiHooks<T = any> = {
 export type ShareResourceConfig = {
   type: ResourceType;
   idPropName: string; // e.g., "datasetId" or "pageId"
-  accessComponent: FC<any>;
-  accessPrivilegesList: { label: string; value: string }[];
+  accessPrivilegesList: ResourcePrivilege[];
   displayName: string; // For UI display
   toastMessages: {
     success: string;
@@ -79,4 +76,38 @@ export type ValidationResult = {
   message?: string;
   resource_audience_type?: string;
   resource_audience_id?: string;
+};
+
+export enum PAGE_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+
+export type PageAccessPrivilegesType = {
+  label: string;
+  value: PAGE_ACCESS_PRIVILEGES;
+};
+
+export type ResourcePrivilege = {
+  kind: ResourceType;
+  label: string;
+  value: string;
+  desc: string;
+};
+
+export enum DATASET_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+}
+export type DatasetAccessPrivilegesType = {
+  label: string;
+  value: DATASET_ACCESS_PRIVILEGES;
+};
+
+export type CombinedOptionListDataType = {
+  label: string;
+  value: string;
+  type?: string;
+  color?: string;
+  team_id?: string;
 };

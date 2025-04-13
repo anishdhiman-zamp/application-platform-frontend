@@ -1,5 +1,5 @@
 export type AudiencesByResourceIdRequest = {
-  resourceType: string;
+  resourceRoute: string;
   resourceId: string;
 };
 
@@ -12,10 +12,7 @@ export type AddAudiencesToResourcePayload = {
 };
 
 export type DeleteAudiencesFromResourcePayload = {
-  audiences: {
-    audience_type: string;
-    audience_id: string;
-  }[];
+  audience_id: string;
 };
 
 type withResource<T> = T & AudiencesByResourceIdRequest;

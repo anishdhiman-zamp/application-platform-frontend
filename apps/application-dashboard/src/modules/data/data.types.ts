@@ -1,10 +1,5 @@
 import { RowClickedEvent } from 'ag-grid-community';
 
-export enum DATASET_ACCESS_PRIVILEGES {
-  ADMIN = 'admin',
-  VIEWER = 'viewer',
-}
-
 export type UserAccessToDataSetType = {
   name: string;
   privilege: string;
@@ -13,11 +8,6 @@ export type UserAccessToDataSetType = {
 
 export type ShareDatasetPopupPropsType = {
   datasetId: string;
-};
-
-export type DatasetAccessPrivilegesType = {
-  label: string;
-  value: DATASET_ACCESS_PRIVILEGES;
 };
 
 export enum DATASET_ACTION_STATUS {

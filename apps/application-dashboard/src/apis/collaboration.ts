@@ -12,30 +12,33 @@ import {
 const Pages = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAudiencesByResourceId: builder.query<AudiencesByResourceResponse[], AudiencesByResourceIdRequest>({
-      query: ({ resourceType, resourceId }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_RESOURCE_ID_GET, { resourceType, resourceId }),
+      query: ({ resourceRoute, resourceId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET, {
+          resourceRoute,
+          resourceId,
+        }),
       }),
     }),
     postShareResourceToAudiences: builder.mutation<void, PostShareResourceToAudiencesType>({
-      query: ({ resourceType, resourceId, body }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST, { resourceType, resourceId }),
+      query: ({ resourceRoute, resourceId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST, { resourceRoute, resourceId }),
         method: REQUEST_TYPES.POST,
         body: body,
       }),
     }),
     patchChangeAudienceRoleInResource: builder.mutation<void, ChangeAudienceRoleInResourceType>({
-      query: ({ resourceType, resourceId, body }) => ({
+      query: ({ resourceRoute, resourceId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH, {
-          resourceType,
+          resourceRoute,
           resourceId,
         }),
         method: REQUEST_TYPES.PATCH,
         body: body,
       }),
     }),
-    deleteResourceFromAudiences: builder.mutation<void, DeleteResourceFromAudiencesType>({
-      query: ({ resourceType, resourceId, body }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES, { resourceType, resourceId }),
+    deleteAudienceFromResource: builder.mutation<void, DeleteResourceFromAudiencesType>({
+      query: ({ resourceRoute, resourceId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES, { resourceRoute, resourceId }),
         method: REQUEST_TYPES.DELETE,
         body: body,
       }),
@@ -47,5 +50,5 @@ export const {
   useGetAudiencesByResourceIdQuery,
   usePostShareResourceToAudiencesMutation,
   usePatchChangeAudienceRoleInResourceMutation,
-  useDeleteResourceFromAudiencesMutation,
+  useDeleteAudienceFromResourceMutation,
 } = Pages;
