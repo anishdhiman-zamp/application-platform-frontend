@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
