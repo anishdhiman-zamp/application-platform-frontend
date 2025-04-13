@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -99,13 +98,6 @@ const MockAccessComponent = ({
   </div>
 );
 
-MockAccessComponent.propTypes = {
-  resourceId: PropTypes.string.isRequired,
-  privilege: PropTypes.string.isRequired,
-  user: PropTypes.shape({
-    email: PropTypes.string.isRequired
-  }).isRequired
-};
 
 const mockStore = configureStore([]);
 const initialState = {
