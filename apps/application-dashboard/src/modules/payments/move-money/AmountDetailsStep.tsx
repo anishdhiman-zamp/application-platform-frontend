@@ -23,6 +23,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   handleStepChange,
   templateDetails: defaultTemplate,
 }) => {
+  console.log('isSelfTransfer', isSelfTransfer);
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     dispatch,
@@ -31,9 +32,6 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
   const [amount, setAmount] = useState(amountDetails?.amount);
   const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
-  const [accountDetails, setAccountDetails] = useState<AccountDetailsType | undefined>(
-    amountDetails?.sourceAccountDetails,
-  );
 
   const handleDestinationAccountSelect = (account: AccountDetailsType) => {
     dispatch({
@@ -50,16 +48,13 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
     setAmount(e?.target?.value.replaceAll(',', '') || '');
   };
 
-  const handleAccountSelect = (account: AccountDetailsType) => setAccountDetails(account);
-
   const onNextClick = () => {
-    if (amount && accountDetails) {
+    if (amount) {
       dispatch({
         type: moveMoneyContextActions.AMOUNT_DETAILS,
         payload: {
           amountDetails: {
             amount,
-            sourceAccountDetails: accountDetails,
             processingMode: paymentProcessingMode,
             currency: { label: 'USD', value: 'USD' },
           },
@@ -71,7 +66,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   };
 
   useEffect(() => {
-    if (inputRef.current && isActiveStep)
+    if (inputRef.current && isActiveStep && !isSelfTransfer)
       inputRef.current.focus({
         preventScroll: true,
       });
@@ -83,12 +78,12 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
         <div className='f-22-550'>{isSelfTransfer ? 'Transfer details' : 'How much are you sending?'}</div>
         {isSelfTransfer && (
           <SelectAccountDropdown
-            autoFocus
+            autoFocus={isActiveStep}
             accountsList={accountsList}
             shouldReset={false}
             accountDetails={destinationAccountDetails}
             onAccountSelect={handleDestinationAccountSelect}
-            label='Recipient account'
+            label='Transfer to'
           />
         )}
         <div className='flex gap-3 items-baseline'>
@@ -107,21 +102,12 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
           />
           <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>USD</div>
         </div>
-        <SelectAccountDropdown
-          accountsList={accountsList}
-          shouldReset={false}
-          accountDetails={defaultTemplate?.details[0]?.source_account ?? accountDetails}
-          onAccountSelect={handleAccountSelect}
-          label='Send from'
-          disabled={!!templateDetails}
-        />
         {defaultTemplate && (
           <SelectAccountDropdown
             hasSubtitle
             accountsList={accountsList}
             shouldReset={false}
             accountDetails={defaultTemplate?.details[0]?.beneficiary_account}
-            onAccountSelect={handleAccountSelect}
             label='Recipient'
             disabled={!!templateDetails}
           />
@@ -162,7 +148,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
           size={SIZE_TYPES.MEDIUM}
           id='MOVE_MONEY_AMOUNT_DETAILS_NEXT'
           onClick={onNextClick}
-          disabled={!amount || !accountDetails}
+          disabled={!amount || (isSelfTransfer && !destinationAccountDetails)}
         >
           Next
         </Button>

@@ -13,7 +13,7 @@ import Input from 'components/common/input';
 type SelectBeneDropdownProps = {
   autoFocus?: boolean;
   accountsList: AccountDetailsType[];
-  onAccountSelect: (val: AccountDetailsType) => void;
+  onAccountSelect?: (val: AccountDetailsType) => void;
   accountDetails?: AccountDetailsType;
   shouldReset?: boolean;
   label?: string;
@@ -33,6 +33,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const { contact_id } = router.query;
 
   const [searchValue, setSearchValue] = useState('');
@@ -46,7 +48,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const handleAccountSelect = (account: AccountDetailsType) => {
     setSearchValue(account.account_name);
-    onAccountSelect(account);
+    onAccountSelect?.(account);
     setIsShowMenu(false);
     setIsSearchActive(false);
     console.log('handleAccountSelect');
@@ -96,6 +98,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     }
   }, [shouldReset]);
 
+  useEffect(() => {
+    if (inputRef.current && autoFocus) {
+      inputRef.current.focus();
+      setIsSearchActive(true);
+      setIsShowMenu(true);
+    }
+  }, [autoFocus]);
+
   return (
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
@@ -111,6 +121,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           <div className='flex items-center gap-1.5 px-3'>
             <Input
               tabIndex={0}
+              inputRef={inputRef}
               id='ADD_ACCOUNT_SEARCH_BANK'
               onFocus={onSearchFocus}
               size={SIZE_TYPES.MEDIUM}
