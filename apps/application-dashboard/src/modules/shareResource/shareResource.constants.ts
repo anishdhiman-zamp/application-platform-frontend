@@ -4,7 +4,7 @@ import {
   ResourcePrivilege,
   ResourceType,
   ShareResourceConfig,
-} from 'modules/shareResource/share-resource.types';
+} from '@/modules/shareResource/shareResource.types';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
@@ -62,4 +62,9 @@ export const pageConfig: ShareResourceConfig = {
     success: TOAST_MESSAGES.SUCCESS_PAGE_SHARED,
     failed: TOAST_MESSAGES.FAILED_PAGE_SHARED,
   },
+};
+
+export const resourceTypeRouteMap = {
+  [ResourceType.DATASET]: 'datasets',
+  [ResourceType.PAGE]: 'pages',
 };

@@ -10,12 +10,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
-import {
-  CombinedOptionListDataType,
-  ResourceType,
-  ShareResourcePopupProps,
-  ValidationResult,
-} from 'modules/shareResource/share-resource.types';
+import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { AudiencesDatasetShareData } from 'types/api/dataset.types';
@@ -26,6 +21,11 @@ import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPer
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import {
+  CombinedOptionListDataType,
+  ShareResourcePopupProps,
+  ValidationResult,
+} from '@/modules/shareResource/shareResource.types';
 import { adminAccessPermissionForResource } from '@/utils/accessPermission/accessPermission';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
@@ -36,11 +36,6 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
-const resourceTypeRouteMap = {
-  [ResourceType.DATASET]: 'datasets',
-  [ResourceType.PAGE]: 'pages',
-};
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceType, resourceConfig }) => {
   const popupRef = useRef<HTMLDivElement>(null);
@@ -427,11 +422,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
                   {updatedUserAccessList?.map((audience, index) => (
                     <AudienceAccess
                       key={index}
-                      resource_type={resourceType}
+                      resourceType={resourceType}
                       privilege={audience?.privilege}
-                      resource_audience_id={audience?.resource_audience_id}
+                      resourceAudienceId={audience?.resource_audience_id}
                       user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
-                      resource_audience_type={audience?.resource_audience_type}
+                      resourceAudienceType={audience?.resource_audience_type}
                       userPrivilege={userPrivilege}
                       orgName={orgLabel}
                       currentUserHasAdminAccess={currentUserHasAdminAccess}

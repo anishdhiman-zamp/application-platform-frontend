@@ -6,6 +6,11 @@ export enum ResourceType {
   PAGE = 'page',
 }
 
+export type TeamInfoType = {
+  name?: string;
+  color?: string;
+};
+
 /**
  * Props for the resource access component
  */
@@ -22,10 +27,7 @@ export type ResourceAccessComponentProps = {
   userPrivilege: string;
   orgName?: string;
   customerName?: string;
-  teamInfo?: {
-    name?: string;
-    color?: string;
-  };
+  teamInfo?: TeamInfoType;
 };
 
 /**
@@ -99,6 +101,7 @@ export enum DATASET_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
 }
+
 export type DatasetAccessPrivilegesType = {
   label: string;
   value: DATASET_ACCESS_PRIVILEGES;

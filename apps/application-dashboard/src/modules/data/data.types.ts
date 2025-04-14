@@ -12,26 +12,6 @@ export enum DATASET_ACTION_STATUS {
   FAILED = 'FAILED',
 }
 
-export type DatasetAccessToAudiencesPropsType = {
-  name?: string;
-  resource_type: string;
-  privilege?: string;
-  datasetId: string;
-  resource_audience_id: string;
-  resource_audience_type: string;
-  user?: {
-    email: string;
-    name?: string;
-  };
-  userPrivilege: string;
-  orgName?: string;
-  customerName?: string;
-  teamInfo?: {
-    name?: string;
-    color?: string;
-  };
-};
-
 export type DatasetColumnRequest = {
   dataset_id: string;
   columns: string[];

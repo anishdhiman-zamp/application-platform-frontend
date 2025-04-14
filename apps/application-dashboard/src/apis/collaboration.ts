@@ -9,7 +9,7 @@ import {
   PostShareResourceToAudiencesType,
 } from '@/types/api/collaboration.types';
 
-const Pages = baseApi.injectEndpoints({
+const Collaboration = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAudiencesByResourceId: builder.query<AudiencesByResourceResponse[], AudiencesByResourceIdRequest>({
       query: ({ resourceRoute, resourceId }) => ({
@@ -51,4 +51,4 @@ export const {
   usePostShareResourceToAudiencesMutation,
   usePatchChangeAudienceRoleInResourceMutation,
   useDeleteAudienceFromResourceMutation,
-} = Pages;
+} = Collaboration;

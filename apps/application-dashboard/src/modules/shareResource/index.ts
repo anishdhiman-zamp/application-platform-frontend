@@ -1,3 +1,3 @@
-export * from './resource-configs';
-export * from './share-resource.types';
-export { default as ShareResourcePopup } from './ShareResourcePopup';
+export * from '@/modules/shareResource/shareResource.constants';
+export * from '@/modules/shareResource/shareResource.types';
+export { default as ShareResourcePopup } from '@/modules/shareResource/ShareResourcePopup';

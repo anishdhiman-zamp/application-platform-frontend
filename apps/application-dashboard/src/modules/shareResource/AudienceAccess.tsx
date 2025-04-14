@@ -2,12 +2,12 @@ import React, { FC, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
-import { ResourcePrivilege, ResourceType } from 'modules/shareResource/share-resource.types';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
 import { OptionsType } from '@/types/commonTypes';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
@@ -16,39 +16,36 @@ import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type AudienceAccessPropsType = {
-  resource_type: ResourceType;
+  resourceType: ResourceType;
   privilege: string;
   changeRole: (resourceAudienceId: string, role: string) => Promise<void>;
   deleteAudience: (resourceAudienceId: string, userName: string) => Promise<void>;
   privilegeList: ResourcePrivilege[];
-  resource_audience_id: string;
+  resourceAudienceId: string;
+  resourceAudienceType: string;
   user: {
     name?: string;
     email?: string;
   };
   userPrivilege: string;
   currentUserHasAdminAccess: boolean;
-  resource_audience_type: string;
   orgName: string;
   customerName: string;
-  teamInfo: {
-    name?: string;
-    color?: string;
-  };
+  teamInfo: TeamInfoType;
   isDeletingAudience: boolean;
   isChangingRole: boolean;
 };
 
 const AudienceAccess: FC<AudienceAccessPropsType> = ({
-  resource_type,
+  resourceType,
   privilege,
   changeRole,
   deleteAudience,
   privilegeList,
-  resource_audience_id,
+  resourceAudienceId,
   user,
   currentUserHasAdminAccess,
-  resource_audience_type,
+  resourceAudienceType,
   orgName,
   customerName,
   teamInfo,
@@ -61,13 +58,13 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<ResourcePrivilege>(role as ResourcePrivilege);
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
-  const checkIfResourceTypeOrg = resource_audience_type === ResourceAudienceType.ORGANIZATION;
-  const checkIfResourceTypeTeam = resource_audience_type === ResourceAudienceType.TEAM;
+  const checkIfResourceTypeOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
+  const checkIfResourceTypeTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const userName = checkIfResourceTypeOrg
     ? orgName
     : checkIfResourceTypeTeam
       ? teamInfo?.name
-      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
+      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
   const showRoleChangeDropdown = currentUserHasAdminAccess && !checkIfResourceTypeOrg;
 
@@ -88,10 +85,10 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleRoleChange = async (selectedOption: OptionsType) => {
-    await changeRole(resource_audience_id, selectedOption.value.toString())
+    await changeRole(resourceAudienceId, selectedOption.value.toString())
       .then(() => {
         setSelectedRole(
-          privilegeList.find((r) => r.value === selectedOption.value && r.kind === resource_type) as ResourcePrivilege,
+          privilegeList.find((r) => r.value === selectedOption.value && r.kind === resourceType) as ResourcePrivilege,
         );
         setOpenChangeRoleDropdown(false);
         setIsHoveredDropdown(false);
@@ -102,7 +99,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleDeleteAudience = async () => {
-    deleteAudience(resource_audience_id, userName || '')
+    deleteAudience(resourceAudienceId, userName || '')
       .then(() => {
         handleCloseRemoveFromTeamPopup();
       })
@@ -151,7 +148,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             {currentUserHasAdminAccess && (
               <>
                 <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
-                {resource_type}
+                {resourceType}
               </>
             )}
           </span>
@@ -190,7 +187,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
         onDelete={handleDeleteAudience}
         isLoading={isDeletingAudience}
         feature='remove-access-from-page'
-        warningDescription={`${userName} will be immediately removed from ${resource_type} and lose all access`}
+        warningDescription={`${userName} will be immediately removed from ${resourceType} and lose all access`}
       />
     </>
   );
