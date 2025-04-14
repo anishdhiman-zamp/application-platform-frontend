@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   experimental: {
-    serverActions: true,
+    serverActions: {},
   },
   webpack: (config) => {
     config.resolve.fallback = {

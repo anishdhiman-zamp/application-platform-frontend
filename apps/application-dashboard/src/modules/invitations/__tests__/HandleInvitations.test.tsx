@@ -103,6 +103,9 @@ describe('HandleInvitations', () => {
       },
       assertions: async () => {
         await waitFor(() => {
+          expect(mockAcceptInvitation).toHaveBeenCalledTimes(2);
+          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
+          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
           expect(mockWhoAmI).toHaveBeenCalled();
           expect(mockRouter.push).toHaveBeenCalledWith(ROUTES_PATH.HOME);
         });

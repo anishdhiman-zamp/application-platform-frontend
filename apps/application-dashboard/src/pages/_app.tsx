@@ -9,7 +9,7 @@ import { FeatureFlagsProvider } from 'modules/feature-flags/provider';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import ErrorBoundary from 'pages/ErrorBoundary';
-import posthog from 'posthog-js';
+import posthogJs from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 import { store } from 'store';
 import { NextPageWithLayout } from 'types/commonTypes';
@@ -54,7 +54,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <ErrorBoundary>
           <SpeedInsights />
           <Provider store={store}>
-            <PostHogProvider client={posthog}>
+            <PostHogProvider client={posthogJs}>
               <AuthGuard loginRoute='/login'>
                 <FeatureFlagsProvider>
                   <ToastContainer />
