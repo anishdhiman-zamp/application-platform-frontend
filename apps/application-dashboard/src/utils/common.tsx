@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import clsx, { ClassValue } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { CHIP_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
