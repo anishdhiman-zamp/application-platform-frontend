@@ -22,6 +22,9 @@ export interface AccountDetailsType {
   bank_identifier?: string;
   balance?: number | null;
   account_balance?: number | null;
+  account_number_last_four_characters?: string;
+  banking_partner?: string;
+  account_holder_name?: string;
 }
 
 export type TemplateDetailsType = {

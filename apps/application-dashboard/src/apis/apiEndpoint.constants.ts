@@ -60,8 +60,12 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
 
+  MOVE_MONEY_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
+
+  RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
+
   USER_INVITATIONS_GET: `/organizations/invitations`,
-  ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
+  ACCEPT_INVITATION_POST: `/organizations/invitations/{{ invitationId }}/accept`,
 };
 
 export const enum REQUEST_TYPES {

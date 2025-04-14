@@ -36,7 +36,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { contact_id } = router.query;
-
+  const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState(templateDetails?.name || '');
   const [selectedRecipient, setSelectedRecipient] = useState<MenuItem | null>(null);
   const [isShowMenu, setIsShowMenu] = useState(false);
@@ -105,6 +105,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     }
   }, [templateDetails]);
 
+  useEffect(() => {
+    if (inputRef.current && autoFocus) {
+      inputRef.current.focus();
+      setIsSearchActive(true);
+      setIsShowMenu(true);
+    }
+  }, [autoFocus]);
+
   const getDropdownBody = () => {
     switch (currentTab.value) {
       case MOVE_MONEY_PAYMENT_TYPE.RECIPIENT: {
@@ -169,6 +177,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             id='ADD_ACCOUNT_SEARCH_BANK'
             onFocus={() => setIsShowMenu(true)}
             size={SIZE_TYPES.MEDIUM}
+            inputRef={inputRef}
             autoFocus={autoFocus}
             value={isSearchActive ? searchValue : selectedRecipient?.label}
             disabled={!!contact_id}

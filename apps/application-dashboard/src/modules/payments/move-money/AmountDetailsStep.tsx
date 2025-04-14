@@ -23,7 +23,6 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   handleStepChange,
   templateDetails: defaultTemplate,
 }) => {
-  console.log('isSelfTransfer', isSelfTransfer);
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     dispatch,
