@@ -24,7 +24,18 @@ const Payments = baseApi.injectEndpoints({
         params,
       }),
     }),
+    getTemplateList: builder.query<SourceAccountResponseType, void>({
+      query: () => ({
+        url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
+      }),
+    }),
   }),
 });
 
-export const { useGetSourceAccountsQuery, useGetRecipientListQuery, useGetDestinationAccountsQuery } = Payments;
+export const {
+  useGetSourceAccountsQuery,
+  useGetRecipientListQuery,
+  useGetDestinationAccountsQuery,
+  useLazyGetDestinationAccountsQuery,
+  useGetTemplateListQuery,
+} = Payments;
