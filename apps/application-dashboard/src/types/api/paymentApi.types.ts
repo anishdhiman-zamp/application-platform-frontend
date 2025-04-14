@@ -7,3 +7,7 @@ export type SourceAccountResponseType = {
 export type RecipientListResponseType = {
   accounts: AccountDetailsType[];
 };
+
+export type DestinationAccountPayloadType = {
+  source_account_id: string;
+};

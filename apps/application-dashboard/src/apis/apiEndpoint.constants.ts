@@ -60,7 +60,8 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
 
-  MOVE_MONEY_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
+  PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
+  PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
 
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
 

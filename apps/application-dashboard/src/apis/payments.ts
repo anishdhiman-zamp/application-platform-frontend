@@ -1,12 +1,16 @@
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
-import { RecipientListResponseType, SourceAccountResponseType } from '@/types/api/paymentApi.types';
+import {
+  DestinationAccountPayloadType,
+  RecipientListResponseType,
+  SourceAccountResponseType,
+} from '@/types/api/paymentApi.types';
 
 const Payments = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSourceAccounts: builder.query<SourceAccountResponseType, void>({
       query: () => ({
-        url: API_ENDPOINTS.MOVE_MONEY_SOURCE_ACCOUNTS_GET,
+        url: API_ENDPOINTS.PAYMENTS_SOURCE_ACCOUNTS_GET,
       }),
     }),
     getRecipientList: builder.query<RecipientListResponseType, void>({
@@ -14,7 +18,13 @@ const Payments = baseApi.injectEndpoints({
         url: API_ENDPOINTS.RECIPIENT_LIST_GET,
       }),
     }),
+    getDestinationAccounts: builder.query<SourceAccountResponseType, DestinationAccountPayloadType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.PAYMENTS_DESTINATION_ACCOUNTS_GET,
+        params,
+      }),
+    }),
   }),
 });
 
-export const { useGetSourceAccountsQuery, useGetRecipientListQuery } = Payments;
+export const { useGetSourceAccountsQuery, useGetRecipientListQuery, useGetDestinationAccountsQuery } = Payments;
