@@ -16,7 +16,6 @@
     "@dagrejs/dagre": "^1.1.4",
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@monaco-editor/react": "^4.7.0",
-    "@radix-ui/react-slot": "^1.2.0",
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^9.1.0",
     "@sentry/nextjs": "^9.5.0",

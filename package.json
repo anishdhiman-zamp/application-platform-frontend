@@ -14,7 +14,8 @@
     "prettier": "prettier --config --list-different",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
