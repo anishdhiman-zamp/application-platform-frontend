@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { defaultAccountData } from 'modules/payments/payments.constant';
-import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { TITLE_MAP } from 'modules/payments/templates/templates.constant';
 import {
   useCreateTemplateMutation,
@@ -13,6 +13,7 @@ import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { MenuItem, SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
 
