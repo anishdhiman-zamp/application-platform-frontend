@@ -13,6 +13,22 @@ const config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          'Inter Variable',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'Cantarell',
+          'Open Sans',
+          'Helvetica Neue',
+          'sans-serif',
+        ],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -268,9 +284,6 @@ const config = {
       },
       borderWidth: {
         0.5: '0.5px',
-      },
-      fontFamily: {
-        outfit: 'Outfit',
       },
       zIndex: {
         1000: '1000',
