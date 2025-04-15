@@ -90,7 +90,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
         </div>
         <div className='flex gap-3 mt-10'>
           <Button
-            disabled
+            onClick={() => handleStepChange(currentStep - 1)}
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_SELECT_BENEFICIARY_BACK'

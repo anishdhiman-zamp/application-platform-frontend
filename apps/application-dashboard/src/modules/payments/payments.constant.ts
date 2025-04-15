@@ -61,7 +61,7 @@ export const MOVE_MONEY_ACTION_ITEMS = [
 ];
 
 export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [
-  { label: 'Recipients', value: MOVE_MONEY_PAYMENT_TYPE.RECIPIENT },
+  { label: 'Accounts', value: MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS },
   { label: 'Templates', value: MOVE_MONEY_PAYMENT_TYPE.TEMPLATES },
 ];
 

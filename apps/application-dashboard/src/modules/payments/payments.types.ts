@@ -27,26 +27,14 @@ export interface AccountDetailsType {
   account_holder_name?: string;
 }
 
-export type TemplateDetailsType = {
-  id: string;
-  name: string;
-  details: {
-    order: string;
-    source_account: AccountDetailsType;
-    beneficiary_account: AccountDetailsType;
-  }[];
-  created_by: string;
-  creation_timestamp: string;
-  type: MOVE_MONEY_TYPE;
-};
-
 export enum MOVE_MONEY_TYPE {
-  SINGLE_TRANSFER = 'single-transfer',
-  SELF_TRANSFER = 'self-transfer',
-  BULK_TRANSFER = 'bulk-transfer',
+  SINGLE_TRANSFER = 'single',
+  SELF_TRANSFER = 'self',
+  BULK_TRANSFER = 'bulk',
 }
 
 export enum MOVE_MONEY_PAYMENT_TYPE {
   RECIPIENT = 'RECIPIENT',
   TEMPLATES = 'TEMPLATES',
+  ACCOUNTS = 'ACCOUNTS',
 }

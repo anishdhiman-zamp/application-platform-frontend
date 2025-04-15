@@ -5,6 +5,7 @@ import {
   DestinationAccountPayloadType,
   RecipientListResponseType,
   SourceAccountResponseType,
+  TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
 
 const Payments = baseApi.injectEndpoints({
@@ -25,7 +26,7 @@ const Payments = baseApi.injectEndpoints({
         params,
       }),
     }),
-    getTemplateList: builder.query<SourceAccountResponseType, void>({
+    getTemplateList: builder.query<TemplateListResponseType, void>({
       query: () => ({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
       }),

@@ -44,10 +44,10 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         {
           order: '1',
           source_account_id: sourceAccountDetails?.id ?? '',
-          beneficiary_id: destinationAccountDetails?.id ?? '',
+          destination_account_id: destinationAccountDetails?.id ?? '',
         },
       ],
-      description: '',
+      description: 'NA',
       type: paymentType,
     });
   };

@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { TemplateDetailsType } from 'modules/payments/payments.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { defaultFn, defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 interface TemplateCardProps {
@@ -10,10 +10,10 @@ interface TemplateCardProps {
 
 const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
   const source = template?.details[0]?.source_account;
-  const beneficiary = template?.details[0]?.beneficiary_account;
+  const destination = template?.details[0]?.destination_account;
 
   return (
-    <div className='flex items-center gap-3 px-1.5 py-2.5 rounded-md'>
+    <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md'>
       <div className='w-6 h-6 flex items-center justify-center bg-BLUE_200 rounded-full'>
         <SvgSpriteLoader id='file-06' size={14} />
       </div>
@@ -21,8 +21,8 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
         <div className='f-13-500 mb-1'>{template?.name}</div>
         <div className='f-12-400 inline-flex divide-x-1 gap-2 divide-GRAY_400 overflow-hidden border border-GRAY_400 rounded-[4px]'>
           {source &&
-            beneficiary &&
-            [source, beneficiary].map((item, index) => (
+            destination &&
+            [source, destination].map((item, index) => (
               <div
                 key={index}
                 className={cn('flex items-center gap-2 py-1 px-1.5 divide-x-1  border-GRAY_400', {
