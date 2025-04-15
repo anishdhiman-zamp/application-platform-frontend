@@ -17,10 +17,12 @@ enum moveMoneyContextActions {
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
   TEMPLATE_DETAILS = 'TEMPLATE_DETAILS',
+  SOURCE_ACCOUNT_DETAILS = 'SOURCE_ACCOUNT_DETAILS',
 }
 interface InitialStateType {
   currentStep: number;
   destinationAccountDetails?: AccountDetailsType;
+  sourceAccountDetails?: AccountDetailsType;
   templateDetails: TemplateDetailsType | undefined;
   moreDetails?: {
     note: string;
@@ -86,6 +88,8 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return { ...state, currentStep: action?.payload?.currentStep };
       case moveMoneyContextActions.DESTINATION_ACCOUNT_DETAILS:
         return { ...state, destinationAccountDetails: action?.payload?.destinationAccountDetails };
+      case moveMoneyContextActions.SOURCE_ACCOUNT_DETAILS:
+        return { ...state, sourceAccountDetails: action?.payload?.sourceAccountDetails };
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
       case moveMoneyContextActions.CONTACT_DETAILS:

@@ -59,7 +59,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
           <SelectBeneDropdown
-            autoFocus={true}
+            autoFocus={currentStep === 1}
             onSelect={handleBeneficiarySelect}
             shouldReset={false}
             templateDetails={defaultTemplate}
