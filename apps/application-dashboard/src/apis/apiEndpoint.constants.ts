@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
 
   DATASET_RULES_BY_RULE_IDS_GET: `datasets/rules/ids`,
   DATASET_RULES_PRIORITY_PATCH: `datasets/rules/priority`,
+  DATASET_RULE_DELETE: `datasets/rules/{{ruleId}}`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
 
