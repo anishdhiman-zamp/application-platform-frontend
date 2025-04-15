@@ -37,7 +37,11 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   const [pendingEntryByInstance, setPendingEntryByInstance] = useState<{ [key: number]: string }>({});
   const [selectedItemsByInstance, setSelectedItemsByInstance] = useState<{ [key: number]: ArrayListOption[] }>({});
   const [selectedRoleByInstance, setSelectedRoleByInstance] = useState<{ [key: number]: TEAM_MEMBERS_PRIVILEGES }>({});
-  const hasEmptySearchValue = useMemo(() => Object.values(searchValues).some((value) => value === ''), [searchValues]);
+  const hasEmptySearchValue = useMemo(() => {
+    const values = Object.values(searchValues);
+
+    return values.length === 0 || values.every((value) => !validateEmail(value));
+  }, [searchValues]);
   const hasNonEmptySelectedItems = useMemo(
     () => Object.values(selectedItemsByInstance)?.some((item) => item?.length !== 0),
     [selectedItemsByInstance],
