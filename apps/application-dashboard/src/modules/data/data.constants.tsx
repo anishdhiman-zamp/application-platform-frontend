@@ -4,7 +4,7 @@ import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACCESS_PRIVILEGES, DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
-import { RuleDeletionMessages , TaggingMessages } from '@/components/common/toast/toast.constants';
+import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
