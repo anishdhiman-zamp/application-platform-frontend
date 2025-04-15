@@ -3,19 +3,13 @@
   "compilerOptions": {
     "baseUrl": "src/",
     "paths": {
-      "@/*": [
-        "*"
-      ]
+      "@/*": ["*"]
     },
     "incremental": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

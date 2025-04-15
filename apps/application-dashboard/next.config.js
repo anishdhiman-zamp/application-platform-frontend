@@ -15,6 +15,7 @@ const nextConfig = {
 
     return config;
   },
+  transpilePackages: ['@zamp-platform/ui'],
 };
 
 module.exports = withSentryConfig(nextConfig, {

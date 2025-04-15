@@ -1,10 +1,14 @@
 import { FC, useState } from 'react';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
-import { accountsList } from 'modules/payments/move-money/move-money.dummy';
 import { defaultAccountData } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import { TITLE_MAP } from 'modules/payments/templates/templates.constant';
+import {
+  useCreateTemplateMutation,
+  useGetSourceAccountsQuery,
+  useLazyGetDestinationAccountsQuery,
+} from '@/apis/payments';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -19,16 +23,42 @@ type CreateTemplatePopoverProps = {
 };
 
 const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose, paymentType }) => {
+  const isSingleTransfer = paymentType === MOVE_MONEY_TYPE.SINGLE_TRANSFER;
   const [destinationAccountDetails, setDestinationAccountDetails] = useState<AccountDetailsType>(defaultAccountData);
-  const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType>(defaultAccountData);
+  const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType | undefined>(undefined);
   const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
   const [templateName, setTemplateName] = useState<string>('');
 
+  const [createTemplate] = useCreateTemplateMutation();
+
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+  const [getDestinationAccounts, { data: destinationAccounts, isLoading: isDestinationAccountsLoading }] =
+    useLazyGetDestinationAccountsQuery();
+
   const handleSubmit = () => {
-    console.log(destinationAccountDetails, sourceAccountDetails, recipientDetails);
+    createTemplate({
+      template_name: templateName,
+      details: [
+        {
+          order: '1',
+          source_account_id: sourceAccountDetails?.id ?? '',
+          beneficiary_id: destinationAccountDetails?.id ?? '',
+        },
+      ],
+      description: '',
+      type: paymentType,
+    });
   };
 
-  const isSingleTransfer = paymentType === MOVE_MONEY_TYPE.SINGLE_TRANSFER;
+  const handleSourceAccountSelect = (account: AccountDetailsType) => {
+    setSourceAccountDetails(account);
+    setDestinationAccountDetails(defaultAccountData);
+    if (!isSingleTransfer && account.id) {
+      getDestinationAccounts({ source_account_id: account.id ?? '' });
+    }
+  };
 
   return (
     <div>
@@ -60,7 +90,15 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
             />
             <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
           </div>
-          {isSingleTransfer && (
+          <SelectAccountDropdown
+            accountsList={sourceAccounts?.accounts ?? []}
+            shouldReset={false}
+            accountDetails={sourceAccountDetails}
+            onAccountSelect={handleSourceAccountSelect}
+            label='Source account'
+            isLoading={isLoading}
+          />
+          {sourceAccountDetails && isSingleTransfer && (
             <SelectBeneDropdown
               onSelect={(recipient: MenuItem | TemplateDetailsType) => setRecipientDetails(recipient)}
               shouldReset={false}
@@ -68,20 +106,16 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
               showTemplate={false}
             />
           )}
-          <SelectAccountDropdown
-            accountsList={accountsList}
-            shouldReset={false}
-            accountDetails={destinationAccountDetails}
-            onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
-            label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
-          />
-          <SelectAccountDropdown
-            accountsList={accountsList}
-            shouldReset={false}
-            accountDetails={sourceAccountDetails}
-            onAccountSelect={(account: AccountDetailsType) => setSourceAccountDetails(account)}
-            label='Source account'
-          />
+          {((isSingleTransfer && !recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
+            <SelectAccountDropdown
+              accountsList={destinationAccounts?.accounts ?? []}
+              shouldReset={false}
+              accountDetails={destinationAccountDetails}
+              onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
+              label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
+              isLoading={isDestinationAccountsLoading}
+            />
+          )}
         </div>
       </Dialogue>
     </div>
