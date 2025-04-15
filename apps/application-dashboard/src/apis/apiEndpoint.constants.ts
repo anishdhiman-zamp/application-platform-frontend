@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
 
   DATASET_RULES_BY_RULE_IDS_GET: `datasets/rules/ids`,
   DATASET_RULES_PRIORITY_PATCH: `datasets/rules/priority`,
+  DATASET_RULE_DELETE: `datasets/rules/{{ruleId}}`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
 
@@ -60,8 +61,15 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
 
+  PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
+  PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
+  PAYMENTS_TEMPLATE_LIST_GET: `payment-templates/list`,
+  PAYMENTS_TEMPLATE_CREATE_POST: `payment-templates/create`,
+
+  RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
+
   USER_INVITATIONS_GET: `/organizations/invitations`,
-  ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
+  ACCEPT_INVITATION_POST: `/organizations/invitations/{{ invitationId }}/accept`,
 };
 
 export const enum REQUEST_TYPES {

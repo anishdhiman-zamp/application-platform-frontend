@@ -21,11 +21,10 @@ import NetworkStatus from 'components/NetWorkStatus';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import 'react-toastify/dist/ReactToastify.css';
-import 'styles/colors.css';
-import 'styles/fonts.css';
-import 'styles/globals.css';
+import 'styles/ag-styles.css';
 import 'styles/react-datepicker.css';
 import 'styles/react-dates.css';
+import '@zamp-platform/ui/globals.css';
 
 LicenseManager.setLicenseKey(AG_GRID_KEY);
 LicenseManagerCharts.setLicenseKey(AG_CHART_KEY);
