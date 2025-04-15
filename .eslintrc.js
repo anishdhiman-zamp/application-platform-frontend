@@ -1,134 +1,38 @@
 module.exports = {
-  env: {
-    browser: true,
-    es6: true,
-    jest: true,
-    node: true,
-  },
-  extends: [
-    'eslint:recommended',
-    'next',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-    'plugin:react/recommended',
-    'prettier',
-  ],
   parser: '@typescript-eslint/parser',
-  plugins: [
-    'react',
-    '@typescript-eslint',
-    'simple-import-sort',
-    'import',
-    'tsdoc',
-    'absolute-imports',
-    'jsx-a11y',
-    'prettier',
-    'react-hooks',
-  ],
   parserOptions: {
+    ecmaVersion: 'latest',
     sourceType: 'module',
-    ecmaVersion: 2022,
-    ecmaFeatures: {
-      modules: true,
-      jsx: true,
-    },
   },
+  plugins: ['@typescript-eslint', 'unused-imports', 'simple-import-sort', 'prettier'],
+  extends: ['plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended'],
+  rules: {
+    'prettier/prettier': 'error',
+    'react/prop-types': 'off',
+    'react/no-unescaped-entities': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error',
+    'unused-imports/no-unused-imports': 'error',
+    '@typescript-eslint/ban-ts-comment': 'off', // turn warn
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
+    'jsx-a11y/role-supports-aria-props': 'off',
+    '@next/next/no-img-element': 'off',
+  },
+  ignorePatterns: ['packages/config/**'],
   settings: {
-    react: {
-      version: 'detect',
+    next: {
+      rootDir: ['apps/*/', 'packages/*/'],
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
     'import/resolver': {
       typescript: {
-        project: ['tsconfig.json', 'apps/*/tsconfig.json', 'packages/*/tsconfig.json'],
+        alwaysTryTypes: true,
+        project: ['apps/*/tsconfig.json'],
       },
     },
   },
-  ignorePatterns: ['*.webp', '*.png', '*.svg', 'fonts.css'],
-  rules: {
-    '@typescript-eslint/ban-ts-comment': [
-      'error',
-      {
-        'ts-ignore': 'allow-with-description',
-        'ts-nocheck': 'allow-with-description',
-      },
-    ],
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      {
-        ignoreRestSiblings: true,
-        vars: 'local',
-      },
-    ],
-    'absolute-imports/only-absolute-imports': 'error',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
-    ],
-    'import/no-extraneous-dependencies': [
-      'error',
-      {
-        devDependencies: true,
-        peerDependencies: true,
-        packageDir: ['./', './apps/*', './packages/*'],
-      },
-    ],
-    'padding-line-between-statements': [
-      'error',
-      {
-        blankLine: 'always',
-        prev: '*',
-        next: 'return',
-      },
-      {
-        blankLine: 'always',
-        prev: ['const', 'let', 'var'],
-        next: '*',
-      },
-      {
-        blankLine: 'any',
-        prev: ['const', 'let', 'var'],
-        next: ['const', 'let', 'var'],
-      },
-    ],
-    'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
-    'simple-import-sort/exports': 'error',
-    'simple-import-sort/imports': 'error',
-    'react-hooks/exhaustive-deps': 'off',
-  },
-  overrides: [
-    // override "simple-import-sort" config
-    {
-      files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
-      rules: {
-        'simple-import-sort/imports': [
-          'error',
-          {
-            groups: [
-              [
-                '^react', // Packages `react` related packages come first.
-                '^@?\\w',
-                '^(@|components)(/.*|$)', // Internal packages.
-                '^\\u0000', // Side effect imports.
-                '^\\.\\.(?!/?$)', // Parent imports. Put `..` last.
-                '^\\.\\./?$',
-                '^\\./(?=.*/)(?!/?$)', // Other relative imports. Put same-folder imports and `.` last.
-                '^\\.(?!/?$)',
-                '^\\./?$',
-                '^.+\\.?(css)$', // Style imports.
-              ],
-            ],
-          },
-        ],
-        'react/react-in-jsx-scope': 'off',
-      },
-    },
-  ],
 };
