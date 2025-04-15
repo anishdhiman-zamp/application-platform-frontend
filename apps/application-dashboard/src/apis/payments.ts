@@ -1,6 +1,7 @@
-import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import {
+  CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   RecipientListResponseType,
   SourceAccountResponseType,
@@ -29,6 +30,13 @@ const Payments = baseApi.injectEndpoints({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
       }),
     }),
+    createTemplate: builder.mutation<SourceAccountResponseType, CreateTemplatePayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.PAYMENTS_TEMPLATE_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -38,4 +46,5 @@ export const {
   useGetDestinationAccountsQuery,
   useLazyGetDestinationAccountsQuery,
   useGetTemplateListQuery,
+  useCreateTemplateMutation,
 } = Payments;

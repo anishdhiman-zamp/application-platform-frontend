@@ -4,7 +4,11 @@ import SelectAccountDropdown from 'modules/payments/move-money/components/Select
 import { defaultAccountData } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import { TITLE_MAP } from 'modules/payments/templates/templates.constant';
-import { useGetSourceAccountsQuery, useLazyGetDestinationAccountsQuery } from '@/apis/payments';
+import {
+  useCreateTemplateMutation,
+  useGetSourceAccountsQuery,
+  useLazyGetDestinationAccountsQuery,
+} from '@/apis/payments';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -25,6 +29,8 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
   const [templateName, setTemplateName] = useState<string>('');
 
+  const [createTemplate] = useCreateTemplateMutation();
+
   const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -32,7 +38,18 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
     useLazyGetDestinationAccountsQuery();
 
   const handleSubmit = () => {
-    console.log(destinationAccountDetails, sourceAccountDetails, recipientDetails);
+    createTemplate({
+      template_name: templateName,
+      details: [
+        {
+          order: '1',
+          source_account_id: sourceAccountDetails?.id ?? '',
+          beneficiary_id: destinationAccountDetails?.id ?? '',
+        },
+      ],
+      description: '',
+      type: paymentType,
+    });
   };
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
@@ -42,13 +59,6 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
       getDestinationAccounts({ source_account_id: account.id ?? '' });
     }
   };
-
-  console.log(
-    isSingleTransfer,
-    recipientDetails,
-    sourceAccountDetails,
-    'isSingleTransfer && recipientDetails && sourceAccountDetails',
-  );
 
   return (
     <div>
