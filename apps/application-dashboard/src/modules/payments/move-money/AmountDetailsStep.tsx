@@ -1,13 +1,16 @@
 import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
+import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
-import { accountsList, PAYMENT_PROCESSING_MODES } from 'modules/payments/move-money/move-money.dummy';
+import { PAYMENT_PROCESSING_MODES } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { AccountDetailsType, TemplateDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import { getCommaSeparatedNumberForInput } from 'utils/common';
+import { getCommaSeparatedNumberForInput, snakeCaseToSentenceCase } from 'utils/common';
 import { COMMA_SEPARATED_NUMBER_REGEX } from 'utils/regex';
+import { useGetDestinationAccountsQuery } from '@/apis/payments';
+import { DEFAULT_BANK } from '@/constants/icons';
 import { Button } from 'components/common/button/Button';
 import { Dropdown } from 'components/common/dropdown';
 import Input from 'components/common/input';
@@ -26,13 +29,17 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     dispatch,
-    state: { amountDetails, currentStep, destinationAccountDetails, templateDetails },
+    state: { amountDetails, currentStep, destinationAccountDetails, sourceAccountDetails },
   } = useMoveMoneyContextStore();
   const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
   const [amount, setAmount] = useState(amountDetails?.amount);
   const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
-  const [accountDetails, setAccountDetails] = useState<AccountDetailsType | undefined>(
-    amountDetails?.sourceAccountDetails,
+
+  const { data: destinationAccounts, isLoading } = useGetDestinationAccountsQuery(
+    {
+      source_account_id: sourceAccountDetails?.id ?? '',
+    },
+    { skip: !sourceAccountDetails?.id || !isSelfTransfer },
   );
 
   const handleDestinationAccountSelect = (account: AccountDetailsType) => {
@@ -50,16 +57,13 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
     setAmount(e?.target?.value.replaceAll(',', '') || '');
   };
 
-  const handleAccountSelect = (account: AccountDetailsType) => setAccountDetails(account);
-
   const onNextClick = () => {
-    if (amount && accountDetails) {
+    if (amount) {
       dispatch({
         type: moveMoneyContextActions.AMOUNT_DETAILS,
         payload: {
           amountDetails: {
             amount,
-            sourceAccountDetails: accountDetails,
             processingMode: paymentProcessingMode,
             currency: { label: 'USD', value: 'USD' },
           },
@@ -71,7 +75,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
   };
 
   useEffect(() => {
-    if (inputRef.current && isActiveStep)
+    if (inputRef.current && isActiveStep && !isSelfTransfer)
       inputRef.current.focus({
         preventScroll: true,
       });
@@ -83,12 +87,13 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
         <div className='f-22-550'>{isSelfTransfer ? 'Transfer details' : 'How much are you sending?'}</div>
         {isSelfTransfer && (
           <SelectAccountDropdown
-            autoFocus
-            accountsList={accountsList}
+            autoFocus={isActiveStep}
+            accountsList={destinationAccounts?.accounts ?? []}
+            isLoading={isLoading}
             shouldReset={false}
             accountDetails={destinationAccountDetails}
             onAccountSelect={handleDestinationAccountSelect}
-            label='Recipient account'
+            label='Transfer to'
           />
         )}
         <div className='flex gap-3 items-baseline'>
@@ -107,26 +112,14 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
           />
           <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>USD</div>
         </div>
-        <SelectAccountDropdown
-          accountsList={accountsList}
-          shouldReset={false}
-          accountDetails={defaultTemplate?.details[0]?.source_account ?? accountDetails}
-          onAccountSelect={handleAccountSelect}
-          label='Send from'
-          disabled={!!templateDetails}
-        />
         {defaultTemplate && (
-          <SelectAccountDropdown
-            hasSubtitle
-            accountsList={accountsList}
-            shouldReset={false}
-            accountDetails={defaultTemplate?.details[0]?.beneficiary_account}
-            onAccountSelect={handleAccountSelect}
-            label='Recipient'
-            disabled={!!templateDetails}
+          <AccountWithLogo
+            className='rounded-md !p-2.5 bg-BACKGROUND_GRAY_2 border border-GRAY_400'
+            name={snakeCaseToSentenceCase(destinationAccountDetails?.account_name ?? '')}
+            logo={DEFAULT_BANK}
+            subtitle={destinationAccountDetails?.account_name}
           />
         )}
-
         <div className='w-full'>
           <div className='f-12-500 text-GRAY_900 mb-2'>Payment processing mode</div>
           <Dropdown
@@ -162,7 +155,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({
           size={SIZE_TYPES.MEDIUM}
           id='MOVE_MONEY_AMOUNT_DETAILS_NEXT'
           onClick={onNextClick}
-          disabled={!amount || !accountDetails}
+          disabled={!amount || (isSelfTransfer && !destinationAccountDetails)}
         >
           Next
         </Button>
