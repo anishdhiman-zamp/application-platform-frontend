@@ -20,17 +20,17 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
         <SvgSpriteLoader id='arrow-narrow-left' size={14} onClick={onBack} />
         <div className='flex items-center gap-2.5'>
           <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
-            {getFirstLetters(recipientDetails?.recipient?.name, 1)}
+            {getFirstLetters(recipientDetails?.name, 1)}
           </div>
           <div>
-            <div className='f-16-600'>{recipientDetails?.recipient?.name}</div>
-            <div className='f-11-400 text-GRAY_700'>{recipientDetails?.recipient?.email}</div>
+            <div className='f-16-600'>{recipientDetails?.name}</div>
+            <div className='f-11-400 text-GRAY_700'>{recipientDetails?.email}</div>
           </div>
         </div>
       </div>
       <CommonWrapper>
         <div className='flex flex-col gap-2.5'>
-          {recipientDetails?.recipient?.recipient_details.map((recipientDetails, index) => (
+          {recipientDetails?.recipient_details.map((recipientDetails, index) => (
             <div key={index} className='flex items-center gap-4'>
               <div className='f-12-400 text-GRAY_700 w-[150px]'>{recipientDetails.label}</div>
               <div className='f-11-400'>{recipientDetails.value}</div>
