@@ -1,5 +1,6 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
+import { APITags } from '@/constants/api.constants';
 import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
@@ -30,6 +31,7 @@ const Payments = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
       }),
+      providesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
     createTemplate: builder.mutation<SourceAccountResponseType, CreateTemplatePayloadType>({
       query: (body) => ({
@@ -37,6 +39,7 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
   }),
 });

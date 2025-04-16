@@ -90,16 +90,17 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
+    if (currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && filteredAccounts?.length === 0) return 56;
     if (
       currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS &&
       filteredAccounts?.length > 0 &&
       filteredAccounts?.length <= 8
     )
-      return 36 * filteredAccounts?.length + 82;
+      return 36 * filteredAccounts?.length + (showTemplate ? 82 : 16);
     if (currentTab === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES && templates?.length > 0 && templates?.length <= 8)
       return 31 * templates?.length + 84;
 
-    return 390;
+    return showTemplate ? 390 : 334;
   }, [isShowMenu, filteredAccounts, templates, currentTab]);
 
   const onSearchBlur = () => {
@@ -141,7 +142,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   if (isLoading) {
     return (
       <>
-        {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
+        {label && <div className={cn('text-GRAY_900 f-12-500', showTemplate ? 'mb-2' : 'mb-0')}>{label}</div>}
         <div className='rounded-md border border-GRAY_500 bg-white p-2'>
           <SkeletonElement className='w-full h-6' />
         </div>
@@ -154,15 +155,20 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
         return (
           <div className='p-1 flex-1 overflow-y-auto'>
-            {filteredAccounts.map((account, index) => (
-              <AccountWithLogo
-                key={`${account?.account_number}_${index}`}
-                className='hover:bg-GRAY_100 rounded-md !p-2.5'
-                name={`${snakeCaseToSentenceCase(account?.account_name)}   ${MASK_DOTS}  ${account?.account_number_last_four_characters}`}
-                onClick={() => handleAccountSelect(account)}
-                logo={DEFAULT_BANK}
-              />
-            ))}
+            <CommonWrapper
+              isNoData={filteredAccounts?.length === 0}
+              noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No accounts found</div>}
+            >
+              {filteredAccounts.map((account, index) => (
+                <AccountWithLogo
+                  key={`${account?.account_number}_${index}`}
+                  className='hover:bg-GRAY_100 rounded-md !p-2.5'
+                  name={`${snakeCaseToSentenceCase(account?.account_name)}   ${MASK_DOTS}  ${account?.masked_account_number}`}
+                  onClick={() => handleAccountSelect(account)}
+                  logo={DEFAULT_BANK}
+                />
+              ))}
+            </CommonWrapper>
           </div>
         );
       }
@@ -229,28 +235,32 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           }}
           className='transition-all duration-200 flex flex-col'
         >
-          {showTemplate && (
-            <div className='px pt-3'>
+          {
+            <div className={cn('px', { 'pt-3': showTemplate })}>
               <TabsV2
                 tabsList={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
                 currentTab={currentTab}
                 onValueChange={handleTabSelect}
                 contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
                 listClassName='grid w-full grid-cols-2 w-[calc(100%-16px)] mx-auto'
+                triggerClassName='f-12-450'
+                hideTabs={!showTemplate}
               >
                 {getDropdownBody()}
               </TabsV2>
             </div>
-          )}
-          <div className='border-t border-GRAY_400 px-1'>
-            <div
-              className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer rounded-md'
-              onClick={() => setCreateTemplateType?.(MOVE_MONEY_TYPE.SINGLE_TRANSFER)}
-            >
-              <SvgSpriteLoader size={12} id='plus' />
-              Create template
+          }
+          {showTemplate && (
+            <div className='border-t border-GRAY_400 px-1'>
+              <div
+                className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer rounded-md'
+                onClick={() => setCreateTemplateType?.(MOVE_MONEY_TYPE.SINGLE_TRANSFER)}
+              >
+                <SvgSpriteLoader size={12} id='plus' />
+                Create template
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

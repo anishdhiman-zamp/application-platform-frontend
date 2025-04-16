@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { toast } from 'react-toastify';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { defaultAccountData } from 'modules/payments/payments.constant';
@@ -30,11 +31,9 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
   const [templateName, setTemplateName] = useState<string>('');
 
-  const [createTemplate] = useCreateTemplateMutation();
+  const [createTemplate, { isLoading: isCreateTemplateLoading }] = useCreateTemplateMutation();
 
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined);
   const [getDestinationAccounts, { data: destinationAccounts, isLoading: isDestinationAccountsLoading }] =
     useLazyGetDestinationAccountsQuery();
 
@@ -50,7 +49,15 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
       ],
       description: 'NA',
       type: paymentType,
-    });
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Template created successfully');
+        onClose();
+      })
+      .catch(() => {
+        toast.error('Failed to create template');
+      });
   };
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
@@ -75,6 +82,9 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         onCancel={onClose}
         onSubmit={handleSubmit}
         closeOnClickOutside={false}
+        isNextButtonLoading={isCreateTemplateLoading}
+        isNextButtonDisabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
+        nextButtonClassName='!min-w-[62px]'
       >
         <div className='flex flex-col gap-5 w-[300px] mx-auto min-h-[600px]'>
           <div className='flex items-end gap-2'>

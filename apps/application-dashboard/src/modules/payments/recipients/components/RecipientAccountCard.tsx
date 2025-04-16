@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { RecipientAccountDetailsType } from '@/types/api/paymentApi.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -14,9 +15,10 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
       className='w-full rounded-md border border-BORDER_GRAY_400 overflow-hidden'
       onClick={() => setIsDetailsOpen((prev) => !prev)}
     >
-      <div className='px-2 py-2.5 flex items-center gap-1.5 bg-BACKGROUND_GRAY_2 f-11-400 cursor-pointer'>
+      <div className='px-2 py-2.5 flex items-center gap-1.5 bg-BACKGROUND_GRAY_2 f-11-400 cursor-pointer select-none'>
         <SvgSpriteLoader id='bank' size={14} />
-        Account Name {account?.masked_account_number}
+        <div className='grow'>Account Name {account?.masked_account_number}</div>
+        <DropdownToggle isShowMenu={isDetailsOpen} setIsShowMenu={setIsDetailsOpen} />
       </div>
       {isDetailsOpen && (
         <div className='px-2.5 py-3 flex flex-col gap-3.5'>

@@ -11,6 +11,7 @@ type TabsV2Props = {
   listClassName?: string;
   contentClassName?: string;
   triggerClassName?: string;
+  hideTabs?: boolean;
 };
 
 const TabsV2: FC<TabsV2Props> = ({
@@ -22,16 +23,19 @@ const TabsV2: FC<TabsV2Props> = ({
   listClassName,
   contentClassName,
   triggerClassName,
+  hideTabs,
 }) => {
   return (
     <Tabs onValueChange={onValueChange} className={className} defaultValue={currentTab}>
-      <TabsList className={listClassName}>
-        {tabsList.map((tab, idx) => (
-          <TabsTrigger key={idx} value={tab?.value as string} className={triggerClassName}>
-            {tab?.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      {!hideTabs && (
+        <TabsList className={listClassName}>
+          {tabsList.map((tab, idx) => (
+            <TabsTrigger key={idx} value={tab?.value as string} className={triggerClassName}>
+              {tab?.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      )}
       <TabsContent className={contentClassName} value={currentTab}>
         {children}
       </TabsContent>

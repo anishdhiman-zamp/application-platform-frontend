@@ -8,6 +8,7 @@ import { useGetTemplateListQuery } from '@/apis/payments';
 import Input from '@/components/common/input';
 import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
@@ -90,6 +91,14 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
             isLoading={isLoading}
             isError={isError}
             noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
+            skeletonType={SkeletonTypes.CUSTOM}
+            loader={
+              <div className='flex flex-col gap-2'>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className='w-full h-16 bg-GRAY_200 rounded-md animate-pulse' />
+                ))}
+              </div>
+            }
           >
             {templates?.map((template, index) => (
               <TemplateCard key={index} template={template} handleSendClick={() => handleTemplateSendClick(template)} />

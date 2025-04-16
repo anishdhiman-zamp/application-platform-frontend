@@ -22,7 +22,7 @@ export interface AccountDetailsType {
   bank_identifier?: string;
   balance?: number | null;
   account_balance?: number | null;
-  account_number_last_four_characters?: string;
+  masked_account_number?: string;
   banking_partner?: string;
   account_holder_name?: string;
 }
@@ -37,4 +37,10 @@ export enum MOVE_MONEY_PAYMENT_TYPE {
   RECIPIENT = 'RECIPIENT',
   TEMPLATES = 'TEMPLATES',
   ACCOUNTS = 'ACCOUNTS',
+}
+
+export enum MOVE_MONEY_ACTION_TYPE {
+  ADD_ACCOUNT = 'add-account',
+  FILTER_PAYMENTS = 'filter-payments',
+  SEND_MONEY = 'send-money',
 }

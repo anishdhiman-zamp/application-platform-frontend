@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { MASK_DOTS } from 'modules/payments/payments.constant';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { defaultFn, defaultFnType } from '@/types/commonTypes';
@@ -32,7 +33,9 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
                 <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden max-w-[100px]'>
                   {item?.account_name}
                 </div>
-                <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px]'>{item?.account_number}</div>
+                <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px]'>
+                  {MASK_DOTS} {item?.account_number}
+                </div>
               </div>
             ))}
         </div>
