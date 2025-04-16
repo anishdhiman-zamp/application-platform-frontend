@@ -58,6 +58,7 @@ export type CreateDatasetRequestType = {
   partition_columns?: string[];
   cluster_columns?: string[];
   provider: ProviderType;
+  order_by_column?: string;
 };
 
 export type CreateDatasetResponseType = {
@@ -139,6 +140,7 @@ export type UpdateDatasetRequestType = {
   dedup_columns: string[];
   cluster_columns: string[];
   partition_columns: string[];
+  order_by_column: string;
 };
 
 export type UpdateDatasetResponseType = {
