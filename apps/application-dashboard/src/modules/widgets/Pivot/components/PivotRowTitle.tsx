@@ -23,7 +23,7 @@ import { cn } from 'utils/common';
 interface PivotRowTitleProps {
   node: IRowNode;
   value: string;
-  maxGroupingLevel: number;
+  maxGroupingLevel?: number;
   displayConfig?: MapAny;
 }
 

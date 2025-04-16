@@ -98,6 +98,10 @@
   border-right: 0.5px solid #ebebeb !important;
   border-bottom: 0.5px solid #ebebeb !important;
 }
+.tree-table .ag-header-cell-comp-wrapper {
+  border-right: 0.5px solid #ebebeb !important;
+  border-bottom: 0.5px solid #ebebeb !important;
+}
 
 .pivot .ag-header-group-cell.ag-column-last {
   border-right: none !important;
