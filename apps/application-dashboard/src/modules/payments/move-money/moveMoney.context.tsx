@@ -1,9 +1,10 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
-import { AccountDetailsType, ContactType, TemplateDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
 import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 
 enum moveMoneyContextActions {
   CURRENT_STEP = 'CURRENT_STEP',
@@ -89,7 +90,12 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case moveMoneyContextActions.DESTINATION_ACCOUNT_DETAILS:
         return { ...state, destinationAccountDetails: action?.payload?.destinationAccountDetails };
       case moveMoneyContextActions.SOURCE_ACCOUNT_DETAILS:
-        return { ...state, sourceAccountDetails: action?.payload?.sourceAccountDetails };
+        return {
+          ...state,
+          sourceAccountDetails: action?.payload?.sourceAccountDetails,
+          templateDetails: undefined,
+          destinationAccountDetails: undefined,
+        };
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
       case moveMoneyContextActions.CONTACT_DETAILS:
@@ -107,7 +113,9 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return {
           ...state,
           templateDetails: action?.payload?.templateDetails,
-          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.beneficiary_account,
+          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.destination_account,
+          sourceAccountDetails: action?.payload?.templateDetails?.details[0]?.source_account,
+          currentStep: 1,
         };
 
       default:
