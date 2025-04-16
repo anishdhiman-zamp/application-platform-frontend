@@ -7,9 +7,11 @@ import { POLLING_STATUS } from 'constants/common.constants';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
-import { EdgeOptions } from 'modules/admin/admin.constants';
+import { EdgeOptions, S3_INGESTION_EDGE_LABEL } from 'modules/admin/admin.constants';
+import { EditDatasetType, NodeType } from 'modules/admin/admin.types';
 import { createNodeAndEdgeList, getLayoutedElements } from 'modules/admin/admin.utils';
 import AdminDatasetTransform from 'modules/admin/AdminDatasetTransform';
+import AdminEditTemplate from 'modules/admin/AdminEditTemplate';
 import CreateDataset from 'modules/admin/CreateDataset';
 import Notification from 'modules/data/Notification';
 import { useRouter } from 'next/router';
@@ -35,6 +37,8 @@ const AdminDatasetDag: FC = () => {
   const [isPolling, setIsPolling] = useState(false);
   const [pollingMessage, setPollingMessage] = useState('');
   const [isCreateTransformationOpen, setIsCreateTransformationOpen] = useState(false);
+  const [editTemplate, setEditTemplate] = useState<Edge | null>(null);
+  const [editDataset, setEditDataset] = useState<EditDatasetType>();
 
   const defaultEdgeOptions = useMemo(() => EdgeOptions, []);
 
@@ -118,6 +122,32 @@ const AdminDatasetDag: FC = () => {
       });
   };
 
+  const handleEdgeClick = (_: any, edge: Edge) => {
+    if (edge.label !== S3_INGESTION_EDGE_LABEL) {
+      setEditTemplate(edge);
+    }
+  };
+
+  const handleNodeClick = (_: any, node: Node) => {
+    if (node.data.nodeType === NodeType.FOLDER) return;
+    const dataset = datasetListing?.datasets?.find((item) => item.ID === node.id);
+
+    setEditDataset({
+      title: dataset?.Title ?? '',
+      description: dataset?.Description ?? '',
+      dedup_columns: dataset?.Metadata?.databricks_config?.dedup_columns ?? [],
+      partition_columns: dataset?.Metadata?.databricks_config?.partition_columns ?? [],
+      cluster_columns: dataset?.Metadata?.databricks_config?.cluster_columns ?? [],
+      datasetId: dataset?.ID ?? '',
+    });
+    setIsCreateDatasetOpen(true);
+  };
+
+  const handleCloseCreateDataset = () => {
+    setIsCreateDatasetOpen(false);
+    setEditDataset(undefined);
+  };
+
   useEffect(() => {
     if (!data || !datasetListing) return;
 
@@ -173,14 +203,17 @@ const AdminDatasetDag: FC = () => {
             fitView
             nodesConnectable={false}
             defaultEdgeOptions={defaultEdgeOptions}
+            onEdgeClick={handleEdgeClick}
+            onNodeClick={handleNodeClick}
           />
         </div>
       </CommonWrapper>
       {isCreateDatasetOpen && (
         <CreateDataset
-          onClose={() => setIsCreateDatasetOpen(false)}
+          onClose={handleCloseCreateDataset}
           isOpen={isCreateDatasetOpen}
           onSuccessfulCreate={handleSuccessfulCreateDataset}
+          editDataset={editDataset}
         />
       )}
       {isCreateTransformationOpen && (
@@ -189,6 +222,9 @@ const AdminDatasetDag: FC = () => {
           onClose={() => setIsCreateTransformationOpen(false)}
           onSuccessfulTransform={handleSuccessfulCreateTransformation}
         />
+      )}
+      {editTemplate && (
+        <AdminEditTemplate isOpen={!!editTemplate} onClose={() => setEditTemplate(null)} edge={editTemplate} />
       )}
     </>
   );
