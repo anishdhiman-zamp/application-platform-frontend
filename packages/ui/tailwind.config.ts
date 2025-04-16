@@ -13,6 +13,22 @@ const config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          'Inter Variable',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Oxygen',
+          'Ubuntu',
+          'Cantarell',
+          'Open Sans',
+          'Helvetica Neue',
+          'sans-serif',
+        ],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -135,6 +151,7 @@ const config = {
         sideDrawerInner: '10px 0px 50px 0px #0000000d',
         menuList: '1px 2px 20px 0px #0000001A',
         selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
+        menuShadow: 'var(--menu-shadow)',
       },
       height: {
         0.25: '1px',
@@ -268,9 +285,6 @@ const config = {
       },
       borderWidth: {
         0.5: '0.5px',
-      },
-      fontFamily: {
-        outfit: 'Outfit',
       },
       zIndex: {
         1000: '1000',

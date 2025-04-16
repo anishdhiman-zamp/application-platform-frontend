@@ -1,5 +1,6 @@
 import Dagre from '@dagrejs/dagre';
 import { type Edge, type Node } from '@xyflow/react';
+import { S3_INGESTION_EDGE_LABEL } from 'modules/admin/admin.constants';
 import { AdminDatasetListingResponseType, GetDatasetDagResponseType } from 'types/api/admin.types';
 
 export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
@@ -45,7 +46,7 @@ export const createNodeAndEdgeList = (
     const parents = node.Parents;
     const datasetLabel = datasetListing.datasets.find((dataset) => dataset.ID === node.NodeId)?.Title ?? node.NodeId;
 
-    nodes.push({ id: node.NodeId, data: { label: datasetLabel }, position: { x: 0, y: 0 } });
+    nodes.push({ id: node.NodeId, data: { label: datasetLabel, nodeType: node.NodeType }, position: { x: 0, y: 0 } });
     parents?.forEach((parent) => {
       if (edge) {
         const edgeId = edge.job_id.toString();
@@ -62,7 +63,7 @@ export const createNodeAndEdgeList = (
             id: edgeId,
             source: parent.NodeId,
             target: node.NodeId,
-            label: 'S3 ingestion',
+            label: S3_INGESTION_EDGE_LABEL,
           });
         } else {
           edges.push({

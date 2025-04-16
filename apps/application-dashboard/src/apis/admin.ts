@@ -7,10 +7,14 @@ import {
   GetDatasetDagResponseType,
   GetDatasetDisplayConfigRequestType,
   GetDatasetDisplayConfigResponseType,
+  GetTemplatesRequestType,
+  GetTemplatesResponseType,
   PostDatasetDisplayConfigRequestType,
   PostDatasetDisplayConfigResponseType,
   TransformDatasetRequestType,
   TransformDatasetResponseType,
+  UpdateDatasetRequestType,
+  UpdateDatasetResponseType,
 } from 'types/api/admin.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -55,6 +59,20 @@ const Admin = baseApi.injectEndpoints({
         url: API_ENDPOINTS.ADMIN_DATASET_ALL_GET,
       }),
     }),
+    getTemplates: builder.mutation<GetTemplatesResponseType, GetTemplatesRequestType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.ADMIN_DATASET_TEMPLATES_GET,
+        method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    }),
+    updateDataset: builder.mutation<UpdateDatasetResponseType, UpdateDatasetRequestType>({
+      query: ({ datasetId, ...rest }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ADMIN_DATASET_UPDATE_PATCH, { datasetId }),
+        method: REQUEST_TYPES.PATCH,
+        body: rest,
+      }),
+    }),
   }),
 });
 
@@ -65,4 +83,6 @@ export const {
   useTransformDatasetMutation,
   useCreateDatasetMutation,
   useGetAllDatasetsQuery,
+  useGetTemplatesMutation,
+  useUpdateDatasetMutation,
 } = Admin;

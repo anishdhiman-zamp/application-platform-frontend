@@ -163,6 +163,12 @@ const Dataset = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILE_IMPORT_HISTORY_GET, { datasetId }),
       }),
     }),
+    deleteRule: builder.mutation<DatasetUpdateResponseType, { ruleId: string }>({
+      query: ({ ruleId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_RULE_DELETE, { ruleId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+    }),
   }),
 });
 
@@ -191,4 +197,5 @@ export const {
   useLazyGetAiTransformationQuery,
   usePostAiTransformationConfirmMutation,
   useGetFileImportHistoryQuery,
+  useDeleteRuleMutation,
 } = Dataset;
