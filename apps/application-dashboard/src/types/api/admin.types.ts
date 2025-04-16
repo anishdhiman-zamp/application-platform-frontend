@@ -1,5 +1,4 @@
 import { DatasetType, ProviderType } from 'modules/admin/admin.types';
-import { MapAny } from 'types/commonTypes';
 
 export type GetDatasetDisplayConfigRequestType = {
   datasetId: string;
@@ -54,33 +53,45 @@ export type GetDatasetDagResponseType = {
 export type CreateDatasetRequestType = {
   title: string;
   description: string;
-  dedup_columns: string[];
+  dedup_columns?: string[];
   s3_path: string;
-  partition_columns: string[];
+  partition_columns?: string[];
+  cluster_columns?: string[];
   provider: ProviderType;
 };
 
 export type CreateDatasetResponseType = {
   action_id: string; // poll this action_id to get the status of the dataset creation
   dataset_id: string;
-  register_dataset_action_id: string;
+  register_dataset_action_id?: string;
 };
 
 export type TransformDatasetRequestType = {
   title: string;
   description: string;
   dataset_type: DatasetType;
-  dedup_columns: string[];
-  partition_columns: string[];
+  dedup_columns?: string[];
+  partition_columns?: string[];
   provider: ProviderType;
   source_dataset_id: string;
   transformation_template_name: string;
   transformation_template_json: string;
+  target_dataset_id?: string;
+  cluster_columns?: string[];
 };
 
 export type TransformDatasetResponseType = {
   action_id: string; // poll this action_id to get the status
   dataset_id: string;
+};
+
+export type AdminDatasetMetadataType = {
+  databricks_config: {
+    dedup_columns: string[];
+    cluster_columns: string[];
+    order_by_column: string;
+    partition_columns: string[];
+  };
 };
 
 export type AdminDatasetType = {
@@ -91,9 +102,46 @@ export type AdminDatasetType = {
   UpdatedAt: string;
   CreatedBy: string;
   OrganizationId: string;
-  Metadata: MapAny;
+  Metadata: AdminDatasetMetadataType;
 };
 
 export type AdminDatasetListingResponseType = {
   datasets: AdminDatasetType[];
+};
+
+export type GetTemplatesRequestType = {
+  template_ids: string[];
+};
+
+export type TemplateType = {
+  id: string;
+  name: string;
+  configuration: string;
+  template_type: string;
+  metadata: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  is_deleted: boolean;
+  deleted_at: string;
+  deleted_by: string;
+};
+
+export type GetTemplatesResponseType = {
+  templates: TemplateType[];
+};
+
+export type UpdateDatasetRequestType = {
+  datasetId: string;
+  title: string;
+  description: string;
+  dedup_columns: string[];
+  cluster_columns: string[];
+  partition_columns: string[];
+};
+
+export type UpdateDatasetResponseType = {
+  action_id: string;
+  dataset_id: string;
 };

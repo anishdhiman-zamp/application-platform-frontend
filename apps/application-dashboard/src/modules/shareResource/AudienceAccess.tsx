@@ -1,59 +1,72 @@
 import React, { FC, useRef, useState } from 'react';
-import {
-  useDeleteAudienceFromDatasetAccessMutation,
-  useGetAudiencesByDatasetIdQuery,
-  usePatchChangeAudienceRoleInDatasetMutation,
-} from 'apis/dataset';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
-import { CHANGE_ACCESS_PRIVILEGES_LIST, DATASET_ACCESS_PRIVILEGES_LIST } from 'modules/data/data.constants';
-import { DatasetAccessPrivilegesType, DatasetAccessToAudiencesPropsType } from 'modules/data/data.types';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
+import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
-import { accessPermissionForDataset } from 'utils/accessPermission/accessPermission';
-import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
+import { OptionsType } from '@/types/commonTypes';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
-  resource_type,
+type AudienceAccessPropsType = {
+  resourceType: ResourceType;
+  privilege: string;
+  changeRole: (resourceAudienceId: string, role: string) => Promise<void>;
+  deleteAudience: (resourceAudienceId: string, userName: string) => Promise<void>;
+  privilegeList: ResourcePrivilege[];
+  resourceAudienceId: string;
+  resourceAudienceType: string;
+  user: {
+    name?: string;
+    email?: string;
+  };
+  userPrivilege: string;
+  currentUserHasAdminAccess: boolean;
+  orgName: string;
+  customerName: string;
+  teamInfo: TeamInfoType;
+  isDeletingAudience: boolean;
+  isChangingRole: boolean;
+};
+
+const AudienceAccess: FC<AudienceAccessPropsType> = ({
+  resourceType,
   privilege,
-  datasetId,
-  resource_audience_id,
-  resource_audience_type,
+  changeRole,
+  deleteAudience,
+  privilegeList,
+  resourceAudienceId,
   user,
-  userPrivilege,
+  currentUserHasAdminAccess,
+  resourceAudienceType,
   orgName,
   customerName,
   teamInfo,
+  isDeletingAudience,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const role = DATASET_ACCESS_PRIVILEGES_LIST.find((role) => role.value === privilege);
+  const role = privilegeList.find((r) => r.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState<DatasetAccessPrivilegesType>(role as DatasetAccessPrivilegesType);
-  const { refetch: refetchAudiencesByDatasetId } = useGetAudiencesByDatasetIdQuery({ datasetId }, { skip: !datasetId });
-  const [changeRole] = usePatchChangeAudienceRoleInDatasetMutation();
-  const [deleteAudience] = useDeleteAudienceFromDatasetAccessMutation();
+  const [selectedRole, setSelectedRole] = useState<ResourcePrivilege>(role as ResourcePrivilege);
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
-  const checkIfResourceTypeOrg = resource_audience_type === ResourceAudienceType.ORGANIZATION;
-  const checkIfResourceTypeTeam = resource_audience_type === ResourceAudienceType.TEAM;
+  const checkIfResourceTypeOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
+  const checkIfResourceTypeTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const userName = checkIfResourceTypeOrg
     ? orgName
     : checkIfResourceTypeTeam
       ? teamInfo?.name
-      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resource_audience_type)) || 'Unknown';
+      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
-  const checkPermission = accessPermissionForDataset(userPrivilege);
-  const showRoleChangeDropdown = checkPermission && !checkIfResourceTypeOrg;
+  const showRoleChangeDropdown = currentUserHasAdminAccess && !checkIfResourceTypeOrg;
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -61,33 +74,6 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
 
   const handleCloseChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(false);
-  };
-
-  const handleRoleChange = (selectedOption: DatasetAccessPrivilegesType) => {
-    if (!checkPermission) {
-      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.ROLE_CHANGE]);
-
-      return;
-    } else {
-      changeRole({
-        datasetId: datasetId,
-        body: {
-          audience_id: resource_audience_id,
-          role: selectedOption?.value,
-        },
-      })
-        .unwrap()
-        .then(() => {
-          setSelectedRole(selectedOption);
-          setOpenChangeRoleDropdown(false);
-          setIsHoveredDropdown(false);
-          refetchAudiencesByDatasetId();
-          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
-        })
-        .catch((err) => {
-          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
-        });
-    }
   };
 
   const handleOpenRemoveFromTeamPopup = () => {
@@ -98,29 +84,29 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
     setIsOpenRemoveFromTeamPopup(false);
   };
 
-  const handleDeleteAudience = () => {
-    if (!checkPermission) {
-      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.DELETE]);
-
-      return;
-    } else {
-      deleteAudience({
-        datasetId: datasetId,
-        body: {
-          audience_id: resource_audience_id,
-        },
+  const handleRoleChange = async (selectedOption: OptionsType) => {
+    await changeRole(resourceAudienceId, selectedOption.value.toString())
+      .then(() => {
+        setSelectedRole(
+          privilegeList.find((r) => r.value === selectedOption.value && r.kind === resourceType) as ResourcePrivilege,
+        );
+        setOpenChangeRoleDropdown(false);
+        setIsHoveredDropdown(false);
       })
-        .unwrap()
-        .then(() => {
-          handleCloseRemoveFromTeamPopup();
-          refetchAudiencesByDatasetId();
-          toast.success(`Removed ${userName} successfully`);
-        })
-        .catch((err) => {
-          handleCloseRemoveFromTeamPopup();
-          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
-        });
-    }
+      .catch((err) => {
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
+      });
+  };
+
+  const handleDeleteAudience = async () => {
+    deleteAudience(resourceAudienceId, userName || '')
+      .then(() => {
+        handleCloseRemoveFromTeamPopup();
+      })
+      .catch((err) => {
+        handleCloseRemoveFromTeamPopup();
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
+      });
   };
 
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
@@ -158,32 +144,26 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
               </div>
             </div>
           </div>
-          <div className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
-            {checkPermission && (
+          <span className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+            {currentUserHasAdminAccess && (
               <>
-                <SvgSpriteLoader
-                  id='coins-stacked-04'
-                  iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}
-                  width={12}
-                  height={12}
-                  color={COLORS.GRAY_1000}
-                  className='mr-1'
-                />
-                {resource_type}
+                <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
+                {resourceType}
               </>
             )}
-          </div>
+          </span>
         </div>
+
         {showRoleChangeDropdown ? (
           <AsyncDropdown
             onOpen={handleOpenChangeRoleDropdown}
             onClose={handleCloseChangeRoleDropdown}
             isOpen={openChangeRoleDropdown}
             onDelete={handleOpenRemoveFromTeamPopup}
-            onChange={(role) => handleRoleChange(role as DatasetAccessPrivilegesType)}
-            options={CHANGE_ACCESS_PRIVILEGES_LIST}
+            onChange={(role: OptionsType) => handleRoleChange(role)}
+            options={privilegeList}
             selectedValue={selectedRole}
-            defaultValue={role as DatasetAccessPrivilegesType}
+            defaultValue={role as ResourcePrivilege}
             showDelete
             showSelectedIcon
             isHoveredDropdown={isHoveredDropdown}
@@ -205,11 +185,12 @@ const DatasetAccessToAudiences: FC<DatasetAccessToAudiencesPropsType> = ({
         isOpen={isOpenRemoveFromTeamPopup}
         onClose={handleCloseRemoveFromTeamPopup}
         onDelete={handleDeleteAudience}
-        feature='remove-access-from-dataset'
-        warningDescription={`${userName} will be immediately removed from ${resource_type} and lose all access`}
+        isLoading={isDeletingAudience}
+        feature='remove-access-from-page'
+        warningDescription={`${userName} will be immediately removed from ${resourceType} and lose all access`}
       />
     </>
   );
 };
 
-export default DatasetAccessToAudiences;
+export default AudienceAccess;
