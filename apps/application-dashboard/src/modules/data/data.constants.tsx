@@ -1,8 +1,10 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
+import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
+import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
@@ -81,3 +83,7 @@ export const TEAM_OPTIONS_LIST = [
     color: COLORS.RED_250,
   },
 ];
+export const DatasetActionMessages = {
+  [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,
+  [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,
+};

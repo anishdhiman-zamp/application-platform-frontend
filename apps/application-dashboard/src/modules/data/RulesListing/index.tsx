@@ -30,6 +30,7 @@ type RulesListingSideDrawerProps = {
   datasetId: string;
   column: string;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
+  onDeleteRuleId: (ruleId: string) => void;
 };
 
 const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
@@ -37,6 +38,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
   datasetId,
   column,
   handleSuccessfulUpdate,
+  onDeleteRuleId,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [rules, setRules] = useState<RuleCardProps[]>([]);
@@ -295,6 +297,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
                   onExpand={handleExpandRule}
                   onCollapse={handleCollapseRule}
                   id={rule?.id}
+                  onDeleteRuleId={onDeleteRuleId}
                 />
               </div>
             ))}

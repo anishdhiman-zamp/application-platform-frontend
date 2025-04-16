@@ -35,3 +35,8 @@ export type ColumnOrderingVisibilityType = {
   isVisible: boolean;
   width: number;
 };
+
+export enum DATASET_ACTION_TYPE {
+  TAGGING = 'tagging',
+  RULE_DELETION = 'rule_deletion',
+}

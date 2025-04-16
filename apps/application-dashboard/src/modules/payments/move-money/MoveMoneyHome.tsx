@@ -9,6 +9,7 @@ import {
 import MoveMoneyMoreInfo from 'modules/payments/move-money/MoveMoneyMoreInfo';
 import ReviewMoneyTransfer from 'modules/payments/move-money/ReviewMoneyTransfer';
 import SelectBeneficiaryStep from 'modules/payments/move-money/SelectBeneficiaryStep';
+import SelectSourceAccount from 'modules/payments/move-money/SelectSourceAccount';
 import SuccessMoveMoney from 'modules/payments/move-money/SuccessMoveMoney';
 import { MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
@@ -48,6 +49,7 @@ const MoneyTransferHome = () => {
         className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
         onClick={() => router.back()}
       />
+      <SelectSourceAccount handleStepChange={handleStepChange} />
       {!isSelfTransfer && (
         <SelectBeneficiaryStep
           defaultTemplate={defaultTemplate}

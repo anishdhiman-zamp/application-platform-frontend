@@ -54,7 +54,7 @@ module.exports = {
       version: 'detect',
     },
   },
-  ignorePatterns: ['*.webp', '*.png', '*.svg', 'fonts.css', 'eslint.js', '**/next.config.js'],
+  ignorePatterns: ['*.webp', '*.png', 'fonts.css', 'eslint.js', '**/next.config.js', 'dist'],
   rules: {
     '@typescript-eslint/ban-ts-comment': [
       'error',

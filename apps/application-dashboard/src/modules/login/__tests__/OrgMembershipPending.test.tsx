@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { useGetOrganizationMembershipRequestsAllQuery } from 'apis/people';
 import { useLogout } from 'hooks/useLogout';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
@@ -25,7 +25,8 @@ jest.mock('hooks/useLogout', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  // eslint-disable-next-line
+  default: (props: any) => <img {...props} alt={props.alt || ''} />,
 }));
 
 describe('OrgMembershipPending', () => {
@@ -33,8 +34,13 @@ describe('OrgMembershipPending', () => {
   const mockUserEmail = 'test@example.com';
 
   beforeEach(() => {
+    jest.clearAllMocks();
     (useSelector as unknown as jest.Mock).mockReturnValue({ user_email: mockUserEmail });
     (useLogout as jest.Mock).mockReturnValue({ logout: mockLogout });
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('should show loading state', () => {
