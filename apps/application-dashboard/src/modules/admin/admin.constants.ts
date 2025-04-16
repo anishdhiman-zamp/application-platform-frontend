@@ -48,8 +48,8 @@ export const ProviderOptions = [
 ];
 
 export const DatasetTypeOptions = [
-  { label: 'Source', value: DatasetType.SOURCE },
-  { label: 'Staged', value: DatasetType.STAGED },
+  { label: 'Source (will be visible to users)', value: DatasetType.SOURCE },
+  { label: 'Staged (will not be visible to users)', value: DatasetType.STAGED },
 ];
 
 export const ADMIN_DATASET_LISTING_COLUMNS: ColDef[] = [
@@ -62,3 +62,16 @@ export const ADMIN_DATASET_LISTING_COLUMNS: ColDef[] = [
     headerName: 'Description',
   },
 ];
+
+export const TRANSFORM_DATASET_LABEL_PROPS = {
+  input: {
+    labelClassName: '!mb-1',
+    className: 'w-full space-y-2',
+  },
+  dropdown: {
+    titleClassName: 'f-12-500 text-GRAY_900 mb-1 select-none',
+    wrapperClassName: 'w-full mb-2',
+  },
+};
+
+export const S3_INGESTION_EDGE_LABEL = 'S3 ingestion';

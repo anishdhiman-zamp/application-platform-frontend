@@ -52,3 +52,17 @@ export enum ProviderType {
   DATABRICKS = 'databricks',
   PINOT = 'pinot',
 }
+
+export type EditDatasetType = {
+  title: string;
+  description: string;
+  dedup_columns?: string[];
+  partition_columns?: string[];
+  cluster_columns?: string[];
+  datasetId: string;
+};
+
+export enum NodeType {
+  DATASET = 'dataset',
+  FOLDER = 'folder',
+}

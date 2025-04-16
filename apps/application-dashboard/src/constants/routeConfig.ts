@@ -17,6 +17,7 @@ export const ROUTES_PATH = {
   MONEY_TRANSFER: '/payments/money-transfer',
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
+  ADMIN_DATASETS_DAG: '/admin/datasets/dag',
 };
 
 export const getPageRouteById = (pageId: string) => {
