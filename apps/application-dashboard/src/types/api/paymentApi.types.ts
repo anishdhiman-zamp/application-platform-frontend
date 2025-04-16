@@ -1,11 +1,51 @@
-import { AccountDetailsType } from '@/modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from '@/modules/payments/payments.types';
+import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
   accounts: AccountDetailsType[];
 };
 
+export type TemplateDetailsType = {
+  id: string;
+  name: string;
+  details: {
+    order: string;
+    source_account: AccountDetailsType;
+    destination_account: AccountDetailsType;
+  }[];
+  created_by: string;
+  creation_timestamp: string;
+  type: MOVE_MONEY_TYPE;
+};
+
+export type TemplateListResponseType = {
+  templates: TemplateDetailsType[];
+};
+
+export type RecipientAccountDetailsType = {
+  masked_account_number: string;
+  account_details: MenuItem[];
+};
+
+export type RecipientDetailsType = {
+  id: string;
+  name: string;
+  email: string;
+  accounts: RecipientAccountDetailsType[];
+  recipient_details: MenuItem[];
+};
+
 export type RecipientListResponseType = {
-  accounts: AccountDetailsType[];
+  id: string;
+  name: string;
+  email: string;
+  accounts: RecipientAccountDetailsType[];
+  recipient: {
+    email: string;
+    name: string;
+    id: string;
+    recipient_details: MenuItem[];
+  };
 };
 
 export type DestinationAccountPayloadType = {
@@ -17,7 +57,7 @@ export type CreateTemplatePayloadType = {
   details: {
     order: string;
     source_account_id: string;
-    beneficiary_id: string;
+    destination_account_id: string;
   }[];
   description: string;
   type: string;

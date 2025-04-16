@@ -5,10 +5,11 @@ import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/Mo
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
 import { RECIPIENT_LIST, TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
-import { MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import Input from 'components/common/input';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
@@ -20,7 +21,6 @@ type SelectBeneDropdownProps = {
   shouldReset?: boolean;
   label?: string;
   showTemplate?: boolean;
-  setCreateTemplateType?: (type: MOVE_MONEY_TYPE | null) => void;
   templateDetails?: TemplateDetailsType | null;
 };
 
@@ -29,8 +29,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   onSelect,
   shouldReset = false,
   label,
-  showTemplate = true,
-  setCreateTemplateType,
+  showTemplate = false,
   templateDetails,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,18 +54,23 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
     return { counterParties: RECIPIENT_LIST, templates: TEMPLATES };
   }, [isSearchActive, searchValue]);
+
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
+    if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && counterParties?.length <= 8) {
+      if (counterParties?.length === 0) return 92;
+
+      return 32 * counterParties?.length + 46;
+    }
     if (
-      currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT &&
-      counterParties?.length > 0 &&
-      counterParties?.length <= 8
+      showTemplate &&
+      currentTab.value === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES &&
+      templates?.length > 0 &&
+      templates?.length <= 8
     )
-      return 32 * counterParties?.length + 123;
-    if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES && templates?.length > 0 && templates?.length <= 8)
       return 32 * templates?.length + 123;
 
-    return 394;
+    return 364;
   }, [isShowMenu, counterParties, templates, currentTab]);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -115,10 +119,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const getDropdownBody = () => {
     switch (currentTab.value) {
-      case MOVE_MONEY_PAYMENT_TYPE.RECIPIENT: {
+      case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
         return (
           <div className='p-1 flex-1'>
-            <div className='max-h-[270px] overflow-y-auto'>
+            <div className='max-h-[320px] overflow-y-auto'>
               <CommonWrapper
                 isNoData={counterParties?.length === 0}
                 noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No recipients found</div>}
@@ -213,13 +217,6 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
               <SvgSpriteLoader size={12} id='plus' />
               New recipient
-            </div>
-            <div
-              className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer hover:bg-GRAY_100 rounded-md'
-              onClick={() => setCreateTemplateType?.(MOVE_MONEY_TYPE.SINGLE_TRANSFER)}
-            >
-              <SvgSpriteLoader size={12} id='plus' />
-              Create template
             </div>
           </div>
         </div>

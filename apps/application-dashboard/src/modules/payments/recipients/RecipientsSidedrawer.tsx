@@ -3,6 +3,7 @@ import AddRecipientAccount from 'modules/payments/recipients/AddRecipientAccount
 import RecipientDetails from 'modules/payments/recipients/RecipientDetails';
 import RecipientsList from 'modules/payments/recipients/RecipientsList';
 import { defaultFnType } from 'types/commonTypes';
+import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types';
 
@@ -12,16 +13,17 @@ type RecipientsSideDrawerProps = {
 };
 
 const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }) => {
-  const [onRecipientDetails, setOnRecipientDetails] = useState<string>('');
+  const [onRecipientDetails, setOnRecipientDetails] = useState<RecipientDetailsType | null>(null);
   const [isAddRecipient, setIsAddRecipient] = useState<boolean>(false);
 
   const renderStep = () => {
-    if (onRecipientDetails) return <RecipientDetails onBack={() => setOnRecipientDetails('')} />;
+    if (onRecipientDetails)
+      return <RecipientDetails onBack={() => setOnRecipientDetails(null)} recipientDetails={onRecipientDetails} />;
     if (isAddRecipient) return <AddRecipientAccount />;
 
     return (
       <RecipientsList
-        onRecipientDetails={(id) => setOnRecipientDetails(id)}
+        onRecipientDetails={(recipientDetails) => setOnRecipientDetails(recipientDetails)}
         onAddRecipient={() => setIsAddRecipient(true)}
       />
     );

@@ -45,3 +45,10 @@ export type ResponsiveGridLayoutType = {
   w: number;
   h: number;
 };
+
+export enum SIDE_OPTIONS {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
+}

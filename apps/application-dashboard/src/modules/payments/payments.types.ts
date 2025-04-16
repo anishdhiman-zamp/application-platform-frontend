@@ -22,31 +22,25 @@ export interface AccountDetailsType {
   bank_identifier?: string;
   balance?: number | null;
   account_balance?: number | null;
-  account_number_last_four_characters?: string;
+  masked_account_number?: string;
   banking_partner?: string;
   account_holder_name?: string;
 }
 
-export type TemplateDetailsType = {
-  id: string;
-  name: string;
-  details: {
-    order: string;
-    source_account: AccountDetailsType;
-    beneficiary_account: AccountDetailsType;
-  }[];
-  created_by: string;
-  creation_timestamp: string;
-  type: MOVE_MONEY_TYPE;
-};
-
 export enum MOVE_MONEY_TYPE {
-  SINGLE_TRANSFER = 'single-transfer',
-  SELF_TRANSFER = 'self-transfer',
-  BULK_TRANSFER = 'bulk-transfer',
+  SINGLE_TRANSFER = 'single',
+  SELF_TRANSFER = 'self',
+  BULK_TRANSFER = 'bulk',
 }
 
 export enum MOVE_MONEY_PAYMENT_TYPE {
   RECIPIENT = 'RECIPIENT',
   TEMPLATES = 'TEMPLATES',
+  ACCOUNTS = 'ACCOUNTS',
+}
+
+export enum MOVE_MONEY_ACTION_TYPE {
+  ADD_ACCOUNT = 'add-account',
+  FILTER_PAYMENTS = 'filter-payments',
+  SEND_MONEY = 'send-money',
 }

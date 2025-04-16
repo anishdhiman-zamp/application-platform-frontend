@@ -1,10 +1,12 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
+import { APITags } from '@/constants/api.constants';
 import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
-  RecipientListResponseType,
+  RecipientDetailsType,
   SourceAccountResponseType,
+  TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
 
 const Payments = baseApi.injectEndpoints({
@@ -14,7 +16,7 @@ const Payments = baseApi.injectEndpoints({
         url: API_ENDPOINTS.PAYMENTS_SOURCE_ACCOUNTS_GET,
       }),
     }),
-    getRecipientList: builder.query<RecipientListResponseType, void>({
+    getRecipientList: builder.query<RecipientDetailsType[], void>({
       query: () => ({
         url: API_ENDPOINTS.RECIPIENT_LIST_GET,
       }),
@@ -25,10 +27,11 @@ const Payments = baseApi.injectEndpoints({
         params,
       }),
     }),
-    getTemplateList: builder.query<SourceAccountResponseType, void>({
+    getTemplateList: builder.query<TemplateListResponseType, void>({
       query: () => ({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
       }),
+      providesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
     createTemplate: builder.mutation<SourceAccountResponseType, CreateTemplatePayloadType>({
       query: (body) => ({
@@ -36,6 +39,7 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
   }),
 });
