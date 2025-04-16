@@ -13,9 +13,11 @@ import AdminDatasetDelete from 'modules/admin/AdminDatasetDelete';
 import AdminDatasetTransform from 'modules/admin/AdminDatasetTransform';
 import CreateDataset from 'modules/admin/CreateDataset';
 import Notification from 'modules/data/Notification';
+import Link from 'next/link';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { Button } from 'components/common/button/Button';
 import DataTable from 'components/common/table/DataTable';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -126,7 +128,11 @@ const AdminDatasetListing = () => {
           <div>Datasets</div>
           <div className='flex items-center gap-4'>
             <Notification isPolling={isPolling} message={pollingMessage} />
-
+            <Link href={ROUTES_PATH.ADMIN_DATASETS_DAG}>
+              <Button id='show-dag' size={SIZE_TYPES.SMALL}>
+                Show Dag
+              </Button>
+            </Link>
             <Button id='create-transformation' size={SIZE_TYPES.SMALL} onClick={handleCreateTransformation}>
               Create Transformation
             </Button>
