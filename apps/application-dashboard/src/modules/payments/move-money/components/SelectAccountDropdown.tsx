@@ -3,20 +3,24 @@ import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
+import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import Input from 'components/common/input';
 
 type SelectBeneDropdownProps = {
   autoFocus?: boolean;
   accountsList: AccountDetailsType[];
-  onAccountSelect: (val: AccountDetailsType) => void;
-  accountDetails: AccountDetailsType;
+  onAccountSelect?: (val: AccountDetailsType) => void;
+  accountDetails?: AccountDetailsType;
   shouldReset?: boolean;
   label?: string;
   hasSubtitle?: boolean;
+  disabled?: boolean;
+  isLoading?: boolean;
 };
 
 const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
@@ -27,9 +31,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   shouldReset = false,
   label,
   hasSubtitle = false,
+  disabled = false,
+  isLoading = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const { contact_id } = router.query;
 
   const [searchValue, setSearchValue] = useState('');
@@ -41,29 +49,32 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     setIsSearchActive(true);
   };
 
-  const handleRecipientSelect = (recipient: AccountDetailsType) => {
-    setSearchValue(recipient.account_name);
-    onAccountSelect(recipient);
+  const handleAccountSelect = (account: AccountDetailsType) => {
+    setSearchValue(account?.account_name);
+    onAccountSelect?.(account);
     setIsShowMenu(false);
     setIsSearchActive(false);
   };
 
-  const filterData = useMemo(() => {
+  const filteredAccounts = useMemo(() => {
     if (isSearchActive) {
       return accountsList.filter((val) => val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
     }
 
     return accountsList;
-  }, [isSearchActive, searchValue]);
-  const dropdownHeight = useMemo(() => {
-    if (isShowMenu) {
-      const beneficiaryHeight = (hasSubtitle ? 52 : 36) * filterData?.length;
+  }, [isSearchActive, searchValue, accountsList]);
 
-      return filterData?.length > 0 && filterData?.length <= 6 ? beneficiaryHeight : 225;
+  const dropdownHeight = useMemo(() => {
+    if (disabled) return 0;
+
+    if (isShowMenu) {
+      const beneficiaryHeight = (hasSubtitle ? 52 : 36) * filteredAccounts?.length;
+
+      return filteredAccounts?.length > 0 && filteredAccounts?.length <= 6 ? beneficiaryHeight : 225;
     }
 
     return 0;
-  }, [isShowMenu, filterData]);
+  }, [isShowMenu, filteredAccounts, disabled]);
 
   const onSearchBlur = () => {
     setIsSearchActive(false);
@@ -89,26 +100,47 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     }
   }, [shouldReset]);
 
+  useEffect(() => {
+    if (inputRef.current && autoFocus) {
+      inputRef.current.focus();
+      setIsSearchActive(true);
+      setIsShowMenu(true);
+    }
+  }, [autoFocus]);
+
+  if (isLoading) {
+    return (
+      <>
+        {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
+        <div className='rounded-md border border-GRAY_500 bg-white p-2'>
+          <SkeletonElement className='w-full h-6' />
+        </div>
+      </>
+    );
+  }
+
   return (
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('rounded-md border border-GRAY_500 bg-white overflow-hidden', {
+        className={cn('rounded-md border border-GRAY_500 bg-white overflow-hidden cursor-pointer', {
           'border-GRAY_400': !isShowMenu,
           'border-GRAY_500': isShowMenu,
+          '!cursor-not-allowed bg-GRAY_100': disabled,
         })}
         ref={containerRef}
       >
-        {!accountDetails?.account_name || isSearchActive ? (
+        {!disabled && (!accountDetails?.account_name || isSearchActive) ? (
           <div className='flex items-center gap-1.5 px-3'>
             <Input
               tabIndex={0}
+              inputRef={inputRef}
               id='ADD_ACCOUNT_SEARCH_BANK'
               onFocus={onSearchFocus}
               size={SIZE_TYPES.MEDIUM}
               autoFocus={autoFocus}
               value={isSearchActive ? searchValue : accountDetails?.account_name}
-              disabled={!!contact_id}
+              disabled={!!contact_id || disabled}
               onChange={handleSearch}
               className='f-13-450 grow'
               focusClassNames='!px-0'
@@ -118,11 +150,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           </div>
         ) : (
           <AccountWithLogo
-            className='rounded-md !p-2.5'
-            name={snakeCaseToSentenceCase(accountDetails?.account_name)}
-            onClick={onClickSelectedAccount}
+            className={cn('rounded-md !p-2.5', {
+              'bg-BACKGROUND_GRAY_2': disabled,
+            })}
+            name={snakeCaseToSentenceCase(accountDetails?.account_name ?? '')}
+            onClick={!disabled ? onClickSelectedAccount : undefined}
             logo={DEFAULT_BANK}
-            subtitle={accountDetails?.account_balance}
+            subtitle={accountDetails?.account_name}
           />
         )}
         <div
@@ -132,12 +166,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           className='transition-all duration-200 overflow-y-auto'
         >
           <div className='p-1'>
-            {filterData.map((recipient, index) => (
+            {filteredAccounts.map((account, index) => (
               <AccountWithLogo
-                key={`${recipient.account_number}_${index}`}
+                key={`${account?.account_number}_${index}`}
                 className='hover:bg-GRAY_100 rounded-md !p-2.5'
-                name={snakeCaseToSentenceCase(recipient.account_name)}
-                onClick={() => handleRecipientSelect(recipient)}
+                name={`${snakeCaseToSentenceCase(account?.account_name)}   ${MASK_DOTS}  ${account?.account_number_last_four_characters}`}
+                onClick={() => handleAccountSelect(account)}
                 logo={DEFAULT_BANK}
               />
             ))}

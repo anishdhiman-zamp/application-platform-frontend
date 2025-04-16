@@ -35,6 +35,12 @@ export const API_ENDPOINTS = {
   // admin
   ADMIN_DATASET_DISPLAY_CONFIG_GET: `datasets/{{datasetId}}/display-config`,
   ADMIN_DATASET_DISPLAY_CONFIG_POST: `datasets/{{datasetId}}/display-config`,
+  ADMIN_DATASET_DAG_GET: `datasets/ops/dag`,
+  ADMIN_DATASET_CREATE_POST: `datasets/ops/create`,
+  ADMIN_DATASET_TRANSFORM_POST: `datasets/ops/transform`,
+  ADMIN_DATASET_ALL_GET: `/datasets/listing-all`,
+  ADMIN_DATASET_TEMPLATES_GET: `/datasets/templates/listing`,
+  ADMIN_DATASET_UPDATE_PATCH: `/datasets/{{datasetId}}/update`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,
@@ -44,6 +50,7 @@ export const API_ENDPOINTS = {
 
   DATASET_RULES_BY_RULE_IDS_GET: `datasets/rules/ids`,
   DATASET_RULES_PRIORITY_PATCH: `datasets/rules/priority`,
+  DATASET_RULE_DELETE: `datasets/rules/{{ruleId}}`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
 
@@ -56,8 +63,20 @@ export const API_ENDPOINTS = {
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
 
+  PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
+  PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
+  PAYMENTS_TEMPLATE_LIST_GET: `payment-templates/list`,
+  PAYMENTS_TEMPLATE_CREATE_POST: `payment-templates/create`,
+
+  RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
+
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
+
+  RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
 };
 
 export const enum REQUEST_TYPES {

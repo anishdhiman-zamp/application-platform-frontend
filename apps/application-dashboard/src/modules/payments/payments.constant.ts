@@ -66,7 +66,7 @@ export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [
 ];
 
 export const defaultAccountData = {
-  account_id: '',
+  id: '',
   currency_code: '',
   account_number: '',
   account_type: '',
@@ -87,3 +87,5 @@ export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
   INPUT_FILE_FORMATS.PDF,
   INPUT_FILE_FORMATS.BMP,
 ];
+
+export const MASK_DOTS = '••';

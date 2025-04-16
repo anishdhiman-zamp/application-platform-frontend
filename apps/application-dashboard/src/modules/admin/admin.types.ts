@@ -32,3 +32,37 @@ export type JsonPreviewSidebarPropsType = {
   onClose: defaultFnType;
   isOpen: boolean;
 };
+
+export enum AdminDatasetActionTypes {
+  DELETE = 'delete',
+  EDIT = 'edit',
+}
+
+export type AdminDeleteDatasetDetailsType = {
+  datasetId: string;
+  datasetName: string;
+};
+
+export enum DatasetType {
+  SOURCE = 'source',
+  STAGED = 'staged',
+}
+
+export enum ProviderType {
+  DATABRICKS = 'databricks',
+  PINOT = 'pinot',
+}
+
+export type EditDatasetType = {
+  title: string;
+  description: string;
+  dedup_columns?: string[];
+  partition_columns?: string[];
+  cluster_columns?: string[];
+  datasetId: string;
+};
+
+export enum NodeType {
+  DATASET = 'dataset',
+  FOLDER = 'folder',
+}

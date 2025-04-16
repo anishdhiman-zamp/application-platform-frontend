@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
-import FileUploaderWrapper from 'modules/data/components/importDataset/FileUploaderWrapper';
 import { FILE_SIZE } from 'modules/data/components/importDataset/importData.constants';
 import { FILE_MIME, ImportFilePropsType } from 'modules/data/components/importDataset/importData.types';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import * as XLSX from 'xlsx';
+import { read, utils } from 'xlsx';
+import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 const ImportFile: FC<ImportFilePropsType> = ({
   acceptedFormats,
@@ -13,9 +13,10 @@ const ImportFile: FC<ImportFilePropsType> = ({
   setFileName,
   filesSelected,
   className,
-  setStartPollingPreview,
-  onClosePopup,
   setRawData,
+  setFileUploadId,
+  keepLoadingFlow,
+  isFileUploading,
 }) => {
   const handleFileUpload = (file: UploadFileResponseType | null) => {
     if (!file?.rawFile) return;
@@ -25,22 +26,22 @@ const ImportFile: FC<ImportFilePropsType> = ({
     reader.onload = (e) => {
       if (!e.target?.result) return;
 
-      let workbook: XLSX.WorkBook;
+      let workbook;
       let sheet: MapAny = [];
 
       if (file?.rawFile?.type === FILE_MIME.TEXT_CSV) {
         const text = e?.target?.result as string;
 
-        workbook = XLSX.read(text, { type: 'string' });
+        workbook = read(text, { type: 'string' });
       } else {
         const data = new Uint8Array(e.target.result as ArrayBuffer);
 
-        workbook = XLSX.read(data, { type: 'array' });
+        workbook = read(data, { type: 'array' });
       }
 
       const sheetName = workbook?.SheetNames[0];
 
-      sheet = XLSX?.utils?.sheet_to_json(workbook.Sheets[sheetName], { defval: '', header: 1 });
+      sheet = utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '', header: 1 });
 
       if (sheet?.length === 0) {
         setRawData({ columns: [], rows: [] });
@@ -77,8 +78,9 @@ const ImportFile: FC<ImportFilePropsType> = ({
       filesSelected={filesSelected}
       className={className}
       setRawData={setRawData}
-      setStartPollingPreview={setStartPollingPreview}
-      onClosePopup={onClosePopup}
+      setFileUploadId={setFileUploadId}
+      keepLoadingFlow={keepLoadingFlow}
+      isFileUploading={isFileUploading}
     />
   );
 };

@@ -1,3 +1,270 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter';
+}
+
+* > ::-webkit-scrollbar {
+  width: 12px;
+  border-radius: 100%;
+  overflow: hidden;
+}
+
+/* Track */
+* > ::-webkit-scrollbar-track {
+  background: #fff0;
+}
+
+/* Handle */
+* > ::-webkit-scrollbar-thumb {
+  background: #f2f2f2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Handle on hover */
+* > ::-webkit-scrollbar-thumb:hover {
+  background: #ebebeb;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  font-feature-settings:
+    'tnum' on,
+    'lnum' on; /* Tabular numerals and lining numerals */
+}
+
+
+/* Colors */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --menu-shadow: 1px 2px 10px 0px rgba(166,166,166,0.10);
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+.light-mode {
+  --GRAY_20: #00000005;
+  --GRAY_50: #a6a6a61a;
+  --GRAY_70: #0000000d;
+  --GRAY_100: #f2f2f2;
+  --GRAY_200: #ebebeb;
+  --GRAY_300: #e6e5e5;
+  --GRAY_400: #ebebeb;
+  --GRAY_500: #c9c9c9;
+  --GRAY_600: #a8a8a8;
+  --GRAY_700: #8f8f8f;
+  --GRAY_800: #7d7d7d;
+  --GRAY_900: #666666;
+  --GRAY_950: #383838;
+  --GRAY_1000: #171717;
+
+  --BG_GRAY_1: #fbfbfb;
+  --BG_GRAY_2: #fafafa;
+  --BG_GRAY_3: #343434;
+  --BG_GRAY_4: #4a4a4a;
+  --BG_GRAY_5: #f4f5ee;
+
+  --BORDER_GRAY_400: #ebebeb;
+  --BLUE_50: #eef1ff;
+  --BLUE_100: #eaf3ff;
+  --BLUE_200: #dfebff;
+  --BLUE_300: #c9deff;
+  --BLUE_400: #afcffe;
+  --BLUE_500: #92bdfb;
+  --BLUE_600: #4389f2;
+  --BLUE_700: #2546f5;
+  --BLUE_800: #1e0ac8;
+  --BLUE_900: #2445ff;
+  --BLUE_1000: #320a70;
+
+  --GREEN_100: #dcffdd;
+  --GREEN_200: #d3fcd4;
+  --GREEN_300: #bff5c4;
+  --GREEN_400: #5fe573;
+  --GREEN_500: #41d558;
+  --GREEN_600: #04af1f;
+  --GREEN_700: #0da425;
+  --GREEN_800: #038408;
+  --GREEN_900: #027400;
+  --GREEN_1000: #00410d;
+
+  --ORANGE_100: #fef9da;
+  --ORANGE_200: #fcedb9;
+  --ORANGE_300: #fbe3a4;
+  --ORANGE_400: #fcd579;
+  --ORANGE_500: #fcbd3a;
+  --ORANGE_600: #ff8f0e;
+  --ORANGE_700: #f97d0b;
+  --ORANGE_800: #ed6704;
+  --ORANGE_900: #842106;
+  --ORANGE_1000: #331302;
+
+  --RED_100: #ffe6e6;
+  --RED_200: #ffdada;
+  --RED_300: #ffd2d2;
+  --RED_400: #ff9a9e;
+  --RED_500: #e98488;
+  --RED_600: #ff5050;
+  --RED_700: #ff1515;
+  --RED_800: #e10909;
+  --RED_900: #a40000;
+  --RED_1000: #5f0808;
+}
+
+.dark-mode {
+  --GRAY_20: #ffffff0d;
+  --GRAY_50: #ffffff33;
+  --GRAY_70: #ffffff0d;
+  --GRAY_100: #1f1f1f;
+  --GRAY_200: #1f1f1f;
+  --GRAY_300: #2e2e2e;
+  --GRAY_400: #2e2e2e;
+  --GRAY_500: #454545;
+  --GRAY_600: #878787;
+  --GRAY_700: #878787;
+  --GRAY_800: #7d7d7d;
+  --GRAY_900: #a1a1a1;
+  --GRAY_1000: #ededed;
+
+  --BLUE_100: #190955;
+  --BLUE_200: #200978;
+  --BLUE_300: #12167f;
+  --BLUE_400: #171b88;
+  --BLUE_500: #1f2da9;
+  --BLUE_600: #2445ff;
+  --BLUE_700: #2546f5;
+  --BLUE_800: #0063f8;
+  --BLUE_900: #3eaeff;
+  --BLUE_1000: #eaf3ff;
+
+  --GREEN_100: #02300b;
+  --GREEN_200: #064312;
+  --GREEN_300: #095318;
+  --GREEN_400: #1c5f27;
+  --GREEN_500: #267933;
+  --GREEN_600: #17b12f;
+  --GREEN_700: #03921a;
+  --GREEN_800: #23b33a;
+  --GREEN_900: #8ade8c;
+  --GREEN_1000: #dcffdd;
+
+  --ORANGE_100: #461902;
+  --ORANGE_200: #5a2407;
+  --ORANGE_300: #6c2e0d;
+  --ORANGE_400: #8b3915;
+  --ORANGE_500: #99411b;
+  --ORANGE_600: #d06c35;
+  --ORANGE_700: #e25c10;
+  --ORANGE_800: #ed6704;
+  --ORANGE_900: #f0da8d;
+  --ORANGE_1000: #fef9da;
+
+  --RED_100: #510404;
+  --RED_200: #750000;
+  --RED_300: #841515;
+  --RED_400: #a70c0c;
+  --RED_500: #c70000;
+  --RED_600: #fe4545;
+  --RED_700: #f20e0e;
+  --RED_800: #ff3434;
+  --RED_900: #ffa2a2;
+  --RED_1000: #ffe6e6;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .container-start-90 {
+    @apply flex items-start justify-start w-[90px];
+  }
+  .login-btn-opacity-300-easeInOut {
+    @apply transition-opacity duration-300 ease-in-out;
+  }
+}
+
+/* Font */
+
 .f-40-500 {
   font-weight: 500;
   line-height: 45px;

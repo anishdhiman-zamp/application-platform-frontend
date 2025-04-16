@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { cn } from '@/utils/common';
 import ProgressBar from 'components/common/RingProgress';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -23,7 +24,9 @@ const DropdownToggle: FC<DropdownToggleProps> = ({ isLoading, isShowMenu, setIsS
       <SvgSpriteLoader
         onClick={() => setIsShowMenu(!isShowMenu)}
         id='chevron-down'
-        className='tw-cursor-pointer'
+        className={cn('tw-cursor-pointer transition-all duration-200', {
+          'rotate-180': isShowMenu,
+        })}
         size={14}
       />
     </CommonWrapper>

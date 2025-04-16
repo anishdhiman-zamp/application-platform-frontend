@@ -1,8 +1,9 @@
-import { Dispatch, ElementType, ReactNode, SetStateAction } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { DatasetBulkLoadersType } from 'store/slices/user';
-import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';
+import { RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { defaultFnType } from 'types/commonTypes';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 
 export enum INPUT_FILE_FORMATS {
   PNG = 'image/png',
@@ -100,23 +101,7 @@ export type FileUploaderPropsType = {
   setFileName: (fileName: string | null) => void;
   indexKey?: number;
   showUploadButton?: boolean;
-};
-
-export type FileUploaderWrapperPropsType = {
-  acceptedFormats: string;
-  disableNext?: (value: boolean) => void;
-  footer?: string;
-  filesSelected?: string;
-  isFileUploading?: boolean;
-  maxSize?: number;
-  Component: ElementType;
-  className?: string;
-  onClosePopup: defaultFnType;
-  setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
-  setStartPollingPreview: Dispatch<SetStateAction<{ check: boolean; actionId: string; fileUploadId: string }>>;
-  fileName: string | null;
-  setFileName: (fileName: string | null) => void;
-  onFileSelect: (arg: UploadFileResponseType | null) => void;
+  supportedFiles?: string[];
 };
 
 export type ImportFilePropsType = {
@@ -124,21 +109,24 @@ export type ImportFilePropsType = {
   filesSelected?: string;
   className?: string;
   file?: UploadFileResponseType | null;
-  onClosePopup: defaultFnType;
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
-  setStartPollingPreview: Dispatch<SetStateAction<{ check: boolean; actionId: string; fileUploadId: string }>>;
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
+  setFileUploadId?: (fileUploadId: string) => void;
+  keepLoadingFlow?: boolean;
+  isFileUploading?: boolean;
 };
 
 export type ImportFileWrapperPropsType = {
   onReset: defaultFnType;
   isOpen: boolean;
   onClose: defaultFnType;
-  setStartPollingPreview: Dispatch<SetStateAction<{ check: boolean; actionId: string; fileUploadId: string }>>;
   setRawData: Dispatch<SetStateAction<RawMetadata | null>>;
   fileName: string | null;
   setFileName: (fileName: string | null) => void;
+  setFileUploadId?: (fileUploadId: string) => void;
+  keepLoadingFlow?: boolean;
+  isFileUploading?: boolean;
 };
 
 export type ImportedDataPreviewPropsType = {

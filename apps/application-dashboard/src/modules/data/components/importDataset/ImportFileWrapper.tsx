@@ -9,15 +9,13 @@ import Popup from 'components/common/popup/Popup';
 const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
   isOpen,
   onClose,
-  setStartPollingPreview,
   setRawData,
   fileName,
   setFileName,
+  setFileUploadId,
+  keepLoadingFlow,
+  isFileUploading,
 }) => {
-  const handleClosePopup = () => {
-    onClose();
-  };
-
   return (
     <Popup
       title='Import Data'
@@ -36,10 +34,11 @@ const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
           fileName={fileName}
           setFileName={setFileName}
           setRawData={setRawData}
-          setStartPollingPreview={setStartPollingPreview}
           acceptedFormats={IMPORT_ALLOWED_FILE_FORMATS}
           className='flex flex-col justify-center items-center bg-BG_GRAY_1 border border-dashed border-GRAY_400 min-h-[220px] rounded-md focus:border-black focus:border-solid cursor-pointer'
-          onClosePopup={handleClosePopup}
+          setFileUploadId={setFileUploadId}
+          keepLoadingFlow={keepLoadingFlow}
+          isFileUploading={isFileUploading}
         />
       </div>
     </Popup>

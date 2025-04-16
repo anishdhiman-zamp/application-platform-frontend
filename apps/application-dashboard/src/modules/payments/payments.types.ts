@@ -10,17 +10,35 @@ export type ContactType = {
 };
 
 export interface AccountDetailsType {
-  account_id: string;
+  id?: string;
   account_name: string;
+  name?: string;
   account_number: string;
-  currency_code: string;
-  account_type: string;
-  nick_name: string;
-  bank_name: string;
-  bank_identifier: string;
+  account_number_masked?: string;
+  currency_code?: string;
+  account_type?: string;
+  nick_name?: string;
+  bank_name?: string;
+  bank_identifier?: string;
   balance?: number | null;
   account_balance?: number | null;
+  account_number_last_four_characters?: string;
+  banking_partner?: string;
+  account_holder_name?: string;
 }
+
+export type TemplateDetailsType = {
+  id: string;
+  name: string;
+  details: {
+    order: string;
+    source_account: AccountDetailsType;
+    beneficiary_account: AccountDetailsType;
+  }[];
+  created_by: string;
+  creation_timestamp: string;
+  type: MOVE_MONEY_TYPE;
+};
 
 export enum MOVE_MONEY_TYPE {
   SINGLE_TRANSFER = 'single-transfer',

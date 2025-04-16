@@ -1,4 +1,4 @@
-import React, { DragEventHandler, FC, KeyboardEvent, useState } from 'react';
+import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
@@ -6,6 +6,7 @@ import { FileUploaderPropsType } from 'modules/data/components/importDataset/imp
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
+import { toast } from '@/components/common/toast/Toast';
 import { Button } from 'components/common/button/Button';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -16,13 +17,13 @@ const FileUploader: FC<FileUploaderPropsType> = ({
   onFileDrop,
   onClick,
   children,
-  errorClassName,
   footer,
   className,
   fileName,
   setFileName,
   indexKey,
   showUploadButton = true,
+  supportedFiles,
 }) => {
   const errorTitle = error ?? FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR;
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -35,7 +36,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
 
     const files = event?.dataTransfer?.files?.[0];
 
-    setFileName(files?.name);
+    setFileName?.(files?.name);
 
     setIsDragOver(false);
     onFileDrop(files);
@@ -88,23 +89,19 @@ const FileUploader: FC<FileUploaderPropsType> = ({
             Browse files
           </Button>
         )}
-        <span className='f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'>
-          {footer ?? 'Or drag and drop .csv, .xslx files here'}
-        </span>
-        {!!error && (
-          <span
-            className={cn(
-              error &&
-                'absolute flex grow justify-center items-center w-[calc(100%+16px)] !text-RED_800 bg-white f-14-400 p-5 -left-2 top-[160px] rounded-2.5 border border-GRAY_400 shadow-tableFilterMenu',
-              errorClassName,
-            )}
-          >
-            {errorTitle}
-          </span>
-        )}
+        <div className='flex flex-col gap-1 f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'>
+          <span>{footer}</span>
+          <span>{`We only accept ${supportedFiles} format files here`}</span>
+        </div>
       </div>
     );
   };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(errorTitle);
+    }
+  }, [error, errorTitle]);
 
   return (
     <>

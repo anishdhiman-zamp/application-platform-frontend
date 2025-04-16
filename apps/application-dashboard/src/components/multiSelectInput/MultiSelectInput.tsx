@@ -330,7 +330,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             className='flex-1 min-w-[20px] h-fit mt-[2px]'
             customPaddingClassName='p-0'
             focusClassNames='focus:outline-none focus:border-none focus:shadow-none'
-            cursorClassname='cursor-default'
+            cursorClassname='cursor-text'
             inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 !rounded-none'}
             style={{
               maxWidth: '100%',
