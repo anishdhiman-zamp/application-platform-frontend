@@ -16,11 +16,11 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
     <div className='flex items-center justify-between px-1.5 py-1 hover:bg-GRAY_50 cursor-pointer rounded-md hover:z-50'>
       <div className='flex items-center gap-1.5'>
         <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
-          {getFirstLetters(recipient.recipient.name, 1)}
+          {getFirstLetters(recipient?.name, 1)}
         </div>
         <div>
-          <div className='f-12-500'>{recipient.recipient.name}</div>
-          <div className='f-11-400 text-GRAY_700'>{recipient.recipient.email}</div>
+          <div className='f-12-500'>{recipient?.name}</div>
+          <div className='f-11-400 text-GRAY_700'>{recipient?.email}</div>
         </div>
       </div>
       <div className='flex items-center gap-2.5'>

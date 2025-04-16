@@ -1,5 +1,4 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
@@ -7,6 +6,7 @@ import { useRouter } from 'next/router';
 import { defaultFnType } from 'types/commonTypes';
 import { useGetTemplateListQuery } from '@/apis/payments';
 import Input from '@/components/common/input';
+import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
@@ -59,15 +59,14 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
         <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
           <div className='f-16-600 mb-4.5'>Templates</div>
           <div className='flex flex-col gap-3'>
-            <Tabs onValueChange={handleTabSelect} className='' defaultValue={currentTab}>
-              <TabsList className='grid w-full grid-cols-2'>
-                {TEMPLATE_LIST_TABS.map((tab, idx) => (
-                  <TabsTrigger key={idx} value={tab.value}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            <TabsV2
+              tabsList={TEMPLATE_LIST_TABS}
+              currentTab={currentTab}
+              onValueChange={handleTabSelect}
+              contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
+              listClassName='grid w-full grid-cols-2 w-[calc(100%-16px)] mx-auto'
+              triggerClassName='f-12-450'
+            />
             <Input
               type='text'
               placeholder='Search...'

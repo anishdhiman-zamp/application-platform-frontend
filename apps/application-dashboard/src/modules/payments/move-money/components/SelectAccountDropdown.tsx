@@ -1,5 +1,4 @@
 import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
@@ -8,9 +7,9 @@ import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/Mo
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
-import { MenuItem, SIZE_TYPES } from 'types/common/components';
+import { SIZE_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
-// import { Tabs } from '@/components/common/tabs/Tabs';
+import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -55,7 +54,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   const [searchValue, setSearchValue] = useState('');
   const [isShowMenu, setIsShowMenu] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(true);
-  const [currentTab, setCurrentTab] = useState<MenuItem>(MOVE_MONEY_PAYMENT_TYPE_OPTIONS[0]);
+  const [currentTab, setCurrentTab] = useState<string>(MOVE_MONEY_PAYMENT_TYPE_OPTIONS[0].value);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event?.target?.value);
@@ -92,12 +91,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
     if (
-      currentTab.value === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS &&
+      currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS &&
       filteredAccounts?.length > 0 &&
       filteredAccounts?.length <= 8
     )
       return 36 * filteredAccounts?.length + 82;
-    if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES && templates?.length > 0 && templates?.length <= 8)
+    if (currentTab === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES && templates?.length > 0 && templates?.length <= 8)
       return 31 * templates?.length + 84;
 
     return 390;
@@ -121,7 +120,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   };
 
   const handleTabSelect = (option?: string) => {
-    if (option) setCurrentTab({ value: option, label: option });
+    if (option) setCurrentTab(option);
   };
 
   useEffect(() => {
@@ -151,7 +150,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   }
 
   const getDropdownBody = () => {
-    switch (currentTab.value) {
+    switch (currentTab) {
       case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
         return (
           <div className='p-1 flex-1 overflow-y-auto'>
@@ -232,20 +231,15 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
         >
           {showTemplate && (
             <div className='px pt-3'>
-              <Tabs onValueChange={handleTabSelect} className='' defaultValue={currentTab.value as string}>
-                <div className='px-3'>
-                  <TabsList className='grid w-full grid-cols-2'>
-                    {MOVE_MONEY_PAYMENT_TYPE_OPTIONS.map((tab, idx) => (
-                      <TabsTrigger key={idx} value={tab.value}>
-                        {tab.label}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </div>
-                <TabsContent className='max-h-[314px] overflow-y-scroll' value={currentTab.value as string}>
-                  {getDropdownBody()}
-                </TabsContent>
-              </Tabs>
+              <TabsV2
+                tabsList={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
+                currentTab={currentTab}
+                onValueChange={handleTabSelect}
+                contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
+                listClassName='grid w-full grid-cols-2 w-[calc(100%-16px)] mx-auto'
+              >
+                {getDropdownBody()}
+              </TabsV2>
             </div>
           )}
           <div className='border-t border-GRAY_400 px-1'>

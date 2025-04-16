@@ -32,12 +32,7 @@ export type RecipientDetailsType = {
   name: string;
   email: string;
   accounts: RecipientAccountDetailsType[];
-  recipient: {
-    email: string;
-    name: string;
-    id: string;
-    recipient_details: MenuItem[];
-  };
+  recipient_details: MenuItem[];
 };
 
 export type RecipientListResponseType = {
