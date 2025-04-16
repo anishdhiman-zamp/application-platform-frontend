@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Inter Variable';
+  font-family: 'Inter';
 }
 
 * > ::-webkit-scrollbar {

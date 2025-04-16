@@ -3,7 +3,7 @@ import baseApi from 'services/api';
 import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
-  RecipientListResponseType,
+  RecipientDetailsType,
   SourceAccountResponseType,
   TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
@@ -15,7 +15,7 @@ const Payments = baseApi.injectEndpoints({
         url: API_ENDPOINTS.PAYMENTS_SOURCE_ACCOUNTS_GET,
       }),
     }),
-    getRecipientList: builder.query<RecipientListResponseType, void>({
+    getRecipientList: builder.query<RecipientDetailsType[], void>({
       query: () => ({
         url: API_ENDPOINTS.RECIPIENT_LIST_GET,
       }),
