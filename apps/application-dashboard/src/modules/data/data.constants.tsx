@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
-import { DATASET_ACCESS_PRIVILEGES, DATASET_ACTION_TYPE } from 'modules/data/data.types';
+import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
@@ -83,31 +83,6 @@ export const TEAM_OPTIONS_LIST = [
     color: COLORS.RED_250,
   },
 ];
-
-export const DATASET_ACCESS_PRIVILEGES_LIST = [
-  {
-    label: 'Admin',
-    value: DATASET_ACCESS_PRIVILEGES.ADMIN,
-  },
-  {
-    label: 'Viewer',
-    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
-  },
-];
-
-export const CHANGE_ACCESS_PRIVILEGES_LIST = [
-  {
-    label: 'Admin',
-    value: DATASET_ACCESS_PRIVILEGES.ADMIN,
-    desc: 'Can manage and share dataset',
-  },
-  {
-    label: 'Viewer',
-    value: DATASET_ACCESS_PRIVILEGES.VIEWER,
-    desc: 'Can read data only',
-  },
-];
-
 export const DatasetActionMessages = {
   [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,
   [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,
