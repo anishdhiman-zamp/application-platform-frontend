@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Inter Variable';
+  font-family: 'Inter';
 }
 
 * > ::-webkit-scrollbar {
@@ -78,6 +78,7 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --menu-shadow: 1px 2px 10px 0px rgba(166,166,166,0.10);
   }
   .dark {
     --background: 0 0% 3.9%;
