@@ -24,7 +24,8 @@ import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
-import { LOADER_STATUS } from 'modules/data/data.types';
+import { DatasetActionMessages } from 'modules/data/data.constants';
+import { DATASET_ACTION_STATUS, DATASET_ACTION_TYPE, LOADER_STATUS } from 'modules/data/data.types';
 import {
   formatColumnLevelStats,
   formatColumns,
@@ -37,6 +38,7 @@ import {
 import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
+import RuleDelete from 'modules/data/RulesListing/RuleDelete';
 import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -57,7 +59,6 @@ import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import { toast } from 'components/common/toast/Toast';
-import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -122,6 +123,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
+  const [deleteRuleId, setDeleteRuleId] = useState<string>();
+  const [pollingMessage, setPollingMessage] = useState<string>('');
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -225,8 +228,15 @@ const DatasetById: FC<DatasetByIdProps> = ({
     tableRef.current?.api?.clearFocusedCell();
   };
 
-  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType, showPolling = true) => {
-    if (showPolling) setIsPolling(true);
+  const handleSuccessfulUpdate = (
+    data: DatasetUpdateResponseType,
+    showPolling = true,
+    actionType = DATASET_ACTION_TYPE.TAGGING,
+  ) => {
+    if (showPolling) {
+      setIsPolling(true);
+      setPollingMessage(DatasetActionMessages[actionType].IN_PROGRESS);
+    }
     setInitiatedActionIds((prev) => [...prev, data.action_id]);
     startPolling({
       fn: () =>
@@ -236,12 +246,23 @@ const DatasetById: FC<DatasetByIdProps> = ({
       },
       interval: 30000,
       maxAttempts: 50,
-    }).then(() => {
-      setIsPolling(false);
-      toast.success(TOAST_MESSAGES.SUCCESS_TAGGING_COMPLETED);
-      tableRef.current?.api?.refreshServerSide();
-      refetchFilterConfig();
-    });
+    })
+      .then((response) => {
+        if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
+          toast.success(DatasetActionMessages[actionType].SUCCESS);
+          tableRef.current?.api?.refreshServerSide();
+          refetchFilterConfig();
+        } else if (response?.status === DATASET_ACTION_STATUS.FAILED) {
+          toast.error(DatasetActionMessages[actionType].ERROR);
+        }
+      })
+      .catch(() => {
+        toast.error(DatasetActionMessages[actionType].ERROR);
+      })
+      .finally(() => {
+        setIsPolling(false);
+        setPollingMessage('');
+      });
   };
 
   const updateApi = ({
@@ -492,6 +513,19 @@ const DatasetById: FC<DatasetByIdProps> = ({
     );
   };
 
+  const handleCloseRulesListingSideDrawer = () => {
+    setIsRulesListingSideDrawerOpen(false);
+  };
+
+  const handleCloseDeleteRule = () => {
+    setDeleteRuleId('');
+  };
+
+  const handleDeleteRuleSuccess = (data: DatasetUpdateResponseType) => {
+    handleCloseRulesListingSideDrawer();
+    handleSuccessfulUpdate(data, true, DATASET_ACTION_TYPE.RULE_DELETION);
+  };
+
   useEffect(() => {
     firstLoadDone.current = false;
     if (drilldownFilters?.conditions === null) return;
@@ -552,7 +586,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
           <div className='relative flex items-center gap-2.5'>
-            {!isReadOnly && <Notification isPolling={isPolling} />}
+            {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}
             {!isReadOnly && (
               <TableSchemaAlignmentStatus
                 showAiTransformationStatus={showAiTransformationStatus}
@@ -608,9 +642,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
           column={columnId}
-          onClose={() => setIsRulesListingSideDrawerOpen(false)}
+          onClose={handleCloseRulesListingSideDrawer}
           datasetId={id as string}
           handleSuccessfulUpdate={handleSuccessfulUpdate}
+          onDeleteRuleId={setDeleteRuleId}
         />
       )}
       {rowPropertiesData && (
@@ -620,6 +655,14 @@ const DatasetById: FC<DatasetByIdProps> = ({
           datasetId={id as string}
           isDrillDownEnabled={datasetData?.data?.config?.is_drilldown_enabled}
           columns={columns}
+        />
+      )}
+      {deleteRuleId && (
+        <RuleDelete
+          isOpen={!!deleteRuleId}
+          onClose={handleCloseDeleteRule}
+          ruleId={deleteRuleId ?? ''}
+          onSuccess={handleDeleteRuleSuccess}
         />
       )}
     </>
