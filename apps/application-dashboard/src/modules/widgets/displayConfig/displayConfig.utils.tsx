@@ -81,9 +81,9 @@ export const compareColumnGroupAliasDate = (data_1: string, data_2: string, oper
 
 /**
  * This function checks if a parent key matches a given parent row field recursively.
- * @param level - The current level in the hierarchy.
- * @param parentRowField - The parent row field to match against.
- * @param node - The current node being checked.
+ * @param level - current level in the hierarchy.
+ * @param parentRowField - parent row field to match against.
+ * @param node - current node being checked.
  * @returns boolean - True if a match is found, false otherwise.
  */
 export const handleMatchRecursiveParentKey = (level: number | null, parentRowField: string, node: MapAny): boolean => {
