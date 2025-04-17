@@ -1,15 +1,11 @@
-.color-transition::before {
+.color-transition::before,
+.color-transition::after {
   content: '';
 }
 
 .color-transition::after {
-  content: '';
   transition: transform 3s ease-in-out !important;
-  background-color: #4a4a4a;
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 100%;
+  background-color: var(--BG_GRAY_4);
   border-radius: 6px;
   transform: translateX(0);
 }
