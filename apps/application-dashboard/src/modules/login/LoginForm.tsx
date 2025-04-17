@@ -1,27 +1,28 @@
-import React from 'react';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
+import { LOGIN_GROUPS } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
 import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
+import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import Input from 'components/common/input';
 
 export const LoginForm = () => {
-  const [email, setEmail] = React.useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
-  const [loginFlow, setLoginFlow] = React.useState<LoginFlow | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [hasError, setHasError] = React.useState<boolean>(false);
+  const [email, setEmail] = useState(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL) ?? '');
+  const [loginFlow, setLoginFlow] = useState<LoginFlow | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [hasError, setHasError] = useState<boolean>(false);
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
       setEmail(e.target.value);
     }
@@ -43,33 +44,41 @@ export const LoginForm = () => {
       });
       const respJson = await resp.json();
 
-      const validSessionMsg = respJson?.ui?.messages?.[0]?.text.includes(VALID_SESSION_DETECTED_ERROR_MSG);
+      switch (resp.status) {
+        case API_STATUS_CODES.UNPROCESSABLE_ENTITY:
+        case API_STATUS_CODES.OK: {
+          setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
 
-      if (resp.status === 422 || resp.status === 200 || (resp.status === 400 && validSessionMsg)) {
-        setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
+          try {
+            const redirectUrl = respJson.redirect_browser_to;
+            const emailDomain = getDomainFromEmail(email);
 
-        const redirectUrl = respJson.redirect_browser_to;
+            const urlObj = new URL(redirectUrl);
 
-        try {
-          const url = new URL(redirectUrl);
-          const emailDomain = getDomainFromEmail(email);
-
-          setHasError(false);
-          url.searchParams.set('hd', emailDomain);
-          window.location.href = url.toString();
-        } catch (error) {
-          setLoading(false);
-          console.error(error);
-          setHasError(true);
+            urlObj.searchParams.set('hd', emailDomain);
+            setHasError(false);
+            window.location.href = urlObj.toString();
+          } catch (error) {
+            console.error(error);
+            setLoading(false);
+            setHasError(true);
+          }
+          break;
         }
-      } else if (resp.status === 400) {
-        setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
-        setHasError(true);
-      } else {
-        setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
-        setHasError(true);
-        setLoading(false);
-        setLoginFlow(respJson);
+
+        case API_STATUS_CODES.BAD_REQUEST: {
+          setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
+          setHasError(true);
+          break;
+        }
+
+        default: {
+          setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
+          setHasError(true);
+          setLoading(false);
+          setLoginFlow(respJson);
+          break;
+        }
       }
     } catch (error) {
       setLoading(false);
@@ -78,7 +87,7 @@ export const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setError(null);
     setLoading(true);
@@ -108,7 +117,7 @@ export const LoginForm = () => {
 
       setHasError(false);
 
-      if (response.status !== 200) {
+      if (response.status !== API_STATUS_CODES.OK) {
         setError(respJson.error);
         removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
         setHasError(true);

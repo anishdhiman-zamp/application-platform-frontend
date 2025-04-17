@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON } from 'constants/icons';
@@ -30,6 +30,7 @@ type RulesListingSideDrawerProps = {
   datasetId: string;
   column: string;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
+  onDeleteRuleId: (ruleId: string) => void;
 };
 
 const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
@@ -37,6 +38,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
   datasetId,
   column,
   handleSuccessfulUpdate,
+  onDeleteRuleId,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [rules, setRules] = useState<RuleCardProps[]>([]);
@@ -75,7 +77,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
     );
   }, [data, datasetId, column]);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     setSearchTerm(value);
@@ -101,7 +103,8 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
     const orderedItems: RuleCardProps[] = newLayout
       .slice()
       .sort((a: any, b: any) => a.y - b.y)
-      .map((l: any) => rules.find((rule) => rule?.id === l.i)!);
+      .map((l: any) => rules.find((rule) => rule?.id === l.i))
+      .filter((rule: RuleCardProps | undefined): rule is RuleCardProps => rule !== undefined);
 
     const isOrderSame = orderedItems.every((rule, index) => rule?.id === listOfRules[index]?.id);
 
@@ -294,6 +297,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
                   onExpand={handleExpandRule}
                   onCollapse={handleCollapseRule}
                   id={rule?.id}
+                  onDeleteRuleId={onDeleteRuleId}
                 />
               </div>
             ))}

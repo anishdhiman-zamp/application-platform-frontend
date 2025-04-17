@@ -2,7 +2,7 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { ColumnFilterConfig, PIVOT_DATA_TYPES } from 'modules/widgets/Pivot/pivot.types';
 import { parseType } from 'modules/widgets/Pivot/pivot.utils';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
-import { PivotTableWidgetInstanceType, WidgetDataResponseType } from 'types/api/widgets.types';
+import { AGGREGATION_TYPES, PivotTableWidgetInstanceType, WidgetDataResponseType } from 'types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -114,7 +114,7 @@ export const getColDefs = (headers: any[], currency: string) => {
   return headers.map((item) => {
     return {
       field: item.field,
-      aggFunc: 'sum',
+      aggFunc: AGGREGATION_TYPES.SUM,
       valueFormatter: (params: { value: number }) => {
         if (params.value) {
           return new Intl.NumberFormat('en-US', {

@@ -1,10 +1,17 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLazyGetActionStatusQuery, useLazyGetAiTransformationQuery } from 'apis/dataset';
+import {
+  useGetPreviewTransformationMutation,
+  useLazyGetActionStatusQuery,
+  useLazyGetAiTransformationQuery,
+} from 'apis/dataset';
 import { COINS_STACKED_05 } from 'constants/icons';
 import usePolling from 'hooks/usePolling';
 import ImportedDataPreview from 'modules/data/components/importDataset/dataPreview';
-import { AI_TRANSFORMATION_STATUS } from 'modules/data/components/importDataset/importData.constants';
+import {
+  AI_TRANSFORMATION_STATUS,
+  FILE_IMPORT_STATUS_MSG,
+} from 'modules/data/components/importDataset/importData.constants';
 import {
   ImportDatasetPropsType,
   StartPollingPreviewType,
@@ -15,15 +22,21 @@ import { useRouter } from 'next/router';
 import { addDatasetBulkLoaders, removeDatasetBulkLoader } from 'store/slices/user';
 import { DatasetActionStatusResponseType, RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { cn } from 'utils/common';
+import { toast } from '@/components/common/toast/Toast';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const isDatasetRoute = !!router?.query?.datasetId;
   const datasetId = router?.query?.datasetId as string;
   const { startPolling } = usePolling();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getAiTransformation] = useLazyGetAiTransformationQuery();
+  const [getPreviewTransformation, { isSuccess: isSuccessPreviewTransformation }] =
+    useGetPreviewTransformationMutation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileUploadId, setFileUploadId] = useState<string>('');
   const [rawData, setRawData] = useState<RawMetadata | null>(null);
   const [startAiTransformation, setStartAiTransformation] = useState<boolean>(false);
   const [isImportFilePopupOpen, setIsImportFilePopupOpen] = useState<boolean>(false);
@@ -98,6 +111,40 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
       });
   };
 
+  const triggerPreviewTransformation = async (fileUploadId: string) => {
+    const oldDatasetImportPayload = {
+      file_upload_id: fileUploadId,
+      dataset_id: datasetId,
+    };
+    const newDatasetImportPayload = { file_upload_id: fileUploadId };
+    const payload = isDatasetRoute ? oldDatasetImportPayload : newDatasetImportPayload;
+
+    getPreviewTransformation(payload)
+      .unwrap()
+      .then((data) => {
+        if (data?.dataset_action_id) {
+          setStartPollingPreview({ check: true, actionId: data?.dataset_action_id, fileUploadId });
+
+          setTimeout(() => {
+            handleCloseImportFilePopup();
+          }, 1500);
+        }
+      })
+      .catch(() => {
+        setRawData(null);
+        toast.error(FILE_IMPORT_STATUS_MSG.PREVIEW_DATA_FAILED);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    if (fileUploadId?.length > 0) {
+      triggerPreviewTransformation(fileUploadId);
+    }
+  }, [fileUploadId]);
+
   useEffect(() => {
     if (startPollingPreview?.check) {
       handleShowAiTransformationStatus();
@@ -112,9 +159,11 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
           setFileName={setFileName}
           isOpen={isImportFilePopupOpen}
           setRawData={setRawData}
-          setStartPollingPreview={setStartPollingPreview}
           onReset={handleReset}
           onClose={handleCloseImportFilePopup}
+          setFileUploadId={setFileUploadId}
+          keepLoadingFlow={isSuccessPreviewTransformation}
+          isFileUploading={isLoading}
         />
       ) : isImportFilePopupOpen && startAiTransformation ? (
         <ImportedDataPreview

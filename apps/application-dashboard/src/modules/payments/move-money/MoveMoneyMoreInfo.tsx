@@ -2,19 +2,20 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.constant';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
 import Textarea from 'components/common/Textarea';
-import FileUploaderWrapperV2 from 'components/file-upload/FileUploaderWrapperV2';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoneyTransferMoreDetailsStepProps {
   shouldReset: boolean;
+  handleStepChange: (step: number) => void;
 }
 
-const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ shouldReset }) => {
+const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ shouldReset, handleStepChange }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
     dispatch,
@@ -38,10 +39,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         },
       },
     });
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 3 },
-    });
+    handleStepChange(currentStep + 1);
   };
 
   const onBackClick = () => {
@@ -55,10 +53,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         },
       },
     });
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: { currentStep: 1 },
-    });
+    handleStepChange(currentStep - 1);
   };
 
   const handleFileUpload = (file: UploadFileResponseType | null) => file && setUploadedFiles((prev) => [...prev, file]);
@@ -98,16 +93,18 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           />
         </div>
         <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments</div>
-        <FileUploaderWrapperV2
+
+        <FileUploaderWrapper
           className='min-h-[100px]'
           Component={FileUploader}
           showUploadButton={false}
           tabIndex={isActiveStep ? 0 : -1}
           footer='Click to upload or drag & drop here'
-          onFilesSelect={handleFileUpload}
+          onFileSelect={handleFileUpload}
           disableNext={(value: boolean) => setIsFileUploading(value)}
           acceptedFormats={MOVE_MONEY_ATTACHMENTS_FILE_FORMATS.join(', ')}
         />
+
         {uploadedFiles.length > 0 && (
           <div className='-z-10 -mt-px  border border-BORDER_7 divide-y divide-BORDER_7'>
             {uploadedFiles.map((file, idx) => (
@@ -145,16 +142,16 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SINGLE_PAYMENT_MORE_INFO_BACK'
+            id='MOVE_MONEY_MORE_INFO_BACK'
             onClick={onBackClick}
           >
             Back
           </Button>
           <Button
             size={SIZE_TYPES.MEDIUM}
-            id='SINGLE_PAYMENT_MORE_INFO_NEXT'
+            id='MOVE_MONEY_MORE_INFO_NEXT'
             onClick={onNextClick}
-            isLoading={isFileUploading}
+            disabled={isFileUploading}
           >
             Next
           </Button>

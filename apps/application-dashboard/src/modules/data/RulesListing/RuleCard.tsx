@@ -1,13 +1,17 @@
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { DATE_FORMATS } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES, RULE_ICON } from 'constants/icons';
 import { format } from 'date-fns';
+import { RULE_ACTIONS } from 'modules/data/RulesListing/ruleListing.constants';
+import { RULE_ACTION_TYPES } from 'modules/data/RulesListing/ruleListing.types';
 import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import Image from 'next/image';
 import { RuleFilters } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
+import { MenuWrapper } from '@/components/common/MenuWrapper';
+import { useOnClickOutside } from '@/hooks';
 import { Button } from 'components/common/button/Button';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';
@@ -23,6 +27,7 @@ export type RuleCardProps = {
   priority?: number;
   onExpand?: (id: string) => void;
   onCollapse?: (id: string) => void;
+  onDeleteRuleId?: (ruleId: string) => void;
 };
 
 const RuleCard: FC<RuleCardProps> = ({
@@ -34,8 +39,13 @@ const RuleCard: FC<RuleCardProps> = ({
   onExpand,
   onCollapse,
   id,
+  onDeleteRuleId,
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const filterStatement = getFilterStatementValues(filters);
   const nonExpandedFilterStatement = filterStatement?.slice(0, 1)?.[0];
   const filterStatementLength = filterStatement?.length;
@@ -49,6 +59,23 @@ const RuleCard: FC<RuleCardProps> = ({
     setIsExpanded(false);
     onCollapse?.(id ?? '');
   };
+
+  const handleClickMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  const handleClickAction = (action: RULE_ACTION_TYPES) => {
+    handleClickMenu();
+    switch (action) {
+      case RULE_ACTION_TYPES.EDIT:
+        break;
+      case RULE_ACTION_TYPES.DELETE:
+        onDeleteRuleId?.(id ?? '');
+        break;
+    }
+  };
+
+  useOnClickOutside(menuRef, () => setIsMenuOpen(false));
 
   return (
     <div
@@ -64,13 +91,35 @@ const RuleCard: FC<RuleCardProps> = ({
             Created on {format(new Date(createdOn), DATE_FORMATS.ddMMMyyyy)}
           </span>
         )}
-        <SvgSpriteLoader
-          id='dots-horizontal'
-          iconCategory={ICON_SPRITE_TYPES.GENERAL}
-          width={14}
-          height={14}
-          className='hidden'
-        />
+        <div ref={menuRef}>
+          <SvgSpriteLoader
+            id='dots-horizontal'
+            iconCategory={ICON_SPRITE_TYPES.GENERAL}
+            width={14}
+            height={14}
+            onClick={handleClickMenu}
+          />
+          {isMenuOpen && (
+            <MenuWrapper
+              id='rule-actions'
+              className='!absolute z-10 p-1 right-0 mt-1 w-[180px]'
+              childrenWrapperClassName='text-GRAY_900 !overflow-y-auto'
+            >
+              {RULE_ACTIONS.map((option) => (
+                <div
+                  key={option.value}
+                  className={cn(
+                    'cursor-pointer py-2 px-2.5 text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_100 rounded-md f-12-500',
+                    option.fontColor,
+                  )}
+                  onClick={() => handleClickAction(option.value)}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </MenuWrapper>
+          )}
+        </div>
       </div>
       <div className='px-2.5 py-3 space-y-3'>
         {!!value && <TagChip item={`${getTagLabel(value)}`} />}

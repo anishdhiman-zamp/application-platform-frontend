@@ -1,19 +1,10 @@
-import { ROUTES_PATH } from 'constants/routeConfig';
-import Listing from 'modules/data';
-import { useRouter } from 'next/router';
+import { ReactElement } from 'react';
+import AdminDatasetListing from 'modules/admin/AdminDatasetListing';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
-const AdminDataset = () => {
-  const router = useRouter();
-  const DATASETS = 'datasets';
-  const onRowClicked = (event: any) => {
-    router.push(`${ROUTES_PATH.ADMIN}/${DATASETS}/${event?.data?.id}`);
-  };
+const AdminDataset = () => <AdminDatasetListing />;
 
-  return <Listing onRowClicked={onRowClicked} />;
-};
-
-AdminDataset.getLayout = function getLayout(page: React.ReactElement) {
+AdminDataset.getLayout = function getLayout(page: ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 

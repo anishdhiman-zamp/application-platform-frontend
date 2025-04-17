@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
 import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
@@ -25,7 +25,7 @@ const commonFetchConfig = {
   },
 };
 
-const LoginForm: React.FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
+const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const router = useRouter();
   const errorId = router.query.error?.toString() ?? '';
@@ -39,9 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ className = '', loginFlow, setLog
   const [email, setEmail] = useState<string>(cachedUserEmail.email ?? '');
   const [password, setPassword] = useState<string>(cachedUserEmail.password ?? '');
 
-  const handlePasswordSubmit = (
-    e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const handlePasswordSubmit = (e?: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>) => {
     setIsEmailLogin(true);
     e?.preventDefault?.();
     if (loginFlow) {

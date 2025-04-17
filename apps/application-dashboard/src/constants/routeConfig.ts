@@ -13,7 +13,11 @@ export const ROUTES_PATH = {
   NO_ACCESS: '/no-access',
   ADMIN: '/admin',
   PAYMENTS: '/payments',
-  MONEY_TRANSFER: '/payments/single-transfer',
+  INVITATIONS: '/invitations',
+  MONEY_TRANSFER: '/payments/money-transfer',
+  ADMIN_DATASETS: '/admin/datasets',
+  ADMIN_DATASET: '/admin/datasets/:datasetId',
+  ADMIN_DATASETS_DAG: '/admin/datasets/dag',
 };
 
 export const getPageRouteById = (pageId: string) => {
@@ -34,6 +38,10 @@ export const getPageDatasetDrilldownRoute = (pageId: string, datasetId: string, 
 
 export const getDatasetDrilldownRoute = (datasetId: string, rowId: string) => {
   return `${ROUTES_PATH.DATASET_DRILLDOWN.replace(':datasetId', datasetId).replace(':rowId', rowId)}`;
+};
+
+export const getAdminDatasetRouteById = (datasetId: string) => {
+  return `${ROUTES_PATH.ADMIN_DATASETS}/${datasetId}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

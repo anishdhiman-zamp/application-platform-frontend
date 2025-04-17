@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, HTMLInputTypeAttribute, memo } from 'react';
+import React, { ChangeEvent, FC, HTMLInputTypeAttribute, KeyboardEvent, memo } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { InputTagProps } from 'types/common/components/input/input.types';
@@ -104,7 +104,7 @@ const InputTag: FC<InputTagProps> = ({
     if (e?.target) executeEventCallback(e?.target?.value);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEYBOARD_KEYS.ENTER) {
       onEnterKey?.(e);
     }

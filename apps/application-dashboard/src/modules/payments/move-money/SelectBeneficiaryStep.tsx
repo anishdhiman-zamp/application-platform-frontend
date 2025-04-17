@@ -7,25 +7,37 @@ import { AccountDetailsType } from 'modules/payments/payments.types';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { snakeCaseToSentenceCase } from 'utils/common';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
-  shouldReset: boolean;
+  handleStepChange: (step: number) => void;
+  defaultTemplate?: TemplateDetailsType;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate }) => {
   const {
-    state: { contactDetails, destinationAccountDetails },
+    state: { contactDetails, destinationAccountDetails, currentStep, templateDetails },
     dispatch,
   } = useMoveMoneyContextStore();
 
-  const handleBeneficiarySelect = (account: MenuItem) => {
-    dispatch({
-      type: moveMoneyContextActions.CONTACT_DETAILS,
-      payload: {
-        contactDetails: account,
-      },
-    });
+  const handleBeneficiarySelect = (beneficiary: MenuItem | TemplateDetailsType, isTemplate = false) => {
+    if (isTemplate) {
+      dispatch({
+        type: moveMoneyContextActions.TEMPLATE_DETAILS,
+        payload: {
+          templateDetails: beneficiary,
+        },
+      });
+      handleStepChange(currentStep + 1);
+    } else {
+      dispatch({
+        type: moveMoneyContextActions.CONTACT_DETAILS,
+        payload: {
+          contactDetails: beneficiary,
+        },
+      });
+    }
   };
 
   const handleAccountSelect = (account: AccountDetailsType) => {
@@ -37,23 +49,20 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
     });
   };
 
-  const handleNextClick = () => {
-    dispatch({
-      type: moveMoneyContextActions.CURRENT_STEP,
-      payload: {
-        currentStep: 1,
-      },
-    });
-  };
-
   return (
     <div className='h-screen overflow-y-scroll pt-34'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
-          <SelectBeneDropdown autoFocus={true} onSelect={handleBeneficiarySelect} shouldReset={false} />
-          {contactDetails?.value && (
+          <SelectBeneDropdown
+            autoFocus={currentStep === 1}
+            onSelect={handleBeneficiarySelect}
+            shouldReset={false}
+            templateDetails={defaultTemplate}
+          />
+          {!templateDetails && contactDetails?.value && (
             <SelectAccountDropdown
+              autoFocus
               accountsList={accountsList}
               shouldReset={false}
               accountDetails={destinationAccountDetails}
@@ -61,7 +70,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
               label='Recipient account'
             />
           )}
-          {destinationAccountDetails?.account_name && (
+          {!templateDetails && destinationAccountDetails?.account_name && (
             <div className='flex flex-col gap-4'>
               {Object.keys(destinationAccountDetails).map((key, index) => (
                 <div key={index} className='grid grid-cols-2'>
@@ -76,14 +85,18 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = () => {
         </div>
         <div className='flex gap-3 mt-10'>
           <Button
-            disabled
+            onClick={() => handleStepChange(currentStep - 1)}
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
-            id='SELF_TRANSFER_SELECT_BENEFICIARY_BACK'
+            id='MOVE_MONEY_SELECT_BENEFICIARY_BACK'
           >
             Back
           </Button>
-          <Button size={SIZE_TYPES.MEDIUM} id='SELF_TRANSFER_SELECT_BENEFICIARY_NEXT' onClick={handleNextClick}>
+          <Button
+            size={SIZE_TYPES.MEDIUM}
+            id='MOVE_MONEY_SELECT_BENEFICIARY_NEXT'
+            onClick={() => handleStepChange(currentStep + 1)}
+          >
             Next
           </Button>
         </div>

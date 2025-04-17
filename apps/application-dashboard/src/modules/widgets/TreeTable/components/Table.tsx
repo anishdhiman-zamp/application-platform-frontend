@@ -24,7 +24,7 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
-import { ROUTES_PATH } from 'constants/routeConfig';
+import { getDatasetRouteById } from 'constants/routeConfig';
 import {
   DISPLAY_CONFIG_RULES,
   DisplayConfigRulesConditionsType,
@@ -33,7 +33,7 @@ import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupH
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
-import { PIVOT_TABLE_THEME_PARAMS } from 'modules/widgets/Pivot/pivot.constants';
+import { PIVOT_REF, PIVOT_TABLE_THEME_PARAMS } from 'modules/widgets/Pivot/pivot.constants';
 import { AllPivotColumnsToHideType, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
 import { concatTagFilters } from 'modules/widgets/Pivot/pivot.utils';
 import TreeCell from 'modules/widgets/TreeTable/components/Cell';
@@ -279,7 +279,7 @@ const TreeTableComponent = ({
       ...filters,
     };
 
-    const path = ROUTES_PATH.DATASET.replace(':datasetId', datasetId ?? '');
+    const path = getDatasetRouteById(datasetId ?? '');
 
     router.push(`${path}?filters=${JSON.stringify(query)}`);
   };
@@ -300,7 +300,7 @@ const TreeTableComponent = ({
     if (node.data?.path) {
       selectedNodeData = node.data;
       selectedNodeData.path
-        .filter((item: { key: string }) => item.key !== '__REF')
+        .filter((item: { key: string }) => item.key !== PIVOT_REF)
         .forEach((item: { value: string; key: string }) => {
           const key = extractKey(item.key);
           const currentFilterContextValue = currentRefContext[key];

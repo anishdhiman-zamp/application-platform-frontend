@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   experimental: {
-    serverActions: true,
+    serverActions: {},
   },
   webpack: (config) => {
     config.resolve.fallback = {
@@ -15,6 +15,7 @@ const nextConfig = {
 
     return config;
   },
+  transpilePackages: ['@zamp-platform/ui'],
 };
 
 module.exports = withSentryConfig(nextConfig, {

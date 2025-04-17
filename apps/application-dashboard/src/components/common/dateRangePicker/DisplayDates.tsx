@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { DateRangeKeys } from 'constants/date.constants';
 import { defaultFnType } from 'types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
@@ -16,7 +16,7 @@ interface DisplayDatesProps {
   isSingle: boolean;
 }
 
-export const DisplayDates: React.FC<DisplayDatesProps> = ({
+export const DisplayDates: FC<DisplayDatesProps> = ({
   setFocusedInput,
   startDate,
   endDate,
@@ -26,8 +26,8 @@ export const DisplayDates: React.FC<DisplayDatesProps> = ({
   currentTab,
   isSingle,
 }) => {
-  const [startDateSearchValue, setStartDateSearchValue] = React.useState<string>(startDate);
-  const [endDateSearchValue, setEndDateSearchValue] = React.useState<string>(endDate);
+  const [startDateSearchValue, setStartDateSearchValue] = useState<string>(startDate);
+  const [endDateSearchValue, setEndDateSearchValue] = useState<string>(endDate);
 
   const handleSearchChange = (value: string, key: DateRangeKeys) => {
     if (key === DateRangeKeys.START_DATE) {

@@ -1,13 +1,13 @@
 import * as Sentry from '@sentry/nextjs';
 import Error from 'next/error';
-import PropTypes from 'prop-types';
+import { number } from 'prop-types';
 
 const CustomErrorComponent = (props) => {
   return <Error statusCode={props.statusCode} />;
 };
 
 CustomErrorComponent.propTypes = {
-  statusCode: PropTypes.number.isRequired,
+  statusCode: number.isRequired,
 };
 
 CustomErrorComponent.getInitialProps = async (contextData) => {

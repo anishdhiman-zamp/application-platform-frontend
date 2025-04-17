@@ -1,0 +1,75 @@
+import { FC, useEffect, useState } from 'react';
+import { captureException } from '@sentry/browser';
+import { useLazyWhoAmIQuery } from 'apis/auth';
+import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
+import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
+import { ROUTES_PATH } from 'constants/routeConfig';
+import { useRouter } from 'next/router';
+import CommonWrapper from 'components/commonWrapper';
+import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
+
+export const HandleInvitations: FC = () => {
+  const router = useRouter();
+
+  const { data: invitationsData, isLoading: loadingInvitations } = useGetMyInvitationsQuery();
+  const [acceptInvitation] = useAcceptInvitationMutation();
+  const [whoAmI] = useLazyWhoAmIQuery();
+  const [handledInvitations, setHandledInvitations] = useState<string[]>([]);
+
+  const handleAcceptInvitations = async (invitationIds: string[]) => {
+    for (const invitationId of invitationIds) {
+      if (handledInvitations.includes(invitationId)) {
+        continue;
+      }
+
+      setHandledInvitations((prev) => [...prev, invitationId]);
+
+      try {
+        await acceptInvitation({ invitationId: invitationId });
+      } catch (error) {
+        console.error(`failed to accept invitation ${invitationId}`, error);
+        captureException(`failed to accept invitation ${invitationId}`, {
+          extra: {
+            error,
+          },
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (loadingInvitations === false) {
+      // use finally because we don't want to block the flow if invitation acceptance fails
+      if (invitationsData) {
+        handleAcceptInvitations(
+          invitationsData.invitations.map((invitation) => invitation.organization_invitation_id),
+        ).finally(() => {
+          whoAmI().finally(() => {
+            router.push(ROUTES_PATH.HOME);
+          });
+        });
+      } else {
+        router.push(ROUTES_PATH.HOME);
+      }
+    }
+  }, [invitationsData, loadingInvitations]);
+
+  return (
+    <CommonWrapper
+      className='h-full'
+      isLoading={true}
+      skeletonType={SkeletonTypes.CUSTOM}
+      loader={
+        <div
+          className='flex justify-center items-center w-full h-full z-1000 bg-white'
+          data-testid='handle-invitations-wrapper'
+        >
+          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+        </div>
+      }
+    >
+      {null}
+    </CommonWrapper>
+  );
+};
