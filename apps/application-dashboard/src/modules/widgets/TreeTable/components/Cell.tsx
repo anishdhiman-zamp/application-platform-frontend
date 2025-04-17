@@ -121,8 +121,6 @@ const TreeCell: FC<TreeCellProps> = ({
     displayConfigStyle: displayConfigStyle,
   });
 
-  console.log('xxxxxxxx', resultantConfigStyles);
-
   return (
     <div
       className={cn(
