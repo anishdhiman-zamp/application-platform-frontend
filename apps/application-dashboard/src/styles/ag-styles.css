@@ -189,15 +189,38 @@
   opacity: 0;
 }
 
-.color-transition::before,
-.color-transition::after {
+.color-transition::before {
+/* .color-transition::after { */
   content: '';
 }
+
+/* .color-transition::after {
+  transition: transform 3s ease-in-out;
+} */
+
+.color-transition::after {
+  content: '';
+  transition: transform 3s ease-in-out !important;
+  background-color: #4A4A4A;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  transform: translateX(0); /* or -150% when inactive */
+}
+
 
 .color-transition:not(.active)::after {
   transition: none;
   transform: translateX(-150%);
 }
+
+
+/* .color-transition:not(.active)::after {
+  transition: none;
+  transform: translateX(-150%);
+} */
 
 .ag-grid-scroll {
   scrollbar-width: thin;
