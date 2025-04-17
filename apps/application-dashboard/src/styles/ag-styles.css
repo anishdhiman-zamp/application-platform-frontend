@@ -190,13 +190,8 @@
 }
 
 .color-transition::before {
-/* .color-transition::after { */
   content: '';
 }
-
-/* .color-transition::after {
-  transition: transform 3s ease-in-out;
-} */
 
 .color-transition::after {
   content: '';
@@ -207,9 +202,8 @@
   height: 100%;
   width: 100%;
   border-radius: 6px;
-  transform: translateX(0); /* or -150% when inactive */
+  transform: translateX(0); 
 }
-
 
 .color-transition:not(.active)::after {
   transition: none;
