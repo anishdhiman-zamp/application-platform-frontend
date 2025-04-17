@@ -174,9 +174,6 @@ export const PIVOT_GRID_OPTIONS: GridOptions = {
   suppressHeaderFocus: true,
   suppressAggFuncInHeader: true,
   suppressRowTransform: true,
-  autoSizeStrategy: {
-    type: 'fitGridWidth',
-  },
 };
 
 export const BANK_NAME_ICON_MAPPING: Record<string, { name: string; icon: string }> = {
