@@ -134,6 +134,16 @@ export type GetTemplatesResponseType = {
   templates: TemplateType[];
 };
 
+export type UpsertTemplateRequestType = {
+  id: string;
+  name: string;
+  configuration: string;
+};
+
+export type UpsertTemplateResponseType = {
+  action_id: string;
+};
+
 export type UpdateDatasetRequestType = {
   datasetId: string;
   title: string;
