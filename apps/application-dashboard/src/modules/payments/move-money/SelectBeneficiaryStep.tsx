@@ -1,13 +1,13 @@
 import { FC } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import SelectBeneDropdown from 'modules/payments/move-money/components/SelectBeneDropdown';
-import { accountsList } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { AccountDetailsType } from 'modules/payments/payments.types';
-import { MenuItem, SIZE_TYPES } from 'types/common/components';
+import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { snakeCaseToSentenceCase } from 'utils/common';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import { useGetRecipientBySourceAccountQuery } from '@/apis/payments';
+import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
@@ -17,27 +17,28 @@ interface SelectBeneficiaryStepProps {
 
 const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate }) => {
   const {
-    state: { contactDetails, destinationAccountDetails, currentStep, templateDetails },
+    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails },
     dispatch,
   } = useMoveMoneyContextStore();
 
-  const handleBeneficiarySelect = (beneficiary: MenuItem | TemplateDetailsType, isTemplate = false) => {
-    if (isTemplate) {
-      dispatch({
-        type: moveMoneyContextActions.TEMPLATE_DETAILS,
-        payload: {
-          templateDetails: beneficiary,
-        },
-      });
-      handleStepChange(currentStep + 1);
-    } else {
-      dispatch({
-        type: moveMoneyContextActions.CONTACT_DETAILS,
-        payload: {
-          contactDetails: beneficiary,
-        },
-      });
-    }
+  const { data: recipientBySourceAccount, isLoading: isRecipientBySourceAccountLoading } =
+    useGetRecipientBySourceAccountQuery(
+      {
+        source_account_id: sourceAccountDetails?.id ?? '',
+      },
+      {
+        refetchOnMountOrArgChange: false,
+        skip: !sourceAccountDetails?.id,
+      },
+    );
+
+  const handleBeneficiarySelect = (beneficiary: RecipientDetailsType) => {
+    dispatch({
+      type: moveMoneyContextActions.RECIPIENT_DETAILS,
+      payload: {
+        recipientDetails: beneficiary,
+      },
+    });
   };
 
   const handleAccountSelect = (account: AccountDetailsType) => {
@@ -58,12 +59,14 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
             autoFocus={currentStep === 1}
             onSelect={handleBeneficiarySelect}
             shouldReset={false}
+            isLoading={isRecipientBySourceAccountLoading}
             templateDetails={defaultTemplate}
+            recipientList={recipientBySourceAccount?.recipients ?? []}
           />
-          {!templateDetails && contactDetails?.value && (
+          {!templateDetails && recipientDetails && (
             <SelectAccountDropdown
               autoFocus
-              accountsList={accountsList}
+              accountsList={recipientDetails.accounts}
               shouldReset={false}
               accountDetails={destinationAccountDetails}
               onAccountSelect={handleAccountSelect}
@@ -95,6 +98,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
           <Button
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_SELECT_BENEFICIARY_NEXT'
+            disabled={!destinationAccountDetails?.id}
             onClick={() => handleStepChange(currentStep + 1)}
           >
             Next

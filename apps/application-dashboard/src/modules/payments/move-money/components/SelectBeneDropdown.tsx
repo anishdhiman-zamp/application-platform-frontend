@@ -3,13 +3,14 @@ import { useOnClickOutside } from 'hooks';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
-import { RECIPIENT_LIST, TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
+import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import SkeletonElement from '@/components/skeletons/SkeletonElement';
+import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 import Input from 'components/common/input';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
@@ -17,11 +18,14 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type SelectBeneDropdownProps = {
   autoFocus?: boolean;
-  onSelect: (recipient: MenuItem | TemplateDetailsType, isTemplate?: boolean) => void;
+  onSelect: (recipient: RecipientDetailsType) => void;
   shouldReset?: boolean;
   label?: string;
   showTemplate?: boolean;
+  isLoading?: boolean;
+  selectedRecipient?: MenuItem | null;
   templateDetails?: TemplateDetailsType | null;
+  recipientList?: RecipientDetailsType[];
 };
 
 const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
@@ -31,6 +35,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   label,
   showTemplate = false,
   templateDetails,
+  recipientList,
+  isLoading = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -44,23 +50,23 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const { counterParties, templates } = useMemo(() => {
     if (isSearchActive) {
-      const counterParties = RECIPIENT_LIST.filter((val) =>
-        val?.label?.toLowerCase()?.includes(searchValue?.toLowerCase()),
+      const counterParties = recipientList?.filter(
+        (recipient) => recipient?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()) ?? [],
       );
       const templates = TEMPLATES.filter((val) => val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
 
-      return { counterParties, templates };
+      return { counterParties: counterParties ?? [], templates: templates ?? [] };
     }
 
-    return { counterParties: RECIPIENT_LIST, templates: TEMPLATES };
-  }, [isSearchActive, searchValue]);
+    return { counterParties: recipientList ?? [], templates: TEMPLATES };
+  }, [isSearchActive, searchValue, recipientList]);
 
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
     if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && counterParties?.length <= 8) {
       if (counterParties?.length === 0) return 92;
 
-      return 32 * counterParties?.length + 46;
+      return 32 * counterParties?.length + 10;
     }
     if (
       showTemplate &&
@@ -82,9 +88,9 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     if (option) setCurrentTab(option);
   };
 
-  const handleRecipientSelect = (recipient: MenuItem) => {
-    setSearchValue(recipient.label);
-    setSelectedRecipient(recipient);
+  const handleRecipientSelect = (recipient: RecipientDetailsType) => {
+    setSearchValue(recipient.name);
+    setSelectedRecipient({ label: recipient.name, value: recipient.id });
     onSelect(recipient);
     setIsShowMenu(false);
     setIsSearchActive(false);
@@ -93,7 +99,6 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   const handleTemplateSelect = (template: TemplateDetailsType) => {
     setSearchValue(template.name);
     setSelectedRecipient({ label: template.name, value: template.id });
-    onSelect(template, true);
     setIsShowMenu(false);
     setIsSearchActive(false);
   };
@@ -129,7 +134,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               >
                 {counterParties.map((recipient, index) => (
                   <RecipientCard
-                    key={`${recipient.value}_${index}`}
+                    key={`${recipient.id}_${index}`}
                     recipient={recipient}
                     handleRecipientSelect={handleRecipientSelect}
                   />
@@ -164,6 +169,17 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       setIsShowMenu(true);
     }
   }, [shouldReset]);
+
+  if (isLoading) {
+    return (
+      <>
+        {label && <div className={cn('text-GRAY_900 f-12-500', showTemplate ? 'mb-2' : 'mb-0')}>{label}</div>}
+        <div className='rounded-md border border-GRAY_500 bg-white p-2'>
+          <SkeletonElement className='w-full h-6' />
+        </div>
+      </>
+    );
+  }
 
   return (
     <div>
@@ -213,12 +229,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             </div>
           )}
           {getDropdownBody()}
-          <div className='border-t border-GRAY_400 p-1 '>
-            <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
-              <SvgSpriteLoader size={12} id='plus' />
-              New recipient
+          {showTemplate && (
+            <div className='border-t border-GRAY_400 p-1 '>
+              <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
+                <SvgSpriteLoader size={12} id='plus' />
+                New recipient
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

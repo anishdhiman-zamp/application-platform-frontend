@@ -1,10 +1,10 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
-import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
+import { defaultContactDetails } from 'modules/payments/payments.constant';
 import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
 import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 
 enum moveMoneyContextActions {
   CURRENT_STEP = 'CURRENT_STEP',
@@ -13,7 +13,7 @@ enum moveMoneyContextActions {
   MORE_DETAILS = 'MORE_DETAILS',
   TRANSACTION_DETAILS = 'TRANSACTION_DETAILS',
   AMOUNT_DETAILS = 'AMOUNT_DETAILS',
-  CONTACT_DETAILS = 'CONTACT_DETAILS',
+  RECIPIENT_DETAILS = 'RECIPIENT_DETAILS',
   POOLED_FUND_DETAILS = 'POOLED_FUND_DETAILS',
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
@@ -37,7 +37,7 @@ interface InitialStateType {
     sourceAccountDetails?: AccountDetailsType;
     processingMode?: string;
   };
-  contactDetails: MenuItem;
+  recipientDetails: RecipientDetailsType | undefined;
   selectedPooledFund: OptionsType;
   counterParties: ContactType[];
 }
@@ -66,7 +66,7 @@ const initialState: InitialStateType = {
     sourceAccountDetails: undefined,
     processingMode: '',
   },
-  contactDetails: defaultContactDetails,
+  recipientDetails: undefined,
   selectedPooledFund: defaultContactDetails,
   counterParties: [],
 };
@@ -98,12 +98,12 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         };
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
-      case moveMoneyContextActions.CONTACT_DETAILS:
+      case moveMoneyContextActions.RECIPIENT_DETAILS:
         return {
           ...state,
-          contactDetails: action?.payload?.contactDetails,
+          recipientDetails: action?.payload?.recipientDetails,
           templateDetails: undefined,
-          destinationAccountDetails: defaultAccountData,
+          destinationAccountDetails: undefined,
         };
       case moveMoneyContextActions.RESET_STATE:
         return initialState;

@@ -1,7 +1,7 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';
 import { Button } from '@/components/common/button/Button';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
@@ -9,9 +9,10 @@ import { SIZE_TYPES } from '@/types/common/components';
 import { BUTTON_TYPES } from '@/types/components/button.type';
 type SelectSourceAccountProps = {
   handleStepChange: (step: number) => void;
+  transferType: MOVE_MONEY_TYPE;
 };
 
-const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange }) => {
+const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange, transferType }) => {
   const {
     dispatch,
     state: { sourceAccountDetails, currentStep },
@@ -21,6 +22,11 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange })
     refetchOnMountOrArgChange: false,
   });
   const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
+
+  const filteredTemplateList = useMemo(
+    () => templateList?.templates?.filter((template) => template.type === transferType),
+    [templateList, transferType],
+  );
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
     dispatch({
@@ -48,7 +54,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange })
           <SelectAccountDropdown
             autoFocus
             accountsList={sourceAccounts?.accounts ?? []}
-            templateList={templateList?.templates ?? []}
+            templateList={filteredTemplateList ?? []}
             shouldReset={false}
             accountDetails={sourceAccountDetails}
             onAccountSelect={handleSourceAccountSelect}

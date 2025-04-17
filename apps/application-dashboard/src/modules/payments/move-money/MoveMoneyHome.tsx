@@ -50,7 +50,10 @@ const MoneyTransferHome = () => {
         className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
         onClick={() => router.back()}
       />
-      <SelectSourceAccount handleStepChange={handleStepChange} />
+      <SelectSourceAccount
+        transferType={isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER}
+        handleStepChange={handleStepChange}
+      />
       {!isSelfTransfer && (
         <SelectBeneficiaryStep defaultTemplate={defaultTemplate} handleStepChange={handleStepChange} />
       )}

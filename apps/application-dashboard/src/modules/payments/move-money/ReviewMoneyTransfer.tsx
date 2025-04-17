@@ -14,7 +14,7 @@ interface ReviewMoneyTransferProps {
 
 const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange }) => {
   const {
-    state: { contactDetails, destinationAccountDetails, amountDetails, moreDetails, currentStep },
+    state: { recipientDetails, destinationAccountDetails, amountDetails, moreDetails, currentStep },
   } = useMoveMoneyContextStore();
 
   const handleBackClick = () => handleStepChange(currentStep - 1);
@@ -26,7 +26,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange })
         <div className='f-22-550 mb-5'>Review</div>
         <div className='border-b border-GRAY_400 pb-5 mb-5'>
           <div className='mb-4'>
-            <div className='f-14-450 mb-1'>Payment to {contactDetails?.label}</div>
+            <div className='f-14-450 mb-1'>Payment to {recipientDetails?.name}</div>
             <div className='f-32-500'>
               {amountDetails?.currency?.label} {Number(amountDetails?.amount)?.toLocaleString()}
             </div>
