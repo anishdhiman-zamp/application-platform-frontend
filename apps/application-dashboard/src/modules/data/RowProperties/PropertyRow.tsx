@@ -67,7 +67,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
           >
             <div
               onClick={
-                sourceValue.source_type === TAG_SOURCE_TYPES.RULE
+                sourceValue?.source_type === TAG_SOURCE_TYPES.RULE
                   ? () => onRuleClick(sourceValue?.source_id)
                   : undefined
               }
