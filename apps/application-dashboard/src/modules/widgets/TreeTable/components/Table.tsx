@@ -53,6 +53,8 @@ import {
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
+import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
+import { getCommaSeparatedNumber } from '@/utils/common';
 import { getDataTableTheme } from 'components/common/table/table.utils';
 
 ModuleRegistry.registerModules([
@@ -103,7 +105,22 @@ const TreeTableComponent = ({
   const displayConfigToggleConditions = display_config?.toggle ?? [];
 
   const handleExportAgGridData = () => {
-    gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
+    gridApi.current?.exportDataAsCsv({
+      fileName: title,
+      allColumns: true,
+      processCellCallback: (params) => {
+        if (typeof params?.value === 'number') {
+          const currencySymbol =
+            CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ??
+            widgetData?.currency ??
+            defaultCurrency;
+
+          return `${currencySymbol} ${getCommaSeparatedNumber(params?.value, 2)}`;
+        }
+
+        return params?.value;
+      },
+    });
   };
 
   const handleExpandAll = useCallback(() => {
