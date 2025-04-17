@@ -177,45 +177,6 @@
   position: relative;
 }
 
-.login-btn-scale-100 {
-  transform: scale(1);
-  transition: transform 0.3s ease-out;
-  opacity: 1;
-}
-
-.login-btn-scale-20 {
-  transform: scale(0.2);
-  transition: transform 0.3s ease-in;
-  opacity: 0;
-}
-
-.color-transition::before {
-  content: '';
-}
-
-.color-transition::after {
-  content: '';
-  transition: transform 3s ease-in-out !important;
-  background-color: #4A4A4A;
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  border-radius: 6px;
-  transform: translateX(0); 
-}
-
-.color-transition:not(.active)::after {
-  transition: none;
-  transform: translateX(-150%);
-}
-
-
-/* .color-transition:not(.active)::after {
-  transition: none;
-  transform: translateX(-150%);
-} */
-
 .ag-grid-scroll {
   scrollbar-width: thin;
   scrollbar-color: #e2e2da #fff0;

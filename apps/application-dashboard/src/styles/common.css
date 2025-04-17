@@ -1,0 +1,20 @@
+.color-transition::before {
+  content: '';
+}
+
+.color-transition::after {
+  content: '';
+  transition: transform 3s ease-in-out !important;
+  background-color: #4a4a4a;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  transform: translateX(0);
+}
+
+.color-transition:not(.active)::after {
+  transition: none;
+  transform: translateX(-150%);
+}
