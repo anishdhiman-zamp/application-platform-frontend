@@ -36,7 +36,7 @@ const MoneyTransferHome = () => {
   };
 
   const defaultTemplate = useMemo(() => {
-    return TEMPLATES.find((template: TemplateDetailsType) => template.id === templateId);
+    return TEMPLATES.find((template: TemplateDetailsType) => template?.id === templateId);
   }, [templateId]);
 
   return (

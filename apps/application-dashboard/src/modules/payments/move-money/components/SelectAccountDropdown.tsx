@@ -69,7 +69,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   };
 
   const handleTemplateSelect = (template: TemplateDetailsType) => {
-    setSearchValue(template.name);
+    setSearchValue(template?.name);
     onTemplateSelect?.(template);
     setIsShowMenu(false);
     setIsSearchActive(false);
@@ -80,7 +80,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       const filteredAccounts = accountsList.filter((val) =>
         val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()),
       );
-      const templates = templateList.filter((val) => val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
+      const templates = templateList?.filter((val) => val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
 
       return { filteredAccounts, templates };
     }
@@ -179,8 +179,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               isNoData={templates?.length === 0}
               noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
             >
-              {templates.map((template) => (
-                <MoveMoneyTemplateListCard key={template.id} template={template} onSelect={handleTemplateSelect} />
+              {templates?.map((template) => (
+                <MoveMoneyTemplateListCard key={template?.id} template={template} onSelect={handleTemplateSelect} />
               ))}
             </CommonWrapper>
           </div>

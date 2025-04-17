@@ -66,7 +66,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
           {!templateDetails && recipientDetails && (
             <SelectAccountDropdown
               autoFocus
-              accountsList={recipientDetails.accounts}
+              accountsList={recipientDetails?.accounts}
               shouldReset={false}
               accountDetails={destinationAccountDetails}
               onAccountSelect={handleAccountSelect}

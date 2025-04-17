@@ -24,7 +24,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange, t
   const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
 
   const filteredTemplateList = useMemo(
-    () => templateList?.templates?.filter((template) => template.type === transferType),
+    () => templateList?.templates?.filter((template) => template?.type === transferType),
     [templateList, transferType],
   );
 
