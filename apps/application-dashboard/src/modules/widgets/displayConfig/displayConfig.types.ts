@@ -1,4 +1,6 @@
+import { AllPivotColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
+import { MapAny } from '@/types/commonTypes';
 
 export const enum DISPLAY_CONFIG_CELL_TYPE {
   ROW_TITLE_CELL = 'row_title_cell',
@@ -84,4 +86,21 @@ export type DisplayConfigStyleType = {
   [key in DISPLAY_CONFIG_CELL_TYPE]?: {
     rules: DisplayConfigRulesType;
   };
+};
+
+export type GetCellStyleParamsType = {
+  node?: MapAny;
+  level?: number;
+  childIndex?: number;
+  column?: MapAny;
+  value?: string | number;
+  rowParentFieldGreaterByOne?: string | null;
+  rowGroupField?: string | null;
+  columnId?: string;
+  columnGroupId?: string;
+  cellType: DISPLAY_CONFIG_CELL_TYPE;
+  setAllPivotColumnsToHide?: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
+  currentWidgetInstanceId?: string;
+  displayConfigStyle?: Partial<Record<DISPLAY_CONFIG_CELL_TYPE, { rules: MapAny[] }>>;
+  colGroupDef?: MapAny;
 };

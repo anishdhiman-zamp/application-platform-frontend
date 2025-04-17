@@ -1,10 +1,10 @@
 import {
   CALENDER_DAYS,
-  DISPLAY_CONFIG_CELL_TYPE,
   DISPLAY_CONFIG_RULES,
   DisplayConfigRulesConditionsAliasType,
   DisplayConfigRulesConditionsPeriodType,
   DisplayConfigRulesConditionsType,
+  GetCellStyleParamsType,
 } from 'modules/widgets/displayConfig/displayConfig.types';
 import {
   compareColumnGroupAliasDate,
@@ -16,23 +16,6 @@ import {
 import { AllPivotColumnsToHideType, ColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
 import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import { MapAny } from 'types/commonTypes';
-
-type GetCellStyleParamsType = {
-  node?: MapAny;
-  level?: number;
-  childIndex?: number;
-  column?: MapAny;
-  value?: string | number;
-  rowParentFieldGreaterByOne?: string | null;
-  rowGroupField?: string | null;
-  columnId?: string;
-  columnGroupId?: string;
-  cellType: DISPLAY_CONFIG_CELL_TYPE;
-  setAllPivotColumnsToHide?: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
-  currentWidgetInstanceId?: string;
-  displayConfigStyle?: Partial<Record<DISPLAY_CONFIG_CELL_TYPE, { rules: MapAny[] }>>;
-  colGroupDef?: MapAny;
-};
 
 export const getCellStyle = (params: GetCellStyleParamsType) => {
   const {
@@ -159,8 +142,6 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
               );
             }
 
-            console.log('case 5');
-
             return false;
           };
 
@@ -223,8 +204,6 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
         break;
     }
   });
-
-  console.log('style at the end', style);
 
   return style;
 };
