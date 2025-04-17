@@ -15,6 +15,8 @@ import {
   TransformDatasetResponseType,
   UpdateDatasetRequestType,
   UpdateDatasetResponseType,
+  UpsertTemplateRequestType,
+  UpsertTemplateResponseType,
 } from 'types/api/admin.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
@@ -73,6 +75,13 @@ const Admin = baseApi.injectEndpoints({
         body: rest,
       }),
     }),
+    upsertTemplate: builder.mutation<UpsertTemplateResponseType, UpsertTemplateRequestType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.ADMIN_DATASET_TEMPLATES_UPSERT_POST,
+        method: REQUEST_TYPES.POST,
+        body: body,
+      }),
+    }),
   }),
 });
 
@@ -85,4 +94,5 @@ export const {
   useGetAllDatasetsQuery,
   useGetTemplatesMutation,
   useUpdateDatasetMutation,
+  useUpsertTemplateMutation,
 } = Admin;
