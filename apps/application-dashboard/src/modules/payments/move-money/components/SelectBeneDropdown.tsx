@@ -172,12 +172,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   if (isLoading) {
     return (
-      <>
-        {label && <div className={cn('text-GRAY_900 f-12-500', showTemplate ? 'mb-2' : 'mb-0')}>{label}</div>}
+      <div>
+        {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
         <div className='rounded-md border border-GRAY_500 bg-white p-2'>
           <SkeletonElement className='w-full h-6' />
         </div>
-      </>
+      </div>
     );
   }
 
