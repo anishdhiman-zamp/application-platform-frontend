@@ -72,13 +72,7 @@ export type DisplayConfigRulesConditionsType = {
   toggle_field?: string;
   toggle_title?: string;
   default?: boolean;
-  style_properties?:
-    | {
-        [key: string]: string;
-      }
-    | {
-        [key: string]: string;
-      }[];
+  style_properties?: Record<string, string>[];
 }[];
 
 export type DisplayConfigRulesType = {

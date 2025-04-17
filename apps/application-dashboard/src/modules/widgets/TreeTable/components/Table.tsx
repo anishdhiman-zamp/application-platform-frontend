@@ -25,10 +25,6 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { getDatasetRouteById } from 'constants/routeConfig';
-import {
-  DISPLAY_CONFIG_RULES,
-  DisplayConfigRulesConditionsType,
-} from 'modules/widgets/displayConfig/displayConfig.types';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
@@ -104,10 +100,7 @@ const TreeTableComponent = ({
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const [allPivotColumnsToHide, setAllPivotColumnsToHide] = useState<AllPivotColumnsToHideType[]>([]);
   const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
-  const displayConfigToggleConditions =
-    display_config?.conditional_styles?.data_cell?.rules
-      ?.filter((rule: { type: string }) => rule?.type === DISPLAY_CONFIG_RULES.TOGGLE)
-      ?.flatMap((rule: { conditions: DisplayConfigRulesConditionsType }) => rule?.conditions ?? []) ?? [];
+  const displayConfigToggleConditions = display_config?.toggle ?? [];
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
@@ -219,9 +212,9 @@ const TreeTableComponent = ({
           <PivotRowTitle
             node={props?.node}
             value={props?.value}
-            // maxGroupingLevel={colDef?.filter((col) => col?.rowGroup)?.length - 1}
             displayConfig={display_config}
             childIndex={props?.node?.parent?.childrenAfterSort?.findIndex((r) => r === props?.node)}
+            displayConfigStyle={display_config?.conditional_styles ?? {}}
           />
         );
       },

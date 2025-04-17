@@ -1,4 +1,5 @@
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
+import { MapAny } from '@/types/commonTypes';
 
 /**
  * This function returns the current date formatted as "DD MMM YYYY" using the 'en-GB' locale.
@@ -85,11 +86,8 @@ export const compareColumnGroupAliasDate = (data_1: string, data_2: string, oper
  * @param node - The current node being checked.
  * @returns boolean - True if a match is found, false otherwise.
  */
-export const handleMatchRecursiveParentKey = (
-  level: number,
-  parentRowField: string,
-  node: { parent?: { key: string }; key: string },
-): boolean => {
+export const handleMatchRecursiveParentKey = (level: number | null, parentRowField: string, node: MapAny): boolean => {
+  if (level === null) return false;
   if (!node || level <= 0) return false;
   if (node?.key === parentRowField) return true;
 

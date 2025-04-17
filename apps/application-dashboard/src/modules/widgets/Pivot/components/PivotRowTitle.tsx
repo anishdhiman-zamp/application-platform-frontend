@@ -8,7 +8,7 @@ import {
   DISABLED_CHEVRON_RIGHT,
   OTHER_GATEWAY,
 } from 'constants/icons';
-import { DISPLAY_CONFIG_CELL_TYPE } from 'modules/widgets/displayConfig/displayConfig.types';
+import { DISPLAY_CONFIG_CELL_TYPE, DisplayConfigStyleType } from 'modules/widgets/displayConfig/displayConfig.types';
 import {
   BANK_NAME_ICON_MAPPING,
   getReconStatusIcon,
@@ -28,9 +28,17 @@ interface PivotRowTitleProps {
   maxGroupingLevel?: number;
   displayConfig?: MapAny;
   childIndex?: number;
+  displayConfigStyle?: DisplayConfigStyleType;
 }
 
-const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, displayConfig, childIndex }) => {
+const PivotRowTitle: FC<PivotRowTitleProps> = ({
+  value,
+  node,
+  maxGroupingLevel,
+  displayConfig,
+  childIndex,
+  displayConfigStyle,
+}) => {
   const [expanded, setExpanded] = useState(node?.expanded || false);
   const allowExpanding = shouldAllowExpandingRow(node);
   const { show_recon_icons, show_bank_icons } = displayConfig || {};
@@ -61,6 +69,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({ value, node, maxGroupingLevel, 
     rowParentFieldGreaterByOne: node?.parent?.key,
     rowGroupField: node?.key,
     cellType: DISPLAY_CONFIG_CELL_TYPE.ROW_TITLE_CELL,
+    displayConfigStyle: displayConfigStyle,
   });
 
   return (

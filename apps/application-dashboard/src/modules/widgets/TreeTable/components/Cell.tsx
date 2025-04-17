@@ -121,6 +121,8 @@ const TreeCell: FC<TreeCellProps> = ({
     displayConfigStyle: displayConfigStyle,
   });
 
+  console.log('xxxxxxxx', resultantConfigStyles);
+
   return (
     <div
       className={cn(
@@ -131,9 +133,7 @@ const TreeCell: FC<TreeCellProps> = ({
           'border-b-0': isRootLevel,
         },
       )}
-      style={{
-        ...resultantConfigStyles,
-      }}
+      style={resultantConfigStyles}
       onClick={handleToggle}
     >
       {displayValue}

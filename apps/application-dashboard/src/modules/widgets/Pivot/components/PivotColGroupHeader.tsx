@@ -29,9 +29,7 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
         'w-full h-full p-3 flex flex-col items-center justify-center bg-white break-words whitespace-normal overflow-hidden',
         isSingleHeader && 'relative flex items-end justify-end',
       )}
-      style={{
-        ...resultantConfigStyles,
-      }}
+      style={resultantConfigStyles}
     >
       {isSingleHeader && (
         <Image

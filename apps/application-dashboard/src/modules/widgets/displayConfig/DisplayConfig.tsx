@@ -17,7 +17,24 @@ import { AllPivotColumnsToHideType, ColumnsToHideType } from 'modules/widgets/Pi
 import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import { MapAny } from 'types/commonTypes';
 
-export const getCellStyle = (params: MapAny) => {
+type GetCellStyleParamsType = {
+  node?: MapAny;
+  level?: number;
+  childIndex?: number;
+  column?: MapAny;
+  value?: string | number;
+  rowParentFieldGreaterByOne?: string | null;
+  rowGroupField?: string | null;
+  columnId?: string;
+  columnGroupId?: string;
+  cellType: DISPLAY_CONFIG_CELL_TYPE;
+  setAllPivotColumnsToHide?: React.Dispatch<React.SetStateAction<AllPivotColumnsToHideType[]>>;
+  currentWidgetInstanceId?: string;
+  displayConfigStyle?: Partial<Record<DISPLAY_CONFIG_CELL_TYPE, { rules: MapAny[] }>>;
+  colGroupDef?: MapAny;
+};
+
+export const getCellStyle = (params: GetCellStyleParamsType) => {
   const {
     node,
     level,
@@ -34,11 +51,17 @@ export const getCellStyle = (params: MapAny) => {
     displayConfigStyle,
   } = params;
 
-  const rules = (displayConfigStyle && displayConfigStyle[cellType as DISPLAY_CONFIG_CELL_TYPE]?.rules) || [];
+  const rules: { type: DISPLAY_CONFIG_RULES; conditions: DisplayConfigRulesConditionsType }[] =
+    (displayConfigStyle &&
+      (displayConfigStyle[cellType]?.rules as {
+        type: DISPLAY_CONFIG_RULES;
+        conditions: DisplayConfigRulesConditionsType;
+      }[])) ||
+    [];
   let style: MapAny = {};
 
   const updateColumnsToHide = (widgetInstanceId: string, newColIds: { colId: string; hide: boolean }[]) => {
-    setAllPivotColumnsToHide((prev: AllPivotColumnsToHideType) => {
+    setAllPivotColumnsToHide?.((prev: AllPivotColumnsToHideType[]) => {
       const updatedConfigs = Array.isArray(prev) ? [...prev] : [];
 
       const existingConfigIndex = updatedConfigs?.findIndex((item) => item?.widgetInstanceId === widgetInstanceId);
@@ -51,7 +74,7 @@ export const getCellStyle = (params: MapAny) => {
         const filteredNewColIds = newColIds?.filter((col) => !existingColIds.has(col.colId));
 
         if (filteredNewColIds.length > 0) {
-          updatedConfigs[existingConfigIndex]?.colIds.push(...filteredNewColIds);
+          (updatedConfigs[existingConfigIndex]?.colIds ?? []).push(...filteredNewColIds);
         }
       } else {
         updatedConfigs.push({
@@ -88,7 +111,7 @@ export const getCellStyle = (params: MapAny) => {
       case DISPLAY_CONFIG_RULES.LEVEL:
         rule?.conditions?.forEach((condition) => {
           if ((!condition?.value || condition?.value === value) && level === condition?.level) {
-            const styledIndex = childIndex % (condition?.alternate_cell_number ?? 1);
+            const styledIndex = (childIndex ?? 0) % (condition?.alternate_cell_number ?? 1);
             const styleToApply = Array.isArray(condition?.style_properties)
               ? condition.style_properties[styledIndex]
               : undefined;
@@ -107,30 +130,36 @@ export const getCellStyle = (params: MapAny) => {
           let shouldApplyStyle = false;
 
           const handleAliasDate = () =>
-            compareColumnGroupAliasDate(columnGroupId, column_group_id ?? '', operator ?? '');
+            compareColumnGroupAliasDate(columnGroupId ?? '', column_group_id ?? '', operator ?? '');
 
           const handleAliasString = () => {
             // Case 1: Only ref is provided
             if (ref && !row_group_field && !column_group_id) {
-              return evaluateOperator(rowParentFieldGreaterByOne, ref, operator ?? '');
+              return evaluateOperator(rowParentFieldGreaterByOne ?? '', ref, operator ?? '');
             }
 
             // Case 2: column_group_id & ref, no row_group_field
             if (column_group_id && ref && !row_group_field) {
-              return column_group_id === column?.parent?.groupId && handleMatchRecursiveParentKey(level, ref, node);
+              return (
+                column_group_id === column?.parent?.groupId &&
+                handleMatchRecursiveParentKey(level ?? null, ref, node ?? {})
+              );
             }
 
             // Case 3: column_group_id present but no ref/row_group_field
             if (column_group_id && !ref && !row_group_field) {
-              return evaluateOperator(columnGroupId, column_group_id, operator ?? '');
+              return evaluateOperator(columnGroupId ?? '', column_group_id, operator ?? '');
             }
 
             // Case 4: row_group_field & ref, no column_group_id
             if (row_group_field && ref && !column_group_id) {
               return (
-                rowGroupField === row_group_field && (handleMatchRecursiveParentKey(level, ref, node) || ref === 'all')
+                rowGroupField === row_group_field &&
+                (handleMatchRecursiveParentKey(level ?? null, ref, node ?? {}) || ref === 'all')
               );
             }
+
+            console.log('case 5');
 
             return false;
           };
@@ -164,7 +193,7 @@ export const getCellStyle = (params: MapAny) => {
 
           // Check for period-based hiding
           if (isDateAlias && period && checkPeriodBasedDateColumnToHide(period, value, header_name, date?.[0])) {
-            updateColumnsToHide(currentWidgetInstanceId, [{ colId: columnId, hide: true }]);
+            updateColumnsToHide(currentWidgetInstanceId ?? '', [{ colId: columnId ?? '', hide: true }]);
 
             return;
           }
@@ -175,10 +204,10 @@ export const getCellStyle = (params: MapAny) => {
             colIds.some((id) => {
               switch (alias) {
                 case DisplayConfigRulesConditionsAliasType.DATE:
-                  return compareColumnGroupAliasDate(id, columnId, operator ?? '');
+                  return compareColumnGroupAliasDate(id, columnId ?? '', operator ?? '');
                 case DisplayConfigRulesConditionsAliasType.STRING:
                 default:
-                  return evaluateOperator(id, columnId, operator ?? '');
+                  return evaluateOperator(id, columnId ?? '', operator ?? '');
               }
             });
 
@@ -194,6 +223,8 @@ export const getCellStyle = (params: MapAny) => {
         break;
     }
   });
+
+  console.log('style at the end', style);
 
   return style;
 };
