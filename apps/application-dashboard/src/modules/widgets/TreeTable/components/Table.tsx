@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -30,7 +30,7 @@ import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDro
 import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
 import { PIVOT_REF, PIVOT_TABLE_THEME_PARAMS } from 'modules/widgets/Pivot/pivot.constants';
-import { ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
+import { AllPivotColumnsToHideType, ParentFilters, PivotContext } from 'modules/widgets/Pivot/pivot.types';
 import { concatTagFilters } from 'modules/widgets/Pivot/pivot.utils';
 import TreeCell from 'modules/widgets/TreeTable/components/Cell';
 import {
@@ -53,6 +53,8 @@ import {
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useRouter } from 'next/navigation';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
+import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
+import { getCommaSeparatedNumber } from '@/utils/common';
 import { getDataTableTheme } from 'components/common/table/table.utils';
 
 ModuleRegistry.registerModules([
@@ -98,9 +100,27 @@ const TreeTableComponent = ({
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
   const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [allPivotColumnsToHide, setAllPivotColumnsToHide] = useState<AllPivotColumnsToHideType[]>([]);
+  const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
+  const displayConfigToggleConditions = display_config?.toggle ?? [];
 
   const handleExportAgGridData = () => {
-    gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
+    gridApi.current?.exportDataAsCsv({
+      fileName: title,
+      allColumns: true,
+      processCellCallback: (params) => {
+        if (typeof params?.value === 'number') {
+          const currencySymbol =
+            CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ??
+            widgetData?.currency ??
+            defaultCurrency;
+
+          return `${currencySymbol} ${getCommaSeparatedNumber(params?.value, 2)}`;
+        }
+
+        return params?.value;
+      },
+    });
   };
 
   const handleExpandAll = useCallback(() => {
@@ -114,6 +134,26 @@ const TreeTableComponent = ({
       gridApi.current?.collapseAll();
     }
   }, []);
+
+  const handleHideColumn = useCallback((colIds: string[]) => {
+    if (gridApi?.current) {
+      gridApi?.current?.setColumnsVisible(colIds, false);
+    }
+  }, []);
+
+  const handleUpdateHiddenColumns = useCallback(() => {
+    if (!currentWidgetInstanceId || !gridApi?.current) return;
+
+    const matchedConfig = allPivotColumnsToHide?.find((item) => item?.widgetInstanceId === currentWidgetInstanceId);
+
+    if (matchedConfig) {
+      const colIds = (matchedConfig?.colIds ?? [])
+        .map((col) => col?.colId)
+        .filter((colId): colId is string => colId !== undefined);
+
+      handleHideColumn(colIds);
+    }
+  }, [allPivotColumnsToHide, currentWidgetInstanceId, gridApi?.current, handleHideColumn]);
 
   const { colDef, rowData, mappingDatasets } = useMemo(() => {
     const transformWidgetData = getTransformedTreeData(widgetData, periodicity, widgetInstanceDetails);
@@ -153,6 +193,10 @@ const TreeTableComponent = ({
             node={node}
             currency={defaultCurrency ?? widgetData?.currency}
             showPercentage={display_config?.show_percentages}
+            childIndex={node?.parent?.childrenAfterSort?.findIndex((r) => r === node)}
+            setAllPivotColumnsToHide={setAllPivotColumnsToHide}
+            currentWidgetInstanceId={currentWidgetInstanceId}
+            displayConfigStyle={display_config?.conditional_styles ?? {}}
           />
         );
       },
@@ -181,7 +225,15 @@ const TreeTableComponent = ({
         handleExpandAll,
       },
       cellRenderer: (props: GroupCellRendererParams) => {
-        return <PivotRowTitle node={props?.node} value={props?.value} displayConfig={display_config} />;
+        return (
+          <PivotRowTitle
+            node={props?.node}
+            value={props?.value}
+            displayConfig={display_config}
+            childIndex={props?.node?.parent?.childrenAfterSort?.findIndex((r) => r === props?.node)}
+            displayConfigStyle={display_config?.conditional_styles ?? {}}
+          />
+        );
       },
       cellRendererParams: {
         suppressCount: true,
@@ -342,6 +394,10 @@ const TreeTableComponent = ({
   }, []);
 
   useEffect(() => {
+    handleUpdateHiddenColumns();
+  }, [handleUpdateHiddenColumns]);
+
+  useEffect(() => {
     const observer = new ResizeObserver(() => {
       if (gridContainerRef?.current) {
         handleWidgetHeightChange(gridContainerRef.current.clientHeight, isSingleHeader);
@@ -359,7 +415,10 @@ const TreeTableComponent = ({
 
   return (
     <div className='h-fit w-full relative pivot tree-table group' ref={gridContainerRef}>
-      <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
+      <PivotConfigDropdown
+        handleExportAgGridData={handleExportAgGridData}
+        displayConfigToggleData={displayConfigToggleConditions}
+      />
       <AgGridReact
         onGridReady={onGridReady}
         theme={customTheme}
