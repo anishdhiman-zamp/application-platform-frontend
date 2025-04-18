@@ -65,6 +65,8 @@ import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
+import { getCommaSeparatedNumber } from '@/utils/common';
 import { myTheme } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -127,7 +129,22 @@ const StackedPivot = ({
   const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
 
   const handleExportAgGridData = () => {
-    gridApi.current?.exportDataAsCsv({ fileName: title, allColumns: true });
+    gridApi.current?.exportDataAsCsv({
+      fileName: title,
+      allColumns: true,
+      processCellCallback: (params) => {
+        if (typeof params?.value === 'number') {
+          const currencySymbol =
+            CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ??
+            widgetData?.currency ??
+            defaultCurrency;
+
+          return `${currencySymbol} ${getCommaSeparatedNumber(params?.value, 2)}`;
+        }
+
+        return params?.value;
+      },
+    });
   };
 
   const handleExpandAll = useCallback(() => {
