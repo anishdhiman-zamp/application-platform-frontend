@@ -9,17 +9,17 @@ type LoginButtonPropsType = {
 };
 
 const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo }) => {
-  const [showOIDCLogo, setShowOIDCLogo] = useState(false);
+  const [isOIDCLogoLoaded, setIsOICLogoLoaded] = useState(false);
+  const showSigningIn = providerLogo?.length > 0 && isOIDCLogoLoaded;
 
   useEffect(() => {
     if (providerLogo) {
-      const timer = setTimeout(() => {
-        setShowOIDCLogo(true);
-      }, 150);
+      const img = new window.Image();
 
-      return () => clearTimeout(timer);
+      img.src = providerLogo;
+      img.onload = () => setIsOICLogoLoaded(true);
     } else {
-      setShowOIDCLogo(false);
+      setIsOICLogoLoaded(false);
     }
   }, [providerLogo]);
 
@@ -40,10 +40,10 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo 
         )}
       >
         <div className='absolute top-[12px] right-40 text-white z-40'>
-          {showOIDCLogo && providerLogo ? (
+          {showSigningIn ? (
             <div className='flex gap-1.5 items-center justify-center text-white f-14-500 animate-opacity'>
               <span>Signing in with</span>
-              <Image src={providerLogo} alt='oidc_logo' width={20} height={20} priority />
+              <Image src={providerLogo} alt='provider logo' width={20} height={20} />
             </div>
           ) : (
             <span className='mr-10'>Login</span>
