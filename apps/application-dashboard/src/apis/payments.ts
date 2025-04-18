@@ -4,6 +4,7 @@ import { APITags } from '@/constants/api.constants';
 import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
+  InitiatePaymentPayloadType,
   RecipientBySourceAccountPayloadType,
   RecipientBySourceAccountResponseType,
   RecipientDetailsType,
@@ -52,6 +53,13 @@ const Payments = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
+    initiatePayment: builder.mutation<SourceAccountResponseType, InitiatePaymentPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.PAYMENTS_INITIATE_PAYMENT_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -64,4 +72,5 @@ export const {
   useCreateTemplateMutation,
   useGetRecipientBySourceAccountQuery,
   useLazyGetRecipientBySourceAccountQuery,
+  useInitiatePaymentMutation,
 } = Payments;

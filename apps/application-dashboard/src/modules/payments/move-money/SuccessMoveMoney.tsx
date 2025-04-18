@@ -16,7 +16,7 @@ interface SuccessSingleTransferStepProps {
 const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset }) => {
   const router = useRouter();
   const {
-    state: { currentStep, transactionDetails },
+    state: { currentStep, transactionDetails, destinationAccountDetails, recipientDetails },
   } = useMoveMoneyContextStore();
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
@@ -24,11 +24,14 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset }) => {
   const isActiveStep = useMemo(() => currentStep === 4, [currentStep]);
 
   return (
-    <div className='max-w-[400px] m-auto pt-34 h-screen overflow-y-scroll'>
+    <div className='max-w-[400px] m-auto pt-10 h-screen overflow-y-scroll'>
       <div className='text-GREEN_1 mb-4'>
         <SvgSpriteLoader size={66} id='check-circle' color='#5AB570' />
       </div>
-      <div className='f-32-500 mb-6'> {transactionDetails?.payment_send_text}</div>
+      <div className='f-32-500 mb-6'>
+        {recipientDetails?.name ??
+          `${destinationAccountDetails?.account_name} ${destinationAccountDetails?.masked_account_number}`}
+      </div>
       <div className='flex flex-col gap-4 mb-4'>
         {!!transactionDetails?.estimated_time && (
           <div className='grid grid-cols-2'>

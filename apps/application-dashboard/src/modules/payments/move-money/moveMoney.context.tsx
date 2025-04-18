@@ -35,7 +35,7 @@ interface InitialStateType {
     amount: string;
     currency: MenuItem | null;
     sourceAccountDetails?: AccountDetailsType;
-    processingMode?: string;
+    processingMode?: MenuItem;
   };
   recipientDetails: RecipientDetailsType | undefined;
   selectedPooledFund: OptionsType;
@@ -57,7 +57,7 @@ const initialState: InitialStateType = {
     attachments: [],
   },
   transactionDetails: {
-    payment_send_text: 'You’ve sent money to Raghav Saraf',
+    payment_send_text: '',
     estimated_time: '24hrs',
   },
   amountDetails: {

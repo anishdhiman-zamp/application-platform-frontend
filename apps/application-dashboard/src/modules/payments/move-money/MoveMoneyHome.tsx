@@ -22,6 +22,7 @@ const MoneyTransferHome = () => {
   const router = useRouter();
   const { type, templateId } = router.query;
   const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
+  const transferType = isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER;
   const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
   const {
     state: { currentStep },
@@ -50,16 +51,13 @@ const MoneyTransferHome = () => {
         className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
         onClick={() => router.back()}
       />
-      <SelectSourceAccount
-        transferType={isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER}
-        handleStepChange={handleStepChange}
-      />
+      <SelectSourceAccount transferType={transferType} handleStepChange={handleStepChange} />
       {!isSelfTransfer && (
         <SelectBeneficiaryStep defaultTemplate={defaultTemplate} handleStepChange={handleStepChange} />
       )}
       <AmountDetailsStep isSelfTransfer={isSelfTransfer} handleStepChange={handleStepChange} />
       <MoveMoneyMoreInfo handleStepChange={handleStepChange} shouldReset={false} />
-      <ReviewMoneyTransfer handleStepChange={handleStepChange} />
+      <ReviewMoneyTransfer transferType={transferType} handleStepChange={handleStepChange} />
       <SuccessMoveMoney onReset={defaultFn} />
       {!!createTemplateType && (
         <CreateTemplatePopover

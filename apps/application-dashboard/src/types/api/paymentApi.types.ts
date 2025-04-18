@@ -75,3 +75,13 @@ export type RecipientBySourceAccountPayloadType = {
 export type RecipientBySourceAccountResponseType = {
   recipients: RecipientDetailsType[];
 };
+
+export type InitiatePaymentPayloadType = {
+  type: MOVE_MONEY_TYPE;
+  source_account_id: string;
+  destination_account_id: string;
+  amount: number;
+  payments_processing_mode: string;
+  statement_descriptor: string;
+  notes?: string[];
+};

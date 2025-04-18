@@ -5,7 +5,6 @@ import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payme
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import { snakeCaseToSentenceCase } from 'utils/common';
 import { useGetRecipientBySourceAccountQuery } from '@/apis/payments';
 import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { Button } from 'components/common/button/Button';
@@ -75,14 +74,14 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
           )}
           {!templateDetails && destinationAccountDetails?.account_name && (
             <div className='flex flex-col gap-4'>
-              {Object.keys(destinationAccountDetails).map((key, index) => (
-                <div key={index} className='grid grid-cols-2'>
-                  <div className='f-12-400 text-GRAY_700'>{snakeCaseToSentenceCase(key)}</div>
-                  <div className='f-12-450 whitespace-no-wrap'>
-                    {snakeCaseToSentenceCase(String(destinationAccountDetails[key as keyof AccountDetailsType] || ''))}
-                  </div>
-                </div>
-              ))}
+              <div className='grid grid-cols-2'>
+                <div className='f-12-400 text-GRAY_700'>Bank name</div>
+                <div className='f-12-450 whitespace-no-wrap'>{destinationAccountDetails?.bank_name}</div>
+              </div>
+              <div className='grid grid-cols-2'>
+                <div className='f-12-400 text-GRAY_700'>Account number</div>
+                <div className='f-12-450 whitespace-no-wrap'>{destinationAccountDetails?.account_number}</div>
+              </div>
             </div>
           )}
         </div>
