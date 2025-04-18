@@ -21,6 +21,7 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [providerLogo, setProviderLogo] = useState<string>('');
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -127,6 +128,7 @@ export const LoginForm = () => {
       }
 
       setLoginFlow(respJson);
+      setProviderLogo(respJson?.ui?.nodes?.[0]?.attributes?.logo_url);
 
       // if the number of login methods is 1 and it is OIDC, we can directly login
       if (respJson?.ui?.nodes?.length == 1) {
@@ -176,7 +178,7 @@ export const LoginForm = () => {
             disabled={inputDisabled}
             size={SIZE_TYPES.LARGE}
           />
-          <LoginButton loading={loading} onClick={() => handleSubmit} />
+          <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
         </form>
       </div>
     </div>

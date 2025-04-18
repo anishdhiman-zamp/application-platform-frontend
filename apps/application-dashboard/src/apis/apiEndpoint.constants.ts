@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   ADMIN_DATASET_ALL_GET: `/datasets/listing-all`,
   ADMIN_DATASET_TEMPLATES_GET: `/datasets/templates/listing`,
   ADMIN_DATASET_UPDATE_PATCH: `/datasets/{{datasetId}}/update`,
+  ADMIN_DATASET_TEMPLATES_UPSERT_POST: `/datasets/templates/upsert`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,
