@@ -17,7 +17,11 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo 
       const img = new window.Image();
 
       img.src = providerLogo;
-      img.onload = () => setIsOICLogoLoaded(true);
+      img.onload = () => {
+        setTimeout(() => {
+          setIsOICLogoLoaded(true);
+        }, 300);
+      };
     } else {
       setIsOICLogoLoaded(false);
     }
