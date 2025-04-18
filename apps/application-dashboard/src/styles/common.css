@@ -5,8 +5,6 @@
 
 .color-transition::after {
   transition: transform 3s ease-in-out !important;
-  background-color: var(--BG_GRAY_4);
-  border-radius: 6px;
   transform: translateX(0);
 }
 
