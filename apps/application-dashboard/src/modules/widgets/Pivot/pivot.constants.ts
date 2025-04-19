@@ -93,6 +93,16 @@ export enum RECON_STATUS_TYPES {
   MISSING_FROM_STRIP = 'missing_from_stripe',
   MISSING_FROM_PARTNER = 'missing_from_partner',
   MISSING_FROM_NETSUITE = 'missing_from_netsuite',
+  UNRECONCILED = 'unreconciled',
+  RECONCILED = 'reconciled',
+  MISSING_FROM_NETSUITE_1 = 'Missing from Netsuite',
+  UNKNOWN = 'Unknown',
+  NETSUITE_UNRECONCILED = 'Netsuite_Unreconciled',
+  RECONCILED_1 = 'Reconciled',
+  MISSING_FROM_PSP = 'Missing from PSP',
+  MISSING_FROM_INTERNAL_1 = 'Missing from Internal',
+  NON_STRIPE_TRANSACTION = 'Non-Stripe transaction',
+  PSP_AND_INTERNAL_MISMATCH = 'PSP & Internal Mismatch',
 }
 
 export enum RECON_BANK_ICONS {
@@ -112,11 +122,15 @@ export enum RECON_BANK_ICONS {
   AFTERPAY = 'Afterpay',
   UNION_PAY = 'UnionPay',
   CASHAPP = 'Cashapp',
+  STRIPE = 'stripe',
 }
 
 export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
   switch (status) {
     case RECON_STATUS_TYPES.SETTLED:
+    case RECON_STATUS_TYPES.RECONCILED:
+    case RECON_STATUS_TYPES.RECONCILED_1:
+    case RECON_STATUS_TYPES.NON_STRIPE_TRANSACTION:
       return GREEN_CHECK_ICON;
     case RECON_STATUS_TYPES.MISSING_FROM_ACQUIRER:
     case RECON_STATUS_TYPES.MISSING_FROM_INTERNAL:
@@ -125,6 +139,13 @@ export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
     case RECON_STATUS_TYPES.MISSING_FROM_PARTNER:
     case RECON_STATUS_TYPES.MISSING_FROM_NETSUITE:
     case RECON_STATUS_TYPES.AMOUNT_MISMATCH:
+    case RECON_STATUS_TYPES.MISSING_FROM_NETSUITE_1:
+    case RECON_STATUS_TYPES.UNKNOWN:
+    case RECON_STATUS_TYPES.NETSUITE_UNRECONCILED:
+    case RECON_STATUS_TYPES.MISSING_FROM_PSP:
+    case RECON_STATUS_TYPES.MISSING_FROM_INTERNAL_1:
+    case RECON_STATUS_TYPES.PSP_AND_INTERNAL_MISMATCH:
+    case RECON_STATUS_TYPES.UNRECONCILED:
       return RED_ALERT_ICON;
     default:
       return GREEN_CHECK_ICON;
@@ -148,6 +169,7 @@ export const RECON_BANK_ICONS_MAPPING: Record<RECON_BANK_ICONS, string> = {
   [RECON_BANK_ICONS.AFTERPAY]: AFTERPAY,
   [RECON_BANK_ICONS.UNION_PAY]: UNION_PAY,
   [RECON_BANK_ICONS.CASHAPP]: CASH_APP,
+  [RECON_BANK_ICONS.STRIPE]: STRIPE,
 };
 
 export const PIVOT_TABLE_THEME_PARAMS = {
