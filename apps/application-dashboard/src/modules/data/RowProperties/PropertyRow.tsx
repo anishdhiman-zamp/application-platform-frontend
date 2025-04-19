@@ -64,10 +64,11 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
             }
             tooltipBodyClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-white w-[102px]'
             className='z-1'
+            disabled={!sourceValue?.source_type}
           >
             <div
               onClick={
-                sourceValue.source_type === TAG_SOURCE_TYPES.RULE
+                sourceValue?.source_type === TAG_SOURCE_TYPES.RULE
                   ? () => onRuleClick(sourceValue?.source_id)
                   : undefined
               }

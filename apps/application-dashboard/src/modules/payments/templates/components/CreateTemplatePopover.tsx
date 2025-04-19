@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
+import { toast } from 'react-toastify';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { defaultAccountData } from 'modules/payments/payments.constant';
-import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { TITLE_MAP } from 'modules/payments/templates/templates.constant';
 import {
   useCreateTemplateMutation,
@@ -13,6 +14,7 @@ import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { MenuItem, SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -29,11 +31,9 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
   const [templateName, setTemplateName] = useState<string>('');
 
-  const [createTemplate] = useCreateTemplateMutation();
+  const [createTemplate, { isLoading: isCreateTemplateLoading }] = useCreateTemplateMutation();
 
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined);
   const [getDestinationAccounts, { data: destinationAccounts, isLoading: isDestinationAccountsLoading }] =
     useLazyGetDestinationAccountsQuery();
 
@@ -44,12 +44,20 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         {
           order: '1',
           source_account_id: sourceAccountDetails?.id ?? '',
-          beneficiary_id: destinationAccountDetails?.id ?? '',
+          destination_account_id: destinationAccountDetails?.id ?? '',
         },
       ],
-      description: '',
+      description: 'NA',
       type: paymentType,
-    });
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Template created successfully');
+        onClose();
+      })
+      .catch(() => {
+        toast.error('Failed to create template');
+      });
   };
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
@@ -74,6 +82,9 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         onCancel={onClose}
         onSubmit={handleSubmit}
         closeOnClickOutside={false}
+        isNextButtonLoading={isCreateTemplateLoading}
+        isNextButtonDisabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
+        nextButtonClassName='!min-w-[62px]'
       >
         <div className='flex flex-col gap-5 w-[300px] mx-auto min-h-[600px]'>
           <div className='flex items-end gap-2'>

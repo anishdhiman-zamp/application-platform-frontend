@@ -22,6 +22,7 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
   const [dedupColumns, setDedupColumns] = useState(editDataset?.dedup_columns?.join(',') ?? '');
   const [partitionColumns, setPartitionColumns] = useState(editDataset?.partition_columns?.join(',') ?? '');
   const [clusterColumns, setClusterColumns] = useState(editDataset?.cluster_columns?.join(',') ?? '');
+  const [orderByColumn, setOrderByColumn] = useState(editDataset?.order_by_column ?? '');
   const [provider, setProvider] = useState<OptionsType>(ProviderOptions[0]);
 
   const [createDataset, { isLoading, isSuccess, data }] = useCreateDatasetMutation();
@@ -37,6 +38,7 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
         dedup_columns: dedupColumns.split(',').map((column) => column.trim()),
         cluster_columns: clusterColumns.split(',').map((column) => column.trim()),
         partition_columns: partitionColumns.split(',').map((column) => column.trim()),
+        order_by_column: orderByColumn,
       });
     } else {
       createDataset({
@@ -46,6 +48,7 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
         partition_columns: partitionColumns.split(',').map((column) => column.trim()),
         cluster_columns: clusterColumns.split(',').map((column) => column.trim()),
         provider: provider.value as ProviderType,
+        order_by_column: orderByColumn,
       });
     }
   };
@@ -127,6 +130,13 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
           description='Comma separated list of columns to cluster on'
           value={clusterColumns}
           onChange={(e) => setClusterColumns(e.target.value)}
+          {...TRANSFORM_DATASET_LABEL_PROPS.input}
+        />
+        <Input
+          label='Order By Column'
+          description='Column to order by'
+          value={orderByColumn}
+          onChange={(e) => setOrderByColumn(e.target.value)}
           {...TRANSFORM_DATASET_LABEL_PROPS.input}
         />
       </div>

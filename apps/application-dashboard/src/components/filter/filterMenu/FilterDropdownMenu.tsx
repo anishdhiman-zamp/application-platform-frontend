@@ -22,7 +22,8 @@ interface FilterDropdownMenuProps {
   disableFutureDate?: boolean;
   operatorOptions?: OptionsType[];
   isPeriodicityEnabled?: boolean;
-  onFilterChange?: (value: string[]) => void;
+  onFilterChange?: (value: string[], filterType?: FILTER_TYPES) => void;
+  updateContextOnChange?: boolean;
 }
 
 const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
@@ -33,6 +34,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
   onFilterChange,
   isOpen,
   label,
+  updateContextOnChange = false,
 }) => {
   const {
     state: { filtersConfig },
@@ -52,6 +54,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
       onFilterChange={onFilterChange}
       isOpen={isOpen}
       label={label}
+      updateContextOnChange={updateContextOnChange}
       {...filterComponentProps}
     />
   ) : null;

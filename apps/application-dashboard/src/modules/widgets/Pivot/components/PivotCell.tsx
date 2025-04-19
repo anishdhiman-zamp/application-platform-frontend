@@ -95,7 +95,7 @@ const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPerc
       )}
       onClick={handleToggle}
     >
-      {displayValue}
+      {getCommaSeparatedNumber(displayValue, 2)}
     </div>
   );
 };

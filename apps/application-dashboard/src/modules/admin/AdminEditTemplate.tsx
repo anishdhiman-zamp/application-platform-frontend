@@ -1,8 +1,10 @@
 import { FC, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import MonacoEditor from '@monaco-editor/react';
 import { type Edge } from '@xyflow/react';
-import { useGetTemplatesMutation } from '@/apis/admin';
+import { useGetTemplatesMutation, useUpsertTemplateMutation } from '@/apis/admin';
 import { Button } from '@/components/common/button/Button';
+import Input from '@/components/common/input';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
@@ -19,13 +21,27 @@ type AdminEditTemplateProps = {
 const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }) => {
   const [getTemplates, { data, isLoading, isError }] = useGetTemplatesMutation();
   const [jsonData, setJsonData] = useState('');
-
+  const [name, setName] = useState('');
+  const [templateId, setTemplateId] = useState('');
+  const [upsertTemplate, { isLoading: isUpserting }] = useUpsertTemplateMutation();
   const handleEditorChange = (value: string | undefined) => {
     setJsonData(value ?? '');
   };
 
   const handleUpdateTemplate = () => {
-    console.log({ jsonData });
+    upsertTemplate({
+      id: templateId,
+      name: name,
+      configuration: jsonData,
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Template updated successfully');
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error('Error updating template');
+      });
   };
 
   useEffect(() => {
@@ -33,8 +49,12 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
       getTemplates({ template_ids: [edge?.label as string] })
         .unwrap()
         .then((data) => {
-          if (data?.templates?.[0]?.configuration) {
-            setJsonData(JSON.stringify(JSON.parse(data?.templates?.[0]?.configuration), null, 2));
+          const template = data?.templates?.[0];
+
+          if (template) {
+            setJsonData(JSON.stringify(JSON.parse(template?.configuration), null, 2));
+            setName(template?.name);
+            setTemplateId(template?.id);
           }
         });
     }
@@ -60,9 +80,18 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
       >
         <div className='flex justify-between m-4 items-center'>
           <div className='f-20-600'>{data?.templates?.[0]?.name}</div>
-          <Button size={SIZE_TYPES.MEDIUM} id='update-template' onClick={handleUpdateTemplate}>
+          <Button
+            size={SIZE_TYPES.MEDIUM}
+            id='update-template'
+            onClick={handleUpdateTemplate}
+            disabled={isUpserting}
+            isLoading={isUpserting}
+          >
             Update Template
           </Button>
+        </div>
+        <div className='m-4'>
+          <Input label='Template Name' value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className='h-full w-full'>
           <MonacoEditor

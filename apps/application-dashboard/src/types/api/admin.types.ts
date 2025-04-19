@@ -58,6 +58,7 @@ export type CreateDatasetRequestType = {
   partition_columns?: string[];
   cluster_columns?: string[];
   provider: ProviderType;
+  order_by_column?: string;
 };
 
 export type CreateDatasetResponseType = {
@@ -72,11 +73,12 @@ export type TransformDatasetRequestType = {
   dataset_type: DatasetType;
   dedup_columns?: string[];
   partition_columns?: string[];
+  order_by_column?: string;
   provider: ProviderType;
   source_dataset_id: string;
   transformation_template_name: string;
   transformation_template_json: string;
-  target_dataset_id?: string;
+  destination_dataset_id?: string;
   cluster_columns?: string[];
 };
 
@@ -132,6 +134,16 @@ export type GetTemplatesResponseType = {
   templates: TemplateType[];
 };
 
+export type UpsertTemplateRequestType = {
+  id: string;
+  name: string;
+  configuration: string;
+};
+
+export type UpsertTemplateResponseType = {
+  action_id: string;
+};
+
 export type UpdateDatasetRequestType = {
   datasetId: string;
   title: string;
@@ -139,6 +151,7 @@ export type UpdateDatasetRequestType = {
   dedup_columns: string[];
   cluster_columns: string[];
   partition_columns: string[];
+  order_by_column: string;
 };
 
 export type UpdateDatasetResponseType = {

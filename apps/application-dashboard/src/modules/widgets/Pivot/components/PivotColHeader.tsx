@@ -7,11 +7,13 @@ import { snakeCaseToSentenceCase } from 'utils/common';
 interface PivotColHeaderProps {
   column: {
     colDef: ColDef;
+    getColId: () => string;
   };
   displayName: string;
 }
 
-const PivotColHeader: FC<PivotColHeaderProps> = ({ column, displayName }) => {
+const PivotColHeader: FC<PivotColHeaderProps> = (params) => {
+  const { column, displayName } = params;
   const contextFieldName = snakeCaseToSentenceCase(column.colDef?.context?.name || '');
 
   return (

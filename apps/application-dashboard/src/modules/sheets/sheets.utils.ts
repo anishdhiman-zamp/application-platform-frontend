@@ -46,6 +46,12 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
         type: filter?.operator,
         values: filter?.value,
       };
+    case FILTER_TYPES.SINGLE_SELECT:
+      return {
+        filterType: filterType,
+        type: filter?.operator,
+        values: filter?.value,
+      };
   }
 };
 
