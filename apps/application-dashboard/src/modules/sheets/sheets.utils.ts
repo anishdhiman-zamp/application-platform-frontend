@@ -68,7 +68,6 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
       );
     }
   });
-  console.log(defaultFilters, 'defaultFilters');
 
   return defaultFilters;
 };
