@@ -102,6 +102,7 @@ const KpiTag: FC<KpiTagProps> = ({
         >
           <div className='f-24-450 text-GRAY_950 truncate sensitive' ref={valueContainerRef}>
             {value}
+            {widgetDetails.display_config?.show_percentages && '%'}
           </div>
         </Tooltip>
       </CommonWrapper>

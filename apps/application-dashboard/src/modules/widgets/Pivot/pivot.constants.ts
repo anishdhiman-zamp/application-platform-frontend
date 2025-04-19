@@ -93,6 +93,16 @@ export enum RECON_STATUS_TYPES {
   MISSING_FROM_STRIP = 'missing_from_stripe',
   MISSING_FROM_PARTNER = 'missing_from_partner',
   MISSING_FROM_NETSUITE = 'missing_from_netsuite',
+  UNRECONCILED = 'unreconciled',
+  RECONCILED = 'reconciled',
+  MISSING_FROM_NETSUITE_1 = 'Missing from Netsuite',
+  UNKNOWN = 'Unknown',
+  NETSUITE_UNRECONCILED = 'Netsuite Unreconciled',
+  RECONCILED_1 = 'Reconciled',
+  MISSING_FROM_PSP = 'Missing from PSP',
+  MISSING_FROM_INTERNAL_1 = 'Missing from Internal',
+  NON_STRIPE_TRANSACTION = 'Non-Stripe transaction',
+  PSP_AND_INTERNAL_MISMATCH = 'PSP & Internal Mismatch',
 }
 
 export enum RECON_BANK_ICONS {
@@ -117,6 +127,7 @@ export enum RECON_BANK_ICONS {
 export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
   switch (status) {
     case RECON_STATUS_TYPES.SETTLED:
+    case RECON_STATUS_TYPES.RECONCILED:
       return GREEN_CHECK_ICON;
     case RECON_STATUS_TYPES.MISSING_FROM_ACQUIRER:
     case RECON_STATUS_TYPES.MISSING_FROM_INTERNAL:
@@ -125,6 +136,12 @@ export const getReconStatusIcon = (status: RECON_STATUS_TYPES): string => {
     case RECON_STATUS_TYPES.MISSING_FROM_PARTNER:
     case RECON_STATUS_TYPES.MISSING_FROM_NETSUITE:
     case RECON_STATUS_TYPES.AMOUNT_MISMATCH:
+    case RECON_STATUS_TYPES.MISSING_FROM_NETSUITE_1:
+    case RECON_STATUS_TYPES.UNKNOWN:
+    case RECON_STATUS_TYPES.NETSUITE_UNRECONCILED:
+    case RECON_STATUS_TYPES.RECONCILED_1:
+    case RECON_STATUS_TYPES.MISSING_FROM_PSP:
+    case RECON_STATUS_TYPES.MISSING_FROM_INTERNAL_1:
       return RED_ALERT_ICON;
     default:
       return GREEN_CHECK_ICON;
