@@ -52,6 +52,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     state: { selectedFilters, filtersConfig, isFilterInitialized, isFilterLoading },
   } = useFiltersContextStore();
 
+  // to be remove
+
   const { filterType, filterOperator } = useMemo(() => {
     if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
       return {
@@ -122,7 +124,11 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
       (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
     const clickFilter: MapAny = {};
 
-    const defaultFilters = getDefaultFilterByDatasetId(widgetDetails?.data_mappings?.mappings, datasetDefaultFilters);
+    const defaultFilters = getDefaultFilterByDatasetId(
+      widgetDetails?.data_mappings?.mappings,
+      datasetId,
+      datasetDefaultFilters,
+    );
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
       const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
