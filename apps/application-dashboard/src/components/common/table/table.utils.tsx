@@ -60,8 +60,18 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
           value: Number(condition.filter),
         };
       } else return null;
+    case FILTER_TYPES.SINGLE_SELECT: {
+      if (condition?.values?.length) {
+        return {
+          column: condition.colId,
+          operator: condition.type,
+          value: condition.values?.[0],
+        };
+      }
+
+      return null;
+    }
     case FILTER_TYPES.MULTI_SELECT:
-    case FILTER_TYPES.SINGLE_SELECT:
       if (condition?.values?.length) {
         return {
           column: condition.colId,

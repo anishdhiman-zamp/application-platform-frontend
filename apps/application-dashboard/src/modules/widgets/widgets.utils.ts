@@ -142,7 +142,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
       const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axisKey]);
       const aggregation = axis?.aggregation !== AGGREGATION_TYPES.COUNT;
-      const yAxisTitle = `${axisKey} (${axis?.aggregation}), ${aggregation ? currency : ''} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
+      const yAxisTitle = `${axisKey} (${axis?.aggregation}), ${aggregation ? (currency ?? '') : ''} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
@@ -191,7 +191,7 @@ export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
   onNodeClick: (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => void,
   baseOptions: AgChartOptions,
-  currency: string,
+  currency = '',
   stackedValues?: MapAny[],
   dataLength?: number,
   donutOthersData?: MapAny[],
@@ -299,7 +299,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: snakeCaseToSentenceCase(yName ?? ''),
-                  value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
+                  value: `${currencySymbol ?? ''} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
                 },
               ],
             }),
@@ -514,19 +514,32 @@ export const getDefaultFilterByDatasetId = (
     | BarLineChartWidgetMapping[]
     | PieDonutChartWidgetMapping[]
     | KPITagWidgetMapping[],
-  defaultFilterss?: string,
+  datasetId: string,
+  defaultWidgetFilters?: string,
 ) => {
   const defaultFilters: ParentFilters = {};
 
-  console.log(JSON.parse(defaultFilterss ?? '{}'), 'defaultFilters');
-
-  JSON.parse(defaultFilterss ?? '{}')?.conditions?.forEach((condition: any) => {
-    defaultFilters[condition?.column] = {
-      filterType: condition?.type,
-      type: condition?.operator,
-      values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
-    };
-  });
+  if (defaultWidgetFilters) {
+    JSON.parse(defaultWidgetFilters ?? '{}')?.conditions?.forEach((condition: any) => {
+      defaultFilters[condition?.column] = {
+        filterType: condition?.type,
+        type: condition?.operator,
+        values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+      };
+    });
+  } else {
+    mappings?.forEach((mapping) => {
+      if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
+        mapping?.default_filters?.conditions?.forEach((condition) => {
+          defaultFilters[condition?.column] = {
+            filterType: condition?.type,
+            type: condition?.operator,
+            values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+          };
+        });
+      }
+    });
+  }
 
   return defaultFilters;
 };

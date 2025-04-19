@@ -160,8 +160,6 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     );
   };
 
-  console.log(currentPageFilters, 'currentPageFilters');
-
   switch (widget_type) {
     case WIDGET_TYPES.BAR_CHART:
     case WIDGET_TYPES.LINE_CHART:

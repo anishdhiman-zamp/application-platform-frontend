@@ -50,7 +50,8 @@ const KpiTag: FC<KpiTagProps> = ({
   );
 
   const value: string = useMemo(() => {
-    const key = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.primary_value?.[0]?.column;
+    const primaryValue = widgetDetails?.data_mappings?.mappings?.[0]?.fields?.primary_value?.[0];
+    const key = primaryValue?.alias ?? primaryValue?.column;
     const data = widgetData?.result?.[0]?.data[0] as Record<string, any>;
 
     const currency =
@@ -61,7 +62,9 @@ const KpiTag: FC<KpiTagProps> = ({
 
     if (isNaN(Number(data?.[key]))) return data?.[key];
 
-    return currency ? `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}` : Number(data?.[key]);
+    return currency
+      ? `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}`
+      : getCommaSeparatedNumber(Number(data?.[key]), 2);
   }, [widgetData]);
 
   useEffect(() => {
