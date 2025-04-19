@@ -123,7 +123,11 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
       (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
     const clickFilter: MapAny = {};
 
-    const defaultFilters = getDefaultFilterByDatasetId(widgetDetails?.data_mappings?.mappings, datasetDefaultFilters);
+    const defaultFilters = getDefaultFilterByDatasetId(
+      widgetDetails?.data_mappings?.mappings,
+      datasetId,
+      datasetDefaultFilters,
+    );
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
       const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
