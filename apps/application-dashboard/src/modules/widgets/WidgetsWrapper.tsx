@@ -51,6 +51,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   const {
     state: { selectedFilters, filtersConfig, isFilterInitialized, isFilterLoading },
   } = useFiltersContextStore();
+  //TOBE renmove
 
   const { filterType, filterOperator } = useMemo(() => {
     if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
