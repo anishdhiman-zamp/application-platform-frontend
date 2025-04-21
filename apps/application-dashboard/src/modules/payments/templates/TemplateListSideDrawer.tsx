@@ -34,15 +34,15 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
   };
 
   const templates = useMemo(() => {
-    const currentTypeTemplates = templateList?.templates.filter((template) => template.type === currentTab);
+    const currentTypeTemplates = templateList?.templates?.filter((template) => template?.type === currentTab);
 
     if (!search.length) return currentTypeTemplates;
 
-    return currentTypeTemplates?.filter((template) => template.name.toLowerCase().includes(search.toLowerCase()));
+    return currentTypeTemplates?.filter((template) => template?.name?.toLowerCase()?.includes(search?.toLowerCase()));
   }, [currentTab, templateList, search]);
 
   const handleTemplateSendClick = (template: TemplateDetailsType) => {
-    router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template.type}&templateId=${template.id}`);
+    router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template?.type}&templateId=${template?.id}`);
   };
 
   return (

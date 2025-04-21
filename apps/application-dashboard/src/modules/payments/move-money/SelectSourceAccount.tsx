@@ -1,7 +1,7 @@
-import { FC } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';
 import { Button } from '@/components/common/button/Button';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
@@ -9,18 +9,29 @@ import { SIZE_TYPES } from '@/types/common/components';
 import { BUTTON_TYPES } from '@/types/components/button.type';
 type SelectSourceAccountProps = {
   handleStepChange: (step: number) => void;
+  transferType: MOVE_MONEY_TYPE;
+  recipientId?: string;
+  templateId?: string;
 };
 
-const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange }) => {
+const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
+  handleStepChange,
+  transferType,
+  recipientId,
+  templateId,
+}) => {
   const {
     dispatch,
     state: { sourceAccountDetails, currentStep },
   } = useMoveMoneyContextStore();
 
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({ recipient_id: recipientId });
   const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
+
+  const filteredTemplateList = useMemo(
+    () => templateList?.templates?.filter((template) => template?.type === transferType),
+    [templateList, transferType],
+  );
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
     dispatch({
@@ -40,6 +51,14 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange })
     });
   };
 
+  useEffect(() => {
+    if (templateId) {
+      const template = filteredTemplateList?.find((template) => template?.id === templateId);
+
+      if (template) handleTemplateSelect(template);
+    }
+  }, [templateId]);
+
   return (
     <div className='h-screen overflow-y-scroll pt-34'>
       <div className='max-w-75 m-auto'>
@@ -48,7 +67,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange })
           <SelectAccountDropdown
             autoFocus
             accountsList={sourceAccounts?.accounts ?? []}
-            templateList={templateList?.templates ?? []}
+            templateList={filteredTemplateList ?? []}
             shouldReset={false}
             accountDetails={sourceAccountDetails}
             onAccountSelect={handleSourceAccountSelect}

@@ -4,16 +4,21 @@ import { APITags } from '@/constants/api.constants';
 import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
+  InitiatePaymentPayloadType,
+  RecipientBySourceAccountPayloadType,
+  RecipientBySourceAccountResponseType,
   RecipientDetailsType,
+  SourceAccountByRecipientIdPayloadType,
   SourceAccountResponseType,
   TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
 
 const Payments = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSourceAccounts: builder.query<SourceAccountResponseType, void>({
-      query: () => ({
+    getSourceAccounts: builder.query<SourceAccountResponseType, SourceAccountByRecipientIdPayloadType>({
+      query: (params) => ({
         url: API_ENDPOINTS.PAYMENTS_SOURCE_ACCOUNTS_GET,
+        params,
       }),
     }),
     getRecipientList: builder.query<RecipientDetailsType[], void>({
@@ -33,6 +38,15 @@ const Payments = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
     }),
+    getRecipientBySourceAccount: builder.query<
+      RecipientBySourceAccountResponseType,
+      RecipientBySourceAccountPayloadType
+    >({
+      query: (params) => ({
+        url: API_ENDPOINTS.PAYMENTS_RECIPIENT_BY_SOURCE_ACCOUNT_GET,
+        params,
+      }),
+    }),
     createTemplate: builder.mutation<SourceAccountResponseType, CreateTemplatePayloadType>({
       query: (body) => ({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_CREATE_POST,
@@ -40,6 +54,13 @@ const Payments = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
+    }),
+    initiatePayment: builder.mutation<SourceAccountResponseType, InitiatePaymentPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.PAYMENTS_INITIATE_PAYMENT_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
     }),
   }),
 });
@@ -51,4 +72,7 @@ export const {
   useLazyGetDestinationAccountsQuery,
   useGetTemplateListQuery,
   useCreateTemplateMutation,
+  useGetRecipientBySourceAccountQuery,
+  useLazyGetRecipientBySourceAccountQuery,
+  useInitiatePaymentMutation,
 } = Payments;

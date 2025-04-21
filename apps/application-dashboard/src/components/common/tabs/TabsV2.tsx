@@ -12,6 +12,7 @@ type TabsV2Props = {
   contentClassName?: string;
   triggerClassName?: string;
   hideTabs?: boolean;
+  tabIndex?: number;
 };
 
 const TabsV2: FC<TabsV2Props> = ({
@@ -24,19 +25,20 @@ const TabsV2: FC<TabsV2Props> = ({
   contentClassName,
   triggerClassName,
   hideTabs,
+  tabIndex = -1,
 }) => {
   return (
-    <Tabs onValueChange={onValueChange} className={className} defaultValue={currentTab}>
+    <Tabs onValueChange={onValueChange} className={className} defaultValue={currentTab} tabIndex={tabIndex}>
       {!hideTabs && (
-        <TabsList className={listClassName}>
+        <TabsList tabIndex={tabIndex} className={listClassName}>
           {tabsList.map((tab, idx) => (
-            <TabsTrigger key={idx} value={tab?.value as string} className={triggerClassName}>
+            <TabsTrigger tabIndex={tabIndex} key={idx} value={tab?.value as string} className={triggerClassName}>
               {tab?.label}
             </TabsTrigger>
           ))}
         </TabsList>
       )}
-      <TabsContent className={contentClassName} value={currentTab}>
+      <TabsContent tabIndex={tabIndex} className={contentClassName} value={currentTab}>
         {children}
       </TabsContent>
     </Tabs>
