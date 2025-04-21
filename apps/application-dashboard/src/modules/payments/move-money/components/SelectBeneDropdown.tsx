@@ -291,9 +291,11 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             onChange={handleSearch}
             onKeyDown={handleKeyDown}
             focusClassNames=''
+            className='f-13-450 grow'
             placeholder='Search recipient or template'
-            inputWrapperClassName='tw-w-full'
-            inputFontClassName={cn({ '!bg-BACKGROUND_GRAY_2': disabled })}
+            inputFontClassName={cn('f-13-450', {
+              '!bg-BACKGROUND_GRAY_2': disabled,
+            })}
           />
 
           <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
