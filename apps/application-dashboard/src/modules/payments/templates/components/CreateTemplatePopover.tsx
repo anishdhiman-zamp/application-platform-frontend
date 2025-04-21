@@ -132,6 +132,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
           {sourceAccountDetails && isSingleTransfer && (
             <SelectBeneDropdown
               onSelect={handleRecipientSelect}
+              defaultSelectedRecipient={recipientDetails}
               shouldReset={false}
               label='Recipient'
               showTemplate={false}

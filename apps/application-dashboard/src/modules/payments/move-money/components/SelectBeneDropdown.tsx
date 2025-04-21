@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
@@ -43,13 +43,20 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const recipientRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const templateRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const { contact_id } = router.query;
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState(templateDetails?.name || '');
   const [selectedRecipient, setSelectedRecipient] = useState<MenuItem | null>(null);
   const [isShowMenu, setIsShowMenu] = useState(false);
-  const [currentTab, setCurrentTab] = useState<MenuItem>(MOVE_MONEY_PAYMENT_TYPE_OPTIONS[0]);
+  const [currentTab, setCurrentTab] = useState<MenuItem>({
+    label: 'Recipients',
+    value: MOVE_MONEY_PAYMENT_TYPE.RECIPIENT,
+  });
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const { counterParties, templates } = useMemo(() => {
     if (isSearchActive) {
@@ -66,7 +73,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
-    if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && counterParties?.length <= 8) {
+    if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT && counterParties?.length <= 8) {
       if (counterParties?.length === 0) return 92;
 
       return 32 * counterParties?.length + 10;
@@ -111,6 +118,55 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     setIsShowMenu(false);
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const keyEvent = e.key;
+    const currentList = currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT ? counterParties : templates;
+    const currentRefs = currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT ? recipientRefs : templateRefs;
+
+    if (keyEvent === 'Tab') return;
+
+    if (keyEvent === 'ArrowDown' || keyEvent === 'ArrowUp') {
+      e.preventDefault();
+      setIsShowMenu(true);
+
+      if (currentList.length === 0) return;
+
+      if (hoveredIndex === null || hoveredIndex >= currentList.length) {
+        const newIndex = keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+
+        setHoveredIndex(newIndex);
+        currentRefs.current[newIndex]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        setHoveredIndex((prev) => {
+          if (prev === null) return keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+          const newIndex =
+            keyEvent === 'ArrowDown'
+              ? prev !== currentList.length - 1
+                ? prev + 1
+                : prev
+              : prev !== 0
+                ? prev - 1
+                : prev;
+          const finalIndex = newIndex < 0 ? currentList.length - 1 : newIndex >= currentList.length ? 0 : newIndex;
+
+          currentRefs.current[finalIndex]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+          return finalIndex;
+        });
+      }
+    } else if (keyEvent === 'Enter' && hoveredIndex !== null && currentList[hoveredIndex]) {
+      e.preventDefault();
+      if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT) {
+        handleRecipientSelect(currentList[hoveredIndex] as RecipientDetailsType);
+      } else {
+        handleTemplateSelect(currentList[hoveredIndex] as TemplateDetailsType);
+      }
+    } else if (keyEvent === 'Escape') {
+      setIsShowMenu(false);
+      setHoveredIndex(null);
+    }
+  };
+
   useEffect(() => {
     if (templateDetails) {
       handleTemplateSelect(templateDetails);
@@ -128,12 +184,17 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   useEffect(() => {
     if (defaultSelectedRecipient) {
       handleRecipientSelect(defaultSelectedRecipient);
+    } else {
+      setIsSearchActive(false);
+      setIsShowMenu(true);
+      setSelectedRecipient(null);
+      setSearchValue('');
     }
   }, [defaultSelectedRecipient]);
 
   const getDropdownBody = () => {
     switch (currentTab.value) {
-      case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
+      case MOVE_MONEY_PAYMENT_TYPE.RECIPIENT: {
         return (
           <div className='p-1 flex-1'>
             <div className='max-h-[320px] overflow-y-auto'>
@@ -144,6 +205,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
                 {counterParties.map((recipient, index) => (
                   <RecipientCard
                     key={`${recipient.id}_${index}`}
+                    ref={(el) => {
+                      recipientRefs.current[index] = el;
+                    }}
+                    className={cn({
+                      'bg-GRAY_100': hoveredIndex === index,
+                    })}
                     recipient={recipient}
                     handleRecipientSelect={handleRecipientSelect}
                   />
@@ -160,8 +227,18 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               isNoData={templates?.length === 0}
               noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
             >
-              {templates?.map((template) => (
-                <MoveMoneyTemplateListCard key={template?.id} template={template} onSelect={handleTemplateSelect} />
+              {templates?.map((template, index) => (
+                <MoveMoneyTemplateListCard
+                  key={`${template?.id}_${index}`}
+                  ref={(el) => {
+                    templateRefs.current[index] = el;
+                  }}
+                  className={cn({
+                    'bg-GRAY_100': hoveredIndex === index,
+                  })}
+                  template={template}
+                  onSelect={handleTemplateSelect}
+                />
               ))}
             </CommonWrapper>
           </div>
@@ -212,6 +289,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             value={isSearchActive ? searchValue : selectedRecipient?.label}
             disabled={!!contact_id}
             onChange={handleSearch}
+            onKeyDown={handleKeyDown}
             focusClassNames=''
             placeholder='Search recipient or template'
             inputWrapperClassName='tw-w-full'

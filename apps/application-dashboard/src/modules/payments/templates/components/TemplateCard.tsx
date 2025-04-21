@@ -34,7 +34,7 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
                   {item?.account_name}
                 </div>
                 <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px] whitespace-nowrap'>
-                  {MASK_DOTS} {item?.account_number}
+                  {MASK_DOTS} {item?.masked_account_number}
                 </div>
               </div>
             ))}
