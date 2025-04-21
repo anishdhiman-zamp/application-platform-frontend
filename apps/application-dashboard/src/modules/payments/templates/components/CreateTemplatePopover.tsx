@@ -34,7 +34,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const [destinationAccountList, setDestinationAccountList] = useState<AccountDetailsType[]>([]);
 
   const [createTemplate, { isLoading: isCreateTemplateLoading }] = useCreateTemplateMutation();
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined);
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({}, { refetchOnMountOrArgChange: false });
   const [
     getRecipientBySourceAccount,
     { data: recipientBySourceAccount, isLoading: isRecipientBySourceAccountLoading },
