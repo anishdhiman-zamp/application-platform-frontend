@@ -531,10 +531,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
         />
       )}
       {isRecipientsSideDrawerOpen && (
-        <RecipientsSideDrawer
-          isOpen={isRecipientsSideDrawerOpen}
-          onClose={() => setIsRecipientsSideDrawerOpen(false)}
-        />
+        <RecipientsSideDrawer isOpen={isRecipientsSideDrawerOpen} onClose={setIsRecipientsSideDrawerOpen} />
       )}
       {isPaymentTemplatesSideDrawerOpen && (
         <TemplateListSideDrawer
