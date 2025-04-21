@@ -52,6 +52,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     state: { selectedFilters, filtersConfig, isFilterInitialized, isFilterLoading },
   } = useFiltersContextStore();
 
+  // to be remove
+
   const { filterType, filterOperator } = useMemo(() => {
     if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
       return {
@@ -116,13 +118,17 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     return JSON.stringify(datasetFilters?.length > 0 ? datasetFilters : []);
   }, [currentPageFiltersConfig, selectedFilters]);
 
-  const onNodeClick = (clickedNode: MapAny, xAxis: string) => {
-    const datasetId = widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id;
+  const onNodeClick = (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => {
     const xAxisColumnName =
       (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
       (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
     const clickFilter: MapAny = {};
-    const defaultFilters = getDefaultFilterByDatasetId(widgetDetails?.data_mappings?.mappings, datasetId);
+
+    const defaultFilters = getDefaultFilterByDatasetId(
+      widgetDetails?.data_mappings?.mappings,
+      datasetId,
+      datasetDefaultFilters,
+    );
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
       const [dateFrom, dateTo] = getDateRangeWithPeriodicity(

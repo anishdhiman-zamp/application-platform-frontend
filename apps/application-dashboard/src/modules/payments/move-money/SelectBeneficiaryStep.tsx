@@ -3,23 +3,19 @@ import SelectAccountDropdown from 'modules/payments/move-money/components/Select
 import SelectBeneDropdown from 'modules/payments/move-money/components/SelectBeneDropdown';
 import { accountsList } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType, MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType } from 'modules/payments/payments.types';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { snakeCaseToSentenceCase } from 'utils/common';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
   handleStepChange: (step: number) => void;
-  setCreateTemplateType: (type: MOVE_MONEY_TYPE | null) => void;
   defaultTemplate?: TemplateDetailsType;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
-  handleStepChange,
-  setCreateTemplateType,
-  defaultTemplate,
-}) => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate }) => {
   const {
     state: { contactDetails, destinationAccountDetails, currentStep, templateDetails },
     dispatch,
@@ -63,7 +59,6 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
             onSelect={handleBeneficiarySelect}
             shouldReset={false}
             templateDetails={defaultTemplate}
-            setCreateTemplateType={setCreateTemplateType}
           />
           {!templateDetails && contactDetails?.value && (
             <SelectAccountDropdown
@@ -90,7 +85,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({
         </div>
         <div className='flex gap-3 mt-10'>
           <Button
-            disabled
+            onClick={() => handleStepChange(currentStep - 1)}
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_SELECT_BENEFICIARY_BACK'

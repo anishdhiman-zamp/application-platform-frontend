@@ -57,8 +57,8 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
     setIsOpen((prev) => !prev);
   };
 
-  const onChange = (value: string[]) => {
-    if (closeOnSelect) {
+  const onChange = (value: string[], filterType?: FILTER_TYPES) => {
+    if (closeOnSelect || filterType === FILTER_TYPES.SINGLE_SELECT) {
       setIsOpen(false);
     }
 
@@ -95,6 +95,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           label={filter?.label}
           className='min-w-[200px] w-full'
           isOpen={isOpen}
+          updateContextOnChange
           onClose={() => setIsOpen(false)}
           allowClear={allowClear}
           isPeriodicityEnabled={isPeriodicityEnabled}

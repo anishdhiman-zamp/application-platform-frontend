@@ -43,6 +43,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
   const [templateName, setTemplateName] = useState('');
   const [targetDataset, setTargetDataset] = useState<OptionsType | null>(null);
   const [sourceDatasetId, setSourceDatasetId] = useState('');
+  const [orderByColumn, setOrderByColumn] = useState('');
 
   const handleEditorChange = (value?: string) => {
     if (value) {
@@ -56,13 +57,14 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
       description,
       transformation_template_json: jsonData,
       source_dataset_id: sourceDatasetId,
-      target_dataset_id: targetDataset?.value as string,
+      destination_dataset_id: targetDataset?.value as string,
       dedup_columns: dedupColumns.split(',').map((column) => column.trim()),
       partition_columns: partitionColumns.split(',').map((column) => column.trim()),
       cluster_columns: clusterColumns.split(',').map((column) => column.trim()),
       dataset_type: datasetType.value as DatasetType,
       provider: provider.value as ProviderType,
       transformation_template_name: templateName,
+      order_by_column: orderByColumn,
     });
   };
 
@@ -77,7 +79,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
   const dropdownOptions = useMemo(() => {
     return (
       data?.datasets?.map((dataset) => ({
-        label: dataset.Title,
+        label: `${dataset.Title} (${dataset.ID})`,
         value: dataset.ID,
       })) || []
     );
@@ -226,6 +228,13 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
                 description='Comma separated list of columns to cluster on'
                 value={clusterColumns}
                 onChange={(e) => setClusterColumns(e.target.value)}
+                {...TRANSFORM_DATASET_LABEL_PROPS.input}
+              />
+              <Input
+                label='Order By Column'
+                description='Column to order by'
+                value={orderByColumn}
+                onChange={(e) => setOrderByColumn(e.target.value)}
                 {...TRANSFORM_DATASET_LABEL_PROPS.input}
               />
               <Dropdown

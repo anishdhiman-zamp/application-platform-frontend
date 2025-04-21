@@ -5,7 +5,7 @@ import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
-import { LOGIN_GROUPS } from 'modules/login/login.constants';
+import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
 import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
@@ -13,6 +13,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
+import { MapAny } from '@/types/commonTypes';
 import Input from 'components/common/input';
 
 export const LoginForm = () => {
@@ -21,10 +22,31 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [providerLogo, setProviderLogo] = useState<string>('');
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
       setEmail(e.target.value);
+    }
+  };
+
+  const handleRedirect = (respJson: MapAny) => {
+    setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
+
+    try {
+      const redirectUrl = respJson.redirect_browser_to;
+      const emailDomain = getDomainFromEmail(email);
+
+      const urlObj = new URL(redirectUrl);
+
+      urlObj.searchParams.set('hd', emailDomain);
+
+      setHasError(false);
+      window.location.href = urlObj.toString();
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setHasError(true);
     }
   };
 
@@ -44,40 +66,31 @@ export const LoginForm = () => {
       });
       const respJson = await resp.json();
 
-      switch (resp.status) {
-        case API_STATUS_CODES.UNPROCESSABLE_ENTITY:
-        case API_STATUS_CODES.OK: {
-          setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL, email);
+      const validSessionMsg =
+        resp.status === API_STATUS_CODES.BAD_REQUEST &&
+        respJson?.ui?.messages?.[0]?.text?.includes(VALID_SESSION_DETECTED_ERROR_MSG);
 
-          try {
-            const redirectUrl = respJson.redirect_browser_to;
-            const emailDomain = getDomainFromEmail(email);
+      const shouldRedirect =
+        resp.status === API_STATUS_CODES.OK || resp.status === API_STATUS_CODES.UNPROCESSABLE_ENTITY || validSessionMsg;
 
-            const urlObj = new URL(redirectUrl);
-
-            urlObj.searchParams.set('hd', emailDomain);
-            setHasError(false);
-            window.location.href = urlObj.toString();
-          } catch (error) {
-            console.error(error);
-            setLoading(false);
+      if (shouldRedirect) {
+        handleRedirect(respJson);
+      } else {
+        switch (resp.status) {
+          case API_STATUS_CODES.BAD_REQUEST: {
+            setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
             setHasError(true);
+            setLoading(false);
+            break;
           }
-          break;
-        }
 
-        case API_STATUS_CODES.BAD_REQUEST: {
-          setError(respJson?.ui?.messages?.[0]?.text ?? LOGIN_ERROR_TEXT);
-          setHasError(true);
-          break;
-        }
-
-        default: {
-          setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
-          setHasError(true);
-          setLoading(false);
-          setLoginFlow(respJson);
-          break;
+          default: {
+            setError(respJson?.error?.message ?? LOGIN_ERROR_TEXT);
+            setHasError(true);
+            setLoading(false);
+            setLoginFlow(respJson);
+            break;
+          }
         }
       }
     } catch (error) {
@@ -127,6 +140,7 @@ export const LoginForm = () => {
       }
 
       setLoginFlow(respJson);
+      setProviderLogo(respJson?.ui?.nodes?.[0]?.attributes?.logo_url);
 
       // if the number of login methods is 1 and it is OIDC, we can directly login
       if (respJson?.ui?.nodes?.length == 1) {
@@ -176,7 +190,7 @@ export const LoginForm = () => {
             disabled={inputDisabled}
             size={SIZE_TYPES.LARGE}
           />
-          <LoginButton loading={loading} onClick={() => handleSubmit} />
+          <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
         </form>
       </div>
     </div>

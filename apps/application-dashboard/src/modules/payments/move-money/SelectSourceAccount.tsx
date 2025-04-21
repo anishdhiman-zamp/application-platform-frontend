@@ -2,8 +2,9 @@ import { FC } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { AccountDetailsType } from 'modules/payments/payments.types';
-import { useGetSourceAccountsQuery } from '@/apis/payments';
+import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';
 import { Button } from '@/components/common/button/Button';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { SIZE_TYPES } from '@/types/common/components';
 import { BUTTON_TYPES } from '@/types/components/button.type';
 type SelectSourceAccountProps = {
@@ -13,16 +14,28 @@ type SelectSourceAccountProps = {
 const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange }) => {
   const {
     dispatch,
-    state: { sourceAccountDetails, currentStep, templateDetails },
+    state: { sourceAccountDetails, currentStep },
   } = useMoveMoneyContextStore();
 
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery();
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+  const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
 
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
     dispatch({
       type: moveMoneyContextActions.SOURCE_ACCOUNT_DETAILS,
       payload: {
         sourceAccountDetails: account,
+      },
+    });
+  };
+
+  const handleTemplateSelect = (template: TemplateDetailsType) => {
+    dispatch({
+      type: moveMoneyContextActions.TEMPLATE_DETAILS,
+      payload: {
+        templateDetails: template,
       },
     });
   };
@@ -35,12 +48,14 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({ handleStepChange })
           <SelectAccountDropdown
             autoFocus
             accountsList={sourceAccounts?.accounts ?? []}
+            templateList={templateList?.templates ?? []}
             shouldReset={false}
             accountDetails={sourceAccountDetails}
             onAccountSelect={handleSourceAccountSelect}
+            onTemplateSelect={handleTemplateSelect}
             label='Send from'
-            disabled={!!templateDetails}
             isLoading={isLoading}
+            showTemplate
           />
         </div>
         <div className='flex gap-3 mt-10'>
