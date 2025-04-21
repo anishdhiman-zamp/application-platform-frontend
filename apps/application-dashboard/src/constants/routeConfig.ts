@@ -1,4 +1,3 @@
-import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
 import { NavigationItemSchema } from 'types/config';
 
 export const ROUTES_PATH = {
@@ -57,7 +56,7 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     label: 'Payments',
     iconId: 'send-01',
     path: ROUTES_PATH.PAYMENTS,
-    isHidden: ENVIRONMENT !== ENVIRONMENT_TYPES.LOCAL && ENVIRONMENT !== ENVIRONMENT_TYPES.DEVELOPMENT,
+    isHidden: true,
   },
   {
     label: 'Team',
