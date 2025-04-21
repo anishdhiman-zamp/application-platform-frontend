@@ -39,16 +39,6 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset }) => {
             <div className='f-12-450'>{transactionDetails?.estimated_time}</div>
           </div>
         )}
-        <div className='grid grid-cols-2'>
-          <div className='text-GRAY_700 f-12-400 grow'>Payment Receipt</div>
-          <div className='flex items-center gap-3'>
-            <div className='flex items-center gap-2 bg-GRAY_100 rounded-md py-1.5 px-2'>
-              <SvgSpriteLoader size={14} id='file-02' />
-              <div className='f-12-400'>file_name_abracadabra.pdf</div>
-            </div>
-            <SvgSpriteLoader size={14} id='mail-02' />
-          </div>
-        </div>
       </div>
       <div className='rounded-md border border-GRAY_400 bg-BG_GRAY_2 p-5 flex flex-col gap-4'>
         <div className='f-16-550'>Save this as payment template</div>

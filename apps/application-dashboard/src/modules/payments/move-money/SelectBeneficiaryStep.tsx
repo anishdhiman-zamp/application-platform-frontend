@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import SelectBeneDropdown from 'modules/payments/move-money/components/SelectBeneDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
@@ -12,9 +12,10 @@ import { Button } from 'components/common/button/Button';
 interface SelectBeneficiaryStepProps {
   handleStepChange: (step: number) => void;
   defaultTemplate?: TemplateDetailsType;
+  recipientId?: string;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate }) => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate, recipientId }) => {
   const {
     state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails },
     dispatch,
@@ -26,7 +27,6 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
         source_account_id: sourceAccountDetails?.id ?? '',
       },
       {
-        refetchOnMountOrArgChange: false,
         skip: !sourceAccountDetails?.id,
       },
     );
@@ -49,13 +49,23 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
     });
   };
 
+  const selectedBeneficiary = useMemo(() => {
+    if (recipientId) {
+      return recipientBySourceAccount?.recipients?.find((recipient) => recipient?.id === recipientId);
+    }
+
+    return null;
+  }, [recipientId, recipientBySourceAccount]);
+
   return (
     <div className='h-screen overflow-y-scroll pt-34'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
           <SelectBeneDropdown
-            autoFocus={currentStep === 1}
+            autoFocus={currentStep === 1 || !!recipientId}
+            disabled={!!recipientId}
+            defaultSelectedRecipient={selectedBeneficiary}
             onSelect={handleBeneficiarySelect}
             shouldReset={false}
             isLoading={isRecipientBySourceAccountLoading}

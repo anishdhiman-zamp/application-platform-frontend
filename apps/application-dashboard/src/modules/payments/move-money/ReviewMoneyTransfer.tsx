@@ -5,10 +5,12 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import { useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { useInitiatePaymentMutation } from '@/apis/payments';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -29,6 +31,11 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
     },
   } = useMoveMoneyContextStore();
   const [initiatePayment, { isLoading }] = useInitiatePaymentMutation();
+  const router = useRouter();
+
+  const handleDownloadFile = (file: UploadFileResponseType) => {
+    router.push(file?.downloadableUrl);
+  };
 
   const handleBackClick = () => handleStepChange(currentStep - 1);
   const handleNextClick = () => {
@@ -40,6 +47,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
       payments_processing_mode: (amountDetails?.processingMode?.value as string) ?? '',
       statement_descriptor: moreDetails?.externalMemo ?? '',
       notes: moreDetails?.note ? [moreDetails?.note] : [],
+      attachments: moreDetails?.attachments?.map((attachment) => ({ file_upload_id: attachment?.identifier })),
     })
       .unwrap()
       .then(() => {
@@ -117,18 +125,20 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
               <div className='f-12-450'>{moreDetails?.note}</div>
             </div>
           )}
-          <div>
-            <div className='f-12-400 mb-3 text-GRAY_700'>Attachments</div>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className='flex justify-between mb-2'>
-                <div className='flex items-center gap-2 bg-GRAY_100 rounded-md py-1.5 px-2'>
-                  <SvgSpriteLoader size={14} id='file-02' />
-                  <div className='f-12-400'>file_name_abracadabra.pdf</div>
+          {!!moreDetails?.attachments.length && (
+            <div>
+              <div className='f-12-400 mb-3 text-GRAY_700'>Attachments</div>
+              {moreDetails?.attachments?.map((attachment, index) => (
+                <div key={index} className='flex justify-between mb-2'>
+                  <div className='flex items-center gap-2 bg-GRAY_100 rounded-md py-1.5 px-2'>
+                    <SvgSpriteLoader size={14} id='file-02' />
+                    <div className='f-12-400'>{attachment?.fileName}</div>
+                  </div>
+                  <SvgSpriteLoader size={14} id='download-02' onClick={() => handleDownloadFile(attachment)} />
                 </div>
-                <SvgSpriteLoader size={14} id='download-02' />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className='flex gap-3 mt-10'>
           <Button

@@ -14,6 +14,7 @@ export enum ENVIRONMENT_TYPES {
   PRODUCTION = 'production',
   DEVELOPMENT = 'development',
   STAGING = 'staging',
+  LOCAL = 'local',
 }
 
 export enum SIZE {

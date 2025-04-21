@@ -23,9 +23,10 @@ type SelectBeneDropdownProps = {
   label?: string;
   showTemplate?: boolean;
   isLoading?: boolean;
-  selectedRecipient?: MenuItem | null;
+  defaultSelectedRecipient?: RecipientDetailsType | null;
   templateDetails?: TemplateDetailsType | null;
   recipientList?: RecipientDetailsType[];
+  disabled?: boolean;
 };
 
 const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
@@ -37,6 +38,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   templateDetails,
   recipientList,
   isLoading = false,
+  defaultSelectedRecipient,
+  disabled = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -122,6 +125,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     }
   }, [autoFocus]);
 
+  useEffect(() => {
+    if (defaultSelectedRecipient) {
+      handleRecipientSelect(defaultSelectedRecipient);
+    }
+  }, [defaultSelectedRecipient]);
+
   const getDropdownBody = () => {
     switch (currentTab.value) {
       case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
@@ -188,6 +197,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
         className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
           'border-GRAY_400 overflow-hidden': !isShowMenu,
           'border-GRAY_500': isShowMenu,
+          '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,
         })}
         ref={containerRef}
       >
@@ -195,7 +205,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           <Input
             tabIndex={0}
             id='ADD_ACCOUNT_SEARCH_BANK'
-            onFocus={() => setIsShowMenu(true)}
+            onFocus={() => !disabled && setIsShowMenu(true)}
             size={SIZE_TYPES.MEDIUM}
             inputRef={inputRef}
             autoFocus={autoFocus}
@@ -205,6 +215,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             focusClassNames=''
             placeholder='Search recipient or template'
             inputWrapperClassName='tw-w-full'
+            inputFontClassName={cn({ '!bg-BACKGROUND_GRAY_2': disabled })}
           />
 
           <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />

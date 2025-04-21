@@ -1,9 +1,8 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
-import { defaultContactDetails } from 'modules/payments/payments.constant';
 import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
 import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { MapAny } from 'types/commonTypes';
 import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 
 enum moveMoneyContextActions {
@@ -24,22 +23,21 @@ interface InitialStateType {
   currentStep: number;
   destinationAccountDetails?: AccountDetailsType;
   sourceAccountDetails?: AccountDetailsType;
-  templateDetails: TemplateDetailsType | undefined;
+  templateDetails?: TemplateDetailsType | undefined;
   moreDetails?: {
     note: string;
     externalMemo: string;
     attachments: UploadFileResponseType[];
   };
-  transactionDetails: MapAny;
-  amountDetails: {
+  transactionDetails?: MapAny;
+  amountDetails?: {
     amount: string;
     currency: MenuItem | null;
     sourceAccountDetails?: AccountDetailsType;
     processingMode?: MenuItem;
   };
-  recipientDetails: RecipientDetailsType | undefined;
-  selectedPooledFund: OptionsType;
-  counterParties: ContactType[];
+  recipientDetails?: RecipientDetailsType | undefined;
+  counterParties?: ContactType[];
 }
 
 export interface ActionType {
@@ -49,26 +47,6 @@ export interface ActionType {
 
 const initialState: InitialStateType = {
   currentStep: 0,
-  destinationAccountDetails: undefined,
-  templateDetails: undefined,
-  moreDetails: {
-    note: '',
-    externalMemo: '',
-    attachments: [],
-  },
-  transactionDetails: {
-    payment_send_text: '',
-    estimated_time: '24hrs',
-  },
-  amountDetails: {
-    amount: '',
-    currency: null,
-    sourceAccountDetails: undefined,
-    processingMode: '',
-  },
-  recipientDetails: undefined,
-  selectedPooledFund: defaultContactDetails,
-  counterParties: [],
 };
 
 const context = createContext<{

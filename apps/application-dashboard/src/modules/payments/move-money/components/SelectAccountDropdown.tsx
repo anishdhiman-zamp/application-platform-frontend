@@ -90,7 +90,11 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const dropdownHeight = useMemo(() => {
     if (!isShowMenu) return 0;
-    if (currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && filteredAccounts?.length === 0) return 56;
+    if (
+      (currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS && filteredAccounts?.length === 0) ||
+      (currentTab === MOVE_MONEY_PAYMENT_TYPE.TEMPLATES && templates?.length === 0)
+    )
+      return 120;
     if (
       currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS &&
       filteredAccounts?.length > 0 &&
