@@ -13,8 +13,10 @@ import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import Input from 'components/common/input';
+
 type SelectBeneDropdownProps = {
   autoFocus?: boolean;
   templateList?: TemplateDetailsType[];
@@ -59,6 +61,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   const [showSearch, setShowSearch] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>(MOVE_MONEY_PAYMENT_TYPE_OPTIONS[0].value);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const accountName = useMemo(() => {
+    return `${snakeCaseToSentenceCase(accountDetails?.account_name ?? '')} ${MASK_DOTS} ${accountDetails?.masked_account_number}`;
+  }, [accountDetails]);
+
+  const isInputEnabled = useMemo(() => {
+    return !disabled && (!accountDetails?.account_name || showSearch);
+  }, [disabled, accountDetails?.account_name, showSearch]);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event?.target?.value);
@@ -162,24 +172,24 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     const currentList = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? filteredAccounts : templates;
     const currentRefs = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? accountRefs : templateRefs;
 
-    if (keyEvent === 'Tab') return;
+    if (keyEvent === KEYBOARD_KEYS.TAB) return;
 
-    if (keyEvent === 'ArrowDown' || keyEvent === 'ArrowUp') {
+    if (keyEvent === KEYBOARD_KEYS.ARROW_DOWN || keyEvent === KEYBOARD_KEYS.ARROW_UP) {
       e.preventDefault();
       setIsShowMenu(true);
 
       if (currentList.length === 0) return;
 
       if (hoveredIndex === null || hoveredIndex >= currentList.length) {
-        const newIndex = keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+        const newIndex = keyEvent === KEYBOARD_KEYS.ARROW_DOWN ? 0 : currentList.length - 1;
 
         setHoveredIndex(newIndex);
         currentRefs.current[newIndex]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {
         setHoveredIndex((prev) => {
-          if (prev === null) return keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+          if (prev === null) return keyEvent === KEYBOARD_KEYS.ARROW_DOWN ? 0 : currentList.length - 1;
           const newIndex =
-            keyEvent === 'ArrowDown'
+            keyEvent === KEYBOARD_KEYS.ARROW_DOWN
               ? prev !== currentList.length - 1
                 ? prev + 1
                 : prev
@@ -193,14 +203,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           return finalIndex;
         });
       }
-    } else if (keyEvent === 'Enter' && hoveredIndex !== null && currentList[hoveredIndex]) {
+    } else if (keyEvent === KEYBOARD_KEYS.ENTER && hoveredIndex !== null && currentList[hoveredIndex]) {
       e.preventDefault();
       if (currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS) {
         handleAccountSelect(currentList[hoveredIndex] as AccountDetailsType);
       } else {
         handleTemplateSelect(currentList[hoveredIndex] as TemplateDetailsType);
       }
-    } else if (keyEvent === 'Escape') {
+    } else if (keyEvent === KEYBOARD_KEYS.ESCAPE) {
       setIsShowMenu(false);
       setHoveredIndex(null);
     }
@@ -242,7 +252,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
                     tabIndex={-1}
-                    name={`${snakeCaseToSentenceCase(account?.account_name)}   ${MASK_DOTS}  ${account?.masked_account_number}`}
+                    name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
                     onClick={() => handleAccountSelect(account)}
                     logo={DEFAULT_BANK}
                   />
@@ -291,7 +301,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
         })}
         ref={containerRef}
       >
-        {!disabled && (!accountDetails?.account_name || showSearch) ? (
+        {isInputEnabled ? (
           <div className='flex items-center gap-1.5 px-3'>
             <Input
               tabIndex={0}
@@ -316,7 +326,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               className={cn('rounded-md !p-2.5', {
                 'bg-BACKGROUND_GRAY_2': disabled,
               })}
-              name={`${snakeCaseToSentenceCase(accountDetails?.account_name ?? '')} ${MASK_DOTS} ${accountDetails?.masked_account_number}`}
+              name={accountName}
               onClick={!disabled ? onClickSelectedAccount : undefined}
               logo={DEFAULT_BANK}
               subtitle={accountDetails?.account_name}

@@ -3,6 +3,7 @@ import { DEFAULT_BANK } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface AccountWithLogoCardProps {
@@ -35,7 +36,7 @@ const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
     ref,
   ) => {
     const onKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') onClick?.();
+      if (e.key === KEYBOARD_KEYS.ENTER) onClick?.();
     };
 
     const iconSize = logoSize || subtitle ? 24 : 14;

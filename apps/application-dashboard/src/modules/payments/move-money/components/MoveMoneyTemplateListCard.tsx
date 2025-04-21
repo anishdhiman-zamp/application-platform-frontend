@@ -1,9 +1,9 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { inter } from '@/constants/common.constants';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-import { cn } from '@/utils/common';
+import { cn, snakeCaseToSentenceCase } from '@/utils/common';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type MoveMoneyTemplateListCardProps = {
@@ -20,6 +20,12 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
 
     const sourceAccount = template?.details?.[0]?.source_account;
     const destinationAccount = template?.details?.[0]?.destination_account;
+    const sourceAccountName = useMemo(() => {
+      return `${snakeCaseToSentenceCase(sourceAccount?.account_name ?? '')} ${MASK_DOTS} ${sourceAccount?.account_number.slice(-4)}`;
+    }, [sourceAccount]);
+    const destinationAccountName = useMemo(() => {
+      return `${snakeCaseToSentenceCase(destinationAccount?.account_name ?? '')} ${MASK_DOTS} ${destinationAccount?.account_number.slice(-4)}`;
+    }, [destinationAccount]);
 
     useEffect(() => {
       if (isHover && elementRef.current) {
@@ -58,7 +64,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
               <div className='flex flex-col gap-3 min-w-[185px]'>
                 <div>
                   <div className='f-11-400 text-GRAY_700 mb-0.5'>Source Account</div>
-                  <div className='f-12-500 text-GRAY_950'>{`${sourceAccount?.account_name}  ${MASK_DOTS} ${sourceAccount?.account_number.slice(-4)}`}</div>
+                  <div className='f-12-500 text-GRAY_950'>{sourceAccountName}</div>
                 </div>
                 <div>
                   <div className='f-11-400 text-GRAY_700 mb-0.5'>Recipient</div>
@@ -66,7 +72,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
                 </div>
                 <div>
                   <div className='f-11-400 text-GRAY_700 mb-0.5'>Recipient Account</div>
-                  <div className='f-12-500 text-GRAY_950'>{`${destinationAccount?.account_name}  ${MASK_DOTS} ${destinationAccount?.account_number.slice(-4)}`}</div>
+                  <div className='f-12-500 text-GRAY_950'>{destinationAccountName}</div>
                 </div>
                 <div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'>
                   Created by {template?.created_by}

@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 import Input from 'components/common/input';
 import { Tabs } from 'components/common/tabs/Tabs';
@@ -123,24 +124,24 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     const currentList = currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT ? counterParties : templates;
     const currentRefs = currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT ? recipientRefs : templateRefs;
 
-    if (keyEvent === 'Tab') return;
+    if (keyEvent === KEYBOARD_KEYS.TAB) return;
 
-    if (keyEvent === 'ArrowDown' || keyEvent === 'ArrowUp') {
+    if (keyEvent === KEYBOARD_KEYS.ARROW_DOWN || keyEvent === KEYBOARD_KEYS.ARROW_UP) {
       e.preventDefault();
       setIsShowMenu(true);
 
       if (currentList.length === 0) return;
 
       if (hoveredIndex === null || hoveredIndex >= currentList.length) {
-        const newIndex = keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+        const newIndex = keyEvent === KEYBOARD_KEYS.ARROW_DOWN ? 0 : currentList.length - 1;
 
         setHoveredIndex(newIndex);
         currentRefs.current[newIndex]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {
         setHoveredIndex((prev) => {
-          if (prev === null) return keyEvent === 'ArrowDown' ? 0 : currentList.length - 1;
+          if (prev === null) return keyEvent === KEYBOARD_KEYS.ARROW_DOWN ? 0 : currentList.length - 1;
           const newIndex =
-            keyEvent === 'ArrowDown'
+            keyEvent === KEYBOARD_KEYS.ARROW_DOWN
               ? prev !== currentList.length - 1
                 ? prev + 1
                 : prev
@@ -154,14 +155,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           return finalIndex;
         });
       }
-    } else if (keyEvent === 'Enter' && hoveredIndex !== null && currentList[hoveredIndex]) {
+    } else if (keyEvent === KEYBOARD_KEYS.ENTER && hoveredIndex !== null && currentList[hoveredIndex]) {
       e.preventDefault();
       if (currentTab.value === MOVE_MONEY_PAYMENT_TYPE.RECIPIENT) {
         handleRecipientSelect(currentList[hoveredIndex] as RecipientDetailsType);
       } else {
         handleTemplateSelect(currentList[hoveredIndex] as TemplateDetailsType);
       }
-    } else if (keyEvent === 'Escape') {
+    } else if (keyEvent === KEYBOARD_KEYS.ESCAPE) {
       setIsShowMenu(false);
       setHoveredIndex(null);
     }

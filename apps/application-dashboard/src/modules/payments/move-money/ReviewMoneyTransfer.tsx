@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { DEFAULT_BANK } from 'constants/icons';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
@@ -32,6 +32,18 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
   } = useMoveMoneyContextStore();
   const [initiatePayment, { isLoading }] = useInitiatePaymentMutation();
   const router = useRouter();
+  const showRecipientDetails = useMemo(() => {
+    return transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && destinationAccountDetails?.account_number;
+  }, [transferType, destinationAccountDetails?.account_number]);
+
+  const sourceAccountName = useMemo(
+    () => `${sourceAccountDetails?.account_name} ${MASK_DOTS} ${sourceAccountDetails?.masked_account_number}`,
+    [sourceAccountDetails],
+  );
+  const destinationAccountName = useMemo(
+    () => `${destinationAccountDetails?.account_name} ${MASK_DOTS} ${destinationAccountDetails?.masked_account_number}`,
+    [destinationAccountDetails],
+  );
 
   const handleDownloadFile = (file: UploadFileResponseType) => {
     router.push(file?.downloadableUrl);
@@ -71,7 +83,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
               {amountDetails?.currency?.label} {Number(amountDetails?.amount)?.toLocaleString()}
             </div>
           </div>
-          {transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && destinationAccountDetails?.account_number && (
+          {showRecipientDetails && (
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-4'>
                 <div className='grid grid-cols-2'>
@@ -97,7 +109,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           <AccountWithLogo
             className='border border-GRAY_400 mb-5 rounded-md'
             logo={DEFAULT_BANK}
-            name={`${sourceAccountDetails?.account_name} ${MASK_DOTS} ${sourceAccountDetails?.masked_account_number}`}
+            name={sourceAccountName}
             subtitle={sourceAccountDetails?.bank_name}
           />
         </div>
@@ -107,7 +119,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
             <AccountWithLogo
               className='border border-GRAY_400 mb-5 rounded-md'
               logo={DEFAULT_BANK}
-              name={`${destinationAccountDetails?.account_name} ${MASK_DOTS} ${destinationAccountDetails?.masked_account_number}`}
+              name={destinationAccountName}
               subtitle={destinationAccountDetails?.bank_name}
             />
           </div>
