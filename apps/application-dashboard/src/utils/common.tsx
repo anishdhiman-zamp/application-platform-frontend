@@ -130,7 +130,9 @@ export function camelCaseToNormalText(camelCaseStr: string) {
  * @param num 1000000
  * @returns 1,000,000
  */
-export const getCommaSeparatedNumber = (num?: number, precision = 0) => {
+export const getCommaSeparatedNumber = (num?: number | string, precision = 0) => {
+  if (typeof num === 'string') return num;
+
   return num === undefined || num === null
     ? '-'
     : num.toLocaleString('en-US', {

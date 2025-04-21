@@ -24,7 +24,7 @@ interface WidgetsWrapperProps {
   >;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
-  onNodeClick: (clickedNode: MapAny, xAxis: string) => void;
+  onNodeClick: (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => void;
   periodicity: string;
   timeColumns: string;
   groupWidgetsOptions: OptionsType[];
