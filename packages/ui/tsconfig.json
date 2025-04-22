@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@zamp-platform/ui/*": ["./src/*"],
-      "@zamp-platform/ui": ["./src/components/index.ts"],
+      "@zamp-platform/ui": ["./src/components/index.ts"]
     },
     "moduleResolution": "node",
     "module": "ESNext",
