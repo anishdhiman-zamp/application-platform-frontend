@@ -17,7 +17,7 @@ import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
+import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
@@ -79,6 +79,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
   const showInitialDropdownOptions = !isLoadingAudiencesData && !!(userAccessToResourceList?.length <= 1);
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
+  const user_id = getUserId();
   const user_role = getUserPrivilege();
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
@@ -87,27 +88,37 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       userAccessToResourceList,
       resourceType,
       organizationId,
-      user_email,
+      user_id,
       allTeamsData
         ?.map((t) => t.team_memberships)
         .flat()
-        .filter((tm) => tm.user_id === user_email)
+        .filter((tm) => tm.user_id === user_id)
         .map((tm) => tm.team_id) ?? [],
     );
-  }, [userAccessToResourceList, organizationId, user_email, allTeamsData]);
+  }, [userAccessToResourceList, organizationId, user_id, allTeamsData]);
   const isResourceSharable = !showValidationError && selectedItems?.length > 0 && currentUserHasAdminAccess;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
 
-  const updatedUserAccessList = userAccessToResourceList?.map((audience) => {
-    const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
+  const updatedUserAccessList = userAccessToResourceList
+    ?.map((audience) => {
+      const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
 
-    return {
-      ...audience,
-      team_name: matchingTeam?.name ?? '',
-      team_color: matchingTeam?.metadata?.color_hex_code ?? '',
-    };
-  });
+      return {
+        ...audience,
+        team_name: matchingTeam?.name ?? '',
+        team_color: matchingTeam?.metadata?.color_hex_code ?? '',
+      };
+    })
+    .filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.resource_audience_type === item.resource_audience_type &&
+            t.resource_audience_id === item.resource_audience_id,
+        ),
+    );
 
   const handleOpenPopup = () => {
     setOpenPopup(true);
