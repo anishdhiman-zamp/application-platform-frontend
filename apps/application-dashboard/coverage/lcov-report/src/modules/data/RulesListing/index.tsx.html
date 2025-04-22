@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/339</span>
+                <span class='fraction'>0/343</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/339</span>
+                <span class='fraction'>0/343</span>
             </div>
         
             
@@ -402,7 +402,11 @@
 <a name='L337'></a><a href='#L337'>337</a>
 <a name='L338'></a><a href='#L338'>338</a>
 <a name='L339'></a><a href='#L339'>339</a>
-<a name='L340'></a><a href='#L340'>340</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L340'></a><a href='#L340'>340</a>
+<a name='L341'></a><a href='#L341'>341</a>
+<a name='L342'></a><a href='#L342'>342</a>
+<a name='L343'></a><a href='#L343'>343</a>
+<a name='L344'></a><a href='#L344'>344</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -741,7 +745,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useEffect, useMemo, useState } from 'react';</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { Responsive, WidthProvider } from 'react-grid-layout';</span>
 <span class="cstat-no" title="statement not covered" >import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';</span>
 <span class="cstat-no" title="statement not covered" >import { DRAG_ICON } from 'constants/icons';</span>
@@ -773,6 +781,7 @@
 <span class="cstat-no" title="statement not covered" >  datasetId: string;</span>
 <span class="cstat-no" title="statement not covered" >  column: string;</span>
 <span class="cstat-no" title="statement not covered" >  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  onDeleteRuleId: (ruleId: string) =&gt; void;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const RulesListingSideDrawer: FC&lt;RulesListingSideDrawerProps&gt; = ({</span>
@@ -780,6 +789,7 @@
 <span class="cstat-no" title="statement not covered" >  datasetId,</span>
 <span class="cstat-no" title="statement not covered" >  column,</span>
 <span class="cstat-no" title="statement not covered" >  handleSuccessfulUpdate,</span>
+<span class="cstat-no" title="statement not covered" >  onDeleteRuleId,</span>
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const [searchTerm, setSearchTerm] = useState('');</span>
 <span class="cstat-no" title="statement not covered" >  const [rules, setRules] = useState&lt;RuleCardProps[]&gt;([]);</span>
@@ -818,7 +828,7 @@
 <span class="cstat-no" title="statement not covered" >    );</span>
 <span class="cstat-no" title="statement not covered" >  }, [data, datasetId, column]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  const handleSearch = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const handleSearch = (e: ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    const value = e.target.value;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    setSearchTerm(value);</span>
@@ -844,7 +854,8 @@
 <span class="cstat-no" title="statement not covered" >    const orderedItems: RuleCardProps[] = newLayout</span>
 <span class="cstat-no" title="statement not covered" >      .slice()</span>
 <span class="cstat-no" title="statement not covered" >      .sort((a: any, b: any) =&gt; a.y - b.y)</span>
-<span class="cstat-no" title="statement not covered" >      .map((l: any) =&gt; rules.find((rule) =&gt; rule?.id === l.i)!);</span>
+<span class="cstat-no" title="statement not covered" >      .map((l: any) =&gt; rules.find((rule) =&gt; rule?.id === l.i))</span>
+<span class="cstat-no" title="statement not covered" >      .filter((rule: RuleCardProps | undefined): rule is RuleCardProps =&gt; rule !== undefined);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const isOrderSame = orderedItems.every((rule, index) =&gt; rule?.id === listOfRules[index]?.id);</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1037,6 +1048,7 @@
 <span class="cstat-no" title="statement not covered" >                  onExpand={handleExpandRule}</span>
 <span class="cstat-no" title="statement not covered" >                  onCollapse={handleCollapseRule}</span>
 <span class="cstat-no" title="statement not covered" >                  id={rule?.id}</span>
+<span class="cstat-no" title="statement not covered" >                  onDeleteRuleId={onDeleteRuleId}</span>
 <span class="cstat-no" title="statement not covered" >                /&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            ))}</span>
@@ -1087,7 +1099,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

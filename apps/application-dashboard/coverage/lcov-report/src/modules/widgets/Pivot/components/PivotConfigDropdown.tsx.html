@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/47</span>
+                <span class='fraction'>0/62</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/47</span>
+                <span class='fraction'>0/62</span>
             </div>
         
             
@@ -110,7 +110,37 @@
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
 <a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -166,9 +196,14 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >interface PivotConfigDropdownProps {</span>
 <span class="cstat-no" title="statement not covered" >  handleExportAgGridData: defaultFnType;</span>
+<span class="cstat-no" title="statement not covered" >  displayConfigToggleData?: {</span>
+<span class="cstat-no" title="statement not covered" >    default: boolean;</span>
+<span class="cstat-no" title="statement not covered" >    toggle_field: string;</span>
+<span class="cstat-no" title="statement not covered" >    toggle_title: string;</span>
+<span class="cstat-no" title="statement not covered" >  }[];</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const PivotConfigDropdown: FC&lt;PivotConfigDropdownProps&gt; = ({ handleExportAgGridData }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >const PivotConfigDropdown: FC&lt;PivotConfigDropdownProps&gt; = ({ handleExportAgGridData, displayConfigToggleData }) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const ref = useRef&lt;HTMLDivElement&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const [showDisplayConfig, setShowDisplayConfig] = useState(false);</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -185,7 +220,7 @@
 <span class="cstat-no" title="statement not covered" >      {showDisplayConfig &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div</span>
 <span class="cstat-no" title="statement not covered" >          className={cn(</span>
-<span class="cstat-no" title="statement not covered" >            'absolute z-[9999] top-[72px] -left-2.5 bg-white flex flex-col gap-2 p-1.5 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',</span>
+<span class="cstat-no" title="statement not covered" >            'absolute z-[9999] top-[72px] -left-2.5 bg-white flex flex-col  p-1.5 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',</span>
 <span class="cstat-no" title="statement not covered" >          )}</span>
 <span class="cstat-no" title="statement not covered" >          ref={ref}</span>
 <span class="cstat-no" title="statement not covered" >        &gt;</span>
@@ -197,6 +232,16 @@
 <span class="cstat-no" title="statement not covered" >              &lt;span className='f-13-450 text-GRAY_1000'&gt;Export Data&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >          {displayConfigToggleData &amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >            displayConfigToggleData?.map((item, index) =&gt; (</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div</span>
+<span class="cstat-no" title="statement not covered" >                key={index}</span>
+<span class="cstat-no" title="statement not covered" >                className='flex items-center justify-between gap-2.5 py-1.5 px-2 rounded cursor-pointer hover:bg-GRAY_100'</span>
+<span class="cstat-no" title="statement not covered" >              &gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;span className='f-13-450 text-GRAY_1000'&gt;{item.toggle_title}&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            ))}</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      )}</span>
 <span class="cstat-no" title="statement not covered" >    &lt;/&gt;</span>
@@ -211,7 +256,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>
