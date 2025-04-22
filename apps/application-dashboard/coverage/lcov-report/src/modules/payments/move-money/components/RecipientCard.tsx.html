@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/26</span>
+                <span class='fraction'>0/34</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/26</span>
+                <span class='fraction'>0/34</span>
             </div>
         
             
@@ -89,7 +89,15 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -115,30 +123,46 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC } from 'react';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { MenuItem } from 'types/common/components';</span>
-<span class="cstat-no" title="statement not covered" >import { getFirstLetters } from 'utils/common';</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { forwardRef } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { cn, getFirstLetters } from 'utils/common';</span>
+<span class="cstat-no" title="statement not covered" >import { RecipientDetailsType } from '@/types/api/paymentApi.types';</span>
 <span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type RecipientCardProps = {</span>
-<span class="cstat-no" title="statement not covered" >  recipient: MenuItem;</span>
-<span class="cstat-no" title="statement not covered" >  handleRecipientSelect: (recipient: MenuItem) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  recipient: RecipientDetailsType;</span>
+<span class="cstat-no" title="statement not covered" >  handleRecipientSelect: (recipient: RecipientDetailsType) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  className?: string;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const RecipientCard: FC&lt;RecipientCardProps&gt; = ({ recipient, handleRecipientSelect }) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div</span>
-<span class="cstat-no" title="statement not covered" >      onClick={() =&gt; handleRecipientSelect(recipient)}</span>
-<span class="cstat-no" title="statement not covered" >      className='cursor-pointer rounded-lg gap-1.5 flex items-center px-2.5 py-2 group hover:bg-GRAY_100 transition duration-100'</span>
-<span class="cstat-no" title="statement not covered" >    &gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div className='w-4 h-4 bg-BLUE_200 flex justify-center items-center pl-px f-8-500 rounded-full'&gt;</span>
-<span class="cstat-no" title="statement not covered" >        {getFirstLetters(recipient?.value as string).toLocaleUpperCase()}</span>
+<span class="cstat-no" title="statement not covered" >const RecipientCard = forwardRef&lt;HTMLDivElement, RecipientCardProps&gt;(</span>
+<span class="cstat-no" title="statement not covered" >  ({ recipient, handleRecipientSelect, className }, ref) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    return (</span>
+<span class="cstat-no" title="statement not covered" >      &lt;div</span>
+<span class="cstat-no" title="statement not covered" >        ref={ref}</span>
+<span class="cstat-no" title="statement not covered" >        onClick={() =&gt; handleRecipientSelect(recipient)}</span>
+<span class="cstat-no" title="statement not covered" >        className={cn(</span>
+<span class="cstat-no" title="statement not covered" >          'cursor-pointer rounded-lg gap-1.5 flex items-center px-2.5 py-2 group hover:bg-GRAY_100 transition duration-100',</span>
+<span class="cstat-no" title="statement not covered" >          className,</span>
+<span class="cstat-no" title="statement not covered" >        )}</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;div className='w-4 h-4 bg-BLUE_200 flex justify-center items-center pl-px f-8-500 rounded-full'&gt;</span>
+<span class="cstat-no" title="statement not covered" >          {getFirstLetters(recipient?.name as string, 1).toLocaleUpperCase()}</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;div className='f-12-500 grow'&gt;{recipient?.name}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;SvgSpriteLoader size={14} id='send-03' className='opacity-0 group-hover:opacity-100 transition duration-100' /&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div className='f-12-500 grow'&gt;{recipient?.label}&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;SvgSpriteLoader size={14} id='send-03' className='opacity-0 group-hover:opacity-100 transition duration-100' /&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >  );</span>
-<span class="cstat-no" title="statement not covered" >};</span>
+<span class="cstat-no" title="statement not covered" >    );</span>
+<span class="cstat-no" title="statement not covered" >  },</span>
+<span class="cstat-no" title="statement not covered" >);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >RecipientCard.displayName = 'RecipientCard';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export default RecipientCard;</span>
 &nbsp;</pre></td></tr></table></pre>
@@ -148,7 +172,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

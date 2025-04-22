@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/104</span>
+                <span class='fraction'>0/97</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/104</span>
+                <span class='fraction'>0/97</span>
             </div>
         
             
@@ -160,21 +160,7 @@
 <a name='L95'></a><a href='#L95'>95</a>
 <a name='L96'></a><a href='#L96'>96</a>
 <a name='L97'></a><a href='#L97'>97</a>
-<a name='L98'></a><a href='#L98'>98</a>
-<a name='L99'></a><a href='#L99'>99</a>
-<a name='L100'></a><a href='#L100'>100</a>
-<a name='L101'></a><a href='#L101'>101</a>
-<a name='L102'></a><a href='#L102'>102</a>
-<a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a>
-<a name='L105'></a><a href='#L105'>105</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L98'></a><a href='#L98'>98</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -289,7 +275,7 @@
 <span class="cstat-no" title="statement not covered" >const SuccessMoveMoney: FC&lt;SuccessSingleTransferStepProps&gt; = ({ onReset }) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const router = useRouter();</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
-<span class="cstat-no" title="statement not covered" >    state: { currentStep, transactionDetails },</span>
+<span class="cstat-no" title="statement not covered" >    state: { currentStep, transactionDetails, destinationAccountDetails, recipientDetails },</span>
 <span class="cstat-no" title="statement not covered" >  } = useMoveMoneyContextStore();</span>
 <span class="cstat-no" title="statement not covered" >  const [templateName, setTemplateName] = useState('');</span>
 <span class="cstat-no" title="statement not covered" >  const [templateDescription, setTemplateDescription] = useState('');</span>
@@ -297,11 +283,14 @@
 <span class="cstat-no" title="statement not covered" >  const isActiveStep = useMemo(() =&gt; currentStep === 4, [currentStep]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div className='max-w-[400px] m-auto pt-34 h-screen overflow-y-scroll'&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div className='max-w-[400px] m-auto pt-10 h-screen overflow-y-scroll'&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='text-GREEN_1 mb-4'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;SvgSpriteLoader size={66} id='check-circle' color='#5AB570' /&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div className='f-32-500 mb-6'&gt; {transactionDetails?.payment_send_text}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;div className='f-32-500 mb-6'&gt;</span>
+<span class="cstat-no" title="statement not covered" >        {recipientDetails?.name ??</span>
+<span class="cstat-no" title="statement not covered" >          `${destinationAccountDetails?.account_name} ${destinationAccountDetails?.masked_account_number}`}</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='flex flex-col gap-4 mb-4'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        {!!transactionDetails?.estimated_time &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >          &lt;div className='grid grid-cols-2'&gt;</span>
@@ -309,16 +298,6 @@
 <span class="cstat-no" title="statement not covered" >            &lt;div className='f-12-450'&gt;{transactionDetails?.estimated_time}&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        )}</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className='grid grid-cols-2'&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className='text-GRAY_700 f-12-400 grow'&gt;Payment Receipt&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className='flex items-center gap-3'&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className='flex items-center gap-2 bg-GRAY_100 rounded-md py-1.5 px-2'&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;SvgSpriteLoader size={14} id='file-02' /&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className='f-12-400'&gt;file_name_abracadabra.pdf&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;SvgSpriteLoader size={14} id='mail-02' /&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='rounded-md border border-GRAY_400 bg-BG_GRAY_2 p-5 flex flex-col gap-4'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='f-16-550'&gt;Save this as payment template&lt;/div&gt;</span>
@@ -382,7 +361,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

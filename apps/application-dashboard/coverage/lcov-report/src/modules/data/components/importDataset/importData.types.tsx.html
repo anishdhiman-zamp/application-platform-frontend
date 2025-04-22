@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/176</span>
+                <span class='fraction'>0/164</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/176</span>
+                <span class='fraction'>0/164</span>
             </div>
         
             
@@ -227,19 +227,7 @@
 <a name='L162'></a><a href='#L162'>162</a>
 <a name='L163'></a><a href='#L163'>163</a>
 <a name='L164'></a><a href='#L164'>164</a>
-<a name='L165'></a><a href='#L165'>165</a>
-<a name='L166'></a><a href='#L166'>166</a>
-<a name='L167'></a><a href='#L167'>167</a>
-<a name='L168'></a><a href='#L168'>168</a>
-<a name='L169'></a><a href='#L169'>169</a>
-<a name='L170'></a><a href='#L170'>170</a>
-<a name='L171'></a><a href='#L171'>171</a>
-<a name='L172'></a><a href='#L172'>172</a>
-<a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a>
-<a name='L175'></a><a href='#L175'>175</a>
-<a name='L176'></a><a href='#L176'>176</a>
-<a name='L177'></a><a href='#L177'>177</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L165'></a><a href='#L165'>165</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -403,23 +391,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Dispatch, SetStateAction } from 'react';</span></span></span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Dispatch, ReactNode, SetStateAction } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { LOADER_STATUS } from 'modules/data/data.types';</span>
 <span class="cstat-no" title="statement not covered" >import { DatasetBulkLoadersType } from 'store/slices/user';</span>
-<span class="cstat-no" title="statement not covered" >import { RawMetadata, TransformationPreviewMetadata, UploadFileResponseType } from 'types/api/dataset.types';</span>
+<span class="cstat-no" title="statement not covered" >import { RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';</span>
 <span class="cstat-no" title="statement not covered" >import { defaultFnType } from 'types/commonTypes';</span>
+<span class="cstat-no" title="statement not covered" >import { UploadFileResponseType } from '@/types/api/fileUpload.types';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export enum INPUT_FILE_FORMATS {</span>
 <span class="cstat-no" title="statement not covered" >  PNG = 'image/png',</span>
@@ -509,7 +486,7 @@
 <span class="cstat-no" title="statement not covered" >  error: string | null;</span>
 <span class="cstat-no" title="statement not covered" >  onFileDrop: (file: File | null) =&gt; void;</span>
 <span class="cstat-no" title="statement not covered" >  onClick: defaultFnType;</span>
-<span class="cstat-no" title="statement not covered" >  children?: React.ReactNode;</span>
+<span class="cstat-no" title="statement not covered" >  children?: ReactNode;</span>
 <span class="cstat-no" title="statement not covered" >  errorClassName?: string;</span>
 <span class="cstat-no" title="statement not covered" >  footer?: string;</span>
 <span class="cstat-no" title="statement not covered" >  className?: string;</span>
@@ -517,23 +494,7 @@
 <span class="cstat-no" title="statement not covered" >  setFileName: (fileName: string | null) =&gt; void;</span>
 <span class="cstat-no" title="statement not covered" >  indexKey?: number;</span>
 <span class="cstat-no" title="statement not covered" >  showUploadButton?: boolean;</span>
-<span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export type FileUploaderWrapperPropsType = {</span>
-<span class="cstat-no" title="statement not covered" >  acceptedFormats: string;</span>
-<span class="cstat-no" title="statement not covered" >  disableNext?: (value: boolean) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >  footer?: string;</span>
-<span class="cstat-no" title="statement not covered" >  filesSelected?: string;</span>
-<span class="cstat-no" title="statement not covered" >  isFileUploading?: boolean;</span>
-<span class="cstat-no" title="statement not covered" >  maxSize?: number;</span>
-<span class="cstat-no" title="statement not covered" >  Component: React.ElementType;</span>
-<span class="cstat-no" title="statement not covered" >  className?: string;</span>
-<span class="cstat-no" title="statement not covered" >  onClosePopup: defaultFnType;</span>
-<span class="cstat-no" title="statement not covered" >  setRawData: Dispatch&lt;SetStateAction&lt;RawMetadata | null&gt;&gt;;</span>
-<span class="cstat-no" title="statement not covered" >  setStartPollingPreview: Dispatch&lt;SetStateAction&lt;{ check: boolean; actionId: string; fileUploadId: string }&gt;&gt;;</span>
-<span class="cstat-no" title="statement not covered" >  fileName: string | null;</span>
-<span class="cstat-no" title="statement not covered" >  setFileName: (fileName: string | null) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >  onFileSelect: (arg: UploadFileResponseType | null) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  supportedFiles?: string[];</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export type ImportFilePropsType = {</span>
@@ -541,21 +502,24 @@
 <span class="cstat-no" title="statement not covered" >  filesSelected?: string;</span>
 <span class="cstat-no" title="statement not covered" >  className?: string;</span>
 <span class="cstat-no" title="statement not covered" >  file?: UploadFileResponseType | null;</span>
-<span class="cstat-no" title="statement not covered" >  onClosePopup: defaultFnType;</span>
 <span class="cstat-no" title="statement not covered" >  setRawData: Dispatch&lt;SetStateAction&lt;RawMetadata | null&gt;&gt;;</span>
-<span class="cstat-no" title="statement not covered" >  setStartPollingPreview: Dispatch&lt;SetStateAction&lt;{ check: boolean; actionId: string; fileUploadId: string }&gt;&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  fileName: string | null;</span>
 <span class="cstat-no" title="statement not covered" >  setFileName: (fileName: string | null) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  setFileUploadId?: (fileUploadId: string) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  keepLoadingFlow?: boolean;</span>
+<span class="cstat-no" title="statement not covered" >  isFileUploading?: boolean;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export type ImportFileWrapperPropsType = {</span>
 <span class="cstat-no" title="statement not covered" >  onReset: defaultFnType;</span>
 <span class="cstat-no" title="statement not covered" >  isOpen: boolean;</span>
 <span class="cstat-no" title="statement not covered" >  onClose: defaultFnType;</span>
-<span class="cstat-no" title="statement not covered" >  setStartPollingPreview: Dispatch&lt;SetStateAction&lt;{ check: boolean; actionId: string; fileUploadId: string }&gt;&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  setRawData: Dispatch&lt;SetStateAction&lt;RawMetadata | null&gt;&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  fileName: string | null;</span>
 <span class="cstat-no" title="statement not covered" >  setFileName: (fileName: string | null) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  setFileUploadId?: (fileUploadId: string) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  keepLoadingFlow?: boolean;</span>
+<span class="cstat-no" title="statement not covered" >  isFileUploading?: boolean;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export type ImportedDataPreviewPropsType = {</span>
@@ -598,7 +562,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>
