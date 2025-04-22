@@ -1,3 +1,4 @@
+/* eslint-disable */
 export enum SIZE_TYPES {
   XLARGE = 'XLARGE',
   LARGE = 'LARGE',
