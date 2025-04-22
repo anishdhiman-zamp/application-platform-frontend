@@ -6,7 +6,8 @@ import { X } from 'lucide-react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '../../lib/utils';
 import { useEffect, useState } from 'react';
-import { POSITION_TYPES, SIZE_TYPES } from '@zamp-platform/ui/types';
+import { SIZE_TYPES } from '../types/common.types';
+import { POSITION_TYPES } from '../types/common.types';
 
 interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root> {
   open?: boolean;
