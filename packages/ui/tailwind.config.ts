@@ -3,6 +3,7 @@ import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
+  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
@@ -63,75 +64,107 @@ const config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        GRAY_20: 'var(--GRAY_20)',
-        GRAY_50: 'var(--GRAY_50)',
-        GRAY_70: 'var(--GRAY_70)',
-        GRAY_100: 'var(--GRAY_100)',
-        GRAY_200: 'var(--GRAY_200)',
-        GRAY_300: 'var(--GRAY_300)',
-        GRAY_400: 'var(--GRAY_400)',
-        GRAY_500: 'var(--GRAY_500)',
-        GRAY_600: 'var(--GRAY_600)',
-        GRAY_700: 'var(--GRAY_700)',
-        GRAY_800: 'var(--GRAY_800)',
-        GRAY_900: 'var(--GRAY_900)',
-        GRAY_950: 'var(--GRAY_950)',
-        GRAY_1000: 'var(--GRAY_1000)',
-
-        BG_GRAY_1: 'var(--BG_GRAY_1)',
-        BG_GRAY_2: 'var(--BG_GRAY_2)',
-        BG_GRAY_3: 'var(--BG_GRAY_3)',
-        BG_GRAY_4: 'var(--BG_GRAY_4)',
-        BG_GRAY_5: 'var(--BG_GRAY_5)',
-        BORDER_GRAY_400: 'var(--BORDER_GRAY_400)',
-
-        BLUE_50: 'var(--BLUE_50)',
-        BLUE_100: 'var(--BLUE_100)',
-        BLUE_200: 'var(--BLUE_200)',
-        BLUE_300: 'var(--BLUE_300)',
-        BLUE_400: 'var(--BLUE_400)',
-        BLUE_500: 'var(--BLUE_500)',
-        BLUE_600: 'var(--BLUE_600)',
-        BLUE_700: 'var(--BLUE_700)',
-        BLUE_800: 'var(--BLUE_800)',
-        BLUE_900: 'var(--BLUE_900)',
-        BLUE_1000: 'var(--BLUE_1000)',
-
-        GREEN_100: 'var(--GREEN_100)',
-        GREEN_200: 'var(--GREEN_200)',
-        GREEN_300: 'var(--GREEN_300)',
-        GREEN_400: 'var(--GREEN_400)',
-        GREEN_500: 'var(--GREEN_500)',
-        GREEN_600: 'var(--GREEN_600)',
-        GREEN_700: 'var(--GREEN_700)',
-        GREEN_800: 'var(--GREEN_800)',
-        GREEN_900: 'var(--GREEN_900)',
-        GREEN_1000: 'var(--GREEN_1000)',
-
-        ORANGE_100: 'var(--ORANGE_100)',
-        ORANGE_200: 'var(--ORANGE_200)',
-        ORANGE_300: 'var(--ORANGE_300)',
-        ORANGE_400: 'var(--ORANGE_400)',
-        ORANGE_500: 'var(--ORANGE_500)',
-        ORANGE_600: 'var(--ORANGE_600)',
-        ORANGE_700: 'var(--ORANGE_700)',
-        ORANGE_800: 'var(--ORANGE_800)',
-        ORANGE_900: 'var(--ORANGE_900)',
-        ORANGE_1000: 'var(--ORANGE_1000)',
-
-        RED_100: 'var(--RED_100)',
-        RED_200: 'var(--RED_200)',
-        RED_300: 'var(--RED_300)',
-        RED_400: 'var(--RED_400)',
-        RED_500: 'var(--RED_500)',
-        RED_600: 'var(--RED_600)',
-        RED_700: 'var(--RED_700)',
-        RED_800: 'var(--RED_800)',
-        RED_900: 'var(--RED_900)',
-        RED_1000: 'var(--RED_1000)',
-
-        BACKGROUND_GRAY_1: 'var(--BG_GRAY_1)',
-        BACKGROUND_GRAY_2: 'var(--BG_GRAY_2)',
+        // Chart colors
+        chart: {
+          1: 'hsl(var(--chart-1))',
+          2: 'hsl(var(--chart-2))',
+          3: 'hsl(var(--chart-3))',
+          4: 'hsl(var(--chart-4))',
+          5: 'hsl(var(--chart-5))',
+        },
+        // Sidebar colors
+        sidebar: {
+          background: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+        // Gray scale
+        gray: {
+          20: 'var(--GRAY_20)',
+          50: 'var(--GRAY_50)',
+          70: 'var(--GRAY_70)',
+          100: 'var(--GRAY_100)',
+          200: 'var(--GRAY_200)',
+          300: 'var(--GRAY_300)',
+          400: 'var(--GRAY_400)',
+          500: 'var(--GRAY_500)',
+          600: 'var(--GRAY_600)',
+          700: 'var(--GRAY_700)',
+          800: 'var(--GRAY_800)',
+          900: 'var(--GRAY_900)',
+          950: 'var(--GRAY_950)',
+          1000: 'var(--GRAY_1000)',
+        },
+        // Background grays
+        'bg-gray': {
+          1: 'var(--BG_GRAY_1)',
+          2: 'var(--BG_GRAY_2)',
+          3: 'var(--BG_GRAY_3)',
+          4: 'var(--BG_GRAY_4)',
+          5: 'var(--BG_GRAY_5)',
+        },
+        // Border gray
+        'border-gray': {
+          400: 'var(--BORDER_GRAY_400)',
+        },
+        // Blue scale
+        blue: {
+          50: 'var(--BLUE_50)',
+          100: 'var(--BLUE_100)',
+          200: 'var(--BLUE_200)',
+          300: 'var(--BLUE_300)',
+          400: 'var(--BLUE_400)',
+          500: 'var(--BLUE_500)',
+          600: 'var(--BLUE_600)',
+          700: 'var(--BLUE_700)',
+          800: 'var(--BLUE_800)',
+          900: 'var(--BLUE_900)',
+          1000: 'var(--BLUE_1000)',
+        },
+        // Green scale
+        green: {
+          100: 'var(--GREEN_100)',
+          200: 'var(--GREEN_200)',
+          300: 'var(--GREEN_300)',
+          400: 'var(--GREEN_400)',
+          500: 'var(--GREEN_500)',
+          600: 'var(--GREEN_600)',
+          700: 'var(--GREEN_700)',
+          800: 'var(--GREEN_800)',
+          900: 'var(--GREEN_900)',
+          1000: 'var(--GREEN_1000)',
+        },
+        // Orange scale
+        orange: {
+          100: 'var(--ORANGE_100)',
+          200: 'var(--ORANGE_200)',
+          300: 'var(--ORANGE_300)',
+          400: 'var(--ORANGE_400)',
+          500: 'var(--ORANGE_500)',
+          600: 'var(--ORANGE_600)',
+          700: 'var(--ORANGE_700)',
+          800: 'var(--ORANGE_800)',
+          900: 'var(--ORANGE_900)',
+          1000: 'var(--ORANGE_1000)',
+        },
+        // Red scale
+        red: {
+          100: 'var(--RED_100)',
+          200: 'var(--RED_200)',
+          300: 'var(--RED_300)',
+          400: 'var(--RED_400)',
+          500: 'var(--RED_500)',
+          600: 'var(--RED_600)',
+          700: 'var(--RED_700)',
+          800: 'var(--RED_800)',
+          900: 'var(--RED_900)',
+          1000: 'var(--RED_1000)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -152,6 +185,58 @@ const config = {
         menuList: '1px 2px 20px 0px #0000001A',
         selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
         menuShadow: 'var(--menu-shadow)',
+      },
+      fontSize: {
+        // 40px
+        '40': ['2.5rem', { lineHeight: '3.125rem' }],
+        // 36px
+        '36': ['2.25rem', { lineHeight: '2.813rem' }],
+        // 32px
+        '32': ['2rem', { lineHeight: '2.625rem' }],
+        // 28px
+        '28': ['1.75rem', { lineHeight: '2.188rem' }],
+        // 24px
+        '24': ['1.5rem', { lineHeight: '2rem' }],
+        // 22px
+        '22': ['1.375rem', { lineHeight: '1.75rem' }],
+        // 21px
+        '21': ['1.313rem', { lineHeight: '1.625rem' }],
+        // 20px
+        '20': ['1.25rem', { lineHeight: '1.688rem' }],
+        // 19px
+        '19': ['1.1875rem', { lineHeight: '1.5rem' }],
+        // 18px
+        '18': ['1.125rem', { lineHeight: '1.438rem' }],
+        // 17px
+        '17': ['1.0625rem', { lineHeight: '1.3125rem' }],
+        // 16px
+        '16': ['1rem', { lineHeight: '1.313rem' }],
+        // 15px
+        '15': ['0.9375rem', { lineHeight: '1.1875rem' }],
+        // 14px
+        '14': ['0.875rem', { lineHeight: '1.188rem' }],
+        // 13px
+        '13': ['0.8125rem', { lineHeight: '1rem' }],
+        // 12px
+        '12': ['0.75rem', { lineHeight: '0.9375rem' }],
+        // 11px
+        '11': ['0.6875rem', { lineHeight: '0.875rem' }],
+        // 10px
+        '10': ['0.625rem', { lineHeight: '0.813rem' }],
+        // 9px
+        '9': ['0.5625rem', { lineHeight: '0.75rem' }],
+        // 8px
+        '8': ['0.5rem', { lineHeight: '0.625rem' }],
+      },
+      fontWeight: {
+        '300': '300',
+        '400': '400',
+        '450': '450',
+        '500': '500',
+        '550': '550',
+        '600': '600',
+        '700': '700',
+        '800': '800',
       },
       height: {
         0.25: '1px',
@@ -319,7 +404,6 @@ const config = {
           '0%': {
             right: '-50vw',
           },
-
           '100%': {
             right: '0px',
           },
@@ -328,7 +412,6 @@ const config = {
           '0%': {
             bottom: '-50vw',
           },
-
           '100%': {
             bottom: '0px',
           },
@@ -337,7 +420,6 @@ const config = {
           '0%': {
             right: '0px',
           },
-
           '100%': {
             right: '-50vw',
           },
@@ -346,7 +428,6 @@ const config = {
           '0%': {
             bottom: '0px',
           },
-
           '100%': {
             bottom: '-50vw',
           },
