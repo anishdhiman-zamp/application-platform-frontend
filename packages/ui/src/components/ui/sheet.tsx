@@ -5,6 +5,14 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '../../lib/utils';
+import { useEffect, useState } from 'react';
+
+enum SheetSides {
+  RIGHT = 'right',
+  LEFT = 'left',
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
 
 interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root> {
   open?: boolean;
@@ -12,9 +20,9 @@ interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitiv
 }
 
 const Sheet = React.forwardRef<HTMLDivElement, SheetProps>(({ open, onOpenChange, ...props }, ref) => {
-  const [isAnimating, setIsAnimating] = React.useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open !== undefined) {
       setIsAnimating(open);
     }
@@ -62,8 +70,14 @@ const sheetVariants = cva(
   {
     variants: {
       side: {
-        right:
+        [SheetSides.RIGHT]:
           'inset-y-0 right-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+        [SheetSides.LEFT]:
+          'inset-y-0 left-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+        [SheetSides.TOP]:
+          'inset-x-0 top-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        [SheetSides.BOTTOM]:
+          'inset-x-0 bottom-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
       },
       size: {
         default: 'w-[450px]',
@@ -71,7 +85,7 @@ const sheetVariants = cva(
       },
     },
     defaultVariants: {
-      side: 'right',
+      side: SheetSides.RIGHT,
       size: 'default',
     },
   },
@@ -89,7 +103,16 @@ interface SheetContentProps
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
   (
-    { side = 'right', size = 'default', className, children, showCloseButton = false, title, description, ...props },
+    {
+      side = SheetSides.RIGHT,
+      size = 'default',
+      className,
+      children,
+      showCloseButton = false,
+      title,
+      description,
+      ...props
+    },
     ref,
   ) => (
     <SheetPortal>
@@ -141,4 +164,5 @@ export {
   SheetHeaderTitle,
   SheetHeaderActions,
   SheetBody,
+  SheetSides,
 };
