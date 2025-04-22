@@ -3,6 +3,7 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
+import { Checkbox } from './checkbox';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -79,7 +80,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'flex items-center gap-[6px] px-[10px] py-[8px] self-stretch cursor-pointer outline-none hover:bg-GRAY_50 text-GRAY_900 f-12-500 font-inter',
+      'flex items-center gap-[6px] gap-x-4 px-[10px] py-[8px] self-stretch cursor-pointer outline-none text-GRAY_900 f-12-500 font-inter',
       inset && 'pl-8',
       className,
     )}
@@ -91,22 +92,22 @@ DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
->(({ className, children, checked, ...props }, ref) => (
+>(({ className, children, checked, onSelect, ...props }, ref) => (
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 f-14-500 outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex cursor-default select-none items-center justify-between rounded-sm py-1.5 px-2 f-14-500 outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     checked={checked}
+    onSelect={(event) => {
+      event.preventDefault();
+      onSelect?.(event);
+    }}
     {...props}
   >
-    <span className='absolute left-2 flex h-3.5 w-3.5 items-center justify-center'>
-      <DropdownMenuPrimitive.ItemIndicator>
-        <Check className='h-4 w-4' />
-      </DropdownMenuPrimitive.ItemIndicator>
-    </span>
     {children}
+    <Checkbox checked={checked} />
   </DropdownMenuPrimitive.CheckboxItem>
 ));
 DropdownMenuCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName;
