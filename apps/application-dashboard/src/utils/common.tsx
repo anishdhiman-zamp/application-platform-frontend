@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import clsx, { ClassValue } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { CHIP_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
@@ -130,7 +130,9 @@ export function camelCaseToNormalText(camelCaseStr: string) {
  * @param num 1000000
  * @returns 1,000,000
  */
-export const getCommaSeparatedNumber = (num?: number, precision = 0) => {
+export const getCommaSeparatedNumber = (num?: number | string, precision = 0) => {
+  if (typeof num === 'string') return num;
+
   return num === undefined || num === null
     ? '-'
     : num.toLocaleString('en-US', {

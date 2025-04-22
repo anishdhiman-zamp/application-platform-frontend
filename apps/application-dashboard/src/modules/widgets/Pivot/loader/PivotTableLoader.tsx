@@ -1,11 +1,14 @@
 const PivotTableLoader = () => {
   return (
-    <div className='overflow-x-auto w-full h-full border border-GRAY_400 rounded-xl animate-pulse overflow-hidden'>
+    <div className='overflow-x-auto w-full h-full border border-GRAY_400 rounded-xl animate-pulse overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
       <table className='w-full text-left border-collapse'>
         <thead className='h-[84px]'>
           <tr className='border-b border-GRAY_400'>
             {Array.from({ length: 6 }).map((_, i) => (
-              <th key={i} className='py-6 px-4 border-r-0.5 border-GRAY_400 last:border-r-0 first:w-[380px] w-[170px]'>
+              <th
+                key={i}
+                className='py-6 px-4 border-r-0.5 border-GRAY_400 last:border-r-0 first:min-w-[380px] first:w-[380px] w-[170px]'
+              >
                 <div className='w-24 h-4 bg-GRAY_50 rounded'></div>
               </th>
             ))}

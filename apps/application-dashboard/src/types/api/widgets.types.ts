@@ -66,6 +66,7 @@ export type KPITagWidgetMapping = {
     primary_value: {
       type: string;
       column: string;
+      alias?: string;
       field_type: FIELD_TYPES;
       aggregation?: AGGREGATION_TYPES;
     }[];

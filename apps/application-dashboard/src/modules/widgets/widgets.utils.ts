@@ -142,7 +142,7 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
       const groupedData = groupTransactionsByDate(dataWithDataType?.[0] ?? [], mappings?.fields);
       const maxValue = getMaxValue(dataWithDataType?.[0] ?? [], [axisKey]);
       const aggregation = axis?.aggregation !== AGGREGATION_TYPES.COUNT;
-      const yAxisTitle = `${axisKey} (${axis?.aggregation}), ${aggregation ? currency : ''} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
+      const yAxisTitle = `${axisKey} (${axis?.aggregation}), ${aggregation ? (currency ?? '') : ''} in ${formatNumber(maxValue ?? '', 0, true, true)}`;
 
       if (widgetDetails?.data_mappings?.mappings?.[0]?.fields?.group_by?.length) {
         groupedData?.groupValues.forEach((value) => {
@@ -189,9 +189,9 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
 
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
-  onNodeClick: (clickedNode: MapAny, xAxis: string) => void,
+  onNodeClick: (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => void,
   baseOptions: AgChartOptions,
-  currency: string,
+  currency = '',
   stackedValues?: MapAny[],
   dataLength?: number,
   donutOthersData?: MapAny[],
@@ -237,7 +237,6 @@ export const getChartOptions = (
     case WIDGET_TYPES.BAR_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
       const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? (mappings?.[0]?.fields?.x_axis?.[0]?.column || '');
-      const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
         ...navigatorConfig,
@@ -246,15 +245,16 @@ export const getChartOptions = (
           CHART_NUMBER_AXES,
           { ...categoryAxis, paddingInner: 0.5, paddingOuter: dataLength && dataLength > 1 ? 1 : 0.4 },
         ],
-        series: yAxis.map((axis) => ({
+        series: mappings.map((axis) => ({
           type: chartType,
           xKey: xAxis,
           cornerRadius: 2,
-          yKey: `${axis.alias ?? axis.column}`,
-          yName: (axis?.alias ?? axis?.column) || '',
+          yKey: `${axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column}`,
+          yName: (axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column) || '',
           stacked: true,
           listeners: {
-            nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
+            nodeClick: (event: any) =>
+              onNodeClick(event.datum, xAxis, axis?.dataset_id, JSON.stringify(axis?.default_filters)),
           },
           tooltip: {
             showArrow: false,
@@ -274,24 +274,24 @@ export const getChartOptions = (
     case WIDGET_TYPES.LINE_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
       const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? mappings?.[0]?.fields?.x_axis?.[0]?.column;
-      const yAxis = stackedValues?.length ? stackedValues : (mappings?.[0]?.fields?.y_axis ?? []);
 
       return {
         ...navigatorConfig,
         ...baseOptions,
         axes: [CHART_NUMBER_AXES, { ...categoryAxis }],
-        series: yAxis.map((axis) => ({
+        series: mappings.map((axis) => ({
           type: chartType,
           xKey: xAxis,
-          yKey: `${axis?.alias ?? axis?.column}`,
-          yName: (axis?.alias ?? axis?.column) || '',
+          yKey: `${axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column}`,
+          yName: (axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column) || '',
           stacked: true,
           nodeClickRange: 'nearest',
           marker: {
             enabled: false,
           },
           listeners: {
-            nodeClick: (event: any) => onNodeClick(event.datum, xAxis),
+            nodeClick: (event: any) =>
+              onNodeClick(event.datum, xAxis, axis?.dataset_id, JSON.stringify(axis?.default_filters)),
           },
           tooltip: {
             showArrow: false,
@@ -299,7 +299,7 @@ export const getChartOptions = (
               data: [
                 {
                   label: snakeCaseToSentenceCase(yName ?? ''),
-                  value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
+                  value: `${currencySymbol ?? ''} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
                 },
               ],
             }),
@@ -356,7 +356,13 @@ export const getChartOptions = (
               },
             },
             listeners: {
-              nodeClick: (event: any) => onNodeClick(event.datum, mappings?.[0]?.fields?.slices?.[0]?.column ?? ''),
+              nodeClick: (event: any) =>
+                onNodeClick(
+                  event.datum,
+                  mappings?.[0]?.fields?.slices?.[0]?.column ?? '',
+                  mappings?.[0]?.dataset_id ?? '',
+                  JSON.stringify(mappings?.[0]?.default_filters),
+                ),
             },
             calloutLabel: {
               formatter: (params: MapAny) => {
@@ -508,21 +514,32 @@ export const getDefaultFilterByDatasetId = (
     | BarLineChartWidgetMapping[]
     | PieDonutChartWidgetMapping[]
     | KPITagWidgetMapping[],
-  datasetId?: string,
+  datasetId: string,
+  defaultWidgetFilters?: string,
 ) => {
   const defaultFilters: ParentFilters = {};
 
-  mappings?.forEach((mapping) => {
-    if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
-      mapping?.default_filters?.conditions?.forEach((condition) => {
-        defaultFilters[condition?.column] = {
-          filterType: condition?.type,
-          type: condition?.operator,
-          values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
-        };
-      });
-    }
-  });
+  if (defaultWidgetFilters) {
+    JSON.parse(defaultWidgetFilters ?? '{}')?.conditions?.forEach((condition: any) => {
+      defaultFilters[condition?.column] = {
+        filterType: condition?.type,
+        type: condition?.operator,
+        values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+      };
+    });
+  } else {
+    mappings?.forEach((mapping) => {
+      if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
+        mapping?.default_filters?.conditions?.forEach((condition) => {
+          defaultFilters[condition?.column] = {
+            filterType: condition?.type,
+            type: condition?.operator,
+            values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+          };
+        });
+      }
+    });
+  }
 
   return defaultFilters;
 };

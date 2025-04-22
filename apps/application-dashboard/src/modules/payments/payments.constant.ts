@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { MOVE_MONEY_ACTION_TYPE, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { INPUT_FILE_FORMATS } from 'types/common/mime';
 
 export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';
@@ -9,6 +9,7 @@ export const CONNECT_ACCOUNT_DESCRIPTION =
 export const RECIPIENT_CARD_ACTION_ITEMS = [
   {
     id: 'add-account',
+    action: MOVE_MONEY_ACTION_TYPE.ADD_ACCOUNT,
     icon: {
       id: 'user-up-01',
       size: 14,
@@ -17,6 +18,7 @@ export const RECIPIENT_CARD_ACTION_ITEMS = [
   },
   {
     id: 'filter-payments',
+    action: MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS,
     icon: {
       id: 'filter-lines',
       size: 14,
@@ -25,6 +27,7 @@ export const RECIPIENT_CARD_ACTION_ITEMS = [
   },
   {
     id: 'send-money',
+    action: MOVE_MONEY_ACTION_TYPE.SEND_MONEY,
     icon: {
       id: 'send-03',
       size: 14,
@@ -61,12 +64,12 @@ export const MOVE_MONEY_ACTION_ITEMS = [
 ];
 
 export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [
-  { label: 'Recipients', value: MOVE_MONEY_PAYMENT_TYPE.RECIPIENT },
+  { label: 'Accounts', value: MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS },
   { label: 'Templates', value: MOVE_MONEY_PAYMENT_TYPE.TEMPLATES },
 ];
 
 export const defaultAccountData = {
-  account_id: '',
+  id: '',
   currency_code: '',
   account_number: '',
   account_type: '',
@@ -86,4 +89,7 @@ export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
   INPUT_FILE_FORMATS.JPG,
   INPUT_FILE_FORMATS.PDF,
   INPUT_FILE_FORMATS.BMP,
+  INPUT_FILE_FORMATS.CSV,
 ];
+
+export const MASK_DOTS = '••';

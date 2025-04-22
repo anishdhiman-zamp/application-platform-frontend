@@ -97,7 +97,7 @@ export const barGraphData = {
           IntegerAmountV2: 234567.0,
         },
         {
-          CurrencyCode: 'SGD',
+          CurrencyCode: 'AED',
           IntegerAmount: 123456.0,
           IntegerAmountV2: 123456.0,
         },

@@ -14,6 +14,7 @@ export enum ENVIRONMENT_TYPES {
   PRODUCTION = 'production',
   DEVELOPMENT = 'development',
   STAGING = 'staging',
+  LOCAL = 'local',
 }
 
 export enum SIZE {
@@ -55,3 +56,9 @@ export const SCREEN_BREAKPOINTS = {
   XL_WIDTH: 1280,
   LG_WIDTH: 1024,
 };
+
+export enum POLLING_STATUS {
+  SUCCESSFUL = 'SUCCESSFUL',
+  FAILED = 'FAILED',
+  INITIATED = 'INITIATED',
+}

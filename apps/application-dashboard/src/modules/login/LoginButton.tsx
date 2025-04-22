@@ -1,14 +1,32 @@
-import React, { FC } from 'react';
-import { GOOGLE_ICON } from 'constants/icons';
+import { FC, MouseEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 
 type LoginButtonPropsType = {
   loading: boolean;
-  onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
+  providerLogo: string;
 };
 
-const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
+const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo }) => {
+  const [isOIDCLogoLoaded, setIsOICLogoLoaded] = useState(false);
+  const showSigningIn = providerLogo?.length > 0 && isOIDCLogoLoaded;
+
+  useEffect(() => {
+    if (providerLogo) {
+      const img = new window.Image();
+
+      img.src = providerLogo;
+      img.onload = () => {
+        setTimeout(() => {
+          setIsOICLogoLoaded(true);
+        }, 300);
+      };
+    } else {
+      setIsOICLogoLoaded(false);
+    }
+  }, [providerLogo]);
+
   return (
     <button
       id='google-login'
@@ -21,32 +39,20 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick }) => {
     >
       <div
         className={cn(
-          'color-transition before:transform before:translate-x-0 before:bg-BG_GRAY_3 after:transform after:-translate-x-1/2 relative h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:transition-transform before:duration-[3000ms] before:ease-in-out before:rounded-[6px] after:absolute after:top-0 after:h-full after:w-full after:transition-transform after:duration-[3000ms] after:ease-in-out after:rounded-[6px] after:bg-BG_GRAY_4',
+          'relative z-10 color-transition before:transform before:translate-x-0 before:bg-BG_GRAY_3 after:transform after:-translate-x-1/2 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:transition-transform before:duration-[3000ms] before:ease-in-out before:rounded-[6px] after:absolute after:top-0 after:h-full after:w-full after:transition-transform after:duration-[3000ms] after:ease-in-out after:rounded-[6px] after:bg-BG_GRAY_4',
           { active: loading },
         )}
-      ></div>
-      <div className='absolute -top-[6px] right-40 text-white'>
-        <span
-          className={cn(
-            '!translate-y-5 flex justify-center items-center gap-1.5 f-14-500',
-            loading
-              ? '!login-btn-scale-100 !opacity-100 !login-btn-opacity-300-easeInOut '
-              : 'login-btn-scale-20 opacity-0 login-btn-opacity-300-easeInOut',
+      >
+        <div className='absolute top-[12px] right-40 text-white z-40'>
+          {showSigningIn ? (
+            <div className='flex gap-1.5 items-center justify-center text-white f-14-500 animate-opacity'>
+              <span>Signing in with</span>
+              <Image src={providerLogo} alt='provider logo' width={20} height={20} />
+            </div>
+          ) : (
+            <span className='mr-10'>Login</span>
           )}
-        >
-          Signing in with
-          <Image src={GOOGLE_ICON} alt='google_icon' width={20} height={20} />
-        </span>
-        <span
-          className={cn(
-            'flex justify-center items-center f-14-500 scale -translate-y-[2px]',
-            loading
-              ? 'login-btn-scale-20 opacity-0 login-btn-opacity-300-easeInOut'
-              : 'login-btn-scale-100 opacity-100 login-btn-opacity-300-easeInOut',
-          )}
-        >
-          Login
-        </span>
+        </div>
       </div>
     </button>
   );

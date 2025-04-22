@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
@@ -12,12 +12,13 @@ interface SingleSelectFilterMenuItemProps {
   column: { colId: string };
   values: string[];
   className?: string;
-  LabelComponent?: (item: string) => React.ReactNode;
+  LabelComponent?: (item: string) => ReactNode;
   allowClear?: boolean;
   allowSearch?: boolean;
-  onFilterChange?: (value: string[]) => void;
+  onFilterChange?: (value: string[], filterType?: FILTER_TYPES) => void;
   debounceTime?: number;
   isOpen?: boolean;
+  updateContextOnChange?: boolean;
 }
 
 const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
@@ -30,6 +31,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   onFilterChange,
   debounceTime = 800,
   isOpen = false,
+  updateContextOnChange = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
@@ -44,8 +46,9 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   };
 
   const setFilter = (updatedValue: string[]) => {
-    if (onFilterChange) onFilterChange(updatedValue);
-    else
+    if (onFilterChange && !updateContextOnChange) onFilterChange(updatedValue);
+    else {
+      if (onFilterChange) onFilterChange(updatedValue, FILTER_TYPES.SINGLE_SELECT);
       dispatch({
         type: filtersContextActions.SET_SELECTED_FILTERS,
         payload: {
@@ -58,6 +61,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
           },
         },
       });
+    }
   };
 
   const handleSetValues = useCallback(

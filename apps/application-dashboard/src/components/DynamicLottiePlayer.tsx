@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { CSSProperties, FC } from 'react';
 import dynamic from 'next/dynamic';
 import { MapAny } from 'types/commonTypes';
 
@@ -10,7 +10,7 @@ interface DynamicLottiePlayerPropsType {
   src: MapAny;
   loop?: boolean;
   autoplay?: boolean;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   keepLastFrame?: boolean;
   className?: string;
 }

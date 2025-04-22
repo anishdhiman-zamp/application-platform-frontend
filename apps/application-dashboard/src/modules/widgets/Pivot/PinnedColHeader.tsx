@@ -47,7 +47,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
   };
 
   return (
-    <div className='bg-white w-full flex justify-between items-start  p-6 border-b-0.5 border-r-0.5 border-GRAY_400'>
+    <div className='bg-white w-full h-full flex justify-between items-start p-6 border-b-0.5 border-r-0.5 border-GRAY_400'>
       <WidgetTitle
         title={title}
         groupWidgetsOptions={groupWidgetsOptions}

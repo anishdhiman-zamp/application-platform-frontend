@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { captureException } from '@sentry/browser';
 import { ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 import ErrorCard from 'components/commonWrapper/ErrorCard';
 
-class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError: boolean }> {
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
     super(props);
 
@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component<{ children: ReactNode }, { hasError:
   componentDidCatch(error: Error, errorInfo: any) {
     // You can use your own error logging service here
     captureException(error, errorInfo);
-    console.log({ error, errorInfo });
+    console.log({ error: error, errorInfo: errorInfo });
   }
   render() {
     // Check if the error is thrown

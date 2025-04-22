@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, RefObject } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -13,7 +13,7 @@ import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
 
 interface DatasetTableProps {
-  tableRef?: React.RefObject<AgGridReact>;
+  tableRef?: RefObject<AgGridReact>;
   columns: MapAny[];
   serverSideDatasource?: IServerSideDatasource;
   columnConfig?: ColDef;
@@ -27,6 +27,8 @@ interface DatasetTableProps {
   onRowPropertiesClick?: (data: MapAny) => void;
   onColumnMoved?: (event: ColumnMovedEvent) => void;
   columnLevelStats?: MapAny;
+  containerStyle?: MapAny;
+  gridStyle?: MapAny;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -44,6 +46,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
   onRowPropertiesClick,
   onColumnMoved,
   columnLevelStats,
+  containerStyle,
+  gridStyle,
 }) => {
   return (
     <div id='dataset-table'>
@@ -64,6 +68,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
         onRowPropertiesClick={onRowPropertiesClick}
         onColumnMoved={onColumnMoved}
         columnLevelStats={columnLevelStats}
+        containerStyle={containerStyle}
+        gridStyle={gridStyle}
       />
     </div>
   );

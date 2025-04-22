@@ -2,12 +2,12 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.constant';
-import { UploadFileResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
+import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
 import Textarea from 'components/common/Textarea';
-import FileUploaderWrapperV2 from 'components/file-upload/FileUploaderWrapperV2';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoneyTransferMoreDetailsStepProps {
@@ -93,33 +93,38 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           />
         </div>
         <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments</div>
-        <FileUploaderWrapperV2
-          className='min-h-[100px]'
+        <FileUploaderWrapper
+          className='min-h-[100px] px-6'
           Component={FileUploader}
           showUploadButton={false}
           tabIndex={isActiveStep ? 0 : -1}
           footer='Click to upload or drag & drop here'
-          onFilesSelect={handleFileUpload}
+          onFileSelect={handleFileUpload}
           disableNext={(value: boolean) => setIsFileUploading(value)}
           acceptedFormats={MOVE_MONEY_ATTACHMENTS_FILE_FORMATS.join(', ')}
         />
-        {uploadedFiles.length > 0 && (
-          <div className='-z-10 -mt-px  border border-BORDER_7 divide-y divide-BORDER_7'>
-            {uploadedFiles.map((file, idx) => (
-              <div
-                key={file?.fileName + idx}
-                style={{ zIndex: idx * -1 }}
-                className='relative animate-file-upload bg-white overflow-hidden flex justify-between items-center px-3 py-4'
-              >
-                <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis pr-4'>{file?.fileName}</div>
-                <SvgSpriteLoader
-                  id='x-close'
-                  className='cursor-pointer'
-                  onClick={() => handleRemoveFile(idx)}
-                  size={20}
-                />
-              </div>
-            ))}
+        {uploadedFiles?.length > 0 && (
+          <div className='flex flex-col gap-2 my-2.5'>
+            <div className=' border border-GRAY_400 rounded-md'>
+              {uploadedFiles.map((file, idx) => (
+                <div
+                  key={file?.fileName + idx}
+                  style={{ zIndex: idx * -1 }}
+                  className='relative animate-file-upload overflow-hidden flex justify-between gap-1.5 items-center p-2'
+                >
+                  <SvgSpriteLoader id='file-05' onClick={() => handleRemoveFile(idx)} size={14} />
+                  <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis f-14-400'>
+                    {file?.fileName}
+                  </div>
+                  <SvgSpriteLoader
+                    id='x-close'
+                    className='cursor-pointer'
+                    onClick={() => handleRemoveFile(idx)}
+                    size={14}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
         <div className='text-GRAY_700 f-11-450 mt-1'>Only visible to members of your organization</div>
@@ -149,7 +154,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
             size={SIZE_TYPES.MEDIUM}
             id='MOVE_MONEY_MORE_INFO_NEXT'
             onClick={onNextClick}
-            isLoading={isFileUploading}
+            disabled={isFileUploading}
           >
             Next
           </Button>

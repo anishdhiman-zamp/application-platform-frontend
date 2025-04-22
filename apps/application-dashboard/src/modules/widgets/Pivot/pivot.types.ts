@@ -99,3 +99,13 @@ export type ColumnFilterConfig = {
       type: CONDITION_OPERATOR_TYPE.STARTS_WITH;
     }
 );
+
+export type ColumnsToHideType = {
+  colId?: string;
+  hide?: boolean;
+};
+
+export type AllPivotColumnsToHideType = {
+  widgetInstanceId?: string;
+  colIds?: ColumnsToHideType[];
+};

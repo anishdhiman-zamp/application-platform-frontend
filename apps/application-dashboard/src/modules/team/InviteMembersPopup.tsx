@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -37,7 +37,12 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   const [pendingEntryByInstance, setPendingEntryByInstance] = useState<{ [key: number]: string }>({});
   const [selectedItemsByInstance, setSelectedItemsByInstance] = useState<{ [key: number]: ArrayListOption[] }>({});
   const [selectedRoleByInstance, setSelectedRoleByInstance] = useState<{ [key: number]: TEAM_MEMBERS_PRIVILEGES }>({});
-  const hasEmptySearchValue = useMemo(() => Object.values(searchValues).some((value) => value === ''), [searchValues]);
+
+  const hasEmptySearchValue = useMemo(() => {
+    const values = Object.values(searchValues);
+
+    return values.length === 0 || values.every((value) => !validateEmail(value));
+  }, [searchValues]);
   const hasNonEmptySelectedItems = useMemo(
     () => Object.values(selectedItemsByInstance)?.some((item) => item?.length !== 0),
     [selectedItemsByInstance],
@@ -207,8 +212,8 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   const validateSearchAndSelectedItems = (
     searchValues: { [key: number]: string },
     selectedItemsByInstance: { [key: number]: ArrayListOption[] },
-    setShowValidationError: React.Dispatch<React.SetStateAction<boolean>>,
-    setValidationErrorText: React.Dispatch<React.SetStateAction<string>>,
+    setShowValidationError: Dispatch<SetStateAction<boolean>>,
+    setValidationErrorText: Dispatch<SetStateAction<string>>,
   ) => {
     let hasInvalidEntry = false;
     let firstErrorMessage = '';
