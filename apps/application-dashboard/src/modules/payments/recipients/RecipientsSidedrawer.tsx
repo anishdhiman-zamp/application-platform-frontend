@@ -1,14 +1,12 @@
 import React, { FC, useState } from 'react';
+import { Sheet, SheetContent } from '@zamp-platform/ui';
 import AddRecipientAccount from 'modules/payments/recipients/AddRecipientAccount';
 import RecipientDetails from 'modules/payments/recipients/RecipientDetails';
 import RecipientsList from 'modules/payments/recipients/RecipientsList';
-import { defaultFnType } from 'types/commonTypes';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
-import SideDrawer from 'components/common/SideDrawer/SideDrawer';
-import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types';
 
 type RecipientsSideDrawerProps = {
-  onClose: defaultFnType;
+  onClose: React.Dispatch<React.SetStateAction<boolean>>;
   isOpen: boolean;
 };
 
@@ -30,17 +28,11 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
   };
 
   return (
-    <SideDrawer
-      id='json-preview-sidebar'
-      isOpen={isOpen}
-      onClose={onClose}
-      hideCloseButton
-      type={SIDE_DRAWER_TYPES.SECONDARY}
-      className='h-screen overflow-hidden '
-      childrenWrapperClassName='!p-0 overflow-y-scroll'
-    >
-      {renderStep()}
-    </SideDrawer>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className='p-0 h-screen overflow-hidden'>
+        <div className='overflow-y-scroll h-full'>{renderStep()}</div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
