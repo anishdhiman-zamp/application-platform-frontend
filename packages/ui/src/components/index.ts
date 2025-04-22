@@ -3,3 +3,7 @@ export * from './ui/button';
 export * from './ui/input';
 export * from './ui/tabs';
 export * from './ui/dropdown-menu';
+export * from './ui/dialog';
+export * from './ui/attribute';
+export * from './ui/checkbox';
+export * from './ui/step-card';
