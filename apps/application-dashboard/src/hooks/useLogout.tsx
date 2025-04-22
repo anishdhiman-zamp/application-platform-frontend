@@ -3,6 +3,7 @@ import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } fr
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useRouter } from 'next/router';
 import { resetPostHog } from 'utils/postHog';
+import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -14,11 +15,12 @@ export const useLogout = () => {
     logOut(logoutFlow?.logout_url ?? '')
       .then(() => {
         whoAmI()
-          .then(() => {
-            resetPostHog();
-            router.push(ROUTES_PATH.LOGIN);
+          .catch((e) => {
+            console.error('WhoAmI failed', e);
           })
-          .catch(() => {
+          .finally(() => {
+            resetPostHog();
+            setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, router.pathname);
             router.push(ROUTES_PATH.LOGIN);
           });
       })

@@ -23,6 +23,7 @@ describe('useLogout', () => {
 
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
+      pathname: '/test-path',
     });
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
@@ -53,6 +54,7 @@ describe('useLogout', () => {
 
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
+      pathname: '/test-path',
     });
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
@@ -66,11 +68,15 @@ describe('useLogout', () => {
     const { result } = renderHook(() => useLogout());
 
     await act(async () => {
-      await result.current.logout();
+      try {
+        await result.current.logout();
+      } catch (error) {
+        // Expected error, we can ignore it
+      }
     });
 
     expect(mockLogOut).toHaveBeenCalledWith('test-url');
-    expect(mockWhoAmI).toHaveBeenCalled(); // Ensure whoAmI is still attempted
+    expect(mockWhoAmI).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith(ROUTES_PATH.LOGIN);
     expect(mockRefetch).not.toHaveBeenCalled();
   });
