@@ -1,10 +1,10 @@
 import { FC, useState } from 'react';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
-import { RecipientAccountDetailsType } from '@/types/api/paymentApi.types';
+import { AccountDetailsType } from 'modules/payments/payments.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type RecipientAccountCardProps = {
-  account: RecipientAccountDetailsType;
+  account: AccountDetailsType;
 };
 
 const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {

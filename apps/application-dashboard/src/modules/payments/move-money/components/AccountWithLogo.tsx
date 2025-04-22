@@ -1,8 +1,9 @@
-import { FC, KeyboardEvent, ReactNode } from 'react';
+import { forwardRef, KeyboardEvent, ReactNode } from 'react';
 import { DEFAULT_BANK } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface AccountWithLogoCardProps {
@@ -18,56 +19,64 @@ interface AccountWithLogoCardProps {
   logoSize?: number;
 }
 
-const AccountWithLogo: FC<AccountWithLogoCardProps> = ({
-  name = '',
-  logo,
-  subtitle = '',
-  accountNumber = '',
-  className,
-  subtitleClassName = '',
-  onClick,
-  tabIndex = 0,
-  currencyCode = '',
-  logoSize,
-}) => {
-  const onKeyPress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') onClick?.();
-  };
+const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
+  (
+    {
+      name = '',
+      logo,
+      subtitle = '',
+      accountNumber = '',
+      className,
+      subtitleClassName = '',
+      onClick,
+      tabIndex = 0,
+      currencyCode = '',
+      logoSize,
+    },
+    ref,
+  ) => {
+    const onKeyPress = (e: KeyboardEvent) => {
+      if (e.key === KEYBOARD_KEYS.ENTER) onClick?.();
+    };
 
-  const iconSize = logoSize || subtitle ? 24 : 14;
+    const iconSize = logoSize || subtitle ? 24 : 14;
 
-  return (
-    <div
-      onClick={onClick}
-      onKeyDown={onKeyPress}
-      tabIndex={tabIndex}
-      className={cn(
-        'outline-0 flex items-center p-3',
-        onClick ? 'cursor-pointer hover:bg-BACKGROUND_SECONDARY' : '',
-        className,
-        subtitle ? 'gap-3' : 'gap-1.5',
-      )}
-    >
-      {logo && (
-        <div
-          className='flex justify-center items-center rounded-full'
-          style={{ minWidth: iconSize, width: iconSize, height: iconSize }}
-        >
-          {!currencyCode ? (
-            <Image src={logo ?? DEFAULT_BANK} height={iconSize} width={iconSize} alt='bank icon' />
-          ) : (
-            <SvgSpriteLoader id={currencyCode} size={iconSize ?? 32} />
-          )}
+    return (
+      <div
+        ref={ref}
+        onClick={onClick}
+        onKeyDown={onKeyPress}
+        tabIndex={tabIndex}
+        className={cn(
+          'outline-0 flex items-center p-3',
+          onClick ? 'cursor-pointer hover:bg-BACKGROUND_SECONDARY' : '',
+          className,
+          subtitle ? 'gap-3' : 'gap-1.5',
+        )}
+      >
+        {logo && (
+          <div
+            className='flex justify-center items-center rounded-full'
+            style={{ minWidth: iconSize, width: iconSize, height: iconSize }}
+          >
+            {!currencyCode ? (
+              <Image src={logo ?? DEFAULT_BANK} height={iconSize} width={iconSize} alt='bank icon' />
+            ) : (
+              <SvgSpriteLoader id={currencyCode} size={iconSize ?? 32} />
+            )}
+          </div>
+        )}
+        <div>
+          <div className='flex gap-2 f-12-450'>
+            {name} {accountNumber}
+          </div>
+          {!!subtitle && <div className={cn('text-GRAY_800 f-11-400 mt-1', subtitleClassName)}>{subtitle}</div>}
         </div>
-      )}
-      <div>
-        <div className='flex gap-2 f-12-450'>
-          {name} {accountNumber}
-        </div>
-        {!!subtitle && <div className={cn('text-GRAY_800 f-11-400 mt-1', subtitleClassName)}>{subtitle}</div>}
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
+
+AccountWithLogo.displayName = 'AccountWithLogo';
 
 export default AccountWithLogo;

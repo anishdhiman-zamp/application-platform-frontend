@@ -71,6 +71,7 @@ export enum KEYBOARD_KEYS {
   SHIFT = 'Shift',
   META = 'Meta',
   CONTROL = 'Control',
+  TAB = 'Tab',
 }
 
 export const FUNCTION_KEYS_ICON = {

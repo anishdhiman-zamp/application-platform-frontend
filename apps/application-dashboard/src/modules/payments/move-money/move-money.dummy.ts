@@ -102,15 +102,15 @@ export const accountsListWithBalance = Array.from({ length: 10 }, () => {
 export const PAYMENT_PROCESSING_MODES = [
   {
     label: 'WIRE',
-    value: 'wire',
+    value: 'WIRE',
   },
   {
     label: 'SEPA',
-    value: 'sepa',
+    value: 'SEPA',
   },
   {
-    label: 'SWIFT',
-    value: 'swift',
+    label: 'RTP',
+    value: 'RTP',
   },
 ];
 
