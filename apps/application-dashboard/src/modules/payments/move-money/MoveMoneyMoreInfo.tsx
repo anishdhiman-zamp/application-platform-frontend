@@ -93,9 +93,8 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           />
         </div>
         <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments</div>
-
         <FileUploaderWrapper
-          className='min-h-[100px]'
+          className='min-h-[100px] px-6'
           Component={FileUploader}
           showUploadButton={false}
           tabIndex={isActiveStep ? 0 : -1}
@@ -104,24 +103,28 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
           disableNext={(value: boolean) => setIsFileUploading(value)}
           acceptedFormats={MOVE_MONEY_ATTACHMENTS_FILE_FORMATS.join(', ')}
         />
-
-        {uploadedFiles.length > 0 && (
-          <div className='-z-10 -mt-px  border border-BORDER_7 divide-y divide-BORDER_7'>
-            {uploadedFiles.map((file, idx) => (
-              <div
-                key={file?.fileName + idx}
-                style={{ zIndex: idx * -1 }}
-                className='relative animate-file-upload bg-white overflow-hidden flex justify-between items-center px-3 py-4'
-              >
-                <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis pr-4'>{file?.fileName}</div>
-                <SvgSpriteLoader
-                  id='x-close'
-                  className='cursor-pointer'
-                  onClick={() => handleRemoveFile(idx)}
-                  size={20}
-                />
-              </div>
-            ))}
+        {uploadedFiles?.length > 0 && (
+          <div className='flex flex-col gap-2 my-2.5'>
+            <div className=' border border-GRAY_400 rounded-md'>
+              {uploadedFiles.map((file, idx) => (
+                <div
+                  key={file?.fileName + idx}
+                  style={{ zIndex: idx * -1 }}
+                  className='relative animate-file-upload overflow-hidden flex justify-between gap-1.5 items-center p-2'
+                >
+                  <SvgSpriteLoader id='file-05' onClick={() => handleRemoveFile(idx)} size={14} />
+                  <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis f-14-400'>
+                    {file?.fileName}
+                  </div>
+                  <SvgSpriteLoader
+                    id='x-close'
+                    className='cursor-pointer'
+                    onClick={() => handleRemoveFile(idx)}
+                    size={14}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
         <div className='text-GRAY_700 f-11-450 mt-1'>Only visible to members of your organization</div>

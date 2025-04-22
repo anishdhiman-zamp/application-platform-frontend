@@ -30,10 +30,10 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
     () =>
       recipientList?.filter(
         (recipient) =>
-          recipient.name.toLowerCase().includes(search.toLowerCase()) ||
-          recipient.email.toLowerCase().includes(search.toLowerCase()) ||
-          recipient.accounts.some((account) =>
-            account.masked_account_number.toLowerCase().includes(search.toLowerCase()),
+          recipient?.name?.toLowerCase().includes(search.toLowerCase()) ||
+          recipient?.email?.toLowerCase().includes(search.toLowerCase()) ||
+          recipient?.accounts?.some((account) =>
+            account?.masked_account_number?.toLowerCase().includes(search.toLowerCase()),
           ),
       ),
     [recipientList, search],

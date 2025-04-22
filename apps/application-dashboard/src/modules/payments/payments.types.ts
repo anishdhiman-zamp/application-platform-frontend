@@ -1,3 +1,5 @@
+import { MenuItem } from '@/types/common/components';
+
 export enum CONNECT_ACCOUNT_STEPS {
   GET_STARTED,
   SELECT_DATASET,
@@ -25,6 +27,7 @@ export interface AccountDetailsType {
   masked_account_number?: string;
   banking_partner?: string;
   account_holder_name?: string;
+  account_details?: MenuItem[];
 }
 
 export enum MOVE_MONEY_TYPE {

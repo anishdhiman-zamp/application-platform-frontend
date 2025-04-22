@@ -60,7 +60,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
             {recipientDetails?.recipient_details.map((recipientDetails, index) => (
               <div key={index} className='flex items-center gap-4'>
                 <div className='f-12-400 text-GRAY_700 w-[150px]'>{recipientDetails.label}</div>
-                <div className='f-11-400'>{recipientDetails.value}</div>
+                <div className='f-11-400'>{recipientDetails?.value}</div>
               </div>
             ))}
           </div>
