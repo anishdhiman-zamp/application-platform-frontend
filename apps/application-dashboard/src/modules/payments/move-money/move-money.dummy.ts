@@ -1,4 +1,5 @@
-import { MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 
 export const ACCOUNT_DETAILS_MOCK = [
   {
@@ -101,15 +102,15 @@ export const accountsListWithBalance = Array.from({ length: 10 }, () => {
 export const PAYMENT_PROCESSING_MODES = [
   {
     label: 'WIRE',
-    value: 'wire',
+    value: 'WIRE',
   },
   {
     label: 'SEPA',
-    value: 'sepa',
+    value: 'SEPA',
   },
   {
-    label: 'SWIFT',
-    value: 'swift',
+    label: 'RTP',
+    value: 'RTP',
   },
 ];
 
@@ -125,7 +126,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Main Business Account',
           account_number: 'ACC123456789',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'John Doe',
           account_name: "John's Rent Account",
           account_number: 'RENT987654321',
@@ -147,7 +148,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Main Business Account',
           account_number: 'ACC123456789',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'John Doe',
           account_name: "John's Rent Account",
           account_number: 'RENT987654321',
@@ -169,7 +170,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Operating Account',
           account_number: 'OPR456789123',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'Tech Supplies Inc',
           account_name: 'Tech Supplies Main Account',
           account_number: 'TECH789123456',
@@ -182,7 +183,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Operating Account',
           account_number: 'OPR456789123',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'Office Solutions Ltd',
           account_name: 'Office Solutions Main Account',
           account_number: 'OFF123456789',
@@ -204,7 +205,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Payroll Account',
           account_number: 'PAY789123456',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'Alice Johnson',
           account_name: "Alice's Salary Account",
           account_number: 'SAL123456789',
@@ -217,7 +218,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Payroll Account',
           account_number: 'PAY789123456',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'Bob Smith',
           account_name: "Bob's Salary Account",
           account_number: 'SAL987654321',
@@ -230,7 +231,7 @@ export const TEMPLATES: TemplateDetailsType[] = [
           account_name: 'Payroll Account',
           account_number: 'PAY789123456',
         },
-        beneficiary_account: {
+        destination_account: {
           name: 'Charlie Brown',
           account_name: "Charlie's Salary Account",
           account_number: 'SAL456789123',

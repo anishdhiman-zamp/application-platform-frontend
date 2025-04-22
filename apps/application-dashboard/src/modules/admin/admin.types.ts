@@ -59,6 +59,7 @@ export type EditDatasetType = {
   dedup_columns?: string[];
   partition_columns?: string[];
   cluster_columns?: string[];
+  order_by_column?: string;
   datasetId: string;
 };
 

@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   ADMIN_DATASET_ALL_GET: `/datasets/listing-all`,
   ADMIN_DATASET_TEMPLATES_GET: `/datasets/templates/listing`,
   ADMIN_DATASET_UPDATE_PATCH: `/datasets/{{datasetId}}/update`,
+  ADMIN_DATASET_TEMPLATES_UPSERT_POST: `/datasets/templates/upsert`,
 
   // file-import
   DATASET_SIGNED_UPLOAD_URL_POST: `datasets/file-imports/init`,
@@ -65,8 +66,10 @@ export const API_ENDPOINTS = {
 
   PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
-  PAYMENTS_TEMPLATE_LIST_GET: `payment-templates/list`,
-  PAYMENTS_TEMPLATE_CREATE_POST: `payment-templates/create`,
+  PAYMENTS_TEMPLATE_LIST_GET: `payments/templates/`,
+  PAYMENTS_TEMPLATE_CREATE_POST: `payments/templates/`,
+  PAYMENTS_RECIPIENT_BY_SOURCE_ACCOUNT_GET: `payments/recipients`,
+  PAYMENTS_INITIATE_PAYMENT_POST: `payments/`,
 
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
 

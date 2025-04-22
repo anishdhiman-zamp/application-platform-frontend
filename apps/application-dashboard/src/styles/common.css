@@ -1,0 +1,14 @@
+.color-transition::before,
+.color-transition::after {
+  content: '';
+}
+
+.color-transition::after {
+  transition: transform 3s ease-in-out !important;
+  transform: translateX(0);
+}
+
+.color-transition:not(.active)::after {
+  transition: none;
+  transform: translateX(-150%);
+}

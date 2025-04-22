@@ -98,6 +98,10 @@
   border-right: 0.5px solid #ebebeb !important;
   border-bottom: 0.5px solid #ebebeb !important;
 }
+.tree-table .ag-header-cell-comp-wrapper {
+  border-right: 0.5px solid #ebebeb !important;
+  border-bottom: 0.5px solid #ebebeb !important;
+}
 
 .pivot .ag-header-group-cell.ag-column-last {
   border-right: none !important;
@@ -171,28 +175,6 @@
   box-shadow: 0px 3px 0px 0px rgba(0, 0, 0, 0.02);
   z-index: 2; /* Ensure it stays above the grid rows */
   position: relative;
-}
-
-.login-btn-scale-100 {
-  transform: scale(1);
-  transition: transform 0.3s ease-out;
-  opacity: 1;
-}
-
-.login-btn-scale-20 {
-  transform: scale(0.2);
-  transition: transform 0.3s ease-in;
-  opacity: 0;
-}
-
-.color-transition::before,
-.color-transition::after {
-  content: '';
-}
-
-.color-transition:not(.active)::after {
-  transition: none;
-  transform: translateX(-150%);
 }
 
 .ag-grid-scroll {

@@ -1,15 +1,18 @@
 import React, { FC, useMemo, useState } from 'react';
-import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
-import { MOVE_MONEY_TYPE, TemplateDetailsType } from 'modules/payments/payments.types';
+import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
 import { useRouter } from 'next/router';
 import { defaultFnType } from 'types/commonTypes';
+import { useGetTemplateListQuery } from '@/apis/payments';
 import Input from '@/components/common/input';
-import { Tabs } from '@/components/common/tabs/Tabs';
+import TabsV2 from '@/components/common/tabs/TabsV2';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { MenuItem, SIZE_TYPES, TAB_TYPES } from '@/types/common/components';
+import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import { SIZE_TYPES } from '@/types/common/components';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types';
 
@@ -21,19 +24,25 @@ type TemplateListSideDrawerProps = {
 
 const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen, onTemplateClick }) => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState<MenuItem>(TEMPLATE_LIST_TABS[0]);
+  const [currentTab, setCurrentTab] = useState<string>(TEMPLATE_LIST_TABS[0].value);
   const [search, setSearch] = useState<string>('');
 
-  const handleTabSelect = (option?: MenuItem) => {
-    if (option) setCurrentTab(option);
+  const { data: templateList, isLoading, isError } = useGetTemplateListQuery();
+
+  const handleTabSelect = (value: string) => {
+    if (value) setCurrentTab(value);
   };
 
   const templates = useMemo(() => {
-    return TEMPLATES.filter((template) => template.type === currentTab.value);
-  }, [currentTab]);
+    const currentTypeTemplates = templateList?.templates?.filter((template) => template?.type === currentTab);
+
+    if (!search.length) return currentTypeTemplates;
+
+    return currentTypeTemplates?.filter((template) => template?.name?.toLowerCase()?.includes(search?.toLowerCase()));
+  }, [currentTab, templateList, search]);
 
   const handleTemplateSendClick = (template: TemplateDetailsType) => {
-    router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template.type}&templateId=${template.id}`);
+    router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template?.type}&templateId=${template?.id}`);
   };
 
   return (
@@ -51,14 +60,13 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
         <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
           <div className='f-16-600 mb-4.5'>Templates</div>
           <div className='flex flex-col gap-3'>
-            <Tabs
-              list={TEMPLATE_LIST_TABS}
-              onSelect={handleTabSelect}
-              wrapperStyle='border-white !w-auto'
-              tabItemWrapperStyle='!w-auto'
-              scrollWrapperClassName='pb-0'
-              id='PAYMENT_TEMPLATES_TABS'
-              type={TAB_TYPES.OUTLINE}
+            <TabsV2
+              tabsList={TEMPLATE_LIST_TABS}
+              currentTab={currentTab}
+              onValueChange={handleTabSelect}
+              contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
+              listClassName='grid w-full grid-cols-2 w-[calc(100%-16px)] mx-auto'
+              triggerClassName='f-12-450'
             />
             <Input
               type='text'
@@ -70,7 +78,7 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
             />
             <div
               className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
-              onClick={() => onTemplateClick(currentTab.value as MOVE_MONEY_TYPE)}
+              onClick={() => onTemplateClick(currentTab as MOVE_MONEY_TYPE)}
             >
               <SvgSpriteLoader id='plus' size={14} />
               Create Template
@@ -78,11 +86,24 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
           </div>
         </div>
         <div className='px-4.5 py-2 h-[calc(100vh-220px)] overflow-y-auto'>
-          <div>
-            {templates.map((template, index) => (
+          <CommonWrapper
+            isNoData={!templates?.length}
+            isLoading={isLoading}
+            isError={isError}
+            noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
+            skeletonType={SkeletonTypes.CUSTOM}
+            loader={
+              <div className='flex flex-col gap-2'>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className='w-full h-16 bg-GRAY_200 rounded-md animate-pulse' />
+                ))}
+              </div>
+            }
+          >
+            {templates?.map((template, index) => (
               <TemplateCard key={index} template={template} handleSendClick={() => handleTemplateSendClick(template)} />
             ))}
-          </div>
+          </CommonWrapper>
         </div>
       </div>
     </SideDrawer>

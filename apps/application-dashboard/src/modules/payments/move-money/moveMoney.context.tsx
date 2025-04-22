@@ -1,9 +1,9 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
-import { defaultAccountData, defaultContactDetails } from 'modules/payments/payments.constant';
-import { AccountDetailsType, ContactType, TemplateDetailsType } from 'modules/payments/payments.types';
+import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
 import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { MapAny } from 'types/commonTypes';
+import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
 
 enum moveMoneyContextActions {
   CURRENT_STEP = 'CURRENT_STEP',
@@ -12,7 +12,7 @@ enum moveMoneyContextActions {
   MORE_DETAILS = 'MORE_DETAILS',
   TRANSACTION_DETAILS = 'TRANSACTION_DETAILS',
   AMOUNT_DETAILS = 'AMOUNT_DETAILS',
-  CONTACT_DETAILS = 'CONTACT_DETAILS',
+  RECIPIENT_DETAILS = 'RECIPIENT_DETAILS',
   POOLED_FUND_DETAILS = 'POOLED_FUND_DETAILS',
   COUNTER_PARTIES = 'COUNTER_PARTIES',
   RESET_STATE = 'RESET_STATE',
@@ -23,22 +23,21 @@ interface InitialStateType {
   currentStep: number;
   destinationAccountDetails?: AccountDetailsType;
   sourceAccountDetails?: AccountDetailsType;
-  templateDetails: TemplateDetailsType | undefined;
+  templateDetails?: TemplateDetailsType | undefined;
   moreDetails?: {
     note: string;
     externalMemo: string;
     attachments: UploadFileResponseType[];
   };
-  transactionDetails: MapAny;
-  amountDetails: {
+  transactionDetails?: MapAny;
+  amountDetails?: {
     amount: string;
     currency: MenuItem | null;
     sourceAccountDetails?: AccountDetailsType;
-    processingMode?: string;
+    processingMode?: MenuItem;
   };
-  contactDetails: MenuItem;
-  selectedPooledFund: OptionsType;
-  counterParties: ContactType[];
+  recipientDetails?: RecipientDetailsType | undefined;
+  counterParties?: ContactType[];
 }
 
 export interface ActionType {
@@ -48,26 +47,6 @@ export interface ActionType {
 
 const initialState: InitialStateType = {
   currentStep: 0,
-  destinationAccountDetails: undefined,
-  templateDetails: undefined,
-  moreDetails: {
-    note: '',
-    externalMemo: '',
-    attachments: [],
-  },
-  transactionDetails: {
-    payment_send_text: 'You’ve sent money to Raghav Saraf',
-    estimated_time: '24hrs',
-  },
-  amountDetails: {
-    amount: '',
-    currency: null,
-    sourceAccountDetails: undefined,
-    processingMode: '',
-  },
-  contactDetails: defaultContactDetails,
-  selectedPooledFund: defaultContactDetails,
-  counterParties: [],
 };
 
 const context = createContext<{
@@ -89,15 +68,20 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case moveMoneyContextActions.DESTINATION_ACCOUNT_DETAILS:
         return { ...state, destinationAccountDetails: action?.payload?.destinationAccountDetails };
       case moveMoneyContextActions.SOURCE_ACCOUNT_DETAILS:
-        return { ...state, sourceAccountDetails: action?.payload?.sourceAccountDetails };
-      case moveMoneyContextActions.MORE_DETAILS:
-        return { ...state, moreDetails: action?.payload?.moreDetails };
-      case moveMoneyContextActions.CONTACT_DETAILS:
         return {
           ...state,
-          contactDetails: action?.payload?.contactDetails,
+          sourceAccountDetails: action?.payload?.sourceAccountDetails,
           templateDetails: undefined,
-          destinationAccountDetails: defaultAccountData,
+          destinationAccountDetails: undefined,
+        };
+      case moveMoneyContextActions.MORE_DETAILS:
+        return { ...state, moreDetails: action?.payload?.moreDetails };
+      case moveMoneyContextActions.RECIPIENT_DETAILS:
+        return {
+          ...state,
+          recipientDetails: action?.payload?.recipientDetails,
+          templateDetails: undefined,
+          destinationAccountDetails: undefined,
         };
       case moveMoneyContextActions.RESET_STATE:
         return initialState;
@@ -107,7 +91,9 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return {
           ...state,
           templateDetails: action?.payload?.templateDetails,
-          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.beneficiary_account,
+          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.destination_account,
+          sourceAccountDetails: action?.payload?.templateDetails?.details[0]?.source_account,
+          currentStep: 1,
         };
 
       default:
