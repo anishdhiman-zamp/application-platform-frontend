@@ -6,13 +6,7 @@ import { X } from 'lucide-react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '../../lib/utils';
 import { useEffect, useState } from 'react';
-
-enum SheetSides {
-  RIGHT = 'right',
-  LEFT = 'left',
-  TOP = 'top',
-  BOTTOM = 'bottom',
-}
+import { POSITION_TYPES, SIZE_TYPES } from '@zamp-platform/ui/types';
 
 interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root> {
   open?: boolean;
@@ -70,23 +64,23 @@ const sheetVariants = cva(
   {
     variants: {
       side: {
-        [SheetSides.RIGHT]:
+        [POSITION_TYPES.RIGHT]:
           'inset-y-0 right-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
-        [SheetSides.LEFT]:
+        [POSITION_TYPES.LEFT]:
           'inset-y-0 left-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
-        [SheetSides.TOP]:
+        [POSITION_TYPES.TOP]:
           'inset-x-0 top-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
-        [SheetSides.BOTTOM]:
+        [POSITION_TYPES.BOTTOM]:
           'inset-x-0 bottom-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
       },
       size: {
-        default: 'w-[450px]',
-        big: 'w-[600px]',
+        [SIZE_TYPES.LARGE]: 'w-[600px]',
+        [SIZE_TYPES.MEDIUM]: 'w-[450px]',
       },
     },
     defaultVariants: {
-      side: SheetSides.RIGHT,
-      size: 'default',
+      side: POSITION_TYPES.RIGHT,
+      size: SIZE_TYPES.MEDIUM,
     },
   },
 );
@@ -99,13 +93,14 @@ interface SheetContentProps
   children?: React.ReactNode;
   title?: string;
   description?: string;
+  size?: SIZE_TYPES.LARGE | SIZE_TYPES.MEDIUM;
 }
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
   (
     {
-      side = SheetSides.RIGHT,
-      size = 'default',
+      side = POSITION_TYPES.RIGHT,
+      size = SIZE_TYPES.MEDIUM,
       className,
       children,
       showCloseButton = false,
@@ -164,5 +159,4 @@ export {
   SheetHeaderTitle,
   SheetHeaderActions,
   SheetBody,
-  SheetSides,
 };
