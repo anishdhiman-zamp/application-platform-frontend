@@ -22,7 +22,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     dispatch,
-    state: { amountDetails, currentStep, destinationAccountDetails, sourceAccountDetails, templateDetails },
+    state: { amountDetails, currentStep, destinationAccountDetails, sourceAccountDetails, templateDetails, reset },
   } = useMoveMoneyContextStore();
   const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
   const [amount, setAmount] = useState(amountDetails?.amount);
@@ -74,8 +74,15 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
       });
   }, [isActiveStep]);
 
+  useEffect(() => {
+    if (reset) {
+      setAmount('');
+      setPaymentProcessingMode(PAYMENT_PROCESSING_MODES[0]);
+    }
+  }, [reset]);
+
   return (
-    <div className='h-screen pt-34 w-75 m-auto'>
+    <div className='h-screen pt-20 w-75 m-auto'>
       <div className='flex flex-col gap-5'>
         <div className='f-22-550'>{isSelfTransfer ? 'Transfer details' : 'How much are you sending?'}</div>
         {isSelfTransfer && (

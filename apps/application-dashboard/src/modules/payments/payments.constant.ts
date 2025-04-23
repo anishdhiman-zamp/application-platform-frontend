@@ -6,12 +6,14 @@ export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';
 export const CONNECT_ACCOUNT_DESCRIPTION =
   'Note: Require attributes in the dataset are entity, account name, account number and currency';
 
+export const FAILED_TO_CREATE_TEMPLATE = 'Failed to create template';
+
 export const RECIPIENT_CARD_ACTION_ITEMS = [
   {
     id: 'add-account',
     action: MOVE_MONEY_ACTION_TYPE.ADD_ACCOUNT,
     icon: {
-      id: 'user-up-01',
+      id: 'plus',
       size: 14,
     },
     tooltipBody: 'Add account',
@@ -84,7 +86,7 @@ export const defaultAccountData = {
 export const defaultContactDetails = { label: '', value: '' };
 
 export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
-  INPUT_FILE_FORMATS.PNG,
+  INPUT_FILE_FORMATS.XLSX,
   INPUT_FILE_FORMATS.JPEG,
   INPUT_FILE_FORMATS.JPG,
   INPUT_FILE_FORMATS.PDF,

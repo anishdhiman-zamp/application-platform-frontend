@@ -22,7 +22,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
 }) => {
   const {
     dispatch,
-    state: { sourceAccountDetails, currentStep },
+    state: { sourceAccountDetails, currentStep, reset },
   } = useMoveMoneyContextStore();
 
   const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({ recipient_id: recipientId });
@@ -60,7 +60,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
   }, [templateId]);
 
   return (
-    <div className='h-screen overflow-y-scroll pt-34'>
+    <div className='h-screen overflow-y-scroll pt-20'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Where are you paying from?</div>
         <div className='flex flex-col gap-5'>
@@ -68,11 +68,10 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
             autoFocus
             accountsList={sourceAccounts?.accounts ?? []}
             templateList={filteredTemplateList ?? []}
-            shouldReset={false}
+            shouldReset={reset}
             accountDetails={sourceAccountDetails}
             onAccountSelect={handleSourceAccountSelect}
             onTemplateSelect={handleTemplateSelect}
-            label='Send from'
             isLoading={isLoading}
             showTemplate
           />

@@ -1,5 +1,7 @@
 import React, { FC, useMemo, useState } from 'react';
+import { Sheet, SheetContent, SIZE_TYPES } from '@zamp-platform/ui';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
 import { useRouter } from 'next/router';
@@ -12,9 +14,6 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-import { SIZE_TYPES } from '@/types/common/components';
-import SideDrawer from 'components/common/SideDrawer/SideDrawer';
-import { SIDE_DRAWER_TYPES } from 'components/common/SideDrawer/sideDrawer.types';
 
 type TemplateListSideDrawerProps = {
   onClose: defaultFnType;
@@ -46,67 +45,61 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
   };
 
   return (
-    <SideDrawer
-      id='payment-templates-sidebar'
-      isOpen={isOpen}
-      size={SIZE_TYPES.LARGE}
-      onClose={onClose}
-      hideCloseButton
-      type={SIDE_DRAWER_TYPES.SECONDARY}
-      className='h-screen overflow-hidden'
-      childrenWrapperClassName='!p-0 overflow-y-hidden'
-    >
-      <div>
-        <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
-          <div className='f-16-600 mb-4.5'>Templates</div>
-          <div className='flex flex-col gap-3'>
-            <TabsV2
-              tabsList={TEMPLATE_LIST_TABS}
-              currentTab={currentTab}
-              onValueChange={handleTabSelect}
-              contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
-              listClassName='grid w-full grid-cols-2 w-[calc(100%-16px)] mx-auto'
-              triggerClassName='f-12-450'
-            />
-            <Input
-              type='text'
-              placeholder='Search...'
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              inputClassName='!border-none !px-0 focus:outline-none'
-              focusClassNames=''
-            />
-            <div
-              className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
-              onClick={() => onTemplateClick(currentTab as MOVE_MONEY_TYPE)}
-            >
-              <SvgSpriteLoader id='plus' size={14} />
-              Create Template
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent size={SIZE_TYPES.LARGE} className='p-0 h-screen overflow-hidden'>
+        <div className='overflow-y-scroll h-full'>
+          <div>
+            <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
+              <div className='f-16-600 mb-4.5'>Templates</div>
+              <div className='flex flex-col gap-3'>
+                <TabsV2
+                  tabsList={TEMPLATE_LIST_TABS}
+                  currentTab={currentTab}
+                  onValueChange={handleTabSelect}
+                  contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
+                  listClassName='grid w-full grid-cols-2 mx-auto'
+                  triggerClassName='f-12-450'
+                  className='mx0'
+                />
+                <Input
+                  type='text'
+                  placeholder='Search...'
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  overrideInputBgClassName='!border-none !px-2 focus:outline-none !py-0 !h-6 placeholder:!text-GRAY_500'
+                  focusClassNames=''
+                />
+                <div
+                  className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
+                  onClick={() => onTemplateClick(currentTab as MOVE_MONEY_TYPE)}
+                >
+                  <SvgSpriteLoader id='plus' size={14} />
+                  Create Template
+                </div>
+              </div>
+            </div>
+            <div className='px-4.5 py-2 h-[calc(100vh-220px)] overflow-y-auto'>
+              <CommonWrapper
+                isNoData={!templates?.length}
+                isLoading={isLoading}
+                isError={isError}
+                noDataBanner={<div className='text-GRAY_500 f-12-450 px-2.5 py-2'>No templates found</div>}
+                skeletonType={SkeletonTypes.CUSTOM}
+                loader={<RecipientCardSkeleton className='mb-4' />}
+              >
+                {templates?.map((template, index) => (
+                  <TemplateCard
+                    key={index}
+                    template={template}
+                    handleSendClick={() => handleTemplateSendClick(template)}
+                  />
+                ))}
+              </CommonWrapper>
             </div>
           </div>
         </div>
-        <div className='px-4.5 py-2 h-[calc(100vh-220px)] overflow-y-auto'>
-          <CommonWrapper
-            isNoData={!templates?.length}
-            isLoading={isLoading}
-            isError={isError}
-            noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={
-              <div className='flex flex-col gap-2'>
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className='w-full h-16 bg-GRAY_200 rounded-md animate-pulse' />
-                ))}
-              </div>
-            }
-          >
-            {templates?.map((template, index) => (
-              <TemplateCard key={index} template={template} handleSendClick={() => handleTemplateSendClick(template)} />
-            ))}
-          </CommonWrapper>
-        </div>
-      </div>
-    </SideDrawer>
+      </SheetContent>
+    </Sheet>
   );
 };
 

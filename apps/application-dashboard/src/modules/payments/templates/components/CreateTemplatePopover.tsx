@@ -99,6 +99,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         backButtonTitle='Discard'
         childrenClassName='mt-12'
         wrapperClassName='w-[1000px]'
+        parentWrapperClassName='z-[1002]'
         onCancel={onClose}
         onSubmit={handleSubmit}
         closeOnClickOutside={false}

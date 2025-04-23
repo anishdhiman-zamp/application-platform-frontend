@@ -231,7 +231,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               }}
             >
               <SvgSpriteLoader id={option.iconId} width={12} height={12} />
-              <div className='f-12-500'>{option.label}</div>
+              <div className='f-12-500'>{option.label}cxv</div>
             </div>
           ))}
           {isTagColumn && (

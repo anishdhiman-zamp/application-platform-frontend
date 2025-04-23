@@ -18,6 +18,7 @@ enum moveMoneyContextActions {
   RESET_STATE = 'RESET_STATE',
   TEMPLATE_DETAILS = 'TEMPLATE_DETAILS',
   SOURCE_ACCOUNT_DETAILS = 'SOURCE_ACCOUNT_DETAILS',
+  RESET = 'RESET',
 }
 interface InitialStateType {
   currentStep: number;
@@ -38,6 +39,7 @@ interface InitialStateType {
   };
   recipientDetails?: RecipientDetailsType | undefined;
   counterParties?: ContactType[];
+  reset: boolean;
 }
 
 export interface ActionType {
@@ -47,6 +49,7 @@ export interface ActionType {
 
 const initialState: InitialStateType = {
   currentStep: 0,
+  reset: false,
 };
 
 const context = createContext<{
@@ -73,6 +76,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           sourceAccountDetails: action?.payload?.sourceAccountDetails,
           templateDetails: undefined,
           destinationAccountDetails: undefined,
+          reset: false,
         };
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
@@ -85,6 +89,12 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         };
       case moveMoneyContextActions.RESET_STATE:
         return initialState;
+      case moveMoneyContextActions.RESET:
+        return {
+          ...initialState,
+          currentStep: 0,
+          reset: true,
+        };
       case moveMoneyContextActions.AMOUNT_DETAILS:
         return { ...state, amountDetails: action?.payload?.amountDetails };
       case moveMoneyContextActions.TEMPLATE_DETAILS:

@@ -49,17 +49,19 @@ export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
 export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
   {
     label: 'Data',
+    id: 'data',
     iconId: 'coins-stacked-04',
     path: ROUTES_PATH.DATA,
   },
   {
     label: 'Payments',
+    id: 'payments',
     iconId: 'send-01',
     path: ROUTES_PATH.PAYMENTS,
-    isHidden: true,
   },
   {
     label: 'Team',
+    id: 'team',
     iconId: 'users-02',
     path: ROUTES_PATH.TEAM,
   },
