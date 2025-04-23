@@ -234,6 +234,59 @@ export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string):
   return currentColumnOrderingVisibility[datasetId];
 };
 
+export const getUpdatedColumnOrderingVisibility = (
+  currentColumnOrderingVisibility: ColumnOrderingVisibilityType[],
+  filterConfig: DatasetFilterConfigResponseType[],
+) => {
+  // Create a map of existing column configurations for quick lookup
+  const existingColumnsMap = new Map(currentColumnOrderingVisibility.map((col) => [col.colId, col]));
+
+  // First, preserve the order of existing columns
+  const updatedColumnOrderingVisibility: ColumnOrderingVisibilityType[] = currentColumnOrderingVisibility.map(
+    (existingCol) => {
+      const matchingFilterConfig = filterConfig.find((fc) => fc.column === existingCol.colId);
+
+      if (matchingFilterConfig) {
+        return {
+          ...existingCol,
+          isVisible: matchingFilterConfig.metadata?.is_hidden !== true,
+        };
+      }
+
+      return {
+        colId: existingCol?.colId ?? '',
+        isVisible: false,
+        width: existingCol?.width ?? 0,
+      };
+    },
+  );
+
+  // Then add any new columns that weren't in the current configuration
+  filterConfig.forEach((column) => {
+    if (!existingColumnsMap.has(column.column)) {
+      updatedColumnOrderingVisibility.push({
+        colId: column.column,
+        isVisible: column.metadata?.is_hidden !== true,
+        width: 0,
+      });
+    }
+  });
+
+  return updatedColumnOrderingVisibility;
+};
+
+export const syncFilterConfigHiddenColumnsInLocalStorage = (
+  datasetId: string,
+  filterConfig: DatasetFilterConfigResponseType[],
+) => {
+  const currentDatasetColumnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId) || [];
+
+  updateLocalStorage(
+    getUpdatedColumnOrderingVisibility(currentDatasetColumnOrderingVisibility, filterConfig),
+    datasetId,
+  );
+};
+
 export const getFilters = (filtersString: string, filterConfig: DatasetFilterConfigResponseType[]) => {
   const filters: MapAny = JSON.parse(filtersString);
   const filterKeys = Object.keys(filters);
