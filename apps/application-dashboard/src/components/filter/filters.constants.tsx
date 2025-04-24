@@ -103,8 +103,8 @@ export const SEARCH_FILTER_OPTIONS = [
 ];
 
 export const MULTI_SELECT_FILTER_OPTIONS = [
-  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
-  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
+  { label: 'contains', value: CONDITION_OPERATOR_TYPE.IN },
+  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_IN },
   { label: 'is blank', value: CONDITION_OPERATOR_TYPE.IS_NULL },
 ];
 

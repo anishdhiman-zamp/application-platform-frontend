@@ -13,6 +13,8 @@ export type TemplateDetailsType = {
     order: string;
     source_account: AccountDetailsType;
     destination_account: AccountDetailsType;
+    recipient_name: string;
+    recipient_id: string;
   }[];
   created_by: string;
   creation_timestamp: string;
@@ -32,14 +34,14 @@ export type RecipientAccountDetailsType = {
 export type RecipientDetailsType = {
   id: string;
   name: string;
-  email: string;
-  accounts: AccountDetailsType[];
-  recipient_details: MenuItem[];
-  account_name: string;
-  masked_account_number: string;
-  currency_code: string;
-  bank_name: string;
-  account_number: string;
+  email?: string;
+  accounts?: AccountDetailsType[];
+  recipient_details?: MenuItem[];
+  account_name?: string;
+  masked_account_number?: string;
+  currency_code?: string;
+  bank_name?: string;
+  account_number?: string;
 };
 
 export type RecipientListResponseType = {

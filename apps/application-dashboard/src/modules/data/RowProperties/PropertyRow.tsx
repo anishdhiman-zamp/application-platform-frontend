@@ -6,6 +6,7 @@ import { TAG_SOURCE_TYPES } from 'modules/data/RowProperties/rowProperties.types
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { MapAny } from 'types/commonTypes';
 import { copyToClipBoard } from 'utils/common';
+import CustomChipsRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
 import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
@@ -77,6 +78,9 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
             </div>
           </Tooltip>
         );
+      }
+      if (column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.CHIP) {
+        return <CustomChipsRenderer value={value} className='flex-wrap' />;
       }
 
       return column.cellRenderer({ colDef: column, data, value });

@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE, TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';
 import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';
 import { Button } from '@/components/common/button/Button';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
@@ -29,7 +29,10 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
   const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
 
   const filteredTemplateList = useMemo(
-    () => templateList?.templates?.filter((template) => template?.type === transferType),
+    () =>
+      templateList?.templates?.filter(
+        (template) => template?.type === transferType && template?.status === TEMPLATE_STATUS_TYPES.ACTIVE,
+      ),
     [templateList, transferType],
   );
 

@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
-import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import {
   moveMoneyContextActions,
   useMoveMoneyContextStore,
@@ -15,7 +14,6 @@ import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useRouter } from 'next/router';
 import { defaultFn } from 'types/commonTypes';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MoneyTransferHome = () => {
@@ -36,10 +34,6 @@ const MoneyTransferHome = () => {
     });
   };
 
-  const defaultTemplate = useMemo(() => {
-    return TEMPLATES.find((template: TemplateDetailsType) => template?.id === templateId);
-  }, [templateId]);
-
   return (
     <div
       style={{ marginTop: `calc(-${currentStep * 100}vh)` }}
@@ -58,11 +52,7 @@ const MoneyTransferHome = () => {
         templateId={(templateId as string) ?? ''}
       />
       {!isSelfTransfer && (
-        <SelectBeneficiaryStep
-          defaultTemplate={defaultTemplate}
-          handleStepChange={handleStepChange}
-          recipientId={(recipientId as string) ?? ''}
-        />
+        <SelectBeneficiaryStep handleStepChange={handleStepChange} recipientId={(recipientId as string) ?? ''} />
       )}
       <AmountDetailsStep isSelfTransfer={isSelfTransfer} handleStepChange={handleStepChange} />
       <MoveMoneyMoreInfo handleStepChange={handleStepChange} />

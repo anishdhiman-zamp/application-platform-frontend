@@ -42,6 +42,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
     case FILTER_TYPES.MULTI_SELECT: {
       const selectedFilter = selectedFilters[key];
       const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
+      const operatorLabel = MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === selectedFilter?.type)?.label;
 
       let title = '';
       const count = selectedFilter?.values?.length;
@@ -51,7 +52,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         : selectedFilter?.values?.join(', ');
 
       if (count) {
-        title = `${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
+        title = `${operatorLabel} ${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
       }
 
       return {
