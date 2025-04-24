@@ -34,6 +34,7 @@ import {
   getColumnOrderingVisibilityForCurrentDataset,
   getEncodedRequestWithAggregations,
   getFilters,
+  syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
 import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
@@ -363,6 +364,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   useEffect(() => {
     if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
+      syncFilterConfigHiddenColumnsInLocalStorage(id as string, filterConfigData?.data);
+
       const columns = formatColumns(
         filterConfigData?.data,
         false,

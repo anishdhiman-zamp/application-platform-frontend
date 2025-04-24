@@ -71,7 +71,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
   };
 
   return (
-    <div className='h-screen overflow-y-scroll py-[136px]'>
+    <div className='h-screen overflow-y-scroll py-20'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Review</div>
         <div

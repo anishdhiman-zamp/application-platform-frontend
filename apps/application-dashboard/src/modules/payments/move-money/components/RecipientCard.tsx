@@ -22,7 +22,7 @@ const RecipientCard = forwardRef<HTMLDivElement, RecipientCardProps>(
         <div className='w-4 h-4 bg-BLUE_200 flex justify-center items-center pl-px f-8-500 rounded-full'>
           {getFirstLetters(recipient?.name as string, 1).toLocaleUpperCase()}
         </div>
-        <div className='f-12-500 grow'>{recipient?.name}</div>
+        <div className='f-13-500 grow'>{recipient?.name}</div>
         <SvgSpriteLoader size={14} id='send-03' className='opacity-0 group-hover:opacity-100 transition duration-100' />
       </div>
     );

@@ -448,6 +448,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
                       privilegeList={resourceConfig.accessPrivilegesList}
                       isDeletingAudience={isDeletingAudience}
                       isChangingRole={isChangingRole}
+                      currentUserId={user_id}
                     />
                   ))}
                 </CommonWrapper>

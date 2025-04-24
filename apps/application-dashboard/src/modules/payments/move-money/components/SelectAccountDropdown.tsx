@@ -2,7 +2,6 @@ import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } 
 import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
-import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
@@ -296,7 +295,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       <div
         className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {
           'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,
-          'border-GRAY_500': isShowMenu,
+          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
           '!cursor-not-allowed bg-GRAY_100': disabled,
         })}
         ref={containerRef}
@@ -318,7 +317,6 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               focusClassNames='!px-0'
               placeholder='Search account name, number'
             />
-            <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
           </div>
         ) : (
           <div onFocus={onFocus}>

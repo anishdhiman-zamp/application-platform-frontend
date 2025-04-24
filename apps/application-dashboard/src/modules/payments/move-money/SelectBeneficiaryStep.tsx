@@ -17,7 +17,7 @@ interface SelectBeneficiaryStepProps {
 
 const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate, recipientId }) => {
   const {
-    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails },
+    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails, reset },
     dispatch,
   } = useMoveMoneyContextStore();
 
@@ -58,7 +58,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
   }, [recipientId, recipientBySourceAccount]);
 
   return (
-    <div className='h-screen overflow-y-scroll pt-34'>
+    <div className='h-screen overflow-y-scroll pt-20'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
@@ -67,7 +67,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
             disabled={!!recipientId}
             defaultSelectedRecipient={selectedBeneficiary}
             onSelect={handleBeneficiarySelect}
-            shouldReset={false}
+            shouldReset={reset}
             isLoading={isRecipientBySourceAccountLoading}
             templateDetails={defaultTemplate}
             recipientList={recipientBySourceAccount?.recipients ?? []}
@@ -76,7 +76,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
             <SelectAccountDropdown
               autoFocus
               accountsList={recipientDetails?.accounts}
-              shouldReset={false}
+              shouldReset={reset}
               accountDetails={destinationAccountDetails}
               onAccountSelect={handleAccountSelect}
               label='Recipient account'

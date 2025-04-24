@@ -40,18 +40,18 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
   };
 
   return (
-    <div className='flex items-center justify-between px-1.5 py-1 hover:bg-GRAY_50 cursor-pointer rounded-md hover:z-50'>
+    <div className='group flex items-center justify-between px-1.5 py-1 hover:bg-GRAY_50 cursor-pointer rounded-md hover:z-50'>
       <div className='flex items-center gap-1.5'>
         <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
           {getFirstLetters(recipient?.name, 1)}
         </div>
         <div>
-          <div className='f-12-500'>{recipient?.name}</div>
+          <div className='f-13-500'>{recipient?.name}</div>
           <div className='f-11-400 text-GRAY_700'>{recipient?.email}</div>
         </div>
       </div>
       <div className='flex items-center gap-2.5'>
-        <div className='f-11-400'>
+        <div className='f-11-400 text-GRAY_700 group-hover:text-GRAY_900'>
           <TooltipV2
             tooltipBody={
               <div>
@@ -72,7 +72,7 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
               type={BUTTON_TYPES.SECONDARY}
               id='recipient-card-action'
               size={SIZE_TYPES.XSMALL}
-              className='border-none'
+              className='border-none !bg-transparent hover:!bg-GRAY_300'
               iconProps={item?.icon}
               onClick={(e) => handleActionClick(item?.action, e)}
             />

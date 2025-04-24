@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-import { defaultFn, defaultFnType } from '@/types/commonTypes';
+import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 interface TemplateCardProps {
   template: TemplateDetailsType;
@@ -12,6 +13,7 @@ interface TemplateCardProps {
 const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
   const source = template?.details[0]?.source_account;
   const destination = template?.details[0]?.destination_account;
+  const isApprovalPending = template?.status !== STATUS_TYPES.SUCCESS;
 
   return (
     <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md'>
@@ -34,14 +36,17 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
                   {item?.account_name}
                 </div>
                 <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px] whitespace-nowrap'>
-                  {MASK_DOTS} {item?.masked_account_number}
+                  {item?.masked_account_number && `${MASK_DOTS} ${item?.masked_account_number}`}
                 </div>
               </div>
             ))}
         </div>
       </div>
-      <SvgSpriteLoader id='edit-03' onClick={defaultFn} size={14} />
-      <SvgSpriteLoader id='send-03' onClick={handleSendClick} size={14} />
+      {!isApprovalPending ? (
+        <div className='f-11-450 text-ORANGE_800'>Approval pending</div>
+      ) : (
+        <SvgSpriteLoader id='send-03' onClick={handleSendClick} size={14} />
+      )}
     </div>
   );
 };

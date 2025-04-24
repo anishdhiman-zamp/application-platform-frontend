@@ -254,6 +254,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     if (shouldReset) {
       setSearchValue('');
       setIsShowMenu(true);
+      setSelectedRecipient(null);
     }
   }, [shouldReset]);
 
@@ -272,9 +273,9 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
+        className={cn('rounded-md border border-GRAY_500 bg-white', {
           'border-GRAY_400 overflow-hidden': !isShowMenu,
-          'border-GRAY_500': isShowMenu,
+          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
           '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,
         })}
         ref={containerRef}

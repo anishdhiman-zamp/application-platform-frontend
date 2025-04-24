@@ -65,9 +65,9 @@ const MoneyTransferHome = () => {
         />
       )}
       <AmountDetailsStep isSelfTransfer={isSelfTransfer} handleStepChange={handleStepChange} />
-      <MoveMoneyMoreInfo handleStepChange={handleStepChange} shouldReset={false} />
+      <MoveMoneyMoreInfo handleStepChange={handleStepChange} />
       <ReviewMoneyTransfer transferType={transferType} handleStepChange={handleStepChange} />
-      <SuccessMoveMoney onReset={defaultFn} />
+      <SuccessMoveMoney onReset={defaultFn} transferType={transferType} />
       {!!createTemplateType && (
         <CreateTemplatePopover
           paymentType={createTemplateType}

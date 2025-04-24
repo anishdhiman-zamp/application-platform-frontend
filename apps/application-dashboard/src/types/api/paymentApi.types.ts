@@ -1,3 +1,4 @@
+import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE } from '@/modules/payments/payments.types';
 import { MenuItem } from '@/types/common/components';
 
@@ -16,6 +17,7 @@ export type TemplateDetailsType = {
   created_by: string;
   creation_timestamp: string;
   type: MOVE_MONEY_TYPE;
+  status?: STATUS_TYPES;
 };
 
 export type TemplateListResponseType = {
@@ -89,4 +91,8 @@ export type InitiatePaymentPayloadType = {
 
 export type SourceAccountByRecipientIdPayloadType = {
   recipient_id?: string;
+};
+
+export type PaymentConfigResponseType = {
+  id: string;
 };
