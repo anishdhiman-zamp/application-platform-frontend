@@ -34,6 +34,7 @@ type AudienceAccessPropsType = {
   teamInfo: TeamInfoType;
   isDeletingAudience: boolean;
   isChangingRole: boolean;
+  currentUserId: string;
 };
 
 const AudienceAccess: FC<AudienceAccessPropsType> = ({
@@ -50,6 +51,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   customerName,
   teamInfo,
   isDeletingAudience,
+  currentUserId,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
@@ -66,7 +68,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
       ? teamInfo?.name
       : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
-  const showRoleChangeDropdown = currentUserHasAdminAccess && !checkIfResourceTypeOrg;
+  const showRoleChangeDropdown =
+    currentUserHasAdminAccess &&
+    !(currentUserId == resourceAudienceId && resourceAudienceType === ResourceAudienceType.USER);
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
