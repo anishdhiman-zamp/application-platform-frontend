@@ -247,9 +247,11 @@ export const getUpdatedColumnOrderingVisibility = (
       const matchingFilterConfig = filterConfig.find((fc) => fc.column === existingCol.colId);
 
       if (matchingFilterConfig) {
+        const isExplicitlyHidden = matchingFilterConfig.metadata?.is_hidden === true;
+
         return {
           ...existingCol,
-          isVisible: matchingFilterConfig.metadata?.is_hidden !== true,
+          isVisible: isExplicitlyHidden ? false : existingCol.isVisible,
         };
       }
 
