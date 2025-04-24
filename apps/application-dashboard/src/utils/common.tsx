@@ -115,6 +115,14 @@ export function isCamelCase(str: string) {
   return camelCaseRegex.test(str);
 }
 
+export function formatToNormalText(camelSnakeCaseStr: string) {
+  const isCamelSnakeCaseString = camelCaseToNormalText(camelSnakeCaseStr);
+
+  return isCamelSnakeCaseString
+    ?.replace(/_([a-z])/g, ' $1') // Insert a space before lowercase letters
+    ?.replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
+}
+
 export function camelCaseToNormalText(camelCaseStr: string) {
   const isCamelCaseString = isCamelCase(camelCaseStr);
 

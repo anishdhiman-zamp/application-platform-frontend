@@ -13,6 +13,7 @@ import {
   RequestType,
 } from 'types/components/table.type';
 import { checkIsObjectEmpty } from 'utils/common';
+import { LOCAL_CURRENCY } from '@/modules/page/pages.constants';
 import {
   AggregationFunctionMap,
   ArrayFilters,
@@ -253,7 +254,7 @@ const formatRequest = (
       page_size: pageSize ?? PAGE_SIZE,
     },
     get_total_records: !disableTotalCount,
-    fx_currency: !fx_currency || fx_currency === 'local' ? undefined : fx_currency,
+    fx_currency: !fx_currency || fx_currency === LOCAL_CURRENCY ? undefined : fx_currency,
   };
 };
 

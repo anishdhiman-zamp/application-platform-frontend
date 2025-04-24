@@ -1,7 +1,7 @@
 import React, { FC, MouseEvent } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { cn, formatToNormalText } from 'utils/common';
 import { FilterConfigType } from 'components/filter/filter.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -44,7 +44,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
           isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : ''
         } ${controlClassName}`}
       >
-        <div className='f-12-400 text-GRAY_900'>{filterConfig?.label}</div>
+        <div className='f-12-400 text-GRAY_900 whitespace-nowrap'>{formatToNormalText(filterConfig?.label)}</div>
         <div className='f-12-500 text-GRAY_1000 whitespace-nowrap'>{filterConfig?.title}</div>
         <div onClick={handleRemoveFilter}>
           {allowClear ? (

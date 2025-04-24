@@ -40,7 +40,7 @@ import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
-import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -87,7 +87,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   gridStyle,
 }) => {
   const filters = useSearchParams().get('filters');
-  const currency = useSearchParams().get('currency') ?? 'local';
+  const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
   const { pageId } = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -618,6 +618,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
                 value={fxCurrency}
                 filterKey='fx_currency'
                 label='Currency'
+                showColumnLabel={false}
                 options={PAGE_CURRENCY_OPTIONS}
               />
             </div>

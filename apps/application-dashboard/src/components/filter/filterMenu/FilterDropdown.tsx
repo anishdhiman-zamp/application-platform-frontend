@@ -19,6 +19,7 @@ interface FilterDropdownProps {
   onFilterChange?: (value: string[]) => void;
   closeOnSelect?: boolean;
   isRightAligned?: boolean;
+  showColumnLabel?: boolean;
 }
 
 const FilterDropdown: FC<FilterDropdownProps> = ({
@@ -34,6 +35,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   onFilterChange,
   closeOnSelect = false,
   isRightAligned = false,
+  showColumnLabel = true,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
   const controlRef = useRef<HTMLDivElement>(null);
@@ -100,6 +102,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           allowClear={allowClear}
           isPeriodicityEnabled={isPeriodicityEnabled}
           onFilterChange={onChange}
+          showColumnLabel={showColumnLabel}
           {...props}
         />
       </div>

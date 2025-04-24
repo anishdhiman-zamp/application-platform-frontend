@@ -16,6 +16,7 @@ interface SearchFilterMenuItemProps {
   className?: string;
   isOpen?: boolean;
   label?: string;
+  showColumnLabel?: boolean;
 }
 
 const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className, isOpen = false, label }) => {
