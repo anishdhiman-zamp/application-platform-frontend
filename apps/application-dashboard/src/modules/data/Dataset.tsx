@@ -141,7 +141,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     description: '',
   });
   const { startPolling } = usePolling();
-  const [getDatasetData, { data: datasetData }] = useLazyGetDatasetDataQuery();
+  const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
 
   const {
     dispatch,
@@ -625,23 +625,30 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         </div>
 
-        <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
-          <DatasetTable
-            tableRef={tableRef}
-            columns={columns}
-            serverSideDatasource={serverSideDatasource}
-            columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
-            totalRows={totalRows}
-            onCellEditRequest={onCellEditRequest}
-            onFillEnd={onFillEnd}
-            onRowPropertiesClick={handleRowPropertiesClick}
-            onColumnMoved={handleColumnMoved}
-            columnLevelStats={columnLevelStats}
-            containerStyle={containerStyle}
-            gridStyle={gridStyle}
-            {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
-          />
-        </div>
+        <CommonWrapper
+          isError={lazyloadDataSetError}
+          errorCardTitle='Failed to load dataset'
+          errorCardSubTitle='Please try again later'
+          refetchFunction={handleRefetchDataset}
+        >
+          <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+            <DatasetTable
+              tableRef={tableRef}
+              columns={columns}
+              serverSideDatasource={serverSideDatasource}
+              columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
+              totalRows={totalRows}
+              onCellEditRequest={onCellEditRequest}
+              onFillEnd={onFillEnd}
+              onRowPropertiesClick={handleRowPropertiesClick}
+              onColumnMoved={handleColumnMoved}
+              columnLevelStats={columnLevelStats}
+              containerStyle={containerStyle}
+              gridStyle={gridStyle}
+              {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
+            />
+          </div>
+        </CommonWrapper>
       </CommonWrapper>
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
