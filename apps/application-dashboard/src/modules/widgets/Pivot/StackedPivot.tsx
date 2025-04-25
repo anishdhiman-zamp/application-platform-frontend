@@ -440,7 +440,7 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
+    <div className='h-fit w-full relative pivot group' ref={gridContainerRef} data-widget-id={currentWidgetInstanceId}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}

@@ -136,7 +136,7 @@
   border-right: none !important;
 }
 
-.pivot .ag-body-viewport {
+.pivot[data-widget-id] .ag-body-viewport {
   overflow: auto !important;
   max-height: var(--pivot-max-height) !important;
 }

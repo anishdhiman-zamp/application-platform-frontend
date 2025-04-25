@@ -30,18 +30,20 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
   } = useFiltersContextStore();
   const [currency, setCurrency] = useState<string[]>(['USD']);
   const [widgetDetails, setWidgetDetails] = useState<{
-    height: number;
-    isSingleHeader: boolean;
-  }>({
-    height: 0,
-    isSingleHeader: true,
-  });
+    [key: string]: {
+      height: number;
+      isSingleHeader: boolean;
+    };
+  }>({});
 
-  const handleWidgetHeightChange = (height: number, isSingleHeader: boolean) => {
-    setWidgetDetails({
-      height,
-      isSingleHeader,
-    });
+  const handleWidgetHeightChange = (widgetId: string, height: number, isSingleHeader: boolean) => {
+    setWidgetDetails((prev) => ({
+      ...prev,
+      [widgetId]: {
+        height,
+        isSingleHeader,
+      },
+    }));
   };
 
   const {
@@ -65,37 +67,45 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
         (widget) => widget?.widget_instance_id === widgetConfig?.default_widget,
       )?.widget_type;
 
+      const widgetId = widgetConfig?.default_widget;
+      const widgetHeight = widgetDetails[widgetId]?.height || 0;
+
       return {
-        i: widgetConfig?.default_widget,
+        i: widgetId,
         ...widgetConfig?.layout,
         h:
-          widgetType === WIDGET_TYPES.PIVOT_TABLE && widgetDetails?.height > 0
-            ? Math.min(getHfromWidgetHeight(widgetDetails?.height), widgetConfig?.layout?.h)
+          widgetType === WIDGET_TYPES.PIVOT_TABLE && widgetHeight > 0
+            ? Math.min(getHfromWidgetHeight(widgetHeight), widgetConfig?.layout?.h)
             : widgetConfig?.layout?.h,
       };
     });
   }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId]);
 
-  //Add the max-height on pivot table based on sheet layout height for pivot and current actual height of the grid
+  //Add the max-height on pivot tables based on sheet layout height for pivots and current actual height of the grid
   useEffect(() => {
-    if (typeof document !== 'undefined' && sheetLayout) {
-      if (sheetLayout && sheetDetails?.sheet_config?.sheet_layout[0]?.layout?.h == sheetLayout[0].h) {
-        const substractedHeight = widgetDetails?.isSingleHeader ? 93 : 135;
-
-        document.documentElement.style.setProperty(
-          '--pivot-max-height',
-          `${sheetLayout[0]?.h * 56 + (sheetLayout[0]?.h - 1) * 20 - substractedHeight}px`,
+    if (document && sheetLayout) {
+      sheetLayout.forEach((layout) => {
+        const widgetInstance = sheetDetails?.widget_instances?.find(
+          (widget) => widget?.widget_instance_id === layout?.i,
         );
-      }
+
+        if (widgetInstance?.widget_type === WIDGET_TYPES.PIVOT_TABLE) {
+          const widgetId = layout?.i;
+          const isSingleHeader = widgetDetails[widgetId]?.isSingleHeader ?? true;
+          const substractedHeight = isSingleHeader ? 93 : 135;
+
+          document.documentElement.style.setProperty(
+            `--pivot-max-height-${widgetId}`,
+            `${layout?.h * 56 + (layout?.h - 1) * 20 - substractedHeight}px`,
+          );
+        }
+      });
     }
-  }, [sheetDetails, sheetLayout]);
+  }, [sheetDetails, sheetLayout, widgetDetails]);
 
   //To reset the widget details on switch of page or sheet
   useEffect(() => {
-    setWidgetDetails({
-      height: 0,
-      isSingleHeader: true,
-    });
+    setWidgetDetails({});
   }, [pageId, sheetId]);
 
   return (
@@ -172,7 +182,9 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                       currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
                       defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
                       widgetInstances={sheetDetails?.widget_instances ?? []}
-                      handleWidgetHeightChange={handleWidgetHeightChange}
+                      handleWidgetHeightChange={(height, isSingleHeader) =>
+                        handleWidgetHeightChange(widgetConfig?.default_widget, height, isSingleHeader)
+                      }
                       sheetId={sheetId}
                     />
                   </div>
