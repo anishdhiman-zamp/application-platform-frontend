@@ -21,9 +21,11 @@ const TooltipV2: FC<TooltipV2Props> = ({
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger className={className}>{children}</TooltipTrigger>
-        <TooltipContent className={tooltipClassName} side={side} sideOffset={10}>
-          {tooltipBody}
-        </TooltipContent>
+        {tooltipBody && (
+          <TooltipContent className={tooltipClassName} side={side} sideOffset={10}>
+            {tooltipBody}
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   );

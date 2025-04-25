@@ -105,7 +105,11 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
       return {
         column: condition.colId,
         operator: condition.type,
-        value: ArrayFilters.includes(condition.type) ? [condition.filter] : condition.filter,
+        value: ArrayFilters.includes(condition.type)
+          ? Array.isArray(condition.filter)
+            ? condition.filter
+            : [condition.filter]
+          : condition.filter,
       };
     case FILTER_TYPES.ARRAY_SEARCH:
       return {

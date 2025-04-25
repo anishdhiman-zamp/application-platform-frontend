@@ -63,6 +63,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
   };
 
   const onOperatorChange = (option: OptionsType) => {
+    setIsConditionOptionsOpen(false);
     setSelectedOperator(option);
     handleSetValues(option?.value as string, searchValue);
   };
@@ -88,7 +89,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({ column, className
         <div className='f-11-400 text-GRAY_700  whitespace-nowrap'>{label || camelCaseToNormalText(columnId)}</div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-2'
-          onClick={() => setIsConditionOptionsOpen(!isOpen)}
+          onClick={() => !isConditionOptionsOpen && setIsConditionOptionsOpen((prev) => !prev)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}

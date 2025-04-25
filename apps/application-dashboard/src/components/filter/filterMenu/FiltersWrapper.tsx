@@ -1,8 +1,7 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
-import { defaultFn, defaultFnType, MapAny } from 'types/commonTypes';
-import { TooltipPositions } from 'components/common/tooltip';
+import { defaultFn, defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
 import { FilterConfigType } from 'components/filter/filter.types';
 import { getFilterValueForKey } from 'components/filter/filter.utils';
 import FilterControlButton from 'components/filter/FilterControlButton';
@@ -157,7 +156,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
           <div className='relative'>
             <FilterControlButton
               tooltipText='Remove all filters'
-              tooltipPosition={TooltipPositions.TOP}
+              tooltipPosition={SIDE_OPTIONS.TOP}
               onClick={() => setShouldShowConfirmationPopup(!shouldShowConfirmationPopup)}
               buttonRef={confirmationPopupControlRef}
               icon='x-close'
