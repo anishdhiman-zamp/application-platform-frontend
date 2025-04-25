@@ -246,7 +246,8 @@ export function shuffleArray(array: any[]) {
  * @param number
  * @returns string number with suffix
  */
-export function formatNumber(value = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
+export function formatNumber(maxValue = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
+  const value = Math.abs(maxValue);
   const suffixes = [
     { threshold: 1000000000, suffix: 'B', valueString: 'Billions' },
     { threshold: 1000000, suffix: 'M', valueString: 'Millions' },
@@ -278,8 +279,9 @@ export function formatNumber(value = 0, precision = 1, allowSuffix = true, getSu
  */
 export const getMaxValue = (data: MapAny[], keys: string[]) => {
   const maxValue = Math.max(...data.flatMap((item) => keys.map((key) => item[key] || 0)));
+  const minValue = Math.min(...data.flatMap((item) => keys.map((key) => item[key] || 0)));
 
-  return maxValue;
+  return Math.abs(maxValue) > Math.abs(minValue) ? Math.abs(maxValue) : Math.abs(minValue);
 };
 
 /**
