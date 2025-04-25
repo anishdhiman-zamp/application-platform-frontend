@@ -509,3 +509,20 @@ export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'bo
 };
 
 export const getCommaSeparatedNumberForInput = (num: string) => num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+/**
+ * Moves a value to the top of an array
+ * @param array
+ * @param value
+ * @returns array
+ */
+export const moveToTop = (array: string[], value: string): string[] => {
+  const index = array.indexOf(value);
+
+  if (index > -1) {
+    array.splice(index, 1);
+    array.unshift(value);
+  }
+
+  return array;
+};

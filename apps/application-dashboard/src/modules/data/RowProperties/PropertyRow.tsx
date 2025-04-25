@@ -74,7 +74,11 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
                   : undefined
               }
             >
-              <TagChip item={getTagLabel(value)} showIcon />
+              <TagChip
+                item={getTagLabel(value)}
+                showIcon
+                externalColor={column?.headerComponentParams?.filterComponentProps?.tagColorMap?.[value]}
+              />
             </div>
           </Tooltip>
         );

@@ -1,20 +1,27 @@
 import { ChangeEvent, useState } from 'react';
 import { MapAny } from 'types/commonTypes';
+import { moveToTop } from '@/utils/common';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';
 import TagWithHierarchy from 'components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';
 
 const CustomTagEditor = (props: MapAny) => {
-  const { values, stopEditing, onValueChange, tagColorMap } = props;
+  const { values, stopEditing, onValueChange, tagColorMap, initialValue } = props;
+
   const [searchValue, setSearchValue] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<string[]>(values);
+  const [searchResults, setSearchResults] = useState<string[]>(moveToTop(values, initialValue));
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (value?.includes('.')) return;
     setSearchValue(value);
-    setSearchResults(values.filter((tag: string) => tag?.toLowerCase()?.includes(value?.toLowerCase())));
+    let filteredSearchResults = values.filter((tag: string) => tag?.toLowerCase()?.includes(value?.toLowerCase()));
+
+    if (filteredSearchResults.includes(initialValue)) {
+      filteredSearchResults = moveToTop(filteredSearchResults, initialValue);
+    }
+    setSearchResults(filteredSearchResults);
   };
 
   const handleTagClick = (tag: string) => {
@@ -51,7 +58,7 @@ const CustomTagEditor = (props: MapAny) => {
         <div className='space-y-1 my-1 overflow-y-auto max-h-[300px]'>
           {searchResults.map((tag: string) => (
             <div key={tag} onClick={() => handleTagClick(tag)}>
-              <TagWithHierarchy tag={tag} labelColor={tagColorMap?.[tag]} />
+              <TagWithHierarchy tag={tag} labelColor={tagColorMap?.[tag]} isSelected={tag === initialValue} />
             </div>
           ))}
         </div>

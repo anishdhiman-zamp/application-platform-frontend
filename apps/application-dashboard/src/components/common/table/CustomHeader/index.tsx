@@ -11,6 +11,7 @@ import { MapAny } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { cn } from 'utils/common';
+import { RuleColumnDetailsType } from '@/modules/data/data.types';
 import { Button } from 'components/common/button/Button';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
 import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
@@ -23,7 +24,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type CustomHeaderProps = {
   metadata: DatasetFilterConfigMetadataType;
-  handleRulesListingSideDrawerOpen: (colId: string) => void;
+  handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   datasetId: string;
   tableRef: RefObject<AgGridReact>;
@@ -84,7 +85,11 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
     switch (option) {
       case CustomHeaderMenuOptionTypes.RULES:
-        handleRulesListingSideDrawerOpen(colId);
+        handleRulesListingSideDrawerOpen({
+          colId,
+          columnLabel: colDef?.headerName ?? colId,
+          tagColorMap: filterComponentProps?.tagColorMap,
+        });
         break;
       case CustomHeaderMenuOptionTypes.ADD_TAG:
         setIsAddTagOpen(true);

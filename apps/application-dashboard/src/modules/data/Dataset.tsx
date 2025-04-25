@@ -25,14 +25,17 @@ import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { DatasetActionMessages } from 'modules/data/data.constants';
-import { DATASET_ACTION_STATUS, DATASET_ACTION_TYPE, LOADER_STATUS } from 'modules/data/data.types';
 import {
-  formatColumnLevelStats,
+  DATASET_ACTION_STATUS,
+  DATASET_ACTION_TYPE,
+  LOADER_STATUS,
+  RuleColumnDetailsType,
+} from 'modules/data/data.types';
+import {
   formatColumns,
   formatDrilldownFilters,
   formatUrlFilters,
   getColumnOrderingVisibilityForCurrentDataset,
-  getEncodedRequestWithAggregations,
   getFilters,
   syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
@@ -63,7 +66,6 @@ import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
-import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -113,7 +115,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [isPolling, setIsPolling] = useState<boolean>(false);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [columnId, setColumnId] = useState<string>('');
+  const [ruleColumnDetails, setRuleColumnDetails] = useState<RuleColumnDetailsType>({
+    colId: '',
+    columnLabel: '',
+    tagColorMap: {},
+  });
   const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
@@ -122,7 +128,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
-  const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
+  // Removed because it is causing load on star tree
+  // const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
   const [deleteRuleId, setDeleteRuleId] = useState<string>();
   const [pollingMessage, setPollingMessage] = useState<string>('');
@@ -357,9 +364,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
     setRowPropertiesData(data);
   };
 
-  const handleRulesListingSideDrawerOpen = (columnId: string) => {
+  const handleRulesListingSideDrawerOpen = (ruleColumnDetailsValue: RuleColumnDetailsType) => {
     setIsRulesListingSideDrawerOpen(true);
-    setColumnId(columnId);
+    setRuleColumnDetails(ruleColumnDetailsValue);
   };
 
   useEffect(() => {
@@ -419,28 +426,29 @@ const DatasetById: FC<DatasetByIdProps> = ({
           isReadOnly
         )
           return;
-        const amountRangeColumns = columns
-          ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
-          ?.map((column) => column?.field)
-          ?.filter((column) => column !== undefined);
+        // Removed because it is causing load on star tree
+        // const amountRangeColumns = columns
+        //   ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
+        //   ?.map((column) => column?.field)
+        //   ?.filter((column) => column !== undefined);
 
-        if (amountRangeColumns?.length > 0) {
-          getDatasetData({
-            datasetId: id as string,
-            query_config: getEncodedRequestWithAggregations(amountRangeColumns),
-          })
-            .unwrap()
-            .then((response) => {
-              if (!isNoRowsOverlayVisible) {
-                setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
-              }
-            })
-            .catch(() => {
-              if (!isNoRowsOverlayVisible) {
-                setColumnLevelStats(undefined);
-              }
-            });
-        }
+        // if (amountRangeColumns?.length > 0) {
+        //   getDatasetData({
+        //     datasetId: id as string,
+        //     query_config: getEncodedRequestWithAggregations(amountRangeColumns),
+        //   })
+        //     .unwrap()
+        //     .then((response) => {
+        //       if (!isNoRowsOverlayVisible) {
+        //         setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
+        //       }
+        //     })
+        //     .catch(() => {
+        //       if (!isNoRowsOverlayVisible) {
+        //         setColumnLevelStats(undefined);
+        //       }
+        //     });
+        // }
       }
     }
   }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
@@ -642,7 +650,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
               onFillEnd={onFillEnd}
               onRowPropertiesClick={handleRowPropertiesClick}
               onColumnMoved={handleColumnMoved}
-              columnLevelStats={columnLevelStats}
+              // Removed because it is causing load on star tree
+              // columnLevelStats={columnLevelStats}
               containerStyle={containerStyle}
               gridStyle={gridStyle}
               {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
@@ -652,7 +661,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
       </CommonWrapper>
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
-          column={columnId}
+          column={ruleColumnDetails?.colId}
+          columnLabel={ruleColumnDetails?.columnLabel}
+          tagColorMap={ruleColumnDetails?.tagColorMap}
           onClose={handleCloseRulesListingSideDrawer}
           datasetId={id as string}
           handleSuccessfulUpdate={handleSuccessfulUpdate}
