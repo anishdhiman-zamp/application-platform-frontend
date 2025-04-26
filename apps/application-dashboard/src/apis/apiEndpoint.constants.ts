@@ -73,6 +73,7 @@ export const API_ENDPOINTS = {
   PAYMENTS_CONFIG_GET: `payments/config`,
 
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
+  RECIPIENT_CREATE_POST: `recipients/540fb621-5f39-46ec-80bc-9df6d4f4e08b/create-recipient-and-account`,
 
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
@@ -81,6 +82,8 @@ export const API_ENDPOINTS = {
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  FORMS_CONFIG_GET: `v1/forms/config`,
+  FORMS_SUBMIT: `v1/forms/submissions`,
 };
 
 export const enum REQUEST_TYPES {

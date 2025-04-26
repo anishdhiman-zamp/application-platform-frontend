@@ -1,5 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Sheet, SheetContent, SIZE_TYPES } from '@zamp-platform/ui';
+import { Sheet, SheetContent } from '@zamp-platform/ui';
+import { SIZE_TYPES } from '@zamp-platform/ui/types';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';

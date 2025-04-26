@@ -47,7 +47,8 @@
     "tailwind-merge": "^2.5.5",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "@zamp-platform/config": "*",
-    "@zamp-platform/ui": "*"
+    "@zamp-platform/ui": "*",
+    "@zamp-platform/form-builder": "*"
   },
   "peerDependencies": {
     "next": "^15",
