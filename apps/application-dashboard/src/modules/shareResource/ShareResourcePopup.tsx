@@ -162,8 +162,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       });
   };
 
-  const handleRoleChange = async (resourceAudienceId: string, role: string) => {
-    await changeRole({
+  const handleRoleChange = async (resourceAudienceId: string, role: string): Promise<boolean> => {
+    const success = await changeRole({
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
       body: {
@@ -177,10 +177,16 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
       .then(() => {
         refetchAudiencesData();
         toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+
+        return true;
       })
       .catch((err) => {
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
+
+        return false;
       });
+
+    return success;
   };
 
   const handleDeleteAudience = async (resourceAudienceId: string, userName: string) => {

@@ -24,6 +24,7 @@ interface FilterDropdownMenuProps {
   isPeriodicityEnabled?: boolean;
   onFilterChange?: (value: string[], filterType?: FILTER_TYPES) => void;
   updateContextOnChange?: boolean;
+  showColumnLabel?: boolean;
 }
 
 const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
@@ -35,6 +36,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
   isOpen,
   label,
   updateContextOnChange = false,
+  showColumnLabel = true,
 }) => {
   const {
     state: { filtersConfig },
@@ -55,6 +57,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
       isOpen={isOpen}
       label={label}
       updateContextOnChange={updateContextOnChange}
+      showColumnLabel={showColumnLabel}
       {...filterComponentProps}
     />
   ) : null;

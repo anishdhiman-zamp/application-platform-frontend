@@ -32,9 +32,7 @@ import {
 } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
-import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
-import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -104,7 +102,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
   const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(false);
-  const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
 
   const firstLoadDone = useRef(false); // Track if first load is done
 
@@ -537,14 +534,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
         <TemplateListSideDrawer
           isOpen={isPaymentTemplatesSideDrawerOpen}
           onClose={() => setIsPaymentTemplatesSideDrawerOpen(false)}
-          onTemplateClick={(paymentType: MOVE_MONEY_TYPE) => setCreateTemplateType(paymentType)}
-        />
-      )}
-      {!!createTemplateType && (
-        <CreateTemplatePopover
-          paymentType={createTemplateType}
-          isOpen={!!createTemplateType}
-          onClose={() => setCreateTemplateType(null)}
         />
       )}
     </>

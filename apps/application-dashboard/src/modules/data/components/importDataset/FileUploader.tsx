@@ -1,4 +1,4 @@
-import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useState } from 'react';
+import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
@@ -27,6 +27,12 @@ const FileUploader: FC<FileUploaderPropsType> = ({
 }) => {
   const errorTitle = error ?? FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR;
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
+
+  const helperText = useMemo(() => {
+    const supportedFilesList = supportedFiles?.replaceAll('.', ' ');
+
+    return `We only accept ${supportedFilesList} format files here`;
+  }, [supportedFiles]);
 
   const handleFileDrop: DragEventHandler<HTMLDivElement> = (event) => {
     if (isLoading) return null;
@@ -91,7 +97,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
         )}
         <div className='flex flex-col gap-1 f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'>
           <span>{footer}</span>
-          <span>{`We only accept ${supportedFiles} format files here`}</span>
+          <span>{helperText}</span>
         </div>
       </div>
     );

@@ -83,7 +83,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const handleRecipientSelect = (recipient: RecipientDetailsType) => {
     setRecipientDetails(recipient);
     setDestinationAccountDetails(undefined);
-    if (recipient.accounts.length) {
+    if (recipient?.accounts?.length) {
       setDestinationAccountList(recipient?.accounts ?? []);
     }
   };

@@ -22,7 +22,10 @@ export const initializePostHog = () => {
 };
 
 export const identifyPostHogUser = (userId: string, merchantName?: string) => {
-  posthogJs.identify(userId);
+  posthogJs.identify(userId, {
+    id: userId,
+    merchant: merchantName,
+  });
 
   posthogJs.people.set({
     id: userId,

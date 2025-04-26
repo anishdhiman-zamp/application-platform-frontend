@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetSheetDetailsQuery } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
@@ -136,9 +136,10 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                   {!!filtersConfig?.length && <div className='border-r border-GRAY_400 h-7'></div>}
                   <SingleSelectFilter
                     filterKey='currency'
-                    options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== 'local')}
+                    options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
                     onFilterChange={(value) => setCurrency(value)}
                     value={currency}
+                    showColumnLabel={false}
                     label='Currency'
                   />
                 </div>

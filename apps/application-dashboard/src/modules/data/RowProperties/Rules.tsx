@@ -1,22 +1,22 @@
 import { FC, useMemo } from 'react';
 import { useGetRulesByRuleIdsQuery } from 'apis/dataset';
+import { RuleConfigType } from 'modules/data/RowProperties/rowProperties.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { cn } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
-import { getTagLabel } from 'components/filter/filter.utils';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type RulesProps = {
-  ruleIds: string[];
+  ruleConfigs: RuleConfigType[];
   selectedRuleId: string;
 };
 
-const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
+const Rules: FC<RulesProps> = ({ ruleConfigs, selectedRuleId }) => {
   const {
     data: rulesData,
     isLoading,
     isError,
-  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleIds }, { skip: !ruleIds?.length });
+  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleConfigs.map((config) => config.id) }, { skip: !ruleConfigs?.length });
 
   const listOfFilters: RuleCardProps[] = useMemo(
     () =>
@@ -35,8 +35,8 @@ const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
     <CommonWrapper
       isLoading={isLoading}
       isError={isError}
-      isNoData={!ruleIds?.length}
-      className={cn({ 'h-full': !ruleIds?.length })}
+      isNoData={!ruleConfigs?.length}
+      className={cn({ 'h-full': !ruleConfigs?.length })}
       noDataBanner={
         <div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'>
           <SvgSpriteLoader id='lightning-01' width={24} height={24} />
@@ -49,9 +49,10 @@ const Rules: FC<RulesProps> = ({ ruleIds, selectedRuleId }) => {
           <RuleCard
             filters={filter?.filters}
             key={index}
-            value={getTagLabel(filter?.value ?? '')}
+            value={filter?.value}
             createdOn={filter?.createdOn}
             defaultExpanded={filter?.defaultExpanded}
+            labelColor={ruleConfigs?.[index]?.tagColorMap?.[filter?.value ?? '']}
           />
         ))}
       </div>

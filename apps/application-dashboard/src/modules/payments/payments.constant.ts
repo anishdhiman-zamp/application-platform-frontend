@@ -1,5 +1,10 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { MOVE_MONEY_ACTION_TYPE, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import {
+  MOVE_MONEY_ACTION_TYPE,
+  MOVE_MONEY_PAYMENT_TYPE,
+  MOVE_MONEY_TYPE,
+  TEMPLATE_STATUS_TYPES,
+} from 'modules/payments/payments.types';
 import { INPUT_FILE_FORMATS } from 'types/common/mime';
 
 export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';
@@ -35,6 +40,21 @@ export const RECIPIENT_CARD_ACTION_ITEMS = [
       size: 14,
     },
     tooltipBody: 'Send Money',
+  },
+];
+
+export const MOVE_MONEY_TEMPLATE_FILTER_ITEMS = [
+  {
+    value: 'all',
+    label: 'All',
+  },
+  {
+    value: TEMPLATE_STATUS_TYPES.ACTIVE,
+    label: 'Active templates',
+  },
+  {
+    value: TEMPLATE_STATUS_TYPES.DRAFTED,
+    label: 'Approval pending',
   },
 ];
 

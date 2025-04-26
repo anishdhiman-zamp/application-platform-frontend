@@ -80,10 +80,11 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
       if (selectedFilters[key] && typeof selectedFilters[key] === 'object' && 'periodicity' in selectedFilters[key]) {
         const filter = filtersConfig?.find((filter) => filter?.key === key);
 
-        return {
-          timeColumn: JSON.stringify(filter?.targets),
-          periodicity: selectedFilters[key]?.periodicity,
-        };
+        if (filter)
+          return {
+            timeColumn: JSON.stringify(filter?.targets),
+            periodicity: selectedFilters[key]?.periodicity,
+          };
       }
     }
 

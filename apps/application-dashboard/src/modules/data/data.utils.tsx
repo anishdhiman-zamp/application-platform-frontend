@@ -11,7 +11,7 @@ import {
   isValid,
 } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
-import { ColumnOrderingVisibilityType } from 'modules/data/data.types';
+import { ColumnOrderingVisibilityType, RuleColumnDetailsType } from 'modules/data/data.types';
 import {
   DatasetFilterConfigResponseType,
   DatasetType,
@@ -77,7 +77,7 @@ export const formatColumns = (
   datasetId: string,
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
   tableRef: RefObject<AgGridReact>,
-  handleRulesListingSideDrawerOpen: (columnId: string) => void,
+  handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -247,9 +247,11 @@ export const getUpdatedColumnOrderingVisibility = (
       const matchingFilterConfig = filterConfig.find((fc) => fc.column === existingCol.colId);
 
       if (matchingFilterConfig) {
+        const isExplicitlyHidden = matchingFilterConfig.metadata?.is_hidden === true;
+
         return {
           ...existingCol,
-          isVisible: matchingFilterConfig.metadata?.is_hidden !== true,
+          isVisible: isExplicitlyHidden ? false : existingCol.isVisible,
         };
       }
 

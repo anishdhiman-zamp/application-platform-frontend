@@ -24,7 +24,10 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
     dispatch,
     state: { amountDetails, currentStep, destinationAccountDetails, sourceAccountDetails, templateDetails, reset },
   } = useMoveMoneyContextStore();
-  const isActiveStep = useMemo(() => currentStep === 1, [currentStep]);
+  const isActiveStep = useMemo(
+    () => (isSelfTransfer ? currentStep === 1 : currentStep === 2),
+    [currentStep, isSelfTransfer],
+  );
   const [amount, setAmount] = useState(amountDetails?.amount);
   const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
 

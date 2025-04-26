@@ -1,8 +1,11 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Sheet, SheetContent } from '@zamp-platform/ui';
 import { SIZE_TYPES } from '@zamp-platform/ui/types';
+import TemplateFilter from 'modules/payments/move-money/components/TemplateFilter';
+import { MOVE_MONEY_TEMPLATE_FILTER_ITEMS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';
+import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
 import { useRouter } from 'next/router';
@@ -15,17 +18,19 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import { MenuItem } from '@/types/common/components';
 
 type TemplateListSideDrawerProps = {
   onClose: defaultFnType;
   isOpen: boolean;
-  onTemplateClick: (paymentType: MOVE_MONEY_TYPE) => void;
 };
 
-const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen, onTemplateClick }) => {
+const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOpen }) => {
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState<string>(TEMPLATE_LIST_TABS[0].value);
   const [search, setSearch] = useState<string>('');
+  const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<MenuItem>(MOVE_MONEY_TEMPLATE_FILTER_ITEMS[0]);
 
   const { data: templateList, isLoading, isError } = useGetTemplateListQuery();
 
@@ -34,12 +39,16 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
   };
 
   const templates = useMemo(() => {
-    const currentTypeTemplates = templateList?.templates?.filter((template) => template?.type === currentTab);
+    const currentTypeTemplates = templateList?.templates?.filter(
+      (template) =>
+        template?.type === currentTab &&
+        (selectedFilter?.value !== 'all' ? template?.status === selectedFilter?.value : true),
+    );
 
     if (!search.length) return currentTypeTemplates;
 
     return currentTypeTemplates?.filter((template) => template?.name?.toLowerCase()?.includes(search?.toLowerCase()));
-  }, [currentTab, templateList, search]);
+  }, [currentTab, templateList, search, selectedFilter]);
 
   const handleTemplateSendClick = (template: TemplateDetailsType) => {
     router.push(`${ROUTES_PATH.MONEY_TRANSFER}?type=${template?.type}&templateId=${template?.id}`);
@@ -47,8 +56,8 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent size={SIZE_TYPES.LARGE} className='p-0 h-screen overflow-hidden'>
-        <div className='overflow-y-scroll h-full'>
+      <SheetContent size={SIZE_TYPES.LARGE} tabIndex={-1} className='p-0 h-screen overflow-hidden'>
+        <div className='overflow-y-scroll h-full' tabIndex={-1}>
           <div>
             <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
               <div className='f-16-600 mb-4.5'>Templates</div>
@@ -57,10 +66,9 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
                   tabsList={TEMPLATE_LIST_TABS}
                   currentTab={currentTab}
                   onValueChange={handleTabSelect}
-                  contentClassName='max-h-[314px] overflow-y-scroll f-12-450'
+                  contentClassName='max-h-[314px] overflow-y-scroll f-12-450 !mt-0'
                   listClassName='grid w-full grid-cols-2 mx-auto'
-                  triggerClassName='f-12-450'
-                  className='mx0'
+                  triggerClassName='!mt-0'
                 />
                 <Input
                   type='text'
@@ -69,13 +77,17 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
                   onChange={(e) => setSearch(e.target.value)}
                   overrideInputBgClassName='!border-none !px-2 focus:outline-none !py-0 !h-6 placeholder:!text-GRAY_500'
                   focusClassNames=''
+                  tabIndex={createTemplateType ? -1 : 0}
                 />
-                <div
-                  className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
-                  onClick={() => onTemplateClick(currentTab as MOVE_MONEY_TYPE)}
-                >
-                  <SvgSpriteLoader id='plus' size={14} />
-                  Create Template
+                <div className='flex justify-between'>
+                  <div
+                    className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
+                    onClick={() => setCreateTemplateType(currentTab as MOVE_MONEY_TYPE)}
+                  >
+                    <SvgSpriteLoader id='plus' size={14} />
+                    Create Template
+                  </div>
+                  <TemplateFilter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
                 </div>
               </div>
             </div>
@@ -98,6 +110,13 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
               </CommonWrapper>
             </div>
           </div>
+          {!!createTemplateType && (
+            <CreateTemplatePopover
+              paymentType={createTemplateType}
+              isOpen={!!createTemplateType}
+              onClose={() => setCreateTemplateType(null)}
+            />
+          )}
         </div>
       </SheetContent>
     </Sheet>

@@ -1,4 +1,5 @@
 import { RowClickedEvent } from 'ag-grid-community';
+import { MapAny } from '@/types/commonTypes';
 
 export type UserAccessToDataSetType = {
   name: string;
@@ -40,3 +41,9 @@ export enum DATASET_ACTION_TYPE {
   TAGGING = 'tagging',
   RULE_DELETION = 'rule_deletion',
 }
+
+export type RuleColumnDetailsType = {
+  colId: string;
+  columnLabel: string;
+  tagColorMap: MapAny;
+};

@@ -19,6 +19,7 @@ interface MultiSearchFilterMenuItemProps {
   label?: string;
   placeholder?: string;
   className?: string;
+  showColumnLabel?: boolean;
 }
 
 const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({

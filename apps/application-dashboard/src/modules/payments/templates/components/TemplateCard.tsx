@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
+import { TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
-import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -13,7 +13,7 @@ interface TemplateCardProps {
 const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
   const source = template?.details[0]?.source_account;
   const destination = template?.details[0]?.destination_account;
-  const isApprovalPending = template?.status !== STATUS_TYPES.SUCCESS;
+  const isApprovalPending = template?.status !== TEMPLATE_STATUS_TYPES.DRAFTED;
 
   return (
     <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md'>

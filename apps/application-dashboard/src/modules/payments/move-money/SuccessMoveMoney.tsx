@@ -2,7 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
-import { FAILED_TO_CREATE_TEMPLATE } from 'modules/payments/payments.constant';
+import { FAILED_TO_CREATE_TEMPLATE, MASK_DOTS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
@@ -66,8 +66,9 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
         <SvgSpriteLoader size={66} id='check-circle' color='#5AB570' />
       </div>
       <div className='f-32-500 mb-6'>
+        You’ve sent money to{' '}
         {recipientDetails?.name ??
-          `${destinationAccountDetails?.account_name} ${destinationAccountDetails?.masked_account_number}`}
+          `${destinationAccountDetails?.account_name} ${MASK_DOTS} ${destinationAccountDetails?.masked_account_number}`}
       </div>
       <div className='flex flex-col gap-4 mb-4'>
         {!!transactionDetails?.estimated_time && (
