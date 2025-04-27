@@ -60,7 +60,7 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
     case FILTER_TYPES.SINGLE_SELECT:
       return {
         filterType: filterType,
-        type: getFilterOperator(filter?.operator),
+        type: filter?.operator,
         values: filter?.value,
       };
   }
