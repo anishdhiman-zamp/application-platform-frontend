@@ -2,7 +2,12 @@ import { store } from 'store';
 import { ResourceAudienceType, UserRoleIdType } from 'types/api/auth.types';
 import { acceptableRolesForAdminPurpose } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
-import { DATASET_ACCESS_PRIVILEGES, PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource';
+import {
+  DATASET_ACCESS_PRIVILEGES,
+  PAGE_ACCESS_PRIVILEGES,
+  PAYMENT_ACCESS_PRIVILEGES,
+  ResourceType,
+} from '@/modules/shareResource';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
 export const accessPermissionForPage = (userRole: string) => {
@@ -43,6 +48,8 @@ export const adminAccessPermissionForResource = (
     resourceAdminPrivilege = DATASET_ACCESS_PRIVILEGES.ADMIN;
   } else if (resourceType === ResourceType.PAGE) {
     resourceAdminPrivilege = PAGE_ACCESS_PRIVILEGES.ADMIN;
+  } else if (resourceType === ResourceType.PAYMENTS) {
+    resourceAdminPrivilege = PAYMENT_ACCESS_PRIVILEGES.ADMIN;
   }
 
   for (const audience of resourceAudiences) {

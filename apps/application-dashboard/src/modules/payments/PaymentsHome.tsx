@@ -33,6 +33,8 @@ import {
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
+import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
+import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -75,6 +77,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
+
+  const { checkUserPrivilege } = useResourceAccess(ResourceType.PAYMENTS, '');
 
   const {
     data: filterConfigData,
@@ -497,7 +501,9 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
               setShowAiTransformationStatus={setShowAiTransformationStatus}
             />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-            <MoveMoneyButton />
+
+            {(checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN) ||
+              checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.INITIATOR)) && <MoveMoneyButton />}
           </div>
         </div>
 
