@@ -8,14 +8,12 @@ const tagVariants = cva(
     variants: {
       variant: {
         default: 'bg-GRAY_100 text-black border-GRAY_200',
-        blue: 'bg-BLUE_100 text-BLUE_800 border-BLUE_300',
-        purple: 'bg-[#eaeaff] text-[#5c5cd6] border-[#d1d1ff]',
-        yellow: 'bg-ORANGE_100 text-ORANGE_900 border-ORANGE_300',
-        red: 'bg-RED_100 text-RED_800 border-RED_300',
-        green: 'bg-GREEN_100 text-GREEN_900 border-GREEN_300',
+        blue: 'bg-blue-150 text-BLUE_800 border-BLUE_300',
+        yellow: 'bg-yellow-100 text-ORANGE_900 border-ORANGE_300',
+        green: 'bg-green-150 text-GREEN_900 border-GREEN_300',
         outline: 'bg-white text-black border-GRAY_300',
         ghost: 'bg-transparent text-black border-transparent',
-        pink: 'bg-[#ffe6f0] text-[#c2185b] border-[#ffb6d5]',
+        pink: 'bg-pink-100 text-[#c2185b] border-[#ffb6d5]',
       },
     },
     defaultVariants: {
