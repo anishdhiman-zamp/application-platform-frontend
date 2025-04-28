@@ -1,6 +1,7 @@
 import {
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
+  PAYMENT_ACCESS_PRIVILEGES,
   ResourcePrivilege,
   ResourceType,
   ShareResourceConfig,
@@ -32,11 +33,48 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     value: PAGE_ACCESS_PRIVILEGES.VIEWER,
     desc: 'Can view page only',
   },
+  {
+    kind: ResourceType.PAYMENTS,
+    label: 'Admin',
+    value: PAYMENT_ACCESS_PRIVILEGES.ADMIN,
+    desc: 'Can manage and share payments',
+  },
+  {
+    kind: ResourceType.PAYMENTS,
+    label: 'Initiator',
+    value: PAYMENT_ACCESS_PRIVILEGES.INITIATOR,
+    desc: 'Can initiate payments',
+  },
+  {
+    kind: ResourceType.PAYMENTS,
+    label: 'Viewer',
+    value: PAYMENT_ACCESS_PRIVILEGES.VIEWER,
+    desc: 'Can view payments only',
+  },
 ];
+
+export const resourcePrivilegeRank = {
+  [ResourceType.DATASET]: {
+    [DATASET_ACCESS_PRIVILEGES.ADMIN]: 1,
+    [DATASET_ACCESS_PRIVILEGES.VIEWER]: 2,
+  },
+  [ResourceType.PAGE]: {
+    [PAGE_ACCESS_PRIVILEGES.ADMIN]: 1,
+    [PAGE_ACCESS_PRIVILEGES.VIEWER]: 2,
+  },
+  [ResourceType.PAYMENTS]: {
+    [PAYMENT_ACCESS_PRIVILEGES.ADMIN]: 1,
+    [PAYMENT_ACCESS_PRIVILEGES.INITIATOR]: 2,
+    [PAYMENT_ACCESS_PRIVILEGES.VIEWER]: 3,
+  },
+};
 
 export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.DATASET]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.DATASET),
   [ResourceType.PAGE]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.PAGE),
+  [ResourceType.PAYMENTS]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
+    (privilege) => privilege.kind === ResourceType.PAYMENTS,
+  ),
 };
 
 /**
@@ -44,7 +82,6 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
  */
 export const datasetConfig: ShareResourceConfig = {
   type: ResourceType.DATASET,
-  idPropName: 'datasetId',
   accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.DATASET],
   displayName: 'dataset',
   toastMessages: {
@@ -55,7 +92,6 @@ export const datasetConfig: ShareResourceConfig = {
 
 export const pageConfig: ShareResourceConfig = {
   type: ResourceType.PAGE,
-  idPropName: 'pageId',
   accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.PAGE],
   displayName: 'page',
   toastMessages: {
@@ -64,7 +100,18 @@ export const pageConfig: ShareResourceConfig = {
   },
 };
 
+export const paymentsConfig: ShareResourceConfig = {
+  type: ResourceType.PAYMENTS,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.PAYMENTS],
+  displayName: 'payments',
+  toastMessages: {
+    success: TOAST_MESSAGES.SUCCESS_PAYMENTS_SHARED,
+    failed: TOAST_MESSAGES.FAILED_PAYMENTS_SHARED,
+  },
+};
+
 export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
+  [ResourceType.PAYMENTS]: 'payments',
 };

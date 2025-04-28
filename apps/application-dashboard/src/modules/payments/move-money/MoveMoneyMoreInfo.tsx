@@ -11,15 +11,14 @@ import Textarea from 'components/common/Textarea';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoneyTransferMoreDetailsStepProps {
-  shouldReset: boolean;
   handleStepChange: (step: number) => void;
 }
 
-const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ shouldReset, handleStepChange }) => {
+const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ handleStepChange }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const {
     dispatch,
-    state: { moreDetails, currentStep },
+    state: { moreDetails, currentStep, reset },
   } = useMoveMoneyContextStore();
   const isActiveStep = useMemo(() => currentStep === 2, [currentStep]);
 
@@ -68,31 +67,31 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
   }, [isActiveStep]);
 
   useEffect(() => {
-    if (shouldReset) {
+    if (reset) {
       setUploadedFiles([]);
       setTransferNote('');
       setExternalMemo('');
     }
-  }, [shouldReset]);
+  }, [reset]);
 
   return (
     <div className='h-screen overflow-y-scroll'>
-      <div className='pt-34 max-w-75 m-auto pb-20'>
+      <div className='pt-20 max-w-75 m-auto pb-20'>
         <div className='f-22-550 mb-5'>Additional Details</div>
         <div className='mt-5'>
-          <div className='text-GRAY_900 f-12-500 mb-2'>External memo</div>
+          <div className='text-GRAY_900 f-12-500 mb-2'>External Memo (Optional)</div>
           <Textarea
             id='SELF_TRANSFER_EXTERNAL_MEMO_TEXTAREA'
             name='text'
+            placeHolder=''
             textAreaRef={textareaRef}
             value={externalMemo}
-            placeHolder='Add external memo'
             tabIndex={isActiveStep ? 0 : -1}
             className=' f-12-300'
             onChange={({ target }) => setExternalMemo(target.value)}
           />
         </div>
-        <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments</div>
+        <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments (Optional)</div>
         <FileUploaderWrapper
           className='min-h-[100px] px-6'
           Component={FileUploader}
@@ -105,37 +104,33 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ s
         />
         {uploadedFiles?.length > 0 && (
           <div className='flex flex-col gap-2 my-2.5'>
-            <div className=' border border-GRAY_400 rounded-md'>
-              {uploadedFiles.map((file, idx) => (
-                <div
-                  key={file?.fileName + idx}
-                  style={{ zIndex: idx * -1 }}
-                  className='relative animate-file-upload overflow-hidden flex justify-between gap-1.5 items-center p-2'
-                >
-                  <SvgSpriteLoader id='file-05' onClick={() => handleRemoveFile(idx)} size={14} />
-                  <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis f-14-400'>
-                    {file?.fileName}
-                  </div>
-                  <SvgSpriteLoader
-                    id='x-close'
-                    className='cursor-pointer'
-                    onClick={() => handleRemoveFile(idx)}
-                    size={14}
-                  />
-                </div>
-              ))}
-            </div>
+            {uploadedFiles.map((file, idx) => (
+              <div
+                key={file?.fileName + idx}
+                style={{ zIndex: 100 - idx }}
+                className='border border-GRAY_400 rounded-md relative animate-file-upload overflow-hidden flex justify-between gap-1.5 items-center p-2'
+              >
+                <SvgSpriteLoader id='file-05' onClick={() => handleRemoveFile(idx)} size={14} />
+                <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis f-14-400'>{file?.fileName}</div>
+                <SvgSpriteLoader
+                  id='x-close'
+                  className='cursor-pointer'
+                  onClick={() => handleRemoveFile(idx)}
+                  size={14}
+                />
+              </div>
+            ))}
           </div>
         )}
         <div className='text-GRAY_700 f-11-450 mt-1'>Only visible to members of your organization</div>
         <div className='mt-5'>
-          <div className='text-GRAY_900 f-12-500 mb-2'>Notes</div>
+          <div className='text-GRAY_900 f-12-500 mb-2'>Notes (Optional)</div>
           <Textarea
             id='SINGLE_TRANSFER_NOTE_TEXTAREA'
             name='text'
             tabIndex={isActiveStep ? 0 : -1}
             value={transferNote}
-            placeHolder='Add any notes for future reference...'
+            placeHolder=''
             className='f-12-300'
             onChange={({ target }) => setTransferNote(target.value)}
           />

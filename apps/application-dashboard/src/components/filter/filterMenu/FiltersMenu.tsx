@@ -1,7 +1,7 @@
 import React, { FC, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { POSITION_TYPES } from 'types/common/components';
-import { TooltipPositions } from 'components/common/tooltip';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { FilterConfigType } from 'components/filter/filter.types';
 import FilterControlButton from 'components/filter/FilterControlButton';
 import SelectFilterMenuItem from 'components/filter/filterMenu/SelectFilterMenuItem';
@@ -53,7 +53,7 @@ const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, cu
       <div ref={controlRef}>
         <FilterControlButton
           onClick={toggleMenu}
-          tooltipPosition={TooltipPositions.TOP}
+          tooltipPosition={SIDE_OPTIONS.TOP}
           tooltipText={tooltipText}
           id='add-filters'
         >

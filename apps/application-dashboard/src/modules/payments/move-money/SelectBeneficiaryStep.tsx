@@ -6,18 +6,17 @@ import { AccountDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { useGetRecipientBySourceAccountQuery } from '@/apis/payments';
-import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';
+import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 import { Button } from 'components/common/button/Button';
 
 interface SelectBeneficiaryStepProps {
   handleStepChange: (step: number) => void;
-  defaultTemplate?: TemplateDetailsType;
   recipientId?: string;
 }
 
-const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, defaultTemplate, recipientId }) => {
+const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChange, recipientId }) => {
   const {
-    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails },
+    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails, reset },
     dispatch,
   } = useMoveMoneyContextStore();
 
@@ -32,12 +31,13 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
     );
 
   const handleBeneficiarySelect = (beneficiary: RecipientDetailsType) => {
-    dispatch({
-      type: moveMoneyContextActions.RECIPIENT_DETAILS,
-      payload: {
-        recipientDetails: beneficiary,
-      },
-    });
+    if (!templateDetails)
+      dispatch({
+        type: moveMoneyContextActions.RECIPIENT_DETAILS,
+        payload: {
+          recipientDetails: beneficiary,
+        },
+      });
   };
 
   const handleAccountSelect = (account: AccountDetailsType) => {
@@ -58,31 +58,32 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
   }, [recipientId, recipientBySourceAccount]);
 
   return (
-    <div className='h-screen overflow-y-scroll pt-34'>
+    <div className='h-screen overflow-y-scroll pt-20'>
       <div className='max-w-75 m-auto'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
           <SelectBeneDropdown
             autoFocus={currentStep === 1 || !!recipientId}
-            disabled={!!recipientId}
-            defaultSelectedRecipient={selectedBeneficiary}
+            disabled={!!recipientId || !!templateDetails}
+            defaultSelectedRecipient={selectedBeneficiary ?? recipientDetails}
             onSelect={handleBeneficiarySelect}
-            shouldReset={false}
+            shouldReset={reset}
             isLoading={isRecipientBySourceAccountLoading}
-            templateDetails={defaultTemplate}
+            templateDetails={templateDetails}
             recipientList={recipientBySourceAccount?.recipients ?? []}
           />
-          {!templateDetails && recipientDetails && (
+          {recipientDetails && (
             <SelectAccountDropdown
               autoFocus
-              accountsList={recipientDetails?.accounts}
-              shouldReset={false}
+              accountsList={recipientDetails?.accounts ?? []}
+              shouldReset={reset}
               accountDetails={destinationAccountDetails}
               onAccountSelect={handleAccountSelect}
               label='Recipient account'
+              disabled={!!templateDetails}
             />
           )}
-          {!templateDetails && destinationAccountDetails?.account_name && (
+          {destinationAccountDetails?.account_name && (
             <div className='flex flex-col gap-4'>
               <div className='grid grid-cols-2'>
                 <div className='f-12-400 text-GRAY_700'>Bank name</div>

@@ -3,7 +3,6 @@ import { useOnClickOutside } from 'hooks';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
-import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
@@ -64,12 +63,11 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       const counterParties = recipientList?.filter(
         (recipient) => recipient?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()) ?? [],
       );
-      const templates = TEMPLATES.filter((val) => val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
 
-      return { counterParties: counterParties ?? [], templates: templates ?? [] };
+      return { counterParties: counterParties ?? [], templates: [] };
     }
 
-    return { counterParties: recipientList ?? [], templates: TEMPLATES };
+    return { counterParties: recipientList ?? [], templates: [] };
   }, [isSearchActive, searchValue, recipientList]);
 
   const dropdownHeight = useMemo(() => {
@@ -175,7 +173,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   }, [templateDetails]);
 
   useEffect(() => {
-    if (inputRef.current && autoFocus) {
+    if (isShowMenu) {
+      inputRef.current?.focus();
+    }
+  }, [isShowMenu]);
+
+  useEffect(() => {
+    if (inputRef.current && autoFocus && !disabled) {
       inputRef.current.focus();
       setIsSearchActive(true);
       setIsShowMenu(true);
@@ -186,12 +190,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     if (defaultSelectedRecipient) {
       handleRecipientSelect(defaultSelectedRecipient);
     } else {
-      setIsSearchActive(false);
-      setIsShowMenu(true);
-      setSelectedRecipient(null);
-      setSearchValue('');
+      if (!disabled) {
+        setIsSearchActive(false);
+        setIsShowMenu(true);
+        setSelectedRecipient(null);
+        setSearchValue('');
+      }
     }
-  }, [defaultSelectedRecipient]);
+  }, [defaultSelectedRecipient, disabled]);
 
   const getDropdownBody = () => {
     switch (currentTab.value) {
@@ -230,7 +236,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             >
               {templates?.map((template, index) => (
                 <MoveMoneyTemplateListCard
-                  key={`${template?.id}_${index}`}
+                  key={`_${index}`}
                   ref={(el) => {
                     templateRefs.current[index] = el;
                   }}
@@ -254,6 +260,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     if (shouldReset) {
       setSearchValue('');
       setIsShowMenu(true);
+      setSelectedRecipient(null);
     }
   }, [shouldReset]);
 
@@ -272,13 +279,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {
+        className={cn('relative rounded-md border border-GRAY_500 bg-white', {
           'border-GRAY_400 overflow-hidden': !isShowMenu,
-          'border-GRAY_500': isShowMenu,
+          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
           '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,
         })}
         ref={containerRef}
       >
+        {disabled && <div className='absolute top-0 right-0 w-full h-full bg-GRAY_100 z-10 opacity-20'></div>}
         <div className='flex items-center gap-1.5 pr-3 w-full cursor-pointer'>
           <Input
             tabIndex={0}

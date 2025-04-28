@@ -113,7 +113,7 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
             case WidgetDataValueType.SMALLINT:
             case WidgetDataValueType.TINYINT:
               {
-                formattedRow[column_name] = Math.abs(parseFloat(value as string) ?? 0);
+                formattedRow[column_name] = parseFloat(value as string) ?? 0;
               }
               break;
             default:

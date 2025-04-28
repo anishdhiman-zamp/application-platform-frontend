@@ -11,10 +11,10 @@ import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { MenuWrapper } from '@/components/common/MenuWrapper';
+import TagWithHierarchy from '@/components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';
 import { useOnClickOutside } from '@/hooks';
 import { Button } from 'components/common/button/Button';
-import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
-import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';
+import { getFilterStatementValues } from 'components/filter/filter.utils';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export type RuleCardProps = {
@@ -28,6 +28,7 @@ export type RuleCardProps = {
   onExpand?: (id: string) => void;
   onCollapse?: (id: string) => void;
   onDeleteRuleId?: (ruleId: string) => void;
+  labelColor?: string;
 };
 
 const RuleCard: FC<RuleCardProps> = ({
@@ -40,6 +41,7 @@ const RuleCard: FC<RuleCardProps> = ({
   onCollapse,
   id,
   onDeleteRuleId,
+  labelColor,
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,7 +83,7 @@ const RuleCard: FC<RuleCardProps> = ({
     <div
       className={cn(
         'rounded-md border transition-all duration-500 bg-white',
-        isExpanded ? 'border-GRAY_600 h-[270px]' : 'border-GRAY_400 h-[118px]',
+        isExpanded ? 'border-GRAY_600 h-[300px]' : 'border-GRAY_400 h-[148px]',
         className,
       )}
     >
@@ -122,7 +124,7 @@ const RuleCard: FC<RuleCardProps> = ({
         </div>
       </div>
       <div className='px-2.5 py-3 space-y-3'>
-        {!!value && <TagChip item={`${getTagLabel(value)}`} />}
+        {!!value && <TagWithHierarchy tag={value} labelColor={labelColor} isReadOnly />}
         <div
           className={cn('flex f-11-400 gap-1.5', {
             'h-[150px] overflow-auto flex-wrap items-start content-start': isExpanded,

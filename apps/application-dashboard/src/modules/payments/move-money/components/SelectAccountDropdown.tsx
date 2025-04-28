@@ -2,7 +2,6 @@ import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } 
 import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
-import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
@@ -168,6 +167,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   }, [shouldReset]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled || !isInputEnabled) return;
     const keyEvent = e.key;
     const currentList = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? filteredAccounts : templates;
     const currentRefs = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? accountRefs : templateRefs;
@@ -251,7 +251,6 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
                     className={cn('hover:bg-GRAY_100 rounded-md !p-2.5', {
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
-                    tabIndex={-1}
                     name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
                     onClick={() => handleAccountSelect(account)}
                     logo={DEFAULT_BANK}
@@ -291,12 +290,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   };
 
   return (
-    <div onFocus={onFocus}>
+    <div onFocus={!disabled ? onFocus : undefined} onKeyDown={handleKeyDown}>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
         className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {
           'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,
-          'border-GRAY_500': isShowMenu,
+          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
           '!cursor-not-allowed bg-GRAY_100': disabled,
         })}
         ref={containerRef}
@@ -313,15 +312,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               value={showSearch ? searchValue : accountDetails?.account_name}
               disabled={!!contact_id || disabled}
               onChange={handleSearch}
-              onKeyDown={handleKeyDown}
               className='f-13-450 grow'
               focusClassNames='!px-0'
               placeholder='Search account name, number'
             />
-            <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
           </div>
         ) : (
-          <div onFocus={onFocus}>
+          <div onFocus={!disabled ? onFocus : undefined}>
             <AccountWithLogo
               className={cn('rounded-md !p-2.5', {
                 'bg-BACKGROUND_GRAY_2': disabled,

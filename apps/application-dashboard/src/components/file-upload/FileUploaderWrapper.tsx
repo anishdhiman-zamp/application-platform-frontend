@@ -17,7 +17,6 @@ import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
 const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   acceptedFormats,
-  fileName,
   disableNext,
   setFileName,
   maxSize = FILE_SIZE.TWENTY_MB,
@@ -42,10 +41,12 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileUploaderKey, setFileUploaderKey] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [currentUploadFileName, setCurrentUploadFileName] = useState<string | null>(null);
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
 
+    setCurrentUploadFileName(filesToUpload?.name ?? null);
     setFileName?.(filesToUpload?.name ?? null);
     handleUpload(filesToUpload);
   };
@@ -178,7 +179,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
       filesSelected={filesSelected}
       supportedFiles={acceptedFormats}
       className={className}
-      fileName={fileName}
+      fileName={currentUploadFileName}
       setFileName={setFileName}
       indexKey={fileUploaderKey}
       uploadProgress={showProgress ? uploadProgress : null}

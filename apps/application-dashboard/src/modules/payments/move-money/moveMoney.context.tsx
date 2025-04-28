@@ -1,5 +1,5 @@
 import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
-import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';
+import { AccountDetailsType, ContactType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { UploadFileResponseType } from 'types/api/fileUpload.types';
 import { MenuItem } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
@@ -18,6 +18,7 @@ enum moveMoneyContextActions {
   RESET_STATE = 'RESET_STATE',
   TEMPLATE_DETAILS = 'TEMPLATE_DETAILS',
   SOURCE_ACCOUNT_DETAILS = 'SOURCE_ACCOUNT_DETAILS',
+  RESET = 'RESET',
 }
 interface InitialStateType {
   currentStep: number;
@@ -38,6 +39,7 @@ interface InitialStateType {
   };
   recipientDetails?: RecipientDetailsType | undefined;
   counterParties?: ContactType[];
+  reset: boolean;
 }
 
 export interface ActionType {
@@ -47,6 +49,7 @@ export interface ActionType {
 
 const initialState: InitialStateType = {
   currentStep: 0,
+  reset: false,
 };
 
 const context = createContext<{
@@ -73,6 +76,8 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           sourceAccountDetails: action?.payload?.sourceAccountDetails,
           templateDetails: undefined,
           destinationAccountDetails: undefined,
+          recipientDetails: undefined,
+          reset: false,
         };
       case moveMoneyContextActions.MORE_DETAILS:
         return { ...state, moreDetails: action?.payload?.moreDetails };
@@ -85,16 +90,36 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         };
       case moveMoneyContextActions.RESET_STATE:
         return initialState;
+      case moveMoneyContextActions.RESET:
+        return {
+          ...initialState,
+          currentStep: 0,
+          reset: true,
+        };
       case moveMoneyContextActions.AMOUNT_DETAILS:
         return { ...state, amountDetails: action?.payload?.amountDetails };
-      case moveMoneyContextActions.TEMPLATE_DETAILS:
+      case moveMoneyContextActions.TEMPLATE_DETAILS: {
+        const templateDetails: TemplateDetailsType = action?.payload?.templateDetails;
+        const destinationAccountDetails = templateDetails?.details[0]?.destination_account;
+        const sourceAccountDetails = templateDetails?.details[0]?.source_account;
+        const recipientDetails: RecipientDetailsType | undefined =
+          templateDetails?.type === MOVE_MONEY_TYPE.SINGLE_TRANSFER
+            ? {
+                name: destinationAccountDetails?.recipient_name ?? '',
+                id: destinationAccountDetails?.recipient_id ?? '',
+                accounts: [destinationAccountDetails],
+              }
+            : undefined;
+
         return {
           ...state,
-          templateDetails: action?.payload?.templateDetails,
-          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.destination_account,
-          sourceAccountDetails: action?.payload?.templateDetails?.details[0]?.source_account,
-          currentStep: 1,
+          templateDetails: templateDetails,
+          destinationAccountDetails: destinationAccountDetails,
+          sourceAccountDetails: sourceAccountDetails,
+          recipientDetails: recipientDetails,
+          currentStep: templateDetails?.type === MOVE_MONEY_TYPE.SINGLE_TRANSFER ? 2 : 1,
         };
+      }
 
       default:
         return state;

@@ -39,3 +39,7 @@ local-build
 
 .vscode
 .vercel
+
+
+coverage
+apps/application-dashboard/coverage

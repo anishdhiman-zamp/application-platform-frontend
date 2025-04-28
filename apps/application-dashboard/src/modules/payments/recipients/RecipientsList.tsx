@@ -1,5 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import RecipientCard from 'modules/payments/recipients/components/RecipientCard';
+import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -42,7 +43,7 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
   return (
     <div className='py-6 pl-4.5 pr-2'>
       <div className='w-full flex items-center justify-between mb-4.5'>
-        <div className='f-16-600'>Recipients</div>
+        <div className='f-16-600 px-1.5'>Recipients</div>
         <Button
           size={SIZE_TYPES.SMALL}
           type={BUTTON_TYPES.SECONDARY}
@@ -58,26 +59,22 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
         </Button>
       </div>
       <Input
+        autoFocus
         type='text'
         placeholder='Search by name, account name, or last 4 digits of account number'
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className='mb-4'
-        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs'
+        className='mb-3.5 px-1.5'
+        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs !py-0 !h-6 placeholder:!text-GRAY_500'
         focusClassNames=''
       />
       <CommonWrapper
         isLoading={isLoading}
         isError={isError}
+        isNoData={filteredRecipientList?.length === 0}
         noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No recipients found</div>}
         skeletonType={SkeletonTypes.CUSTOM}
-        loader={
-          <div className='flex flex-col gap-2'>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className='w-full h-9 bg-GRAY_200 rounded-md animate-pulse' />
-            ))}
-          </div>
-        }
+        loader={<RecipientCardSkeleton />}
       >
         <div className='flex flex-col gap-2'>
           {filteredRecipientList?.map((recipient) => (

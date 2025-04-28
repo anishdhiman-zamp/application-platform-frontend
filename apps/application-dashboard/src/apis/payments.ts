@@ -5,6 +5,7 @@ import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   InitiatePaymentPayloadType,
+  PaymentConfigResponseType,
   RecipientBySourceAccountPayloadType,
   RecipientBySourceAccountResponseType,
   RecipientDetailsType,
@@ -37,6 +38,11 @@ const Payments = baseApi.injectEndpoints({
         url: API_ENDPOINTS.PAYMENTS_TEMPLATE_LIST_GET,
       }),
       providesTags: [APITags.GET_PAYMENT_TEMPLATE_LIST],
+    }),
+    getPaymentConfig: builder.query<PaymentConfigResponseType, void>({
+      query: () => ({
+        url: API_ENDPOINTS.PAYMENTS_CONFIG_GET,
+      }),
     }),
     getRecipientBySourceAccount: builder.query<
       RecipientBySourceAccountResponseType,
@@ -75,4 +81,5 @@ export const {
   useGetRecipientBySourceAccountQuery,
   useLazyGetRecipientBySourceAccountQuery,
   useInitiatePaymentMutation,
+  useGetPaymentConfigQuery,
 } = Payments;

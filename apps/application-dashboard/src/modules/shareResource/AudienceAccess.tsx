@@ -18,7 +18,7 @@ import SvgSpriteLoader from 'components/SvgSpriteLoader';
 type AudienceAccessPropsType = {
   resourceType: ResourceType;
   privilege: string;
-  changeRole: (resourceAudienceId: string, role: string) => Promise<void>;
+  changeRole: (resourceAudienceId: string, role: string) => Promise<boolean>;
   deleteAudience: (resourceAudienceId: string, userName: string) => Promise<void>;
   privilegeList: ResourcePrivilege[];
   resourceAudienceId: string;
@@ -34,6 +34,7 @@ type AudienceAccessPropsType = {
   teamInfo: TeamInfoType;
   isDeletingAudience: boolean;
   isChangingRole: boolean;
+  currentUserId: string;
 };
 
 const AudienceAccess: FC<AudienceAccessPropsType> = ({
@@ -50,6 +51,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   customerName,
   teamInfo,
   isDeletingAudience,
+  currentUserId,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
@@ -66,7 +68,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
       ? teamInfo?.name
       : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
-  const showRoleChangeDropdown = currentUserHasAdminAccess && !checkIfResourceTypeOrg;
+  const showRoleChangeDropdown =
+    currentUserHasAdminAccess &&
+    !(currentUserId == resourceAudienceId && resourceAudienceType === ResourceAudienceType.USER);
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);
@@ -86,7 +90,12 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
 
   const handleRoleChange = async (selectedOption: OptionsType) => {
     await changeRole(resourceAudienceId, selectedOption.value.toString())
-      .then(() => {
+      .then((success) => {
+        if (!success) {
+          setSelectedRole(role as ResourcePrivilege);
+
+          return;
+        }
         setSelectedRole(
           privilegeList.find((r) => r.value === selectedOption.value && r.kind === resourceType) as ResourcePrivilege,
         );
@@ -95,6 +104,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
       })
       .catch((err) => {
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
+        setSelectedRole(role as ResourcePrivilege);
       });
   };
 

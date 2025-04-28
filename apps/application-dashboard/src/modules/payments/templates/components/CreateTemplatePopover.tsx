@@ -83,7 +83,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const handleRecipientSelect = (recipient: RecipientDetailsType) => {
     setRecipientDetails(recipient);
     setDestinationAccountDetails(undefined);
-    if (recipient.accounts.length) {
+    if (recipient?.accounts?.length) {
       setDestinationAccountList(recipient?.accounts ?? []);
     }
   };
@@ -99,6 +99,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         backButtonTitle='Discard'
         childrenClassName='mt-12'
         wrapperClassName='w-[1000px]'
+        parentWrapperClassName='z-[1002]'
         onCancel={onClose}
         onSubmit={handleSubmit}
         closeOnClickOutside={false}
