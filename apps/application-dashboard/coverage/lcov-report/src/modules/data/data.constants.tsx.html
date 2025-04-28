@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/108</span>
+                <span class='fraction'>0/89</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/108</span>
+                <span class='fraction'>0/89</span>
             </div>
         
             
@@ -152,45 +152,7 @@
 <a name='L87'></a><a href='#L87'>87</a>
 <a name='L88'></a><a href='#L88'>88</a>
 <a name='L89'></a><a href='#L89'>89</a>
-<a name='L90'></a><a href='#L90'>90</a>
-<a name='L91'></a><a href='#L91'>91</a>
-<a name='L92'></a><a href='#L92'>92</a>
-<a name='L93'></a><a href='#L93'>93</a>
-<a name='L94'></a><a href='#L94'>94</a>
-<a name='L95'></a><a href='#L95'>95</a>
-<a name='L96'></a><a href='#L96'>96</a>
-<a name='L97'></a><a href='#L97'>97</a>
-<a name='L98'></a><a href='#L98'>98</a>
-<a name='L99'></a><a href='#L99'>99</a>
-<a name='L100'></a><a href='#L100'>100</a>
-<a name='L101'></a><a href='#L101'>101</a>
-<a name='L102'></a><a href='#L102'>102</a>
-<a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a>
-<a name='L105'></a><a href='#L105'>105</a>
-<a name='L106'></a><a href='#L106'>106</a>
-<a name='L107'></a><a href='#L107'>107</a>
-<a name='L108'></a><a href='#L108'>108</a>
-<a name='L109'></a><a href='#L109'>109</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L90'></a><a href='#L90'>90</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -282,9 +244,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ColDef, ICellRendererParams } from 'ag-grid-community';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { COLORS } from 'constants/colors';</span>
 <span class="cstat-no" title="statement not covered" >import { DATASET_ICON } from 'constants/icons';</span>
-<span class="cstat-no" title="statement not covered" >import { DATASET_ACCESS_PRIVILEGES } from 'modules/data/data.types';</span>
+<span class="cstat-no" title="statement not covered" >import { DATASET_ACTION_TYPE } from 'modules/data/data.types';</span>
 <span class="cstat-no" title="statement not covered" >import Image from 'next/image';</span>
 <span class="cstat-no" title="statement not covered" >import { cn } from 'utils/common';</span>
+<span class="cstat-no" title="statement not covered" >import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';</span>
 <span class="cstat-no" title="statement not covered" >import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';</span>
 <span class="cstat-no" title="statement not covered" >import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';</span>
@@ -363,30 +326,10 @@
 <span class="cstat-no" title="statement not covered" >    color: COLORS.RED_250,</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" >];</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export const DATASET_ACCESS_PRIVILEGES_LIST = [</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    label: 'Admin',</span>
-<span class="cstat-no" title="statement not covered" >    value: DATASET_ACCESS_PRIVILEGES.ADMIN,</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    label: 'Viewer',</span>
-<span class="cstat-no" title="statement not covered" >    value: DATASET_ACCESS_PRIVILEGES.VIEWER,</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >];</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export const CHANGE_ACCESS_PRIVILEGES_LIST = [</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    label: 'Admin',</span>
-<span class="cstat-no" title="statement not covered" >    value: DATASET_ACCESS_PRIVILEGES.ADMIN,</span>
-<span class="cstat-no" title="statement not covered" >    desc: 'Can manage and share dataset',</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    label: 'Viewer',</span>
-<span class="cstat-no" title="statement not covered" >    value: DATASET_ACCESS_PRIVILEGES.VIEWER,</span>
-<span class="cstat-no" title="statement not covered" >    desc: 'Can read data only',</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >];</span>
+<span class="cstat-no" title="statement not covered" >export const DatasetActionMessages = {</span>
+<span class="cstat-no" title="statement not covered" >  [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,</span>
+<span class="cstat-no" title="statement not covered" >  [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,</span>
+<span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -394,7 +337,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

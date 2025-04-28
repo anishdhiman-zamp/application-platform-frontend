@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/89</span>
+                <span class='fraction'>0/95</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/89</span>
+                <span class='fraction'>0/95</span>
             </div>
         
             
@@ -152,7 +152,19 @@
 <a name='L87'></a><a href='#L87'>87</a>
 <a name='L88'></a><a href='#L88'>88</a>
 <a name='L89'></a><a href='#L89'>89</a>
-<a name='L90'></a><a href='#L90'>90</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -242,7 +254,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ROUTES_PATH } from 'constants/routeConfig';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';</span>
+<span class="cstat-no" title="statement not covered" >import { MOVE_MONEY_ACTION_TYPE, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';</span>
 <span class="cstat-no" title="statement not covered" >import { INPUT_FILE_FORMATS } from 'types/common/mime';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export const CONNECT_ACCOUNT_TITLE = 'Connect accounts';</span>
@@ -252,6 +264,7 @@
 <span class="cstat-no" title="statement not covered" >export const RECIPIENT_CARD_ACTION_ITEMS = [</span>
 <span class="cstat-no" title="statement not covered" >  {</span>
 <span class="cstat-no" title="statement not covered" >    id: 'add-account',</span>
+<span class="cstat-no" title="statement not covered" >    action: MOVE_MONEY_ACTION_TYPE.ADD_ACCOUNT,</span>
 <span class="cstat-no" title="statement not covered" >    icon: {</span>
 <span class="cstat-no" title="statement not covered" >      id: 'user-up-01',</span>
 <span class="cstat-no" title="statement not covered" >      size: 14,</span>
@@ -260,6 +273,7 @@
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" >  {</span>
 <span class="cstat-no" title="statement not covered" >    id: 'filter-payments',</span>
+<span class="cstat-no" title="statement not covered" >    action: MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS,</span>
 <span class="cstat-no" title="statement not covered" >    icon: {</span>
 <span class="cstat-no" title="statement not covered" >      id: 'filter-lines',</span>
 <span class="cstat-no" title="statement not covered" >      size: 14,</span>
@@ -268,6 +282,7 @@
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" >  {</span>
 <span class="cstat-no" title="statement not covered" >    id: 'send-money',</span>
+<span class="cstat-no" title="statement not covered" >    action: MOVE_MONEY_ACTION_TYPE.SEND_MONEY,</span>
 <span class="cstat-no" title="statement not covered" >    icon: {</span>
 <span class="cstat-no" title="statement not covered" >      id: 'send-03',</span>
 <span class="cstat-no" title="statement not covered" >      size: 14,</span>
@@ -280,36 +295,36 @@
 <span class="cstat-no" title="statement not covered" >  {</span>
 <span class="cstat-no" title="statement not covered" >    id: 'single-payment',</span>
 <span class="cstat-no" title="statement not covered" >    label: 'Single payment',</span>
-<span class="cstat-no" title="statement not covered" >    url: ROUTES_PATH.MONEY_TRANSFER,</span>
+<span class="cstat-no" title="statement not covered" >    url: `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SINGLE_TRANSFER}`,</span>
 <span class="cstat-no" title="statement not covered" >    icon: {</span>
 <span class="cstat-no" title="statement not covered" >      id: 'arrow-narrow-right',</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" >  {</span>
-<span class="cstat-no" title="statement not covered" >    id: 'bulk-payment',</span>
-<span class="cstat-no" title="statement not covered" >    label: 'Bulk payment',</span>
-<span class="cstat-no" title="statement not covered" >    url: ROUTES_PATH.MONEY_TRANSFER, //to be update</span>
-<span class="cstat-no" title="statement not covered" >    icon: {</span>
-<span class="cstat-no" title="statement not covered" >      id: 'arrows-right',</span>
-<span class="cstat-no" title="statement not covered" >    },</span>
-<span class="cstat-no" title="statement not covered" >  },</span>
-<span class="cstat-no" title="statement not covered" >  {</span>
 <span class="cstat-no" title="statement not covered" >    id: 'self-transfer',</span>
 <span class="cstat-no" title="statement not covered" >    label: 'Self transfer',</span>
-<span class="cstat-no" title="statement not covered" >    url: ROUTES_PATH.MONEY_TRANSFER, //to be update</span>
+<span class="cstat-no" title="statement not covered" >    url: `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SELF_TRANSFER}`,</span>
 <span class="cstat-no" title="statement not covered" >    icon: {</span>
 <span class="cstat-no" title="statement not covered" >      id: 'refresh-ccw-02',</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
+<span class="cstat-no" title="statement not covered" >  // {</span>
+<span class="cstat-no" title="statement not covered" >  //   id: 'bulk-payment',</span>
+<span class="cstat-no" title="statement not covered" >  //   label: 'Bulk payment',</span>
+<span class="cstat-no" title="statement not covered" >  //   url: ROUTES_PATH.MONEY_TRANSFER, //to be update</span>
+<span class="cstat-no" title="statement not covered" >  //   icon: {</span>
+<span class="cstat-no" title="statement not covered" >  //     id: 'arrows-right',</span>
+<span class="cstat-no" title="statement not covered" >  //   },</span>
+<span class="cstat-no" title="statement not covered" >  // }</span>
 <span class="cstat-no" title="statement not covered" >];</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export const MOVE_MONEY_PAYMENT_TYPE_OPTIONS = [</span>
-<span class="cstat-no" title="statement not covered" >  { label: 'Recipients', value: MOVE_MONEY_PAYMENT_TYPE.RECIPIENT },</span>
+<span class="cstat-no" title="statement not covered" >  { label: 'Accounts', value: MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS },</span>
 <span class="cstat-no" title="statement not covered" >  { label: 'Templates', value: MOVE_MONEY_PAYMENT_TYPE.TEMPLATES },</span>
 <span class="cstat-no" title="statement not covered" >];</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export const defaultAccountData = {</span>
-<span class="cstat-no" title="statement not covered" >  account_id: '',</span>
+<span class="cstat-no" title="statement not covered" >  id: '',</span>
 <span class="cstat-no" title="statement not covered" >  currency_code: '',</span>
 <span class="cstat-no" title="statement not covered" >  account_number: '',</span>
 <span class="cstat-no" title="statement not covered" >  account_type: '',</span>
@@ -329,7 +344,10 @@
 <span class="cstat-no" title="statement not covered" >  INPUT_FILE_FORMATS.JPG,</span>
 <span class="cstat-no" title="statement not covered" >  INPUT_FILE_FORMATS.PDF,</span>
 <span class="cstat-no" title="statement not covered" >  INPUT_FILE_FORMATS.BMP,</span>
+<span class="cstat-no" title="statement not covered" >  INPUT_FILE_FORMATS.CSV,</span>
 <span class="cstat-no" title="statement not covered" >];</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export const MASK_DOTS = '••';</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -337,7 +355,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

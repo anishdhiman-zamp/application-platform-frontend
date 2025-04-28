@@ -9,6 +9,7 @@ import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
 import { identifyPostHogUser } from 'utils/postHog';
+import { getFromSessionStorage, removeFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -33,6 +34,12 @@ export const AuthGuard: FC<Props> = (props) => {
       identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
 
       dispatch(setWorkspace(defaultWorkspace));
+      const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
+
+      if (preLogoutPath) {
+        removeFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
+        router.push(preLogoutPath);
+      }
     }
   }, [session, isSuccess, dispatch]);
 

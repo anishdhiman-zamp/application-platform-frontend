@@ -1,3 +1,5 @@
+import { MenuItem } from '@/types/common/components';
+
 export enum CONNECT_ACCOUNT_STEPS {
   GET_STARTED,
   SELECT_DATASET,
@@ -25,6 +27,9 @@ export interface AccountDetailsType {
   masked_account_number?: string;
   banking_partner?: string;
   account_holder_name?: string;
+  account_details?: MenuItem[];
+  recipient_name?: string;
+  recipient_id?: string;
 }
 
 export enum MOVE_MONEY_TYPE {
@@ -44,3 +49,9 @@ export enum MOVE_MONEY_ACTION_TYPE {
   FILTER_PAYMENTS = 'filter-payments',
   SEND_MONEY = 'send-money',
 }
+
+export const TEMPLATE_STATUS_TYPES = {
+  DRAFTED: 'drafted',
+  ACTIVE: 'active',
+  DECLINED: 'declined',
+};

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/71</span>
+                <span class='fraction'>0/73</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/71</span>
+                <span class='fraction'>0/73</span>
             </div>
         
             
@@ -134,7 +134,11 @@
 <a name='L69'></a><a href='#L69'>69</a>
 <a name='L70'></a><a href='#L70'>70</a>
 <a name='L71'></a><a href='#L71'>71</a>
-<a name='L72'></a><a href='#L72'>72</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -207,6 +211,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { Provider } from 'react-redux';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { ToastContainer } from 'react-toastify';</span>
+<span class="cstat-no" title="statement not covered" >import { SpeedInsights } from '@vercel/speed-insights/next';</span>
 <span class="cstat-no" title="statement not covered" >import { LicenseManager as LicenseManagerCharts } from 'ag-charts-enterprise';</span>
 <span class="cstat-no" title="statement not covered" >import { LicenseManager } from 'ag-grid-enterprise';</span>
 <span class="cstat-no" title="statement not covered" >import { inter } from 'constants/common.constants';</span>
@@ -215,7 +220,7 @@
 <span class="cstat-no" title="statement not covered" >import type { AppProps } from 'next/app';</span>
 <span class="cstat-no" title="statement not covered" >import Head from 'next/head';</span>
 <span class="cstat-no" title="statement not covered" >import ErrorBoundary from 'pages/ErrorBoundary';</span>
-<span class="cstat-no" title="statement not covered" >import posthog from 'posthog-js';</span>
+<span class="cstat-no" title="statement not covered" >import posthogJs from 'posthog-js';</span>
 <span class="cstat-no" title="statement not covered" >import { PostHogProvider } from 'posthog-js/react';</span>
 <span class="cstat-no" title="statement not covered" >import { store } from 'store';</span>
 <span class="cstat-no" title="statement not covered" >import { NextPageWithLayout } from 'types/commonTypes';</span>
@@ -227,11 +232,11 @@
 <span class="cstat-no" title="statement not covered" >import 'react-date-range/dist/styles.css';</span>
 <span class="cstat-no" title="statement not covered" >import 'react-date-range/dist/theme/default.css';</span>
 <span class="cstat-no" title="statement not covered" >import 'react-toastify/dist/ReactToastify.css';</span>
-<span class="cstat-no" title="statement not covered" >import 'styles/colors.css';</span>
-<span class="cstat-no" title="statement not covered" >import 'styles/fonts.css';</span>
-<span class="cstat-no" title="statement not covered" >import 'styles/globals.css';</span>
+<span class="cstat-no" title="statement not covered" >import 'styles/ag-styles.css';</span>
+<span class="cstat-no" title="statement not covered" >import 'styles/common.css';</span>
 <span class="cstat-no" title="statement not covered" >import 'styles/react-datepicker.css';</span>
 <span class="cstat-no" title="statement not covered" >import 'styles/react-dates.css';</span>
+<span class="cstat-no" title="statement not covered" >import '@zamp-platform/ui/globals.css';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >LicenseManager.setLicenseKey(AG_GRID_KEY);</span>
 <span class="cstat-no" title="statement not covered" >LicenseManagerCharts.setLicenseKey(AG_CHART_KEY);</span>
@@ -259,8 +264,9 @@
 <span class="cstat-no" title="statement not covered" >      &lt;div className={inter.className}&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;NetworkStatus /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;ErrorBoundary&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;SpeedInsights /&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;Provider store={store}&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;PostHogProvider client={posthog}&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;PostHogProvider client={posthogJs}&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;AuthGuard loginRoute='/login'&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;FeatureFlagsProvider&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;ToastContainer /&gt;</span>
@@ -283,7 +289,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

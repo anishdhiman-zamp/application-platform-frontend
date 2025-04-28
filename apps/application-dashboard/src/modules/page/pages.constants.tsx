@@ -1,5 +1,7 @@
+export const LOCAL_CURRENCY = 'Local';
+
 export const PAGE_CURRENCY_OPTIONS = [
-  'local',
+  LOCAL_CURRENCY,
   'TRY',
   'ILS',
   'LBP',

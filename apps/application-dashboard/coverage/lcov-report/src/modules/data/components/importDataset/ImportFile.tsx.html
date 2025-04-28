@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/86</span>
+                <span class='fraction'>0/88</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/86</span>
+                <span class='fraction'>0/88</span>
             </div>
         
             
@@ -149,7 +149,11 @@
 <a name='L84'></a><a href='#L84'>84</a>
 <a name='L85'></a><a href='#L85'>85</a>
 <a name='L86'></a><a href='#L86'>86</a>
-<a name='L87'></a><a href='#L87'>87</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -237,12 +241,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { FC } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import FileUploader from 'modules/data/components/importDataset/FileUploader';</span>
-<span class="cstat-no" title="statement not covered" >import FileUploaderWrapper from 'modules/data/components/importDataset/FileUploaderWrapper';</span>
 <span class="cstat-no" title="statement not covered" >import { FILE_SIZE } from 'modules/data/components/importDataset/importData.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { FILE_MIME, ImportFilePropsType } from 'modules/data/components/importDataset/importData.types';</span>
-<span class="cstat-no" title="statement not covered" >import { UploadFileResponseType } from 'types/api/dataset.types';</span>
 <span class="cstat-no" title="statement not covered" >import { MapAny } from 'types/commonTypes';</span>
-<span class="cstat-no" title="statement not covered" >import * as XLSX from 'xlsx';</span>
+<span class="cstat-no" title="statement not covered" >import { read, utils } from 'xlsx';</span>
+<span class="cstat-no" title="statement not covered" >import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';</span>
+<span class="cstat-no" title="statement not covered" >import { UploadFileResponseType } from '@/types/api/fileUpload.types';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const ImportFile: FC&lt;ImportFilePropsType&gt; = ({</span>
 <span class="cstat-no" title="statement not covered" >  acceptedFormats,</span>
@@ -250,9 +254,10 @@
 <span class="cstat-no" title="statement not covered" >  setFileName,</span>
 <span class="cstat-no" title="statement not covered" >  filesSelected,</span>
 <span class="cstat-no" title="statement not covered" >  className,</span>
-<span class="cstat-no" title="statement not covered" >  setStartPollingPreview,</span>
-<span class="cstat-no" title="statement not covered" >  onClosePopup,</span>
 <span class="cstat-no" title="statement not covered" >  setRawData,</span>
+<span class="cstat-no" title="statement not covered" >  setFileUploadId,</span>
+<span class="cstat-no" title="statement not covered" >  keepLoadingFlow,</span>
+<span class="cstat-no" title="statement not covered" >  isFileUploading,</span>
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const handleFileUpload = (file: UploadFileResponseType | null) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (!file?.rawFile) return;</span>
@@ -262,22 +267,22 @@
 <span class="cstat-no" title="statement not covered" >    reader.onload = (e) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      if (!e.target?.result) return;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      let workbook: XLSX.WorkBook;</span>
+<span class="cstat-no" title="statement not covered" >      let workbook;</span>
 <span class="cstat-no" title="statement not covered" >      let sheet: MapAny = [];</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      if (file?.rawFile?.type === FILE_MIME.TEXT_CSV) {</span>
 <span class="cstat-no" title="statement not covered" >        const text = e?.target?.result as string;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        workbook = XLSX.read(text, { type: 'string' });</span>
+<span class="cstat-no" title="statement not covered" >        workbook = read(text, { type: 'string' });</span>
 <span class="cstat-no" title="statement not covered" >      } else {</span>
 <span class="cstat-no" title="statement not covered" >        const data = new Uint8Array(e.target.result as ArrayBuffer);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        workbook = XLSX.read(data, { type: 'array' });</span>
+<span class="cstat-no" title="statement not covered" >        workbook = read(data, { type: 'array' });</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      const sheetName = workbook?.SheetNames[0];</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      sheet = XLSX?.utils?.sheet_to_json(workbook.Sheets[sheetName], { defval: '', header: 1 });</span>
+<span class="cstat-no" title="statement not covered" >      sheet = utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '', header: 1 });</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      if (sheet?.length === 0) {</span>
 <span class="cstat-no" title="statement not covered" >        setRawData({ columns: [], rows: [] });</span>
@@ -314,8 +319,9 @@
 <span class="cstat-no" title="statement not covered" >      filesSelected={filesSelected}</span>
 <span class="cstat-no" title="statement not covered" >      className={className}</span>
 <span class="cstat-no" title="statement not covered" >      setRawData={setRawData}</span>
-<span class="cstat-no" title="statement not covered" >      setStartPollingPreview={setStartPollingPreview}</span>
-<span class="cstat-no" title="statement not covered" >      onClosePopup={onClosePopup}</span>
+<span class="cstat-no" title="statement not covered" >      setFileUploadId={setFileUploadId}</span>
+<span class="cstat-no" title="statement not covered" >      keepLoadingFlow={keepLoadingFlow}</span>
+<span class="cstat-no" title="statement not covered" >      isFileUploading={isFileUploading}</span>
 <span class="cstat-no" title="statement not covered" >    /&gt;</span>
 <span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >};</span>
@@ -328,7 +334,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T15:13:36.007Z
+                at 2025-04-22T12:15:25.536Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

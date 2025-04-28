@@ -236,7 +236,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
           ))}
         </div>
       ) : (
-        <div className='overflow-hidden'>
+        <div>
           <MultiSelectInput
             id='select-team'
             search={search}

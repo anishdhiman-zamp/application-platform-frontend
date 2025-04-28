@@ -16,6 +16,7 @@ interface AmountRangeFilterMenuItemProps {
   values: string[];
   className?: string;
   label?: string;
+  showColumnLabel?: boolean;
 }
 
 const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column, className, label }) => {

@@ -1,6 +1,3 @@
-import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-
 export const ACCOUNT_DETAILS_MOCK = [
   {
     label: 'Recipient Bank',
@@ -102,144 +99,14 @@ export const accountsListWithBalance = Array.from({ length: 10 }, () => {
 export const PAYMENT_PROCESSING_MODES = [
   {
     label: 'WIRE',
-    value: 'wire',
+    value: 'WIRE',
   },
   {
     label: 'SEPA',
-    value: 'sepa',
+    value: 'SEPA',
   },
   {
-    label: 'SWIFT',
-    value: 'swift',
-  },
-];
-
-export const TEMPLATES: TemplateDetailsType[] = [
-  {
-    id: 'temp_001',
-    name: 'monthly_rent',
-    details: [
-      {
-        order: '1',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Main Business Account',
-          account_number: 'ACC123456789',
-        },
-        destination_account: {
-          name: 'John Doe',
-          account_name: "John's Rent Account",
-          account_number: 'RENT987654321',
-        },
-      },
-    ],
-    created_by: 'user_abc',
-    creation_timestamp: '2024-01-01T10:00:00Z',
-    type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
-  },
-  {
-    id: 'temp_002',
-    name: 'Self Transfer',
-    details: [
-      {
-        order: '1',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Main Business Account',
-          account_number: 'ACC123456789',
-        },
-        destination_account: {
-          name: 'John Doe',
-          account_name: "John's Rent Account",
-          account_number: 'RENT987654321',
-        },
-      },
-    ],
-    created_by: 'user_abc',
-    creation_timestamp: '2024-01-01T10:00:00Z',
-    type: MOVE_MONEY_TYPE.SELF_TRANSFER,
-  },
-  {
-    id: 'temp_003',
-    name: 'vendor_payments',
-    details: [
-      {
-        order: '1',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Operating Account',
-          account_number: 'OPR456789123',
-        },
-        destination_account: {
-          name: 'Tech Supplies Inc',
-          account_name: 'Tech Supplies Main Account',
-          account_number: 'TECH789123456',
-        },
-      },
-      {
-        order: '2',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Operating Account',
-          account_number: 'OPR456789123',
-        },
-        destination_account: {
-          name: 'Office Solutions Ltd',
-          account_name: 'Office Solutions Main Account',
-          account_number: 'OFF123456789',
-        },
-      },
-    ],
-    created_by: 'user_xyz',
-    creation_timestamp: '2024-02-15T14:30:00Z',
-    type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
-  },
-  {
-    id: 'temp_004',
-    name: 'salary_payments',
-    details: [
-      {
-        order: '1',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Payroll Account',
-          account_number: 'PAY789123456',
-        },
-        destination_account: {
-          name: 'Alice Johnson',
-          account_name: "Alice's Salary Account",
-          account_number: 'SAL123456789',
-        },
-      },
-      {
-        order: '2',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Payroll Account',
-          account_number: 'PAY789123456',
-        },
-        destination_account: {
-          name: 'Bob Smith',
-          account_name: "Bob's Salary Account",
-          account_number: 'SAL987654321',
-        },
-      },
-      {
-        order: '3',
-        source_account: {
-          name: 'Business Corp',
-          account_name: 'Payroll Account',
-          account_number: 'PAY789123456',
-        },
-        destination_account: {
-          name: 'Charlie Brown',
-          account_name: "Charlie's Salary Account",
-          account_number: 'SAL456789123',
-        },
-      },
-    ],
-    created_by: 'user_pqr',
-    creation_timestamp: '2024-03-01T09:15:00Z',
-    type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
+    label: 'RTP',
+    value: 'RTP',
   },
 ];

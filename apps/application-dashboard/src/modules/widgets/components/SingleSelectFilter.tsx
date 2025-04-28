@@ -7,14 +7,23 @@ interface SingleSelectFilterProps {
   label: string;
   onFilterChange: (value: string[]) => void;
   options?: string[];
+  showColumnLabel?: boolean;
 }
 
-const SingleSelectFilter = ({ value, filterKey, label, onFilterChange, options }: SingleSelectFilterProps) => {
+const SingleSelectFilter = ({
+  value,
+  filterKey,
+  label,
+  onFilterChange,
+  options,
+  showColumnLabel = true,
+}: SingleSelectFilterProps) => {
   return (
     <FilterDropdown
       index={0}
       onFilterChange={onFilterChange}
       closeOnSelect={true}
+      showColumnLabel={showColumnLabel}
       filter={{
         key: filterKey,
         title: value?.[0],

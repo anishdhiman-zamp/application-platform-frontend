@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
+import { TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-import { defaultFn, defaultFnType } from '@/types/commonTypes';
+import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 interface TemplateCardProps {
   template: TemplateDetailsType;
@@ -12,6 +13,7 @@ interface TemplateCardProps {
 const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
   const source = template?.details[0]?.source_account;
   const destination = template?.details[0]?.destination_account;
+  const isApprovalPending = template?.status !== TEMPLATE_STATUS_TYPES.DRAFTED;
 
   return (
     <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md'>
@@ -33,15 +35,18 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
                 <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden max-w-[100px]'>
                   {item?.account_name}
                 </div>
-                <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px]'>
-                  {MASK_DOTS} {item?.account_number}
+                <div className='f-11-450 text-ellipsis overflow-hidden max-w-[100px] whitespace-nowrap'>
+                  {item?.masked_account_number && `${MASK_DOTS} ${item?.masked_account_number}`}
                 </div>
               </div>
             ))}
         </div>
       </div>
-      <SvgSpriteLoader id='edit-03' onClick={defaultFn} size={14} />
-      <SvgSpriteLoader id='send-03' onClick={handleSendClick} size={14} />
+      {!isApprovalPending ? (
+        <div className='f-11-450 text-ORANGE_800'>Approval pending</div>
+      ) : (
+        <SvgSpriteLoader id='send-03' onClick={handleSendClick} size={14} />
+      )}
     </div>
   );
 };

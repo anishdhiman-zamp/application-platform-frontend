@@ -29,7 +29,7 @@ const MoveMoneyButton = () => {
         Move money
       </Button>
       {isMoveMoneyActionMenuOpen && (
-        <div className='absolute top-full right-0 p-1 rounded-md border border-GRAY_500 bg-white mt-1 animate-opacity select-none'>
+        <div className='absolute top-full right-0 p-1 rounded-md border border-GRAY_500 bg-white mt-1 animate-opacity select-none min-w-[165px]'>
           {MOVE_MONEY_ACTION_ITEMS.map((item) => (
             <Link
               href={item.url}

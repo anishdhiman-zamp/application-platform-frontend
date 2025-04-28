@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
-import { camelCaseToNormalText, cn, debounce } from 'utils/common';
+import { cn, debounce, formatToNormalText } from 'utils/common';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -19,6 +19,7 @@ interface SingleSelectFilterMenuItemProps {
   debounceTime?: number;
   isOpen?: boolean;
   updateContextOnChange?: boolean;
+  showColumnLabel?: boolean;
 }
 
 const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
@@ -32,6 +33,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   debounceTime = 800,
   isOpen = false,
   updateContextOnChange = false,
+  showColumnLabel = true,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
@@ -96,9 +98,11 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
       )}
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 px-2.5'>
-        <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
-          {camelCaseToNormalText(columnId)}
-        </div>
+        {showColumnLabel && (
+          <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
+            {formatToNormalText(columnId)}
+          </div>
+        )}
 
         {allowClear && (
           <div className='flex justify-end text-GRAY_700 cursor-pointer'>
@@ -118,7 +122,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
             size={SIZE_TYPES.XSMALL}
             inputRef={inputRef}
             value={inputValue}
-            placeholder='type a value...'
+            placeholder='Search...'
             onChange={onSearchChange}
           />
         </div>

@@ -1,5 +1,6 @@
 export enum CUSTOM_COLUMNS_TYPE {
   TAG = 'tags',
+  CHIP = 'chips',
 }
 
 export enum DISPLAY_OPTIONS {

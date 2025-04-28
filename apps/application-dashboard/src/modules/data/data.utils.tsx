@@ -11,7 +11,7 @@ import {
   isValid,
 } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
-import { ColumnOrderingVisibilityType } from 'modules/data/data.types';
+import { ColumnOrderingVisibilityType, RuleColumnDetailsType } from 'modules/data/data.types';
 import {
   DatasetFilterConfigResponseType,
   DatasetType,
@@ -77,7 +77,7 @@ export const formatColumns = (
   datasetId: string,
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
   tableRef: RefObject<AgGridReact>,
-  handleRulesListingSideDrawerOpen: (columnId: string) => void,
+  handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -232,6 +232,61 @@ export const getColumnOrderingVisibilityForCurrentDataset = (datasetId: string):
   );
 
   return currentColumnOrderingVisibility[datasetId];
+};
+
+export const getUpdatedColumnOrderingVisibility = (
+  currentColumnOrderingVisibility: ColumnOrderingVisibilityType[],
+  filterConfig: DatasetFilterConfigResponseType[],
+) => {
+  // Create a map of existing column configurations for quick lookup
+  const existingColumnsMap = new Map(currentColumnOrderingVisibility.map((col) => [col.colId, col]));
+
+  // First, preserve the order of existing columns
+  const updatedColumnOrderingVisibility: ColumnOrderingVisibilityType[] = currentColumnOrderingVisibility.map(
+    (existingCol) => {
+      const matchingFilterConfig = filterConfig.find((fc) => fc.column === existingCol.colId);
+
+      if (matchingFilterConfig) {
+        const isExplicitlyHidden = matchingFilterConfig.metadata?.is_hidden === true;
+
+        return {
+          ...existingCol,
+          isVisible: isExplicitlyHidden ? false : existingCol.isVisible,
+        };
+      }
+
+      return {
+        colId: existingCol?.colId ?? '',
+        isVisible: false,
+        width: existingCol?.width ?? 0,
+      };
+    },
+  );
+
+  // Then add any new columns that weren't in the current configuration
+  filterConfig.forEach((column) => {
+    if (!existingColumnsMap.has(column.column)) {
+      updatedColumnOrderingVisibility.push({
+        colId: column.column,
+        isVisible: column.metadata?.is_hidden !== true,
+        width: 0,
+      });
+    }
+  });
+
+  return updatedColumnOrderingVisibility;
+};
+
+export const syncFilterConfigHiddenColumnsInLocalStorage = (
+  datasetId: string,
+  filterConfig: DatasetFilterConfigResponseType[],
+) => {
+  const currentDatasetColumnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId) || [];
+
+  updateLocalStorage(
+    getUpdatedColumnOrderingVisibility(currentDatasetColumnOrderingVisibility, filterConfig),
+    datasetId,
+  );
 };
 
 export const getFilters = (filtersString: string, filterConfig: DatasetFilterConfigResponseType[]) => {

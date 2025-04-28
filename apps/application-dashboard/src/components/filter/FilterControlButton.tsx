@@ -2,8 +2,9 @@ import React, { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { SIZE } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { cn } from 'utils/common';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { Loader } from 'components/common/loader/Loader';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface FilterControlButtonProps extends PropsWithChildren {
@@ -19,13 +20,13 @@ interface FilterControlButtonProps extends PropsWithChildren {
   isLoading?: boolean;
   disabled?: boolean;
   id?: string;
-  tooltipPosition?: TooltipPositions;
+  tooltipPosition?: SIDE_OPTIONS;
 }
 
 const FilterControlButton: FC<FilterControlButtonProps> = ({
   onClick,
   tooltipText = '',
-  tooltipPosition = TooltipPositions.BOTTOM,
+  tooltipPosition = SIDE_OPTIONS.BOTTOM,
   icon = 'filter-lines',
   iconCategory = ICON_SPRITE_TYPES.GENERAL,
   buttonRef,
@@ -46,14 +47,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   };
 
   return (
-    <Tooltip
-      tooltipBody={tooltipText}
-      color='{TMS_COLORS.GRAY_200}'
-      tooltipBodyClassName='f-12-450 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
-      className='z-1'
-      disabled={disabled}
-      position={tooltipPosition}
-    >
+    <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText}>
       <button
         className={cn(
           'border border-GRAY_400 rounded px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
@@ -79,7 +73,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           </>
         )}
       </button>
-    </Tooltip>
+    </TooltipV2>
   );
 };
 

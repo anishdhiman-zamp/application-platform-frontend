@@ -1,11 +1,11 @@
 import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
-import { OptionsType } from 'types/commonTypes';
+import { OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
-import { Tooltip } from 'components/common/tooltip';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE, MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
@@ -50,6 +50,8 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   const [selectedOperator, setSelectedOperator] = useState<OptionsType>(currentOperator);
   const [isSelectAll, setIsSelectAll] = useState(false);
 
+  const isNullOperator = useMemo(() => selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL, [selectedOperator]);
+
   const setFilter = useCallback(
     (operator: string, updatedValues: string[]) => {
       dispatch({
@@ -80,6 +82,8 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   };
 
   const onChange = (value: string) => {
+    if (isNullOperator) return;
+
     const updatedValues = selectedValues.includes(value)
       ? selectedValues.filter((item) => item !== value)
       : [...selectedValues, value];
@@ -165,7 +169,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
             <div className='p-1 z-10 absolute top-full left-0 bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'>
               {operatorOptions.map((option) => (
                 <div
-                  className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
+                  className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md whitespace-nowrap'
                   key={option.value}
                   onClick={() => onOperatorChange(option)}
                 >
@@ -222,20 +226,19 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
               className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
             >
               {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{String(item)}</div>}
-              <Tooltip
-                tooltipBody={`condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`}
-                tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md z-999 bg-black text-white w-28'
-                className='z-1'
-                disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
+              <TooltipV2
+                side={SIDE_OPTIONS.RIGHT}
+                key={item}
+                tooltipBody={
+                  isNullOperator
+                    ? `condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`
+                    : ''
+                }
               >
                 <div className='min-w-[14px]'>
-                  <CheckBox
-                    checked={selectedValues?.includes(item)}
-                    id='checkbox-1'
-                    disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
-                  />
+                  <CheckBox checked={selectedValues?.includes(item)} id='checkbox-1' disabled={isNullOperator} />
                 </div>
-              </Tooltip>
+              </TooltipV2>
             </div>
           ))}
       </div>

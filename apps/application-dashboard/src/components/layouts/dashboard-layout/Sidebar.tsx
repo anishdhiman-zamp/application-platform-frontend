@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useGetPagesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIDEBAR_ITEMS } from 'constants/routeConfig';
@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { useGetPaymentConfigQuery } from '@/apis/payments';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
@@ -25,6 +26,9 @@ const Sidebar = () => {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
+  const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   useEffect(() => {
     if (pages) {
@@ -32,7 +36,13 @@ const Sidebar = () => {
     }
   }, [pages]);
 
-  const filteredSidebarItems = SIDEBAR_ITEMS.filter((item) => !item.isHidden);
+  const filteredSidebarItems = useMemo(
+    () =>
+      SIDEBAR_ITEMS.filter(
+        (item) => !item?.isHidden && (item?.id !== 'payments' || (item?.id === 'payments' && paymentConfig?.id)),
+      ),
+    [paymentConfig],
+  );
 
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>

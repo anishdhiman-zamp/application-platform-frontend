@@ -4,6 +4,7 @@ import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
+import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
 import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
@@ -46,6 +47,7 @@ export const LISTING_COLUMNS: ColDef[] = [
 
 export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => JSX.Element> = {
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
+  [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
 };
 
 export enum TEAM_OPTIONS {

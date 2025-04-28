@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
+import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
@@ -39,6 +40,15 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
           </div>
           <div className='f-16-600'>{recipientDetails?.name}</div>
         </div>
+        <TooltipV2 tooltipBody='Filter payment'>
+          <Button
+            type={BUTTON_TYPES.SECONDARY}
+            id='recipient-card-action'
+            size={SIZE_TYPES.XSMALL}
+            iconProps={{ id: 'filter-lines', size: 14 }}
+            onClick={handleSendMoney}
+          />
+        </TooltipV2>
         <Button
           id='send-money'
           onClick={handleSendMoney}
@@ -57,10 +67,10 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
         <div className=''>
           <div className='f-13-500 mb-2.5'>Recipient details</div>
           <div className='flex flex-col gap-2.5'>
-            {recipientDetails?.recipient_details.map((recipientDetails, index) => (
+            {recipientDetails?.recipient_details?.map((recipientDetails, index) => (
               <div key={index} className='flex items-center gap-4'>
                 <div className='f-12-400 text-GRAY_700 w-[150px]'>{recipientDetails.label}</div>
-                <div className='f-11-400'>{recipientDetails.value}</div>
+                <div className='f-11-400'>{recipientDetails?.value}</div>
               </div>
             ))}
           </div>

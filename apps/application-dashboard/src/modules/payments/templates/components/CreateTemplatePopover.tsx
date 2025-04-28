@@ -9,13 +9,14 @@ import {
   useCreateTemplateMutation,
   useGetSourceAccountsQuery,
   useLazyGetDestinationAccountsQuery,
+  useLazyGetRecipientBySourceAccountQuery,
 } from '@/apis/payments';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
-import { MenuItem, SIZE_TYPES } from '@/types/common/components';
+import { RecipientDetailsType } from '@/types/api/paymentApi.types';
+import { SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
 
 type CreateTemplatePopoverProps = {
@@ -26,16 +27,19 @@ type CreateTemplatePopoverProps = {
 
 const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose, paymentType }) => {
   const isSingleTransfer = paymentType === MOVE_MONEY_TYPE.SINGLE_TRANSFER;
-  const [destinationAccountDetails, setDestinationAccountDetails] = useState<AccountDetailsType>(defaultAccountData);
-  const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType | undefined>(undefined);
-  const [recipientDetails, setRecipientDetails] = useState<MenuItem | TemplateDetailsType>();
+  const [destinationAccountDetails, setDestinationAccountDetails] = useState<AccountDetailsType | undefined>();
+  const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType | undefined>();
+  const [recipientDetails, setRecipientDetails] = useState<RecipientDetailsType | undefined>();
   const [templateName, setTemplateName] = useState<string>('');
+  const [destinationAccountList, setDestinationAccountList] = useState<AccountDetailsType[]>([]);
 
   const [createTemplate, { isLoading: isCreateTemplateLoading }] = useCreateTemplateMutation();
-
-  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery(undefined);
-  const [getDestinationAccounts, { data: destinationAccounts, isLoading: isDestinationAccountsLoading }] =
-    useLazyGetDestinationAccountsQuery();
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({}, { refetchOnMountOrArgChange: false });
+  const [
+    getRecipientBySourceAccount,
+    { data: recipientBySourceAccount, isLoading: isRecipientBySourceAccountLoading },
+  ] = useLazyGetRecipientBySourceAccountQuery();
+  const [getDestinationAccounts, { isLoading: isDestinationAccountsLoading }] = useLazyGetDestinationAccountsQuery();
 
   const handleSubmit = () => {
     createTemplate({
@@ -63,8 +67,24 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
   const handleSourceAccountSelect = (account: AccountDetailsType) => {
     setSourceAccountDetails(account);
     setDestinationAccountDetails(defaultAccountData);
+    setDestinationAccountList([]);
+    setRecipientDetails(undefined);
     if (!isSingleTransfer && account.id) {
-      getDestinationAccounts({ source_account_id: account.id ?? '' });
+      getDestinationAccounts({ source_account_id: account.id ?? '' })
+        .unwrap()
+        .then((res) => {
+          setDestinationAccountList(res.accounts);
+        });
+    } else if (isSingleTransfer && account.id) {
+      getRecipientBySourceAccount({ source_account_id: account.id ?? '' });
+    }
+  };
+
+  const handleRecipientSelect = (recipient: RecipientDetailsType) => {
+    setRecipientDetails(recipient);
+    setDestinationAccountDetails(undefined);
+    if (recipient?.accounts?.length) {
+      setDestinationAccountList(recipient?.accounts ?? []);
     }
   };
 
@@ -79,6 +99,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         backButtonTitle='Discard'
         childrenClassName='mt-12'
         wrapperClassName='w-[1000px]'
+        parentWrapperClassName='z-[1002]'
         onCancel={onClose}
         onSubmit={handleSubmit}
         closeOnClickOutside={false}
@@ -111,20 +132,23 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
           />
           {sourceAccountDetails && isSingleTransfer && (
             <SelectBeneDropdown
-              onSelect={(recipient: MenuItem | TemplateDetailsType) => setRecipientDetails(recipient)}
+              onSelect={handleRecipientSelect}
+              defaultSelectedRecipient={recipientDetails}
               shouldReset={false}
               label='Recipient'
               showTemplate={false}
+              recipientList={recipientBySourceAccount?.recipients ?? []}
+              isLoading={isRecipientBySourceAccountLoading}
             />
           )}
-          {((isSingleTransfer && !recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
+          {((isSingleTransfer && recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
             <SelectAccountDropdown
-              accountsList={destinationAccounts?.accounts ?? []}
+              accountsList={destinationAccountList}
               shouldReset={false}
               accountDetails={destinationAccountDetails}
               onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
               label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
-              isLoading={isDestinationAccountsLoading}
+              isLoading={isDestinationAccountsLoading || isRecipientBySourceAccountLoading}
             />
           )}
         </div>

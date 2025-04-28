@@ -115,6 +115,14 @@ export function isCamelCase(str: string) {
   return camelCaseRegex.test(str);
 }
 
+export function formatToNormalText(camelSnakeCaseStr: string) {
+  const isCamelSnakeCaseString = camelCaseToNormalText(camelSnakeCaseStr);
+
+  return isCamelSnakeCaseString
+    ?.replace(/_([a-z])/g, ' $1') // Insert a space before lowercase letters
+    ?.replace(/^./, (str) => str.toUpperCase()); // Capitalize the first letter
+}
+
 export function camelCaseToNormalText(camelCaseStr: string) {
   const isCamelCaseString = isCamelCase(camelCaseStr);
 
@@ -238,7 +246,8 @@ export function shuffleArray(array: any[]) {
  * @param number
  * @returns string number with suffix
  */
-export function formatNumber(value = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
+export function formatNumber(maxValue = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
+  const value = Math.abs(maxValue);
   const suffixes = [
     { threshold: 1000000000, suffix: 'B', valueString: 'Billions' },
     { threshold: 1000000, suffix: 'M', valueString: 'Millions' },
@@ -270,8 +279,9 @@ export function formatNumber(value = 0, precision = 1, allowSuffix = true, getSu
  */
 export const getMaxValue = (data: MapAny[], keys: string[]) => {
   const maxValue = Math.max(...data.flatMap((item) => keys.map((key) => item[key] || 0)));
+  const minValue = Math.min(...data.flatMap((item) => keys.map((key) => item[key] || 0)));
 
-  return maxValue;
+  return Math.abs(maxValue) > Math.abs(minValue) ? Math.abs(maxValue) : Math.abs(minValue);
 };
 
 /**
@@ -501,3 +511,20 @@ export const checkObjOrArrType = (value: unknown, type: 'object' | 'array' | 'bo
 };
 
 export const getCommaSeparatedNumberForInput = (num: string) => num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+/**
+ * Moves a value to the top of an array
+ * @param array
+ * @param value
+ * @returns array
+ */
+export const moveToTop = (array: string[], value: string): string[] => {
+  const index = array.indexOf(value);
+
+  if (index > -1) {
+    array.splice(index, 1);
+    array.unshift(value);
+  }
+
+  return array;
+};

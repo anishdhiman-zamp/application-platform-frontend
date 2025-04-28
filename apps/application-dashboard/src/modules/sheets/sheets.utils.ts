@@ -17,6 +17,17 @@ export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
   };
 };
 
+const getFilterOperator = (operator: CONDITION_OPERATOR_TYPE) => {
+  switch (operator) {
+    case CONDITION_OPERATOR_TYPE.EQUAL:
+      return CONDITION_OPERATOR_TYPE.IN;
+    case CONDITION_OPERATOR_TYPE.NOT_EQUAL:
+      return CONDITION_OPERATOR_TYPE.NOT_IN;
+    default:
+      return operator;
+  }
+};
+
 const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTER_TYPES) => {
   switch (filterType) {
     case FILTER_TYPES.SEARCH:
@@ -43,7 +54,7 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
     case FILTER_TYPES.MULTI_SELECT:
       return {
         filterType: filterType,
-        type: filter?.operator,
+        type: getFilterOperator(filter?.operator),
         values: filter?.value,
       };
     case FILTER_TYPES.SINGLE_SELECT:

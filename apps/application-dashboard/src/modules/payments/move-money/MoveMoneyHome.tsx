@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
-import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';
 import {
   moveMoneyContextActions,
   useMoveMoneyContextStore,
@@ -15,13 +14,13 @@ import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useRouter } from 'next/router';
 import { defaultFn } from 'types/commonTypes';
-import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MoneyTransferHome = () => {
   const router = useRouter();
-  const { type, templateId } = router.query;
+  const { type, templateId, recipientId } = router.query;
   const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
+  const transferType = isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER;
   const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
   const {
     state: { currentStep },
@@ -35,10 +34,6 @@ const MoneyTransferHome = () => {
     });
   };
 
-  const defaultTemplate = useMemo(() => {
-    return TEMPLATES.find((template: TemplateDetailsType) => template.id === templateId);
-  }, [templateId]);
-
   return (
     <div
       style={{ marginTop: `calc(-${currentStep * 100}vh)` }}
@@ -50,14 +45,19 @@ const MoneyTransferHome = () => {
         className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
         onClick={() => router.back()}
       />
-      <SelectSourceAccount handleStepChange={handleStepChange} />
+      <SelectSourceAccount
+        transferType={transferType}
+        handleStepChange={handleStepChange}
+        recipientId={(recipientId as string) ?? ''}
+        templateId={(templateId as string) ?? ''}
+      />
       {!isSelfTransfer && (
-        <SelectBeneficiaryStep defaultTemplate={defaultTemplate} handleStepChange={handleStepChange} />
+        <SelectBeneficiaryStep handleStepChange={handleStepChange} recipientId={(recipientId as string) ?? ''} />
       )}
       <AmountDetailsStep isSelfTransfer={isSelfTransfer} handleStepChange={handleStepChange} />
-      <MoveMoneyMoreInfo handleStepChange={handleStepChange} shouldReset={false} />
-      <ReviewMoneyTransfer handleStepChange={handleStepChange} />
-      <SuccessMoveMoney onReset={defaultFn} />
+      <MoveMoneyMoreInfo handleStepChange={handleStepChange} />
+      <ReviewMoneyTransfer transferType={transferType} handleStepChange={handleStepChange} />
+      <SuccessMoveMoney onReset={defaultFn} transferType={transferType} />
       {!!createTemplateType && (
         <CreateTemplatePopover
           paymentType={createTemplateType}

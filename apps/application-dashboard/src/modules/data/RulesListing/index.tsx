@@ -9,7 +9,7 @@ import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
 import Image from 'next/image';
 import { DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType } from 'types/commonTypes';
+import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { getUserId } from 'utils/accessPermission/accessPermission.utils';
@@ -20,7 +20,6 @@ import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
-import { getTagLabel } from 'components/filter/filter.utils';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -31,6 +30,8 @@ type RulesListingSideDrawerProps = {
   column: string;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   onDeleteRuleId: (ruleId: string) => void;
+  columnLabel: string;
+  tagColorMap: MapAny;
 };
 
 const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
@@ -39,6 +40,8 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
   column,
   handleSuccessfulUpdate,
   onDeleteRuleId,
+  columnLabel,
+  tagColorMap,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [rules, setRules] = useState<RuleCardProps[]>([]);
@@ -215,7 +218,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
       <div className='h-full mt-2'>
         <div className='px-6'>
           <div className='flex justify-between items-center'>
-            <div className='f-16-600'>{column}</div>
+            <div className='f-16-600'>{columnLabel}</div>
             {isApplyChangesEnabled && (
               <Button
                 type={BUTTON_TYPES.SECONDARY}
@@ -253,7 +256,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
         <CommonWrapper
           isLoading={isLoading}
           isError={isError}
-          className='h-[calc(100vh-120px)] overflow-auto pl-1.5'
+          className='h-[calc(100vh-180px)] overflow-auto pl-1.5'
           skeletonType={SkeletonTypes.CUSTOM}
           loader={
             <div className='flex justify-center items-center h-full'>
@@ -275,7 +278,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
             isResizable={false} // Disable resizing
             onLayoutChange={handleLayoutChange} // Handle drag-and-drop reordering
             draggableHandle='.drag-handle' // Restrict drag to the handle
-            rowHeight={118}
+            rowHeight={148}
             margin={[14, 14]}
             containerPadding={[0, 0]}
           >
@@ -290,7 +293,8 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
                 </div>
                 <RuleCard
                   filters={rule?.filters}
-                  value={getTagLabel(rule?.value ?? '')}
+                  value={rule?.value ?? ''}
+                  labelColor={tagColorMap?.[rule?.value ?? '']}
                   createdOn={rule?.createdOn}
                   key={rule?.id}
                   className='w-[428px]'

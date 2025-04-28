@@ -68,6 +68,9 @@ export const API_ENDPOINTS = {
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
   PAYMENTS_TEMPLATE_LIST_GET: `payments/templates/`,
   PAYMENTS_TEMPLATE_CREATE_POST: `payments/templates/`,
+  PAYMENTS_RECIPIENT_BY_SOURCE_ACCOUNT_GET: `payments/recipients`,
+  PAYMENTS_INITIATE_PAYMENT_POST: `payments/`,
+  PAYMENTS_CONFIG_GET: `payments/config`,
 
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
 

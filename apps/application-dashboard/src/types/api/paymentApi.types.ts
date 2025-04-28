@@ -1,3 +1,4 @@
+import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE } from '@/modules/payments/payments.types';
 import { MenuItem } from '@/types/common/components';
 
@@ -12,10 +13,13 @@ export type TemplateDetailsType = {
     order: string;
     source_account: AccountDetailsType;
     destination_account: AccountDetailsType;
+    recipient_name: string;
+    recipient_id: string;
   }[];
   created_by: string;
   creation_timestamp: string;
   type: MOVE_MONEY_TYPE;
+  status?: STATUS_TYPES;
 };
 
 export type TemplateListResponseType = {
@@ -30,9 +34,14 @@ export type RecipientAccountDetailsType = {
 export type RecipientDetailsType = {
   id: string;
   name: string;
-  email: string;
-  accounts: RecipientAccountDetailsType[];
-  recipient_details: MenuItem[];
+  email?: string;
+  accounts?: AccountDetailsType[];
+  recipient_details?: MenuItem[];
+  account_name?: string;
+  masked_account_number?: string;
+  currency_code?: string;
+  bank_name?: string;
+  account_number?: string;
 };
 
 export type RecipientListResponseType = {
@@ -61,4 +70,31 @@ export type CreateTemplatePayloadType = {
   }[];
   description: string;
   type: string;
+};
+
+export type RecipientBySourceAccountPayloadType = {
+  source_account_id: string;
+};
+
+export type RecipientBySourceAccountResponseType = {
+  recipients: RecipientDetailsType[];
+};
+
+export type InitiatePaymentPayloadType = {
+  type: MOVE_MONEY_TYPE;
+  source_account_id: string;
+  destination_account_id: string;
+  amount: number;
+  payments_processing_mode: string;
+  statement_descriptor: string;
+  notes?: string[];
+  attachments?: { file_upload_id: string }[];
+};
+
+export type SourceAccountByRecipientIdPayloadType = {
+  recipient_id?: string;
+};
+
+export type PaymentConfigResponseType = {
+  id: string;
 };

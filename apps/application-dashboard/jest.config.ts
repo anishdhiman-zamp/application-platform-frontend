@@ -85,29 +85,28 @@ const config: Config = {
   // maxWorkers: "50%",
 
   // An array of directory names to be searched recursively up from the requiring module's location
-  // moduleDirectories: [
-  //   "node_modules"
-  // ],
+  moduleDirectories: ['node_modules', 'packages/ui/src'],
 
   // An array of file extensions your modules use
-  // moduleFileExtensions: [
-  //   "js",
-  //   "mjs",
-  //   "cjs",
-  //   "jsx",
-  //   "ts",
-  //   "tsx",
-  //   "json",
-  //   "node"
-  // ],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
-  moduleDirectories: ['node_modules', 'src'],
-  // If you still need specific aliases, you can keep them:
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@/(.*)$': '<rootDir>/src/$1', // Optional: for @ alias if you use it
+    '^@zamp-platform/ui$': '<rootDir>/../../packages/ui/src/components/index.ts',
+    '^@zamp-platform/ui/(.*)$': '<rootDir>/../../packages/ui/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^modules/(.*)$': '<rootDir>/src/modules/$1',
+    '^apis/(.*)$': '<rootDir>/src/apis/$1',
+    '^constants/(.*)$': '<rootDir>/src/constants/$1',
+    '^types/(.*)$': '<rootDir>/src/types/$1',
+    '^components/(.*)$': '<rootDir>/src/components/$1',
+    '^styles/(.*)$': '<rootDir>/src/styles/$1',
+    '^store/(.*)$': '<rootDir>/src/store/$1',
+    '^services/(.*)$': '<rootDir>/src/services/$1',
+    '^hooks/(.*)$': '<rootDir>/src/hooks/$1',
+    '^pages/(.*)$': '<rootDir>/src/pages/$1',
+    '^hooks$': '<rootDir>/src/hooks',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

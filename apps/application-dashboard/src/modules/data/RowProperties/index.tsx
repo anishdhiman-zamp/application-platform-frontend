@@ -4,7 +4,11 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { getDatasetDrilldownRoute } from 'constants/routeConfig';
 import Properties from 'modules/data/RowProperties/Properties';
 import { ROW_PROPERTIES_TABS } from 'modules/data/RowProperties/rowProperties.constants';
-import { ROW_PROPERTIES_TABS_TYPES, TAG_SOURCE_TYPES } from 'modules/data/RowProperties/rowProperties.types';
+import {
+  ROW_PROPERTIES_TABS_TYPES,
+  RuleConfigType,
+  TAG_SOURCE_TYPES,
+} from 'modules/data/RowProperties/rowProperties.types';
 import Rules from 'modules/data/RowProperties/Rules';
 import { useRouter } from 'next/router';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
@@ -43,8 +47,8 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
     setSelectedTab(item?.value as ROW_PROPERTIES_TABS_TYPES);
   };
 
-  const ruleIds = useMemo(() => {
-    const ruleIds: string[] = [];
+  const ruleConfigs: RuleConfigType[] = useMemo(() => {
+    const configs: RuleConfigType[] = [];
     const tagColumns = columns.filter(
       (column) => column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG,
     );
@@ -54,11 +58,14 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
       const sourceValue = JSON.parse(data[sourceColumnId] ?? '{}');
 
       if (sourceValue?.source_type === TAG_SOURCE_TYPES.RULE) {
-        ruleIds.push(sourceValue?.source_id);
+        configs.push({
+          id: sourceValue?.source_id,
+          tagColorMap: column?.headerComponentParams?.filterComponentProps?.tagColorMap,
+        });
       }
     });
 
-    return ruleIds;
+    return configs;
   }, [columns, data]);
 
   const getTabContent = () => {
@@ -75,7 +82,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
           />
         );
       case ROW_PROPERTIES_TABS_TYPES.RULES:
-        return <Rules ruleIds={ruleIds} selectedRuleId={selectedRuleId} />;
+        return <Rules ruleConfigs={ruleConfigs} selectedRuleId={selectedRuleId} />;
     }
   };
 
@@ -116,6 +123,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
           )}
         </div>
       }
+      childrenWrapperClassName='h-[calc(100vh-120px)] overflow-auto'
     >
       {getTabContent()}
     </SideDrawer>
