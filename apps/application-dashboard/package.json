@@ -21,6 +21,8 @@
     "@sentry/nextjs": "^9.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "@xyflow/react": "^12.5.5",
+    "@zamp-platform/config": "*",
+    "@zamp-platform/ui": "*",
     "ag-charts-community": "^11.0.0",
     "ag-charts-enterprise": "^11.0.0",
     "ag-charts-react": "^11.0.0",
@@ -32,6 +34,7 @@
     "date-fns": "2.30.0",
     "external-svg-loader": "^1.7.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
+    "lucide-react": "^0.503.0",
     "monaco-editor": "^0.52.2",
     "posthog-js": "^1.234.6",
     "prop-types": "^15.8.1",
@@ -45,9 +48,7 @@
     "react-toastify": "^11.0.3",
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.5.5",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "@zamp-platform/config": "*",
-    "@zamp-platform/ui": "*"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "peerDependencies": {
     "next": "^15",

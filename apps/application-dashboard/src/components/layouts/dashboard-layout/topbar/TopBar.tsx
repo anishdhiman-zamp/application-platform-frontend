@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
+import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
+import PaymentActions from 'modules/payments/components/PaymentActions';
 import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -37,6 +39,19 @@ const Topbar = () => {
         return null;
     }
   }, [currentRoute, router?.query?.pageId, router?.query?.datasetId, router?.query?.paymentConfigId]);
+
+  const renderRightSideActions = useMemo(() => {
+    if (currentRoute.includes(ROUTES_PATH.PAYMENTS)) {
+      return (
+        <div className='flex items-center gap-3'>
+          <PaymentActions />
+          {renderShareButton}
+        </div>
+      );
+    }
+
+    return renderShareButton;
+  }, [currentRoute, renderShareButton]);
 
   const handleBackClick = () => {
     dispatch(removeLastBreadcrumb());
@@ -106,7 +121,7 @@ const Topbar = () => {
           setSearch(e.target.value);
         }}
       />
-      <div className='pr-8'>{renderShareButton}</div>
+      <div className='pr-8'>{renderRightSideActions}</div>
     </div>
   );
 };
