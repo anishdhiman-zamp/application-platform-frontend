@@ -1,4 +1,5 @@
 import { ColumnContext } from 'modules/widgets/Pivot/pivot.utils';
+import type { MapAny } from '@/types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -73,13 +74,15 @@ export type FilterConfig = {
   dateTo?: string;
   column?: string;
   targets?: string[];
+  title?: string;
+  filters?: ParentFilters;
 };
 
 export type ParentFilters = Record<string, FilterConfig>;
 
 export type PivotContext = {
-  filterContext: Record<string, ColumnFilterConfig[]>;
-  widgetMappingDatasets: Record<string, string>;
+  filterContext: MapAny;
+  widgetMappingDatasets: MapAny;
   columnContextMapping: Record<string, Record<string, ColumnContext>>;
 };
 
