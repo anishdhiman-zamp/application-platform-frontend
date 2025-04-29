@@ -15,6 +15,7 @@ import {
   StepCard,
 } from '@zamp-platform/ui';
 import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
+import ApproverList from 'modules/policies/create/ApproverList';
 import PolicyQuorumDropdown from 'modules/policies/create/PolicyQuorumDropdown';
 import { PolicyQuorum } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -87,8 +88,9 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
               Approval steps
             </div>
             <StepCard stepNumber={1}>
-              <div>
+              <div className='flex gap-2.5'>
                 <PolicyQuorumDropdown modifier={approvalStepModifier} onChange={handleApprovalStepModifierChange} />
+                <ApproverList />
               </div>
             </StepCard>
           </div>

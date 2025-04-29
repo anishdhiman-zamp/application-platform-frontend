@@ -13,7 +13,7 @@ const PolicyQuorumDropdown: FC<PolicyQuorumDropdownProps> = ({ modifier, onChang
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className='px-2.5 py-2 bg-GRAY_100 rounded-md w-fit f-12-500 flex items-center gap-1.5 cursor-pointer'>
+        <div className='px-2.5 py-2 bg-GRAY_100 rounded-md w-fit f-12-500 flex items-center gap-1.5 cursor-pointer text-nowrap'>
           <span>{modifier.label}</span>
           <SvgSpriteLoader id='chevron-down' size={14} />
         </div>
