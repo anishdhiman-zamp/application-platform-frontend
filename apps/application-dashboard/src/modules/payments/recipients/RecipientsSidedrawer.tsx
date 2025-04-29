@@ -17,7 +17,6 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
   const renderStep = () => {
     if (onRecipientDetails)
       return <RecipientDetails onBack={() => setOnRecipientDetails(null)} recipientDetails={onRecipientDetails} />;
-    if (isAddRecipient) return <AddRecipientAccount />;
 
     return (
       <RecipientsList
@@ -31,6 +30,7 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className='p-0 h-screen overflow-hidden'>
         <div className='overflow-y-scroll h-full'>{renderStep()}</div>
+        <AddRecipientAccount open={isAddRecipient} onOpenChange={setIsAddRecipient} />
       </SheetContent>
     </Sheet>
   );

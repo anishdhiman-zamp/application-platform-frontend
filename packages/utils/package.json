@@ -1,0 +1,9 @@
+{
+  "name": "@zamp-platform/utils",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "./index.ts"
+  ],
+  "devDependencies": {}
+}

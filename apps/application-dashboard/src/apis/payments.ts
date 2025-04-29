@@ -68,6 +68,12 @@ const Payments = baseApi.injectEndpoints({
         body,
       }),
     }),
+    addRecipient: builder.mutation<void, void>({
+      query: () => ({
+        url: API_ENDPOINTS.RECIPIENT_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
   }),
 });
 
@@ -82,4 +88,5 @@ export const {
   useLazyGetRecipientBySourceAccountQuery,
   useInitiatePaymentMutation,
   useGetPaymentConfigQuery,
+  useAddRecipientMutation,
 } = Payments;
