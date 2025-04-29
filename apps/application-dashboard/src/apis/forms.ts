@@ -8,7 +8,7 @@ export type GetFormConfigRequestType = {
 
 export type SubmitFormRequestType = {
   form_type: string;
-  data: Record<string, string | string[]>;
+  payload: Record<string, string | string[]>;
 };
 
 const Forms = baseApi.injectEndpoints({

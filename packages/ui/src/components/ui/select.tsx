@@ -23,6 +23,7 @@ export interface SelectProps
   onValueChange?: (value: string) => void;
   onBlur?: () => void;
   clearOptions?: boolean;
+  setShouldClearOptions?: (shouldClearOptions: boolean) => void;
 }
 
 const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Root>, SelectProps>(
@@ -38,6 +39,7 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
       onValueChange,
       clearOptions,
       onBlur,
+      setShouldClearOptions,
       ...props
     },
     ref,
@@ -61,7 +63,7 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
       } finally {
         setLoading(false);
       }
-    }, [fetchOptions, page, inputRef]);
+    }, [fetchOptions, page]);
 
     const handleOpenChange = (open: boolean) => {
       setIsOpen(open);
@@ -70,6 +72,9 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
       }
       if (!open) {
         setSearchQuery('');
+        inputRef.current?.blur();
+      } else {
+        inputRef.current?.focus();
       }
       if (props.onOpenChange) {
         props.onOpenChange(open);
@@ -86,7 +91,22 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
       setSearchQuery('');
       e.stopPropagation();
       e.preventDefault();
-      inputRef.current?.focus();
+      if (isOpen) {
+        inputRef.current?.focus();
+      } else {
+        inputRef.current?.blur();
+      }
+    };
+
+    const handleBlur = (e: React.FocusEvent) => {
+      // Only close if we're not focusing within the dropdown
+      const relatedTarget = e.relatedTarget as HTMLElement;
+      const isWithinDropdown = relatedTarget?.closest('[data-radix-popper-content-wrapper]');
+
+      if (!isWithinDropdown) {
+        setIsOpen(false);
+        onBlur?.();
+      }
     };
 
     const options = fetchOptions ? dynamicOptions : initialOptions;
@@ -113,40 +133,36 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
       if (clearOptions) {
         setDynamicOptions([]);
         setPage(1);
+        setShouldClearOptions?.(false);
       }
-    }, [clearOptions]);
+    }, [clearOptions, setShouldClearOptions]);
 
     return (
       <DropdownMenuPrimitive.Root {...props} open={isOpen} onOpenChange={handleOpenChange}>
-        <DropdownMenuPrimitive.Trigger asChild>
-          <button
-            ref={ref}
-            onClick={handleSearchClick}
-            className={cn(
-              'f-13-400 flex w-full items-center justify-between rounded-md border border-gray-400 focus:border-gray-600 bg-white px-3 outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
-              value ? 'text-primary' : 'text-gray-700',
-              'data-[state=open]:border-gray-600 data-[state=open]:ring-2 data-[state=open]:ring-gray-400',
-              getVariantStyles(variant),
-              className,
-            )}
-          >
-            <Search className='h-4 w-4 text-gray-400 mr-2' />
-            <input
-              ref={inputRef}
-              type='text'
-              placeholder={placeholder}
-              value={selectedOption?.label || searchQuery}
-              onChange={handleSearchChange}
-              onFocus={(e) => e.stopPropagation()}
-              className='w-full bg-transparent border-none outline-none text-sm placeholder:text-gray-700 text-primary'
-            />
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 opacity-50 transition-transform duration-200 text-gray-900',
-                isOpen && 'rotate-180',
-              )}
-            />
-          </button>
+        <DropdownMenuPrimitive.Trigger
+          ref={ref}
+          onClick={handleSearchClick}
+          onBlur={handleBlur}
+          className={cn(
+            'f-13-400 flex w-full items-center justify-between rounded-md border border-input focus:border-gray-600 bg-white px-3 outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
+            value ? 'text-primary' : 'text-gray-700',
+            'data-[state=open]:border-gray-600 data-[state=open]:ring-2 data-[state=open]:ring-gray-400',
+            getVariantStyles(variant),
+            className,
+          )}
+        >
+          <Search className='h-4 w-4 text-gray-400 mr-2' />
+          <input
+            ref={inputRef}
+            type='text'
+            placeholder={placeholder}
+            value={selectedOption?.label || searchQuery}
+            onChange={handleSearchChange}
+            className='h-full w-full bg-transparent border-none outline-none text-sm placeholder:text-gray-700 text-primary'
+          />
+          <ChevronDown
+            className={cn('h-4 w-4 opacity-50 transition-transform duration-200 text-gray-900', isOpen && 'rotate-180')}
+          />
         </DropdownMenuPrimitive.Trigger>
         <DropdownMenuPrimitive.Portal>
           <DropdownMenuPrimitive.Content
@@ -157,7 +173,6 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
             )}
             sideOffset={6}
             align='start'
-            onBlur={onBlur}
             onCloseAutoFocus={(e) => {
               e.preventDefault();
             }}
@@ -185,7 +200,7 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
               ))}
               {loading && (
                 <div className='space-y-2 p-2'>
-                  {[1, 2, 3].map((i) => (
+                  {[1, 2, 3, 4, 5].map((i) => (
                     <Skeleton key={i} className='h-6 w-full' />
                   ))}
                 </div>

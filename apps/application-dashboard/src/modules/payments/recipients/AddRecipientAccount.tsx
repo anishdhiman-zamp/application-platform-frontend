@@ -30,13 +30,12 @@ const AddRecipientAccount = ({ open, onOpenChange }: { open: boolean; onOpenChan
     messageToastId.current = toast.loading('Recipient creation in progress');
     await submitForm({
       form_type: FORM_TYPES.RECIPIENT_ACCOUNTS_ROBINHOOD,
-      data: data,
+      payload: data,
     });
   };
 
   useEffect(() => {
     if (submitFormStatus === 'fulfilled') {
-      console.log('zzzzzzz', submitFormData);
       addRecipient(submitFormData);
     } else if (submitFormStatus === 'rejected') {
       reactToastify.dismiss(messageToastId.current);
@@ -66,7 +65,7 @@ const AddRecipientAccount = ({ open, onOpenChange }: { open: boolean; onOpenChan
       <DialogContent showCloseButton size={SIZE_TYPES.LARGE}>
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
-          <div className='w-1/2'>
+          <div className='max-w-[400px] w-[45%]'>
             <FormBuilder ref={formRef} schema={schema} onSubmit={onSubmit} />
           </div>
         </DialogBody>

@@ -69,6 +69,9 @@ const DialogContent = React.forwardRef<
           window.document.body.style.pointerEvents = '';
         }
       }}
+      onOpenAutoFocus={(event) => {
+        event.preventDefault();
+      }}
       {...props}
     >
       <DialogPrimitive.Title className='sr-only'>{title || 'Dialog'}</DialogPrimitive.Title>

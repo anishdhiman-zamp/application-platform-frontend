@@ -29,13 +29,6 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name }) => {
     }
   }, [watchedValues]);
 
-  // Reset clear flag after it's been used
-  React.useEffect(() => {
-    if (shouldClearOptions) {
-      setShouldClearOptions(false);
-    }
-  }, [shouldClearOptions]);
-
   const loadOptions = async (currentFieldValues: Record<string, any>, page: number) => {
     if (!field.data_source) return { options: [], hasMore: false };
 
@@ -109,6 +102,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name }) => {
               onValueChange={onChange}
               onBlur={onBlur}
               clearOptions={shouldClearOptions}
+              setShouldClearOptions={setShouldClearOptions}
             />
           </div>
           {fieldError?.message ? (
