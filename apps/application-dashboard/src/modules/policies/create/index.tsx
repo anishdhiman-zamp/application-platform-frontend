@@ -14,6 +14,10 @@ import {
   DropdownMenuTrigger,
   StepCard,
 } from '@zamp-platform/ui';
+import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
+import PolicyQuorumDropdown from 'modules/policies/create/PolicyQuorumDropdown';
+import { PolicyQuorum } from 'modules/policies/types';
+import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 const creators = [
   {
@@ -32,6 +36,11 @@ const creators = [
 
 const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
   const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
+  const [approvalStepModifier, setApprovalStepModifier] = useState<PolicyQuorum>(POLICY_APPROVAL_STEP_MODIFIERS[0]);
+
+  const handleApprovalStepModifierChange = (modifier: PolicyQuorum) => {
+    setApprovalStepModifier(modifier);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -73,10 +82,13 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
             </DropdownMenu>
           </div>
           <div className='bg-BG_GRAY_2 p-4 flex flex-col border-t border-gray-200'>
+            <div className='f-11-400 text-GRAY_700 flex items-center gap-1 px-1 pb-2.5'>
+              <SvgSpriteLoader id='arrow-down' size={12} />
+              Approval steps
+            </div>
             <StepCard stepNumber={1}>
               <div>
-                <h3 className='f-16-700'>Step 1</h3>
-                <p className='f-14-400'>Select the creator you want to create a policy for.</p>
+                <PolicyQuorumDropdown modifier={approvalStepModifier} onChange={handleApprovalStepModifierChange} />
               </div>
             </StepCard>
           </div>
