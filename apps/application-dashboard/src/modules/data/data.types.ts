@@ -1,4 +1,5 @@
 import { RowClickedEvent } from 'ag-grid-community';
+import type { FilterConfig } from 'modules/widgets/Pivot/pivot.types';
 import { MapAny } from '@/types/commonTypes';
 
 export type UserAccessToDataSetType = {
@@ -46,4 +47,17 @@ export type RuleColumnDetailsType = {
   colId: string;
   columnLabel: string;
   tagColorMap: MapAny;
+};
+
+export type DatasetUrlDataType = {
+  [key: string]: {
+    title: string;
+    filters?: Record<string, FilterConfig>;
+  };
+};
+
+export type DatasetTabType = {
+  id: string;
+  title: string;
+  filters?: Record<string, FilterConfig>;
 };

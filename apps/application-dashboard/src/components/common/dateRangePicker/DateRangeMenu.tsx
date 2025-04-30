@@ -182,8 +182,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
 
       switch (value?.type) {
         case DATE_RANGE_TYPES.MONTH:
-          update.setMonth(value?.value as number);
           update.setDate(1);
+          update.setMonth(value?.value as number);
           update.setFullYear(value?.year);
 
           endDateUpdate.setMonth((value?.value as number) + 1);

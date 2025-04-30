@@ -105,6 +105,26 @@ export type PivotTableWidgetMapping = {
     }[];
   };
   default_filters?: Partial<DefaultFilterType>;
+  drilldown_config?: DrillDownConfigType;
+};
+
+export type DrillDownConfigType = {
+  column_mappings: {
+    [key: string]: {
+      [column: string]: {
+        target_column: string;
+        filter_type: FILTER_TYPES;
+        filter_operator: CONDITION_OPERATOR_TYPE;
+      };
+    };
+  };
+  measure_drilldowns: Record<
+    string,
+    {
+      dataset_id: string;
+      dataset_name: string;
+    }[]
+  >;
 };
 
 export type DefaultFilterType = {
@@ -206,3 +226,20 @@ export type WidgetInstanceType =
   | PieDonutChartWidgetInstanceType
   | PivotTableWidgetInstanceType
   | KPITagWidgetInstanceType;
+
+export type MappingDatasetsType = Record<
+  string,
+  | {
+      [measure: string]: {
+        dataset_id: string;
+        dataset_name: string;
+      }[];
+    }
+  | undefined
+>;
+
+export type MappingDatasetType = {
+  [key: string]: {
+    [measure: string]: string[];
+  };
+};

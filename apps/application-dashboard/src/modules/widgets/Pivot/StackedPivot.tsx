@@ -27,7 +27,7 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
@@ -35,6 +35,7 @@ import PivotRowTitle from 'modules/widgets/Pivot/components/PivotRowTitle';
 import PinnedColHeader from 'modules/widgets/Pivot/PinnedColHeader';
 import {
   COL_MIN_WIDTH,
+  DRILLDOWN_VERSION_V2,
   GRAND_ROW_TOTAL_POSITION,
   PINNED_COL_WIDTH,
   PINNED_DIRECTION,
@@ -61,6 +62,7 @@ import {
   getWidgetMappingDatasets,
   shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
+import { getFilterContextV2, getWidgetMappingDatasetsV2 } from 'modules/widgets/TreeTable/utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
@@ -127,6 +129,7 @@ const StackedPivot = ({
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
   const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
+  const currentVersion = widgetInstanceDetails?.data_mappings?.version;
 
   const handleExportAgGridData = () => {
     gridApi.current?.exportDataAsCsv({
@@ -174,13 +177,19 @@ const StackedPivot = ({
     };
   }, [widgetInstanceDetails, widgetData, periodicity]);
 
-  const pivotContext: PivotContext = useMemo(
+  const pivotContext = useMemo(
     () => ({
-      filterContext: getFilterContext(widgetInstanceDetails),
-      widgetMappingDatasets: getWidgetMappingDatasets(widgetInstanceDetails),
+      filterContext:
+        currentVersion === DRILLDOWN_VERSION_V2
+          ? getFilterContextV2(widgetInstanceDetails)
+          : getFilterContext(widgetInstanceDetails),
+      widgetMappingDatasets:
+        currentVersion === DRILLDOWN_VERSION_V2
+          ? getWidgetMappingDatasetsV2(widgetInstanceDetails)
+          : getWidgetMappingDatasets(widgetInstanceDetails),
       columnContextMapping,
     }),
-    [widgetInstanceDetails, columnContextMapping],
+    [widgetInstanceDetails, columnContextMapping, currentVersion],
   );
 
   const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col)?.length === 1, [colDef]);
@@ -347,9 +356,14 @@ const StackedPivot = ({
     if (!currentRef) return;
 
     // extract the column filters for the current ref
-    const currentRefColumnFilters: ColumnFilterConfig[] = context?.filterContext?.[currentRef];
+    const currentRefColumnFilters = context?.filterContext?.[currentRef];
 
     if (!currentRefColumnFilters) return;
+
+    // Convert to ColumnFilterConfig[] for both versions
+    const currentRefColumnFiltersArray: ColumnFilterConfig[] = Array.isArray(currentRefColumnFilters)
+      ? currentRefColumnFilters
+      : Object.values(currentRefColumnFilters).flat();
 
     // extract the column context mapping for the current ref
     // this mapping holds the mapping of identifiers set in AGGrid against the column context (name, alias)
@@ -357,15 +371,15 @@ const StackedPivot = ({
 
     if (!currentRefColumnContextMapping) return;
 
-    // extract the row level filters for the currently clickedn ode
-    const rowLevelFilters = getRowLevelFilters(currentRefColumnFilters, currentRefColumnContextMapping, node);
+    // extract the row level filters for the currently clicked node
+    const rowLevelFilters = getRowLevelFilters(currentRefColumnFiltersArray, currentRefColumnContextMapping, node);
 
     // get the pivot columns that the current cell belongs to
     const pivotColumns = params.api.getPivotColumns().map((col) => col.getColDef());
 
     // get the column level filters for the current cell
     const columnLevelFilters = getColumnLevelFilters(
-      currentRefColumnFilters,
+      currentRefColumnFiltersArray,
       pivotColumns,
       currentRefColumnContextMapping,
       {
@@ -401,6 +415,111 @@ const StackedPivot = ({
 
     // navigate to the dataset
     navigateToDataset(datasetId, widgetFilter);
+  };
+
+  const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
+    if (datasets?.length > 0) {
+      const path = getPageDrilldownMultiRoute(
+        pageId as string,
+        datasets?.map((dataset) => dataset?.dataset_id),
+      );
+
+      router.push(`${path}?datasets=${JSON.stringify(filters)}`);
+    }
+  };
+
+  const handleDrilldownV2 = (params: CellDoubleClickedEvent<MapAny[], PivotContext>) => {
+    const { node, colDef: currentColDef } = params;
+
+    // Ignore grand total or pinned columns
+    if (node?.level === -1 || currentColDef?.pinned === PINNED_DIRECTION.LEFT) return;
+
+    const context: PivotContext = params.context;
+    let currentRef = currentColDef?.context?.mappingName;
+
+    // For stacked pivot with multiple mappings
+    if (Object.keys(context?.columnContextMapping || {})?.length > 1) {
+      currentRef = getTopNode(node)?.key;
+    }
+
+    if (!currentRef) return;
+
+    //extract the headername from current coldef and converting it to the lowercase
+    const headerName = currentColDef?.headerName?.toString()?.toLowerCase();
+
+    if (!headerName) return;
+
+    //extracting actual headername from column context mapping because we have both alias and actual name
+    const actualHeaderName = context?.columnContextMapping[currentRef]?.[headerName]?.name;
+
+    // extract the dataset ids from the context
+    const datasets = context?.widgetMappingDatasets?.[currentRef]?.[actualHeaderName] ?? [];
+
+    if (!datasets || !Array.isArray(datasets)) return;
+
+    const combinedFilters: ParentFilters = {};
+
+    datasets.forEach((dataset) => {
+      const currentRefColumnFilters: ColumnFilterConfig[] =
+        context?.filterContext?.[dataset?.dataset_id]?.[currentRef] ?? [];
+
+      if (!currentRefColumnFilters) return;
+
+      const currentRefColumnContextMapping = context?.columnContextMapping?.[currentRef];
+
+      if (!currentRefColumnContextMapping) return;
+
+      // Get filters for the clicked cell (row-level)
+      const rowLevelFilters = getRowLevelFilters(currentRefColumnFilters, currentRefColumnContextMapping, node);
+
+      // Get filters for pivot columns
+      const pivotColumns = params.api.getPivotColumns().map((col) => col.getColDef());
+      const columnLevelFilters = getColumnLevelFilters(
+        currentRefColumnFilters,
+        pivotColumns,
+        currentRefColumnContextMapping,
+        {
+          periodicity,
+          widgetSelectedFilter: currentWidgetSelectedFilter,
+        },
+        currentColDef.pivotKeys || [],
+      );
+
+      // Combine filters
+      let widgetFilter: ParentFilters = concatTagFilters({
+        ...rowLevelFilters,
+        ...columnLevelFilters,
+      });
+
+      // Normalize untagged tags
+      if (widgetFilter?.tags?.values?.includes(UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED)) {
+        widgetFilter = {
+          ...widgetFilter,
+          tags: {
+            ...widgetFilter.tags,
+            type: CONDITION_OPERATOR_TYPE.IS_NULL,
+            values: widgetFilter.tags.values.map((value) =>
+              value === UNTAGGED_TAGS_FRONTEND_MAPPING.UNTAGGED ? '' : value,
+            ),
+          },
+        };
+      }
+
+      const datasetDefaultFilters = getDefaultFilterByDatasetId(
+        widgetInstanceDetails?.data_mappings?.mappings,
+        dataset?.dataset_id,
+      );
+
+      const mergedFilters = mergeFilters(datasetDefaultFilters, currentWidgetSelectedFilter);
+
+      combinedFilters[dataset?.dataset_id] = {
+        filters: { ...mergedFilters, ...widgetFilter },
+        title: dataset.dataset_name,
+      };
+    });
+
+    // Navigate to multi-dataset drilldown
+    navigateToDatasetV2(datasets, combinedFilters);
   };
 
   const handleScrollToRightEnd = () => {
@@ -455,7 +574,7 @@ const StackedPivot = ({
         pivotHeaderHeight={isSingleHeader ? 0 : PIVOT_HEADER_HEIGHT}
         grandTotalRow={display_config?.show_column_aggregations ? GRAND_ROW_TOTAL_POSITION : undefined}
         processPivotResultColGroupDef={processPivotResultColGroupDef}
-        onCellDoubleClicked={handleDrilldown}
+        onCellDoubleClicked={currentVersion === DRILLDOWN_VERSION_V2 ? handleDrilldownV2 : handleDrilldown}
         {...PIVOT_GRID_OPTIONS}
       />
     </div>
