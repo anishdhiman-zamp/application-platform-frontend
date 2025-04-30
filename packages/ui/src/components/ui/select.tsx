@@ -7,6 +7,7 @@ import { SIZE_TYPES } from '../../types';
 
 export interface SelectOption {
   label: string;
+  richLabel?: React.ReactNode;
   value: string;
   icon?: React.ReactNode;
 }

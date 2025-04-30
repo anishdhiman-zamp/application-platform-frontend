@@ -30,6 +30,8 @@ export interface DataSource {
   triggers?: Array<{
     field: string;
   }>;
+  valueFormatter?: (value: any) => SelectOption[];
+  useCustomHook?: (...args: any[]) => any;
 }
 
 export interface Condition {
@@ -56,8 +58,12 @@ export interface ValidationDependency {
 export type FieldType = 'text' | 'select';
 
 export interface SelectOption {
-  id: string;
+  id?: string;
+  label: string;
+  richLabel?: React.ReactNode;
   value: string;
+  icon?: React.ReactNode;
+  displayValue?: string;
 }
 
 export interface FormField {

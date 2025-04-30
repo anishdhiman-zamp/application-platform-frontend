@@ -66,11 +66,10 @@ export const fetchDataSource = async <T = any>(
       return { data: [], error: 'Failed to fetch data' };
     }
 
-    const { data } = await response.json();
-    return { data, error: null };
+    const res = await response.json();
+    return { data: res?.data || res, error: null };
   } catch (err) {
-    console.error('Error fetching data source:', err);
-    return { data: [], error: 'Failed to load data' };
+    throw err;
   } finally {
     onLoadingChange?.(false);
   }
