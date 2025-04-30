@@ -32,6 +32,7 @@ export const Tag = React.forwardRef<HTMLDivElement, TagProps>(({ className, vari
     </div>
   );
 });
+
 Tag.displayName = 'Tag';
 
 export { tagVariants };
