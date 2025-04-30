@@ -72,6 +72,8 @@ export enum PINNED_DIRECTION {
   RIGHT = 'right',
 }
 
+export const DRILLDOWN_VERSION_V2 = '2';
+
 export enum PIVOT_REF_TYPES {
   RECONCILLIATION = 'Reconciliation Data',
   TAGS = 'Tag',

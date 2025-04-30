@@ -370,6 +370,7 @@ const TreeTableComponent = ({
 
     if (!mappingDatasets[ref]) return;
 
+    // @ts-ignore- will be fixed with tree table drilldown
     navigateToDataset(mappingDatasets[ref], widgetFilter);
   };
 
