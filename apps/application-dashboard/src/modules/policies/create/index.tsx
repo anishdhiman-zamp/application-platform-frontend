@@ -1,24 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectOption } from '@zamp-platform/form-builder';
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  StepCard,
-} from '@zamp-platform/ui';
+import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
+import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
+import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeDropdown from 'modules/policies/create/AttributeDropdown';
 import { attributes } from 'modules/policies/create/constants';
+import { ApprovalFlowStep } from 'modules/policies/types';
 
 interface PolicyFormData {
   [key: string]: SelectOption[];
 }
 
 const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
+  const [approvalSteps, setApprovalSteps] = useState<ApprovalFlowStep[]>([DEFAULT_APPROVAL_STEP]);
   const methods = useForm<PolicyFormData>({
     defaultValues: attributes.reduce(
       (acc, attr) => ({
@@ -47,14 +42,7 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
                   <AttributeDropdown key={attribute.label} attribute={attribute} name={attribute.label} />
                 ))}
               </div>
-              <div className='bg-BG_GRAY_2 p-4 flex flex-col border-t border-gray-200'>
-                <StepCard stepNumber={1}>
-                  <div>
-                    <h3 className='f-16-700'>Step 1</h3>
-                    <p className='f-14-400'>Select the creator you want to create a policy for.</p>
-                  </div>
-                </StepCard>
-              </div>
+              <ApprovalFlow approvalSteps={approvalSteps} onChange={setApprovalSteps} />
             </DialogBody>
             <DialogFooter>
               <div className='flex justify-end gap-3'>

@@ -14,6 +14,19 @@ export type AttributeType = {
   | { data_source: DataSource; options: { label: string; value: string }[] }
 );
 
+export const formatAudienceMembers = (rawData: any) => {
+  return rawData.map((item: any) => ({
+    id: item.resource_audience_id,
+    label: item.name ?? '',
+    richLabel: getAudienceMember(item),
+    displayValue: getAudienceName(item),
+    value: {
+      type: item.resource_audience_type,
+      id: item.resource_audience_id,
+    },
+  }));
+};
+
 export const attributes: AttributeType[] = [
   {
     label: 'Creator',
@@ -21,18 +34,7 @@ export const attributes: AttributeType[] = [
       endpoint: 'payments/audiences',
       method: 'GET',
       useCustomHook: useAudienceMembers,
-      valueFormatter: (rawData) => {
-        return rawData.map((item: any) => ({
-          id: item.resource_audience_id,
-          label: item.name ?? '',
-          richLabel: getAudienceMember(item),
-          displayValue: getAudienceName(item),
-          value: {
-            type: item.resource_audience_type,
-            id: item.resource_audience_id,
-          },
-        }));
-      },
+      valueFormatter: formatAudienceMembers,
       params: {
         resourceType: ResourceType.PAYMENTS,
         resourceId: '',
