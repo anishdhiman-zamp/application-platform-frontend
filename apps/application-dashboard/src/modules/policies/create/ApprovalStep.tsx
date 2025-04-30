@@ -3,14 +3,16 @@ import { StepCard } from '@zamp-platform/ui';
 import SequenceStep from 'modules/policies/create/SequenceStep';
 import { ApprovalFlowCondition, ApprovalFlowStep, PolicyQuorum } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { defaultFnType } from '@/types/commonTypes';
 
 type ApprovalStepProps = {
   stepNumber: number;
   step: ApprovalFlowStep;
   onChange: (stepNumber: number, step: ApprovalFlowStep) => void;
+  onRemove?: defaultFnType;
 };
 
-const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onChange }) => {
+const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onChange, onRemove }) => {
   const handleAddApproverSequence = () => {
     onChange(stepNumber, {
       ...step,
@@ -33,7 +35,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onChange }) => 
   };
 
   return (
-    <StepCard stepNumber={stepNumber}>
+    <StepCard stepNumber={stepNumber} onRemove={onRemove}>
       {step?.conditions.map((sequence, index) => (
         <SequenceStep
           key={index}
