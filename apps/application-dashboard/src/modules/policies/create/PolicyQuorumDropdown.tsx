@@ -1,12 +1,12 @@
 import { FC } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
-import { PolicyQuorum } from 'modules/policies/types';
+import { PolicyQuorumOption } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type PolicyQuorumDropdownProps = {
-  modifier: PolicyQuorum;
-  onChange: (value: PolicyQuorum) => void;
+  modifier: PolicyQuorumOption;
+  onChange: (value: PolicyQuorumOption) => void;
 };
 
 const PolicyQuorumDropdown: FC<PolicyQuorumDropdownProps> = ({ modifier, onChange }) => {

@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
 import ApproverList from 'modules/policies/create/ApproverList';
 import PolicyQuorumDropdown from 'modules/policies/create/PolicyQuorumDropdown';
-import { PolicyQuorum } from 'modules/policies/types';
+import { PolicyQuorumOption } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type SequenceStepProps = {
@@ -10,10 +10,12 @@ type SequenceStepProps = {
   onRemove: (sequence: number) => void;
 };
 const SequenceStep: FC<SequenceStepProps> = ({ sequence, onRemove }) => {
-  const [approvalStepModifier, setApprovalStepModifier] = useState<PolicyQuorum>(POLICY_APPROVAL_STEP_MODIFIERS[0]);
+  const [approvalStepModifier, setApprovalStepModifier] = useState<PolicyQuorumOption>(
+    POLICY_APPROVAL_STEP_MODIFIERS[0],
+  );
   const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
 
-  const handleApprovalStepModifierChange = (modifier: PolicyQuorum) => {
+  const handleApprovalStepModifierChange = (modifier: PolicyQuorumOption) => {
     setApprovalStepModifier(modifier);
   };
 
