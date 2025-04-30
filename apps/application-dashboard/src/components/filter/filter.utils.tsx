@@ -46,7 +46,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === selectedFilter?.type)?.label ?? '';
 
       let title = '';
-      const count = selectedFilter?.values?.length;
+      const count = Array.isArray(selectedFilter?.values) ? selectedFilter?.values?.length : 0;
 
       title = isNull
         ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label

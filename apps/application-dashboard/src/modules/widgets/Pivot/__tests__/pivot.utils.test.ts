@@ -150,8 +150,8 @@ describe('concatTagFilters', () => {
 
     expect(result).toEqual({
       tag: {
-        filterType: 'search',
-        type: 'startswith',
+        filterType: 'multi-select',
+        type: 'in',
         values: ['cloud.aws.ec2'],
       },
       otherFilter: {
@@ -174,8 +174,8 @@ describe('concatTagFilters', () => {
 
     expect(result).toEqual({
       tag: {
-        filterType: 'search',
-        type: 'startswith',
+        filterType: 'multi-select',
+        type: 'in',
         values: ['cloud'],
       },
     });
@@ -199,8 +199,8 @@ describe('concatTagFilters', () => {
 
     expect(result).toEqual({
       tag: {
-        filterType: 'search',
-        type: 'startswith',
+        filterType: 'multi-select',
+        type: 'in',
         values: ['cloud.ec2'],
       },
     });
@@ -230,8 +230,8 @@ describe('concatTagFilters', () => {
 
     expect(result).toEqual({
       tag: {
-        filterType: 'search',
-        type: 'startswith',
+        filterType: 'multi-select',
+        type: 'in',
         values: ['cloud'],
       },
       status: {
