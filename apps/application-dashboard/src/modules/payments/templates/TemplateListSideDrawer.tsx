@@ -1,5 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Sheet, SheetContent, SIZE_TYPES } from '@zamp-platform/ui';
+import { Sheet, SheetContent } from '@zamp-platform/ui';
+import { SIZE_TYPES } from '@zamp-platform/ui/types';
 import TemplateFilter from 'modules/payments/move-money/components/TemplateFilter';
 import { MOVE_MONEY_TEMPLATE_FILTER_ITEMS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';

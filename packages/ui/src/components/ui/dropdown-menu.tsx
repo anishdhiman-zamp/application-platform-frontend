@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { Check, ChevronRight, Circle } from 'lucide-react';
+import { ChevronRight, Circle } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
 import { Checkbox } from './checkbox';
@@ -96,12 +96,13 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center justify-between rounded-sm py-1.5 px-2 f-14-500 outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex pointer-events-auto cursor-pointer select-none gap-x-2 items-center justify-between rounded-sm py-1.5 px-2 f-12-500 outline-none transition-colors data-[state=open]:bg-gray-50 hover:bg-gray-50 focus:bg-gray-50 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     checked={checked}
     onSelect={(event) => {
       event.preventDefault();
+      event.stopPropagation();
       onSelect?.(event);
     }}
     {...props}

@@ -12,11 +12,7 @@ export enum LOCAL_STORAGE_KEYS {
 }
 
 export const getFromLocalStorage = (key: string) => {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-
-  return window?.localStorage?.getItem(key);
+  return localStorage.getItem(key);
 };
 
 export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {

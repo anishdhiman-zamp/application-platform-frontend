@@ -56,6 +56,7 @@ module.exports = {
   },
   ignorePatterns: ['*.webp', '*.png', 'fonts.css', 'eslint.js', '**/next.config.js', 'dist'],
   rules: {
+    'no-unused-vars': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',
       {
@@ -122,6 +123,7 @@ module.exports = {
     {
       files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
       rules: {
+        'no-unused-vars': 'off',
         'simple-import-sort/imports': [
           'error',
           {

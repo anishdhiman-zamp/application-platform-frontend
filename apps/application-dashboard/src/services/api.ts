@@ -21,7 +21,6 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const baseQueryWithAuth: any = async (args: any, api: any, extraOptions: any) => {
   await mutex.waitForUnlock();
 
@@ -34,7 +33,6 @@ const baseQueryWithAuth: any = async (args: any, api: any, extraOptions: any) =>
 
   if (error) {
     const status = error?.status;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = error?.data;
 
     if (status === 401 && !isLoginRoute) {
