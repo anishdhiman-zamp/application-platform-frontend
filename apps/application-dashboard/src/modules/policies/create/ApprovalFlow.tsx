@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { Button } from '@zamp-platform/ui';
+import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalStep from 'modules/policies/create/ApprovalStep';
+import { ApprovalFlowStep } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 const ApprovalFlow = () => {
-  const [approvalSteps, setApprovalSteps] = useState<number[]>([1]);
+  const [approvalSteps, setApprovalSteps] = useState<ApprovalFlowStep[]>([DEFAULT_APPROVAL_STEP]);
 
   const handleAddApprovalStep = () => {
-    setApprovalSteps((prev) => [...prev, prev.length + 1]);
+    setApprovalSteps((prev) => [...prev, DEFAULT_APPROVAL_STEP]);
+  };
+
+  const handleUpdateApprovalStep = (stepNumber: number, step: ApprovalFlowStep) => {
+    setApprovalSteps((prev) => prev.map((s, index) => (index === stepNumber - 1 ? step : s)));
   };
 
   return (
@@ -17,8 +23,13 @@ const ApprovalFlow = () => {
         Approval steps
       </div>
       <div className='space-y-3'>
-        {approvalSteps.map((step) => (
-          <ApprovalStep key={step} stepNumber={step} />
+        {approvalSteps.map((step, index) => (
+          <ApprovalStep
+            key={index}
+            stepNumber={index + 1}
+            step={step}
+            onUpdateApprovalStep={handleUpdateApprovalStep}
+          />
         ))}
         <Button variant='outline' onClick={handleAddApprovalStep} size='xs' className='flex items-center gap-1.5'>
           <SvgSpriteLoader id='layers-two-02' size={14} />

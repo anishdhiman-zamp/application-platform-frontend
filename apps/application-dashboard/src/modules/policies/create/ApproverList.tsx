@@ -6,45 +6,37 @@ import {
   DropdownMenuTrigger,
   Tag,
 } from '@zamp-platform/ui';
+import { DUMMY_APPROVERS as dummyApprovers } from 'modules/policies/constants';
+import { ApproverDetail } from 'modules/policies/types';
 import { KEY_CODES } from '@/components/multiSelectInput/multiSelectInput.types';
 
-const approvers = [
-  { label: 'Design', value: 'design' },
-  { label: 'Engineering', value: 'engineering' },
-  { label: 'Finance', value: 'finance' },
-  { label: 'John', value: 'John' },
-  { label: 'Jane', value: 'Jane' },
-  { label: 'Jim', value: 'Jim' },
-  { label: 'Jill', value: 'Jill' },
-];
-
 type ApproverListProps = {
-  selectedApprovers: string[];
-  setSelectedApprovers: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedApprovers: ApproverDetail[];
+  onChange: (approvers: ApproverDetail[]) => void;
 };
 
-const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, setSelectedApprovers }) => {
+const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) => {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter approvers based on input value
-  const filteredApprovers = approvers.filter((approver) =>
+  const filteredApprovers = dummyApprovers.filter((approver) =>
     approver.label.toLowerCase().includes(inputValue.toLowerCase()),
   );
 
   // Remove last tag if input is empty and backspace is pressed
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === KEY_CODES.BACKSPACE && inputValue.length === 0 && selectedApprovers.length > 0) {
-      setSelectedApprovers((prev) => prev.slice(0, -1));
+      onChange(selectedApprovers.slice(0, -1));
     }
   };
 
   // Add approver to selected list
-  const handleSelect = (checked: boolean, value: string) => {
+  const handleSelect = (checked: boolean, approver: ApproverDetail) => {
     if (checked) {
-      setSelectedApprovers((prev) => [...prev, value]);
+      onChange([...selectedApprovers, approver]);
     } else {
-      setSelectedApprovers((prev) => prev.filter((a) => a !== value));
+      onChange(selectedApprovers.filter((a) => a.id !== approver.id));
     }
     setInputValue('');
     // Keep focus on input after selection
@@ -56,8 +48,8 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, setSelectedApp
       <DropdownMenuTrigger asChild>
         <div className='flex flex-wrap gap-2.5 border p-1.5 rounded-md w-full min-h-[40px] items-center cursor-text'>
           {selectedApprovers.map((approver) => (
-            <Tag variant='outline' key={approver} className='flex items-center gap-1'>
-              {approvers.find((a) => a.value === approver)?.label || approver}
+            <Tag variant='outline' key={approver.id} className='flex items-center gap-1'>
+              {approver.label}
             </Tag>
           ))}
           <input
@@ -78,9 +70,9 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, setSelectedApp
         ) : (
           filteredApprovers.map((approver) => (
             <DropdownMenuCheckboxItem
-              key={approver.value}
-              checked={selectedApprovers.includes(approver.value)}
-              onCheckedChange={(checked) => handleSelect(checked, approver.value)}
+              key={approver.id}
+              checked={selectedApprovers.includes(approver)}
+              onCheckedChange={(checked) => handleSelect(checked, approver)}
             >
               <Tag variant='outline'>{approver.label}</Tag>
             </DropdownMenuCheckboxItem>

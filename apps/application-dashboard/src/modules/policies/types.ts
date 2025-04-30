@@ -14,6 +14,7 @@ export type PolicyQuorumOption = {
 export type ApproverDetail = {
   type: ResourceAudienceType;
   id: string;
+  label: string;
 };
 
 export type ApprovalFlowCondition = {
