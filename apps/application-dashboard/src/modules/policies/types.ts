@@ -1,6 +1,6 @@
 export enum POLICY_QUORUM {
-  ONE = 'ONE',
-  ALL = 'ALL',
+  ONE = 'ANY_OF',
+  ALL = 'ALL_OF',
 }
 
 export type PolicyQuorum = {
