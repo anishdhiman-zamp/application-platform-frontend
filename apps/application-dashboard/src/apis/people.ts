@@ -20,6 +20,13 @@ import {
   PostTeamsByOrganizationIdResponseType,
   RemoveTeamFromAudienceRequestType,
 } from 'types/api/people.types';
+import {
+  GetPendingApprovalsResponse,
+  GetPoliciesResponse,
+  GetPolicyResultApprovalsResponse,
+  ProcessApprovalRequest,
+  ProcessApprovalResponse,
+} from 'types/api/policies.types';
 import { formRequestUrlWithParams } from 'utils/common';
 
 const People = baseApi.injectEndpoints({
@@ -126,6 +133,56 @@ const People = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_USER_INVITATIONS],
     }),
+    getPendingApprovals: builder.query<GetPendingApprovalsResponse, void>({
+      query: () => ({
+        url: API_ENDPOINTS.POLICY_PENDING_APPROVALS_GET,
+      }),
+      providesTags: [APITags.GET_POLICY_APPROVALS],
+    }),
+    approvePolicy: builder.mutation<ProcessApprovalResponse, ProcessApprovalRequest>({
+      query: (params) => {
+        return {
+          url: API_ENDPOINTS.POLICY_APPROVE_POST,
+          method: REQUEST_TYPES.POST,
+          params: {
+            ids: params.ids.join(','),
+          },
+          body: {},
+        };
+      },
+      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS, APITags.GET_POLICY_APPROVALS],
+    }),
+    rejectPolicy: builder.mutation<ProcessApprovalResponse, ProcessApprovalRequest>({
+      query: (params) => {
+        return {
+          url: API_ENDPOINTS.POLICY_REJECT_POST,
+          method: REQUEST_TYPES.POST,
+          params: {
+            ids: params.ids.join(','),
+          },
+          body: {},
+        };
+      },
+      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS, APITags.GET_POLICY_APPROVALS],
+    }),
+    getAllPolicies: builder.query<GetPoliciesResponse, { resourceType?: string; actionType?: string }>({
+      query: (params) => {
+        return {
+          url: API_ENDPOINTS.POLICY_LIST_GET,
+          params: {
+            resource_type: params.resourceType,
+            action_type: params.actionType,
+          },
+        };
+      },
+      providesTags: [APITags.GET_POLICY_LIST],
+    }),
+    getPolicyResultApprovals: builder.query<GetPolicyResultApprovalsResponse, { policyResultId: string }>({
+      query: ({ policyResultId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_RESULT_APPROVALS_GET, { policyResultId }),
+      }),
+      providesTags: [APITags.GET_POLICY_APPROVALS],
+    }),
   }),
 });
 
@@ -143,4 +200,9 @@ export const {
   useRemoveTeamFromAudienceMutation,
   useGetMyInvitationsQuery,
   useAcceptInvitationMutation,
+  useGetPendingApprovalsQuery,
+  useApprovePolicyMutation,
+  useRejectPolicyMutation,
+  useGetAllPoliciesQuery,
+  useGetPolicyResultApprovalsQuery,
 } = People;

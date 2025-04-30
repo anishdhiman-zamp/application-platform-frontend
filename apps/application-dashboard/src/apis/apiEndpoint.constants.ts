@@ -79,6 +79,11 @@ export const API_ENDPOINTS = {
 
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
+  POLICY_LIST_GET: `/policy/list`,
+  POLICY_PENDING_APPROVALS_GET: `/policy/pending-approvals`,
+  POLICY_RESULT_APPROVALS_GET: `/policy-result/{{policyResultId}}/approvals`,
+  POLICY_APPROVE_POST: `/approval/approve`,
+  POLICY_REJECT_POST: `/approval/reject`,
 
   RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET: `{{resourceRoute}}/{{resourceId}}/audiences`,
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,

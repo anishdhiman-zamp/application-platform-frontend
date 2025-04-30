@@ -528,3 +528,11 @@ export const moveToTop = (array: string[], value: string): string[] => {
 
   return array;
 };
+
+export const getUserDisplayName = (user?: { name?: string; email?: string }) => {
+  if (user?.name) return user.name;
+
+  if (user?.email) return convertEmailUsernameToName(getUserNameFromEmail(user.email));
+
+  return 'Unknown';
+};

@@ -1,5 +1,5 @@
 import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from 'modules/team/people.types';
-
+import { PolicyResultStatus } from 'types/api/policies.types';
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
 };
@@ -19,6 +19,11 @@ export type InvitedAudiencesByOrganisationIdResponse = {
   name: string;
   email: string;
   privilege: string;
+  organization_invitation_id?: string;
+  policy_application_metadata?: {
+    status: PolicyResultStatus;
+    policy_result_id?: string;
+  };
 };
 
 export type PostAudiencesInviteData = {
