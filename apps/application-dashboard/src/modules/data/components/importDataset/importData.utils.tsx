@@ -56,7 +56,7 @@ export const generateUniqueId = (length: number) => {
 
   crypto.getRandomValues(array);
 
-  return Array.from(array, (x) => chars[x % chars?.length]).join('');
+  return Array.from(array, (x) => chars[x % chars?.length])?.join('');
 };
 
 /**

@@ -648,7 +648,7 @@ export const concatTagFilters = (filters: Record<string, any>) => {
     concatenatedFilters[tagName] = {
       filterType: FILTER_TYPES.SEARCH,
       type: CONDITION_OPERATOR_TYPE.STARTS_WITH,
-      values: [sortedTagFilters?.map(([, value]) => value).join('.')],
+      values: [sortedTagFilters?.map(([, value]) => value)?.join('.')],
     };
   }
 
