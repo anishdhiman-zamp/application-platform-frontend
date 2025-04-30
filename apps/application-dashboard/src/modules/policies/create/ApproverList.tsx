@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,8 +18,12 @@ const approvers = [
   { label: 'Jill', value: 'Jill' },
 ];
 
-const ApproverList = () => {
-  const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
+type ApproverListProps = {
+  selectedApprovers: string[];
+  setSelectedApprovers: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
+const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, setSelectedApprovers }) => {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 

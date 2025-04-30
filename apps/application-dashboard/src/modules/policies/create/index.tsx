@@ -12,12 +12,8 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  StepCard,
 } from '@zamp-platform/ui';
-import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
-import ApproverList from 'modules/policies/create/ApproverList';
-import PolicyQuorumDropdown from 'modules/policies/create/PolicyQuorumDropdown';
-import { PolicyQuorum } from 'modules/policies/types';
+import ApprovalStep from 'modules/policies/create/ApprovalStep';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 const creators = [
@@ -37,10 +33,10 @@ const creators = [
 
 const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
   const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
-  const [approvalStepModifier, setApprovalStepModifier] = useState<PolicyQuorum>(POLICY_APPROVAL_STEP_MODIFIERS[0]);
+  const [approvalSteps, setApprovalSteps] = useState<number[]>([1]);
 
-  const handleApprovalStepModifierChange = (modifier: PolicyQuorum) => {
-    setApprovalStepModifier(modifier);
+  const handleAddApprovalStep = () => {
+    setApprovalSteps((prev) => [...prev, prev.length + 1]);
   };
 
   return (
@@ -82,17 +78,25 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div className='bg-BG_GRAY_2 p-4 flex flex-col border-t border-gray-200'>
+          <div className='bg-BG_GRAY_2 p-4 border-t border-gray-200'>
             <div className='f-11-400 text-GRAY_700 flex items-center gap-1 px-1 pb-2.5'>
               <SvgSpriteLoader id='arrow-down' size={12} />
               Approval steps
             </div>
-            <StepCard stepNumber={1}>
-              <div className='flex gap-2.5'>
-                <PolicyQuorumDropdown modifier={approvalStepModifier} onChange={handleApprovalStepModifierChange} />
-                <ApproverList />
-              </div>
-            </StepCard>
+            <div className='space-y-3'>
+              {approvalSteps.map((step) => (
+                <ApprovalStep key={step} stepNumber={step} />
+              ))}
+              <Button
+                variant='outline'
+                onClick={handleAddApprovalStep}
+                size='xxs'
+                className='flex items-center gap-1.5'
+              >
+                <SvgSpriteLoader id='layers-two-02' size={14} />
+                Add step
+              </Button>
+            </div>
           </div>
         </DialogBody>
         <DialogFooter>
