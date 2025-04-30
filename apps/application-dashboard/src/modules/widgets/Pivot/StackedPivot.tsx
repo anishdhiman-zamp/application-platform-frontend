@@ -62,7 +62,7 @@ import {
   getWidgetMappingDatasets,
   shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
-import { getFilterContextV2, getWidgetMappingDatasetsV2 } from 'modules/widgets/TreeTable/utils';
+import { getFilterContextV2, getWidgetMappingDatasetsV2, replaceFilterKeys } from 'modules/widgets/TreeTable/utils';
 import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
@@ -512,8 +512,16 @@ const StackedPivot = ({
 
       const mergedFilters = mergeFilters(datasetDefaultFilters, currentWidgetSelectedFilter);
 
+      const newFilters = replaceFilterKeys(
+        {
+          ...mergedFilters,
+          ...widgetFilter,
+        },
+        currentRefColumnFilters,
+      );
+
       combinedFilters[dataset?.dataset_id] = {
-        filters: { ...mergedFilters, ...widgetFilter },
+        filters: newFilters,
         title: dataset.dataset_name,
       };
     });
