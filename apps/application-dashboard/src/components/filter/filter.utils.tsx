@@ -50,7 +50,9 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
       title = isNull
         ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
-        : selectedFilter?.values?.join(', ');
+        : Array.isArray(selectedFilter?.values)
+          ? selectedFilter?.values?.join(', ')
+          : (selectedFilter?.values ?? '');
 
       if (count) {
         title = `${operatorLabel} ${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
