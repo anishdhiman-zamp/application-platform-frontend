@@ -33,7 +33,7 @@ export const maskString = (str: string, start: number, end: number, limit?: numb
 
   const parts = str.split('.');
   const extension = parts.pop();
-  const name = parts.join('.');
+  const name = parts?.join('.');
 
   limit = limit ?? 16;
   if (name?.length > limit) {
