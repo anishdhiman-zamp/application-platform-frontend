@@ -80,7 +80,7 @@ export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
   datasetId: string,
-  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
+  handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
   tableRef: RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
 ): ColDef[] => {

@@ -72,6 +72,9 @@ export const API_ENDPOINTS = {
   PAYMENTS_INITIATE_PAYMENT_POST: `payments/`,
   PAYMENTS_CONFIG_GET: `payments/config`,
 
+  PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,
+  PAYMENT_LIST_GET: `payments/`,
+  PAYMENT_DETAILS_GET: `payments/{{paymentId}}`,
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
 
   USER_INVITATIONS_GET: `/organizations/invitations`,

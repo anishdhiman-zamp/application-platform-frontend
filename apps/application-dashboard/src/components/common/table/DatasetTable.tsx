@@ -7,6 +7,7 @@ import {
   ColumnVisibleEvent,
   FillEndEvent,
   IServerSideDatasource,
+  RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
@@ -29,6 +30,7 @@ interface DatasetTableProps {
   columnLevelStats?: MapAny;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
+  onRowClicked?: (event: RowClickedEvent) => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -48,6 +50,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   columnLevelStats,
   containerStyle,
   gridStyle,
+  onRowClicked,
 }) => {
   return (
     <div id='dataset-table'>
@@ -70,6 +73,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         columnLevelStats={columnLevelStats}
         containerStyle={containerStyle}
         gridStyle={gridStyle}
+        onRowClicked={onRowClicked}
       />
     </div>
   );

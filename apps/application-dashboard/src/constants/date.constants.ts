@@ -23,6 +23,7 @@ export const DATE_FORMATS = {
   QQ_yyyy: `'Q'Q yyyy`,
   EEE: 'EEE',
   ddMMyyyyHHmmss: 'dd/MM/yyyy, HH:mm:ss',
+  HMMAAA: 'h:mmaaa',
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);

@@ -1,6 +1,8 @@
 export enum CUSTOM_COLUMNS_TYPE {
   TAG = 'tags',
   CHIP = 'chips',
+  STATUS_BADGE = 'status-tag',
+  USER_AVATAR = 'user-avatar',
 }
 
 export enum DISPLAY_OPTIONS {
