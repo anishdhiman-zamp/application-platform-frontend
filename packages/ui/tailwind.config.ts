@@ -157,6 +157,7 @@ const config = {
           50: 'var(--GRAY_50)',
           70: 'var(--GRAY_70)',
           100: 'var(--GRAY_100)',
+          150: '#F1F0F0',
           200: 'var(--GRAY_200)',
           300: 'var(--GRAY_300)',
           400: 'var(--GRAY_400)',
@@ -184,6 +185,7 @@ const config = {
         blue: {
           50: 'var(--BLUE_50)',
           100: 'var(--BLUE_100)',
+          150: '#DFF0FF',
           200: 'var(--BLUE_200)',
           300: 'var(--BLUE_300)',
           400: 'var(--BLUE_400)',
@@ -194,9 +196,19 @@ const config = {
           900: 'var(--BLUE_900)',
           1000: 'var(--BLUE_1000)',
         },
+        yellow: {
+          100: '#FFF3C9',
+        },
+        violet: {
+          100: '#E3E5FB',
+        },
+        pink: {
+          100: '#FFB6D5',
+        },
         // Green scale
         green: {
           100: 'var(--GREEN_100)',
+          150: '#E2F1E0',
           200: 'var(--GREEN_200)',
           300: 'var(--GREEN_300)',
           400: 'var(--GREEN_400)',
@@ -210,6 +222,7 @@ const config = {
         // Orange scale
         orange: {
           100: 'var(--ORANGE_100)',
+          150: '#FAE5D6',
           200: 'var(--ORANGE_200)',
           300: 'var(--ORANGE_300)',
           400: 'var(--ORANGE_400)',
@@ -225,6 +238,7 @@ const config = {
           100: 'var(--RED_100)',
           200: 'var(--RED_200)',
           300: 'var(--RED_300)',
+          350: '#FBE3E5',
           400: 'var(--RED_400)',
           500: 'var(--RED_500)',
           600: 'var(--RED_600)',
