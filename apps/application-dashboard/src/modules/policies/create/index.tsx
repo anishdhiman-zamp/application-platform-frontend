@@ -87,12 +87,7 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
               {approvalSteps.map((step) => (
                 <ApprovalStep key={step} stepNumber={step} />
               ))}
-              <Button
-                variant='outline'
-                onClick={handleAddApprovalStep}
-                size='xxs'
-                className='flex items-center gap-1.5'
-              >
+              <Button variant='outline' onClick={handleAddApprovalStep} size='xs' className='flex items-center gap-1.5'>
                 <SvgSpriteLoader id='layers-two-02' size={14} />
                 Add step
               </Button>
