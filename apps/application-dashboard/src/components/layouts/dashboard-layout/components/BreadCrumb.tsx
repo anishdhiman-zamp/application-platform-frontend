@@ -70,9 +70,9 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
               className='!absolute z-[100] p-1 top-4 mt-2'
               childrenWrapperClassName='!overflow-y-auto'
             >
-              {middleBreadCrumbs?.map((item) => (
+              {middleBreadCrumbs?.map((item, index) => (
                 <Link
-                  key={item.title}
+                  key={`${item.title}-${index}`}
                   className='hover:bg-GRAY_200 rounded-md py-2 px-2.5 f-12-500 cursor-pointer text-nowrap'
                   href={item.href ?? ''}
                   onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}
@@ -86,7 +86,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
       )}
       {lastTwoBreadCrumbs?.map((item, index) => (
         <Link
-          key={item.title}
+          key={`${item.title}-${index}`}
           href={item.href ?? ''}
           className={cn({ 'f-13-500 text-GRAY_1000': index == lastTwoBreadCrumbs?.length - 1 })}
           onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}

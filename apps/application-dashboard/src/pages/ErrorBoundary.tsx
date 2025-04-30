@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 import { captureException } from '@sentry/browser';
 import { ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 import ErrorCard from 'components/commonWrapper/ErrorCard';

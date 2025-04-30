@@ -44,7 +44,11 @@ export const layoutConfigsSlice = createSlice({
       return state;
     },
     addBreadcrumb: (state, action) => {
-      state.breadcrumbStack = [...state.breadcrumbStack, action.payload];
+      const hasCommonValue = state.breadcrumbStack.some((value) => value.title === action.payload.title);
+
+      if (!hasCommonValue) {
+        state.breadcrumbStack = [...state.breadcrumbStack, action.payload];
+      }
 
       return state;
     },

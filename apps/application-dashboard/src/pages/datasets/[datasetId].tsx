@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import DashboardLayout from 'components/layouts/dashboard-layout';
