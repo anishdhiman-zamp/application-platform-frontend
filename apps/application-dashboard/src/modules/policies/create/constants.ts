@@ -1,5 +1,5 @@
 import { DataSource } from '@zamp-platform/form-builder';
-import { getAccountWithLogo, getAudienceMember, getAudienceName } from 'modules/policies/commons';
+import { getAccountWithLogo, getAudienceLabel, getAudienceMember, getAudienceName } from 'modules/policies/commons';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { MASK_DOTS } from '@/modules/payments/payments.constant';
 import { ResourceType } from '@/modules/shareResource';
@@ -17,7 +17,7 @@ export type AttributeType = {
 export const formatAudienceMembers = (rawData: any) => {
   return rawData.map((item: any) => ({
     id: item.resource_audience_id,
-    label: item.name ?? '',
+    label: item.name ?? getAudienceLabel(item),
     richLabel: getAudienceMember(item),
     displayValue: getAudienceName(item),
     value: {

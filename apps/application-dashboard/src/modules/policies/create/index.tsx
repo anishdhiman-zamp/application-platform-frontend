@@ -25,7 +25,7 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
   });
 
   const onSubmit = (data: PolicyFormData) => {
-    console.log('Selected values:', data);
+    console.log('Selected values:', data, approvalSteps);
   };
 
   return (

@@ -2,7 +2,8 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { ResourceType } from 'modules/shareResource';
-import { snakeCaseToSentenceCase } from 'utils/common';
+import { store } from 'store';
+import { convertEmailUsernameToName, getUserNameFromEmail, snakeCaseToSentenceCase } from 'utils/common';
 import AudienceMember from '@/components/audience-member';
 import AudienceMemberName from '@/components/audience-member/Name';
 import { DEFAULT_BANK } from '@/constants/icons';
@@ -60,4 +61,27 @@ export const getAudienceName = (audience: {
       user={audience.user}
     />
   );
+};
+
+export const getAudienceLabel = (audience: {
+  resource_audience_id: string;
+  resource_audience_type: ResourceAudienceType;
+  user?: {
+    email: string;
+  };
+  team_name: string;
+  team_color: string;
+}) => {
+  const orgName = store.getState()?.user?.user?.orgs?.[0]?.name;
+  const orgLabel = `Everyone in ${orgName}`;
+  const isOrg = audience.resource_audience_type === ResourceAudienceType.ORGANIZATION;
+  const isTeam = audience.resource_audience_type === ResourceAudienceType.TEAM;
+  const userName = isOrg
+    ? orgLabel
+    : isTeam
+      ? audience?.team_name
+      : convertEmailUsernameToName(getUserNameFromEmail(audience.user?.email || audience.resource_audience_type)) ||
+        'Unknown';
+
+  return userName;
 };

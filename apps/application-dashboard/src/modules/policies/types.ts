@@ -14,7 +14,6 @@ export type PolicyQuorumOption = {
 export type ApproverDetail = {
   type: ResourceAudienceType;
   id: string;
-  label: string;
 };
 
 export type ApprovalFlowCondition = {
@@ -29,4 +28,12 @@ export type ApprovalFlowStep = {
 
 export type ApprovalFlow = {
   steps: ApprovalFlowStep[];
+};
+
+export type ApproverListOption = {
+  id: string;
+  label: string;
+  richLabel: JSX.Element;
+  displayValue: JSX.Element;
+  value: { type: ResourceAudienceType; id: string };
 };
