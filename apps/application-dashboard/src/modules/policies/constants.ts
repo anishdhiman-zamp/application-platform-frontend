@@ -9,7 +9,7 @@ export const POLICY_APPROVAL_STEP_MODIFIERS: PolicyQuorumOption[] = [
 
 export const DEFAULT_APPROVAL_STEP: ApprovalFlowStep = {
   logical_operator: LOGICAL_OPERATOR_CONDITIONS.OR,
-  conditions: [],
+  conditions: [{ mode: PolicyQuorum.ONE, approver_details: [] }],
 };
 
 export const DUMMY_APPROVERS: ApproverDetail[] = [

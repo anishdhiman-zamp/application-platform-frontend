@@ -13,7 +13,9 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@zamp-platform/ui';
+import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
+import { ApprovalFlowStep } from 'modules/policies/types';
 
 const creators = [
   {
@@ -32,6 +34,7 @@ const creators = [
 
 const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
   const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
+  const [approvalSteps, setApprovalSteps] = useState<ApprovalFlowStep[]>([DEFAULT_APPROVAL_STEP]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -72,7 +75,7 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <ApprovalFlow />
+          <ApprovalFlow approvalSteps={approvalSteps} onChange={setApprovalSteps} />
         </DialogBody>
         <DialogFooter>
           <div className='flex justify-end gap-3'>

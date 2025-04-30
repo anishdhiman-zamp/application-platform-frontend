@@ -7,26 +7,26 @@ import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 type ApprovalStepProps = {
   stepNumber: number;
   step: ApprovalFlowStep;
-  onUpdateApprovalStep: (stepNumber: number, step: ApprovalFlowStep) => void;
+  onChange: (stepNumber: number, step: ApprovalFlowStep) => void;
 };
 
-const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onUpdateApprovalStep }) => {
+const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onChange }) => {
   const handleAddApproverSequence = () => {
-    onUpdateApprovalStep(stepNumber, {
+    onChange(stepNumber, {
       ...step,
       conditions: [...step.conditions, { mode: PolicyQuorum.ONE, approver_details: [] }],
     });
   };
 
   const handleRemoveApproverSequence = (index: number) => {
-    onUpdateApprovalStep(stepNumber, {
+    onChange(stepNumber, {
       ...step,
       conditions: step.conditions.filter((_, i) => i !== index),
     });
   };
 
   const handleUpdateApproverSequence = (index: number, sequence: ApprovalFlowCondition) => {
-    onUpdateApprovalStep(stepNumber, {
+    onChange(stepNumber, {
       ...step,
       conditions: step.conditions.map((s, i) => (i === index ? sequence : s)),
     });
