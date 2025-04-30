@@ -88,6 +88,7 @@ export type PivotContext = {
 
 export type ColumnFilterConfig = {
   column: string;
+  target?: string;
 } & (
   | {
       filterType: FILTER_TYPES.MULTI_SELECT;

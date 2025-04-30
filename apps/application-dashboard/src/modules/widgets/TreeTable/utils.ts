@@ -1,5 +1,5 @@
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { ColumnFilterConfig, PIVOT_DATA_TYPES } from 'modules/widgets/Pivot/pivot.types';
+import { ColumnFilterConfig, type ParentFilters, PIVOT_DATA_TYPES } from 'modules/widgets/Pivot/pivot.types';
 import { parseType } from 'modules/widgets/Pivot/pivot.utils';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';
 import {
@@ -234,7 +234,8 @@ export const getFilterContextV2 = (
 
       Object.keys(drilldown_config?.column_mappings[datasetId] || {}).forEach((column) => {
         columnFilterConfigs[datasetId][mapping?.ref].push({
-          column: drilldown_config?.column_mappings[datasetId][column]?.target_column,
+          column: column,
+          target: drilldown_config?.column_mappings[datasetId][column]?.target_column,
           filterType: drilldown_config?.column_mappings[datasetId][column]?.filter_type as FILTER_TYPES,
           type: drilldown_config?.column_mappings[datasetId][column]?.filter_operator as CONDITION_OPERATOR_TYPE,
         } as ColumnFilterConfig);
@@ -243,6 +244,22 @@ export const getFilterContextV2 = (
   });
 
   return columnFilterConfigs;
+};
+
+export const replaceFilterKeys = (filters: ParentFilters, mapping: ColumnFilterConfig[]): ParentFilters => {
+  const newFilters: ParentFilters = {};
+
+  Object.keys(filters)?.forEach((outerKey) => {
+    const newKey = mapping.find((m) => m?.column === outerKey)?.target;
+
+    if (newKey) {
+      newFilters[newKey] = filters[outerKey];
+    } else {
+      newFilters[outerKey] = filters[outerKey];
+    }
+  });
+
+  return newFilters;
 };
 
 export const getFilterContext = (
