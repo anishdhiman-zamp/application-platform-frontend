@@ -108,12 +108,21 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
       query: (params) => ({
         url: API_ENDPOINTS.POLICIES_GET,
         params,
       }),
+      providesTags: [APITags.GET_POLICY_LIST],
+    }),
+    deletePolicy: builder.mutation<void, string>({
+      query: (policyId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_DELETE, { policyId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
   }),
 });
@@ -135,4 +144,5 @@ export const {
   useGetPaymentDetailsQuery,
   useCreatePolicyMutation,
   useLazyGetPoliciesQuery,
+  useDeletePolicyMutation,
 } = Payments;
