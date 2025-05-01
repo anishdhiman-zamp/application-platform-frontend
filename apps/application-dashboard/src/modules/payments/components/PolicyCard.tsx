@@ -5,13 +5,16 @@ import PolicyDeleteConfirmPopup from 'modules/payments/components/PolicyDeleteCo
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
+import { AudiencesByOrganisationIdResponse } from '@/types/api/people.types';
 
 type PolicyCardProps = {
   policy: PolicyDetailsType;
+  teamMembersData?: AudiencesByOrganisationIdResponse[];
 };
 
-const PolicyCard: FC<PolicyCardProps> = ({ policy }) => {
+const PolicyCard: FC<PolicyCardProps> = ({ policy, teamMembersData }) => {
   const [isDeleteConfirmPopupOpen, setIsDeleteConfirmPopupOpen] = useState(false);
+  const teamMember = teamMembersData?.find((member) => member.user?.user_id === policy.created_by);
 
   return (
     <>
@@ -19,7 +22,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy }) => {
         header={
           <div className='flex items-center gap-2'>
             <span className='f-11-400 text-gray-700'>
-              Created on {format(new Date(policy.created_at), DATE_FORMATS.ddMMMyyyy)} by {policy.created_by}
+              Created on {format(new Date(policy.created_at), DATE_FORMATS.ddMMMyyyy)} by {teamMember?.user?.name}
             </span>
             {policy.status && (
               <>
