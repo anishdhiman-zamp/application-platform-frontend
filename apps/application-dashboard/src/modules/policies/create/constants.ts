@@ -1,5 +1,5 @@
 import { DataSource } from '@zamp-platform/form-builder';
-import { getAccountWithLogo, getAudienceMember, getAudienceName } from 'modules/policies/commons';
+import { getAccountWithLogo, getAudienceLabel, getAudienceMember, getAudienceName } from 'modules/policies/commons';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { MASK_DOTS } from '@/modules/payments/payments.constant';
 import { ResourceType } from '@/modules/shareResource';
@@ -27,6 +27,19 @@ export type AttributeType = {
   | { data_source: DataSource; options: { label: string; value: string }[] }
   | { input_config: InputConfig }
 );
+
+export const formatAudienceMembers = (rawData: any) => {
+  return rawData.map((item: any) => ({
+    id: item.resource_audience_id,
+    label: item.name ?? getAudienceLabel(item),
+    richLabel: getAudienceMember(item),
+    displayValue: getAudienceName(item),
+    value: {
+      type: item.resource_audience_type,
+      id: item.resource_audience_id,
+    },
+  }));
+};
 
 export const commonAttributes: AttributeType[] = [
   {
@@ -99,18 +112,7 @@ export const payoutAttributes: AttributeType[] = [
       endpoint: 'payments/audiences',
       method: 'GET',
       useCustomHook: useAudienceMembers,
-      valueFormatter: (rawData) => {
-        return rawData.map((item: any) => ({
-          id: item.resource_audience_id,
-          label: item.name ?? '',
-          richLabel: getAudienceMember(item),
-          displayValue: getAudienceName(item),
-          value: {
-            type: item.resource_audience_type,
-            id: item.resource_audience_id,
-          },
-        }));
-      },
+      valueFormatter: formatAudienceMembers,
       params: {
         resourceType: ResourceType.PAYMENTS,
         resourceId: '',
