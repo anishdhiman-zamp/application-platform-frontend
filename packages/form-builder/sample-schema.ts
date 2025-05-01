@@ -352,11 +352,11 @@ export const schema: FormSchema = {
       label: 'Account Currency',
       options: [
         {
-          id: 'USD',
+          label: 'USD',
           value: 'USD',
         },
         {
-          id: 'EUR',
+          label: 'EUR',
           value: 'EUR',
         },
       ],
@@ -448,11 +448,11 @@ export const schema: FormSchema = {
       label: 'Routing Code Type 1',
       options: [
         {
-          id: 'ABA',
+          label: 'ABA',
           value: 'ABA',
         },
         {
-          id: 'IBAN',
+          label: 'IBAN',
           value: 'IBAN',
         },
       ],
@@ -536,19 +536,19 @@ export const schema: FormSchema = {
       label: 'Routing Code Type 2',
       options: [
         {
-          id: 'BIC',
+          label: 'BIC',
           value: 'BIC',
         },
         {
-          id: 'SWIFT',
+          label: 'SWIFT',
           value: 'SWIFT',
         },
         {
-          id: 'IBAN',
+          label: 'IBAN',
           value: 'IBAN',
         },
         {
-          id: 'ACH',
+          label: 'ACH',
           value: 'ACH',
         },
       ],
@@ -863,23 +863,23 @@ export const schema: FormSchema = {
       label: 'Transfer Type',
       options: [
         {
-          id: 'SWIFT',
+          label: 'SWIFT',
           value: 'SWIFT',
         },
         {
-          id: 'RTP',
+          label: 'RTP',
           value: 'RTP',
         },
         {
-          id: 'ACH',
+          label: 'ACH',
           value: 'ACH',
         },
         {
-          id: 'WIRE',
+          label: 'WIRE',
           value: 'WIRE',
         },
         {
-          id: 'BLOCKCHAIN',
+          label: 'BLOCKCHAIN',
           value: 'BLOCKCHAIN',
         },
       ],

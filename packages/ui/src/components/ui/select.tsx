@@ -8,7 +8,7 @@ import { SizeType } from '@zamp-platform/ui/types';
 export interface SelectOption {
   label: string;
   richLabel?: React.ReactNode;
-  value: string;
+  value: string | { type: string; id: string };
   icon?: React.ReactNode;
 }
 
@@ -20,8 +20,8 @@ export interface SelectProps
   className?: string;
   label?: string;
   fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>;
-  value?: string;
-  onValueChange?: (value: string) => void;
+  value?: string | { type: string; id: string };
+  onValueChange?: (value: string | { type: string; id: string }) => void;
   onBlur?: () => void;
   clearOptions?: boolean;
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;

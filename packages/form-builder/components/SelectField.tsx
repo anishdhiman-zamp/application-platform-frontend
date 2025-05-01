@@ -90,7 +90,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name }) => {
               options={
                 field?.options?.length
                   ? field?.options?.map((option) => ({
-                      label: option.id,
+                      label: option.id ?? '',
                       value: option.value,
                     }))
                   : []
