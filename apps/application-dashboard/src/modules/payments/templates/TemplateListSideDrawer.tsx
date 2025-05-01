@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Sheet, SheetContent, SIZE_TYPES } from '@zamp-platform/ui';
+import { Sheet, SheetContent } from '@zamp-platform/ui';
 import TemplateFilter from 'modules/payments/move-money/components/TemplateFilter';
 import { MOVE_MONEY_TEMPLATE_FILTER_ITEMS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
@@ -55,7 +55,7 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent size={SIZE_TYPES.LARGE} tabIndex={-1} className='p-0 h-screen overflow-hidden'>
+      <SheetContent size='large' tabIndex={-1} className='p-0 h-screen overflow-hidden'>
         <div className='overflow-y-scroll h-full' tabIndex={-1}>
           <div>
             <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>

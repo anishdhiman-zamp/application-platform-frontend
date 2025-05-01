@@ -1,11 +1,12 @@
 import React, { FC, useState } from 'react';
-import { Sheet, SheetContent, SIZE_TYPES } from '@zamp-platform/ui';
+import { Sheet, SheetContent } from '@zamp-platform/ui';
 import PaymentApprovals from 'modules/payments/payment-details/PaymentApprovals';
 import PaymentDetails from 'modules/payments/payment-details/PaymentDetails';
 import { PAYMENT_DETAILS_TABS } from 'modules/payments/payments.constant';
 import { PAYMENT_TABS } from 'modules/payments/payments.types';
 import { defaultFnType } from 'types/commonTypes';
 import { Button } from '@/components/common/button/Button';
+import { SIZE_TYPES } from '@/types/common/components';
 import { BUTTON_TYPES } from '@/types/components/button.type';
 import { cn } from '@/utils/common';
 
@@ -31,7 +32,7 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
 
   return (
     <Sheet open={!!paymentDetailsId} onOpenChange={onClose}>
-      <SheetContent size={SIZE_TYPES.MEDIUM} tabIndex={-1} className='p-0 h-screen overflow-hidden'>
+      <SheetContent size='medium' tabIndex={-1} className='p-0 h-screen overflow-hidden'>
         <div className='h-full flex flex-col' tabIndex={-1}>
           <div className='px-4.5 py-6 flex items-center gap-3 border-b border-GRAY_400'>
             {PAYMENT_DETAILS_TABS.map((tab) => (

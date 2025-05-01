@@ -4,6 +4,23 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const dialogVariants = cva(
+  'fixed left-[50%] top-[50%] z-[1001] flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-white shadow-lg duration-200 max-h-[60vh]',
+  {
+    variants: {
+      size: {
+        large: 'w-[80vw]',
+        medium: 'w-[60vw]',
+        small: 'w-[40vw]',
+      },
+    },
+    defaultVariants: {
+      size: 'medium',
+    },
+  },
+);
 
 const Dialog = ({ ...props }: DialogPrimitive.DialogProps) => <DialogPrimitive.Root {...props} />;
 
