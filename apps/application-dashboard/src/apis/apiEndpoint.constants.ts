@@ -95,6 +95,7 @@ export const API_ENDPOINTS = {
 
   POLICY_CREATE_POST: '/policy',
   POLICY_CREATE_POST_PAYMENTS: '/payments/policy',
+  POLICIES_GET: '/policy/list',
 };
 
 export const enum REQUEST_TYPES {

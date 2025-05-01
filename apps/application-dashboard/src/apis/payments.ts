@@ -10,6 +10,8 @@ import {
   CreatePolicyPayloadType,
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
+  GetPoliciesParamsType,
+  GetPoliciesResponseType,
   InitiatePaymentPayloadType,
   PaymentConfigResponseType,
   PaymentDetailsResponseType,
@@ -107,6 +109,12 @@ const Payments = baseApi.injectEndpoints({
         body,
       }),
     }),
+    getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.POLICIES_GET,
+        params,
+      }),
+    }),
   }),
 });
 
@@ -126,4 +134,5 @@ export const {
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
   useCreatePolicyMutation,
+  useLazyGetPoliciesQuery,
 } = Payments;

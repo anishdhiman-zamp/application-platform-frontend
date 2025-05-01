@@ -1,6 +1,7 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
 import { CreatePolicyConfigPayload, PolicyDialogType } from '@/modules/policies/types';
+import { ResourceType } from '@/modules/shareResource';
 import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
@@ -135,3 +136,27 @@ export interface CreatePolicyPayloadType {
   action_type: 'CREATE_PAYMENT' | 'CREATE_TEMPLATE';
   config: CreatePolicyConfigPayload;
 }
+
+export type GetPoliciesParamsType = {
+  resource_id?: string;
+  resource_type?: ResourceType;
+  action_type?: string;
+};
+
+export type PolicyDetailsType = {
+  id: string;
+  name: string;
+  description: string;
+  resource_action_type_id: string;
+  organisation_id: string;
+  policy_configurations: CreatePolicyConfigPayload;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  status: string;
+};
+
+export type GetPoliciesResponseType = {
+  data: PolicyDetailsType[];
+};
