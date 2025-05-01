@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { toast as reactToastify } from 'react-toastify';
 import { FormBuilder, FormBuilderRef, schema } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
-import { SIZE_TYPES } from '@zamp-platform/ui/types';
 import { useGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
@@ -62,7 +61,7 @@ const AddRecipientAccount = ({ open, onOpenChange }: { open: boolean; onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton size={SIZE_TYPES.LARGE}>
+      <DialogContent showCloseButton size='large'>
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='max-w-[400px] w-[45%]'>
@@ -70,10 +69,10 @@ const AddRecipientAccount = ({ open, onOpenChange }: { open: boolean; onOpenChan
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>
-          <Button size={SIZE_TYPES.SMALL} variant='secondary' onClick={() => onOpenChange(false)}>
+          <Button size='small' variant='secondary' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button size={SIZE_TYPES.SMALL} onClick={handleSave}>
+          <Button size='small' onClick={handleSave}>
             Save
           </Button>
         </DialogFooter>

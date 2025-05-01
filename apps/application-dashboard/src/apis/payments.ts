@@ -7,6 +7,7 @@ import {
   DatasetFilterConfigResponseType,
 } from '@/types/api/dataset.types';
 import {
+  CreatePolicyPayloadType,
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   InitiatePaymentPayloadType,
@@ -98,6 +99,14 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
       }),
     }),
+    createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
+      query: (body) => ({
+        url:
+          body.templateFor === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -116,4 +125,5 @@ export const {
   useGetPaymentListDatasetFilterConfigQuery,
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
+  useCreatePolicyMutation,
 } = Payments;

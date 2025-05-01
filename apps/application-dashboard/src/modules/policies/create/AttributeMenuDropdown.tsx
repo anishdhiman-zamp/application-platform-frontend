@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
   Skeleton,
 } from '@zamp-platform/ui';
-import { AttributeType } from 'modules/policies/create/constants';
+import { AttributeType } from 'modules/policies/types';
 
 const useCustomHook = (dataSource?: DataSource) => {
   if (!dataSource || !dataSource.useCustomHook) return { data: undefined, loading: false, error: undefined };

@@ -1,32 +1,9 @@
-import { DataSource } from '@zamp-platform/form-builder';
 import { getAccountWithLogo, getAudienceLabel, getAudienceMember, getAudienceName } from 'modules/policies/commons';
+import { AttributeType } from 'modules/policies/types';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { MASK_DOTS } from '@/modules/payments/payments.constant';
 import { ResourceType } from '@/modules/shareResource';
 import { getCommaSeparatedNumber } from '@/utils/common';
-
-export type AttributeValue = string | Record<string, string>;
-
-export interface InputConfig {
-  type: 'number' | 'text' | 'date' | 'datetime';
-  placeholder?: string;
-  label?: string;
-  suffix_text?: string;
-  prefix_text?: string;
-  min?: number;
-  max?: number;
-}
-
-export type AttributeType = {
-  label: string;
-  type: 'input' | 'select' | 'multi-select';
-  displayValueFormatter?: (value: number | string) => string;
-} & (
-  | { data_source: DataSource }
-  | { options: { label: string; value: string }[] }
-  | { data_source: DataSource; options: { label: string; value: string }[] }
-  | { input_config: InputConfig }
-);
 
 export const formatAudienceMembers = (rawData: any) => {
   return rawData.map((item: any) => ({
@@ -41,10 +18,13 @@ export const formatAudienceMembers = (rawData: any) => {
   }));
 };
 
-export const commonAttributes: AttributeType[] = [
-  {
+export const attributesMap: Record<string, AttributeType> = {
+  source_accounts: {
     label: 'Source account',
+    id: 'source_accounts',
     type: 'multi-select',
+    operator: 'in',
+    formFieldType: 'condition',
     data_source: {
       endpoint: 'payments/source-accounts',
       method: 'GET',
@@ -61,9 +41,12 @@ export const commonAttributes: AttributeType[] = [
       },
     },
   },
-  {
+  recipient: {
     label: 'Recipient',
+    id: 'recipient',
+    operator: '==',
     type: 'multi-select',
+    formFieldType: 'condition',
     options: [
       {
         label: 'Single',
@@ -75,27 +58,32 @@ export const commonAttributes: AttributeType[] = [
       },
     ],
   },
-  {
+  action: {
     label: 'Action',
     type: 'multi-select',
+    id: 'action',
+    operator: '==',
+    formFieldType: 'creator',
     options: [
       {
         label: 'Send for Approval',
         value: 'REQUIRE_APPROVAL',
+        displayValue: 'Send for Approval',
       },
       {
         label: 'Block',
         value: 'BLOCK',
+        displayValue: 'Block',
       },
     ],
   },
-];
-
-export const payoutAttributes: AttributeType[] = [
-  {
+  amount: {
     label: 'Amount',
     type: 'input',
     displayValueFormatter: getCommaSeparatedNumber,
+    id: 'amount',
+    operator: '>',
+    formFieldType: 'condition',
     input_config: {
       type: 'number',
       placeholder: 'type a value',
@@ -104,10 +92,12 @@ export const payoutAttributes: AttributeType[] = [
       suffix_text: 'USD',
     },
   },
-
-  {
+  initiator: {
     label: 'Initiator',
     type: 'multi-select',
+    id: 'creator',
+    operator: '==',
+    formFieldType: 'creator',
     data_source: {
       endpoint: 'payments/audiences',
       method: 'GET',
@@ -119,13 +109,12 @@ export const payoutAttributes: AttributeType[] = [
       },
     },
   },
-  ...commonAttributes,
-];
-
-export const templateAttributes: AttributeType[] = [
-  {
+  creator: {
     label: 'Creator',
+    id: 'creator',
     type: 'multi-select',
+    operator: '==',
+    formFieldType: 'creator',
     data_source: {
       endpoint: 'payments/audiences',
       method: 'GET',
@@ -148,5 +137,9 @@ export const templateAttributes: AttributeType[] = [
       },
     },
   },
-  ...commonAttributes,
-];
+};
+export const commonAttributes = ['source_accounts', 'recipient', 'action'];
+
+export const payoutAttributes = ['amount', 'initiator', ...commonAttributes];
+
+export const templateAttributes = ['creator', ...commonAttributes];

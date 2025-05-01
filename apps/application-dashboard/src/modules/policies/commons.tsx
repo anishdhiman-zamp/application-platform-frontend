@@ -1,6 +1,9 @@
+import { SelectOption } from '@zamp-platform/form-builder';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
+import { attributesMap, payoutAttributes, templateAttributes } from 'modules/policies/create/constants';
+import { CreatePolicyConfigPayload, PolicyDialogType, PolicyFormData } from 'modules/policies/types';
 import { ResourceType } from 'modules/shareResource';
 import { store } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail, snakeCaseToSentenceCase } from 'utils/common';
@@ -84,4 +87,79 @@ export const getAudienceLabel = (audience: {
         'Unknown';
 
   return userName;
+};
+
+export const getAttributes = (type: PolicyDialogType) => {
+  if (type === 'payout') {
+    return payoutAttributes;
+  }
+
+  return templateAttributes;
+};
+
+const getValue = (key: string, value: SelectOption[]) => {
+  const selectValue = value[0]?.value;
+
+  // Handle different field types
+  switch (key) {
+    case 'amount':
+      return Number(selectValue ?? 0);
+    case 'source_accounts':
+      return value.map((option) => option.value);
+    case 'entities':
+      return value.map((option) => option.value);
+    default:
+      return selectValue;
+  }
+};
+
+export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolicyConfigPayload => {
+  // Transform creator data
+  const creator = (data.creator as SelectOption[]).map((option) => {
+    if (typeof option.value === 'string') {
+      return { type: 'user', id: option.value };
+    }
+
+    return { type: option.value.type, id: option.value.id };
+  });
+
+  // Transform conditions
+  const conditions = {
+    logical_operator: '&&',
+    conditions: Object.entries(data)
+      .filter(([key]) => attributesMap[key]?.formFieldType === 'condition')
+      .map(([key, value]) => {
+        const attribute = attributesMap[key];
+        const payloadValue = getValue(key, value as SelectOption[]);
+
+        return {
+          field: key,
+          value: payloadValue,
+          operator: attribute.operator,
+        };
+      }),
+  };
+
+  // Transform approval flow
+  const approval_flow = {
+    steps: data.approvalSteps.map((step) => ({
+      logical_operator: step.logical_operator,
+      conditions: step.conditions.map((condition) => ({
+        mode: condition.mode,
+        approver_details: condition.approver_details.map((approver) => ({
+          type: approver.type,
+          id: approver.id,
+        })),
+      })),
+    })),
+  };
+
+  const action = (data.action as SelectOption[])[0]?.value as string;
+
+  return {
+    creator: creator.length > 0 ? creator : undefined,
+    conditions,
+    action,
+    approval_flow,
+  };
 };

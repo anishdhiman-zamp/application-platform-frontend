@@ -116,4 +116,7 @@ export const toast = {
   loading: (message: string, options?: ToastOptions) => {
     return reactToastify.loading(<CustomToast text={message} type='loading' />, { ...defaultToastOptions, ...options });
   },
+  dismiss: (toastId: string | number) => {
+    reactToastify.dismiss(toastId);
+  },
 };

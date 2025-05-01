@@ -92,6 +92,9 @@ export const API_ENDPOINTS = {
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
   FORMS_CONFIG_GET: `v1/forms/config`,
   FORMS_SUBMIT: `v1/forms/submissions`,
+
+  POLICY_CREATE_POST: '/policy',
+  POLICY_CREATE_POST_PAYMENTS: '/payments/policy',
 };
 
 export const enum REQUEST_TYPES {

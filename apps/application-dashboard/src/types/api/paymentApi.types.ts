@@ -1,5 +1,6 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
+import { CreatePolicyConfigPayload, PolicyDialogType } from '@/modules/policies/types';
 import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
@@ -124,3 +125,13 @@ export type PaymentDetailsResponseType = {
     file_upload_id: string;
   }[];
 };
+
+export interface CreatePolicyPayloadType {
+  templateFor: PolicyDialogType;
+  name: string;
+  description?: string;
+  resource_id: string;
+  resource_type: string;
+  action_type: 'CREATE_PAYMENT' | 'CREATE_TEMPLATE';
+  config: CreatePolicyConfigPayload;
+}

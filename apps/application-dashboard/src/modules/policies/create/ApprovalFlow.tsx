@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { Button } from '@zamp-platform/ui';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalStep from 'modules/policies/create/ApprovalStep';
@@ -6,21 +7,34 @@ import { ApprovalFlowStep } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type ApprovalFlowProps = {
-  approvalSteps: ApprovalFlowStep[];
-  onChange: (steps: ApprovalFlowStep[]) => void;
+  onChange?: (steps: ApprovalFlowStep[]) => void;
 };
 
-const ApprovalFlow: FC<ApprovalFlowProps> = ({ approvalSteps, onChange }) => {
+const ApprovalFlow: FC<ApprovalFlowProps> = ({ onChange }) => {
+  const { setValue, watch } = useFormContext();
+  const formApprovalSteps = watch('approvalSteps') || [DEFAULT_APPROVAL_STEP];
+
   const handleAddApprovalStep = () => {
-    onChange([...approvalSteps, DEFAULT_APPROVAL_STEP]);
+    const newSteps = [...formApprovalSteps, DEFAULT_APPROVAL_STEP];
+
+    setValue('approvalSteps', newSteps);
+    onChange?.(newSteps);
   };
 
   const handleApprovalStepChange = (stepNumber: number, step: ApprovalFlowStep) => {
-    onChange(approvalSteps.map((s, index) => (index === stepNumber - 1 ? step : s)));
+    const newSteps = formApprovalSteps.map((s: ApprovalFlowStep, index: number) =>
+      index === stepNumber - 1 ? step : s,
+    );
+
+    setValue('approvalSteps', newSteps);
+    onChange?.(newSteps);
   };
 
   const handleRemoveApprovalStep = (index: number) => {
-    onChange(approvalSteps.filter((_, i) => i !== index));
+    const newSteps = formApprovalSteps.filter((_: ApprovalFlowStep, i: number) => i !== index);
+
+    setValue('approvalSteps', newSteps);
+    onChange?.(newSteps);
   };
 
   return (
@@ -30,16 +44,16 @@ const ApprovalFlow: FC<ApprovalFlowProps> = ({ approvalSteps, onChange }) => {
         Approval steps
       </div>
       <div className='space-y-3'>
-        {approvalSteps.map((step, index) => (
+        {formApprovalSteps.map((step: ApprovalFlowStep, index: number) => (
           <ApprovalStep
             key={index}
             stepNumber={index + 1}
             step={step}
             onChange={handleApprovalStepChange}
-            onRemove={approvalSteps.length > 1 ? () => handleRemoveApprovalStep(index) : undefined}
+            onRemove={formApprovalSteps.length > 1 ? () => handleRemoveApprovalStep(index) : undefined}
           />
         ))}
-        <Button variant='outline' onClick={handleAddApprovalStep} size='xs' className='flex items-center gap-1.5'>
+        <Button variant='outline' onClick={handleAddApprovalStep} size='xsmall' className='flex items-center gap-1.5'>
           <SvgSpriteLoader id='layers-two-02' size={14} />
           Add step
         </Button>

@@ -61,7 +61,7 @@ export interface SelectOption {
   id?: string;
   label: string;
   richLabel?: React.ReactNode;
-  value: string;
+  value: string | { type: string; id: string };
   icon?: React.ReactNode;
   displayValue?: string;
 }
