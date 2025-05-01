@@ -6,6 +6,7 @@ import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 import { AudiencesByOrganisationIdResponse } from '@/types/api/people.types';
+import { snakeCaseToSentenceCase } from '@/utils/common';
 
 type PolicyCardProps = {
   policy: PolicyDetailsType;
@@ -50,8 +51,8 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, teamMembersData }) => {
             {policy.policy_configurations.conditions.conditions.map((condition) => (
               <Tag variant='gray' key={condition.field}>
                 {Array.isArray(condition.value)
-                  ? `${condition.value.length} ${condition.field} `
-                  : `${condition.field} ${condition.operator} ${condition.value}`}
+                  ? `${condition.value.length} ${snakeCaseToSentenceCase(condition.field)} `
+                  : `${snakeCaseToSentenceCase(condition.field)} ${condition.operator} ${condition.value}`}
               </Tag>
             ))}
           </div>
