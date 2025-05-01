@@ -109,3 +109,8 @@ export type PolicyFormData = {
   policyName: string;
   [key: string]: SelectOption[] | ApprovalFlowStep[] | string;
 };
+
+export enum PolicyActionType {
+  CREATE_PAYMENT = 'CREATE_PAYMENT',
+  CREATE_TEMPLATE = 'CREATE_TEMPLATE',
+}
