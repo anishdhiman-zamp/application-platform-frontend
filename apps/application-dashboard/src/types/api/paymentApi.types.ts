@@ -1,5 +1,5 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
-import { AccountDetailsType, MOVE_MONEY_TYPE } from '@/modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
 import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
@@ -97,4 +97,30 @@ export type SourceAccountByRecipientIdPayloadType = {
 
 export type PaymentConfigResponseType = {
   id: string;
+};
+
+export type PaymentDetailsResponseType = {
+  amount: number;
+  currency: string;
+  status: PAYMENT_STATUS_TYPES;
+  date: string;
+  header: {
+    SourceAccountDetails: string;
+    Recipient: string;
+  };
+  sections: {
+    title: string;
+    values: {
+      label: string;
+      value: string;
+    }[];
+  }[];
+  descriptors: {
+    title: string;
+    description: string[];
+  }[];
+  attachments: {
+    label: string;
+    file_upload_id: string;
+  }[];
 };

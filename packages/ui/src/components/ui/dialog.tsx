@@ -4,7 +4,6 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { SIZE_TYPES } from '../../types';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 const dialogVariants = cva(
@@ -12,13 +11,13 @@ const dialogVariants = cva(
   {
     variants: {
       size: {
-        [SIZE_TYPES.LARGE]: 'w-[80vw]',
-        [SIZE_TYPES.MEDIUM]: 'w-[60vw]',
-        [SIZE_TYPES.SMALL]: 'w-[40vw]',
+        large: 'w-[80vw]',
+        medium: 'w-[60vw]',
+        small: 'w-[40vw]',
       },
     },
     defaultVariants: {
-      size: SIZE_TYPES.MEDIUM,
+      size: 'medium',
     },
   },
 );

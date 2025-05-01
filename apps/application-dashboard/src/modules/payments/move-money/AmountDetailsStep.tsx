@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, useEffect, useMemo, useRef, useState } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
-import { PAYMENT_PROCESSING_MODES } from 'modules/payments/move-money/move-money.dummy';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
+import { PAYMENT_PROCESSING_MODES } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';

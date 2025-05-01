@@ -55,3 +55,19 @@ export const TEMPLATE_STATUS_TYPES = {
   ACTIVE: 'active',
   DECLINED: 'declined',
 };
+
+export enum PAYMENT_STATUS_TYPES {
+  PROPOSED = 'proposed',
+  FAILED = 'failed',
+  CREATED = 'created',
+  SUCCEEDED = 'succeeded',
+  APPROVED = 'approved',
+  PROCESSED = 'processed',
+  PARTNER_QUEUED = 'partner_queued',
+  BLOCKED = 'blocked',
+}
+
+export const PAYMENT_TABS = {
+  PAYMENT_DETAILS: 'payment-details',
+  APPROVALS: 'approvals',
+};

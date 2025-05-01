@@ -46,15 +46,17 @@
   },
   "exports": {
     ".": {
-      "default": "./src/components/index.ts",
-      "types": "./src/types/index.ts"
+      "default": "./src/components/index.ts"
     },
     "./globals.css": "./src/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
-    "./types": "./src/types/index.ts"
+    "./types": {
+      "types": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
+    }
   },
   "lint-staged": {
     "*.ts": "eslint --fix",

@@ -80,7 +80,7 @@ export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
   datasetId: string,
-  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
+  handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
   tableRef: RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
 ): ColDef[] => {
@@ -180,7 +180,7 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
     return {
       cellEditor: CustomTagEditor,
       cellEditorParams: {
-        values: column.options.filter((option) => !!option),
+        values: column.options?.filter((option) => !!option),
       },
     };
   }
@@ -298,7 +298,7 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   const filters: MapAny = JSON.parse(filtersString);
   const filterKeys = Object.keys(filters);
 
-  const requiredTagFilterConfigs = filterConfig.filter(
+  const requiredTagFilterConfigs = filterConfig?.filter(
     (item) => item.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG && filterKeys.includes(item.column),
   );
 

@@ -77,7 +77,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
 
     startPolling({
       fn: () => getActionStatus({ datasetId, params: { action_ids: [startPollingPreview?.actionId] } }),
-      validate: (data: DatasetActionStatusResponseType[]) => data.filter((item) => !item.is_completed)?.length === 0,
+      validate: (data: DatasetActionStatusResponseType[]) => data?.filter((item) => !item.is_completed)?.length === 0,
       interval: 3000,
       maxAttempts: 50,
     })

@@ -34,7 +34,7 @@ export const getPageDatasetRoute = (pageId: string, datasetId: string) => {
 };
 
 export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {
-  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId).replace(':datasetIds', datasetIds.join(','))}`;
+  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId).replace(':datasetIds', datasetIds?.join(','))}`;
 };
 
 export const getPageDatasetDrilldownRoute = (pageId: string, datasetId: string, rowId: string) => {

@@ -4,7 +4,7 @@ export enum TOAST_MESSAGES {
   SUCCESS_PAYMENTS_SHARED = 'Payments access shared successfully',
   SUCCESS_AUDIENCE_ROLE_CHANGED = 'Role changed successfully',
   SUCCESS_AUDIENCE_DELETED = 'Audience deleted successfully',
-  SUCCESS_AUDIENCE_INVITED = 'Invitation sent successfully',
+  SUCCESS_AUDIENCE_INVITED = 'Done',
 
   FAILED_DATASET_SHARED = 'Failed to shared dataset',
   FAILED_PAGE_SHARED = 'Failed to share page',
@@ -12,6 +12,12 @@ export enum TOAST_MESSAGES {
   FAILED_AUDIENCE_ROLE_CHANGED = 'Failed to change role',
   FAILED_AUDIENCE_DELETED = 'Failed to delete audience',
   FAILED_AUDIENCE_INVITED = 'Failed to send invitation',
+
+  SUCCESS_APPROVED = 'Approved',
+  SUCCESS_REJECTED = 'Rejected',
+
+  ERROR_APPROVED = 'Failed to approve',
+  ERROR_REJECTED = 'Failed to reject',
 
   SUCCESS_TAGGING_COMPLETED = 'Tagging completed successfully',
   ERROR_TAGGING = 'Tagging failed',

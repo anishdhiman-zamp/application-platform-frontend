@@ -250,7 +250,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       fn: () =>
         getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed)?.length === 0;
+        return data?.filter((item) => !item.is_completed)?.length === 0;
       },
       interval: 30000,
       maxAttempts: 50,

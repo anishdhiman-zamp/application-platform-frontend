@@ -3,7 +3,6 @@ import { cn } from '@zamp-platform/ui/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
-import { SIZE_TYPES } from '../../types';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -19,13 +18,12 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-10 py-3 px-4 f-14-500',
-        [SIZE_TYPES.LARGE]: 'h-10 py-3 px-4 f-14-500',
-        [SIZE_TYPES.MEDIUM]: 'h-8 px-2 py-2 f-13-500',
-        [SIZE_TYPES.SMALL]: 'h-7 px-3 f-12-500',
-        [SIZE_TYPES.XSMALL]: 'h-6 px-0.5 py-1 f-11-500',
-        [SIZE_TYPES.XXSMALL]: 'h-5 rounded-sm px-0.5 py-1 f-11-500',
+        large: 'h-10 py-3 px-4 f-14-500',
+        medium: 'h-8 px-2 py-2 f-13-500',
+        small: 'h-7 px-3 f-12-500',
+        xsmall: 'h-[26px] rounded-md px-2.5 py-1.5 f-11-500',
+        xxsmall: 'h-5 rounded-sm px-0.5 py-1 f-11-500',
         icon: 'h-10 w-10',
-        xs: 'h-[26px] rounded-md px-2.5 py-1.5 f-11-500',
       },
     },
     defaultVariants: {

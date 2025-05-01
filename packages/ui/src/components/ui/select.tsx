@@ -3,7 +3,7 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ChevronDown, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
-import { SIZE_TYPES } from '../../types';
+import { SizeType } from '@zamp-platform/ui/types';
 
 export interface SelectOption {
   label: string;
@@ -16,7 +16,7 @@ export interface SelectProps
   extends Omit<React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>, 'children'> {
   options: SelectOption[];
   placeholder?: string;
-  variant?: SIZE_TYPES;
+  variant?: SizeType;
   className?: string;
   label?: string;
   fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>;
@@ -32,7 +32,7 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
     {
       options: initialOptions,
       placeholder,
-      variant = SIZE_TYPES.MEDIUM,
+      variant = 'medium',
       className,
       label,
       fetchOptions,
@@ -113,17 +113,17 @@ const Select = React.forwardRef<React.ElementRef<typeof DropdownMenuPrimitive.Ro
     const options = fetchOptions ? dynamicOptions : initialOptions;
     const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const getVariantStyles = (variant: SIZE_TYPES) => {
+    const getVariantStyles = (variant: SizeType) => {
       switch (variant) {
-        case SIZE_TYPES.SMALL:
+        case 'small':
           return 'h-8';
-        case SIZE_TYPES.MEDIUM:
+        case 'medium':
           return 'h-10';
-        case SIZE_TYPES.LARGE:
+        case 'large':
           return 'h-12 text-lg';
-        case SIZE_TYPES.XLARGE:
+        case 'xlarge':
           return 'h-14 text-xl';
-        case SIZE_TYPES.XSMALL:
+        case 'xsmall':
           return 'h-6 text-xs';
         default:
           return 'h-10 text-base';
