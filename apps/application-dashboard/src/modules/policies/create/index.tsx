@@ -82,7 +82,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton autoFocus>
         <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          <div className='f-12-500 text-primary py-3 px-4'>New policy</div>
+          <div className='f-12-500 text-primary py-3 px-4 pb-0'>New policy</div>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)}>
               <div className='px-4 pb-3 pt-6'>
