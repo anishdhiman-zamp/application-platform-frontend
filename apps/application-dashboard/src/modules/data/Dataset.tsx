@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CellEditRequestEvent,
   ColDef,
@@ -250,7 +250,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       fn: () =>
         getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
       validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed)?.length === 0;
+        return data?.filter((item) => !item.is_completed)?.length === 0;
       },
       interval: 30000,
       maxAttempts: 50,

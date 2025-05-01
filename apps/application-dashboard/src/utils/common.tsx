@@ -168,12 +168,12 @@ export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()},
 export const getFirstLetters = (str: string, length = 2) =>
   str
     ?.split(' ')
-    .map((word, index) => {
+    ?.map((word, index) => {
       if (index > 1 || !word?.length) return null;
       else return word[0].toUpperCase();
     })
-    .join('')
-    .slice(0, length); // Ensure only the first 2 characters are returned;
+    ?.join('')
+    ?.slice(0, length); // Ensure only the first 2 characters are returned;
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -213,9 +213,9 @@ export const getUserNameFromEmail = (email: string) => {
  */
 export const convertEmailUsernameToName = (emailUsername: string) => {
   return emailUsername
-    .split('.')
-    .map((name) => capitalizeFirstLetter(name))
-    .join(' ');
+    ?.split('.')
+    ?.map((name) => capitalizeFirstLetter(name))
+    ?.join(' ');
 };
 
 export function isValidDate(dateString: string) {
@@ -447,7 +447,7 @@ export const sentenceCase = (str: string) => {
  * @returns The converted string in Sentence case.
  */
 export const snakeCaseToSentenceCase = (str: string) => {
-  return sentenceCase(str?.split('_').join(' '));
+  return sentenceCase(str?.split('_')?.join(' '));
 };
 
 /**
@@ -527,4 +527,12 @@ export const moveToTop = (array: string[], value: string): string[] => {
   }
 
   return array;
+};
+
+export const getUserDisplayName = (user?: { name?: string; email?: string }) => {
+  if (user?.name) return user.name;
+
+  if (user?.email) return convertEmailUsernameToName(getUserNameFromEmail(user.email));
+
+  return 'Unknown';
 };

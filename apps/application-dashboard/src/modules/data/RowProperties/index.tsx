@@ -49,7 +49,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
 
   const ruleConfigs: RuleConfigType[] = useMemo(() => {
     const configs: RuleConfigType[] = [];
-    const tagColumns = columns.filter(
+    const tagColumns = columns?.filter(
       (column) => column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG,
     );
 

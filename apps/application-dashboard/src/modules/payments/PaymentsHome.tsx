@@ -1,65 +1,44 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  CellEditRequestEvent,
   ColDef,
   ColumnMovedEvent,
-  FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
+  RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import {
-  useGetDatasetFilterConfigQuery,
-  useLazyGetActionStatusQuery,
-  useLazyGetDatasetDataQuery,
-  useUpdateDatasetDataMutation,
-} from 'apis/dataset';
+import { useGetPaymentListDatasetFilterConfigQuery, useLazyGetPaymentListQuery } from 'apis/payments';
 import { COLORS } from 'constants/colors';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
-import { useOnClickOutside } from 'hooks';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
-import usePolling from 'hooks/usePolling';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import {
-  formatColumnLevelStats,
-  formatColumns,
-  getColumnOrderingVisibilityForCurrentDataset,
-  getEncodedRequestWithAggregations,
-  getFilters,
-} from 'modules/data/data.utils';
+import { formatColumns, getColumnOrderingVisibilityForCurrentDataset, getFilters } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
+import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
+import { useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
-import {
-  DatasetActionStatusResponseType,
-  DatasetDataResponseType,
-  DatasetUpdateResponseType,
-} from 'types/api/dataset.types';
+import { DatasetDataResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn, MapAny } from 'types/commonTypes';
-import { LogicalOperatorType } from 'types/components/table.type';
 import { cn } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import PaymentDetailsSideDrawer from '@/modules/payments/payment-details/PaymentDetailsSideDrawer';
 import TemplateListSideDrawer from '@/modules/payments/templates/TemplateListSideDrawer';
 import TooltipButton from 'components/common/button/TooltipButton';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
 import { getEncodedRequest } from 'components/common/table/table.utils';
-import { toast } from 'components/common/toast/Toast';
-import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import { TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
-import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -70,41 +49,30 @@ type PaymentsListProps = {
 };
 
 const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
-  const { pageId } = useParams();
+  const tableRef = useRef<AgGridReact>(null);
+  const datasetTableRef = useRef<HTMLDivElement>(null);
+  const firstLoadDone = useRef(false); // Track if first load is done
 
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
+  const { checkUserPrivilege } = useResourceAccess(ResourceType.PAYMENTS, '');
+
   const {
-    data: filterConfigData,
-    refetch: refetchFilterConfig,
-    isFetching,
-    isError,
-  } = useGetDatasetFilterConfigQuery(
-    {
-      datasetId: id as string,
-    },
-    {
-      skip: !id,
-    },
-  );
-  const filterConfig = filterConfigData?.data;
-  const [updateDatasetData] = useUpdateDatasetDataMutation();
-  const [getActionStatus] = useLazyGetActionStatusQuery();
+    dispatch,
+    state: { selectedFilters, filtersConfig },
+  } = useFiltersContextStore();
+
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [datasetTitle, setDatasetTitle] = useState<string>('');
-  const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
-  const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
   const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(false);
-
-  const firstLoadDone = useRef(false); // Track if first load is done
-
+  const [paymentDetailsId, setPaymentDetailsId] = useState<string>('');
   const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
     open: boolean;
     status: string;
@@ -116,13 +84,15 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
     title: '',
     description: '',
   });
-  const { startPolling } = usePolling();
-  const [getDatasetData, { data: datasetData }] = useLazyGetDatasetDataQuery();
 
+  const [getPaymentList, { data: paymentListData }] = useLazyGetPaymentListQuery();
   const {
-    dispatch,
-    state: { selectedFilters, filtersConfig },
-  } = useFiltersContextStore();
+    data: filterConfigData,
+    refetch: refetchFilterConfig,
+    isFetching,
+    isError,
+  } = useGetPaymentListDatasetFilterConfigQuery();
+  const filterConfig = filterConfigData;
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
@@ -141,7 +111,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
         );
 
-        removeCellFocus();
         if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
           // Use Cached Data for First Load
           firstLoadDone.current = true; // Mark first load as done
@@ -150,8 +119,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
             ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
           });
         } else {
-          getDatasetData({
-            datasetId: id as string,
+          getPaymentList({
             query_config: queryConfig,
           })
             .unwrap()
@@ -176,187 +144,12 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
         }
       },
     };
-  }, [getDatasetData, id, zampIds, cachedDatasetData]);
+  }, [getPaymentList, id, zampIds, cachedDatasetData]);
 
-  const router = useRouter();
-  const tableRef = useRef<AgGridReact>(null);
-  const datasetTableRef = useRef<HTMLDivElement>(null);
-
-  const removeCellFocus = () => {
-    tableRef.current?.api?.clearCellSelection();
-    tableRef.current?.api?.clearFocusedCell();
+  const handleRowClicked = (event: RowClickedEvent) => {
+    setPaymentDetailsId(event?.data?.payment_id);
+    // console.log('event', event.payment_id);
   };
-
-  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType) => {
-    setInitiatedActionIds((prev) => [...prev, data.action_id]);
-    startPolling({
-      fn: () =>
-        getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
-      validate: (data: DatasetActionStatusResponseType[]) => {
-        return data.filter((item) => !item.is_completed)?.length === 0;
-      },
-      interval: 30000,
-      maxAttempts: 50,
-    }).then(() => {
-      toast.success(TOAST_MESSAGES.SUCCESS_TAGGING_COMPLETED);
-      tableRef.current?.api?.refreshServerSide();
-      refetchFilterConfig();
-    });
-  };
-
-  const updateApi = ({
-    rowId,
-    field,
-    newValue,
-    operator = CONDITION_OPERATOR_TYPE.EQUAL,
-  }: {
-    rowId: string | string[];
-    field: string;
-    newValue: string;
-    operator?: CONDITION_OPERATOR_TYPE;
-  }) => {
-    updateDatasetData({
-      datasetId: id as string,
-      data: {
-        filters: {
-          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-          conditions: [
-            {
-              column: '_zamp_id',
-              value: rowId,
-              operator: operator,
-            },
-          ],
-        },
-        update: {
-          column: field as string,
-          value: newValue,
-        },
-      },
-    })
-      .unwrap()
-      .then((response) => handleSuccessfulUpdate(response));
-  };
-
-  const onCellEditRequest = (event: CellEditRequestEvent) => {
-    const { colDef, newValue, data, source, node } = event;
-    const { field } = colDef;
-    const updatedRow = { ...event.data, [field as string]: newValue };
-
-    // Optimistic update
-    node.setData(updatedRow);
-
-    if (source === 'edit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
-  };
-
-  const onFillEnd = (event: FillEndEvent) => {
-    const { finalRange } = event;
-    const { startRow, endRow, startColumn } = finalRange;
-
-    const startIndex = startRow?.rowIndex as number;
-    const endIndex = endRow?.rowIndex as number;
-    const field = startColumn?.getColId();
-    const rowIds: string[] = [];
-    let newValue = '';
-    let loopStartIndex = startIndex;
-    let loopEndIndex = endIndex;
-
-    if (startIndex > endIndex) {
-      loopStartIndex = endIndex;
-      loopEndIndex = startIndex;
-    }
-    for (let i = loopStartIndex; i <= loopEndIndex; i++) {
-      const row = tableRef.current?.api?.getDisplayedRowAtIndex(i);
-
-      rowIds.push(row?.data?._zamp_id as string);
-      if (i === startIndex) {
-        newValue = row?.data?.[field as string] as string;
-      }
-    }
-
-    updateApi({
-      rowId: rowIds,
-      field,
-      newValue,
-      operator: CONDITION_OPERATOR_TYPE.IN,
-    });
-  };
-
-  const handleDrilldownClick = (data: MapAny) => {
-    if (pageId) {
-      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
-    } else {
-      router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
-    }
-  };
-
-  const handleRowPropertiesClick = (data: MapAny) => {
-    setRowPropertiesData(data);
-  };
-
-  useEffect(() => {
-    if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, false, id as string, handleSuccessfulUpdate, tableRef, defaultFn);
-
-      if (columns?.length > 0) {
-        setColumns(columns);
-        dispatch({
-          type: filtersContextActions.SET_FILTERS_CONFIG,
-          payload: {
-            filtersConfig: filterConfig
-              ?.filter((item) => !item?.metadata?.is_hidden)
-              ?.map((column) => ({
-                key: column.column,
-                label: column.column,
-                values: column.options,
-                type: column.type,
-              })),
-          },
-        });
-        if (filters)
-          dispatch({
-            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
-          });
-        const amountRangeColumns = columns
-          ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
-          ?.map((column) => column?.field)
-          ?.filter((column) => column !== undefined);
-
-        if (amountRangeColumns?.length > 0) {
-          getDatasetData({
-            datasetId: id as string,
-            query_config: getEncodedRequestWithAggregations(amountRangeColumns),
-          })
-            .unwrap()
-            .then((response) => {
-              setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
-            })
-            .catch(() => {
-              setColumnLevelStats(undefined);
-            });
-        }
-      }
-    }
-  }, [filterConfig, filters, id]);
-
-  useEffect(() => {
-    tableRef.current?.api?.setFilterModel(selectedFilters);
-  }, [selectedFilters]);
-
-  useEffect(() => {
-    if (isNoRowsOverlayVisible) {
-      tableRef.current?.api?.showNoRowsOverlay();
-    } else {
-      tableRef.current?.api?.hideOverlay();
-    }
-  }, [isNoRowsOverlayVisible]);
-
-  useEffect(() => {
-    if (datasetTitle && breadcrumbStack?.length === 0) {
-      appDispatch(addBreadcrumb([datasetTitle]));
-    }
-  }, [datasetTitle, breadcrumbStack]);
 
   const handleColumnMoved = (event: ColumnMovedEvent) => {
     const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(id);
@@ -401,6 +194,52 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   };
 
   useEffect(() => {
+    if (filterConfig?.length) {
+      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn);
+
+      if (columns?.length > 0) {
+        setColumns(columns);
+        dispatch({
+          type: filtersContextActions.SET_FILTERS_CONFIG,
+          payload: {
+            filtersConfig: filterConfig
+              ?.filter((item) => !item?.metadata?.is_hidden)
+              ?.map((column) => ({
+                key: column.column,
+                label: column.column,
+                values: column.options,
+                type: column.type,
+              })),
+          },
+        });
+        if (filters)
+          dispatch({
+            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+            payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
+          });
+      }
+    }
+  }, [filterConfig, filters, id]);
+
+  useEffect(() => {
+    tableRef.current?.api?.setFilterModel(selectedFilters);
+  }, [selectedFilters]);
+
+  useEffect(() => {
+    if (isNoRowsOverlayVisible) {
+      tableRef.current?.api?.showNoRowsOverlay();
+    } else {
+      tableRef.current?.api?.hideOverlay();
+    }
+  }, [isNoRowsOverlayVisible]);
+
+  useEffect(() => {
+    if (datasetTitle && breadcrumbStack?.length === 0) {
+      appDispatch(addBreadcrumb([datasetTitle]));
+    }
+  }, [datasetTitle, breadcrumbStack]);
+
+  useEffect(() => {
     if (filters) return;
     const filtersFromZampIds = {
       column: '_zamp_id',
@@ -416,8 +255,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
       zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
     );
 
-    getDatasetData({
-      datasetId: id as string,
+    getPaymentList({
       query_config: queryConfig,
     })
       .unwrap()
@@ -432,8 +270,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
         });
       });
   }, [filters]);
-
-  useOnClickOutside(datasetTableRef, removeCellFocus);
 
   return (
     <>
@@ -462,6 +298,20 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
           <div className='relative flex items-center gap-3'>
+            <TooltipButton
+              id='export-dataset'
+              onClick={() => setPaymentDetailsId('')}
+              tooltipBody='Payment Details'
+              className='border-none'
+              tooltipClassName='!z-1000'
+              tooltipColor={COLORS.BLACK}
+              buttonSize={SIZE_TYPES.XSMALL}
+              tooltipPosition={TooltipPositions.TOP}
+              buttonIcon={{
+                id: 'user-up-01',
+                size: 14,
+              }}
+            />
             <TooltipButton
               id='export-dataset'
               onClick={() => setIsRecipientsSideDrawerOpen(true)}
@@ -497,7 +347,9 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
               setShowAiTransformationStatus={setShowAiTransformationStatus}
             />
             <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-            <MoveMoneyButton />
+
+            {(checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN) ||
+              checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.INITIATOR)) && <MoveMoneyButton />}
           </div>
         </div>
 
@@ -508,12 +360,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
             serverSideDatasource={serverSideDatasource}
             columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
             totalRows={totalRows}
-            onCellEditRequest={onCellEditRequest}
-            onFillEnd={onFillEnd}
-            onRowPropertiesClick={handleRowPropertiesClick}
             onColumnMoved={handleColumnMoved}
-            columnLevelStats={columnLevelStats}
-            {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
+            onRowClicked={handleRowClicked}
           />
         </div>
       </CommonWrapper>
@@ -523,7 +371,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           data={rowPropertiesData}
           onClose={() => setRowPropertiesData(undefined)}
           datasetId={id as string}
-          isDrillDownEnabled={datasetData?.data?.config?.is_drilldown_enabled}
+          isDrillDownEnabled={paymentListData?.data?.config?.is_drilldown_enabled}
           columns={columns}
         />
       )}
@@ -535,6 +383,9 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           isOpen={isPaymentTemplatesSideDrawerOpen}
           onClose={() => setIsPaymentTemplatesSideDrawerOpen(false)}
         />
+      )}
+      {paymentDetailsId && (
+        <PaymentDetailsSideDrawer paymentDetailsId={paymentDetailsId} onClose={() => setPaymentDetailsId('')} />
       )}
     </>
   );

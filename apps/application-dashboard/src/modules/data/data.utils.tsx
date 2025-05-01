@@ -11,7 +11,12 @@ import {
   isValid,
 } from 'date-fns';
 import { CustomColumnsMapping } from 'modules/data/data.constants';
-import { ColumnOrderingVisibilityType, RuleColumnDetailsType } from 'modules/data/data.types';
+import {
+  ColumnOrderingVisibilityType,
+  type DatasetTabType,
+  type DatasetUrlDataType,
+  RuleColumnDetailsType,
+} from 'modules/data/data.types';
 import {
   DatasetFilterConfigResponseType,
   DatasetType,
@@ -75,7 +80,7 @@ export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
   datasetId: string,
-  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void,
+  handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
   tableRef: RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
 ): ColDef[] => {
@@ -175,7 +180,7 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
     return {
       cellEditor: CustomTagEditor,
       cellEditorParams: {
-        values: column.options.filter((option) => !!option),
+        values: column.options?.filter((option) => !!option),
       },
     };
   }
@@ -293,7 +298,7 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
   const filters: MapAny = JSON.parse(filtersString);
   const filterKeys = Object.keys(filters);
 
-  const requiredTagFilterConfigs = filterConfig.filter(
+  const requiredTagFilterConfigs = filterConfig?.filter(
     (item) => item.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG && filterKeys.includes(item.column),
   );
 
@@ -618,4 +623,31 @@ export const updateLocalStorage = (columnOrderingVisibility: ColumnOrderingVisib
     LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
     JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: columnOrderingVisibility }),
   );
+};
+
+export const extractDatasetsFromUrl = (url: string): DatasetUrlDataType => {
+  try {
+    const searchParams = new URLSearchParams(url.split('?')[1] || '');
+    const datasetsParam = searchParams.get('datasets');
+
+    if (!datasetsParam) {
+      throw new Error('No datasets parameter found');
+    }
+
+    return JSON.parse(datasetsParam);
+  } catch (error) {
+    console.error('Error extracting datasets:', error);
+
+    return {};
+  }
+};
+
+export const parseDatasets = (url: string, datasetIds: string[]): DatasetTabType[] => {
+  const datasets = extractDatasetsFromUrl(url);
+
+  return datasetIds?.map((id) => ({
+    id,
+    title: datasets[id]?.title || '',
+    filters: datasets[id]?.filters || {},
+  }));
 };

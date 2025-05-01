@@ -51,7 +51,7 @@ export type DatasetExportResponseType = {
 };
 
 export type DatasetDataRequestType = {
-  datasetId: string;
+  datasetId?: string;
   query_config?: string;
 };
 

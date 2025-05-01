@@ -10,7 +10,7 @@ const RecipientCardSkeleton: FC<RecipientCardSkeletonProps> = ({ length = 8, cla
   return (
     <>
       {Array.from({ length }, (_, index) => index).map((index) => (
-        <div key={index} className={cn('flex py-1 px-1.5 justify-between mb-2', className)}>
+        <div key={index} className={cn('flex py-1 px-1.5 justify-between mb-2 animate-pulse', className)}>
           <div className='flex items-center gap-1.5'>
             <div className='w-6 h-6 flex items-center justify-center rounded-full bg-GRAY_200'></div>
             <div className='flex flex-col gap-1'>

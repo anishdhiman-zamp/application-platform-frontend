@@ -3,6 +3,7 @@ import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
+import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -23,14 +24,19 @@ const Topbar = () => {
   const currentRoute = router.pathname;
 
   const renderShareButton = useMemo(() => {
-    if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES)) {
-      return <SharePagePopup pageId={router?.query?.pageId as string} />;
-    } else if (currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS)) {
-      return <ShareDatasetPopup datasetId={router?.query?.datasetId as string} />;
-    } else if (currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET) {
-      return null;
+    switch (true) {
+      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
+        return <SharePagePopup pageId={router?.query?.pageId as string} />;
+      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
+        return <ShareDatasetPopup datasetId={router?.query?.datasetId as string} />;
+      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
+        return <SharePaymentsPopup paymentConfigId={router?.query?.paymentConfigId as string} />;
+      case currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET:
+        return null;
+      default:
+        return null;
     }
-  }, [currentRoute, router?.query?.pageId, router?.query?.datasetId]);
+  }, [currentRoute, router?.query?.pageId, router?.query?.datasetId, router?.query?.paymentConfigId]);
 
   const handleBackClick = () => {
     dispatch(removeLastBreadcrumb());

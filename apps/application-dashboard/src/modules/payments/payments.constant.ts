@@ -3,6 +3,7 @@ import {
   MOVE_MONEY_ACTION_TYPE,
   MOVE_MONEY_PAYMENT_TYPE,
   MOVE_MONEY_TYPE,
+  PAYMENT_TABS,
   TEMPLATE_STATUS_TYPES,
 } from 'modules/payments/payments.types';
 import { INPUT_FILE_FORMATS } from 'types/common/mime';
@@ -55,6 +56,17 @@ export const MOVE_MONEY_TEMPLATE_FILTER_ITEMS = [
   {
     value: TEMPLATE_STATUS_TYPES.DRAFTED,
     label: 'Approval pending',
+  },
+];
+
+export const PAYMENT_DETAILS_TABS = [
+  {
+    value: PAYMENT_TABS.PAYMENT_DETAILS,
+    label: 'Payment details',
+  },
+  {
+    value: PAYMENT_TABS.APPROVALS,
+    label: 'Approvals',
   },
 ];
 
@@ -115,3 +127,18 @@ export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
 ];
 
 export const MASK_DOTS = '••';
+
+export const PAYMENT_PROCESSING_MODES = [
+  {
+    label: 'WIRE',
+    value: 'WIRE',
+  },
+  {
+    label: 'SEPA',
+    value: 'SEPA',
+  },
+  {
+    label: 'RTP',
+    value: 'RTP',
+  },
+];

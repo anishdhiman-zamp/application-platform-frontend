@@ -4,6 +4,7 @@
 export enum ResourceType {
   DATASET = 'dataset',
   PAGE = 'page',
+  PAYMENTS = 'payments',
 }
 
 export type TeamInfoType = {
@@ -51,7 +52,6 @@ export type ResourceApiHooks<T = any> = {
  */
 export type ShareResourceConfig = {
   type: ResourceType;
-  idPropName: string; // e.g., "datasetId" or "pageId"
   accessPrivilegesList: ResourcePrivilege[];
   displayName: string; // For UI display
   toastMessages: {
@@ -64,7 +64,7 @@ export type ShareResourceConfig = {
  * Props for the shared component
  */
 export type ShareResourcePopupProps = {
-  resourceId: string;
+  resourceId?: string;
   resourceType: ResourceType;
   resourceAdminPrivilege: string;
   resourceConfig: ShareResourceConfig;
@@ -80,6 +80,21 @@ export type ValidationResult = {
   resource_audience_id?: string;
 };
 
+export type ResourcePrivilege = {
+  kind: ResourceType;
+  label: string;
+  value: string;
+  desc: string;
+};
+
+export type CombinedOptionListDataType = {
+  label: string;
+  value: string;
+  type?: string;
+  color?: string;
+  team_id?: string;
+};
+
 export enum PAGE_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
@@ -88,13 +103,6 @@ export enum PAGE_ACCESS_PRIVILEGES {
 export type PageAccessPrivilegesType = {
   label: string;
   value: PAGE_ACCESS_PRIVILEGES;
-};
-
-export type ResourcePrivilege = {
-  kind: ResourceType;
-  label: string;
-  value: string;
-  desc: string;
 };
 
 export enum DATASET_ACCESS_PRIVILEGES {
@@ -107,10 +115,13 @@ export type DatasetAccessPrivilegesType = {
   value: DATASET_ACCESS_PRIVILEGES;
 };
 
-export type CombinedOptionListDataType = {
+export enum PAYMENT_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  INITIATOR = 'initiator',
+  VIEWER = 'viewer',
+}
+
+export type PaymentAccessPrivilegesType = {
   label: string;
-  value: string;
-  type?: string;
-  color?: string;
-  team_id?: string;
+  value: PAYMENT_ACCESS_PRIVILEGES;
 };

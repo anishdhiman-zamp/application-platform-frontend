@@ -5,6 +5,8 @@ import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
+import RecipientNameCell from '@/components/common/table/CustomCellRenderers/RecipientNameCell';
+import StatusBadgeCell from '@/components/common/table/CustomCellRenderers/StatusBadgeCell';
 import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
@@ -48,6 +50,8 @@ export const LISTING_COLUMNS: ColDef[] = [
 export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => JSX.Element> = {
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
+  [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,
+  [CUSTOM_COLUMNS_TYPE.USER_AVATAR]: (props: ICellRendererParams) => <RecipientNameCell value={props.value} />,
 };
 
 export enum TEAM_OPTIONS {

@@ -46,11 +46,13 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
         MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === selectedFilter?.type)?.label ?? '';
 
       let title = '';
-      const count = selectedFilter?.values?.length;
+      const count = Array.isArray(selectedFilter?.values) ? selectedFilter?.values?.length : 0;
 
       title = isNull
         ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
-        : selectedFilter?.values?.join(', ');
+        : Array.isArray(selectedFilter?.values)
+          ? selectedFilter?.values?.join(', ')
+          : (selectedFilter?.values ?? '');
 
       if (count) {
         title = `${operatorLabel} ${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
@@ -142,7 +144,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
       const values = selectedFilters[key];
 
-      let title = values?.map((v: MapAny) => v?.label).join(', ');
+      let title = values?.map((v: MapAny) => v?.label)?.join(', ');
 
       if (!values?.length) {
         title = '';
@@ -169,7 +171,7 @@ export const getTagLabel = (tag?: string) => {
 export const getTagParents = (tag: string) => {
   const parents = tag?.split('.').slice(0, -1) ?? [];
 
-  return parents?.length ? parents.join(' / ') : null;
+  return parents?.length ? parents?.join(' / ') : null;
 };
 
 const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';

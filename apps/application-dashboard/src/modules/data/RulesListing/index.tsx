@@ -107,7 +107,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
       .slice()
       .sort((a: any, b: any) => a.y - b.y)
       .map((l: any) => rules.find((rule) => rule?.id === l.i))
-      .filter((rule: RuleCardProps | undefined): rule is RuleCardProps => rule !== undefined);
+      ?.filter((rule: RuleCardProps | undefined): rule is RuleCardProps => rule !== undefined);
 
     const isOrderSame = orderedItems.every((rule, index) => rule?.id === listOfRules[index]?.id);
 

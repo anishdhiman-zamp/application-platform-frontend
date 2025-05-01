@@ -1,7 +1,6 @@
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import {
   useDeleteAudienceFromResourceMutation,
-  useGetAudiencesByResourceIdQuery,
   usePatchChangeAudienceRoleInResourceMutation,
   usePostShareResourceToAudiencesMutation,
 } from 'apis/collaboration';
@@ -10,6 +9,7 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
+import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
@@ -19,14 +19,17 @@ import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
-import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
+import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import {
   CombinedOptionListDataType,
+  DATASET_ACCESS_PRIVILEGES,
+  PAGE_ACCESS_PRIVILEGES,
+  PAYMENT_ACCESS_PRIVILEGES,
+  ResourceType,
   ShareResourcePopupProps,
   ValidationResult,
 } from '@/modules/shareResource/shareResource.types';
-import { adminAccessPermissionForResource } from '@/utils/accessPermission/accessPermission';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -37,7 +40,9 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
-const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceType, resourceConfig }) => {
+const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
+  const { resourceType, resourceConfig } = props;
+  const resourceId = props.resourceId || '';
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
     resourceConfig.accessPrivilegesList[0].value,
@@ -49,19 +54,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
+  const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =
+    useResourceAccess(resourceType, props.resourceId || '');
+
   // get teams and users data in the organization
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
-
-  // get existing audiences for the resource
-  const {
-    data: audiencesData,
-    isLoading: isLoadingAudiencesData,
-    refetch: refetchAudiencesData,
-  } = useGetAudiencesByResourceIdQuery(
-    { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
-    { skip: !resourceId },
-  );
-
   // post invite audiences
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostShareResourceToAudiencesMutation();
 
@@ -70,9 +67,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
 
   // delete audience
   const [deleteAudience, { isLoading: isDeletingAudience }] = useDeleteAudienceFromResourceMutation();
-
-  // get all teams in the organization
-  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
 
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
@@ -84,18 +78,18 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const currentUserHasAdminAccess = useMemo(() => {
-    return adminAccessPermissionForResource(
-      userAccessToResourceList,
-      resourceType,
-      organizationId,
-      user_id,
-      allTeamsData
-        ?.map((t) => t.team_memberships)
-        .flat()
-        .filter((tm) => tm.user_id === user_id)
-        .map((tm) => tm.team_id) ?? [],
-    );
-  }, [userAccessToResourceList, organizationId, user_id, allTeamsData]);
+    switch (resourceType) {
+      case ResourceType.DATASET:
+        return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.PAGE:
+        return checkUserPrivilege(PAGE_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.PAYMENTS:
+        return checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN);
+      default:
+        return false;
+    }
+  }, [checkUserPrivilege, resourceType]);
+
   const isResourceSharable = !showValidationError && selectedItems?.length > 0 && currentUserHasAdminAccess;
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
@@ -436,9 +430,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = ({ resourceId, resourceT
                   isLoading={isLoadingAudiencesData}
                   loader={<WhoHasAccessSkeletonLoader />}
                 >
-                  {updatedUserAccessList?.map((audience, index) => (
+                  {updatedUserAccessList?.map((audience) => (
                     <AudienceAccess
-                      key={index}
+                      key={audience?.resource_audience_id}
                       resourceType={resourceType}
                       privilege={audience?.privilege}
                       resourceAudienceId={audience?.resource_audience_id}

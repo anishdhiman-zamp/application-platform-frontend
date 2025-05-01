@@ -40,6 +40,7 @@ import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { formatNumber, getCommaSeparatedNumber, getMaxValue, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
+import { FILTER_OPERATOR_TYPE_MAP } from '@/components/filter/filters.constants';
 import { getConditionValues } from 'components/common/table/table.utils';
 import { FilterConfigType } from 'components/filter/filter.types';
 
@@ -532,7 +533,7 @@ export const getDefaultFilterByDatasetId = (
       if (mapping?.dataset_id === datasetId && mapping?.default_filters) {
         mapping?.default_filters?.conditions?.forEach((condition) => {
           defaultFilters[condition?.column] = {
-            filterType: condition?.type,
+            filterType: FILTER_OPERATOR_TYPE_MAP[condition?.operator as keyof typeof FILTER_OPERATOR_TYPE_MAP],
             type: condition?.operator,
             values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
           };

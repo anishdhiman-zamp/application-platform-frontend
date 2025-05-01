@@ -2,10 +2,16 @@ import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import { APITags } from '@/constants/api.constants';
 import {
+  DatasetDataRequestType,
+  DatasetDataResponseType,
+  DatasetFilterConfigResponseType,
+} from '@/types/api/dataset.types';
+import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   InitiatePaymentPayloadType,
   PaymentConfigResponseType,
+  PaymentDetailsResponseType,
   RecipientBySourceAccountPayloadType,
   RecipientBySourceAccountResponseType,
   RecipientDetailsType,
@@ -13,6 +19,7 @@ import {
   SourceAccountResponseType,
   TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
+import { formRequestUrlWithParams } from '@/utils/common';
 
 const Payments = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -74,6 +81,23 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
+    getPaymentListDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], void>({
+      query: () => ({
+        url: API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET,
+      }),
+      transformResponse: (data) => data,
+    }),
+    getPaymentList: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
+      query: ({ query_config }) => ({
+        url: API_ENDPOINTS.PAYMENT_LIST_GET,
+        params: { query_config },
+      }),
+    }),
+    getPaymentDetails: builder.query<PaymentDetailsResponseType, string>({
+      query: (paymentId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
+      }),
+    }),
   }),
 });
 
@@ -89,4 +113,7 @@ export const {
   useInitiatePaymentMutation,
   useGetPaymentConfigQuery,
   useAddRecipientMutation,
+  useGetPaymentListDatasetFilterConfigQuery,
+  useLazyGetPaymentListQuery,
+  useGetPaymentDetailsQuery,
 } = Payments;
