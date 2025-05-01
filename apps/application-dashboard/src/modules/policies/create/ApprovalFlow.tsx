@@ -14,7 +14,8 @@ const ApprovalFlow: FC<ApprovalFlowProps> = ({ onChange }) => {
   const { setValue, watch } = useFormContext();
   const formApprovalSteps = watch('approvalSteps') || [DEFAULT_APPROVAL_STEP];
 
-  const handleAddApprovalStep = () => {
+  const handleAddApprovalStep = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     const newSteps = [...formApprovalSteps, DEFAULT_APPROVAL_STEP];
 
     setValue('approvalSteps', newSteps);

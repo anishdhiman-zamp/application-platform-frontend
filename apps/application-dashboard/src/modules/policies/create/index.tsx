@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectOption } from '@zamp-platform/form-builder';
-import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
+import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter } from '@zamp-platform/ui';
 import { getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
@@ -48,7 +48,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     }
     const apiPayload: CreatePolicyPayloadType = {
       templateFor: type,
-      name: 'test policy',
+      name: data.policyName,
       resource_id: paymentConfig?.id,
       resource_type: 'payments',
       action_type: 'CREATE_PAYMENT',
@@ -80,13 +80,21 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent showCloseButton>
-        <DialogHeader>
-          <h2 className='text-lg font-semibold'>New policy</h2>
-        </DialogHeader>
+      <DialogContent showCloseButton autoFocus>
         <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+          <div className='f-12-500 text-primary py-3 px-4'>New policy</div>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)}>
+              <div className='px-4 pb-3 pt-6'>
+                <input
+                  type='text'
+                  {...methods.register('policyName')}
+                  name='policyName'
+                  className='f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit'
+                  placeholder='Policy Title'
+                  autoFocus
+                />
+              </div>
               <div className='flex gap-2 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden'>
                 {getAttributes(type).map((attributeId) => {
                   const attribute = attributesMap[attributeId];
