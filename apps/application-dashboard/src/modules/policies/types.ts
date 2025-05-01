@@ -105,7 +105,6 @@ export type ApproverListOption = {
 };
 
 export type PolicyFormData = {
-  policyName: string;
   approvalSteps: ApprovalFlowStep[];
   [key: string]: SelectOption[] | ApprovalFlowStep[];
 };
