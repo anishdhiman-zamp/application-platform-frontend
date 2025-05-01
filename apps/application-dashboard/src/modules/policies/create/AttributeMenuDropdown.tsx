@@ -23,7 +23,7 @@ interface AttributeDropdownProps {
   name: string;
 }
 
-const AttributeDropdown = ({ attribute, name }: AttributeDropdownProps) => {
+const AttributeMenuDropdown = ({ attribute, name }: AttributeDropdownProps) => {
   const { control } = useFormContext();
   const [currentOptions, setCurrentOptions] = useState<SelectOption[]>('options' in attribute ? attribute.options : []);
   const [loading, setLoading] = useState(false);
@@ -166,4 +166,4 @@ const AttributeDropdown = ({ attribute, name }: AttributeDropdownProps) => {
   );
 };
 
-export default AttributeDropdown;
+export default AttributeMenuDropdown;

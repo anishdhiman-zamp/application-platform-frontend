@@ -11,8 +11,9 @@ import {
   DialogHeader,
   StepCard,
 } from '@zamp-platform/ui';
-import AttributeDropdown from 'modules/policies/create/AttributeDropdown';
-import { attributes } from 'modules/policies/create/constants';
+import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
+import { payoutAttributes } from 'modules/policies/create/constants';
+import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
 
 interface PolicyFormData {
   [key: string]: SelectOption[];
@@ -20,7 +21,7 @@ interface PolicyFormData {
 
 const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChange: (open: boolean) => void }) => {
   const methods = useForm<PolicyFormData>({
-    defaultValues: attributes.reduce(
+    defaultValues: payoutAttributes.reduce(
       (acc, attr) => ({
         ...acc,
         [attr.label]: [],
@@ -42,10 +43,14 @@ const CreatePolicyDialog = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenC
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <DialogBody>
-              <div className='flex gap-2 px-4 py-3'>
-                {attributes.map((attribute) => (
-                  <AttributeDropdown key={attribute.label} attribute={attribute} name={attribute.label} />
-                ))}
+              <div className='flex gap-2 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden'>
+                {payoutAttributes.map((attribute) =>
+                  attribute.type === 'input' ? (
+                    <AttributeInputDropdown key={attribute.label} attribute={attribute} name={attribute.label} />
+                  ) : (
+                    <AttributeMenuDropdown key={attribute.label} attribute={attribute} name={attribute.label} />
+                  ),
+                )}
               </div>
               <div className='bg-BG_GRAY_2 p-4 flex flex-col border-t border-gray-200'>
                 <StepCard stepNumber={1}>
