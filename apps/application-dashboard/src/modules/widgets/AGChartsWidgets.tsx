@@ -17,7 +17,7 @@ import {
   WidgetInstanceType,
 } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
-import { snakeCaseToSentenceCase } from 'utils/common';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -66,8 +66,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   const {
     data: widgetData,
-    isLoading,
+    isFetching,
     isError,
+    isLoading,
     refetch,
   } = useGetWidgetDataQuery(
     {
@@ -109,7 +110,11 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   }, [widgetDetails, transformedData, stackedValues]);
 
   return (
-    <div className=' bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden'>
+    <div
+      className={cn('bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden', {
+        'opacity-85 animate-pulse': isFetching,
+      })}
+    >
       <WidgetTitle
         title={widgetDetails?.title}
         groupWidgetsOptions={groupWidgetsOptions}
@@ -123,7 +128,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         isNoData={!transformedData?.length}
         className='h-full'
-        noDataBanner={<NoWidgetData />}
+        noDataBanner={<NoWidgetData className={cn({ 'opacity-100 animate-pulse': isFetching })} />}
         isError={isError}
         refetchFunction={refetch}
         loader={

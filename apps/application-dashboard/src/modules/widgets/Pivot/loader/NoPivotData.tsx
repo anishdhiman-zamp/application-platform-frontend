@@ -3,17 +3,24 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
+import { cn } from '@/utils/common';
 
 interface NoPivotDataProps {
   groupWidgetsOptions: OptionsType[];
   onWidgetChange: (widgetId: string) => void;
   title: string;
   activeWidget: string;
+  className?: string;
 }
 
-const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange, title, activeWidget }) => {
+const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange, title, activeWidget, className }) => {
   return (
-    <div className='overflow-x-auto flex flex-col w-full h-full border border-GRAY_400 rounded-xl overflow-hidden group'>
+    <div
+      className={cn(
+        'overflow-x-auto flex flex-col w-full h-full border border-GRAY_400 rounded-xl overflow-hidden group',
+        className,
+      )}
+    >
       <div className='bg-white w-full flex justify-between items-start h-[110px] p-6 border-b-0.5'>
         <WidgetTitle
           groupWidgetsOptions={groupWidgetsOptions}

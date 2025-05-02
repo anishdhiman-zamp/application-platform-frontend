@@ -68,7 +68,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
-import { getCommaSeparatedNumber } from '@/utils/common';
+import { cn, getCommaSeparatedNumber } from '@/utils/common';
 import { myTheme } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -106,6 +106,7 @@ type StackedPivotProps = {
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
   sheetId: string;
+  className?: string;
 };
 
 const StackedPivot = ({
@@ -119,6 +120,7 @@ const StackedPivot = ({
   handleWidgetHeightChange,
   defaultCurrency,
   sheetId,
+  className,
 }: StackedPivotProps) => {
   const router = useRouter();
   const { pageId } = useParams();
@@ -574,7 +576,7 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
+    <div className={cn('h-fit w-full relative pivot group', className)} ref={gridContainerRef}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}

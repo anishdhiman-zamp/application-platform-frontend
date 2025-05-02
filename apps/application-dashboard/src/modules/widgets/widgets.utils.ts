@@ -605,7 +605,7 @@ export const getDefaultFilters = ({
       if (datasetFilterKeys?.includes(condition?.column)) {
         defaultFilters[condition?.column] = {
           filterType: datasetFilters?.[condition?.column]?.filter_type,
-          type: datasetFilters?.[condition?.column]?.filter_operator,
+          type: condition?.operator,
           values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
         };
       }
@@ -620,7 +620,7 @@ export const getDefaultFilters = ({
 
           defaultFilters[key] = {
             filterType: currentRefColumnFilters?.find((filter) => filter?.column === condition?.column)?.filterType,
-            type: currentRefColumnFilters?.find((filter) => filter?.column === condition?.column)?.type,
+            type: condition?.operator,
             values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
           };
         }
