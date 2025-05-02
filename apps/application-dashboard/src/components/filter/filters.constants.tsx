@@ -94,10 +94,10 @@ export const AMOUNT_RANGE_FILTER_OPTIONS = [
 ];
 
 export const SEARCH_FILTER_OPTIONS = [
-  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
-  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
   { label: 'equals', value: CONDITION_OPERATOR_TYPE.EQUAL },
   { label: 'does not equal', value: CONDITION_OPERATOR_TYPE.NOT_EQUAL },
+  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
+  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
   { label: 'begins with', value: CONDITION_OPERATOR_TYPE.STARTS_WITH },
   { label: 'ends with', value: CONDITION_OPERATOR_TYPE.ENDS_WITH },
 ];
