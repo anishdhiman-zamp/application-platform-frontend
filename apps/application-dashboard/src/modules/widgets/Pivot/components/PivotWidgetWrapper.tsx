@@ -7,7 +7,6 @@ import StackedPivot from 'modules/widgets/Pivot/StackedPivot';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { cn } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -46,7 +45,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
   defaultCurrency,
   sheetId,
 }) => {
-  const { data, isFetching, isLoading, isError, refetch } = useGetWidgetDataQuery(
+  const { data, isFetching, isError, refetch } = useGetWidgetDataQuery(
     {
       widgetId: widgetInstanceDetails.widget_instance_id,
       payload: {
@@ -57,7 +56,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       },
     },
     {
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: true,
       skip: !isFilterInitialized,
     },
   );
@@ -91,7 +90,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
 
   return (
     <CommonWrapper
-      isLoading={isLoading || !isFilterInitialized || isFilterLoading}
+      isLoading={isFetching || !isFilterInitialized || isFilterLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={data?.result?.every((res) => res?.rowcount === 0)}
       refetchFunction={refetch}
@@ -103,7 +102,6 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           onWidgetChange={onWidgetChange}
           title={widgetInstanceDetails?.title}
           activeWidget={activeWidget}
-          className={cn({ 'opacity-85 animate-pulse': isFetching })}
         />
       }
       loader={<PivotTableLoader />}
@@ -120,7 +118,6 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
           handleWidgetHeightChange={handleWidgetHeightChange}
           defaultCurrency={defaultCurrency}
           sheetId={sheetId}
-          className={cn({ 'opacity-85 animate-pulse': isFetching })}
         />
       )}
     </CommonWrapper>
