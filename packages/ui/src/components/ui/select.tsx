@@ -20,8 +20,8 @@ export interface SelectProps
   className?: string;
   label?: string;
   fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>;
-  value?: string | { type: string; id: string };
-  onValueChange?: (value: string | { type: string; id: string }) => void;
+  value?: string | { type: string; id: string } | boolean;
+  onValueChange?: (value: string | { type: string; id: string } | boolean) => void;
   onBlur?: () => void;
   clearOptions?: boolean;
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;
