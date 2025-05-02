@@ -81,7 +81,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     const policyConfig = transformFormDataToApiPayload(data);
 
     if (!paymentConfig?.id) {
-      console.log('No payment config found');
+      console.log('No payment config found skipping policy creation');
 
       return;
     }
