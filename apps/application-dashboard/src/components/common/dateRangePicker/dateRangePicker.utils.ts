@@ -20,7 +20,7 @@ export const getYearList = () => {
   const yearList = [];
 
   // Add five years before the current year
-  for (let i = currentYear - 10; i < currentYear; i++) {
+  for (let i = currentYear - 15; i < currentYear; i++) {
     yearList.push(i);
   }
 

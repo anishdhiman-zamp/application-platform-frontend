@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
@@ -142,7 +142,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
               )}
               <div
                 className={cn(
-                  'flex justify-center items-center gap-1',
+                  'flex justify-center items-center gap-1 whitespace-nowrap',
                   checkIfResourceTypeTeam && 'px-1.5 py-0.5 rounded',
                 )}
                 style={{
