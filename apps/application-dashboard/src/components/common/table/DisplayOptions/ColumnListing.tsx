@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useState } from 'react';
+import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -26,6 +26,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
+  const [inputFocused, setInputFocused] = useState(false);
   // State for grid layout
   const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
 
@@ -48,7 +49,15 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
 
     setSearchTerm(value);
     if (value) {
-      const filteredColumns = latestColumns?.filter((column) => column.getColId()?.includes(value));
+      const filteredColumns = latestColumns
+        ?.filter((column) => {
+          const colId = column.getColId()?.toLowerCase();
+          const headerName = column.getColDef()?.headerName?.toLowerCase();
+          const searchValue = value.toLowerCase();
+
+          return colId?.includes(searchValue) || headerName?.includes(searchValue);
+        })
+        .filter((column) => column !== undefined);
 
       setColumns(filteredColumns);
     } else {
@@ -58,6 +67,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
 
   // Handle layout change
   const onLayoutChange = (newLayout: any) => {
+    if (inputFocused || searchTerm) return;
+
     setLayout(newLayout);
     // Optional: Update item order based on layout
     const orderedItems: Column[] = newLayout
@@ -152,7 +163,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           focusClassNames='mt-2 mb-2.5'
           onChange={handleSearch}
           value={searchTerm}
-          autoFocus
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
       </div>
       <div className='text-GRAY_900 overflow-auto max-h-[330px] [&::-webkit-scrollbar]:hidden !overflow-x-visible'>
@@ -163,7 +175,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           cols={{ lg: 1 }} // Single-column layout
           rowHeight={28} // Set row height
           isResizable={false} // Disable resizing
-          onLayoutChange={onLayoutChange} // Handle drag-and-drop reordering
+          onLayoutChange={onLayoutChange} // Only handle drag-and-drop when not searching
+          isDraggable={!(searchTerm || inputFocused)}
           draggableHandle='.drag-handle' // Restrict drag to the handle
         >
           {columns?.map((column) => (

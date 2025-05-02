@@ -20,7 +20,7 @@ import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyBut
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
 import { DatasetDataResponseType } from 'types/api/dataset.types';
@@ -49,6 +49,7 @@ type PaymentsListProps = {
 };
 
 const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
+  const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const firstLoadDone = useRef(false); // Track if first load is done
@@ -85,13 +86,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
     description: '',
   });
 
-  const [getPaymentList, { data: paymentListData }] = useLazyGetPaymentListQuery();
-  const {
-    data: filterConfigData,
-    refetch: refetchFilterConfig,
-    isFetching,
-    isError,
-  } = useGetPaymentListDatasetFilterConfigQuery();
+  const [getPaymentList, { data: paymentListData, isError: isPaymentListError }] = useLazyGetPaymentListQuery();
+  const { data: filterConfigData, isFetching, isError } = useGetPaymentListDatasetFilterConfigQuery();
   const filterConfig = filterConfigData;
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
@@ -148,6 +144,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
 
   const handleRowClicked = (event: RowClickedEvent) => {
     setPaymentDetailsId(event?.data?.payment_id);
+    tableRef.current?.api?.clearFocusedCell();
     // console.log('event', event.payment_id);
   };
 
@@ -278,9 +275,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           'flex flex-col items-center justify-center': isFetching,
         })}
         isLoading={isFetching}
-        isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
-        refetchFunction={refetchFilterConfig}
         loader={
           <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
             <DynamicLottiePlayer
@@ -295,23 +290,9 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
       >
         <div className='flex items-center justify-between pr-8'>
           <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+            {!isError && <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />}
           </div>
           <div className='relative flex items-center gap-3'>
-            <TooltipButton
-              id='export-dataset'
-              onClick={() => setPaymentDetailsId('')}
-              tooltipBody='Payment Details'
-              className='border-none'
-              tooltipClassName='!z-1000'
-              tooltipColor={COLORS.BLACK}
-              buttonSize={SIZE_TYPES.XSMALL}
-              tooltipPosition={TooltipPositions.TOP}
-              buttonIcon={{
-                id: 'user-up-01',
-                size: 14,
-              }}
-            />
             <TooltipButton
               id='export-dataset'
               onClick={() => setIsRecipientsSideDrawerOpen(true)}
@@ -353,17 +334,19 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           </div>
         </div>
 
-        <div className='z-10 w-full h-full' ref={datasetTableRef}>
-          <DatasetTable
-            tableRef={tableRef}
-            columns={columns}
-            serverSideDatasource={serverSideDatasource}
-            columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
-            totalRows={totalRows}
-            onColumnMoved={handleColumnMoved}
-            onRowClicked={handleRowClicked}
-          />
-        </div>
+        <CommonWrapper isError={isPaymentListError} refetchFunction={() => router.refresh()}>
+          <div className='z-10 w-full h-full' ref={datasetTableRef}>
+            <DatasetTable
+              tableRef={tableRef}
+              columns={columns}
+              serverSideDatasource={serverSideDatasource}
+              columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
+              totalRows={totalRows}
+              onColumnMoved={handleColumnMoved}
+              onRowClicked={handleRowClicked}
+            />
+          </div>
+        </CommonWrapper>
       </CommonWrapper>
 
       {rowPropertiesData && (

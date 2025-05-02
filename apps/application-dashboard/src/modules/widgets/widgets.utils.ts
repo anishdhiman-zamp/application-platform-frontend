@@ -15,7 +15,7 @@ import {
   startOfYear,
 } from 'date-fns';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
-import { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
+import { type ColumnFilterConfig, ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import {
   AG_CHART_TYPES,
   CHART_NUMBER_AXES,
@@ -28,8 +28,10 @@ import {
 import {
   AGGREGATION_TYPES,
   BarLineChartWidgetMapping,
+  type DrillDownConfigType,
   FieldsMappingType,
   KPITagWidgetMapping,
+  type PieDonutChartFieldsMappingType,
   PieDonutChartWidgetMapping,
   PivotTableWidgetMapping,
   WIDGET_TYPES,
@@ -40,9 +42,9 @@ import { MapAny } from 'types/commonTypes';
 import { LogicalOperatorType } from 'types/components/table.type';
 import { formatNumber, getCommaSeparatedNumber, getMaxValue, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { FILTER_OPERATOR_TYPE_MAP } from '@/components/filter/filters.constants';
+import { type CONDITION_OPERATOR_TYPE, FILTER_OPERATOR_TYPE_MAP } from '@/components/filter/filters.constants';
 import { getConditionValues } from 'components/common/table/table.utils';
-import { FilterConfigType } from 'components/filter/filter.types';
+import { type FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 
 export function groupTransactionsByDate(
   data: MapAny[],
@@ -190,7 +192,14 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
 
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
-  onNodeClick: (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => void,
+  onNodeClick: (
+    clickedNode: MapAny,
+    xAxis: string,
+    datasetId: string,
+    datasetDefaultFilters: string,
+    drilldown_config?: DrillDownConfigType,
+    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
+  ) => void,
   baseOptions: AgChartOptions,
   currency = '',
   stackedValues?: MapAny[],
@@ -255,7 +264,14 @@ export const getChartOptions = (
           stacked: true,
           listeners: {
             nodeClick: (event: any) =>
-              onNodeClick(event.datum, xAxis, axis?.dataset_id, JSON.stringify(axis?.default_filters)),
+              onNodeClick(
+                event.datum,
+                xAxis,
+                axis?.dataset_id,
+                JSON.stringify(axis?.default_filters),
+                axis?.drilldown_config,
+                axis?.fields,
+              ),
           },
           tooltip: {
             showArrow: false,
@@ -292,7 +308,14 @@ export const getChartOptions = (
           },
           listeners: {
             nodeClick: (event: any) =>
-              onNodeClick(event.datum, xAxis, axis?.dataset_id, JSON.stringify(axis?.default_filters)),
+              onNodeClick(
+                event.datum,
+                xAxis,
+                axis?.dataset_id,
+                JSON.stringify(axis?.default_filters),
+                axis?.drilldown_config,
+                axis?.fields,
+              ),
           },
           tooltip: {
             showArrow: false,
@@ -363,6 +386,8 @@ export const getChartOptions = (
                   mappings?.[0]?.fields?.slices?.[0]?.column ?? '',
                   mappings?.[0]?.dataset_id ?? '',
                   JSON.stringify(mappings?.[0]?.default_filters),
+                  mappings?.[0]?.drilldown_config,
+                  mappings?.[0]?.fields,
                 ),
             },
             calloutLabel: {
@@ -509,21 +534,25 @@ export const getDateRangeWithPeriodicity = (
   }
 };
 
-export const getDefaultFilterByDatasetId = (
+export const getDefaultFilterByDatasetId = ({
+  mappings,
+  datasetId,
+  defaultWidgetFilters,
+}: {
   mappings:
     | PivotTableWidgetMapping[]
     | BarLineChartWidgetMapping[]
     | PieDonutChartWidgetMapping[]
-    | KPITagWidgetMapping[],
-  datasetId: string,
-  defaultWidgetFilters?: string,
-) => {
+    | KPITagWidgetMapping[];
+  datasetId?: string;
+  defaultWidgetFilters?: string;
+}) => {
   const defaultFilters: ParentFilters = {};
 
   if (defaultWidgetFilters) {
     JSON.parse(defaultWidgetFilters ?? '{}')?.conditions?.forEach((condition: any) => {
       defaultFilters[condition?.column] = {
-        filterType: condition?.type,
+        filterType: FILTER_OPERATOR_TYPE_MAP[condition?.operator as keyof typeof FILTER_OPERATOR_TYPE_MAP],
         type: condition?.operator,
         values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
       };
@@ -539,6 +568,63 @@ export const getDefaultFilterByDatasetId = (
           };
         });
       }
+    });
+  }
+
+  return defaultFilters;
+};
+
+export const getDefaultFilters = ({
+  mappings,
+  defaultWidgetFilters,
+  currentRefColumnFilters,
+  datasetFilters,
+}: {
+  mappings?:
+    | PivotTableWidgetMapping[]
+    | BarLineChartWidgetMapping[]
+    | PieDonutChartWidgetMapping[]
+    | KPITagWidgetMapping[];
+
+  defaultWidgetFilters?: string;
+  currentRefColumnFilters?: ColumnFilterConfig[];
+  datasetFilters?: {
+    [column: string]: {
+      target_column: string;
+      filter_type: FILTER_TYPES;
+      filter_operator: CONDITION_OPERATOR_TYPE;
+    };
+  };
+}) => {
+  const defaultFilters: ParentFilters = {};
+
+  if (defaultWidgetFilters) {
+    JSON.parse(defaultWidgetFilters ?? '{}')?.conditions?.forEach((condition: any) => {
+      const datasetFilterKeys = Object.keys(datasetFilters ?? {});
+
+      if (datasetFilterKeys?.includes(condition?.column)) {
+        defaultFilters[condition?.column] = {
+          filterType: datasetFilters?.[condition?.column]?.filter_type,
+          type: condition?.operator,
+          values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+        };
+      }
+    });
+  } else {
+    mappings?.forEach((mapping) => {
+      mapping?.default_filters?.conditions?.forEach((condition) => {
+        if (currentRefColumnFilters?.find((filter) => filter?.column === condition?.column)) {
+          const key =
+            currentRefColumnFilters?.find((filter) => filter?.column === condition?.column)?.target ??
+            condition?.column;
+
+          defaultFilters[key] = {
+            filterType: currentRefColumnFilters?.find((filter) => filter?.column === condition?.column)?.filterType,
+            type: condition?.operator,
+            values: Array.isArray(condition?.value) ? [...condition.value] : [condition?.value],
+          };
+        }
+      });
     });
   }
 
@@ -563,4 +649,19 @@ export const mergeFilters = (currentFilters: ParentFilters, defaultFilters: Pare
   });
 
   return mergedFilters;
+};
+
+export const transformFilterKeys = (
+  datasetClickFilter: ParentFilters,
+  currentDatasetFilters: MapAny,
+): ParentFilters => {
+  const transformedClickFilter: ParentFilters = {};
+
+  Object.entries(datasetClickFilter).forEach(([key, value]) => {
+    if (currentDatasetFilters[key] && currentDatasetFilters[key]?.target_column) {
+      transformedClickFilter[currentDatasetFilters[key]?.target_column] = value;
+    }
+  });
+
+  return transformedClickFilter;
 };

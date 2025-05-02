@@ -88,7 +88,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   containerStyle,
   gridStyle,
 }) => {
-  const filters = useSearchParams().get('filters');
+  const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
+
   const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
   const { pageId } = useParams();
   const appDispatch = useAppDispatch();

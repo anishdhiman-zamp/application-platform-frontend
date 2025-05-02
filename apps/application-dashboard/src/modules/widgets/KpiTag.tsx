@@ -4,7 +4,7 @@ import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
-import { getCommaSeparatedNumber } from 'utils/common';
+import { cn, getCommaSeparatedNumber } from 'utils/common';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -36,7 +36,11 @@ const KpiTag: FC<KpiTagProps> = ({
   const windowWidth = useWindowDimensions().width;
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const { data: widgetData, isFetching } = useGetWidgetDataQuery(
+  const {
+    data: widgetData,
+    isFetching,
+    isLoading,
+  } = useGetWidgetDataQuery(
     {
       widgetId: widgetDetails?.widget_instance_id,
       payload: {
@@ -89,11 +93,16 @@ const KpiTag: FC<KpiTagProps> = ({
   }, [containerRef, valueContainerRef, widgetData, isFetching, windowWidth]);
 
   return (
-    <div className='bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 z-[9999]' ref={containerRef}>
+    <div
+      className={cn('bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 z-[9999]', {
+        'opacity-85 animate-pulse': isFetching,
+      })}
+      ref={containerRef}
+    >
       <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isFetching || isFilterLoading}
+        isLoading={isLoading || isFilterLoading}
         loader={<SkeletonElement className='max-w-[250px]' />}
       >
         <Tooltip

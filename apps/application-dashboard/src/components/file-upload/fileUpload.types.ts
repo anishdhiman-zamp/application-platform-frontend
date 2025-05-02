@@ -21,4 +21,5 @@ export type FileUploaderWrapperPropsType = {
   keepLoadingFlow?: boolean;
   showUploadButton?: boolean;
   tabIndex?: number;
+  uploadPath?: string;
 };

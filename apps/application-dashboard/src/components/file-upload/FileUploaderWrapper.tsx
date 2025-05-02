@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
-import { REQUEST_TYPES } from 'apis/apiEndpoint.constants';
+import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { useAppSelector } from 'hooks/toolkit';
 import {
   FILE_IMPORT_STATUS_MSG,
@@ -33,6 +33,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   tabIndex = 0,
   footer,
   showUploadButton,
+  uploadPath = API_ENDPOINTS.DATASET_SIGNED_UPLOAD_URL_POST,
 }) => {
   const hiddenFileInput = useRef<HTMLInputElement>(null);
   const user_id = useAppSelector((state: RootState) => state?.user)?.user?.user_id;
@@ -118,8 +119,11 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
         const isAllowedFormat = acceptedFormatsArr.includes(FileExtensionToInputFormatMapping[fileExtension]);
 
         const signedUrlPayload = {
-          file_name: fileName,
-          file_type: fileType,
+          path: uploadPath,
+          payload: {
+            file_name: fileName,
+            file_type: fileType,
+          },
         };
 
         if (isAllowedFormat) {

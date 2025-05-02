@@ -18,7 +18,7 @@ const MoveMoneyButton = () => {
       <Button
         id='export-dataset'
         onClick={() => setIsMoveMoneyActionMenuOpen(!isMoveMoneyActionMenuOpen)}
-        className='!px-3'
+        className='!px-3 whitespace-nowrap'
         iconProps={{
           id: 'chevron-down',
           className: cn(isMoveMoneyActionMenuOpen && 'rotate-180', 'transition-transform duration-200'),

@@ -5,7 +5,11 @@ import PaymentDetails from 'modules/payments/payment-details/PaymentDetails';
 import { PAYMENT_DETAILS_TABS } from 'modules/payments/payments.constant';
 import { PAYMENT_TABS } from 'modules/payments/payments.types';
 import { defaultFnType } from 'types/commonTypes';
+import { useGetPaymentApprovalsInfoQuery } from '@/apis/payments';
+import { useApprovePolicyMutation, useRejectPolicyMutation } from '@/apis/people';
 import { Button } from '@/components/common/button/Button';
+import { toast } from '@/components/common/toast/Toast';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { SIZE_TYPES } from '@/types/common/components';
 import { BUTTON_TYPES } from '@/types/components/button.type';
 import { cn } from '@/utils/common';
@@ -21,10 +25,36 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
     if (value) setCurrentTab(value);
   };
 
+  const { data: paymentApprovalsInfo } = useGetPaymentApprovalsInfoQuery('109fa994-2664-419d-8c84-2470e707f320');
+  const [approvePolicy, { isLoading: isApprovePolicyLoading }] = useApprovePolicyMutation();
+  const [rejectPolicy, { isLoading: isRejectPolicyLoading }] = useRejectPolicyMutation();
+
+  const handleApprove = () => {
+    approvePolicy({ ids: [paymentDetailsId] })
+      .unwrap()
+      .then(() => {
+        toast.success(TOAST_MESSAGES.SUCCESS_APPROVED);
+      })
+      .catch((error: any) => {
+        toast.error(`${TOAST_MESSAGES.ERROR_APPROVED}: ${error?.data?.error}`);
+      });
+  };
+
+  const handleReject = () => {
+    rejectPolicy({ ids: [paymentDetailsId] })
+      .unwrap()
+      .then(() => {
+        toast.success(TOAST_MESSAGES.SUCCESS_REJECTED);
+      })
+      .catch((error: any) => {
+        toast.error(`${TOAST_MESSAGES.ERROR_REJECTED}: ${error?.data?.error}`);
+      });
+  };
+
   const renderTabContent = () => {
     switch (currentTab) {
       case PAYMENT_TABS.APPROVALS:
-        return <PaymentApprovals />;
+        return <PaymentApprovals paymentApprovalsInfo={paymentApprovalsInfo} />;
       default:
         return <PaymentDetails paymentDetailsId={paymentDetailsId} />;
     }
@@ -56,11 +86,19 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
               id='reject-payment'
               type={BUTTON_TYPES.SECONDARY}
               size={SIZE_TYPES.SMALL}
-              className='f-12-500 text-RED_700 border-RED_700 hover:!text-RED_700 '
+              onClick={handleReject}
+              isLoading={isRejectPolicyLoading}
+              className='f-12-500 text-RED_700 border-RED_700 hover:!text-RED_700 min-w-16'
             >
               Reject
             </Button>
-            <Button id='approve-payment' size={SIZE_TYPES.SMALL} className='f-12-500'>
+            <Button
+              id='approve-payment'
+              onClick={handleApprove}
+              size={SIZE_TYPES.SMALL}
+              isLoading={isApprovePolicyLoading}
+              className='f-12-500 min-w-[72px]'
+            >
               Approve
             </Button>
           </div>

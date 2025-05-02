@@ -27,6 +27,7 @@ export enum STATUS_TYPES {
   PENDING = 'pending',
   SUCCESS = 'success',
   FAILED = 'failed',
+  REJECTED = 'rejected',
 }
 
 export enum FILE_MIME {

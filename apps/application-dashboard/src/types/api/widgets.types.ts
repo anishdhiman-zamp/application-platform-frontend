@@ -72,6 +72,7 @@ export type KPITagWidgetMapping = {
     }[];
   };
   default_filters?: Partial<DefaultFilterType>;
+  drilldown_config?: DrillDownConfigType;
 };
 
 export type PivotTableWidgetMapping = {
@@ -149,6 +150,7 @@ export type BarLineChartWidgetMapping = {
   dataset_id: string;
   fields: FieldsMappingType;
   default_filters?: Partial<DefaultFilterType>;
+  drilldown_config?: DrillDownConfigType;
 };
 
 export type PieDonutChartFieldsMappingType = {
@@ -160,6 +162,7 @@ export interface PieDonutChartWidgetMapping {
   dataset_id: string;
   fields: PieDonutChartFieldsMappingType;
   default_filters?: Partial<DefaultFilterType>;
+  drilldown_config?: DrillDownConfigType;
 }
 
 export interface AxisMappingType {

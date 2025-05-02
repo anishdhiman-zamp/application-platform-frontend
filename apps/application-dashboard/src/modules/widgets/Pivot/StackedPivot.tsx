@@ -63,12 +63,12 @@ import {
   shouldAllowExpandingRow,
 } from 'modules/widgets/Pivot/pivot.utils';
 import { getFilterContextV2, getWidgetMappingDatasetsV2, replaceFilterKeys } from 'modules/widgets/TreeTable/utils';
-import { getDefaultFilterByDatasetId } from 'modules/widgets/widgets.utils';
+import { getDefaultFilterByDatasetId, getDefaultFilters } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
-import { getCommaSeparatedNumber } from '@/utils/common';
+import { cn, getCommaSeparatedNumber } from '@/utils/common';
 import { myTheme } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -106,6 +106,7 @@ type StackedPivotProps = {
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   defaultCurrency: string;
   sheetId: string;
+  className?: string;
 };
 
 const StackedPivot = ({
@@ -119,6 +120,7 @@ const StackedPivot = ({
   handleWidgetHeightChange,
   defaultCurrency,
   sheetId,
+  className,
 }: StackedPivotProps) => {
   const router = useRouter();
   const { pageId } = useParams();
@@ -308,7 +310,10 @@ const StackedPivot = ({
   };
 
   const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
-    const defaultFilters = getDefaultFilterByDatasetId(widgetInstanceDetails?.data_mappings?.mappings, datasetId ?? '');
+    const defaultFilters = getDefaultFilterByDatasetId({
+      mappings: widgetInstanceDetails?.data_mappings?.mappings,
+      datasetId: datasetId ?? '',
+    });
 
     const currentColumnName = Object.keys(currentWidgetSelectedFilter)?.[0];
 
@@ -334,7 +339,9 @@ const StackedPivot = ({
         path = getPageDatasetRoute(pageId as string, datasetId);
       }
 
-      router.push(`${path}?filters=${JSON.stringify(query)}`);
+      const encodedFilters = encodeURIComponent(JSON.stringify(query));
+
+      router.push(`${path}?filters=${encodedFilters}`);
     }
   };
 
@@ -424,7 +431,9 @@ const StackedPivot = ({
         datasets?.map((dataset) => dataset?.dataset_id),
       );
 
-      router.push(`${path}?datasets=${JSON.stringify(filters)}`);
+      const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+
+      router.push(`${path}?datasets=${encodedFilters}`);
     }
   };
 
@@ -505,14 +514,14 @@ const StackedPivot = ({
         };
       }
 
-      const datasetDefaultFilters = getDefaultFilterByDatasetId(
-        widgetInstanceDetails?.data_mappings?.mappings,
-        dataset?.dataset_id,
-      );
+      const datasetDefaultFilters = getDefaultFilters({
+        mappings: widgetInstanceDetails?.data_mappings?.mappings,
+        currentRefColumnFilters: currentRefColumnFilters,
+      });
 
       const mergedFilters = mergeFilters(datasetDefaultFilters, currentWidgetSelectedFilter);
 
-      const newFilters = replaceFilterKeys(
+      const transformedFilters = replaceFilterKeys(
         {
           ...mergedFilters,
           ...widgetFilter,
@@ -521,7 +530,7 @@ const StackedPivot = ({
       );
 
       combinedFilters[dataset?.dataset_id] = {
-        filters: newFilters,
+        filters: transformedFilters,
         title: dataset.dataset_name,
       };
     });
@@ -567,7 +576,7 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className='h-fit w-full relative pivot group' ref={gridContainerRef}>
+    <div className={cn('h-fit w-full relative pivot group', className)} ref={gridContainerRef}>
       <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
       <AgGridReact
         onGridReady={onGridReady}

@@ -11,6 +11,7 @@ import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   InitiatePaymentPayloadType,
+  type PaymentApprovalsInfoResponseType,
   PaymentConfigResponseType,
   PaymentDetailsResponseType,
   RecipientBySourceAccountPayloadType,
@@ -86,7 +87,7 @@ const Payments = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET,
       }),
-      transformResponse: (data) => data,
+      transformResponse: ({ data }) => data,
     }),
     getPaymentList: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
       query: ({ query_config }) => ({
@@ -105,6 +106,11 @@ const Payments = baseApi.injectEndpoints({
           body.templateFor === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
         method: REQUEST_TYPES.POST,
         body,
+      }),
+    }),
+    getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
+      query: (paymentId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_APPROVALS_INFO_GET, { paymentId }),
       }),
     }),
   }),
@@ -126,4 +132,5 @@ export const {
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
   useCreatePolicyMutation,
+  useGetPaymentApprovalsInfoQuery,
 } = Payments;

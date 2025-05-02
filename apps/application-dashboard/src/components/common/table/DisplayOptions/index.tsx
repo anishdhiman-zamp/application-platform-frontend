@@ -1,4 +1,4 @@
-import React, { FC, RefObject, useRef, useState } from 'react';
+import { FC, RefObject, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';

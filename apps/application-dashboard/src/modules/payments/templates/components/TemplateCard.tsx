@@ -16,7 +16,7 @@ const TemplateCard: FC<TemplateCardProps> = ({ handleSendClick, template }) => {
   const isApprovalPending = template?.status !== TEMPLATE_STATUS_TYPES.DRAFTED;
 
   return (
-    <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md'>
+    <div className='pivot flex items-center gap-3 px-1.5 py-2.5 rounded-md cursor-pointer hover:bg-GRAY_50 transition-all duration-200'>
       <div className='w-6 h-6 flex items-center justify-center bg-BLUE_200 rounded-full'>
         <SvgSpriteLoader id='file-06' size={14} />
       </div>
