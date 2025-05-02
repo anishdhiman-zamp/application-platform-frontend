@@ -97,48 +97,49 @@ export const getAttributes = (type: PolicyDialogType) => {
   return templateAttributes;
 };
 
-const getValue = (key: string, value: SelectOption[]) => {
-  const selectValue = value[0]?.value;
-
+const getValue = (key: string, selectedValue: string | number | SelectOption[]) => {
   // Handle different field types
   switch (key) {
     case 'amount':
-      return Number(selectValue ?? 0);
-    case 'source_accounts':
-      return value.map((option) => option.value);
-    case 'entities':
-      return value.map((option) => option.value);
+      return Number(selectedValue ?? 0);
+    case 'is_template_based_payment':
+      if (Array.isArray(selectedValue) && selectedValue?.[0]?.value === 'true') {
+        return true;
+      }
+
+      return false;
     default:
-      return selectValue;
+      if (Array.isArray(selectedValue)) {
+        return selectedValue.map((option) => option.value);
+      }
+
+      return selectedValue;
   }
 };
 
 export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolicyConfigPayload => {
   // Transform creator data
   const creator = (data.creator as SelectOption[]).map((option) => {
-    if (typeof option.value === 'string') {
-      return { type: 'user', id: option.value };
+    if (typeof option.value === 'string' || typeof option.value === 'boolean') {
+      return { type: 'user', id: option.value.toString() };
     }
 
     return { type: option.value.type, id: option.value.id };
   });
 
   // Transform conditions
-  const conditions = {
-    logical_operator: '&&',
-    conditions: Object.entries(data)
-      .filter(([key]) => attributesMap[key]?.formFieldType === 'condition')
-      .map(([key, value]) => {
-        const attribute = attributesMap[key];
-        const payloadValue = getValue(key, value as SelectOption[]);
+  const conditions = Object.entries(data)
+    .filter(([key]) => attributesMap[key]?.formFieldType === 'condition')
+    .map(([key, value]) => {
+      const attribute = attributesMap[key];
+      const payloadValue = getValue(key, value as SelectOption[]);
 
-        return {
-          field: key,
-          value: payloadValue,
-          operator: attribute.operator,
-        };
-      }),
-  };
+      return {
+        field: key,
+        value: payloadValue,
+        operator: attribute.operator,
+      };
+    });
 
   // Transform approval flow
   const approval_flow = {
@@ -158,7 +159,17 @@ export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolic
 
   return {
     creator: creator.length > 0 ? creator : undefined,
-    conditions,
+    conditions: {
+      logical_operator: '&&',
+      conditions: [
+        ...(conditions ?? []),
+        {
+          field: 'currency',
+          value: 'USD',
+          operator: '==',
+        },
+      ],
+    },
     action,
     approval_flow,
   };

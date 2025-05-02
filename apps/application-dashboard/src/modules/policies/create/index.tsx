@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { SelectOption } from '@zamp-platform/form-builder';
+import { SelectOption, validateField } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter } from '@zamp-platform/ui';
 import { getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
@@ -18,8 +18,16 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const [createPolicy, { isLoading: createPolicyLoading, isSuccess: createPolicySuccess, error: createPolicyError }] =
-    useCreatePolicyMutation();
+  const [
+    createPolicy,
+    {
+      isLoading: createPolicyLoading,
+      isSuccess: createPolicySuccess,
+      error: createPolicyError,
+      reset: resetCreatePolicy,
+    },
+  ] = useCreatePolicyMutation();
+
   const methods = useForm<PolicyFormData>({
     defaultValues: {
       ...getAttributes(type)
@@ -38,6 +46,37 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
 
   const onSubmit = (data: PolicyFormData) => {
     console.log('data', data);
+    // Validate each field
+    const errors: Record<string, string> = {};
+
+    Object.entries(data).forEach(([fieldName]) => {
+      const fieldConfig = attributesMap[fieldName];
+
+      if (fieldConfig?.validations) {
+        console.log('fieldConfig', fieldConfig, data[fieldName]);
+
+        const { isValid, errors: fieldErrors } = validateField(data[fieldName], data, fieldConfig.validations);
+
+        console.log('isValid', isValid, fieldErrors);
+
+        if (!isValid) {
+          errors[fieldName] = fieldErrors[0];
+        }
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      let errorMessage = '';
+
+      // Set form errors
+      Object.entries(errors).forEach(([field, message]) => {
+        errorMessage += `${message}\n`;
+        methods.setError(field, { type: 'validate', message });
+      });
+      toast.error(errorMessage);
+
+      return;
+    }
     messageToastId.current = toast.loading('Policy creation in progress');
     const policyConfig = transformFormDataToApiPayload(data);
 
@@ -66,8 +105,10 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     }
     if (createPolicySuccess) {
       toast.success('Policy created successfully');
+      resetCreatePolicy();
     } else if (createPolicyError) {
       toast.error(createPolicyError?.data?.error || 'Failed to create policy');
+      resetCreatePolicy();
     }
   }, [createPolicySuccess, createPolicyError]);
 
@@ -92,17 +133,23 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
                   name='policyName'
                   className='f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit'
                   placeholder='Policy Title'
-                  autoFocus
+                  onFocus={(e) => e.stopPropagation()}
                 />
               </div>
               <div className='flex gap-2 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden'>
                 {getAttributes(type).map((attributeId) => {
                   const attribute = attributesMap[attributeId];
+                  const error = methods.formState.errors[attributeId]?.message;
 
                   return attribute.type === 'input' ? (
-                    <AttributeInputDropdown key={attribute.id} attribute={attribute} name={attribute.id} />
+                    <AttributeInputDropdown
+                      key={attribute.id}
+                      attribute={attribute}
+                      name={attribute.id}
+                      error={error}
+                    />
                   ) : (
-                    <AttributeMenuDropdown key={attribute.id} attribute={attribute} name={attribute.id} />
+                    <AttributeMenuDropdown key={attribute.id} attribute={attribute} name={attribute.id} error={error} />
                   );
                 })}
               </div>

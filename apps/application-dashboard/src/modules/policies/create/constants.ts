@@ -36,27 +36,73 @@ export const attributesMap: Record<string, AttributeType> = {
           label: item.account_name,
           richLabel: getAccountWithLogo(item),
           displayValue: `${MASK_DOTS}  ${item?.masked_account_number}`,
-          value: item.id,
+          value: item.account_number,
         }));
       },
     },
   },
-  recipient: {
-    label: 'Recipient',
-    id: 'recipient',
+  recipients: {
+    label: 'Recipients',
+    id: 'recipients',
     operator: '==',
     type: 'multi-select',
     formFieldType: 'condition',
     options: [
       {
+        id: 'Single',
         label: 'Single',
         value: 'contact',
+        displayValue: 'Single',
       },
       {
+        id: 'Self',
         label: 'Self',
         value: 'internal',
+        displayValue: 'Self',
       },
     ],
+  },
+  is_template_based_payment: {
+    label: 'Payment Type',
+    id: 'is_template_based_payment',
+    type: 'select',
+    operator: '==',
+    formFieldType: 'condition',
+    options: [
+      {
+        id: 'Single',
+        label: 'Single',
+        value: false,
+        displayValue: 'Single',
+      },
+      {
+        id: 'Template',
+        label: 'Template',
+        value: true,
+        displayValue: 'Template',
+      },
+    ],
+  },
+  entities: {
+    label: 'Entities',
+    id: 'entities',
+    type: 'multi-select',
+    operator: 'in',
+    formFieldType: 'condition',
+    data_source: {
+      endpoint: 'payments/entities',
+      method: 'GET',
+      valueFormatter: (rawData) => {
+        const data = rawData.entities;
+
+        return data.map((item: string) => ({
+          id: item,
+          label: item,
+          displayValue: item,
+          value: item,
+        }));
+      },
+    },
   },
   action: {
     label: 'Action',
@@ -64,13 +110,23 @@ export const attributesMap: Record<string, AttributeType> = {
     id: 'action',
     operator: '==',
     formFieldType: 'creator',
+    validations: [
+      {
+        type: 'required',
+        config: {
+          message: 'Action is required',
+        },
+      },
+    ],
     options: [
       {
+        id: 'Send for Approval',
         label: 'Send for Approval',
         value: 'REQUIRE_APPROVAL',
         displayValue: 'Send for Approval',
       },
       {
+        id: 'Block',
         label: 'Block',
         value: 'BLOCK',
         displayValue: 'Block',
@@ -90,6 +146,7 @@ export const attributesMap: Record<string, AttributeType> = {
       label: 'Amount',
       prefix_text: 'is greater than',
       suffix_text: 'USD',
+      min: 0,
     },
   },
   initiator: {
@@ -138,8 +195,8 @@ export const attributesMap: Record<string, AttributeType> = {
     },
   },
 };
-export const commonAttributes = ['source_accounts', 'recipient', 'action'];
+export const commonAttributes = ['source_accounts', 'recipients', 'action'];
 
-export const payoutAttributes = ['amount', 'initiator', ...commonAttributes];
+export const payoutAttributes = ['amount', 'initiator', 'entities', 'is_template_based_payment', ...commonAttributes];
 
 export const templateAttributes = ['creator', ...commonAttributes];

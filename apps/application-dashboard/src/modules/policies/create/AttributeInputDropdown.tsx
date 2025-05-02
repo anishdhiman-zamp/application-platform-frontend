@@ -9,10 +9,12 @@ import {
   Input,
 } from '@zamp-platform/ui';
 import { AttributeType, InputConfig } from 'modules/policies/types';
+import { cn } from 'utils/common';
 
 interface AttributeInputDropdownProps {
   attribute: AttributeType;
   name: string;
+  error?: string;
 }
 
 const getInputType = (type: string) => {
@@ -28,18 +30,9 @@ const getInputType = (type: string) => {
   }
 };
 
-const AttributeInputDropdown = ({ attribute, name }: AttributeInputDropdownProps) => {
+const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdownProps) => {
   const { control } = useFormContext();
   const [open, setOpen] = useState(false);
-
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Add a small delay before closing to ensure any click events are processed
-      setTimeout(() => setOpen(false), 100);
-    } else {
-      setOpen(true);
-    }
-  };
 
   // Type guard to check if attribute has input_config
   const hasInputConfig = (attr: AttributeType): attr is AttributeType & { input_config: InputConfig } => {
@@ -59,16 +52,34 @@ const AttributeInputDropdown = ({ attribute, name }: AttributeInputDropdownProps
       control={control}
       defaultValue=''
       render={({ field: { value, onChange } }) => (
-        <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-          <DropdownMenuTrigger>
-            <div className='relative' onClick={(e) => e.preventDefault()}>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <div
+              className='cursor-pointer'
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
               <Attribute
+                className={cn({
+                  'border border-red-500 rounded-md': error,
+                })}
                 label={attribute.label}
                 displayValue={`${inputConfig.prefix_text} ${(formatter?.(Number(value)) || value) ?? 0} ${inputConfig.suffix_text}`}
               />
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className='z-[1001] p-2.5 space-y-2' sideOffset={6} align='start' side='bottom'>
+          <DropdownMenuContent
+            className='z-[1001] p-2.5 space-y-2'
+            sideOffset={6}
+            align='start'
+            side='bottom'
+            autoFocus={false}
+            onCloseAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+          >
             <DropdownMenuItem className='p-0'>
               <div className='flex items-center gap-2'>
                 <p className='f-11-400 text-gray-700'>{inputConfig.label}</p>
@@ -83,9 +94,14 @@ const AttributeInputDropdown = ({ attribute, name }: AttributeInputDropdownProps
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={inputConfig.placeholder}
+                onFocus={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 size='small'
                 min={inputConfig.min}
                 max={inputConfig.max}
+                tabIndex={0}
                 className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
               />
             </DropdownMenuItem>

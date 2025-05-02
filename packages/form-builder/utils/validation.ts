@@ -1,27 +1,26 @@
-import { FormField, FormSchema, FormValues } from '../types';
+import { FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
 // Function to validate a field with its dependencies
 export const validateField = (
-  field: FormField,
   value: any,
   formValues: FormValues,
+  validations?: Validation[],
+  dependentValidations?: ValidationDependency[],
 ): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
   // Get all validations including those from dependencies
   const allValidations = [
-    ...(field.validations || []),
-    ...(field.validation_dependencies?.flatMap((dependency) =>
-      evaluateValidationDependencies(dependency, formValues),
-    ) || []),
+    ...(validations || []),
+    ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
   ];
 
   // Apply all validations
   allValidations.forEach((validation) => {
     switch (validation.type) {
       case 'required':
-        if (!value) {
+        if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
           errors.push(validation.config.message);
         }
         break;
@@ -67,7 +66,12 @@ export const createCustomResolver = (schema: FormSchema) => {
     const errors: Record<string, { type: string; message: string }> = {};
 
     Object.entries(schema.fields).forEach(([fieldName, field]) => {
-      const { isValid, errors: fieldErrors } = validateField(field, values[fieldName], values);
+      const { isValid, errors: fieldErrors } = validateField(
+        values[fieldName],
+        values,
+        field.validations,
+        field.validation_dependencies,
+      );
 
       if (!isValid) {
         errors[fieldName] = {

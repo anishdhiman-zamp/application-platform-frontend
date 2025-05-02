@@ -8,7 +8,7 @@ import { SizeType } from '@zamp-platform/ui/types';
 export interface SelectOption {
   label: string;
   richLabel?: React.ReactNode;
-  value: string | { type: string; id: string };
+  value: string | boolean | { type: string; id: string };
   icon?: React.ReactNode;
 }
 

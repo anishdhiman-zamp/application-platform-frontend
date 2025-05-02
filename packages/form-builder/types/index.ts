@@ -55,13 +55,13 @@ export interface ValidationDependency {
   }>;
 }
 
-export type FieldType = 'text' | 'select';
+export type FieldType = 'text' | 'select' | 'input' | 'multi-select';
 
 export interface SelectOption {
   id?: string;
   label: string;
   richLabel?: React.ReactNode;
-  value: string | { type: string; id: string };
+  value: string | boolean | { type: string; id: string };
   icon?: React.ReactNode;
   displayValue?: string;
 }

@@ -28,10 +28,16 @@ export type AttributeType = {
   displayValueFormatter?: (value: number | string) => string;
   operator: '>' | '<' | '==' | 'in' | '!=' | '>=' | '<=';
   formFieldType: FormFieldType;
+  validations?: {
+    type: 'required';
+    config: {
+      message: string;
+    };
+  }[];
 } & (
   | { data_source: DataSource }
-  | { options: { label: string; value: string; displayValue?: string }[] }
-  | { data_source: DataSource; options: { label: string; value: string; displayValue?: string }[] }
+  | { options: SelectOption[] }
+  | { data_source: DataSource; options: SelectOption[] }
   | { input_config: InputConfig }
 );
 

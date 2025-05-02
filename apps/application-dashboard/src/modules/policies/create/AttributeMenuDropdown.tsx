@@ -10,6 +10,7 @@ import {
   Skeleton,
 } from '@zamp-platform/ui';
 import { AttributeType } from 'modules/policies/types';
+import { cn } from 'utils/common';
 
 const useCustomHook = (dataSource?: DataSource) => {
   if (!dataSource || !dataSource.useCustomHook) return { data: undefined, loading: false, error: undefined };
@@ -21,9 +22,10 @@ const useCustomHook = (dataSource?: DataSource) => {
 interface AttributeDropdownProps {
   attribute: AttributeType;
   name: string;
+  error?: string;
 }
 
-const AttributeMenuDropdown = ({ attribute, name }: AttributeDropdownProps) => {
+const AttributeMenuDropdown = ({ attribute, name, error }: AttributeDropdownProps) => {
   const { control } = useFormContext();
   const [currentOptions, setCurrentOptions] = useState<SelectOption[]>('options' in attribute ? attribute.options : []);
   const [loading, setLoading] = useState(false);
@@ -124,6 +126,9 @@ const AttributeMenuDropdown = ({ attribute, name }: AttributeDropdownProps) => {
             <div className='relative'>
               <Attribute
                 label={attribute.label}
+                className={cn({
+                  'border border-red-500 rounded-md': error,
+                })}
                 displayValue={attributeDisplayValue(value)}
                 onClick={(e: React.MouseEvent) => {
                   e.preventDefault();
@@ -132,10 +137,13 @@ const AttributeMenuDropdown = ({ attribute, name }: AttributeDropdownProps) => {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='z-[1001] max-h-[300px] overflow-y-auto  [&::-webkit-scrollbar]:hidden'
+            className='z-[1001] max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
             sideOffset={6}
             align='start'
             side='bottom'
+            onCloseAutoFocus={(e) => {
+              e.preventDefault();
+            }}
           >
             {currentOptions.map((option, index) => (
               <DropdownMenuCheckboxItem
