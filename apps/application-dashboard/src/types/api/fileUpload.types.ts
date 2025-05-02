@@ -15,6 +15,9 @@ export type SignedUrlResponseType = {
 };
 
 export type SignedUrlBodyType = {
-  file_name: string;
-  file_type: string;
+  path: string;
+  payload: {
+    file_name: string;
+    file_type: string;
+  };
 };

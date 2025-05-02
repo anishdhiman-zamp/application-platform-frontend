@@ -4,6 +4,7 @@ import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payme
 import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.constant';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
 import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
@@ -101,6 +102,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
           onFileSelect={handleFileUpload}
           disableNext={(value: boolean) => setIsFileUploading(value)}
           acceptedFormats={MOVE_MONEY_ATTACHMENTS_FILE_FORMATS.join(', ')}
+          uploadPath={API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST}
         />
         {uploadedFiles?.length > 0 && (
           <div className='flex flex-col gap-2 my-2.5'>

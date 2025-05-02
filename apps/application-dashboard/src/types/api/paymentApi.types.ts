@@ -1,5 +1,6 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
+import type { PolicyConfigType } from '@/types/api/policies.types';
 import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
@@ -123,4 +124,8 @@ export type PaymentDetailsResponseType = {
     label: string;
     file_upload_id: string;
   }[];
+};
+
+export type PaymentApprovalsInfoResponseType = {
+  policy_evaluation_data: PolicyConfigType;
 };

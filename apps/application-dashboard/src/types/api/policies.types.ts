@@ -57,27 +57,43 @@ export enum PolicyResultStatus {
   REJECTED = 'REJECTED',
 }
 
-export type Policy = {
+export type ApprovalStatusType = {
+  status: string;
+  user_approvals: {
+    id: string;
+    status: string;
+  }[];
+};
+
+export type ApproverDetailsType = {
+  id: string;
+  type: string;
+  approval_status_details: ApprovalStatusType;
+};
+
+export type PolicyStepType = {
+  conditions: {
+    mode: string;
+    approver_details: ApproverDetailsType[];
+    logical_operator: string;
+  }[];
+  logical_operator: string;
+};
+
+export type PolicyConfigType = {
+  action: string;
+  approval_flow: {
+    steps: PolicyStepType[];
+  };
+};
+
+export type PolicyType = {
   id: string;
   name: string;
   description: string;
   resource_action_type_id: string;
   organisation_id: string;
-  policy_configurations: {
-    action: string;
-    approval_flow: {
-      steps: {
-        conditions: {
-          mode: string;
-          approver_details: {
-            id: string;
-            type: string;
-          }[];
-        }[];
-        logical_operator: string;
-      }[];
-    };
-  };
+  policy_configurations: PolicyConfigType[];
   created_at: string;
   created_by: string;
   updated_at: string;
@@ -85,5 +101,5 @@ export type Policy = {
 };
 
 export type GetPoliciesResponse = {
-  data: Policy[];
+  data: PolicyType[];
 };

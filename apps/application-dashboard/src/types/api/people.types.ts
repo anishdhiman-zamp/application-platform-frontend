@@ -67,7 +67,7 @@ export type GetTeamsByOrganizationIdResponseType = {
       user_id: string;
     },
   ];
-}[];
+};
 export type GetTeamsByOrganizationIdRequestType = {
   organizationId: string;
 };

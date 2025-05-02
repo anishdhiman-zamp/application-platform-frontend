@@ -87,7 +87,10 @@ const People = baseApi.injectEndpoints({
     getOrganizationMembershipRequestsAll: builder.query<GetMembershipRequestsByOrganizationIdResponse, void>({
       query: () => ({ url: API_ENDPOINTS.MEMBERSHIP_REQUESTS_ALL_GET }),
     }),
-    getTeamsByOrganizationId: builder.query<GetTeamsByOrganizationIdResponseType, GetTeamsByOrganizationIdRequestType>({
+    getTeamsByOrganizationId: builder.query<
+      GetTeamsByOrganizationIdResponseType[],
+      GetTeamsByOrganizationIdRequestType
+    >({
       query: ({ organizationId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),

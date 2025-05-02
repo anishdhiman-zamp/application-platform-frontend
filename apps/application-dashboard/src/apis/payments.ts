@@ -10,6 +10,7 @@ import {
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   InitiatePaymentPayloadType,
+  type PaymentApprovalsInfoResponseType,
   PaymentConfigResponseType,
   PaymentDetailsResponseType,
   RecipientBySourceAccountPayloadType,
@@ -79,7 +80,7 @@ const Payments = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET,
       }),
-      transformResponse: (data) => data,
+      transformResponse: ({ data }) => data,
     }),
     getPaymentList: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
       query: ({ query_config }) => ({
@@ -90,6 +91,11 @@ const Payments = baseApi.injectEndpoints({
     getPaymentDetails: builder.query<PaymentDetailsResponseType, string>({
       query: (paymentId) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
+      }),
+    }),
+    getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
+      query: (paymentId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_APPROVALS_INFO_GET, { paymentId }),
       }),
     }),
   }),
@@ -109,4 +115,5 @@ export const {
   useGetPaymentListDatasetFilterConfigQuery,
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
+  useGetPaymentApprovalsInfoQuery,
 } = Payments;
