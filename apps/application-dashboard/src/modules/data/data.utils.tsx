@@ -627,16 +627,24 @@ export const updateLocalStorage = (columnOrderingVisibility: ColumnOrderingVisib
 
 export const extractDatasetsFromUrl = (url: string): DatasetUrlDataType => {
   try {
-    const searchParams = new URLSearchParams(url.split('?')[1] || '');
-    const datasetsParam = searchParams.get('datasets');
+    const queryString = url?.split('?')?.[1];
 
-    if (!datasetsParam) {
-      throw new Error('No datasets parameter found');
+    if (!queryString) {
+      throw new Error('No query string found in URL.');
     }
 
-    return JSON.parse(datasetsParam);
+    const searchParams = new URLSearchParams(queryString);
+    const encodedDatasets = searchParams.get('datasets');
+
+    if (!encodedDatasets) {
+      throw new Error('No "datasets" parameter found in URL.');
+    }
+
+    const decodedDatasets = decodeURIComponent(encodedDatasets);
+
+    return JSON.parse(decodedDatasets);
   } catch (error) {
-    console.error('Error extracting datasets:', error);
+    console.error('Failed to extract datasets from URL:', (error as Error)?.message);
 
     return {};
   }

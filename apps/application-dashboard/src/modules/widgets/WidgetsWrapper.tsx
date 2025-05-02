@@ -1,18 +1,23 @@
 import { FC, useMemo } from 'react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
-import { getDatasetRouteById, getPageDatasetRoute } from 'constants/routeConfig';
+import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
 import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
+import { DRILLDOWN_VERSION_V2 } from 'modules/widgets/Pivot/pivot.constants';
+import type { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import {
   getCurrentPageFilters,
   getDateRangeWithPeriodicity,
   getDefaultFilterByDatasetId,
+  getDefaultFilters,
   mergeFilters,
+  transformFilterKeys,
 } from 'modules/widgets/widgets.utils';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import {
+  type DrillDownConfigType,
   FieldsMappingType,
   PieDonutChartFieldsMappingType,
   WIDGET_TYPES,
@@ -21,6 +26,7 @@ import {
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { useFiltersContextStore } from 'components/filter/filters.context';
+
 interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceType;
   groupWidgetsOptions: OptionsType[];
@@ -48,6 +54,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   const { pageId } = useParams();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
+  const { version } = widgetDetails?.data_mappings ?? {};
   const {
     state: { selectedFilters, filtersConfig, isFilterInitialized, isFilterLoading },
   } = useFiltersContextStore();
@@ -119,17 +126,108 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     return JSON.stringify(datasetFilters?.length > 0 ? datasetFilters : []);
   }, [currentPageFiltersConfig, selectedFilters]);
 
+  const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
+    if (datasets?.length > 0) {
+      const path = getPageDrilldownMultiRoute(
+        pageId as string,
+        datasets?.map((dataset) => dataset?.dataset_id),
+      );
+
+      const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+
+      router.push(`${path}?datasets=${encodedFilters}`);
+    }
+  };
+
+  const onNodeClickV2 = (
+    clickedNode: MapAny,
+    xAxis: string,
+    datasetId: string,
+    datasetDefaultFilters: string,
+    drilldown_config?: DrillDownConfigType,
+    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
+  ) => {
+    const xAxisColumnName =
+      (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
+      (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
+
+    const yAxisColumnName =
+      (fields as FieldsMappingType)?.y_axis?.[0]?.alias ??
+      (fields as PieDonutChartFieldsMappingType).values?.[0]?.alias;
+
+    const datasets = drilldown_config?.measure_drilldowns?.[yAxisColumnName as string];
+    const columnFilters = drilldown_config?.column_mappings;
+
+    if (!datasets || !Array.isArray(datasets) || !columnFilters) return;
+
+    const clickFilter: ParentFilters = {};
+
+    datasets?.forEach((dataset) => {
+      if (!dataset?.dataset_id) return;
+      const currentDatasetFilters = columnFilters?.[dataset?.dataset_id];
+
+      const type = currentDatasetFilters?.[xAxisColumnName]?.filter_type;
+      const operator = currentDatasetFilters?.[xAxisColumnName]?.filter_operator;
+
+      const defaultFilters = getDefaultFilters({
+        defaultWidgetFilters: datasetDefaultFilters,
+        datasetFilters: currentDatasetFilters,
+      });
+
+      const datasetClickFilter: ParentFilters = {};
+
+      if (type === FILTER_TYPES.DATE_RANGE) {
+        const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
+          periodicity.periodicity,
+          clickedNode[xAxis],
+          currentWidgetSelectedFilters[xAxis]?.dateFrom ?? '',
+          currentWidgetSelectedFilters[xAxis]?.dateTo ?? '',
+        );
+
+        datasetClickFilter[xAxisColumnName] = {
+          filterType: FILTER_TYPES.DATE_RANGE,
+          type: operator,
+          dateFrom,
+          dateTo,
+        };
+      } else {
+        datasetClickFilter[xAxisColumnName] = {
+          filterType: type,
+          type: operator,
+          values: [clickedNode[xAxis]],
+        };
+      }
+
+      const mergedFilters = mergeFilters(defaultFilters, currentWidgetSelectedFilters);
+
+      const transformedClickFilter = transformFilterKeys(
+        {
+          ...mergedFilters,
+          ...datasetClickFilter,
+        },
+        currentDatasetFilters,
+      );
+
+      clickFilter[dataset?.dataset_id] = {
+        filters: transformedClickFilter,
+        title: dataset?.dataset_name,
+      };
+    });
+
+    navigateToDatasetV2(datasets, clickFilter);
+  };
+
   const onNodeClick = (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => {
     const xAxisColumnName =
       (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
       (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
+
     const clickFilter: MapAny = {};
 
-    const defaultFilters = getDefaultFilterByDatasetId(
-      widgetDetails?.data_mappings?.mappings,
-      datasetId,
-      datasetDefaultFilters,
-    );
+    const defaultFilters = getDefaultFilterByDatasetId({
+      mappings: widgetDetails?.data_mappings?.mappings,
+      defaultWidgetFilters: datasetDefaultFilters,
+    });
 
     if (filterType === FILTER_TYPES.DATE_RANGE) {
       const [dateFrom, dateTo] = getDateRangeWithPeriodicity(
@@ -177,7 +275,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           widgetDetails={widgetDetails}
           currentPageFilters={currentPageFilters}
           isFilterInitialized={isFilterInitialized}
-          onNodeClick={onNodeClick}
+          onNodeClick={version === DRILLDOWN_VERSION_V2 ? onNodeClickV2 : onNodeClick}
           periodicity={periodicity.periodicity ?? PERIODICITY_TYPES.DAILY}
           timeColumns={periodicity.timeColumn ?? ''}
           groupWidgetsOptions={groupWidgetsOptions}

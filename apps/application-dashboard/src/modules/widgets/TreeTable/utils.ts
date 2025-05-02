@@ -250,12 +250,10 @@ export const replaceFilterKeys = (filters: ParentFilters, mapping: ColumnFilterC
   const newFilters: ParentFilters = {};
 
   Object.keys(filters)?.forEach((outerKey) => {
-    const newKey = mapping.find((m) => m?.column === outerKey)?.target;
+    const newKey = mapping.find((map) => map?.column === outerKey)?.target;
 
     if (newKey) {
       newFilters[newKey] = filters[outerKey];
-    } else {
-      newFilters[outerKey] = filters[outerKey];
     }
   });
 

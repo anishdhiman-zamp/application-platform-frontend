@@ -282,7 +282,10 @@ const TreeTableComponent = ({
   };
 
   const navigateToDataset = (datasetId: string | null, filters: ParentFilters) => {
-    const defaultFilters = getDefaultFilterByDatasetId(widgetInstanceDetails?.data_mappings?.mappings, datasetId ?? '');
+    const defaultFilters = getDefaultFilterByDatasetId({
+      mappings: widgetInstanceDetails?.data_mappings?.mappings,
+      datasetId: datasetId ?? '',
+    });
 
     const query = {
       ...mergeFilters(currentWidgetSelectedFilter, defaultFilters),

@@ -9,7 +9,13 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widgets/widgets.constant';
 import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
-import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import {
+  type DrillDownConfigType,
+  type FieldsMappingType,
+  type PieDonutChartFieldsMappingType,
+  WIDGET_TYPES,
+  WidgetInstanceType,
+} from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
@@ -24,7 +30,14 @@ interface WidgetsWrapperProps {
   >;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
-  onNodeClick: (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => void;
+  onNodeClick: (
+    clickedNode: MapAny,
+    xAxis: string,
+    datasetId: string,
+    datasetDefaultFilters: string,
+    drilldown_config?: DrillDownConfigType,
+    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
+  ) => void;
   periodicity: string;
   timeColumns: string;
   groupWidgetsOptions: OptionsType[];
