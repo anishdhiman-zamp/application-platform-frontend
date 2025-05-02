@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
 import { getPageRouteById } from 'constants/routeConfig';
 import { useAppDispatch } from 'hooks/toolkit';
@@ -60,7 +60,12 @@ const Page = () => {
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
       <div className='relative h-full rounded-tl-md w-full'>
-        <Sheets pageId={pageId as string} sheetId={currentSheetId as string} isPageLoading={isLoading} />
+        <Sheets
+          key={currentSheetId}
+          pageId={pageId as string}
+          sheetId={currentSheetId as string}
+          isPageLoading={isLoading}
+        />
         <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} />
       </div>
     </CommonWrapper>

@@ -57,7 +57,7 @@ const PivotTableWidgetWrapper: FC<PivotTableWidgetPropsType> = ({
       },
     },
     {
-      refetchOnMountOrArgChange: true,
+      refetchOnMountOrArgChange: false,
       skip: !isFilterInitialized,
     },
   );

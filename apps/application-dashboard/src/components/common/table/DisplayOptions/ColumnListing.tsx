@@ -50,7 +50,13 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     setSearchTerm(value);
     if (value) {
       const filteredColumns = latestColumns
-        ?.filter((column) => column.getColId()?.toLowerCase().includes(value?.toLowerCase()))
+        ?.filter((column) => {
+          const colId = column.getColId()?.toLowerCase();
+          const headerName = column.getColDef()?.headerName?.toLowerCase();
+          const searchValue = value.toLowerCase();
+
+          return colId?.includes(searchValue) || headerName?.includes(searchValue);
+        })
         .filter((column) => column !== undefined);
 
       setColumns(filteredColumns);
