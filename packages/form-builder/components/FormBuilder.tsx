@@ -15,9 +15,14 @@ export interface FormBuilderRef {
 }
 
 export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schema, onSubmit }, ref) => {
+  // Build defaultValues from schema.fields
+  const defaultValues = Object.fromEntries(
+    Object.entries(schema.fields).map(([key, field]) => [key, field.defaultValue]),
+  );
+
   const methods = useForm({
     resolver: createCustomResolver(schema),
-    defaultValues: {},
+    defaultValues,
     mode: 'onBlur',
   });
 

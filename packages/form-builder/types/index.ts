@@ -71,6 +71,7 @@ export interface FormField {
   type: FieldType;
   label: string;
   placeholder?: string;
+  defaultValue?: any;
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
@@ -80,14 +81,14 @@ export interface FormField {
 
 export interface FormSection {
   id: string;
-  title: string;
-  fields?: string[];
+  title?: string;
   sections?: FormSection[];
+  layout: Array<Array<{ field: string; colSpan: number }>>;
 }
 
 export interface FormSchema {
-  Id: string;
-  Type: string;
+  id: string;
+  type: string;
   sections: FormSection[];
   fields: Record<string, FormField>;
 }
@@ -118,6 +119,8 @@ export const formFieldSchema = z.object({
   type: z.enum(['text', 'select']),
   label: z.string(),
   name: z.string().optional(),
+  placeholder: z.string().optional(),
+  defaultValue: z.any().optional(),
   validations: z.array(validationSchema).optional(),
   data_source: dataSourceSchema.optional(),
 });
@@ -125,8 +128,15 @@ export const formFieldSchema = z.object({
 export const formSectionSchema: z.ZodType<FormSection> = z.object({
   id: z.string(),
   title: z.string(),
-  fields: z.array(z.string()).optional(),
   sections: z.lazy(() => z.array(formSectionSchema)).optional(),
+  layout: z.array(
+    z.array(
+      z.object({
+        field: z.string(),
+        colSpan: z.number(),
+      }),
+    ),
+  ),
 });
 
 export const formSchemaSchema = z.object({

@@ -1,32 +1,44 @@
 import { FormSchema } from './types';
 
 export const schema: FormSchema = {
-  Id: 'recipient-accounts-robinhood',
-  Type: 'recipient',
+  id: 'recipient-accounts-robinhood',
+  type: 'recipient',
   sections: [
     {
       id: 'recipient_personal_information',
-      title: 'Personal Information',
+      title: '',
+      layout: [],
       sections: [
         {
           id: 'recipient_personal_details',
           title: 'Personal Information',
-          fields: ['recipient_name'],
+          layout: [[{ field: 'recipient_name', colSpan: 8 }]],
         },
         {
           id: 'recipient_contact_details',
           title: 'Contact Details',
-          fields: ['recipient_contact_country_code', 'recipient_contact_number', 'recipient_email'],
+          layout: [
+            [{ field: 'recipient_email', colSpan: 8 }],
+            [
+              { field: 'recipient_contact_country_code', colSpan: 2 },
+              { field: 'recipient_contact_number', colSpan: 6 },
+            ],
+          ],
         },
         {
           id: 'recipient_address_details',
           title: 'Address Details',
-          fields: [
-            'recipient_country_code',
-            'recipient_state',
-            'recipient_city',
-            'recipient_address_line_1',
-            'recipient_address_line_2',
+          layout: [
+            [{ field: 'recipient_address_line_1', colSpan: 8 }],
+            [{ field: 'recipient_address_line_2', colSpan: 8 }],
+            [
+              { field: 'recipient_country_code', colSpan: 4 },
+              { field: 'recipient_state', colSpan: 4 },
+            ],
+            [
+              { field: 'recipient_city', colSpan: 4 },
+              { field: 'recipient_postal_code', colSpan: 4 },
+            ],
           ],
         },
       ],
@@ -34,38 +46,41 @@ export const schema: FormSchema = {
     {
       id: 'recipient_account_information',
       title: 'Account Information',
+      layout: [],
       sections: [
         {
           id: 'account_details',
           title: 'Account Details',
-          fields: [
-            'recipient_account_currency',
-            'recipient_account_country_code',
-            'transfer_type',
-            'recipient_account_number',
-            'recipient_account_routing_code_type_1',
-            'recipient_account_routing_code_value_1',
-            'recipient_account_routing_code_type_2',
-            'recipient_account_routing_code_value_2',
+          layout: [
+            [
+              { field: 'recipient_account_country_code', colSpan: 4 },
+              { field: 'recipient_account_currency', colSpan: 4 },
+            ],
+            [{ field: 'transfer_type', colSpan: 8 }],
+            [{ field: 'recipient_account_number', colSpan: 8 }],
+            [{ field: 'recipient_account_routing_code_type_1', colSpan: 8 }],
+            [{ field: 'recipient_account_routing_code_value_1', colSpan: 8 }],
+            [{ field: 'recipient_account_routing_code_type_2', colSpan: 8 }],
+            [{ field: 'recipient_account_routing_code_value_2', colSpan: 8 }],
           ],
         },
         {
           id: 'account_holder_details',
           title: 'Account Holder Details',
-          fields: [
-            'account_holder_name',
-            'account_holder_city',
-            'account_holder_country',
-            'account_holder_postal_code',
-            'account_holder_state',
-            'account_holder_address_line_1',
-            'account_holder_address_line_2',
+          layout: [
+            [{ field: 'account_holder_name', colSpan: 8 }],
+            [{ field: 'account_holder_city', colSpan: 8 }],
+            [{ field: 'account_holder_country', colSpan: 8 }],
+            [{ field: 'account_holder_postal_code', colSpan: 8 }],
+            [{ field: 'account_holder_state', colSpan: 8 }],
+            [{ field: 'account_holder_address_line_1', colSpan: 8 }],
+            [{ field: 'account_holder_address_line_2', colSpan: 8 }],
           ],
         },
         {
           id: 'bank_details',
           title: 'Bank Details',
-          fields: ['recipient_account_bank_name'],
+          layout: [[{ field: 'recipient_account_bank_name', colSpan: 8 }]],
         },
       ],
     },
@@ -75,6 +90,7 @@ export const schema: FormSchema = {
       id: 'account_holder_address_line_1',
       type: 'text',
       label: 'Account Holder Address Line 1',
+      placeholder: 'Address Line 1',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
@@ -118,6 +134,7 @@ export const schema: FormSchema = {
       id: 'account_holder_address_line_2',
       type: 'text',
       label: 'Account Holder Address Line 2',
+      placeholder: 'Address Line 2',
       validations: [
         {
           type: 'maxLength',
@@ -221,6 +238,7 @@ export const schema: FormSchema = {
     account_holder_postal_code: {
       id: 'account_holder_postal_code',
       type: 'text',
+      defaultValue: '560068',
       label: 'Account Holder Postal Code',
       validation_dependencies: [
         {
@@ -329,6 +347,7 @@ export const schema: FormSchema = {
       id: 'recipient_account_country_code',
       type: 'select',
       label: 'Account Country',
+
       data_source: {
         endpoint: 'v1/forms/countries',
         method: 'GET',
@@ -350,6 +369,7 @@ export const schema: FormSchema = {
       id: 'recipient_account_currency',
       type: 'select',
       label: 'Account Currency',
+      placeholder: 'Currency',
       options: [
         {
           label: 'USD',
@@ -380,6 +400,7 @@ export const schema: FormSchema = {
       id: 'recipient_account_number',
       type: 'text',
       label: 'Account Number',
+      placeholder: 'Account Number',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
