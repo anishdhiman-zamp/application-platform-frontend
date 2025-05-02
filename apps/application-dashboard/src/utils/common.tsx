@@ -246,7 +246,14 @@ export function shuffleArray(array: any[]) {
  * @param number
  * @returns string number with suffix
  */
-export function formatNumber(maxValue = 0, precision = 1, allowSuffix = true, getSuffix = false): string {
+export function formatNumber(
+  maxValue = 0,
+  precision = 1,
+  allowSuffix = true,
+  getSuffix = false,
+  getSignedValue = false,
+): string {
+  const isNegative = maxValue < 0;
   const value = Math.abs(maxValue);
   const suffixes = [
     { threshold: 1000000000, suffix: 'B', valueString: 'Billions' },
@@ -264,7 +271,11 @@ export function formatNumber(maxValue = 0, precision = 1, allowSuffix = true, ge
 
   for (const { threshold, suffix } of suffixes) {
     if (value >= threshold) {
-      return (value / threshold).toFixed(precision).replace(/\.00$/, '') + (allowSuffix ? suffix : '');
+      return (
+        (getSignedValue && isNegative ? '-' : '') +
+        (value / threshold).toFixed(precision).replace(/\.00$/, '') +
+        (allowSuffix ? suffix : '')
+      );
     }
   }
 

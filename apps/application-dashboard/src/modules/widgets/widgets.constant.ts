@@ -117,7 +117,7 @@ export const CHART_NUMBER_AXES: AgCartesianAxisOptions = {
   },
   label: {
     formatter: ({ value }) => {
-      return formatNumber(value, 2, false);
+      return formatNumber(value, 2, false, false, true);
     },
   },
 };

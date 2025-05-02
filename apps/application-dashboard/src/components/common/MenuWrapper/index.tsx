@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react';
+import React, { type CSSProperties, FC, ReactNode } from 'react';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -13,7 +13,9 @@ export interface MenuWrapperProps {
   onReset?: defaultFnType;
   id: string;
   childrenWrapperClassName?: string;
+  style?: CSSProperties;
 }
+
 export const MenuWrapper: FC<MenuWrapperProps> = ({
   children,
   className = '',
@@ -23,6 +25,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
   onReset,
   id,
   childrenWrapperClassName = '',
+  style,
 }) => {
   const handleReset = () => {
     onReset?.();
@@ -32,6 +35,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
     <div
       className={cn('bg-white relative z-1 shadow-menuList rounded-md border-0.5 border-GRAY_500', className)}
       data-testid={`menu-wrapper-${id}`}
+      style={style}
     >
       <div
         className={`max-h-[300px] overflow-y-scroll ${childrenWrapperClassName}`}
