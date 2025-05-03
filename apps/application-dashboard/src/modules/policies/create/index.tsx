@@ -106,11 +106,12 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     if (createPolicySuccess) {
       toast.success('Policy created successfully');
       resetCreatePolicy();
+      onOpenChange(false);
     } else if (createPolicyError) {
       toast.error(createPolicyError?.data?.error || 'Failed to create policy');
       resetCreatePolicy();
     }
-  }, [createPolicySuccess, createPolicyError]);
+  }, [createPolicySuccess, createPolicyError, createPolicyLoading, onOpenChange]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {

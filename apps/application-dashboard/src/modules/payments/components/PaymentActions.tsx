@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
-import { toast } from '@/components/common/toast/Toast';
-import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CreatePolicyDialog from '@/modules/policies/create';
 import PoliciesListSideDrawer from '@/modules/policies/listing/PoliciesListSideDrawer';
 import { PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
@@ -14,10 +12,9 @@ const PaymentActions = () => {
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const [getPolicies] = useLazyGetPoliciesQuery();
+  const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
   const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState<boolean>(false);
   const [policyType, setPolicyType] = useState<PolicyDialogType>('template');
-  const [policies, setPolicies] = useState<PolicyDetailsType[]>([]);
   const [sideDrawerConfig, setSideDrawerConfig] = useState<{
     type: PolicyDialogType;
     policies: PolicyDetailsType[];
@@ -32,26 +29,25 @@ const PaymentActions = () => {
     setSideDrawerConfig(undefined);
   };
 
-  useEffect(() => {
-    if (paymentConfig) {
-      getPolicies({ resource_id: paymentConfig?.id, resource_type: ResourceType.PAYMENTS })
-        .unwrap()
-        .then((res) => {
-          setPolicies(res?.data);
-        })
-        .catch(() => {
-          toast.error(TOAST_MESSAGES.ERROR_FETCHING_POLICIES);
-        });
+  React.useEffect(() => {
+    if (paymentConfig?.id) {
+      getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS });
     }
-  }, [paymentConfig, getPolicies]);
+  }, [paymentConfig?.id, getPolicies]);
 
   const paymentPolicies = useMemo(
-    () => policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_PAYMENT),
-    [policies],
+    () =>
+      policiesData?.data?.filter(
+        (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_PAYMENT,
+      ) ?? [],
+    [policiesData?.data],
   );
   const templatePolicies = useMemo(
-    () => policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_TEMPLATE),
-    [policies],
+    () =>
+      policiesData?.data?.filter(
+        (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_TEMPLATE,
+      ) ?? [],
+    [policiesData?.data],
   );
 
   return (
