@@ -149,12 +149,26 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
                       error={error}
                     />
                   ) : (
-                    <AttributeMenuDropdown key={attribute.id} attribute={attribute} name={attribute.id} error={error} />
+                    <AttributeMenuDropdown
+                      key={attribute.id}
+                      attribute={attribute}
+                      name={attribute.id}
+                      error={error}
+                      isMultiSelect={attribute.type === 'multi-select'}
+                    />
                   );
                 })}
               </div>
 
-              <ApprovalFlow />
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${(() => {
+                  const actionValue = (methods.watch('action') as SelectOption[])?.[0]?.value;
+
+                  return actionValue !== 'BLOCK' ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0';
+                })()}`}
+              >
+                <ApprovalFlow />
+              </div>
             </form>
           </FormProvider>
         </DialogBody>

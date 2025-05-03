@@ -134,12 +134,20 @@ export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolic
       const attribute = attributesMap[key];
       const payloadValue = getValue(key, value as SelectOption[]);
 
+      if (
+        (typeof payloadValue === 'string' || Array.isArray(payloadValue)) &&
+        (!payloadValue || !payloadValue.length)
+      ) {
+        return;
+      }
+
       return {
         field: key,
         value: payloadValue,
         operator: attribute.operator,
       };
-    });
+    })
+    .filter((condition) => condition !== undefined);
 
   // Transform approval flow
   const approval_flow = {
@@ -171,6 +179,6 @@ export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolic
       ],
     },
     action,
-    approval_flow,
+    approval_flow: action === 'BLOCK' ? undefined : approval_flow,
   };
 };

@@ -6,6 +6,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
   Skeleton,
 } from '@zamp-platform/ui';
@@ -23,9 +25,10 @@ interface AttributeDropdownProps {
   attribute: AttributeType;
   name: string;
   error?: string;
+  isMultiSelect?: boolean;
 }
 
-const AttributeMenuDropdown = ({ attribute, name, error }: AttributeDropdownProps) => {
+const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: AttributeDropdownProps) => {
   const { control } = useFormContext();
   const [currentOptions, setCurrentOptions] = useState<SelectOption[]>('options' in attribute ? attribute.options : []);
   const [loading, setLoading] = useState(false);
@@ -145,21 +148,40 @@ const AttributeMenuDropdown = ({ attribute, name, error }: AttributeDropdownProp
               e.preventDefault();
             }}
           >
-            {currentOptions.map((option, index) => (
-              <DropdownMenuCheckboxItem
-                key={option.id ?? index}
-                checked={isChecked(option, value)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    onChange([...value, option]);
-                  } else {
-                    onChange(value.filter((selectedOption: SelectOption) => selectedOption.id !== option.id));
+            {isMultiSelect ? (
+              currentOptions.map((option, index) => (
+                <DropdownMenuCheckboxItem
+                  key={option.id ?? index}
+                  checked={isChecked(option, value)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      onChange([...value, option]);
+                    } else {
+                      onChange(value.filter((selectedOption: SelectOption) => selectedOption.id !== option.id));
+                    }
+                  }}
+                >
+                  {option.richLabel || option.label}
+                </DropdownMenuCheckboxItem>
+              ))
+            ) : (
+              <DropdownMenuRadioGroup
+                value={value?.[0]?.id}
+                onValueChange={(selectedId) => {
+                  const selectedOption = currentOptions.find((option) => option.id === selectedId);
+
+                  if (selectedOption) {
+                    onChange([selectedOption]);
                   }
                 }}
               >
-                {option.richLabel || option.label}
-              </DropdownMenuCheckboxItem>
-            ))}
+                {currentOptions.map((option, index) => (
+                  <DropdownMenuRadioItem key={option.id ?? index} value={option.id ?? index.toString()}>
+                    {option.richLabel || option.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            )}
             {loading && (
               <div className='space-y-2 p-2'>
                 {[1, 2, 3, 4, 5].map((i) => (

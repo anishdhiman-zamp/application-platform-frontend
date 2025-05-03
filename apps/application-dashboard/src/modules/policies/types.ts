@@ -55,7 +55,7 @@ export interface CreatePolicyConfigPayload {
     }>;
   };
   action: string;
-  approval_flow: {
+  approval_flow?: {
     steps: Array<{
       logical_operator: string;
       conditions: Array<{

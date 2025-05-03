@@ -106,7 +106,7 @@ export const attributesMap: Record<string, AttributeType> = {
   },
   action: {
     label: 'Action',
-    type: 'multi-select',
+    type: 'select',
     id: 'action',
     operator: '==',
     formFieldType: 'creator',
