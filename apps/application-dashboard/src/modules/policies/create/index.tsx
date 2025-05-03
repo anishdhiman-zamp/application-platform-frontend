@@ -7,7 +7,7 @@ import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
 import { attributesMap } from 'modules/policies/create/constants';
-import { CreatePolicyDialogProps, PolicyFormData } from 'modules/policies/types';
+import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData } from 'modules/policies/types';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
@@ -90,7 +90,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
       name: data.policyName,
       resource_id: paymentConfig?.id,
       resource_type: 'payments',
-      action_type: 'CREATE_PAYMENT',
+      action_type: type === 'payout' ? PolicyActionType.CREATE_PAYMENT : PolicyActionType.CREATE_TEMPLATE,
       config: policyConfig,
     };
 

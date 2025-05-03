@@ -134,7 +134,7 @@ export interface CreatePolicyPayloadType {
   description?: string;
   resource_id: string;
   resource_type: string;
-  action_type: 'CREATE_PAYMENT' | 'CREATE_TEMPLATE';
+  action_type: PolicyActionType;
   config: CreatePolicyConfigPayload;
 }
 export type PaymentApprovalsInfoResponseType = {

@@ -1,21 +1,21 @@
 import { FC, useState } from 'react';
-import { ListCard, Tag } from '@zamp-platform/ui';
+import { ListCard } from '@zamp-platform/ui';
 import { format } from 'date-fns';
-import PolicyDeleteConfirmPopup from 'modules/payments/components/PolicyDeleteConfirmPopup';
+import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
+import PolicyDeleteConfirmPopup from '@/modules/policies/listing/PolicyDeleteConfirmPopup';
+import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
-import { AudiencesByOrganisationIdResponse } from '@/types/api/people.types';
-import { snakeCaseToSentenceCase } from '@/utils/common';
 
 type PolicyCardProps = {
   policy: PolicyDetailsType;
-  teamMembersData?: AudiencesByOrganisationIdResponse[];
+  audienceMembersData: AudiencesByResourceResponse[];
 };
 
-const PolicyCard: FC<PolicyCardProps> = ({ policy, teamMembersData }) => {
+const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
   const [isDeleteConfirmPopupOpen, setIsDeleteConfirmPopupOpen] = useState(false);
-  const teamMember = teamMembersData?.find((member) => member.user?.user_id === policy.created_by);
+  const teamMember = audienceMembersData?.find((member) => member.user?.user_id === policy.created_by);
 
   return (
     <>
@@ -46,16 +46,10 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, teamMembersData }) => {
       >
         <div className='space-y-2'>
           <h2 className='f-13-550'>{policy.name}</h2>
-          <div className='flex gap-1.5 flex-wrap'>
-            <Tag variant='gray'>{policy.policy_configurations.creator?.length ?? 'Any'} Creator</Tag>
-            {policy.policy_configurations.conditions.conditions.map((condition) => (
-              <Tag variant='gray' key={condition.field}>
-                {Array.isArray(condition.value)
-                  ? `${condition.value.length} ${snakeCaseToSentenceCase(condition.field)} `
-                  : `${snakeCaseToSentenceCase(condition.field)} ${condition.operator} ${condition.value}`}
-              </Tag>
-            ))}
-          </div>
+          <PolicyAttributeTags
+            creatorLength={policy.policy_configurations.creator?.length}
+            conditions={policy.policy_configurations.conditions.conditions}
+          />
         </div>
       </ListCard>
       <PolicyDeleteConfirmPopup

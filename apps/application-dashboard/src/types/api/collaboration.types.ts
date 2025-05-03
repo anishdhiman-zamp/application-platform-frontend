@@ -1,3 +1,5 @@
+import { ResourceAudienceType } from 'types/api/auth.types';
+
 export type AudiencesByResourceIdRequest = {
   resourceRoute: string;
   resourceId: string;
@@ -35,7 +37,7 @@ export type ChangeAudienceRoleInResourceType = withResource<{
 }>;
 
 export type AudiencesByResourceResponse = {
-  resource_audience_type: string;
+  resource_audience_type: ResourceAudienceType;
   resource_audience_id: string;
   privilege: string;
   resource_type: string;
@@ -43,5 +45,7 @@ export type AudiencesByResourceResponse = {
   user?: {
     role?: string;
     email?: string;
+    user_id?: string;
+    name?: string;
   };
 };

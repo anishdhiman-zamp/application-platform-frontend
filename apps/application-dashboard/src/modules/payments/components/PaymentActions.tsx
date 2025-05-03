@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
-import PoliciesListSideDrawer from 'modules/payments/components/PoliciesListSideDrawer';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CreatePolicyDialog from '@/modules/policies/create';
+import PoliciesListSideDrawer from '@/modules/policies/listing/PoliciesListSideDrawer';
 import { PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
@@ -45,6 +45,15 @@ const PaymentActions = () => {
     }
   }, [paymentConfig, getPolicies]);
 
+  const paymentPolicies = useMemo(
+    () => policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_PAYMENT),
+    [policies],
+  );
+  const templatePolicies = useMemo(
+    () => policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_TEMPLATE),
+    [policies],
+  );
+
   return (
     <>
       <DropdownMenu>
@@ -68,14 +77,12 @@ const PaymentActions = () => {
                 onClick={() =>
                   setSideDrawerConfig({
                     type: 'template',
-                    policies: policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_TEMPLATE),
+                    policies: templatePolicies,
                   })
                 }
-                disabled={
-                  policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_TEMPLATE).length === 0
-                }
+                disabled={templatePolicies.length === 0}
               >
-                {policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_TEMPLATE).length} policies
+                {templatePolicies.length} policies
               </Button>
               <Button
                 variant='ghost'
@@ -94,17 +101,15 @@ const PaymentActions = () => {
                 variant='ghost'
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
-                disabled={
-                  policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_PAYMENT).length === 0
-                }
+                disabled={paymentPolicies.length === 0}
                 onClick={() =>
                   setSideDrawerConfig({
                     type: 'payout',
-                    policies: policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_PAYMENT),
+                    policies: paymentPolicies,
                   })
                 }
               >
-                {policies?.filter((policy) => policy.action_type === PolicyActionType.CREATE_PAYMENT).length} policies
+                {paymentPolicies.length} policies
               </Button>
               <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange('payout')}>
                 <Plus className='h-3 w-3' />

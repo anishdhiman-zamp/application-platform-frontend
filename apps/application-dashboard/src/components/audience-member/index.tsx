@@ -16,8 +16,10 @@ interface AudienceMemberProps {
   resourceAudienceType: ResourceAudienceType;
   resourceType: string;
   customerName?: string;
-  user: {
-    email: string;
+  user?: {
+    name?: string;
+    role?: string;
+    email?: string;
   };
   showAvatar?: boolean;
 }
@@ -34,7 +36,7 @@ const AudienceMember = ({
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
   const isTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const isOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
-  const customAvatarWord = isOrg && customerName ? customerName : user?.email;
+  const customAvatarWord = isOrg && customerName ? customerName : (user?.email ?? '');
 
   return (
     <div className='flex items-center justify-start'>

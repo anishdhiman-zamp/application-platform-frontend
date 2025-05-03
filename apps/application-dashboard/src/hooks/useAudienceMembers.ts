@@ -6,6 +6,10 @@ import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.cons
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
 import { RootState } from '@/store';
 
+export const getAudienceByTeamId = (audiences: any[], teamId: string) => {
+  return audiences?.find((audience) => audience.resource_audience_id === teamId) ?? null;
+};
+
 const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: string }) => {
   const { user } = useAppSelector((state: RootState) => state.user);
   const organizationId = user?.orgs?.[0]?.organization_id ?? '';

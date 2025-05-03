@@ -44,7 +44,7 @@ export const attributesMap: Record<string, AttributeType> = {
   recipients: {
     label: 'Recipients',
     id: 'recipients',
-    operator: '==',
+    operator: 'in',
     type: 'multi-select',
     formFieldType: 'condition',
     options: [
