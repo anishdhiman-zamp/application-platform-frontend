@@ -91,6 +91,8 @@ export const API_ENDPOINTS = {
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
+
+  PROCESSES_GET: `processes/`,
 };
 
 export const enum REQUEST_TYPES {

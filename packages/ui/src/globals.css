@@ -790,6 +790,12 @@ body {
   font-size: 0.75rem;
 }
 
+.f-12-550 {
+  font-weight: 550;
+  line-height: 0.9375rem;
+  font-size: 0.75rem;
+}
+
 .f-12-500 {
   font-weight: 500;
   line-height: 0.9375rem;

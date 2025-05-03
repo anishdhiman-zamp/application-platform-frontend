@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { useGetPagesQuery } from 'apis/pages';
+import { useEffect, useMemo } from 'react';
+import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
@@ -13,16 +13,21 @@ import { useGetPaymentConfigQuery } from '@/apis/payments';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
+import ProcessNavTab from 'components/layouts/dashboard-layout/components/ProcessNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
+
 const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
-  const { pageId } = useParams();
+  const params = useParams();
   const router = useRouter();
   const pathname = router?.pathname;
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
@@ -44,6 +49,8 @@ const Sidebar = () => {
     [paymentConfig],
   );
 
+  const isLoading = isLoadingProcesses || isLoadingPages;
+
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
@@ -54,14 +61,40 @@ const Sidebar = () => {
               name={item.label}
               path={item.path}
               iconId={item.iconId}
-              isSelected={!pageId && pathname.includes(item?.path)}
+              isSelected={!params?.pageId && !params?.activityId && pathname.includes(item?.path)}
             />
           ))}
         </div>
-        <div className='px-2 py-2.5'>
-          <div className='f-11-600 text-GRAY_700 px-1.5 py-2'>Pages</div>
+        {processes && processes?.length > 0 && (
+          <div className='px-2 py-2.5'>
+            <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
+            <CommonWrapper
+              isLoading={isLoading}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<SkeletonLoaderSidebarPages />}
+            >
+              {processes
+                ?.map((process) => ({
+                  ...process,
+                  fractionalIndex: process?.fractional_index,
+                }))
+                .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
+                .map((process) => (
+                  <ProcessNavTab
+                    key={process?.id}
+                    label={process?.display_name}
+                    processId={process?.id}
+                    isSelected={params?.activityId === process?.id}
+                    disable
+                  />
+                ))}
+            </CommonWrapper>
+          </div>
+        )}
+        <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
+          <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
           <CommonWrapper
-            isLoading={isLoadingPages}
+            isLoading={isLoading}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderSidebarPages />}
           >
@@ -70,7 +103,7 @@ const Sidebar = () => {
                 key={item?.page_id}
                 label={item?.name}
                 pageId={item?.page_id}
-                isSelected={pageId === item?.page_id}
+                isSelected={params?.pageId === item?.page_id}
               />
             ))}
           </CommonWrapper>
