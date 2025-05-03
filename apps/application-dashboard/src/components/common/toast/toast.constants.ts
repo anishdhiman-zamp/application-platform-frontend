@@ -32,6 +32,10 @@ export enum TOAST_MESSAGES {
   SUCCESS_RULE_DELETION = 'Rule deleted successfully',
   ERROR_RULE_DELETION = 'Rule deletion failed',
   IN_PROGRESS_RULE_DELETION = 'Rule deletion in progress',
+
+  ERROR_FETCHING_POLICIES = 'Error fetching policies',
+  ERROR_DELETING_POLICY = 'Failed to delete policy',
+  SUCCESS_POLICY_DELETED = 'Policy deleted successfully',
 }
 
 export const TaggingMessages = {

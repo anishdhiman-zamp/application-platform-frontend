@@ -15,6 +15,7 @@ const tagVariants = cva(
         outline: 'bg-transparent border-gray-400',
         ghost: 'bg-transparent',
         pink: 'bg-pink-100',
+        gray: 'bg-gray-50 text-gray-900',
       },
     },
     defaultVariants: {

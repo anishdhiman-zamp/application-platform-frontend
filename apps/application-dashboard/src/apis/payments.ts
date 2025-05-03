@@ -10,6 +10,8 @@ import {
   CreatePolicyPayloadType,
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
+  GetPoliciesParamsType,
+  GetPoliciesResponseType,
   InitiatePaymentPayloadType,
   type PaymentApprovalsInfoResponseType,
   PaymentConfigResponseType,
@@ -107,6 +109,21 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
+    }),
+    getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.POLICIES_GET,
+        params,
+      }),
+      providesTags: [APITags.GET_POLICY_LIST],
+    }),
+    deletePolicy: builder.mutation<void, string>({
+      query: (policyId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_DELETE, { policyId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
       query: (paymentId) => ({
@@ -133,4 +150,6 @@ export const {
   useGetPaymentDetailsQuery,
   useCreatePolicyMutation,
   useGetPaymentApprovalsInfoQuery,
+  useLazyGetPoliciesQuery,
+  useDeletePolicyMutation,
 } = Payments;
