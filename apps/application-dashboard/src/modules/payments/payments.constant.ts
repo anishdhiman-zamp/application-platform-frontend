@@ -4,6 +4,7 @@ import {
   MOVE_MONEY_PAYMENT_TYPE,
   MOVE_MONEY_TYPE,
   PAYMENT_TABS,
+  TEMPLATE_APPROVAL_ACTION_TYPES,
   TEMPLATE_STATUS_TYPES,
 } from 'modules/payments/payments.types';
 import { INPUT_FILE_FORMATS } from 'types/common/mime';
@@ -24,15 +25,15 @@ export const RECIPIENT_CARD_ACTION_ITEMS = [
     },
     tooltipBody: 'Add account',
   },
-  {
-    id: 'filter-payments',
-    action: MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS,
-    icon: {
-      id: 'filter-lines',
-      size: 14,
-    },
-    tooltipBody: 'Filter payments',
-  },
+  // {
+  //   id: 'filter-payments',
+  //   action: MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS,
+  //   icon: {
+  //     id: 'filter-lines',
+  //     size: 14,
+  //   },
+  //   tooltipBody: 'Filter payments',
+  // },
   {
     id: 'send-money',
     action: MOVE_MONEY_ACTION_TYPE.SEND_MONEY,
@@ -140,5 +141,29 @@ export const PAYMENT_PROCESSING_MODES = [
   {
     label: 'RTP',
     value: 'RTP',
+  },
+];
+
+export const TEMPLATE_APPROVAL_ACTION_ITEMS = [
+  {
+    value: TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE,
+    label: 'Approve',
+    icon: {
+      id: 'check',
+    },
+  },
+  {
+    value: TEMPLATE_APPROVAL_ACTION_TYPES.REJECT,
+    label: 'Reject',
+    icon: {
+      id: 'x-close',
+    },
+  },
+  {
+    value: TEMPLATE_APPROVAL_ACTION_TYPES.VIEW_ALL_APPROVALS,
+    label: 'View all approvals',
+    icon: {
+      id: 'info-circle',
+    },
   },
 ];

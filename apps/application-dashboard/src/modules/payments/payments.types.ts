@@ -71,3 +71,9 @@ export const PAYMENT_TABS = {
   PAYMENT_DETAILS: 'payment-details',
   APPROVALS: 'approvals',
 };
+
+export const TEMPLATE_APPROVAL_ACTION_TYPES = {
+  APPROVE: 'approve',
+  REJECT: 'reject',
+  VIEW_ALL_APPROVALS: 'view-all-approvals',
+};

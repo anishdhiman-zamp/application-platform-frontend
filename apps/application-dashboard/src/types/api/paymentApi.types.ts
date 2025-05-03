@@ -21,6 +21,8 @@ export type TemplateDetailsType = {
   creation_timestamp: string;
   type: MOVE_MONEY_TYPE;
   status?: STATUS_TYPES;
+  can_approve: boolean;
+  policy_result_id?: string;
 };
 
 export type TemplateListResponseType = {
@@ -127,5 +129,6 @@ export type PaymentDetailsResponseType = {
 };
 
 export type PaymentApprovalsInfoResponseType = {
+  approval_id: string;
   policy_evaluation_data: PolicyConfigType;
 };

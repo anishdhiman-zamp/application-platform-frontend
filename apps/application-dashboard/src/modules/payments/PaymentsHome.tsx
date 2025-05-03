@@ -288,8 +288,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8'>
-          <div className='flex items-center py-3'>
+        <div className='flex items-center justify-between pr-8 py-3'>
+          <div className='flex items-center'>
             {!isError && <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />}
           </div>
           <div className='relative flex items-center gap-3'>
