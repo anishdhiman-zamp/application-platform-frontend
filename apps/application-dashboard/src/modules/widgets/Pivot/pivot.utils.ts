@@ -3,7 +3,12 @@ import { DATE_FORMATS, PERIODICITY_TYPES } from 'constants/date.constants';
 import { format, isValid, parse } from 'date-fns';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotColHeader from 'modules/widgets/Pivot/components/PivotColHeader';
-import { GROUPING_COL_NAME_PREFIX, NESTING_LEVEL_INFIX, PIVOT_REF } from 'modules/widgets/Pivot/pivot.constants';
+import {
+  DATE_COLUMN_NAME,
+  GROUPING_COL_NAME_PREFIX,
+  NESTING_LEVEL_INFIX,
+  PIVOT_REF,
+} from 'modules/widgets/Pivot/pivot.constants';
 import {
   ColumnFilterConfig,
   PIVOT_DATA_TYPES,
@@ -334,7 +339,64 @@ export const getPivotData = (
     });
   });
 
+  // For each row, check if it has a duplicate row with the same date and the same value for the last grouping level
+  // If it does, increment the last grouping level
+  rows.forEach((currentRow) => {
+    const lastGroupingLevel = getLastLevelKeyAndValue(currentRow);
+
+    if (lastGroupingLevel) {
+      const duplicateRow = rows?.find(
+        (otherRow) =>
+          otherRow[lastGroupingLevel?.key] === lastGroupingLevel?.value &&
+          otherRow[DATE_COLUMN_NAME] === currentRow[DATE_COLUMN_NAME] &&
+          otherRow !== currentRow,
+      );
+
+      if (duplicateRow) {
+        currentRow[keyIncrement(lastGroupingLevel?.key)] = lastGroupingLevel?.value;
+      }
+    }
+  });
+
   return rows;
+};
+
+export const keyIncrement = (key: string) => {
+  // Split the key into segments
+  const keySegments = key?.split('_') ?? [];
+
+  // Get the last segment (level number)
+  const levelNumber = keySegments?.pop() || '0';
+
+  // Increment the level number
+  const nextLevelNumber = parseInt(levelNumber) + 1;
+
+  // Join the segments back together with the incremented level number
+  return keySegments?.join('_') + '_' + nextLevelNumber;
+};
+
+export const getLastLevelKeyAndValue = (item: Record<string, any>): { key: string; value: string } | null => {
+  // Get all level keys
+  const levelKeys = Object.keys(item).filter((key) => key.includes(GROUPING_COL_NAME_PREFIX));
+
+  if (levelKeys?.length === 0) {
+    return null;
+  }
+
+  // Sort keys to get the highest level - DESC
+  const sortedKeys = levelKeys?.sort((keyA, keyB) => {
+    const levelA = parseInt(keyA?.split('_')?.pop() || '0');
+    const levelB = parseInt(keyB?.split('_')?.pop() || '0');
+
+    return levelB - levelA;
+  });
+
+  const lastLevelKey = sortedKeys?.[0];
+
+  return {
+    key: lastLevelKey,
+    value: item[lastLevelKey],
+  };
 };
 
 export type ColumnContext = {

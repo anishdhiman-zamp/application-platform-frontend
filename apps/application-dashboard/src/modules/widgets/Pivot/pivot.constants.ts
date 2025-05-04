@@ -66,6 +66,7 @@ import {
 export const PIVOT_REF = '__REF';
 export const NESTING_LEVEL_INFIX = '_LEVEL_';
 export const GROUPING_COL_NAME_PREFIX = 'GROUPING_DEPTH_';
+export const DATE_COLUMN_NAME = 'date';
 export const ROOT_LEVEL_TITLE = 'Total';
 export enum PINNED_DIRECTION {
   LEFT = 'left',
