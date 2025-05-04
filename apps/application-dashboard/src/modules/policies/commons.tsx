@@ -103,9 +103,7 @@ const getValue = (key: string, selectedValue: string | number | SelectOption[]) 
     case 'amount':
       return Number(selectedValue ?? 0);
     case 'is_template_based_payment':
-      if (Array.isArray(selectedValue) && selectedValue?.[0]?.value === 'true') {
-        return true;
-      }
+      if (Array.isArray(selectedValue)) return selectedValue?.[0]?.value;
 
       return false;
     default:

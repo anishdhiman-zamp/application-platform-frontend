@@ -28,6 +28,7 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
           <PolicyAttributeTags
             creatorLength={policy.policy_configurations.creator?.length}
             conditions={policy.policy_configurations.conditions.conditions}
+            action={policy.policy_configurations.action}
           />
           {/* Approval Flow Section */}
           <div className='space-y-4'>

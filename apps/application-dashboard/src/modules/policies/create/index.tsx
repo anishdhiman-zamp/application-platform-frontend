@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectOption, validateField } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter } from '@zamp-platform/ui';
@@ -7,14 +7,17 @@ import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
 import { attributesMap } from 'modules/policies/create/constants';
-import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData } from 'modules/policies/types';
-import { useCreatePolicyMutation, useGetPaymentConfigQuery } from '@/apis/payments';
+import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData, PolicyQuorum } from 'modules/policies/types';
+import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
+import { LOGICAL_OPERATOR_CONDITIONS } from '@/modules/widgets/displayConfig/displayConfig.types';
+import { ResourceAudienceType } from '@/types/api/auth.types';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 
-const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogProps) => {
+const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePolicyDialogProps) => {
   const messageToastId = useRef<number | string>(0);
+  const isEdit = !!policyData;
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -27,11 +30,69 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
       reset: resetCreatePolicy,
     },
   ] = useCreatePolicyMutation();
+  const [
+    updatePolicy,
+    {
+      isLoading: updatePolicyLoading,
+      isSuccess: updatePolicySuccess,
+      error: updatePolicyError,
+      reset: resetUpdatePolicy,
+    },
+  ] = useUpdatePolicyMutation();
+
+  const updatedAttributeMap = useMemo(() => {
+    if (!policyData) return attributesMap;
+
+    const updatedMap = { ...attributesMap };
+
+    updatedMap.action.defaultValue = [policyData.policy_configurations.action];
+    updatedMap.creator.defaultValue = policyData.policy_configurations.creator;
+    updatedMap.initiator.defaultValue = policyData.policy_configurations.creator;
+
+    policyData.policy_configurations.conditions.conditions
+      .filter((condition) => condition.field !== 'currency')
+      .forEach((condition) => {
+        const attribute = updatedMap[condition.field];
+
+        if (attribute) attribute.defaultValue = condition.value;
+      });
+
+    return updatedMap;
+  }, [policyData, type]);
 
   const methods = useForm<PolicyFormData>({
     defaultValues: {
+      policyName: policyData?.name || '',
+      approvalSteps: policyData?.policy_configurations.approval_flow?.steps.map((step) => ({
+        logical_operator: step.logical_operator as LOGICAL_OPERATOR_CONDITIONS,
+        conditions: step.conditions.map((condition) => ({
+          mode: condition.mode as PolicyQuorum,
+          approver_details: condition.approver_details.map((approver) => {
+            const creatorAttribute = updatedAttributeMap.creator;
+
+            if ('data_source' in creatorAttribute && creatorAttribute.data_source?.valueFormatter) {
+              const formatter = creatorAttribute.data_source.valueFormatter;
+
+              return formatter([
+                {
+                  resource_audience_id: approver.id,
+                  resource_audience_type: approver.type,
+                  name: approver.id,
+                },
+              ])[0];
+            }
+
+            return {
+              type: approver.type as ResourceAudienceType,
+              id: approver.id,
+              label: approver.id,
+            };
+          }),
+        })),
+      })) || [DEFAULT_APPROVAL_STEP],
+      creator: [],
       ...getAttributes(type)
-        .filter((attrId) => attributesMap[attrId].formFieldType === 'condition')
+        .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
         .reduce<Record<string, SelectOption[]>>(
           (acc, attr) => ({
             ...acc,
@@ -39,8 +100,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
           }),
           {},
         ),
-      creator: [],
-      approvalSteps: [DEFAULT_APPROVAL_STEP],
     },
   });
 
@@ -50,7 +109,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     const errors: Record<string, string> = {};
 
     Object.entries(data).forEach(([fieldName]) => {
-      const fieldConfig = attributesMap[fieldName];
+      const fieldConfig = updatedAttributeMap[fieldName];
 
       if (fieldConfig?.validations) {
         console.log('fieldConfig', fieldConfig, data[fieldName]);
@@ -95,38 +154,50 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
     };
 
     console.log('API Payload:', apiPayload);
-    createPolicy(apiPayload);
+    if (isEdit) {
+      updatePolicy({ ...apiPayload, policyId: policyData?.id });
+    } else {
+      createPolicy(apiPayload);
+    }
   };
 
   useEffect(() => {
     console.log('createPolicyStatus', createPolicySuccess, createPolicyError, createPolicyLoading);
-    if (!createPolicyLoading) {
+    if (!createPolicyLoading || !updatePolicyLoading) {
       toast.dismiss(messageToastId.current);
     }
-    if (createPolicySuccess) {
-      toast.success('Policy created successfully');
+    if (createPolicySuccess || updatePolicySuccess) {
+      toast.success(isEdit ? 'Policy updated successfully' : 'Policy created successfully');
       resetCreatePolicy();
+      resetUpdatePolicy();
       onOpenChange(false);
-    } else if (createPolicyError) {
-      toast.error(createPolicyError?.data?.error || 'Failed to create policy');
+    } else if (createPolicyError || updatePolicyError) {
+      toast.error(isEdit ? 'Failed to update policy' : 'Failed to create policy');
       resetCreatePolicy();
+      resetUpdatePolicy();
     }
-  }, [createPolicySuccess, createPolicyError, createPolicyLoading, onOpenChange]);
+  }, [
+    createPolicySuccess,
+    createPolicyError,
+    createPolicyLoading,
+    onOpenChange,
+    updatePolicySuccess,
+    updatePolicyError,
+    updatePolicyLoading,
+  ]);
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      methods.reset();
-    }
+    methods.reset();
     onOpenChange(open);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent showCloseButton autoFocus>
-        <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          <div className='f-12-500 text-primary py-3 px-4 pb-0'>New policy</div>
+      <DialogContent showCloseButton onClick={(e) => e.stopPropagation()}>
+        <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden z-[1002]'>
+          <div className='f-12-500 text-primary py-3 px-4 pb-0'>{isEdit ? 'Edit policy' : 'New policy'}</div>
           <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className='px-4 pb-3 pt-6'>
                 <input
                   type='text'
@@ -139,7 +210,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
               </div>
               <div className='flex gap-2 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden'>
                 {getAttributes(type).map((attributeId) => {
-                  const attribute = attributesMap[attributeId];
+                  const attribute = updatedAttributeMap[attributeId];
                   const error = methods.formState.errors[attributeId]?.message;
 
                   return attribute.type === 'input' ? (
@@ -181,7 +252,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange }: CreatePolicyDialogPr
               </Button>
             </DialogClose>
             <Button size='small' onClick={() => methods.handleSubmit(onSubmit)()}>
-              Create
+              {isEdit ? 'Update' : 'Create'}
             </Button>
           </div>
         </DialogFooter>

@@ -96,7 +96,9 @@ export const API_ENDPOINTS = {
   FORMS_SUBMIT: `v1/forms/submissions`,
 
   POLICY_CREATE_POST: '/policy',
+  POLICY_UPDATE_POST: '/policy/{{policyId}}',
   POLICY_CREATE_POST_PAYMENTS: '/payments/policy',
+  POLICY_UPDATE_POST_PAYMENTS: '/payments/policy/{{policyId}}',
   POLICIES_GET: '/policy/list',
   POLICY_DELETE: '/policy/{{policyId}}',
 };

@@ -14,3 +14,4 @@ export * from './ui/select';
 export * from './ui/skeleton';
 export * from './ui/tags';
 export * from './ui/list-card';
+export * from './ui/popover';

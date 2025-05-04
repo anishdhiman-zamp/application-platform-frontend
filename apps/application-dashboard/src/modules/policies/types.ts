@@ -1,6 +1,7 @@
-import { DataSource, SelectOption } from '@zamp-platform/form-builder';
+import { DataSource, SelectOption, SelectOptionValue } from '@zamp-platform/form-builder';
 import { LOGICAL_OPERATOR_CONDITIONS } from 'modules/widgets/displayConfig/displayConfig.types';
 import { ResourceAudienceType } from '@/types/api/auth.types';
+import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 
 export enum PolicyQuorum {
   ONE = 'ANY_OF',
@@ -19,7 +20,7 @@ export interface InputConfig {
   max?: number;
 }
 
-export type FormFieldType = 'condition' | 'creator';
+export type FormFieldType = 'condition' | 'creator' | 'input';
 
 export type AttributeType = {
   label: string;
@@ -34,6 +35,7 @@ export type AttributeType = {
       message: string;
     };
   }[];
+  defaultValue?: SelectOptionValue | SelectOptionValue[];
 } & (
   | { data_source: DataSource }
   | { options: SelectOption[] }
@@ -75,6 +77,7 @@ export interface CreatePolicyDialogProps {
   type: PolicyDialogType;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  policyData?: PolicyDetailsType;
 }
 
 export type PolicyQuorumOption = {

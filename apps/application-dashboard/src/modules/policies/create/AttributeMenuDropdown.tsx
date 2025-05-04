@@ -29,7 +29,7 @@ interface AttributeDropdownProps {
 }
 
 const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: AttributeDropdownProps) => {
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
   const [currentOptions, setCurrentOptions] = useState<SelectOption[]>('options' in attribute ? attribute.options : []);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -78,6 +78,40 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
     }
   }, [hookLoading]);
 
+  useEffect(() => {
+    let defaultValues: Array<SelectOption | undefined> = [];
+
+    if (attribute.defaultValue?.toString() && currentOptions.length > 0) {
+      if (
+        attribute.formFieldType === 'creator' &&
+        Array.isArray(attribute.defaultValue) &&
+        typeof attribute.defaultValue[0] === 'object'
+      ) {
+        defaultValues = attribute.defaultValue
+          .map((value) => currentOptions.find((option) => option.id === (value as any).id))
+          .filter((value): value is SelectOption => value !== undefined);
+      } else if (attribute.formFieldType === 'condition' || attribute.formFieldType === 'input') {
+        if (Array.isArray(attribute.defaultValue)) {
+          defaultValues = attribute.defaultValue
+            .map((value) => {
+              console.log('value', attribute.label, value, currentOptions);
+
+              return currentOptions.find((option) => option.value === value);
+            })
+            .filter((value): value is SelectOption => value !== undefined);
+        } else {
+          console.log('value', attribute.label, attribute.defaultValue, currentOptions);
+          defaultValues = [currentOptions.find((option) => option.value === attribute.defaultValue)];
+        }
+      }
+    }
+    console.log('defaultValues', attribute.label, defaultValues, currentOptions, attribute.defaultValue);
+
+    if (defaultValues.length > 0) {
+      setValue(name, defaultValues);
+    }
+  }, [currentOptions, attribute.defaultValue, attribute.formFieldType, name, setValue]);
+
   const handleOpenChange = async (open: boolean) => {
     setOpen(open);
     if (open && currentOptions.length === 0 && hasDataSource && !attribute.data_source?.useCustomHook) {
@@ -88,7 +122,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
   };
 
   const attributeDisplayValue = useCallback((selectedOptions: SelectOption[]) => {
-    if (selectedOptions.length === 0) {
+    if (!selectedOptions || selectedOptions.length === 0) {
       return 'Any';
     }
     if (selectedOptions.length > 1) {
@@ -122,7 +156,6 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
     <Controller
       name={name}
       control={control}
-      defaultValue={[]}
       render={({ field: { value, onChange } }) => (
         <DropdownMenu open={open} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>

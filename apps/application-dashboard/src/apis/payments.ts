@@ -102,10 +102,20 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
       }),
     }),
+    updatePolicy: builder.mutation<void, CreatePolicyPayloadType>({
+      query: ({ policyId, config, name, templateFor }) => ({
+        url: formRequestUrlWithParams(
+          templateFor === 'payout' ? API_ENDPOINTS.POLICY_UPDATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_UPDATE_POST,
+          { policyId: policyId },
+        ),
+        method: REQUEST_TYPES.PATCH,
+        body: { config, name },
+        invalidatesTags: [APITags.GET_POLICY_LIST],
+      }),
+    }),
     createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
-      query: (body) => ({
-        url:
-          body.templateFor === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
+      query: ({ templateFor, ...body }) => ({
+        url: templateFor === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
         method: REQUEST_TYPES.POST,
         body,
       }),
@@ -149,6 +159,7 @@ export const {
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
   useCreatePolicyMutation,
+  useUpdatePolicyMutation,
   useGetPaymentApprovalsInfoQuery,
   useLazyGetPoliciesQuery,
   useDeletePolicyMutation,

@@ -129,6 +129,7 @@ export type PaymentDetailsResponseType = {
 };
 
 export interface CreatePolicyPayloadType {
+  policyId?: string;
   templateFor: PolicyDialogType;
   name: string;
   description?: string;

@@ -57,11 +57,12 @@ export interface ValidationDependency {
 
 export type FieldType = 'text' | 'select' | 'input' | 'multi-select';
 
+export type SelectOptionValue = string | boolean | { type: string; id: string };
 export interface SelectOption {
   id?: string;
   label: string;
   richLabel?: React.ReactNode;
-  value: string | boolean | { type: string; id: string };
+  value: SelectOptionValue;
   icon?: React.ReactNode;
   displayValue?: string;
 }

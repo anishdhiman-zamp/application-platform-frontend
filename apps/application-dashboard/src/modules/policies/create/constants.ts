@@ -32,7 +32,7 @@ export const attributesMap: Record<string, AttributeType> = {
         const data = rawData.accounts;
 
         return data.map((item: any) => ({
-          id: item.id,
+          id: item.account_number,
           label: item.account_name,
           richLabel: getAccountWithLogo(item),
           displayValue: `${MASK_DOTS}  ${item?.masked_account_number}`,
@@ -109,7 +109,8 @@ export const attributesMap: Record<string, AttributeType> = {
     type: 'select',
     id: 'action',
     operator: '==',
-    formFieldType: 'creator',
+    formFieldType: 'input',
+    defaultValue: 'REQUIRE_APPROVAL',
     validations: [
       {
         type: 'required',
