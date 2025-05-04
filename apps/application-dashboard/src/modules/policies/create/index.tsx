@@ -172,7 +172,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       });
       resetCreatePolicy();
       resetUpdatePolicy();
-      onOpenChange(false);
+      handleOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
       toast.error(isEdit ? 'Failed to update policy' : 'Failed to create policy', {
         autoClose: 2000,
