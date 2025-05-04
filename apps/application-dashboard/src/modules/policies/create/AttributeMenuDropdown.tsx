@@ -143,10 +143,10 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
 
   const isChecked = (option: SelectOption, selectedOptions: SelectOption[]) => {
     if (typeof option.value === 'string') {
-      return selectedOptions.some((selectedOption) => selectedOption.value === option.value);
+      return selectedOptions?.some((selectedOption) => selectedOption.value === option.value);
     }
     if (typeof option.value === 'object') {
-      return selectedOptions.some((selectedOption) => selectedOption.id === option.id);
+      return selectedOptions?.some((selectedOption) => selectedOption.id === option.id);
     }
 
     return false;
