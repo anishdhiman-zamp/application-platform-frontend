@@ -29,7 +29,14 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton size='small'>
+      <DialogContent
+        showCloseButton
+        size='small'
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          e.preventDefault();
+        }}
+      >
         <DialogHeader className='f-16-600'>Delete Policy</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='f-14-400'>

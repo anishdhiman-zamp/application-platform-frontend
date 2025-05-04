@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { Button, StepCard } from '@zamp-platform/ui';
+import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
 import AudienceMember from '@/components/audience-member';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -16,11 +17,14 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
   return (
     <>
       <div className='flex items-center justify-between mb-4.5'>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-2 w-full'>
           <Button variant='ghost' size='small' onClick={onBack} className='p-0 min-w-0'>
             <SvgSpriteLoader id='arrow-left' size={18} />
           </Button>
           <h1 className='f-16-600'>{policy.name}</h1>
+          <div className='ml-auto'>
+            <PolicyActionsDropdown policy={policy} />
+          </div>
         </div>
       </div>
       <div className='overflow-y-auto h-[calc(100vh-92px)] pb-6 [&::-webkit-scrollbar]:hidden'>

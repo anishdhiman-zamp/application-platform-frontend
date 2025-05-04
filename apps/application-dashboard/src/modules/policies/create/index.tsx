@@ -163,16 +163,20 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
 
   useEffect(() => {
     console.log('createPolicyStatus', createPolicySuccess, createPolicyError, createPolicyLoading);
-    if (!createPolicyLoading || !updatePolicyLoading) {
+    if (!createPolicyLoading && !updatePolicyLoading) {
       toast.dismiss(messageToastId.current);
     }
     if (createPolicySuccess || updatePolicySuccess) {
-      toast.success(isEdit ? 'Policy updated successfully' : 'Policy created successfully');
+      toast.success(isEdit ? 'Policy updated successfully' : 'Policy created successfully', {
+        autoClose: 2000,
+      });
       resetCreatePolicy();
       resetUpdatePolicy();
       onOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
-      toast.error(isEdit ? 'Failed to update policy' : 'Failed to create policy');
+      toast.error(isEdit ? 'Failed to update policy' : 'Failed to create policy', {
+        autoClose: 2000,
+      });
       resetCreatePolicy();
       resetUpdatePolicy();
     }

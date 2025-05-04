@@ -133,8 +133,8 @@ export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolic
       const payloadValue = getValue(key, value as SelectOption[]);
 
       if (
-        (typeof payloadValue === 'string' || Array.isArray(payloadValue)) &&
-        (!payloadValue || !payloadValue.length)
+        !payloadValue ||
+        ((typeof payloadValue === 'string' || Array.isArray(payloadValue)) && (!payloadValue || !payloadValue.length))
       ) {
         return;
       }

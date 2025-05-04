@@ -1,12 +1,9 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { ListCard } from '@zamp-platform/ui';
 import { format } from 'date-fns';
-import CreatePolicyDialog from 'modules/policies/create';
+import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
-import { PolicyActionType } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
-import PolicyDeleteConfirmPopup from '@/modules/policies/listing/PolicyDeleteConfirmPopup';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 
@@ -16,8 +13,6 @@ type PolicyCardProps = {
 };
 
 const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
-  const [isDeleteConfirmPopupOpen, setIsDeleteConfirmPopupOpen] = useState(false);
-  const [isEditPolicyDialogOpen, setIsEditPolicyDialogOpen] = useState(false);
   const teamMember = audienceMembersData?.find((member) => member.user?.user_id === policy.created_by);
 
   return (
@@ -36,30 +31,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
             )}
           </div>
         }
-        dropdownOptions={[
-          <div
-            className='flex gap-1.5 text-primary flex-1 f-12-500 items-center'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditPolicyDialogOpen(true);
-            }}
-            key='edit-policy'
-          >
-            <SvgSpriteLoader id='edit-03' size={12} />
-            <span>Edit</span>
-          </div>,
-          <div
-            className='flex gap-1.5 text-red-800 flex-1 f-12-500 items-center'
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDeleteConfirmPopupOpen(true);
-            }}
-            key='delete-policy'
-          >
-            <SvgSpriteLoader id='trash-03' size={12} />
-            <span>Delete</span>
-          </div>,
-        ]}
+        rightComponent={<PolicyActionsDropdown policy={policy} />}
       >
         <div className='space-y-2'>
           <h2 className='f-13-550'>{policy.name}</h2>
@@ -70,17 +42,6 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
           />
         </div>
       </ListCard>
-      <PolicyDeleteConfirmPopup
-        isOpen={isDeleteConfirmPopupOpen}
-        onClose={() => setIsDeleteConfirmPopupOpen(false)}
-        policy={policy}
-      />
-      <CreatePolicyDialog
-        type={policy.action_type === PolicyActionType.CREATE_PAYMENT ? 'payout' : 'template'}
-        isOpen={isEditPolicyDialogOpen}
-        onOpenChange={setIsEditPolicyDialogOpen}
-        policyData={policy}
-      />
     </>
   );
 };
