@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
 import { PAYMENT_STATUS_TYPES } from 'modules/payments/payments.types';
@@ -7,8 +7,6 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
-import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
-import { CURRENCY_SYMBOLS } from '@/modules/page/pages.constants';
 import { cn, getCommaSeparatedNumber } from '@/utils/common';
 
 type PaymentDetailsProps = {
@@ -16,15 +14,35 @@ type PaymentDetailsProps = {
 };
 
 const cardStyleByStatus = {
-  [STATUS_TYPES.PENDING]: {
+  [PAYMENT_STATUS_TYPES.APPROVAL_PENDING]: {
     backgroundColor: 'bg-[#FFFCED]',
     borderColor: 'border-ORANGE_800',
     textColor: 'text-ORANGE_800',
   },
-  [STATUS_TYPES.SUCCESS]: {
+  [PAYMENT_STATUS_TYPES.SENT_TO_BANK]: {
+    backgroundColor: 'bg-[#FFFCED]',
+    borderColor: 'border-ORANGE_800',
+    textColor: 'text-ORANGE_800',
+  },
+  [PAYMENT_STATUS_TYPES.PENDING]: {
+    backgroundColor: 'bg-[#FFFCED]',
+    borderColor: 'border-ORANGE_800',
+    textColor: 'text-ORANGE_800',
+  },
+  [PAYMENT_STATUS_TYPES.SUCCEEDED]: {
     backgroundColor: 'bg-[#E6F9F2]',
     borderColor: 'border-GREEN_800',
     textColor: 'text-GREEN_800',
+  },
+  [PAYMENT_STATUS_TYPES.FAILED]: {
+    backgroundColor: 'bg-[#FFE6E6]',
+    borderColor: 'border-RED_800',
+    textColor: 'text-RED_800',
+  },
+  [PAYMENT_STATUS_TYPES.BLOCKED]: {
+    backgroundColor: 'bg-[#FFE6E6]',
+    borderColor: 'border-RED_800',
+    textColor: 'text-RED_800',
   },
 };
 
@@ -38,17 +56,6 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
     refetchOnMountOrArgChange: false,
     skip: !paymentDetailsId,
   });
-
-  const paymentStatus = useMemo(() => {
-    switch (paymentDetails?.status) {
-      case PAYMENT_STATUS_TYPES.APPROVED:
-      case PAYMENT_STATUS_TYPES.SUCCEEDED:
-      case PAYMENT_STATUS_TYPES.PROCESSED:
-        return STATUS_TYPES.SUCCESS;
-      default:
-        return STATUS_TYPES.PENDING;
-    }
-  }, [paymentDetails]);
 
   return (
     <CommonWrapper
@@ -68,13 +75,12 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             )}
           </div>
           <div className='f-28-450'>
-            {CURRENCY_SYMBOLS[paymentDetails?.currency as keyof typeof CURRENCY_SYMBOLS] ?? paymentDetails?.currency}{' '}
-            {getCommaSeparatedNumber(paymentDetails?.amount, 2)}
+            {paymentDetails?.currency} {getCommaSeparatedNumber(paymentDetails?.amount, 2)}
           </div>
           <div
             className={cn(
               'mt-5 border rounded-md overflow-hidden',
-              cardStyleByStatus[paymentStatus as keyof typeof cardStyleByStatus].borderColor,
+              cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.borderColor,
             )}
           >
             <div className='p-3'>
@@ -83,15 +89,18 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             <div
               className={cn(
                 'p-3 flex justify-between gap-2 border-t',
-                cardStyleByStatus[paymentStatus as keyof typeof cardStyleByStatus].borderColor,
-                cardStyleByStatus[paymentStatus as keyof typeof cardStyleByStatus].backgroundColor,
+                cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.borderColor,
+                cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.backgroundColor,
               )}
             >
               <div>
                 <span className='text-GRAY_700'>To</span> {paymentDetails?.header?.Recipient}
               </div>
               <div
-                className={cn('f-11-500', cardStyleByStatus[paymentStatus as keyof typeof cardStyleByStatus].textColor)}
+                className={cn(
+                  'f-11-500',
+                  cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.textColor,
+                )}
               >
                 {paymentDetails?.status}
               </div>
@@ -116,7 +125,11 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             {paymentDetails?.descriptors?.map((descriptor) => (
               <div key={descriptor.title}>
                 <div className='f-12-400 text-GRAY_700 w-44 mb-1.5'>{descriptor.title}</div>
-                <div className='f-12-450'>{descriptor.description}</div>
+                {descriptor.description.map((description) => (
+                  <div className='f-12-450' key={description}>
+                    {description}
+                  </div>
+                ))}
               </div>
             ))}
           </div>

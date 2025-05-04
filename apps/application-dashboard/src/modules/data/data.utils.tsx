@@ -387,7 +387,7 @@ const getFormattedValueWithColumnPrefix = (valueFormat: ValueFormatType, value: 
   const columnToBeUsedForPrefix = valueFormat?.value ?? '';
   const prefixValue = data?.[columnToBeUsedForPrefix]?.toUpperCase();
 
-  return prefixValue && value ? `${prefixValue} ${value}` : value;
+  return prefixValue && value ? `${prefixValue} ${getCommaSeparatedNumber(Number(value), 2)}` : value;
 };
 
 export const convertFilterModelToRuleFilters = (filterModel: FilterModelType | null): RuleFilters | null => {

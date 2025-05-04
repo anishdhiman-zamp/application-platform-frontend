@@ -93,6 +93,14 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        if (!parameters.request.sortModel?.length) {
+          parameters.request.sortModel = [
+            {
+              colId: 'date',
+              sort: 'desc',
+            },
+          ];
+        }
         const filtersFromZampIds = {
           column: '_zamp_id',
           operator: CONDITION_OPERATOR_TYPE.IN,
