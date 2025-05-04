@@ -9,22 +9,30 @@ type DropdownToggleProps = {
   isLoading?: boolean;
   isShowMenu: boolean;
   setIsShowMenu: (val: boolean) => void;
+  indicatorColor?: string;
 };
 
-const DropdownToggle: FC<DropdownToggleProps> = ({ isLoading, isShowMenu, setIsShowMenu }) => {
+const DropdownToggle: FC<DropdownToggleProps> = ({ isLoading, isShowMenu, setIsShowMenu, indicatorColor }) => {
   return (
     <CommonWrapper
-      className='tw-h-full tw-right-3 tw-top-0 tw-absolute tw-z-50 tw-flex tw-items-center'
+      className='h-full right-3 top-0 z-50 flex items-center'
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
-      skeleton={
-        <ProgressBar indicatorWidth={2.5} trackWidth={2.5} size={14} className='tw-animate-spin' progress={30} />
+      loader={
+        <ProgressBar
+          indicatorWidth={2.5}
+          trackWidth={2.5}
+          size={14}
+          className='animate-spin'
+          indicatorColor={indicatorColor}
+          progress={30}
+        />
       }
     >
       <SvgSpriteLoader
         onClick={() => setIsShowMenu(!isShowMenu)}
         id='chevron-down'
-        className={cn('tw-cursor-pointer transition-all duration-200', {
+        className={cn('cursor-pointer transition-all duration-200', {
           'rotate-180': isShowMenu,
         })}
         size={14}

@@ -9,6 +9,7 @@ import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
 import { identifyPostHogUser } from 'utils/postHog';
+import { useGetPaymentConfigQuery } from '@/apis/payments';
 import { getFromSessionStorage, removeFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 import NotAuthorized from 'components/NotAuthorized';
 
@@ -23,6 +24,10 @@ export const AuthGuard: FC<Props> = (props) => {
 
   const { data: session, isLoading, isError, isSuccess } = useWhoAmIQuery();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
+
+  useGetPaymentConfigQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   useEffect(() => {
     if (session && isSuccess) {

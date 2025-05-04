@@ -1,15 +1,17 @@
 import { FC } from 'react';
 import ApprovalDetailsBadge from 'modules/payments/payment-details/components/ApprovalDetailsBadge';
-import type { GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
+import type { AudiencesByOrganisationIdResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import type { PolicyStepType } from '@/types/api/policies.types';
 
 type ApprovalStatusCardProps = {
   step: number;
   approvalDetails: PolicyStepType;
   teamsData: GetTeamsByOrganizationIdResponseType[];
+  orgMembers: AudiencesByOrganisationIdResponse[];
+  orgName: string;
 };
 
-const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({ step, approvalDetails, teamsData }) => {
+const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({ step, approvalDetails, teamsData, orgMembers, orgName }) => {
   return (
     <div className='flex rounded-lg overflow-hidden border border-GRAY_500 w-full'>
       <div className='bg-GRAY_100'>
@@ -23,7 +25,13 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({ step, approvalDetails
             </div>
             <div className='flex flex-wrap gap-1.5 '>
               {condition?.approver_details?.map((approver, index) => (
-                <ApprovalDetailsBadge key={index} approvalDetails={approver} teamsData={teamsData} />
+                <ApprovalDetailsBadge
+                  key={index}
+                  approvalDetails={approver}
+                  teamsData={teamsData}
+                  orgMembers={orgMembers ?? []}
+                  orgName={orgName}
+                />
               ))}
             </div>
             {index !== approvalDetails?.conditions.length - 1 && (

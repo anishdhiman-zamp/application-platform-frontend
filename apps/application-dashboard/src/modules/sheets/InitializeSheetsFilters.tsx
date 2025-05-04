@@ -41,10 +41,8 @@ const InitializeSheetsFilters: FC<{ children: ReactNode; pageId: string; sheetId
   };
 
   const initializeFilters = () => {
-    const updatedFilters =
-      currentSheetLSFilters && Object.keys(currentSheetLSFilters || {})?.length > 0
-        ? currentSheetLSFilters
-        : defaultFilterValues;
+    const localStorageFilters = currentSheetLSFilters ?? {};
+    const updatedFilters = { ...defaultFilterValues, ...localStorageFilters };
 
     if (!isFetching && sheetFilterConfig?.native_filter_config?.length) {
       const filtersConfig = sheetFilterConfig?.native_filter_config;

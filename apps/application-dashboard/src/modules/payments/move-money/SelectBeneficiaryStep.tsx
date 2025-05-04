@@ -81,6 +81,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
               onAccountSelect={handleAccountSelect}
               label='Recipient account'
               disabled={!!templateDetails}
+              showCurrencyLogo
             />
           )}
           {destinationAccountDetails?.account_name && (

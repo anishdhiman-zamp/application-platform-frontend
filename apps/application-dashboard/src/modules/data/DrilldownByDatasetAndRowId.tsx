@@ -104,6 +104,7 @@ const DrilldownByDatasetAndRowId = () => {
         </div>
         {selectedTab && (
           <DatasetById
+            key={selectedTab}
             id={selectedTab}
             drilldownFilters={data?.tabs.find((tab) => tab.dataset_id === selectedTab)?.filters}
             isDrilldown

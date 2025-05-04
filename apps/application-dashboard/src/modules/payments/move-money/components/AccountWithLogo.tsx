@@ -1,9 +1,10 @@
 import { forwardRef, KeyboardEvent, ReactNode } from 'react';
-import { DEFAULT_BANK } from 'constants/icons';
+import { DEFAULT_BANK, ICON_SPRITE_TYPES } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { BANK_NAME_ICON_MAPPING } from '@/modules/widgets/Pivot/pivot.constants';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface AccountWithLogoCardProps {
@@ -60,9 +61,18 @@ const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
             style={{ minWidth: iconSize, width: iconSize, height: iconSize }}
           >
             {!currencyCode ? (
-              <Image src={logo ?? DEFAULT_BANK} height={iconSize} width={iconSize} alt='bank icon' />
+              <Image
+                src={BANK_NAME_ICON_MAPPING[logo]?.icon ?? DEFAULT_BANK}
+                height={iconSize}
+                width={iconSize}
+                alt='bank icon'
+              />
             ) : (
-              <SvgSpriteLoader id={currencyCode} size={iconSize ?? 32} />
+              <SvgSpriteLoader
+                id={currencyCode}
+                iconCategory={ICON_SPRITE_TYPES.FIAT_CURRENCIES}
+                size={iconSize ?? 32}
+              />
             )}
           </div>
         )}

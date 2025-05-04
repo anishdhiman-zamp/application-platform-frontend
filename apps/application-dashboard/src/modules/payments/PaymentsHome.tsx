@@ -93,6 +93,14 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        if (!parameters.request.sortModel?.length) {
+          parameters.request.sortModel = [
+            {
+              colId: 'date',
+              sort: 'desc',
+            },
+          ];
+        }
         const filtersFromZampIds = {
           column: '_zamp_id',
           operator: CONDITION_OPERATOR_TYPE.IN,
@@ -288,8 +296,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8'>
-          <div className='flex items-center py-3'>
+        <div className='flex items-center justify-between pr-8 py-3'>
+          <div className='flex items-center'>
             {!isError && <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />}
           </div>
           <div className='relative flex items-center gap-3'>

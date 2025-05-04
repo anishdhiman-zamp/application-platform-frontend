@@ -1,13 +1,16 @@
 import { FC, useMemo } from 'react';
+import { APPROVAL_TYPE } from 'modules/payments/payments.constant';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
-import type { GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
+import type { AudiencesByOrganisationIdResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import type { ApproverDetailsType } from '@/types/api/policies.types';
 import { cn } from '@/utils/common';
 
 type ApprovalDetailsBadgeProps = {
   approvalDetails: ApproverDetailsType;
   teamsData: GetTeamsByOrganizationIdResponseType[];
+  orgMembers: AudiencesByOrganisationIdResponse[];
+  orgName: string;
 };
 
 const STATUS_ICON_MAP = {
@@ -16,21 +19,37 @@ const STATUS_ICON_MAP = {
   REJECTED: <SvgSpriteLoader id='close' color={COLORS.ORANGE_200} size={12} />,
 };
 
-const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({ approvalDetails, teamsData }) => {
+const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({ approvalDetails, teamsData, orgMembers, orgName }) => {
   const teamLength = useMemo(() => {
     return approvalDetails?.approval_status_details?.user_approvals?.length;
   }, [approvalDetails]);
 
   const { label, backgroundColor, borderColor } = useMemo(() => {
-    if (approvalDetails.type === 'organization') {
-      const id = '6d0e0ce5-5a8f-4097-a07c-ba19a0914283';
-      const team = teamsData?.find((team) => team?.team_id === id);
+    switch (approvalDetails.type) {
+      case APPROVAL_TYPE.TEAM: {
+        const team = teamsData?.find((team) => team?.team_id === approvalDetails?.id);
 
-      return {
-        label: team?.name,
-        backgroundColor: team?.metadata?.color_hex_code,
-        borderColor: team?.metadata?.color_hex_code,
-      };
+        return {
+          label: team?.name,
+          backgroundColor: team?.metadata?.color_hex_code,
+          borderColor: team?.metadata?.color_hex_code,
+        };
+      }
+      case APPROVAL_TYPE.USER: {
+        const orgMember = orgMembers?.find((member) => member?.resource_audience_id === approvalDetails?.id);
+
+        return {
+          label: orgMember?.user?.name,
+          backgroundColor: COLORS.WHITE,
+          borderColor: COLORS.GRAY_400,
+        };
+      }
+      case APPROVAL_TYPE.ORGANIZATION:
+        return {
+          label: orgName,
+          backgroundColor: COLORS.WHITE,
+          borderColor: COLORS.GRAY_400,
+        };
     }
 
     return { label: 'user', backgroundColor: COLORS.WHITE, borderColor: COLORS.GRAY_400 };

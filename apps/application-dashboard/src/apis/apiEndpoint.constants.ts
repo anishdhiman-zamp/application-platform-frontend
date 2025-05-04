@@ -101,6 +101,8 @@ export const API_ENDPOINTS = {
   POLICY_UPDATE_POST_PAYMENTS: '/payments/policy/{{policyId}}',
   POLICIES_GET: '/policy/list',
   POLICY_DELETE: '/policy/{{policyId}}',
+
+  PROCESSES_GET: `processes/`,
 };
 
 export const enum REQUEST_TYPES {

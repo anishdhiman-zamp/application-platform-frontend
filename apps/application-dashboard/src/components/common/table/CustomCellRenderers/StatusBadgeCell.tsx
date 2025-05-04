@@ -1,3 +1,4 @@
+import { PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
 import { cn } from '@/utils/common';
 
 type StatusBadgeCellProps = {
@@ -5,14 +6,12 @@ type StatusBadgeCellProps = {
 };
 
 const badgeStyles = {
-  proposed: 'bg-ORANGE_100 text-ORANGE_800',
-  failed: 'bg-RED_100 text-RED_800',
-  created: 'bg-ORANGE_100 text-ORANGE_800',
-  succeeded: 'bg-GREEN_100 text-GREEN_800',
-  approved: 'bg-GREEN_100 text-GREEN_800',
-  processed: 'bg-GREEN_100 text-GREEN_800',
-  partner_queued: 'bg-ORANGE_100 text-ORANGE_800',
-  blocked: 'bg-RED_100 text-RED_800',
+  [PAYMENT_STATUS_TYPES.BLOCKED]: 'bg-RED_100 text-RED_800',
+  [PAYMENT_STATUS_TYPES.FAILED]: 'bg-RED_100 text-RED_800',
+  [PAYMENT_STATUS_TYPES.PENDING]: 'bg-ORANGE_100 text-ORANGE_800',
+  [PAYMENT_STATUS_TYPES.SUCCEEDED]: 'bg-GREEN_100 text-GREEN_800',
+  [PAYMENT_STATUS_TYPES.SENT_TO_BANK]: 'bg-ORANGE_100 text-ORANGE_800',
+  [PAYMENT_STATUS_TYPES.APPROVAL_PENDING]: 'bg-ORANGE_100 text-ORANGE_800',
 };
 
 const StatusBadgeCell = ({ value }: StatusBadgeCellProps) => {

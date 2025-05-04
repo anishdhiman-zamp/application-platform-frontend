@@ -105,3 +105,36 @@ export const barGraphData = {
     },
   ],
 };
+
+export const PROCESSES = [
+  {
+    id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    display_name: 'Accounts Payable',
+    organization_id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8254',
+    metadata: {
+      sql_template: 'SELECT COUNT(*) FROM $1 WHERE $2 = $3',
+      view_name: 'PO',
+    },
+    process_type: 'ACCOUNTS_PAYABLE',
+    fractional_index: 1.0,
+    created_by: 'b7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    created_at: '2025-04-25T12:00:00Z',
+    updated_at: '2025-04-25T12:30:00Z',
+    deleted_at: null,
+  },
+  {
+    id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8256',
+    display_name: 'Accounts Receivable',
+    organization_id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8254',
+    metadata: {
+      sql_template: 'SELECT COUNT(*) FROM $1 WHERE $2 = $3',
+      view_name: 'Invoices',
+    },
+    process_type: 'ACCOUNTS_RECEIVABLE',
+    fractional_index: 1.0,
+    created_by: 'b7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    created_at: '2025-04-25T12:00:00Z',
+    updated_at: '2025-04-25T12:30:00Z',
+    deleted_at: null,
+  },
+];

@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useState } from 'react';
+import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -27,6 +27,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   const [searchTerm, setSearchTerm] = useState('');
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
   const [inputFocused, setInputFocused] = useState(false);
+  const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
   // State for grid layout
   const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
 
@@ -133,11 +134,23 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     );
   }, []);
 
+  const maxWidth = useMemo(() => {
+    if (columnRefs.current.length > 0) {
+      const widths = columnRefs.current.map((ref) => ref?.offsetWidth || 0);
+      const maxElementWidth = Math.max(...widths);
+
+      return Math.max(maxElementWidth + 50, 250); // Add padding and ensure minimum width
+    }
+
+    return 250;
+  }, [columns]);
+
   return (
     <MenuWrapper
       id='display-options'
-      className='!absolute z-10 right-0 mt-1 min-w-[250px] w-fit !overflow-visible'
+      className={`!absolute z-10 right-0 mt-1 min-w-[250px] !overflow-visible`}
       childrenWrapperClassName='!overflow-visible max-h-[422px] w-full'
+      style={{ width: maxWidth }}
     >
       <div className='pt-1 px-1'>
         <div className='flex items-center gap-1.5 p-2'>
@@ -167,7 +180,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           onBlur={() => setInputFocused(false)}
         />
       </div>
-      <div className='text-GRAY_900 overflow-auto max-h-[330px] [&::-webkit-scrollbar]:hidden !overflow-x-visible'>
+      <div className='text-GRAY_900 max-h-[330px] [&::-webkit-scrollbar]:hidden !overflow-x-visible'>
         <ResponsiveGridLayout
           className='layout'
           layouts={{ lg: layout }}
@@ -179,7 +192,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           isDraggable={!(searchTerm || inputFocused)}
           draggableHandle='.drag-handle' // Restrict drag to the handle
         >
-          {columns?.map((column) => (
+          {columns?.map((column, index) => (
             <div
               key={column?.getColId()}
               className='flex items-center gap-2.5 p-2 bg-white hover:!bg-GRAY_100 rounded-md w-full'
@@ -187,13 +200,21 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
               <div className='drag-handle cursor-grab min-w-[14px]'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
               </div>
-              <div className='flex items-center gap-2.5 cursor-pointer' onClick={(e) => handleColumnClick(e, column)}>
+              <div
+                ref={(el) => {
+                  columnRefs.current[index] = el;
+                }}
+                className='flex items-center gap-2.5 cursor-pointer'
+                onClick={(e) => handleColumnClick(e, column)}
+              >
                 <CheckBox
                   checked={columnsChecked?.find((col) => col?.colId === column?.getColId())?.isVisible ?? false}
                   onPress={(e) => handleColumnClick(e, column)}
                   id={column?.getColId() ?? ''}
                 />
-                <div className='f-12-400 text-GRAY_1000 break-all select-none'>{column?.getColDef()?.headerName}</div>
+                <div className='f-12-400 text-GRAY_1000 whitespace-nowrap select-none'>
+                  {column?.getColDef()?.headerName}
+                </div>
               </div>
             </div>
           ))}

@@ -30,6 +30,7 @@ type SelectBeneDropdownProps = {
   isLoading?: boolean;
   showTemplate?: boolean;
   setCreateTemplateType?: (type: MOVE_MONEY_TYPE | null) => void;
+  showCurrencyLogo?: boolean;
 };
 
 const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
@@ -45,6 +46,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   isLoading = false,
   showTemplate = false,
   setCreateTemplateType,
+  showCurrencyLogo = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -93,8 +95,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const { filteredAccounts, templates } = useMemo(() => {
     if (isSearchActive) {
-      const filteredAccounts = accountsList.filter((val) =>
-        val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()),
+      const filteredAccounts = accountsList.filter(
+        (val) =>
+          val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()) ||
+          val?.masked_account_number?.toLowerCase()?.includes(searchValue?.toLowerCase()),
       );
       const templates = templateList?.filter((val) => val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));
 
@@ -133,7 +137,6 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   const onSearchFocus = () => {
     setIsShowMenu(true);
-    setIsSearchActive(true);
     setShowSearch(true);
     inputRef.current?.focus();
   };
@@ -248,12 +251,13 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               {filteredAccounts.map((account, index) => (
                 <div key={`${account?.account_number}_${index}`} onMouseEnter={() => setHoveredIndex(index)}>
                   <AccountWithLogo
-                    className={cn('hover:bg-GRAY_100 rounded-md !p-2.5', {
+                    className={cn('rounded-md !p-2.5', {
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
                     name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
                     onClick={() => handleAccountSelect(account)}
-                    logo={DEFAULT_BANK}
+                    logo={account?.banking_partner ?? DEFAULT_BANK}
+                    currencyCode={showCurrencyLogo ? account?.currency_code : ''}
                   />
                 </div>
               ))}
@@ -290,7 +294,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   };
 
   return (
-    <div onFocus={!disabled ? onFocus : undefined} onKeyDown={handleKeyDown}>
+    <div onFocus={!disabled && !isShowMenu ? onFocus : undefined} onKeyDown={handleKeyDown}>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
         className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {
@@ -318,15 +322,16 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             />
           </div>
         ) : (
-          <div onFocus={!disabled ? onFocus : undefined}>
+          <div onFocus={!disabled && !isInputEnabled ? onFocus : undefined}>
             <AccountWithLogo
               className={cn('rounded-md !p-2.5', {
                 'bg-BACKGROUND_GRAY_2': disabled,
               })}
               name={accountName}
               onClick={!disabled ? onClickSelectedAccount : undefined}
-              logo={DEFAULT_BANK}
-              subtitle={accountDetails?.account_name}
+              logo={accountDetails?.banking_partner ?? DEFAULT_BANK}
+              currencyCode={showCurrencyLogo ? accountDetails?.currency_code : ''}
+              subtitle={accountDetails?.bank_name}
             />
           </div>
         )}

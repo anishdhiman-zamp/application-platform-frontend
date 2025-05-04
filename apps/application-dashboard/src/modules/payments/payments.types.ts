@@ -57,17 +57,21 @@ export const TEMPLATE_STATUS_TYPES = {
 };
 
 export enum PAYMENT_STATUS_TYPES {
-  PROPOSED = 'proposed',
-  FAILED = 'failed',
-  CREATED = 'created',
-  SUCCEEDED = 'succeeded',
-  APPROVED = 'approved',
-  PROCESSED = 'processed',
-  PARTNER_QUEUED = 'partner_queued',
-  BLOCKED = 'blocked',
+  BLOCKED = 'Blocked',
+  FAILED = 'Failed',
+  PENDING = 'Pending',
+  SUCCEEDED = 'Succeeded',
+  SENT_TO_BANK = 'Sent to Bank',
+  APPROVAL_PENDING = 'Approval Pending',
 }
 
 export const PAYMENT_TABS = {
   PAYMENT_DETAILS: 'payment-details',
   APPROVALS: 'approvals',
+};
+
+export const TEMPLATE_APPROVAL_ACTION_TYPES = {
+  APPROVE: 'approve',
+  REJECT: 'reject',
+  VIEW_ALL_APPROVALS: 'view-all-approvals',
 };

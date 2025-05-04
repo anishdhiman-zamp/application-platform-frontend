@@ -1,7 +1,8 @@
-import { FC, useEffect, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { AccountDetailsType, MOVE_MONEY_TYPE, TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';
+import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';
 import { Button } from '@/components/common/button/Button';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
@@ -24,6 +25,8 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
     dispatch,
     state: { sourceAccountDetails, currentStep, reset },
   } = useMoveMoneyContextStore();
+
+  const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
 
   const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({ recipient_id: recipientId });
   const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });
@@ -77,6 +80,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
             onTemplateSelect={handleTemplateSelect}
             isLoading={isLoading}
             showTemplate
+            setCreateTemplateType={setCreateTemplateType}
           />
         </div>
         <div className='flex gap-3 mt-10'>
@@ -98,6 +102,13 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
           </Button>
         </div>
       </div>
+      {createTemplateType && (
+        <CreateTemplatePopover
+          isOpen={!!createTemplateType}
+          onClose={() => setCreateTemplateType(null)}
+          paymentType={createTemplateType}
+        />
+      )}
     </div>
   );
 };

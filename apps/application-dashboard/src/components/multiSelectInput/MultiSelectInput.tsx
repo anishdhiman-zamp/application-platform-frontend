@@ -308,7 +308,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
                 }}
               >
-                <span className='f-12-500 text-GRAY_1000'>{item?.label}</span>
+                <span className='f-12-500 text-GRAY_1000 capitalize'>{item?.label}</span>
                 <SvgSpriteLoader
                   id='x-close'
                   iconCategory={ICON_SPRITE_TYPES.GENERAL}
