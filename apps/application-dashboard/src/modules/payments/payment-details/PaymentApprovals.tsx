@@ -40,6 +40,13 @@ const PaymentApprovals: FC<PaymentApprovalsProps> = ({ paymentApprovalsInfo, isE
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ApprovalSkeleton />}
+      isNoData={!paymentApprovalsInfo?.policy_evaluation_data?.approval_flow?.steps?.length}
+      noDataBanner={
+        <div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'>
+          <SvgSpriteLoader id='lightning-01' width={24} height={24} />
+          <div>No approvals found</div>
+        </div>
+      }
       className='overflow-auto'
     >
       <div className='w-full h-full overflow-auto bg-BACKGROUND_GRAY_2 py-4 text-GRAY_700'>

@@ -47,7 +47,9 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
                 onClick={() => handleTabSelect(tab.value)}
               >
                 <div className='f-12-500'>{tab.label}</div>
-                {tab.value === 'approvals' && <div className='w-1.5 h-1.5 rounded-full bg-ORANGE_700' />}
+                {tab.value === 'approvals' && paymentApprovalsInfo?.approval_id && (
+                  <div className='w-1.5 h-1.5 rounded-full bg-ORANGE_700' />
+                )}
               </div>
             ))}
           </div>
