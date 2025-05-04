@@ -61,7 +61,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
           amountDetails: {
             amount,
             processingMode: paymentProcessingMode,
-            currency: { label: 'USD', value: 'USD' },
+            currency: { label: sourceAccountDetails?.currency_code, value: sourceAccountDetails?.currency_code },
           },
         },
       });
@@ -114,7 +114,9 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
             inputFontClassName='!px-3 placeholder:text-base bg-white placeholder:!text-GRAY_500 placeholder:text-[13px] w-full'
             inputWrapperClassName='w-full '
           />
-          <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>USD</div>
+          <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>
+            {sourceAccountDetails?.currency_code}
+          </div>
         </div>
         <div className='w-full'>
           <div className='f-12-500 text-GRAY_900 mb-2'>Payment processing mode</div>

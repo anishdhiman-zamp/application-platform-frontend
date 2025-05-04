@@ -4,7 +4,7 @@ import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
-import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
@@ -14,6 +14,7 @@ import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
+import type { defaultFnType } from '@/types/commonTypes';
 import Input from 'components/common/input';
 
 type SelectBeneDropdownProps = {
@@ -29,7 +30,7 @@ type SelectBeneDropdownProps = {
   disabled?: boolean;
   isLoading?: boolean;
   showTemplate?: boolean;
-  setCreateTemplateType?: (type: MOVE_MONEY_TYPE | null) => void;
+  onCreateTemplate?: defaultFnType;
   showCurrencyLogo?: boolean;
 };
 
@@ -45,7 +46,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   disabled = false,
   isLoading = false,
   showTemplate = false,
-  setCreateTemplateType,
+  onCreateTemplate,
   showCurrencyLogo = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -364,7 +365,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             <div className='border-t border-GRAY_400 px-1'>
               <div
                 className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer rounded-md'
-                onClick={() => setCreateTemplateType?.(MOVE_MONEY_TYPE.SINGLE_TRANSFER)}
+                onClick={onCreateTemplate}
               >
                 <SvgSpriteLoader size={12} id='plus' />
                 Create template

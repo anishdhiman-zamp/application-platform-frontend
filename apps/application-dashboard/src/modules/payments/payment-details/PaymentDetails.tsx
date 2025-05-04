@@ -125,7 +125,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             {paymentDetails?.descriptors?.map((descriptor) => (
               <div key={descriptor.title}>
                 <div className='f-12-400 text-GRAY_700 w-44 mb-1.5'>{descriptor.title}</div>
-                {descriptor.description.map((description) => (
+                {descriptor?.description?.map((description) => (
                   <div className='f-12-450' key={description}>
                     {description}
                   </div>

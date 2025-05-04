@@ -80,7 +80,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
             onTemplateSelect={handleTemplateSelect}
             isLoading={isLoading}
             showTemplate
-            setCreateTemplateType={setCreateTemplateType}
+            onCreateTemplate={() => setCreateTemplateType(transferType)}
           />
         </div>
         <div className='flex gap-3 mt-10'>

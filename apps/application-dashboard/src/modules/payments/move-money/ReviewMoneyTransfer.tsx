@@ -8,7 +8,7 @@ import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useInitiatePaymentMutation } from '@/apis/payments';
 import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
@@ -80,7 +80,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           <div className='mb-4'>
             {recipientDetails?.name && <div className='f-14-450 mb-1'>Payment to {recipientDetails?.name}</div>}
             <div className='f-32-500'>
-              {amountDetails?.currency?.label} {Number(amountDetails?.amount)?.toLocaleString()}
+              {amountDetails?.currency?.label} {getCommaSeparatedNumber(amountDetails?.amount)}
             </div>
           </div>
           {showRecipientDetails && (
@@ -105,7 +105,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           )}
         </div>
         <div>
-          <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer from</div>
+          <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer from {sourceAccountDetails?.account_holder_name}</div>
           <AccountWithLogo
             className='border border-GRAY_400 mb-5 rounded-md'
             logo={DEFAULT_BANK}
@@ -127,7 +127,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
         <div className='flex flex-col gap-6'>
           {moreDetails?.externalMemo && (
             <div>
-              <div className='f-12-400 mb-1.5 text-GRAY_700'>External memo</div>
+              <div className='f-12-400 mb-1.5 text-GRAY_700'>Memo for recipient</div>
               <div className='f-12-450'>{moreDetails?.externalMemo}</div>
             </div>
           )}
