@@ -94,13 +94,10 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
         if (Array.isArray(attribute.defaultValue)) {
           defaultValues = attribute.defaultValue
             .map((value) => {
-              console.log('value', attribute.label, value, currentOptions);
-
               return currentOptions.find((option) => option.value === value);
             })
             .filter((value): value is SelectOption => value !== undefined);
         } else {
-          console.log('value', attribute.label, attribute.defaultValue, currentOptions);
           defaultValues = [currentOptions.find((option) => option.value === attribute.defaultValue)];
         }
       }

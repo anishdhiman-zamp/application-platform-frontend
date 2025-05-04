@@ -104,7 +104,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
   });
 
   const onSubmit = (data: PolicyFormData) => {
-    console.log('data', data);
     // Validate each field
     const errors: Record<string, string> = {};
 
@@ -112,11 +111,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       const fieldConfig = updatedAttributeMap[fieldName];
 
       if (fieldConfig?.validations) {
-        console.log('fieldConfig', fieldConfig, data[fieldName]);
-
         const { isValid, errors: fieldErrors } = validateField(data[fieldName], data, fieldConfig.validations);
-
-        console.log('isValid', isValid, fieldErrors);
 
         if (!isValid) {
           errors[fieldName] = fieldErrors[0];
@@ -162,7 +157,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
   };
 
   useEffect(() => {
-    console.log('createPolicyStatus', createPolicySuccess, createPolicyError, createPolicyLoading);
     if (!createPolicyLoading && !updatePolicyLoading) {
       toast.dismiss(messageToastId.current);
     }
