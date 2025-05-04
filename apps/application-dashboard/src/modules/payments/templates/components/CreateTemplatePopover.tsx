@@ -107,7 +107,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         isNextButtonDisabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
         nextButtonClassName='!min-w-[62px]'
       >
-        <div className='flex flex-col gap-5 w-[300px] mx-auto min-h-[600px]'>
+        <div className='flex flex-col gap-5 w-[300px] mx-auto min-h-[400px]'>
           <div className='flex items-end gap-2'>
             <Input
               id='ADD_ACCOUNT_SEARCH_BANK'

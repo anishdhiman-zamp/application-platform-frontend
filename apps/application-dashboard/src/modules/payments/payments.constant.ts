@@ -167,3 +167,9 @@ export const TEMPLATE_APPROVAL_ACTION_ITEMS = [
     },
   },
 ];
+
+export enum APPROVAL_TYPE {
+  TEAM = 'team',
+  USER = 'user',
+  ORGANIZATION = 'organization',
+}

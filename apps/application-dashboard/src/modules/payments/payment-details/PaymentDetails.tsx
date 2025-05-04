@@ -57,8 +57,9 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<PaymentDetailsSkeleton />}
+      className='overflow-auto pb-10'
     >
-      <div className='overflow-auto pb-10'>
+      <div>
         <div className='f-12-450 pt-6 pb-5 px-6 border-b border-GRAY_400'>
           <div className=' mb-1 text-GRAY_700'>
             {format(
@@ -68,7 +69,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
           </div>
           <div className='f-28-450'>
             {CURRENCY_SYMBOLS[paymentDetails?.currency as keyof typeof CURRENCY_SYMBOLS] ?? paymentDetails?.currency}{' '}
-            {getCommaSeparatedNumber(paymentDetails?.amount)}
+            {getCommaSeparatedNumber(paymentDetails?.amount, 2)}
           </div>
           <div
             className={cn(

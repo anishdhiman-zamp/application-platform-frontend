@@ -343,6 +343,7 @@ export const BANK_NAME_ICON_MAPPING: Record<string, { name: string; icon: string
   BOH: { name: 'Bank of Hawaii', icon: DEFAULT_BANK },
   DBS_HK: { name: 'DBS HONGKONG', icon: DEFAULT_BANK },
   JPMC_KSA: { name: 'JP Morgan Chase Bank N.A. Riyadh Branch', icon: CHASE_SVG },
+  JPMC: { name: 'JPMC', icon: CHASE_SVG },
 };
 
 export enum PIVOT_DATA_EXPORT_FORMAT {

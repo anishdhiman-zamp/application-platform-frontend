@@ -20,7 +20,7 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
     if (value) setCurrentTab(value);
   };
 
-  const { data: paymentApprovalsInfo } = useGetPaymentApprovalsInfoQuery('109fa994-2664-419d-8c84-2470e707f320');
+  const { data: paymentApprovalsInfo } = useGetPaymentApprovalsInfoQuery(paymentDetailsId);
 
   const renderTabContent = () => {
     switch (currentTab) {
