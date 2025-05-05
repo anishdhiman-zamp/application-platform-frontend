@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, RefObject, useCallback, useMemo } from 'react';
+import { FC, ReactNode, RefObject, useCallback, useMemo } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -174,7 +174,7 @@ const Table: FC<TableProps> = ({
       headerClass: 'f-12-600 text-GRAY_1000',
       cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : ''}`,
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
-      suppressSizeToFit: true,
+      flex: 1,
       cellStyle: (params: MapAny) => {
         if (!params.node?.__hasChildren && params.node?.parent?.key) {
           return { backgroundColor: COLORS.BACKGROUND_GRAY_2 };
