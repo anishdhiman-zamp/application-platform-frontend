@@ -4,7 +4,7 @@ import { ChevronDown, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
 import { SizeType } from '@zamp-platform/ui/types';
-import { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 export interface SelectOption {
   label: string;
@@ -27,7 +27,7 @@ export interface SelectProps {
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;
 }
 
-const Select = React.forwardRef<HTMLInputElement, SelectProps>(
+const Select = forwardRef<HTMLInputElement, SelectProps>(
   (
     {
       options: initialOptions,
