@@ -12,31 +12,33 @@ interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitiv
   onOpenChange?: (open: boolean) => void;
 }
 
-const Sheet = React.forwardRef<HTMLDivElement, SheetProps>(({ open, onOpenChange, ...props }, ref) => {
-  const [isAnimating, setIsAnimating] = useState(false);
+const Sheet = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Root>, SheetProps>(
+  ({ onOpenChange, open, ...props }) => {
+    const [isAnimating, setIsAnimating] = useState(false);
 
-  useEffect(() => {
-    if (open !== undefined) {
-      setIsAnimating(open);
-    }
-  }, [open]);
+    useEffect(() => {
+      if (open !== undefined) {
+        setIsAnimating(open);
+      }
+    }, [open]);
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      setIsAnimating(true);
-    } else {
-      setIsAnimating(false);
-      // Wait for animation to complete before setting isOpen to false
-      setTimeout(() => {
-        if (onOpenChange) {
-          onOpenChange(false);
-        }
-      }, 300); // Match this with your animation duration
-    }
-  };
+    const handleOpenChange = (newOpen: boolean) => {
+      if (newOpen) {
+        setIsAnimating(true);
+      } else {
+        setIsAnimating(false);
+        // Wait for animation to complete before setting isOpen to false
+        setTimeout(() => {
+          if (onOpenChange) {
+            onOpenChange(false);
+          }
+        }, 300); // Match this with your animation duration
+      }
+    };
 
-  return <SheetPrimitive.Root open={isAnimating} onOpenChange={handleOpenChange} {...props} />;
-});
+    return <SheetPrimitive.Root open={isAnimating} onOpenChange={handleOpenChange} {...props} />;
+  },
+);
 Sheet.displayName = SheetPrimitive.Root.displayName;
 
 const SheetTrigger = SheetPrimitive.Trigger;
