@@ -7,9 +7,10 @@ import { FormField as FormFieldType } from '../types';
 interface TextFieldProps {
   field: FormFieldType;
   name: string;
+  className?: string;
 }
 
-export const TextField: React.FC<TextFieldProps> = ({ field, name }) => {
+export const TextField: React.FC<TextFieldProps> = ({ field, name, className }) => {
   const { control, clearErrors } = useFormContext();
 
   return (
@@ -17,7 +18,7 @@ export const TextField: React.FC<TextFieldProps> = ({ field, name }) => {
       name={name}
       control={control}
       render={({ field: { onChange, value, ref, onBlur }, fieldState }) => (
-        <div className='space-y-2'>
+        <div className={`space-y-2 ${className}`}>
           <Input
             placeholder={field.placeholder || field.label}
             id={name}

@@ -13,17 +13,17 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields }) => 
     <div className='form-section flex flex-col gap-5'>
       <div className='flex flex-col gap-2'>
         <Label>{section.title}</Label>
-        <div className='flex flex-col gap-1.5'>
+        <div className='grid'>
           {section.layout.map((row, rowIdx) => (
             <div key={rowIdx} className='flex w-full gap-2'>
-              {row.map(({ field, colSpan }) =>
+              {row.map(({ field, col_span }) =>
                 fields[field]?.type ? (
                   <div
                     key={field}
-                    style={{ flexBasis: `${(colSpan / 8) * 100}%`, maxWidth: `${(colSpan / 8) * 100}%` }}
+                    style={{ flexBasis: `${(col_span / 8) * 100}%`, maxWidth: `${(col_span / 8) * 100}%` }}
                     className='flex-1'
                   >
-                    <FormField field={fields[field]} name={field} />
+                    <FormField className='mb-2' field={fields[field]} name={field} />
                   </div>
                 ) : null,
               )}
@@ -31,13 +31,6 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields }) => 
           ))}
         </div>
       </div>
-      {section.sections && (
-        <div className='nested-sections flex flex-col gap-5'>
-          {section.sections.map((nestedSection) => (
-            <FormSection key={nestedSection.id} section={nestedSection} fields={fields} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

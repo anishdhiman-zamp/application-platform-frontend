@@ -1,3 +1,4 @@
+import { Label } from '@zamp-platform/ui';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -17,7 +18,7 @@ export interface FormBuilderRef {
 export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schema, onSubmit }, ref) => {
   // Build defaultValues from schema.fields
   const defaultValues = Object.fromEntries(
-    Object.entries(schema.fields).map(([key, field]) => [key, field.defaultValue]),
+    Object.entries(schema.fields).map(([key, field]) => [key, field.default_value]),
   );
 
   const methods = useForm({
@@ -36,7 +37,16 @@ export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schem
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className='flex flex-col gap-5 pb-5'>
         {schema.sections.map((section) => (
-          <FormSection key={section.id} section={section} fields={schema.fields} />
+          <div className='form-section flex flex-col gap-5'>
+            <Label>{section.title}</Label>
+            {section.sections && (
+              <div className='nested-sections flex flex-col gap-5'>
+                {section.sections.map((nestedSection) => (
+                  <FormSection key={nestedSection.id} section={nestedSection} fields={schema.fields} />
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </form>
     </FormProvider>

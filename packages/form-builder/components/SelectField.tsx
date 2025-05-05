@@ -8,11 +8,12 @@ import { fetchDataSource } from '../utils/dataSource';
 interface SelectFieldProps {
   field: FormFieldType;
   name: string;
+  className?: string;
 }
 
 const PAGE_SIZE = 10;
 
-export const SelectField: React.FC<SelectFieldProps> = ({ field, name }) => {
+export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className }) => {
   const { control, watch } = useFormContext();
 
   const dependentFields = field.data_source?.triggers?.map((trigger) => trigger.field) || [];
@@ -84,7 +85,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name }) => {
       name={name}
       control={control}
       render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
-        <div className='space-y-2'>
+        <div className={`space-y-2 ${className}`}>
           <div className='relative'>
             <Select
               options={

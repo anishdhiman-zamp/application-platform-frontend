@@ -35,7 +35,6 @@ export interface DataSource {
 }
 
 export interface Condition {
-  logical_operator: '' | 'AND' | 'OR' | null;
   field: string;
   operator: 'in' | 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte';
   value: string | string[];
@@ -55,6 +54,18 @@ export interface ValidationDependency {
   }>;
 }
 
+export interface FieldConfig {
+  default_value?: string;
+  label?: string;
+  should_show?: boolean;
+  options?: SelectOption[];
+}
+
+export interface DisplayDependency {
+  fields: string[];
+  expressions: Array<Expression & { config: FieldConfig }>;
+}
+
 export type FieldType = 'text' | 'select' | 'input' | 'multi-select';
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
@@ -72,25 +83,36 @@ export interface FormField {
   type: FieldType;
   label: string;
   placeholder?: string;
-  defaultValue?: any;
+  default_value?: any;
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
   options?: SelectOption[];
   data_source?: DataSource;
+  display_dependencies?: DisplayDependency[];
 }
 
 export interface FormSection {
   id: string;
   title?: string;
+  layout: Array<Array<FormSectionLayout>>;
+}
+
+export interface FormSectionLayout {
+  field: string;
+  col_span: number;
+}
+
+export interface OuterFormSection {
+  id: string;
+  title?: string;
   sections?: FormSection[];
-  layout: Array<Array<{ field: string; colSpan: number }>>;
 }
 
 export interface FormSchema {
   id: string;
   type: string;
-  sections: FormSection[];
+  sections: OuterFormSection[];
   fields: Record<string, FormField>;
 }
 
@@ -134,7 +156,7 @@ export const formSectionSchema: z.ZodType<FormSection> = z.object({
     z.array(
       z.object({
         field: z.string(),
-        colSpan: z.number(),
+        col_span: z.number(),
       }),
     ),
   ),

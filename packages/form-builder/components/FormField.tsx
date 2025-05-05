@@ -1,5 +1,7 @@
+import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 
+import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { FormField as FormFieldType } from '../types';
 import { SelectField } from './SelectField';
 import { TextField } from './TextField';
@@ -7,15 +9,41 @@ import { TextField } from './TextField';
 interface FormFieldProps {
   field: FormFieldType;
   name: string;
+  className?: string;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name }) => {
-  switch (field.type) {
-    case 'text':
-      return <TextField field={field} name={name} />;
-    case 'select':
-      return <SelectField field={field} name={name} />;
-    default:
-      return null;
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) => {
+  const { shouldShow, fieldConfig } = useDisplayDependencies(field);
+
+  if (!shouldShow) {
+    return null;
   }
+
+  const fieldWithConfig = {
+    ...field,
+    label: fieldConfig?.label || field.label,
+    default_value: fieldConfig?.default_value || field.default_value,
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        {(() => {
+          switch (fieldWithConfig.type) {
+            case 'text':
+              return <TextField className={className} field={fieldWithConfig} name={name} />;
+            case 'select':
+              return <SelectField className={className} field={fieldWithConfig} name={name} />;
+            default:
+              return null;
+          }
+        })()}
+      </motion.div>
+    </AnimatePresence>
+  );
 };
