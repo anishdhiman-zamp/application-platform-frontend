@@ -375,7 +375,7 @@ export const getValueFormatter = (
 const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
-  const date = new Date(value);
+  const date = new Date(createDateObjectFromUTCString(value));
 
   return isValid(date) ? format(date, validDateFormat) : value;
 };
