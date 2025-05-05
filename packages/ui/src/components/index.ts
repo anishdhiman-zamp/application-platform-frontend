@@ -1,6 +1,5 @@
 // Re-export all components
 export * from './ui/button';
-export * from './ui/input';
 export * from './ui/tabs';
 export * from './ui/tooltip';
 export * from './ui/dropdown-menu';
@@ -9,4 +8,10 @@ export * from './ui/attribute';
 export * from './ui/checkbox';
 export * from './ui/step-card';
 export * from './ui/sheet';
+export * from './ui/input';
+export * from './ui/label';
+export * from './ui/select';
+export * from './ui/skeleton';
 export * from './ui/tags';
+export * from './ui/list-card';
+export * from './ui/popover';

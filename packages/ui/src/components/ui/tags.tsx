@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@zamp-platform/ui/lib/utils';
 
 const tagVariants = cva(
-  'inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border gap-1 select-none border-transparent text-primary',
+  'inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary',
   {
     variants: {
       variant: {
@@ -15,6 +15,7 @@ const tagVariants = cva(
         outline: 'bg-transparent border-gray-400',
         ghost: 'bg-transparent',
         pink: 'bg-pink-100',
+        gray: 'bg-gray-50 text-gray-900',
       },
     },
     defaultVariants: {

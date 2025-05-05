@@ -1,8 +1,8 @@
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/utils';
 import { SizeType } from '@zamp-platform/ui/types';
-import { cva, VariantProps } from 'class-variance-authority';
 
 const inputVariants = cva(
   'p-3 flex w-full rounded-md border border-gray-400 placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white file:border-0 file:bg-transparent file:text-sm file:font-medium outline-none disabled:cursor-not-allowed disabled:opacity-50',
