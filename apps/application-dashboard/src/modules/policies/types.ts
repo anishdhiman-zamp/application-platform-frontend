@@ -59,9 +59,9 @@ export interface CreatePolicyConfigPayload {
   action: string;
   approval_flow?: {
     steps: Array<{
-      logical_operator: string;
+      logical_operator: LOGICAL_OPERATOR_CONDITIONS;
       conditions: Array<{
-        mode: string;
+        mode: PolicyQuorum;
         approver_details: Array<{
           type: string;
           id: string;

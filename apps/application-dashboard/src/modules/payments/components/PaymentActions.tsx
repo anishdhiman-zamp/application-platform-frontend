@@ -15,10 +15,7 @@ const PaymentActions = () => {
   const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
   const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState<boolean>(false);
   const [policyType, setPolicyType] = useState<PolicyDialogType>('template');
-  const [sideDrawerConfig, setSideDrawerConfig] = useState<{
-    type: PolicyDialogType;
-    policies: PolicyDetailsType[];
-  }>();
+  const [sideDrawerConfig, setSideDrawerConfig] = useState<PolicyDialogType>();
 
   const handlePolicyDialogOpenChange = (type: PolicyDialogType) => {
     setIsPolicyDialogOpen(true);
@@ -70,12 +67,7 @@ const PaymentActions = () => {
                 variant='ghost'
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
-                onClick={() =>
-                  setSideDrawerConfig({
-                    type: 'template',
-                    policies: templatePolicies,
-                  })
-                }
+                onClick={() => setSideDrawerConfig('template')}
                 disabled={templatePolicies.length === 0}
               >
                 {templatePolicies.length} policies
@@ -98,12 +90,7 @@ const PaymentActions = () => {
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
                 disabled={paymentPolicies.length === 0}
-                onClick={() =>
-                  setSideDrawerConfig({
-                    type: 'payout',
-                    policies: paymentPolicies,
-                  })
-                }
+                onClick={() => setSideDrawerConfig('payout')}
               >
                 {paymentPolicies.length} policies
               </Button>
@@ -119,8 +106,8 @@ const PaymentActions = () => {
         <PoliciesListSideDrawer
           isOpen={!!sideDrawerConfig}
           onClose={handlePolicyListClose}
-          policies={sideDrawerConfig.policies}
-          type={sideDrawerConfig.type}
+          policies={sideDrawerConfig === 'payout' ? paymentPolicies : templatePolicies}
+          type={sideDrawerConfig}
           handlePolicyDialogOpenChange={handlePolicyDialogOpenChange}
         />
       )}

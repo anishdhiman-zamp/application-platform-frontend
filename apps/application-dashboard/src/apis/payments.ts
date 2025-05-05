@@ -110,8 +110,8 @@ const Payments = baseApi.injectEndpoints({
         ),
         method: REQUEST_TYPES.PATCH,
         body: { config, name },
-        invalidatesTags: [APITags.GET_POLICY_LIST],
       }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
       query: ({ templateFor, ...body }) => ({

@@ -7,12 +7,10 @@ import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
 import { attributesMap } from 'modules/policies/create/constants';
-import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData, PolicyQuorum } from 'modules/policies/types';
+import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData } from 'modules/policies/types';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
-import { LOGICAL_OPERATOR_CONDITIONS } from '@/modules/widgets/displayConfig/displayConfig.types';
-import { ResourceAudienceType } from '@/types/api/auth.types';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 
 const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePolicyDialogProps) => {
@@ -63,33 +61,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
   const methods = useForm<PolicyFormData>({
     defaultValues: {
       policyName: policyData?.name || '',
-      approvalSteps: policyData?.policy_configurations.approval_flow?.steps.map((step) => ({
-        logical_operator: step.logical_operator as LOGICAL_OPERATOR_CONDITIONS,
-        conditions: step.conditions.map((condition) => ({
-          mode: condition.mode as PolicyQuorum,
-          approver_details: condition.approver_details.map((approver) => {
-            const creatorAttribute = updatedAttributeMap.creator;
-
-            if ('data_source' in creatorAttribute && creatorAttribute.data_source?.valueFormatter) {
-              const formatter = creatorAttribute.data_source.valueFormatter;
-
-              return formatter([
-                {
-                  resource_audience_id: approver.id,
-                  resource_audience_type: approver.type,
-                  name: approver.id,
-                },
-              ])[0];
-            }
-
-            return {
-              type: approver.type as ResourceAudienceType,
-              id: approver.id,
-              label: approver.id,
-            };
-          }),
-        })),
-      })) || [DEFAULT_APPROVAL_STEP],
+      approvalSteps: policyData?.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
       creator: [],
       ...getAttributes(type)
         .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')

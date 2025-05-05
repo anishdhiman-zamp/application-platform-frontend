@@ -15,7 +15,8 @@ type PolicyDeleteConfirmPopupProps = {
 const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, onClose, policy }) => {
   const [deletePolicy, { isLoading }] = useDeletePolicyMutation();
 
-  const handleDeletePolicy = () => {
+  const handleDeletePolicy = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     deletePolicy(policy.id)
       .unwrap()
       .then(() => {
@@ -47,7 +48,14 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>
-          <Button size='small' variant='secondary' onClick={() => onClose()}>
+          <Button
+            size='small'
+            variant='secondary'
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
             No
           </Button>
           <Button size='small' onClick={handleDeletePolicy} isLoading={isLoading} variant='destructive'>

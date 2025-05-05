@@ -14,35 +14,32 @@ const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuTrigger
+          className='focus-visible:ring-0 focus-visible:ring-offset-0'
+          onClick={(e) => e.stopPropagation()}
+        >
           <Ellipsis size={14} className='cursor-pointer' />
         </DropdownMenuTrigger>
         <DropdownMenuContent className='z-[1001] max-h-60 overflow-y-auto' align='end'>
-          <DropdownMenuItem className='hover:bg-gray-100 rounded-md'>
-            <div
-              className='flex gap-1.5 text-primary flex-1 f-12-500 items-center'
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditPolicyDialogOpen(true);
-              }}
-              key='edit-policy'
-            >
-              <SvgSpriteLoader id='edit-03' size={12} />
-              <span>Edit</span>
-            </div>
+          <DropdownMenuItem
+            className='hover:bg-gray-100 rounded-md flex gap-1.5 text-primary flex-1 f-12-500 items-center'
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditPolicyDialogOpen(true);
+            }}
+          >
+            <SvgSpriteLoader id='edit-03' size={12} />
+            <span>Edit</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className='hover:bg-gray-100 rounded-md'>
-            <div
-              className='flex gap-1.5 text-red-800 flex-1 f-12-500 items-center'
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDeleteConfirmPopupOpen(true);
-              }}
-              key='delete-policy'
-            >
-              <SvgSpriteLoader id='trash-03' size={12} />
-              <span>Delete</span>
-            </div>
+          <DropdownMenuItem
+            className='hover:bg-gray-100 rounded-md flex gap-1.5 text-red-800 flex-1 f-12-500 items-center'
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDeleteConfirmPopupOpen(true);
+            }}
+          >
+            <SvgSpriteLoader id='trash-03' size={12} />
+            <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
