@@ -1,0 +1,140 @@
+export const PAGES_ITEMS = [
+  {
+    label: 'Daily Liquidity Summary',
+    iconId: 'notebook',
+  },
+  {
+    label: 'Cash Summary',
+    iconId: 'notebook',
+  },
+  {
+    label: 'Bank Account Balances',
+    iconId: 'notebook',
+  },
+  {
+    label: 'Cash Positioning',
+    iconId: 'notebook',
+  },
+];
+
+export const WORKSPACE_ITEMS = [
+  {
+    label: 'Reconciliation',
+    workspace_id: 'reconciliation',
+    color: '#40A97F',
+  },
+  {
+    label: 'Cash Management',
+    workspace_id: 'cash-management',
+    color: '#0052D6',
+  },
+  {
+    label: 'Financial Forecasting',
+    workspace_id: 'financial-forecasting',
+    color: '#BF0000',
+  },
+];
+
+export const barGraphInstance = {
+  instance_id: 'currency_volume_analysis',
+  widget_id: 1,
+  type: 'bar',
+  title: 'Transaction Volume by Currency',
+  data_mappings: {
+    datasets: [
+      {
+        id: 'CashOpsBankTransactions',
+      },
+    ],
+    mappings: {
+      x_axis: {
+        field: 'CurrencyCode',
+      },
+      y_axis: {
+        field: 'IntegerAmount',
+        aggregation: 'sum',
+      },
+    },
+  },
+  visual_config: {},
+};
+
+export const barGraphData = {
+  result: [
+    {
+      status: 'success',
+      error: null,
+      rowcount: 5,
+      columns: [
+        {
+          column_name: 'CurrencyCode',
+          column_type: 'STRING',
+        },
+        {
+          column_name: 'SUM(IntegerAmount)',
+          column_type: 'NUMBER',
+        },
+      ],
+      data: [
+        {
+          CurrencyCode: 'USD',
+          IntegerAmount: 1543437.0,
+          IntegerAmountV2: 1543437.0,
+        },
+        {
+          CurrencyCode: 'EUR',
+          IntegerAmount: 756909.0,
+          IntegerAmountV2: 756909.0,
+        },
+        {
+          CurrencyCode: 'GBP',
+          IntegerAmount: 432224.0,
+          IntegerAmountV2: 432224.0,
+        },
+        {
+          CurrencyCode: 'JPY',
+          IntegerAmount: 234567.0,
+          IntegerAmountV2: 234567.0,
+        },
+        {
+          CurrencyCode: 'AED',
+          IntegerAmount: 123456.0,
+          IntegerAmountV2: 123456.0,
+        },
+      ],
+    },
+  ],
+};
+
+export const PROCESSES = [
+  {
+    id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    display_name: 'Accounts Payable',
+    organization_id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8254',
+    metadata: {
+      sql_template: 'SELECT COUNT(*) FROM $1 WHERE $2 = $3',
+      view_name: 'PO',
+    },
+    process_type: 'ACCOUNTS_PAYABLE',
+    fractional_index: 1.0,
+    created_by: 'b7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    created_at: '2025-04-25T12:00:00Z',
+    updated_at: '2025-04-25T12:30:00Z',
+    deleted_at: null,
+  },
+  {
+    id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8256',
+    display_name: 'Accounts Receivable',
+    organization_id: 'e7c6f4d2-3c76-4f2b-9a85-1248c08c8254',
+    metadata: {
+      sql_template: 'SELECT COUNT(*) FROM $1 WHERE $2 = $3',
+      view_name: 'Invoices',
+    },
+    process_type: 'ACCOUNTS_RECEIVABLE',
+    fractional_index: 1.0,
+    created_by: 'b7c6f4d2-3c76-4f2b-9a85-1248c08c8255',
+    created_at: '2025-04-25T12:00:00Z',
+    updated_at: '2025-04-25T12:30:00Z',
+    deleted_at: null,
+  },
+];

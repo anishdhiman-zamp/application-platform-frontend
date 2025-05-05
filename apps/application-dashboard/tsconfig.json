@@ -1,0 +1,15 @@
+{
+  "extends": "@zamp-platform/config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src/",
+    "paths": {
+      "@/*": ["*"]
+    },
+    "incremental": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
