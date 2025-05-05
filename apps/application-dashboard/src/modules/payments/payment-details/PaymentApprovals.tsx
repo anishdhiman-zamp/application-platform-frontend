@@ -42,12 +42,12 @@ const PaymentApprovals: FC<PaymentApprovalsProps> = ({ paymentApprovalsInfo, isE
       loader={<ApprovalSkeleton />}
       isNoData={!paymentApprovalsInfo?.policy_evaluation_data?.approval_flow?.steps?.length}
       noDataBanner={
-        <div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'>
+        <div className='flex items-center gap-2.5 h-[calc(100%-72px)] justify-center text-GRAY_700 f-12-450 mt-10'>
           <SvgSpriteLoader id='lightning-01' width={24} height={24} />
           <div>No approvals found</div>
         </div>
       }
-      className='overflow-auto'
+      className='overflow-auto h-[calc(100%-72px)]'
     >
       <div className='w-full h-full overflow-auto bg-BACKGROUND_GRAY_2 py-4 text-GRAY_700'>
         <div className='px-5'>

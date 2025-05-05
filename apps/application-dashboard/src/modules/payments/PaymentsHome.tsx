@@ -200,7 +200,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn);
+      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn, 'date', 'desc');
 
       if (columns?.length > 0) {
         setColumns(columns);

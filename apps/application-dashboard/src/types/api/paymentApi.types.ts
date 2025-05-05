@@ -92,6 +92,7 @@ export type InitiatePaymentPayloadType = {
   statement_descriptor: string;
   notes?: string[];
   attachments?: { file_upload_id: string }[];
+  template_id?: string;
 };
 
 export type SourceAccountByRecipientIdPayloadType = {

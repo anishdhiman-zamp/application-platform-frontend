@@ -98,6 +98,11 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_APPROVALS_INFO_GET, { paymentId }),
       }),
     }),
+    getTemplateApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
+      query: (templateId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_TEMPLATE_APPROVALS_INFO_GET, { templateId }),
+      }),
+    }),
   }),
 });
 
@@ -116,4 +121,5 @@ export const {
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
   useGetPaymentApprovalsInfoQuery,
+  useGetTemplateApprovalsInfoQuery,
 } = Payments;
