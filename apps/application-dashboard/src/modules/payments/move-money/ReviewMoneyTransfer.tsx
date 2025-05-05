@@ -28,6 +28,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
       amountDetails,
       moreDetails,
       currentStep,
+      templateDetails,
     },
   } = useMoveMoneyContextStore();
   const [initiatePayment, { isLoading }] = useInitiatePaymentMutation();
@@ -60,6 +61,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
       statement_descriptor: moreDetails?.externalMemo ?? '',
       notes: moreDetails?.note ? [moreDetails?.note] : [],
       attachments: moreDetails?.attachments?.map((attachment) => ({ file_upload_id: attachment?.identifier })),
+      template_id: templateDetails?.id,
     })
       .unwrap()
       .then(() => {
@@ -80,7 +82,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           <div className='mb-4'>
             {recipientDetails?.name && <div className='f-14-450 mb-1'>Payment to {recipientDetails?.name}</div>}
             <div className='f-32-500'>
-              {amountDetails?.currency?.label} {getCommaSeparatedNumber(amountDetails?.amount)}
+              {amountDetails?.currency?.label} {getCommaSeparatedNumber(Number(amountDetails?.amount), 2)}
             </div>
           </div>
           {showRecipientDetails && (

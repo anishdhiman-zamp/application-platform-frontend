@@ -7,7 +7,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
-import { cn, getCommaSeparatedNumber } from '@/utils/common';
+import { cn, createDateObjectFromUTCString, getCommaSeparatedNumber } from '@/utils/common';
 
 type PaymentDetailsProps = {
   paymentDetailsId: string;
@@ -70,7 +70,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
         <div className='f-12-450 pt-6 pb-5 px-6 border-b border-GRAY_400'>
           <div className=' mb-1 text-GRAY_700'>
             {format(
-              paymentDetails?.date ? new Date(paymentDetails?.date) : new Date(),
+              paymentDetails?.date ? createDateObjectFromUTCString(paymentDetails?.date) : new Date(),
               `${DATE_FORMATS.dd_MMM_yyyy} 'at' ${DATE_FORMATS.HMMAAA}`,
             )}
           </div>

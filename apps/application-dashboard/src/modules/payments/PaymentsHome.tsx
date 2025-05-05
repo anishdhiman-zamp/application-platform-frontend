@@ -4,7 +4,6 @@ import {
   ColumnMovedEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
-  IServerSideGetRowsRequest,
   RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -23,7 +22,6 @@ import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/s
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
-import { DatasetDataResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn, MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -52,7 +50,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
-  const firstLoadDone = useRef(false); // Track if first load is done
 
   const filters = useSearchParams().get('filters');
   const appDispatch = useAppDispatch();
@@ -70,7 +67,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
   const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(false);
   const [paymentDetailsId, setPaymentDetailsId] = useState<string>('');
@@ -93,14 +89,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        if (!parameters.request.sortModel?.length) {
-          parameters.request.sortModel = [
-            {
-              colId: 'date',
-              sort: 'desc',
-            },
-          ];
-        }
         const filtersFromZampIds = {
           column: '_zamp_id',
           operator: CONDITION_OPERATOR_TYPE.IN,
@@ -115,40 +103,31 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
           zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
         );
 
-        if (!firstLoadDone.current && cachedDatasetData && cachedDatasetData?.data?.rows?.length > 0) {
-          // Use Cached Data for First Load
-          firstLoadDone.current = true; // Mark first load as done
-          parameters.success({
-            rowData: cachedDatasetData?.data?.rows,
-            ...(parameters.request.startRow === 0 ? { rowCount: cachedDatasetData?.data?.total_count } : {}),
-          });
-        } else {
-          getPaymentList({
-            query_config: queryConfig,
-          })
-            .unwrap()
-            .then((response) => {
-              if (parameters.request.startRow === 0) {
-                setDatasetTitle(response?.title);
-                setTotalRows(response?.data?.total_count);
-                setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
-                dispatch({
-                  type: filtersContextActions.SET_TOTAL_ROWS,
-                  payload: { totalRows: response?.data?.total_count },
-                });
-              }
-              parameters.success({
-                rowData: response?.data?.rows,
-                ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
+        getPaymentList({
+          query_config: queryConfig,
+        })
+          .unwrap()
+          .then((response) => {
+            if (parameters.request.startRow === 0) {
+              setDatasetTitle(response?.title);
+              setTotalRows(response?.data?.total_count);
+              setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
+              dispatch({
+                type: filtersContextActions.SET_TOTAL_ROWS,
+                payload: { totalRows: response?.data?.total_count },
               });
-            })
-            .catch(() => {
-              parameters.fail();
+            }
+            parameters.success({
+              rowData: response?.data?.rows,
+              ...(parameters.request.startRow === 0 ? { rowCount: response?.data?.total_count } : {}),
             });
-        }
+          })
+          .catch(() => {
+            parameters.fail();
+          });
       },
     };
-  }, [getPaymentList, id, zampIds, cachedDatasetData]);
+  }, [getPaymentList, id, zampIds]);
 
   const handleRowClicked = (event: RowClickedEvent) => {
     setPaymentDetailsId(event?.data?.payment_id);
@@ -200,7 +179,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn);
+      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn, 'date', 'desc');
 
       if (columns?.length > 0) {
         setColumns(columns);
@@ -243,38 +222,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
       appDispatch(addBreadcrumb([datasetTitle]));
     }
   }, [datasetTitle, breadcrumbStack]);
-
-  useEffect(() => {
-    if (filters) return;
-    const filtersFromZampIds = {
-      column: '_zamp_id',
-      operator: CONDITION_OPERATOR_TYPE.IN,
-      value: zampIds,
-    };
-    const queryConfig = getEncodedRequest(
-      {} as IServerSideGetRowsRequest,
-      '',
-      false,
-      false,
-      false,
-      zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
-    );
-
-    getPaymentList({
-      query_config: queryConfig,
-    })
-      .unwrap()
-      .then((response) => {
-        setDatasetTitle(response?.title);
-        setTotalRows(response?.data?.total_count);
-        setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
-        setCachedDatasetData(response);
-        dispatch({
-          type: filtersContextActions.SET_TOTAL_ROWS,
-          payload: { totalRows: response?.data?.total_count },
-        });
-      });
-  }, [filters]);
 
   return (
     <>

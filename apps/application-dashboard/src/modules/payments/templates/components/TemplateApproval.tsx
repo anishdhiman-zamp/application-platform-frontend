@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import ApproveActionCard from 'modules/payments/payment-details/components/ApproveActionCard';
 import PaymentApprovals from 'modules/payments/payment-details/PaymentApprovals';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
-import { useGetPaymentApprovalsInfoQuery } from '@/apis/payments';
+import { useGetTemplateApprovalsInfoQuery } from '@/apis/payments';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import type { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
@@ -18,7 +18,7 @@ const TemplateApproval: FC<TemplateApprovalProps> = ({ template, onBackClick }) 
     isLoading: isPaymentApprovalsInfoLoading,
     isError,
     refetch,
-  } = useGetPaymentApprovalsInfoQuery(template?.policy_result_id || '');
+  } = useGetTemplateApprovalsInfoQuery(template?.id || '');
 
   return (
     <div className='py-6 h-full flex flex-col '>

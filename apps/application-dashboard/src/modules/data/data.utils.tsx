@@ -1,5 +1,5 @@
 import { RefObject } from 'react';
-import { ColDef, IServerSideGetRowsRequest, ValueFormatterParams } from 'ag-grid-community';
+import { ColDef, IServerSideGetRowsRequest, type SortDirection, ValueFormatterParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
@@ -83,6 +83,8 @@ export const formatColumns = (
   handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
   tableRef: RefObject<AgGridReact>,
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
+  sortColumn?: string,
+  sortOrder?: string,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -100,6 +102,7 @@ export const formatColumns = (
       editable: column?.metadata?.is_editable && !isInitiatedAction,
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
+      sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,
       filterParams: {
         values: column?.options,
       },
@@ -372,7 +375,7 @@ export const getValueFormatter = (
 const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
-  const date = new Date(value);
+  const date = new Date(createDateObjectFromUTCString(value));
 
   return isValid(date) ? format(date, validDateFormat) : value;
 };

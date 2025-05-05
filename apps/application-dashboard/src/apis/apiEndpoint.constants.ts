@@ -72,6 +72,7 @@ export const API_ENDPOINTS = {
   PAYMENTS_INITIATE_PAYMENT_POST: `payments/`,
   PAYMENTS_CONFIG_GET: `payments/config`,
   PAYMENTS_APPROVALS_INFO_GET: `payments/{{paymentId}}/approvals-info`,
+  PAYMENTS_TEMPLATE_APPROVALS_INFO_GET: `payments/templates/{{templateId}}/approvals-info`,
   FORMS_SIGNED_UPLOAD_URL_POST: `v1/forms/file-upload/init`,
 
   PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,

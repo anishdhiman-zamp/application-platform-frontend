@@ -55,14 +55,14 @@ const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
           subtitle ? 'gap-3' : 'gap-1.5',
         )}
       >
-        {logo && (
+        {(logo || currencyCode) && (
           <div
             className='flex justify-center items-center rounded-full'
             style={{ minWidth: iconSize, width: iconSize, height: iconSize }}
           >
             {!currencyCode ? (
               <Image
-                src={BANK_NAME_ICON_MAPPING[logo]?.icon ?? DEFAULT_BANK}
+                src={BANK_NAME_ICON_MAPPING[logo as keyof typeof BANK_NAME_ICON_MAPPING]?.icon ?? DEFAULT_BANK}
                 height={iconSize}
                 width={iconSize}
                 alt='bank icon'
