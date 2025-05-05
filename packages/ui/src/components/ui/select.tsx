@@ -4,6 +4,7 @@ import { ChevronDown, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
 import { SizeType } from '@zamp-platform/ui/types';
+import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 export interface SelectOption {
   label: string;
@@ -43,18 +44,18 @@ const Select = React.forwardRef<HTMLInputElement, SelectProps>(
     },
     ref,
   ) => {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const [page, setPage] = React.useState(1);
-    const [loading, setLoading] = React.useState(false);
-    const [dynamicOptions, setDynamicOptions] = React.useState<SelectOption[]>([]);
-    const [highlightedIndex, setHighlightedIndex] = React.useState<number>(-1);
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const popoverRef = React.useRef<HTMLDivElement>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [dynamicOptions, setDynamicOptions] = useState<SelectOption[]>([]);
+    const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const popoverRef = useRef<HTMLDivElement>(null);
 
-    React.useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
+    useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (clearOptions) {
         setDynamicOptions([]);
         setPage(1);
@@ -62,7 +63,7 @@ const Select = React.forwardRef<HTMLInputElement, SelectProps>(
       }
     }, [clearOptions, setShouldClearOptions]);
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (isOpen && fetchOptions && dynamicOptions.length === 0 && !loading) {
         fetchMoreOptions();
       }
@@ -85,7 +86,7 @@ const Select = React.forwardRef<HTMLInputElement, SelectProps>(
     const options = fetchOptions ? dynamicOptions : initialOptions;
     const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    React.useEffect(() => {
+    useEffect(() => {
       setHighlightedIndex(filteredOptions.length > 0 ? 0 : -1);
     }, [searchQuery, isOpen, filteredOptions.length]);
 
@@ -125,7 +126,7 @@ const Select = React.forwardRef<HTMLInputElement, SelectProps>(
       }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (value !== undefined && value !== null) {
         const selected = options.find((o) => o.value === value);
         if (selected) setSearchQuery(selected.label);
