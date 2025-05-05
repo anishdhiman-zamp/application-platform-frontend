@@ -37,6 +37,7 @@
     "launchdarkly-react-client-sdk": "^3.6.1",
     "lucide-react": "^0.503.0",
     "monaco-editor": "^0.52.2",
+    "motion": "^12.9.4",
     "posthog-js": "^1.234.6",
     "prop-types": "^15.8.1",
     "react-date-range": "1.4.0",

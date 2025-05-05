@@ -2,6 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import { Sheet, SheetContent } from '@zamp-platform/ui';
 import DetailsView from 'modules/policies/listing/DetailsView';
 import ListView from 'modules/policies/listing/ListView';
+import { AnimatePresence, motion } from 'motion/react';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { PolicyDialogType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
@@ -49,21 +50,37 @@ const PoliciesListSideDrawer: FC<PoliciesListSideDrawerProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className='p-0 h-screen overflow-hidden'>
         <div className='py-6 px-4.5'>
-          {selectedPolicy ? (
-            <DetailsView
-              policy={selectedPolicy}
-              audienceMembersData={audienceMembersData}
-              onBack={() => setSelectedPolicy(null)}
-            />
-          ) : (
-            <ListView
-              policies={policies}
-              audienceMembersData={audienceMembersData}
-              onPolicyClick={setSelectedPolicy}
-              heading={heading}
-              onNew={handleNewPolicy}
-            />
-          )}
+          <AnimatePresence mode='wait'>
+            {selectedPolicy ? (
+              <motion.div
+                key='details'
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, type: 'spring' }}
+              >
+                <DetailsView
+                  policy={selectedPolicy}
+                  audienceMembersData={audienceMembersData}
+                  onBack={() => setSelectedPolicy(null)}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key='list'
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, type: 'spring' }}
+              >
+                <ListView
+                  policies={policies}
+                  audienceMembersData={audienceMembersData}
+                  onPolicyClick={setSelectedPolicy}
+                  heading={heading}
+                  onNew={handleNewPolicy}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </SheetContent>
     </Sheet>

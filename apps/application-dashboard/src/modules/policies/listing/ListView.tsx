@@ -1,6 +1,7 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import PolicyCard from 'modules/policies/listing/PolicyCard';
+import { AnimatePresence, motion } from 'motion/react';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
@@ -78,11 +79,24 @@ const ListView: FC<ListViewProps> = ({ policies, audienceMembersData, onPolicyCl
         </DropdownMenu>
       </div>
       <div className='space-y-3.5 overflow-y-auto h-[calc(100vh-125px)] pb-6 [&::-webkit-scrollbar]:hidden'>
-        {filteredPolicies.map((policy) => (
-          <div key={policy.id} onClick={() => onPolicyClick(policy)}>
-            <PolicyCard policy={policy} audienceMembersData={audienceMembersData} />
-          </div>
-        ))}
+        <AnimatePresence mode='popLayout'>
+          {filteredPolicies.map((policy) => (
+            <motion.div
+              key={policy.id}
+              onClick={() => onPolicyClick(policy)}
+              initial={{ opacity: 1, height: 'auto' }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                marginBottom: 0,
+                transition: { duration: 0.3 },
+              }}
+              layout
+            >
+              <PolicyCard policy={policy} audienceMembersData={audienceMembersData} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </>
   );

@@ -5,9 +5,16 @@ import CreatePolicyDialog from 'modules/policies/create';
 import PolicyDeleteConfirmPopup from 'modules/policies/listing/PolicyDeleteConfirmPopup';
 import { PolicyActionType } from 'modules/policies/types';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
+import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 
-const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
+const PolicyActionsDropdown = ({
+  policy,
+  audienceMembersData,
+}: {
+  policy: PolicyDetailsType;
+  audienceMembersData?: AudiencesByResourceResponse[];
+}) => {
   const [isDeleteConfirmPopupOpen, setIsDeleteConfirmPopupOpen] = useState(false);
   const [isEditPolicyDialogOpen, setIsEditPolicyDialogOpen] = useState(false);
 
@@ -47,6 +54,7 @@ const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
         isOpen={isDeleteConfirmPopupOpen}
         onClose={() => setIsDeleteConfirmPopupOpen(false)}
         policy={policy}
+        audienceMembersData={audienceMembersData}
       />
       <CreatePolicyDialog
         type={policy.action_type === PolicyActionType.CREATE_PAYMENT ? 'payout' : 'template'}

@@ -23,7 +23,7 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
           </Button>
           <h1 className='f-16-600'>{policy.name}</h1>
           <div className='ml-auto'>
-            <PolicyActionsDropdown policy={policy} />
+            <PolicyActionsDropdown policy={policy} audienceMembersData={audienceMembersData} />
           </div>
         </div>
       </div>

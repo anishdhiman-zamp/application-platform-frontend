@@ -1,18 +1,25 @@
 import { FC } from 'react';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
+import PolicyCard from 'modules/policies/listing/PolicyCard';
 import { useDeletePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 import { defaultFnType } from '@/types/commonTypes';
-
 type PolicyDeleteConfirmPopupProps = {
   isOpen: boolean;
   onClose: defaultFnType;
   policy: PolicyDetailsType;
+  audienceMembersData?: AudiencesByResourceResponse[];
 };
 
-const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, onClose, policy }) => {
+const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({
+  isOpen,
+  onClose,
+  policy,
+  audienceMembersData,
+}) => {
   const [deletePolicy, { isLoading }] = useDeletePolicyMutation();
 
   const handleDeletePolicy = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,14 +45,9 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
           e.preventDefault();
         }}
       >
-        <DialogHeader className='f-16-600'>Delete Policy</DialogHeader>
+        <DialogHeader className='f-16-600'>Are you sure you want to delete this policy?</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
-          <div className='f-14-400'>
-            <p className='mb-2'>
-              Are you sure you want to delete <span className='f-14-600'>{policy.name}</span>?
-            </p>
-            <p>This action cannot be undone.</p>
-          </div>
+          <PolicyCard policy={policy} audienceMembersData={audienceMembersData ?? []} />
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>
           <Button

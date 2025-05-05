@@ -31,7 +31,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
             )}
           </div>
         }
-        rightComponent={<PolicyActionsDropdown policy={policy} />}
+        rightComponent={<PolicyActionsDropdown policy={policy} audienceMembersData={audienceMembersData} />}
       >
         <div className='space-y-2'>
           <h2 className='f-13-550'>{policy.name}</h2>
