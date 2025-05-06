@@ -6,7 +6,7 @@ import { getToggleConfigFromLocalStorage } from 'modules/widgets/displayConfig/d
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import ToggleSwitch from '@/components/common/toggleSwitch';
-import { DATE_RANGE_TYPES, PERIODICITY_TYPES } from '@/constants/date.constants';
+import { PERIODICITY_TYPES } from '@/constants/date.constants';
 import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -133,7 +133,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
 
   useEffect(() => {
     const checkDisplayConfigForWeekends = widgetData?.display_config?.toggle;
-    const checkIfPeriodicityDaily = widgetData?.filters?.time_stamp_local?.periodicity === DATE_RANGE_TYPES.DAY;
+    const checkIfPeriodicityDaily = periodicity === PERIODICITY_TYPES.DAILY;
 
     if (!checkDisplayConfigForWeekends || checkIfPeriodicityDaily) return;
 
