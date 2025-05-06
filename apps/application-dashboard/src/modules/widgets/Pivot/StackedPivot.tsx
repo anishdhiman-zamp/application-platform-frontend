@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -28,6 +28,11 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
+import {
+  generateColIdsVisibilityConfig,
+  getAllColumnIds,
+  updateColIdsVisibility,
+} from 'modules/widgets/displayConfig/displayConfig.utils';
 import PivotCell from 'modules/widgets/Pivot/components/PivotCell';
 import PivotColGroupHeader from 'modules/widgets/Pivot/components/PivotColGroupHeader';
 import PivotConfigDropdown from 'modules/widgets/Pivot/components/PivotConfigDropdown';
@@ -45,6 +50,7 @@ import {
   PIVOT_TABLE_THEME_PARAMS,
 } from 'modules/widgets/Pivot/pivot.constants';
 import {
+  AllPivotColumnsToHideType,
   ColumnFilterConfig,
   ParentFilters,
   PivotContext,
@@ -129,8 +135,12 @@ const StackedPivot = ({
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
   const { title, display_config } = widgetInstanceDetails;
   const gridContainerRef = useRef<HTMLDivElement>(null);
-
+  const [toggleUpdateSignal, setToggleUpdateSignal] = useState(0); // triggers updateColIdsVisibility when local-storage update the toggle
+  const [allPivotColumnsToHide, setAllPivotColumnsToHide] = useState<AllPivotColumnsToHideType[]>([]); // final state for storing col-ids to hide
+  const [colIdsToHideForDisplayOptions, setColIdsToHideForDisplayOptions] = useState<MapAny>({}); // temporary state for storing col-ids to hide
+  const displayConfigRules = display_config?.conditional_styles?.data_cell?.rules;
   const currentWidgetInstanceId = widgetInstanceDetails?.widget_instance_id;
+  const displayConfigToggleConditions = display_config?.toggle ?? [];
   const currentVersion = widgetInstanceDetails?.data_mappings?.version;
 
   const handleExportAgGridData = () => {
@@ -168,6 +178,35 @@ const StackedPivot = ({
     }
   }, []);
 
+  const handleHideColumn = useCallback((colIds: string[]) => {
+    if (gridApi?.current) {
+      gridApi?.current?.setColumnsVisible(colIds, false);
+    }
+  }, []);
+
+  const handleShowColumn = useCallback((colIds: string[]) => {
+    if (gridApi?.current) {
+      gridApi?.current?.setColumnsVisible(colIds, true);
+    }
+  }, []);
+
+  const handleUpdateHiddenColumns = useCallback(() => {
+    if (!currentWidgetInstanceId || !gridApi?.current) return;
+
+    const matchedConfig = allPivotColumnsToHide?.find((item) => item?.widgetInstanceId === currentWidgetInstanceId);
+
+    const hiddenColIds = generateColIdsVisibilityConfig(matchedConfig?.colIds, true);
+    const visibleColIds = generateColIdsVisibilityConfig(matchedConfig?.colIds, false);
+
+    if (hiddenColIds?.length > 0) {
+      handleHideColumn?.(hiddenColIds);
+    }
+
+    if (visibleColIds?.length > 0) {
+      handleShowColumn?.(visibleColIds);
+    }
+  }, [allPivotColumnsToHide, currentWidgetInstanceId, gridApi?.current]);
+
   const { colDef, rowData, columnContextMapping } = useMemo(() => {
     const pivotCols = getPivotColumns(widgetInstanceDetails, widgetData);
     const { coldefs, columnContextMapping } = getPivotColDefs(pivotCols);
@@ -194,7 +233,7 @@ const StackedPivot = ({
     [widgetInstanceDetails, columnContextMapping, currentVersion],
   );
 
-  const isSingleHeader = useMemo(() => colDef.filter((col) => 'aggFunc' in col)?.length === 1, [colDef]);
+  const isSingleHeader = useMemo(() => colDef?.filter((col) => 'aggFunc' in col)?.length === 1, [colDef]);
 
   const defaultColDef = useMemo<ColDef>(
     () => ({
@@ -214,6 +253,10 @@ const StackedPivot = ({
             currency={defaultCurrency ?? widgetData?.currency}
             maxGroupingLevel={colDef?.filter((col) => col.rowGroup)?.length - 1}
             showPercentage={display_config?.show_percentages}
+            childIndex={node?.parent?.childrenAfterSort?.findIndex((r) => r === node)}
+            setAllPivotColumnsToHide={setAllPivotColumnsToHide}
+            currentWidgetInstanceId={currentWidgetInstanceId}
+            displayConfigStyle={display_config?.conditional_styles ?? {}}
           />
         );
       },
@@ -560,6 +603,20 @@ const StackedPivot = ({
   }, []);
 
   useEffect(() => {
+    if (gridApi?.current) {
+      getAllColumnIds(gridApi, displayConfigRules, setColIdsToHideForDisplayOptions);
+    }
+  }, [gridApi?.current]);
+
+  useEffect(() => {
+    updateColIdsVisibility(currentWidgetInstanceId, sheetId, colIdsToHideForDisplayOptions, setAllPivotColumnsToHide);
+  }, [toggleUpdateSignal, currentWidgetInstanceId, sheetId, colIdsToHideForDisplayOptions]);
+
+  useEffect(() => {
+    handleUpdateHiddenColumns();
+  }, [handleUpdateHiddenColumns]);
+
+  useEffect(() => {
     const observer = new ResizeObserver(() => {
       if (gridContainerRef?.current) {
         handleWidgetHeightChange(gridContainerRef.current.clientHeight, isSingleHeader);
@@ -577,7 +634,14 @@ const StackedPivot = ({
 
   return (
     <div className={cn('h-fit w-full relative pivot group', className)} ref={gridContainerRef}>
-      <PivotConfigDropdown handleExportAgGridData={handleExportAgGridData} />
+      <PivotConfigDropdown
+        handleExportAgGridData={handleExportAgGridData}
+        displayConfigToggleData={displayConfigToggleConditions}
+        currentSheetId={sheetId}
+        currentWidgetInstanceId={currentWidgetInstanceId}
+        setToggleUpdateSignal={setToggleUpdateSignal}
+        colIdsToHideForDisplayOptions={colIdsToHideForDisplayOptions}
+      />
       <AgGridReact
         onGridReady={onGridReady}
         theme={customTheme ?? myTheme}
