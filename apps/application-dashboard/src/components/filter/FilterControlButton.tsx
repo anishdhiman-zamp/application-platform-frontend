@@ -47,7 +47,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   };
 
   return (
-    <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText}>
+    <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText} asChildTrigger>
       <button
         className={cn(
           'border border-GRAY_400 rounded px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',

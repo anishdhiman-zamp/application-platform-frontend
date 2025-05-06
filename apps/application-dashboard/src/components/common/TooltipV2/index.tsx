@@ -8,6 +8,7 @@ type TooltipV2Props = {
   side?: SIDE_OPTIONS;
   className?: string;
   tooltipClassName?: string;
+  asChildTrigger?: boolean;
 };
 
 const TooltipV2: FC<TooltipV2Props> = ({
@@ -16,11 +17,14 @@ const TooltipV2: FC<TooltipV2Props> = ({
   side = SIDE_OPTIONS.TOP,
   className,
   tooltipClassName,
+  asChildTrigger = false,
 }) => {
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger className={className}>{children}</TooltipTrigger>
+        <TooltipTrigger className={className} asChild={asChildTrigger}>
+          {children}
+        </TooltipTrigger>
         {tooltipBody && (
           <TooltipContent className={tooltipClassName} side={side} sideOffset={10}>
             {tooltipBody}
