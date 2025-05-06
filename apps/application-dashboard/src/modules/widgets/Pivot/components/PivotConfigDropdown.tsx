@@ -6,7 +6,7 @@ import { getToggleConfigFromLocalStorage } from 'modules/widgets/displayConfig/d
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import ToggleSwitch from '@/components/common/toggleSwitch';
-import { DATE_RANGE_TYPES } from '@/constants/date.constants';
+import { DATE_RANGE_TYPES, PERIODICITY_TYPES } from '@/constants/date.constants';
 import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
@@ -21,6 +21,7 @@ interface PivotConfigDropdownProps {
   currentWidgetInstanceId?: string;
   setToggleUpdateSignal?: Dispatch<SetStateAction<number>>;
   colIdsToHideForDisplayOptions?: MapAny;
+  periodicity?: PERIODICITY_TYPES;
 }
 
 const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
@@ -29,6 +30,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
   currentSheetId = '',
   setToggleUpdateSignal,
   colIdsToHideForDisplayOptions,
+  periodicity,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [showDisplayConfig, setShowDisplayConfig] = useState(false);
@@ -37,7 +39,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
   const widgetData = storedData[currentSheetId ?? ''] || {};
 
   const isToggleOptionDisabled = (toggleField: string) => {
-    const checkIfPeriodicityDaily = widgetData?.filters?.time_stamp_local?.periodicity === DATE_RANGE_TYPES.DAY;
+    const checkIfPeriodicityDaily = periodicity === PERIODICITY_TYPES.DAILY;
     const hasHideWeekendKey = Object.keys(colIdsToHideForDisplayOptions ?? {}).includes(
       DisplayConfigToggleType.HIDE_WEEKENDS,
     );

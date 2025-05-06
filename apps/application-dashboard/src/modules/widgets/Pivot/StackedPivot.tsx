@@ -641,6 +641,7 @@ const StackedPivot = ({
         currentWidgetInstanceId={currentWidgetInstanceId}
         setToggleUpdateSignal={setToggleUpdateSignal}
         colIdsToHideForDisplayOptions={colIdsToHideForDisplayOptions}
+        periodicity={periodicity}
       />
       <AgGridReact
         onGridReady={onGridReady}
