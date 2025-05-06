@@ -4,9 +4,9 @@ import { useParams } from 'next/navigation';
 import DashboardLayout from 'components/layouts/dashboard-layout';
 
 const AdminDatasetId = () => {
-  const { id } = useParams();
+  const params = useParams();
 
-  return <AdminDatasetById id={id as string} />;
+  return <AdminDatasetById id={params?.id as string} />;
 };
 
 AdminDatasetId.getLayout = function getLayout(page: ReactElement) {
