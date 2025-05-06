@@ -1,7 +1,7 @@
 import { CSSProperties, FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type CopiedTooltipProps = {
   style?: CSSProperties;

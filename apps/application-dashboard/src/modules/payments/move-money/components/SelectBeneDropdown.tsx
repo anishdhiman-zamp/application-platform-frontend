@@ -1,4 +1,5 @@
 import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
@@ -14,7 +15,6 @@ import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentAp
 import Input from 'components/common/input';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type SelectBeneDropdownProps = {
   autoFocus?: boolean;

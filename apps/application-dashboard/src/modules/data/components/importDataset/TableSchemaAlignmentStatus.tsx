@@ -1,9 +1,9 @@
 import React, { FC, useEffect } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { TableSchemaAlignmentStatusPropsType } from 'modules/data/components/importDataset/importData.types';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { cn } from 'utils/common';
 import StatusIndicator from 'components/common/StatusIndicator';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const TableSchemaAlignmentStatus: FC<TableSchemaAlignmentStatusPropsType> = ({
   showAiTransformationStatus,

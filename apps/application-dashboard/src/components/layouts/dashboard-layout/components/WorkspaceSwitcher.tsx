@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { WORKSPACE_ITEMS } from 'constants/dummyData';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
 // import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import WorkspaceTab from 'components/layouts/dashboard-layout/components/WorkspaceTab';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface WorkspaceType {
   workspace_id: string;

@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn, stopPropagationAction } from 'utils/common';
 import { PopupProps } from 'components/common/popup/popup.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const Popup: FC<PopupProps> = ({
   title,

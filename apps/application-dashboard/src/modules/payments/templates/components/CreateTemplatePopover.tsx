@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { toast } from 'react-toastify';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { defaultAccountData } from 'modules/payments/payments.constant';
@@ -13,7 +14,6 @@ import {
 } from '@/apis/payments';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 import { SIZE_TYPES } from '@/types/common/components';

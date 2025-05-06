@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
 import {
   moveMoneyContextActions,
@@ -14,7 +15,6 @@ import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useRouter } from 'next/router';
 import { defaultFn } from 'types/commonTypes';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MoneyTransferHome = () => {
   const router = useRouter();

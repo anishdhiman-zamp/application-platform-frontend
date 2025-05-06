@@ -1,11 +1,11 @@
 import { type FC, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { TEMPLATE_APPROVAL_ACTION_ITEMS } from 'modules/payments/payments.constant';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
 import { useApprovePolicyMutation, useRejectPolicyMutation } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
 import { useOnClickOutside } from '@/hooks';
 import type { defaultFnType } from '@/types/commonTypes';

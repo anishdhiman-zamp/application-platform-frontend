@@ -1,10 +1,10 @@
 import { FC, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByRuleIdsQuery } from 'apis/dataset';
 import { RuleConfigType } from 'modules/data/RowProperties/rowProperties.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { cn } from 'utils/common';
 import CommonWrapper from 'components/commonWrapper';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type RulesProps = {
   ruleConfigs: RuleConfigType[];

@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn, getFirstLetters } from 'utils/common';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 type RecipientCardProps = {
   recipient: RecipientDetailsType;
   handleRecipientSelect: (recipient: RecipientDetailsType) => void;

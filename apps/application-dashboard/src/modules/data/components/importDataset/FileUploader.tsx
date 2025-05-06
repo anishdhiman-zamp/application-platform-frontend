@@ -1,4 +1,5 @@
 import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';
@@ -8,7 +9,6 @@ import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { toast } from '@/components/common/toast/Toast';
 import { Button } from 'components/common/button/Button';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const FileUploader: FC<FileUploaderPropsType> = ({
   isLoading,

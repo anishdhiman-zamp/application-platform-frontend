@@ -1,9 +1,9 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { MapAny } from 'types/commonTypes';
 import { stopPropagationAction } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export enum DESCRIPTION_TAGS {
   DESCRIPTION_PROPERTY = 'description_property',

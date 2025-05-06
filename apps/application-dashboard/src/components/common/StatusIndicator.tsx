@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import ProgressBar from 'components/common/RingProgress';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type StatusIndicatorPropsType = {
   status: LOADER_STATUS;

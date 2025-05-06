@@ -1,5 +1,6 @@
 import { MouseEvent, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
@@ -8,7 +9,6 @@ import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface WidgetTitleProps {
   title: string;

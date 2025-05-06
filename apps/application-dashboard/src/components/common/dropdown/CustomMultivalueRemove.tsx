@@ -1,9 +1,9 @@
 import React from 'react';
 import { components, MultiValueRemoveProps } from 'react-select';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { OptionsType } from 'types/commonTypes';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const CustomMultivalueRemove = (props: MultiValueRemoveProps<OptionsType>) => {
   return (

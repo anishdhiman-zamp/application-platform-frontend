@@ -1,9 +1,9 @@
 import React, { FC, memo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { SIZE_TYPES } from 'types/common/components';
 import { InputFieldProps } from 'types/common/components/input/input.types';
 import { defaultFn } from 'types/commonTypes';
 import InputTag from 'components/common/input/InputTag';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const sizeClassName = {
   //TODO: Update other classes once design component is ready

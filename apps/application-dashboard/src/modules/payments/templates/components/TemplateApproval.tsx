@@ -1,9 +1,9 @@
 import type { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApproveActionCard from 'modules/payments/payment-details/components/ApproveActionCard';
 import PaymentApprovals from 'modules/payments/payment-details/PaymentApprovals';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { useGetTemplateApprovalsInfoQuery } from '@/apis/payments';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import type { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 

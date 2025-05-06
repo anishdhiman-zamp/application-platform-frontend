@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATASET_TABLE } from 'constants/icons';
 import {
   ACCOUNT_DATASET_COLUMNS_MAPPING,
@@ -9,7 +10,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn, MapAny } from 'types/commonTypes';
 import { Button } from 'components/common/button/Button';
 import { Dropdown } from 'components/common/dropdown';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface DatasetColumnsMappingProps {
   onSelectDataset: (dataset: string) => void;

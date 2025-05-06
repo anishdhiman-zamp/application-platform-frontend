@@ -1,11 +1,11 @@
 import React, { FC, MouseEvent } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { BUTTON_STATE_TYPES, BUTTON_TYPES, ButtonProps, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { cn, doDebounce } from 'utils/common';
 import ProgressBar from 'components/common/RingProgress';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const BUTTON_STATE_STYLES = {
   [BUTTON_TYPES.PRIMARY]: {

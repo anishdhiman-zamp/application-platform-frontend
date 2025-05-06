@@ -1,10 +1,10 @@
 import { forwardRef, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from '@/utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type MoveMoneyTemplateListCardProps = {
   template: TemplateDetailsType;

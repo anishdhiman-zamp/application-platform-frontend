@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
@@ -8,7 +9,6 @@ import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface SearchFilterMenuItemProps {
   column: { colId: string };

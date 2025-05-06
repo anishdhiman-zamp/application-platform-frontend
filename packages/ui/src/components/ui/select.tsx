@@ -3,14 +3,19 @@ import * as Popover from '@radix-ui/react-popover';
 import { ChevronDown, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
-import { SizeType } from '@zamp-platform/ui/types';
+import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '../assets';
 
 export interface SelectOption {
   label: string;
   richLabel?: React.ReactNode;
   value: string | boolean | { type: string; id: string };
-  icon?: React.ReactNode;
+  icon?: {
+    type: 'sprite' | 'icon';
+    category?: ICON_SPRITE_TYPES;
+    id?: string;
+  };
 }
 
 export interface SelectProps {
@@ -26,6 +31,11 @@ export interface SelectProps {
   clearOptions?: boolean;
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;
 }
+
+const RenderIcon = ({ icon }: { icon: SelectOption['icon'] }) => {
+  if (icon?.id) return <SvgSpriteLoader id={icon.id} iconCategory={icon.category} />;
+  return null;
+};
 
 const Select = forwardRef<HTMLInputElement, SelectProps>(
   (
@@ -211,7 +221,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
         >
           <div className='p-1'>
             {filteredOptions.length === 0 && !loading && (
-              <div className='px-2 py-2 text-gray-500 text-sm'>No options</div>
+              <div className='px-2 py-2 text-gray-500 text-sm '>No options</div>
             )}
             {filteredOptions.map((option, idx) => (
               <div
@@ -225,9 +235,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                 role='option'
                 aria-selected={idx === highlightedIndex}
               >
-                {option.icon && (
-                  <span className='mr-2 flex h-4 w-4 items-center justify-center text-gray-400'>{option.icon}</span>
-                )}
+                {option.icon && <RenderIcon icon={option.icon} />}
                 {option.richLabel || option.label}
               </div>
             ))}

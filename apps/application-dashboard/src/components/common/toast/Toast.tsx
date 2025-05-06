@@ -1,9 +1,9 @@
 import { FC, useMemo } from 'react';
 import { toast as reactToastify, ToastOptions } from 'react-toastify';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { CustomToastPropsType } from 'components/common/toast/toast.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const CustomToast: FC<CustomToastPropsType> = ({ text = '' }) => {
   return <div className='f-14-400 flex w-full items-center gap-6 text-GRAY_700 -ml-[8px] -mt-[2px]'>{text}</div>;

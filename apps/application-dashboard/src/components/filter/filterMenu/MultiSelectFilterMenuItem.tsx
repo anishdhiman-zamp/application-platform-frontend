@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
@@ -9,7 +10,6 @@ import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE, MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MultiSelectFilterMenuItemProps {
   column: { colId: string };

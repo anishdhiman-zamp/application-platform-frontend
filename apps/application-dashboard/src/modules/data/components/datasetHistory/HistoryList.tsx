@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { HistoryListPropsType } from 'modules/data/components/importDataset/importData.types';
 import { formattedDate, maskString } from 'modules/data/components/importDataset/importData.utils';
@@ -10,7 +11,6 @@ import { cn, getUserNameFromEmail } from 'utils/common';
 import StatusIndicator from 'components/common/StatusIndicator';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHistoryData }) => {
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];

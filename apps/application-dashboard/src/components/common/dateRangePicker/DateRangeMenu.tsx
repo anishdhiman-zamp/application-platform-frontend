@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   DATE_FILTER_CATEGORIES,
   DATE_FORMATS,
@@ -20,7 +21,6 @@ import { searchDateRange } from 'components/common/dateRangePicker/dateRangePick
 import { DateUnitTabDisplay } from 'components/common/dateRangePicker/DateUnitTabDisplay';
 import { DisplayDates } from 'components/common/dateRangePicker/DisplayDates';
 import { Tabs } from 'components/common/tabs/Tabs';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface DateRangeMenuProps {
   className?: string;

@@ -1,12 +1,12 @@
 import React, { FC } from 'react';
 import { useDispatch } from 'react-redux';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { HistoryBulkLoadersPropsType } from 'modules/data/components/importDataset/importData.types';
 import { LOADER_STATUS } from 'modules/data/data.types';
 import { removeDatasetBulkLoader } from 'store/slices/user';
 import { cn } from 'utils/common';
 import StatusIndicator from 'components/common/StatusIndicator';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
   isHoveredLoaders,

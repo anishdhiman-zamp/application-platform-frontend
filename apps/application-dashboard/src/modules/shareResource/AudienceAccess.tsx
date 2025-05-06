@@ -1,4 +1,5 @@
 import { FC, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
@@ -13,7 +14,6 @@ import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type AudienceAccessPropsType = {
   resourceType: ResourceType;

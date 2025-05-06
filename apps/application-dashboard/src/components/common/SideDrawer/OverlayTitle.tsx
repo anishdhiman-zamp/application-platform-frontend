@@ -1,8 +1,8 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { cn } from 'utils/common';
 import { OverlayTitleProps } from 'components/common/SideDrawer/sideDrawer.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 // TODO: needs to be updated to use the new design system
 const OverlayTitle: FC<OverlayTitleProps> = ({

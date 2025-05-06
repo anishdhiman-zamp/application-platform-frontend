@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
 import { AsyncDropdownPropsType } from 'components/asyncDropdown/asyncDropdown.types';
 import { KEY_CODES } from 'components/multiSelectInput/multiSelectInput.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
   onOpen,

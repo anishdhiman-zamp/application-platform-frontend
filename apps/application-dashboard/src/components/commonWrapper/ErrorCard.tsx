@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ERROR_BUTTON_TEXT } from 'constants/auth.constants';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -8,7 +9,6 @@ import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { ErrorCardPropTypes, ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ErrorCard: FC<ErrorCardPropTypes> = ({
   className,
