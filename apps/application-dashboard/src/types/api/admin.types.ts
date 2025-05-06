@@ -6,6 +6,7 @@ export type GetDatasetDisplayConfigRequestType = {
 
 export type displayConfigType = {
   column: string;
+  alias?: string;
   is_hidden: string;
   is_editable: string;
   type: string;
