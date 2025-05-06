@@ -1,5 +1,6 @@
 import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
@@ -11,7 +12,6 @@ import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import { ColumnVisibility } from 'components/common/table/table.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 import 'react-grid-layout/css/styles.css';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);

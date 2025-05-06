@@ -1,11 +1,11 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
 import { PAYMENT_STATUS_TYPES } from 'modules/payments/payments.types';
 import { useGetPaymentDetailsQuery } from '@/apis/payments';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { cn, createDateObjectFromUTCString, getCommaSeparatedNumber } from '@/utils/common';
 

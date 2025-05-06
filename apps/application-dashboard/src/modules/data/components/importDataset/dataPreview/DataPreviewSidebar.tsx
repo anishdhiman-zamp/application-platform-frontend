@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { usePostAiTransformationConfirmMutation } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
 import {
@@ -11,7 +12,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
   fileName,

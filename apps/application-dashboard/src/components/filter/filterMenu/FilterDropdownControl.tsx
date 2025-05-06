@@ -1,9 +1,9 @@
 import React, { FC, MouseEvent } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
 import { cn, formatToNormalText } from 'utils/common';
 import { FilterConfigType } from 'components/filter/filter.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface FilterDropdownControlProps {
   onClick?: defaultFnType;

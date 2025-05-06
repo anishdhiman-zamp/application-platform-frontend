@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { APPROVAL_TYPE } from 'modules/payments/payments.constant';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
 import type { AudiencesByOrganisationIdResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import type { ApproverDetailsType } from '@/types/api/policies.types';

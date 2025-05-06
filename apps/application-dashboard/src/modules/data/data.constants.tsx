@@ -1,3 +1,4 @@
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
@@ -11,7 +12,6 @@ import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const LISTING_COLUMNS: ColDef[] = [
   {

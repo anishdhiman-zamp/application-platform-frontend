@@ -1,4 +1,5 @@
 import { FC, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATE_FORMATS } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES, RULE_ICON } from 'constants/icons';
 import { format } from 'date-fns';
@@ -15,7 +16,6 @@ import TagWithHierarchy from '@/components/common/table/CustomCellEditors/Custom
 import { useOnClickOutside } from '@/hooks';
 import { Button } from 'components/common/button/Button';
 import { getFilterStatementValues } from 'components/filter/filter.utils';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export type RuleCardProps = {
   filters: RuleFilters;

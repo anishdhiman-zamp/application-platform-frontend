@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useLazyGetActionStatusQuery,
   useLazyGetDatasetExportQuery,
@@ -13,7 +14,6 @@ import { useRouter } from 'next/router';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import ProgressBar from 'components/common/RingProgress';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface ExportDatasetProps {
   query: string;

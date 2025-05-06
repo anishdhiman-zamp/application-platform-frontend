@@ -1,11 +1,11 @@
 import React, { FC, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { inter } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export interface PositionedMenuWrapperProps {
   children: ReactNode;

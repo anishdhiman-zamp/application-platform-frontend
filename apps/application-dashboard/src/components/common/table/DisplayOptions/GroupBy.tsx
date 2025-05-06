@@ -1,4 +1,5 @@
 import React, { ChangeEvent, DragEvent, FC, RefObject, useEffect, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
 import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
 import Image from 'next/image';
@@ -6,7 +7,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type GroupByProps = {
   onClose: defaultFnType;

@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useAppSelector } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -10,7 +11,6 @@ import { Button } from 'components/common/button/Button';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface SheetsTabsProps {
   tabs: MenuItem[];

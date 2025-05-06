@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MenuSingleValuePropsType } from 'types/common/components/dropdown/dropdown.types';
 import { DROPDOWN_SIZE_STYLES } from 'components/common/dropdown/dropdown.constants';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MenuSingleValue: FC<MenuSingleValuePropsType> = ({
   icon,

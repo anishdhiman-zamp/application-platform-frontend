@@ -1,4 +1,5 @@
 import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DEFAULT_BANK } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
@@ -11,7 +12,6 @@ import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import type { defaultFnType } from '@/types/commonTypes';

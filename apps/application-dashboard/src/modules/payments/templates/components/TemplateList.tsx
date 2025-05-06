@@ -1,5 +1,6 @@
 import { type FC, useMemo } from 'react';
 import { useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import TemplateFilter from 'modules/payments/move-money/components/TemplateFilter';
 import { MOVE_MONEY_TEMPLATE_FILTER_ITEMS } from 'modules/payments/payments.constant';
 import type { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
@@ -13,7 +14,6 @@ import Input from '@/components/common/input';
 import TabsV2 from '@/components/common/tabs/TabsV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { TemplateDetailsType } from '@/types/api/paymentApi.types';
 import type { MenuItem } from '@/types/common/components';

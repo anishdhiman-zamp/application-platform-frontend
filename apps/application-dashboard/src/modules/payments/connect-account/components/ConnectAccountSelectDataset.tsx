@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import DatasetColumnsMapping from 'modules/payments/connect-account/components/DatasetColumnsMapping';
 import SelectAccountDataset from 'modules/payments/connect-account/components/SelectAccountDataset';
 import { CONNECT_ACCOUNT_DESCRIPTION, CONNECT_ACCOUNT_TITLE } from 'modules/payments/payments.constant';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 interface ConnectAccountSelectDatasetProps {
   stateChange: (state: number) => void;
 }

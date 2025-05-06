@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn, debounce, formatToNormalText } from 'utils/common';
@@ -6,7 +7,6 @@ import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface SingleSelectFilterMenuItemProps {
   column: { colId: string };

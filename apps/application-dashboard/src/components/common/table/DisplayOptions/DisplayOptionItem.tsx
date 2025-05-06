@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export type DisplayOptionItemProps = {
   id: DISPLAY_OPTIONS;

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { components } from 'react-select';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { CustomDropdownIndicatorProps } from 'types/common/components/dropdown/dropdown.types';
 import { DROPDOWN_SIZE_STYLES } from 'components/common/dropdown/dropdown.constants';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const CustomDropdownIndicator = (props: CustomDropdownIndicatorProps) => {
   const { selectProps = {}, isHoveredDropdown, customDropdownIndicatorSize } = props;

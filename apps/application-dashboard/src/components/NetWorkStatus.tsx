@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 function NetworkStatus() {
   const [isOffline, setIsOffline] = useState(false);

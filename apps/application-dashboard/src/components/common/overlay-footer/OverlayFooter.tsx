@@ -1,5 +1,5 @@
 import { FC, ReactElement } from 'react';
-import { SvgSpriteLoaderProps } from '@/components/SvgSpriteLoader';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from '@/types/components/button.type';

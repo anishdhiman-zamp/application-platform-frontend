@@ -10,6 +10,7 @@ import {
   SingleValueProps,
   ValueContainerProps,
 } from 'react-select';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
@@ -24,7 +25,6 @@ import ValueContainerContent from 'components/common/dropdown/ValueContainerCont
 import { Label } from 'components/common/Label';
 import { MenuOption } from 'components/common/MenuOption';
 import { SupporterInfo } from 'components/common/SupporterInfo';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 export const Dropdown: FC<DropdownProps> = ({
   options = [],

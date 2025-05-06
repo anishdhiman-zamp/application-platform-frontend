@@ -58,7 +58,8 @@
     "./types": {
       "types": "./src/types/index.ts",
       "default": "./src/types/index.ts"
-    }
+    },
+    "./assets": "./src/components/assets/index.ts"
   },
   "lint-staged": {
     "*.ts": "eslint --fix",

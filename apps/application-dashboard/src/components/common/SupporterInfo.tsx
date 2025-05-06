@@ -1,6 +1,6 @@
 import React, { FC, ReactElement } from 'react';
+import { SvgSpriteLoader, SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { SUPPORT_INFO_TYPES } from 'types/common/components/input/input.types';
-import SvgSpriteLoader, { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export interface SupporterInfoProps {
   type?: SUPPORT_INFO_TYPES;

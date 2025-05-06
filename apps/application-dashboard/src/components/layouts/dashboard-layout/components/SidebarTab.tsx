@@ -1,7 +1,7 @@
 import React, { FC, memo, ReactNode } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Link from 'next/link';
 import { cn } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type SidebarTabProps = {
   isSelected: boolean;

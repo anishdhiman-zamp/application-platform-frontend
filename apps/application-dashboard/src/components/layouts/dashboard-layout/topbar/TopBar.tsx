@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -13,7 +14,6 @@ import { cn } from 'utils/common';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);

@@ -1,10 +1,10 @@
 import React, { ChangeEvent, FC, HTMLInputTypeAttribute, KeyboardEvent, memo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { InputTagProps } from 'types/common/components/input/input.types';
 import { defaultFn } from 'types/commonTypes';
 import { cn, debounce, stopPropagationAction } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const InputTag: FC<InputTagProps> = ({
   id = '',

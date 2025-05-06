@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
 import { MOVE_MONEY_ACTION_ITEMS } from 'modules/payments/payments.constant';
 import Link from 'next/link';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MoveMoneyButton = () => {
   const moveMoneyActionMenuRef = useRef<HTMLDivElement>(null);

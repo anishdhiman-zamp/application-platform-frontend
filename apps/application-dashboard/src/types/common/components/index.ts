@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { MapAny } from 'types/commonTypes';
-import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export enum SIZE_TYPES {
   XLARGE = 'XLARGE',

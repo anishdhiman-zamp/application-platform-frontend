@@ -1,4 +1,5 @@
 import { FC, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
@@ -20,7 +21,6 @@ import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
 import { useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type CustomHeaderProps = {
   metadata: DatasetFilterConfigMetadataType;

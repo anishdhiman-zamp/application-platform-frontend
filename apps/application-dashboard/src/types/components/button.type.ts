@@ -1,7 +1,7 @@
 import { MouseEvent, ReactNode } from 'react';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
-import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export enum BUTTON_TYPES {
   PRIMARY = 'PRIMARY',

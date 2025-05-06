@@ -1,8 +1,8 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { CustomMenuItemProps } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { defaultFnType } from 'types/commonTypes';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface CustomContextMenuItemProps extends CustomMenuItemProps {
   action: defaultFnType;
