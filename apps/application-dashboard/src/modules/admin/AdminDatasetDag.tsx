@@ -70,7 +70,13 @@ const AdminDatasetDag: FC = () => {
     setIsPolling(true);
     setPollingMessage('Dataset creation in progress');
     startPolling({
-      fn: () => getActionStatus({ datasetId: data.dataset_id as string, params: { action_ids: [data.action_id] } }),
+      fn: () => {
+        if (data?.dataset_id && data?.action_id) {
+          return getActionStatus({ datasetId: data.dataset_id as string, params: { action_ids: [data.action_id] } });
+        }
+
+        return Promise.reject(new Error(`Dataset ID or Action ID is missing ${JSON.stringify(data)}`));
+      },
       validate: (data: DatasetActionStatusResponseType[]) => {
         return data.filter((item) => !item.is_completed)?.length === 0;
       },
@@ -97,7 +103,13 @@ const AdminDatasetDag: FC = () => {
     setIsPolling(true);
     setPollingMessage('Transformation in progress');
     startPolling({
-      fn: () => getActionStatus({ datasetId: data.dataset_id as string, params: { action_ids: [data.action_id] } }),
+      fn: () => {
+        if (data?.dataset_id && data?.action_id) {
+          return getActionStatus({ datasetId: data.dataset_id as string, params: { action_ids: [data.action_id] } });
+        }
+
+        return Promise.reject(new Error(`Dataset ID or Action ID is missing ${JSON.stringify(data)}`));
+      },
       validate: (data: DatasetActionStatusResponseType[]) => {
         return data.filter((item) => !item.is_completed)?.length === 0;
       },

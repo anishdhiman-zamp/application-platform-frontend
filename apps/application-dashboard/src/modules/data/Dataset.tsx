@@ -91,7 +91,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
 
   const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
-  const { pageId } = useParams();
+  const params = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
@@ -354,8 +354,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   const handleDrilldownClick = (data: MapAny) => {
     appDispatch(updateUrlForLastBreadcrumb(router.asPath));
-    if (pageId) {
-      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
+    if (params?.pageId) {
+      router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {
       router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
     }

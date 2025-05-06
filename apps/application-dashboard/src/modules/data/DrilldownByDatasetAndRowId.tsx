@@ -14,15 +14,18 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const DrilldownByDatasetAndRowId = () => {
-  const { datasetId, rowId } = useParams();
+  const params = useParams();
   const [selectedTab, setSelectedTab] = useState<string>();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
-  const { data, isLoading, isError, refetch } = useGetDatasetDrilldownQuery({
-    datasetId: datasetId as string,
-    rowId: rowId as string,
-  });
+  const { data, isLoading, isError, refetch } = useGetDatasetDrilldownQuery(
+    {
+      datasetId: params?.datasetId as string,
+      rowId: params?.rowId as string,
+    },
+    { skip: !params?.datasetId || !params?.rowId },
+  );
 
   const tabs = useMemo(
     () =>

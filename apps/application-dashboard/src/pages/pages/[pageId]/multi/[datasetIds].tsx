@@ -3,9 +3,9 @@ import { useParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import DrilldownMultiDataset from '@/modules/data/DrilldownMultiDataset';
 const MultiDatasetDrilldown = () => {
-  const { datasetIds } = useParams();
+  const params = useParams();
 
-  return <DrilldownMultiDataset datasetIds={datasetIds as string} />;
+  return <DrilldownMultiDataset datasetIds={params?.datasetIds as string} />;
 };
 
 MultiDatasetDrilldown.getLayout = function getLayout(page: ReactElement) {

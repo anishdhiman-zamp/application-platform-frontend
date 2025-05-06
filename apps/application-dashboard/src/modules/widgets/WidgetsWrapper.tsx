@@ -51,7 +51,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   sheetId,
 }) => {
   const router = useRouter();
-  const { pageId } = useParams();
+  const params = useParams();
   const { widget_type } = widgetDetails;
   const { fields } = widgetDetails?.data_mappings?.mappings?.[0] ?? {};
   const { version } = widgetDetails?.data_mappings ?? {};
@@ -129,7 +129,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
     if (datasets?.length > 0) {
       const path = getPageDrilldownMultiRoute(
-        pageId as string,
+        params?.pageId as string,
         datasets?.map((dataset) => dataset?.dataset_id),
       );
 
@@ -253,8 +253,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
     let path = getDatasetRouteById(datasetId);
 
-    if (pageId) {
-      path = getPageDatasetRoute(pageId as string, datasetId);
+    if (params?.pageId) {
+      path = getPageDatasetRoute(params?.pageId as string, datasetId);
     }
 
     router.push(
