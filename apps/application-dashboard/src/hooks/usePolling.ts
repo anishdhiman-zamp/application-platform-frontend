@@ -1,6 +1,7 @@
 //Reference : https://levelup.gitconnected.com/polling-in-javascript-ab2d6378705a
 
 import { useEffect, useRef } from 'react';
+import { captureException } from '@sentry/browser';
 import { MapAny } from 'types/commonTypes';
 
 export const POLLING_ERROR = 'Exceeded max attempts';
@@ -65,7 +66,8 @@ const usePolling = () => {
      */
     const executePoll = async (resolve: (val: MapAny) => void, reject: (val: MapAny) => void) => {
       try {
-        const result = await fn()?.unwrap();
+        const response = await fn();
+        const result = response?.unwrap();
 
         attempts++;
 
@@ -89,7 +91,11 @@ const usePolling = () => {
             currentInterval = Math.min(currentInterval * backoffFactor, maxInterval);
           }
           if (pollingFlag.current) pollingTimer.current = setTimeout(executePoll, currentInterval, resolve, reject);
-        } else return reject({ error: POLLING_ERROR });
+        } else {
+          captureException(err);
+
+          return reject({ error: POLLING_ERROR });
+        }
       }
     };
 
