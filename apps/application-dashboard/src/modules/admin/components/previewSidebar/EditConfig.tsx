@@ -43,8 +43,12 @@ const EditableConfigField = ({
     <div
       className={cn(firstColumn && 'border-l', 'flex items-center gap-2 border-r border-GRAY_400 p-2 overflow-hidden')}
     >
-      {value && <EditConfig isEditing={isEditing} onClick={handleEditToggle} />}
-      {isEditing ? <Input type='text' value={value} onChange={handleChange} /> : <span>{value}</span>}
+      {onEditToggle && onChange && <EditConfig isEditing={isEditing} onClick={handleEditToggle} />}
+      {isEditing ? (
+        <Input type='text' value={value} onChange={handleChange} />
+      ) : (
+        <span className='text-wrap break-words'>{value}</span>
+      )}
     </div>
   );
 };
