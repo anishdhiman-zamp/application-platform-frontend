@@ -123,7 +123,7 @@ const StackedPivot = ({
   className,
 }: StackedPivotProps) => {
   const router = useRouter();
-  const { pageId } = useParams();
+  const params = useParams();
 
   const gridApi = useRef<GridApi | null>(null);
   const customTheme = useMemo(() => getDataTableTheme({ ...PIVOT_TABLE_THEME_PARAMS, ...{} }), []);
@@ -335,8 +335,8 @@ const StackedPivot = ({
     if (datasetId) {
       let path = getDatasetRouteById(datasetId);
 
-      if (pageId) {
-        path = getPageDatasetRoute(pageId as string, datasetId);
+      if (params?.pageId) {
+        path = getPageDatasetRoute(params?.pageId as string, datasetId);
       }
 
       const encodedFilters = encodeURIComponent(JSON.stringify(query));
@@ -427,7 +427,7 @@ const StackedPivot = ({
   const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
     if (datasets?.length > 0) {
       const path = getPageDrilldownMultiRoute(
-        pageId as string,
+        params?.pageId as string,
         datasets?.map((dataset) => dataset?.dataset_id),
       );
 

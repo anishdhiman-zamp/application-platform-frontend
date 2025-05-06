@@ -180,7 +180,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           onBlur={() => setInputFocused(false)}
         />
       </div>
-      <div className='text-GRAY_900 max-h-[330px] [&::-webkit-scrollbar]:hidden !overflow-x-visible'>
+      <div className='text-GRAY_900 max-h-[330px] [&::-webkit-scrollbar]:hidden overflow-x-visible overflow-y-auto'>
         <ResponsiveGridLayout
           className='layout'
           layouts={{ lg: layout }}

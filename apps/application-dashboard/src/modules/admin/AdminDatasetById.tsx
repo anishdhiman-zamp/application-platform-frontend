@@ -12,7 +12,7 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
-  const { data, isLoading, isError } = useGetDatasetDisplayConfigQuery({ datasetId: id });
+  const { data, isLoading, isError } = useGetDatasetDisplayConfigQuery({ datasetId: id }, { skip: !id });
   const displayConfigData = data?.display_config;
   const [editMode, setEditMode] = useState<{ [key: string]: boolean }>({});
   const [displayConfigUpdatedData, setDisplayConfigUpdatedData] = useState(displayConfigData);

@@ -1,4 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import {
   CellEditRequestEvent,
   ColDef,
@@ -69,6 +70,7 @@ import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+
 type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
@@ -91,7 +93,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
 
   const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
-  const { pageId } = useParams();
+  const params = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
@@ -354,8 +356,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   const handleDrilldownClick = (data: MapAny) => {
     appDispatch(updateUrlForLastBreadcrumb(router.asPath));
-    if (pageId) {
-      router.push(getPageDatasetDrilldownRoute(pageId as string, id as string, data?._zamp_id as string));
+    if (params?.pageId) {
+      router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {
       router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
     }
@@ -566,6 +568,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
           type: filtersContextActions.SET_TOTAL_ROWS,
           payload: { totalRows: response?.data?.total_count },
         });
+      })
+      .catch((err) => {
+        captureException(err);
       });
   }, [filters, drilldownFilters, id]);
 

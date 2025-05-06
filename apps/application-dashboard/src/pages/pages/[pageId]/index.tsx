@@ -16,7 +16,8 @@ import 'ag-charts-enterprise';
 const Page = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { pageId } = useParams();
+  const params = useParams();
+  const pageId = params?.pageId;
   const {
     data: pageDetails,
     isLoading,

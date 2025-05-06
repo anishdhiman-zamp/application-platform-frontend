@@ -110,7 +110,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer from {sourceAccountDetails?.account_holder_name}</div>
           <AccountWithLogo
             className='border border-GRAY_400 mb-5 rounded-md'
-            logo={DEFAULT_BANK}
+            logo={sourceAccountDetails?.banking_partner ?? DEFAULT_BANK}
             name={sourceAccountName}
             subtitle={sourceAccountDetails?.bank_name}
           />
@@ -120,7 +120,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
             <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer to</div>
             <AccountWithLogo
               className='border border-GRAY_400 mb-5 rounded-md'
-              logo={DEFAULT_BANK}
+              logo={destinationAccountDetails?.banking_partner ?? DEFAULT_BANK}
               name={destinationAccountName}
               subtitle={destinationAccountDetails?.bank_name}
             />
