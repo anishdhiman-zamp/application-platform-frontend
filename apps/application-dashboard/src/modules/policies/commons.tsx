@@ -115,7 +115,10 @@ const getValue = (key: string, selectedValue: string | number | SelectOption[]) 
   }
 };
 
-export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolicyConfigPayload => {
+export const transformFormDataToApiPayload = (
+  data: PolicyFormData,
+  defaultConditions: any[],
+): CreatePolicyConfigPayload => {
   // Transform creator data
   const creator = (data.creator as SelectOption[]).map((option) => {
     if (typeof option.value === 'string' || typeof option.value === 'boolean') {
@@ -167,16 +170,17 @@ export const transformFormDataToApiPayload = (data: PolicyFormData): CreatePolic
     creator: creator.length > 0 ? creator : undefined,
     conditions: {
       logical_operator: '&&',
-      conditions: [
-        ...(conditions ?? []),
-        {
-          field: 'currency',
-          value: 'USD',
-          operator: '==',
-        },
-      ],
+      conditions: [...(conditions ?? []), ...defaultConditions],
     },
     action,
     approval_flow: action === 'BLOCK' ? undefined : approval_flow,
   };
 };
+
+export const defaultConditions = [
+  {
+    field: 'currency',
+    value: 'USD',
+    operator: '==',
+  },
+];

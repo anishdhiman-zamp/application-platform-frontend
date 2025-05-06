@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectOption, validateField } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter } from '@zamp-platform/ui';
-import { getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
+import { cn } from '@zamp-platform/ui/lib/utils';
+import { defaultConditions, getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
@@ -91,6 +92,10 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       }
     });
 
+    if (!data.policyName.length) {
+      errors.policyName = 'Policy name is required';
+    }
+
     if (Object.keys(errors).length > 0) {
       let errorMessage = '';
 
@@ -104,7 +109,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       return;
     }
     messageToastId.current = toast.loading('Policy creation in progress');
-    const policyConfig = transformFormDataToApiPayload(data);
+    const policyConfig = transformFormDataToApiPayload(data, type === 'payout' ? defaultConditions : []);
 
     if (!paymentConfig?.id) {
       console.log('No payment config found skipping policy creation');
@@ -173,7 +178,10 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
                   type='text'
                   {...methods.register('policyName')}
                   name='policyName'
-                  className='f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit'
+                  className={cn(
+                    'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit',
+                    methods.formState.errors.policyName && 'border-red-500',
+                  )}
                   placeholder='Policy Title'
                   onFocus={(e) => e.stopPropagation()}
                 />
