@@ -95,7 +95,12 @@ const AddTag = ({
     if (value?.includes('.')) return;
 
     setSearchValue(value);
-    setSearchResults(tagList?.filter((tag) => tag?.toLowerCase()?.includes(value?.toLowerCase())));
+    const cleanedValue = value
+      ?.split('/')
+      .map((str) => str.trim())
+      .join('.');
+
+    setSearchResults(tagList?.filter((tag) => tag?.toLowerCase()?.includes(cleanedValue)));
     if (value) {
       setIsOpen(true);
     }
