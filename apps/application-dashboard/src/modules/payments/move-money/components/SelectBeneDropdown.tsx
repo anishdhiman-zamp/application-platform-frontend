@@ -180,7 +180,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
 
   useEffect(() => {
     if (inputRef.current && autoFocus && !disabled) {
-      inputRef.current.focus();
+      inputRef.current?.focus();
       setIsSearchActive(true);
       setIsShowMenu(true);
     }

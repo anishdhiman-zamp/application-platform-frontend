@@ -86,7 +86,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current?.focus();
     }
   }, [isOpen]);
 

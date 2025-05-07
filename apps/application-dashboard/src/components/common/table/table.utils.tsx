@@ -38,7 +38,7 @@ const getFiltersFromGroupKeys = (request: IServerSideGetRowsRequest): FilterType
 };
 
 export const getConditionValues = (condition: MapAny): FilterType | null => {
-  switch (condition.filterType) {
+  switch (condition?.filterType) {
     case FILTER_TYPES.AMOUNT_RANGE:
       if (condition.type === CONDITION_OPERATOR_TYPE.IN_BETWEEN) {
         if (condition.filterTo !== '' && condition.filter !== '')
@@ -136,7 +136,7 @@ const parseCondition = (condition: MapAny): FilterType | null => {
 export const convertToFilterModel = (input: MapAny | null): FilterModelType | null => {
   if (!input) {
     return null;
-  } else if (input.filterType === 'join') {
+  } else if (input?.filterType === 'join') {
     return {
       logical_operator: LogicalOperatorMap[input.type] || LogicalOperatorType.OperatorLogicalAnd,
       conditions: input.conditions

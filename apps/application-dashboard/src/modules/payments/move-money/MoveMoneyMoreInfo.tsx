@@ -62,7 +62,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
 
   useEffect(() => {
     if (textareaRef.current && isActiveStep)
-      textareaRef.current.focus({
+      textareaRef.current?.focus({
         preventScroll: true,
       });
   }, [isActiveStep]);
