@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIDEBAR_ITEMS } from 'constants/routeConfig';
@@ -16,7 +17,6 @@ import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTa
 import ProcessNavTab from 'components/layouts/dashboard-layout/components/ProcessNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);

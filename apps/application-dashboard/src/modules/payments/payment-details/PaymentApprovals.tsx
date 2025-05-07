@@ -1,10 +1,10 @@
 import type { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApprovalSkeleton from 'modules/payments/payment-details/components/ApprovalSkeleton';
 import ApprovalStatusCard from 'modules/payments/payment-details/components/ApprovalStatusCard';
 import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { useAppSelector } from '@/hooks/toolkit';
 import type { RootState } from '@/store';
 import type { PaymentApprovalsInfoResponseType } from '@/types/api/paymentApi.types';

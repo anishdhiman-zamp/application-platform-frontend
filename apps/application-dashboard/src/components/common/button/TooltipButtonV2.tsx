@@ -1,4 +1,5 @@
 import { FC, ReactNode } from 'react';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
@@ -6,7 +7,6 @@ import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
-import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 interface TooltipButtonPropsType {
   tooltipBodyClassName?: string;

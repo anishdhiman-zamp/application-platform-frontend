@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import ImportFileHistory from 'modules/data/components/datasetHistory/ImportFileHistory';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const DatasetHistory = () => {
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];

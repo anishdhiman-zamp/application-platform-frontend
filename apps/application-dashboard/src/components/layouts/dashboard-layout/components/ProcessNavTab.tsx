@@ -1,7 +1,7 @@
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { getProcessRouteById } from 'constants/routeConfig';
 import { useRouter } from 'next/router';
 import { cn } from 'utils/common';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { ICON_SPRITE_TYPES } from '@/constants/icons';
 
 interface ProcessNavTabProps {

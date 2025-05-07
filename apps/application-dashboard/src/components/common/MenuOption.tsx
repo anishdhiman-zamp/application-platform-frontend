@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { MenuOptionProps } from 'types/common/components/dropdown/dropdown.types';
@@ -6,7 +7,6 @@ import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { CheckBox } from 'components/common/Checkbox';
 import { Radio } from 'components/common/Radio';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const leadingIconClassBySize = 'w-6 h-6';
 const leadingIconClass = 'flex justify-center items-center mr-4';

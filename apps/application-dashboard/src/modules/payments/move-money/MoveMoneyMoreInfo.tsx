@@ -1,4 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import FileUploader from 'modules/data/components/importDataset/FileUploader';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MOVE_MONEY_ATTACHMENTS_FILE_FORMATS } from 'modules/payments/payments.constant';
@@ -9,7 +10,6 @@ import FileUploaderWrapper from '@/components/file-upload/FileUploaderWrapper';
 import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
 import Textarea from 'components/common/Textarea';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface MoneyTransferMoreDetailsStepProps {
   handleStepChange: (step: number) => void;

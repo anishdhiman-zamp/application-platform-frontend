@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { AccountDetailsType } from 'modules/payments/payments.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type RecipientAccountCardProps = {
   account: AccountDetailsType;

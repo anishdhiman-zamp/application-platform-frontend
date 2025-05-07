@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientAccountCard from 'modules/payments/recipients/components/RecipientAccountCard';
 import { useRouter } from 'next/router';
@@ -11,7 +12,6 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 import { getFirstLetters } from '@/utils/common';
 import { Button } from 'components/common/button/Button';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 type RecipientDetailsProps = {
   onBack: defaultFnType;
   recipientDetails: RecipientDetailsType;

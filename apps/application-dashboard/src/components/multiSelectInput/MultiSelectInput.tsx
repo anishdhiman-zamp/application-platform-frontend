@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFn, MapAny } from 'types/commonTypes';
@@ -19,7 +20,6 @@ import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import { KEY_CODES, MultiSelectInputPropsType } from 'components/multiSelectInput/multiSelectInput.types';
 import OptionsListSkeletonLoader from 'components/multiSelectInput/OptionsListSkeletonLoader';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   id,

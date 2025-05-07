@@ -1,4 +1,5 @@
 import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -22,7 +23,6 @@ import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, teamMembersData }) => {
   const user_email = getUserEmail();

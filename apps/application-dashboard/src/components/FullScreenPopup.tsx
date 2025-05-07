@@ -1,9 +1,9 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ZAMP_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFn, defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface FullScreenPopupProps {
   onClose?: defaultFnType;

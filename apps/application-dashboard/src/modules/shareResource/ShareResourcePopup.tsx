@@ -1,4 +1,5 @@
 import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useDeleteAudienceFromResourceMutation,
   usePatchChangeAudienceRoleInResourceMutation,
@@ -38,7 +39,6 @@ import CopyToClipboardBrowserUrl from 'components/CopyToClipboardBrowserUrl';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const { resourceType, resourceConfig } = props;

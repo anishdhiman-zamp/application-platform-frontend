@@ -1,4 +1,5 @@
 import React, { FC, useCallback, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { debounce, useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
@@ -9,7 +10,6 @@ import { Tooltip } from 'components/common/tooltip';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface AmountRangeFilterMenuItemProps {
   column: { colId: string };

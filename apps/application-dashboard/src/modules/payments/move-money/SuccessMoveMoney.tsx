@@ -1,4 +1,5 @@
 import { FC, useMemo, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { FAILED_TO_CREATE_TEMPLATE } from 'modules/payments/payments.constant';
@@ -11,7 +12,6 @@ import { useCreateTemplateMutation } from '@/apis/payments';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import { toast } from 'components/common/toast/Toast';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 interface SuccessSingleTransferStepProps {
   onReset: defaultFnType;
   transferType: MOVE_MONEY_TYPE;

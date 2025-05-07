@@ -1,8 +1,8 @@
 import React, { FC, useRef, useState } from 'react';
+import { SvgSpriteLoader, SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { MapAny } from 'types/commonTypes';
 import { DataAlign } from 'components/common/agGridTable/agGrid.types';
 import AgGridTableActionPortal from 'components/common/agGridTable/components/AgGridTableActionPortal';
-import SvgSpriteLoader, { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export interface AgGridTableHeaderActionProps {
   actionIcon?: SvgSpriteLoaderProps;

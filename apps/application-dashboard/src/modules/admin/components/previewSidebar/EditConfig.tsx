@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';
 import Input from 'components/common/input';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const EditConfig = ({ isEditing, onClick }: { isEditing: boolean; onClick: () => void }) => {
   return (

@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn, getTagColor } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type TagChipProps = { item: string; existingList?: string[]; showIcon?: boolean; externalColor?: string };
 

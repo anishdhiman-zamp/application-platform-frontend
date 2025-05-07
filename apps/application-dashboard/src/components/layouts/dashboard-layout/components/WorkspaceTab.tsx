@@ -1,8 +1,8 @@
 import React from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface WorkspaceTabProps {
   label: string;

@@ -1,7 +1,7 @@
 import { FC, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import ProgressBar from 'components/common/RingProgress';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type NotificationProps = {
   isPolling: boolean;

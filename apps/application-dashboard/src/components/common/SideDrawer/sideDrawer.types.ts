@@ -1,8 +1,8 @@
 import { ReactElement, ReactNode } from 'react';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { POSITION_TYPES, SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { ICON_POSITION_TYPES } from 'types/components/button.type';
-import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export enum SIDE_DRAWER_TYPES {
   PRIMARY = 'PRIMARY',

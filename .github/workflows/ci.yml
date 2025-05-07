@@ -42,6 +42,5 @@ jobs:
         echo "You can download the full report from the artifacts section." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Coverage files:" >> $GITHUB_STEP_SUMMARY
-        ls -la coverage/ >> $GITHUB_STEP_SUMMARY
 
  

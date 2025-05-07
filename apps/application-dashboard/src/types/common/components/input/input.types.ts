@@ -8,10 +8,10 @@ import {
   ReactNode,
   RefObject,
 } from 'react';
+import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, EventCallbackType } from 'types/commonTypes';
 import { SupporterInfoProps } from 'components/common/SupporterInfo';
-import { SvgSpriteLoaderProps } from 'components/SvgSpriteLoader';
 
 export enum SUPPORT_INFO_TYPES {
   GUIDE = 'GUIDE',

@@ -1,6 +1,7 @@
 import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { captureException } from '@sentry/browser';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON } from 'constants/icons';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
@@ -23,7 +24,6 @@ import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

@@ -1,9 +1,9 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@/utils/common';
 import ProgressBar from 'components/common/RingProgress';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 type DropdownToggleProps = {
   isLoading?: boolean;

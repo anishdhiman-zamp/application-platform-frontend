@@ -1,10 +1,10 @@
 import { FC, useRef, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import { OptionsType } from 'types/common/components/dropdown/dropdown.types';
 import { MapAny } from 'types/commonTypes';
 import { CONDITION_OPERATOR_TYPE, DESCRIPTION_OPERATORS } from 'components/filter/filters.constants';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface DescriptionOperatorsDropdownProps {
   operator?: MapAny;

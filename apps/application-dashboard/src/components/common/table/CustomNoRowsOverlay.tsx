@@ -1,4 +1,4 @@
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 
 const CustomNoRowsOverlay = () => {
   return (

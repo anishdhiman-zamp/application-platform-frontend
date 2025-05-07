@@ -1,5 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { useUpdateDatasetDataMutation } from 'apis/dataset';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -19,8 +20,6 @@ import { toast } from 'components/common/toast/Toast';
 import ToggleSwitch from 'components/common/toggleSwitch';
 import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';
 import { useFiltersContextStore } from 'components/filter/filters.context';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
-
 const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';
 
 const AddTag = ({
