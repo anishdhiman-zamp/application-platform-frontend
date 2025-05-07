@@ -272,21 +272,22 @@ export const getAllColumnIds = (
     const formattedDateFromColId = extractDateDWDFormat(colId) ?? '';
     const currentDate = getTodayFormattedDatePivot();
     const columnHeaderName = handleGetSuffixAfterDateFromColId(colId, formattedDateFromColId); // value_1
-    let historicalForecastHeaderName: string | undefined; // column header_name
+    let historicalForecastHeaderNames: string[] = []; // column header_name
 
     if (Array.isArray(displayConfigRules)) {
       const hideRule = displayConfigRules?.find((rule) => rule?.type === DISPLAY_CONFIG_RULES.HIDE);
 
-      if (hideRule && Array.isArray(hideRule.conditions)) {
-        const historicalForecastCondition = hideRule?.conditions?.find(
+      if (hideRule && Array.isArray(hideRule?.conditions)) {
+        const historicalForecastConditions = hideRule?.conditions?.filter(
           (cond) => cond?.toggle_field === DisplayConfigToggleType.SHOW_HISTORICAL_FORECAST,
         );
 
-        historicalForecastHeaderName = historicalForecastCondition?.header_name;
+        // get all header names
+        historicalForecastHeaderNames = historicalForecastConditions?.map((cond) => cond?.header_name as string);
       }
     }
 
-    if (currentDate !== formattedDateFromColId && columnHeaderName === historicalForecastHeaderName) {
+    if (currentDate !== formattedDateFromColId && historicalForecastHeaderNames?.includes(columnHeaderName ?? '')) {
       showForecastColIds.push(colId);
     }
 

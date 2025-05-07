@@ -562,7 +562,7 @@ export const getColumnLevelFilters = (
 
     if (columnColumnFilterConfig) {
       columnLevelFilters[columnColumnFilterConfig?.column] = columnColumnFilterConfig;
-      switch (columnColumnFilterConfig.filterType) {
+      switch (columnColumnFilterConfig?.filterType) {
         case FILTER_TYPES.MULTI_SELECT: {
           columnLevelFilters[columnColumnFilterConfig.column].values = [pivotKey];
           break;

@@ -2,7 +2,7 @@ import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
 import { CreatePolicyConfigPayload, PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
-import type { PolicyConfigType } from '@/types/api/policies.types';
+import type { PolicyConfigType, PolicyResultStatus } from '@/types/api/policies.types';
 import { MenuItem } from '@/types/common/components';
 
 export type SourceAccountResponseType = {
@@ -144,6 +144,7 @@ export interface CreatePolicyPayloadType {
 export type PaymentApprovalsInfoResponseType = {
   approval_id: string;
   policy_evaluation_data: PolicyConfigType;
+  status: PolicyResultStatus;
 };
 
 export type GetPoliciesParamsType = {

@@ -115,7 +115,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
 
   useEffect(() => {
     if (inputRef.current && isOpen) {
-      inputRef.current.focus();
+      inputRef?.current?.focus();
     }
   }, [isOpen]);
 

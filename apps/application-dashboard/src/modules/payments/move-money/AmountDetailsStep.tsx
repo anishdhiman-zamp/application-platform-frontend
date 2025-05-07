@@ -72,7 +72,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
 
   useEffect(() => {
     if (inputRef.current && isActiveStep && !isSelfTransfer)
-      inputRef.current.focus({
+      inputRef.current?.focus({
         preventScroll: true,
       });
   }, [isActiveStep]);

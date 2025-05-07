@@ -319,7 +319,7 @@ const TreeTableComponent = ({
           const currentFilterContextValue = currentRefContext[key];
 
           treeFilters[item.key] = {
-            filterType: currentFilterContextValue.filterType,
+            filterType: currentFilterContextValue?.filterType,
             type: currentFilterContextValue.type,
             values: [item.value],
             column: item.key,
@@ -343,7 +343,7 @@ const TreeTableComponent = ({
             const currentFilterContextValue = currentRefContext[key];
 
             treeFilters[levelData.key] = {
-              filterType: currentFilterContextValue.filterType,
+              filterType: currentFilterContextValue?.filterType,
               type: currentFilterContextValue.type,
               values: [levelData.value],
               column: levelData.key,
