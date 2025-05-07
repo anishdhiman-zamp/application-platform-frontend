@@ -59,6 +59,7 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -307,7 +308,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
       },
     })
       .unwrap()
-      .then((response) => handleSuccessfulUpdate(response, false));
+      .then((response) => handleSuccessfulUpdate(response, false))
+      .catch((err) => {
+        captureException(err);
+        toast.error(TOAST_MESSAGES.FAILED_DATASET_UPDATE);
+      });
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {

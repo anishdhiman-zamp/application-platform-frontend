@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
 import { ColDef } from 'ag-grid-community';
 import { useGetAllDatasetsQuery } from 'apis/admin';
 import { useLazyGetActionStatusQuery } from 'apis/dataset';
@@ -20,6 +19,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { Button } from 'components/common/button/Button';
 import DataTable from 'components/common/table/DataTable';
+import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';

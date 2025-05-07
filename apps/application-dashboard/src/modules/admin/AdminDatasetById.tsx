@@ -59,7 +59,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
 
       <div className='flex flex-row overflow-y-auto'>
         <div className='flex flex-col w-full f-14-400'>
-          <div className='grid grid-cols-6 border-GRAY_400 px-10'>
+          <div className='grid grid-cols-7 border-GRAY_400 px-10'>
             {DisplayConfigHeadersList.map((header, index: number) => (
               <div key={index} className='border border-GRAY_400 px-2 py-5'>
                 {header?.value}
@@ -68,13 +68,13 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
           </div>
           <div className='flex flex-col p-10 pt-0 h-[calc(100vh-130px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
             {displayConfigUpdatedData?.map((config, index) => (
-              <div key={index} className='grid grid-cols-6 border-b border-GRAY_400'>
+              <div key={index} className='grid grid-cols-7 border-b border-GRAY_400'>
+                <EditableConfigField value={config?.column || ''} isEditing={false} firstColumn />
                 <EditableConfigField
-                  value={config?.column || ''}
-                  isEditing={editMode[`${index}-${DISPLAY_CONFIG_HEADERS.COLUMN}`]}
-                  onEditToggle={() => handleEditToggle(index, DISPLAY_CONFIG_HEADERS.COLUMN)}
-                  onChange={(e) => handleChange(index, DISPLAY_CONFIG_HEADERS.COLUMN, e.target.value)}
-                  firstColumn
+                  value={config?.alias || ''}
+                  isEditing={editMode[`${index}-${DISPLAY_CONFIG_HEADERS.ALIAS}`]}
+                  onEditToggle={() => handleEditToggle(index, DISPLAY_CONFIG_HEADERS.ALIAS)}
+                  onChange={(e) => handleChange(index, DISPLAY_CONFIG_HEADERS.ALIAS, e.target.value)}
                 />
 
                 <div className='flex gap-2 border-r border-GRAY_400 p-2'>

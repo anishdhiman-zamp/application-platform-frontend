@@ -33,7 +33,6 @@
     "async-mutex": "^0.5.0",
     "clsx": "^2.1.1",
     "date-fns": "2.30.0",
-    "external-svg-loader": "^1.7.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
     "lucide-react": "^0.503.0",
     "monaco-editor": "^0.52.2",
@@ -51,7 +50,8 @@
     "react-toastify": "^11.0.3",
     "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.5.5",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "@zamp-platform/svg-loader": "*"
   },
   "peerDependencies": {
     "next": "^15",

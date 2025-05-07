@@ -37,6 +37,28 @@ export const myTheme = themeQuartz.withParams({
   menuShadow: '1px 2px 20px 0px #0000001A',
 });
 
+export const myThemeWithProcess = myTheme.withParams({
+  fontFamily: { googleFont: 'Inter' },
+  headerFontSize: 12,
+  headerFontWeight: 600,
+  rowHeight: 44,
+  rowBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
+  columnBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
+  headerHeight: 31,
+  headerRowBorder: { style: 'solid', width: 1, color: COLORS.GRAY_400 },
+  headerColumnBorder: { style: 'solid', width: 0, color: COLORS.GRAY_100 },
+  headerBackgroundColor: COLORS.WHITE,
+  wrapperBorderRadius: 0,
+  iconSize: 12,
+  rowHoverColor: COLORS.BACKGROUND_GRAY_2,
+  headerColumnResizeHandleColor: COLORS.WHITE,
+  menuBorder: { style: 'solid', width: 1, color: COLORS.GRAY_500 },
+  menuBackgroundColor: COLORS.WHITE,
+  wrapperBorder: { width: 1, style: 'solid', color: COLORS.GRAY_400 },
+  rowLoadingSkeletonEffectColor: COLORS.GRAY_50,
+  menuShadow: '1px 2px 20px 0px #0000001A',
+});
+
 export const myIcons = {
   groupExpanded: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3 4.5L6 7.5L9 4.5" fill="#8F8F8F"/>

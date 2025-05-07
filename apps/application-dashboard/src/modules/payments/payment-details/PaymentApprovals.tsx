@@ -69,6 +69,7 @@ const PaymentApprovals: FC<PaymentApprovalsProps> = ({ paymentApprovalsInfo, isE
               teamsData={teamsData ?? []}
               orgMembers={orgMembers ?? []}
               orgName={organizationName}
+              isApproved={index < paymentApprovalsInfo?.policy_evaluation_data?.current_approval_step}
             />
           ))}
         </div>

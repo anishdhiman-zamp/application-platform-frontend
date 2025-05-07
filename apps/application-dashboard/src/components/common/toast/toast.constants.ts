@@ -36,6 +36,14 @@ export enum TOAST_MESSAGES {
   ERROR_FETCHING_POLICIES = 'Error fetching policies',
   ERROR_DELETING_POLICY = 'Failed to delete policy',
   SUCCESS_POLICY_DELETED = 'Policy deleted successfully',
+  FAILED_DATASET_UPDATE = 'Dataset update failed',
+
+  SUCCESS_TEMPLATE_UPDATED = 'Template updated successfully',
+  ERROR_TEMPLATE_UPDATED = 'Template update failed',
+  ERROR_TEMPLATE_FETCH = 'Template fetch failed',
+
+  ERROR_RULE_PRIORITY_UPDATE = 'Rule priority update failed',
+  ERROR_FETCHING_ACCOUNTS = 'Failed to fetch accounts',
 }
 
 export const TaggingMessages = {

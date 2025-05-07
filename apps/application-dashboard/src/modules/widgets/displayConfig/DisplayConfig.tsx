@@ -1,20 +1,17 @@
 import {
-  CALENDER_DAYS,
   DISPLAY_CONFIG_RULES,
   DisplayConfigRulesConditionsAliasType,
-  DisplayConfigRulesConditionsPeriodType,
   DisplayConfigRulesConditionsType,
   GetCellStyleParamsType,
 } from 'modules/widgets/displayConfig/displayConfig.types';
 import {
+  checkPeriodBasedDateColumnToHide,
   compareColumnGroupAliasDate,
   evaluateOperator,
-  getTodayFormattedDatePivot,
   handleExtractPartsFromColId,
   handleMatchRecursiveParentKey,
+  updateColumnsToHideForDisplayConfig,
 } from 'modules/widgets/displayConfig/displayConfig.utils';
-import { AllPivotColumnsToHideType, ColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
-import { formatColGroupHeaderDisplayName } from 'modules/widgets/Pivot/pivot.utils';
 import { MapAny } from 'types/commonTypes';
 
 export const getCellStyle = (params: GetCellStyleParamsType) => {
@@ -32,6 +29,7 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
     setAllPivotColumnsToHide,
     currentWidgetInstanceId,
     displayConfigStyle,
+    colGroupHeaderName,
   } = params;
 
   const rules: { type: DISPLAY_CONFIG_RULES; conditions: DisplayConfigRulesConditionsType }[] =
@@ -42,52 +40,6 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
       }[])) ||
     [];
   let style: MapAny = {};
-
-  const updateColumnsToHide = (widgetInstanceId: string, newColIds: { colId: string; hide: boolean }[]) => {
-    setAllPivotColumnsToHide?.((prev: AllPivotColumnsToHideType[]) => {
-      const updatedConfigs = Array.isArray(prev) ? [...prev] : [];
-
-      const existingConfigIndex = updatedConfigs?.findIndex((item) => item?.widgetInstanceId === widgetInstanceId);
-
-      if (existingConfigIndex !== -1) {
-        const existingColIds = new Set(
-          updatedConfigs[existingConfigIndex]?.colIds?.map((col: ColumnsToHideType) => col?.colId),
-        );
-
-        const filteredNewColIds = newColIds?.filter((col) => !existingColIds.has(col.colId));
-
-        if (filteredNewColIds.length > 0) {
-          (updatedConfigs[existingConfigIndex]?.colIds ?? []).push(...filteredNewColIds);
-        }
-      } else {
-        updatedConfigs.push({
-          widgetInstanceId,
-          colIds: newColIds,
-        });
-      }
-
-      return updatedConfigs;
-    });
-  };
-
-  const checkPeriodBasedDateColumnToHide = (
-    period: string,
-    value: string,
-    headerName?: string,
-    date?: string,
-  ): boolean => {
-    if (period === DisplayConfigRulesConditionsPeriodType.TODAY) {
-      return value === headerName && date !== getTodayFormattedDatePivot();
-    }
-
-    if (period === DisplayConfigRulesConditionsPeriodType.WEEKEND) {
-      const { suffix } = formatColGroupHeaderDisplayName(date ?? '');
-
-      return [CALENDER_DAYS.SATURDAY, CALENDER_DAYS.SUNDAY].some((day) => suffix?.includes(day));
-    }
-
-    return false;
-  };
 
   rules.forEach((rule: { type: DISPLAY_CONFIG_RULES; conditions: DisplayConfigRulesConditionsType }) => {
     switch (rule.type as DISPLAY_CONFIG_RULES) {
@@ -164,17 +116,26 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
 
       case DISPLAY_CONFIG_RULES.HIDE:
         rule?.conditions?.forEach((condition) => {
-          if (!condition?.hide) return;
-
-          const { alias, column_id = [], period, header_name, operator } = condition;
+          const { alias, column_id = [], period, header_name, operator, toggle_field } = condition;
           const isDateAlias = alias === DisplayConfigRulesConditionsAliasType.DATE;
           const colIds = [...(column_id || [])];
+          const { date } = handleExtractPartsFromColId(column?.colId);
 
-          const { date, value } = handleExtractPartsFromColId(column?.colId);
-
-          // Check for period-based hiding
-          if (isDateAlias && period && checkPeriodBasedDateColumnToHide(period, value, header_name, date?.[0])) {
-            updateColumnsToHide(currentWidgetInstanceId ?? '', [{ colId: columnId ?? '', hide: true }]);
+          // Check for period-based hiding without toggle_field
+          if (
+            !toggle_field &&
+            isDateAlias &&
+            period &&
+            checkPeriodBasedDateColumnToHide({
+              period,
+              colGroupHeaderName,
+              headerName: header_name,
+              date: date?.[0],
+            })
+          ) {
+            updateColumnsToHideForDisplayConfig(setAllPivotColumnsToHide, currentWidgetInstanceId ?? '', [
+              { colId: columnId ?? '', hide: true },
+            ]);
 
             return;
           }
@@ -195,7 +156,7 @@ export const getCellStyle = (params: GetCellStyleParamsType) => {
           if (currentWidgetInstanceId && shouldHide) {
             const newColIds = colIds.map((id) => ({ colId: id, hide: true }));
 
-            updateColumnsToHide(currentWidgetInstanceId, newColIds);
+            updateColumnsToHideForDisplayConfig(setAllPivotColumnsToHide, currentWidgetInstanceId, newColIds);
           }
         });
         break;

@@ -85,6 +85,7 @@ export type PolicyConfigType = {
   approval_flow: {
     steps: PolicyStepType[];
   };
+  current_approval_step: number;
 };
 
 export type PolicyType = {

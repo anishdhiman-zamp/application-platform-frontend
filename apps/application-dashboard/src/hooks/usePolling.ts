@@ -67,7 +67,7 @@ const usePolling = () => {
     const executePoll = async (resolve: (val: MapAny) => void, reject: (val: MapAny) => void) => {
       try {
         const response = await fn();
-        const result = response?.unwrap();
+        const result = response?.data;
 
         attempts++;
 
