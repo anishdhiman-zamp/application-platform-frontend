@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/78</span>
+                <span class='fraction'>0/84</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/78</span>
+                <span class='fraction'>0/84</span>
             </div>
         
             
@@ -141,7 +141,13 @@
 <a name='L76'></a><a href='#L76'>76</a>
 <a name='L77'></a><a href='#L77'>77</a>
 <a name='L78'></a><a href='#L78'>78</a>
-<a name='L79'></a><a href='#L79'>79</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -219,7 +225,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { ReactElement, useEffect, useMemo } from 'react';</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ReactElement, useEffect, useMemo } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';</span>
 <span class="cstat-no" title="statement not covered" >import { getPageRouteById } from 'constants/routeConfig';</span>
 <span class="cstat-no" title="statement not covered" >import { useAppDispatch } from 'hooks/toolkit';</span>
@@ -237,7 +249,8 @@
 <span class="cstat-no" title="statement not covered" >const Page = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const dispatch = useAppDispatch();</span>
 <span class="cstat-no" title="statement not covered" >  const router = useRouter();</span>
-<span class="cstat-no" title="statement not covered" >  const { pageId } = useParams();</span>
+<span class="cstat-no" title="statement not covered" >  const params = useParams();</span>
+<span class="cstat-no" title="statement not covered" >  const pageId = params?.pageId;</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
 <span class="cstat-no" title="statement not covered" >    data: pageDetails,</span>
 <span class="cstat-no" title="statement not covered" >    isLoading,</span>
@@ -281,7 +294,12 @@
 <span class="cstat-no" title="statement not covered" >  return (</span>
 <span class="cstat-no" title="statement not covered" >    &lt;CommonWrapper isError={isError} refetchFunction={refetch}&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='relative h-full rounded-tl-md w-full'&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;Sheets pageId={pageId as string} sheetId={currentSheetId as string} isPageLoading={isLoading} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;Sheets</span>
+<span class="cstat-no" title="statement not covered" >          key={currentSheetId}</span>
+<span class="cstat-no" title="statement not covered" >          pageId={pageId as string}</span>
+<span class="cstat-no" title="statement not covered" >          sheetId={currentSheetId as string}</span>
+<span class="cstat-no" title="statement not covered" >          isPageLoading={isLoading}</span>
+<span class="cstat-no" title="statement not covered" >        /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} /&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >    &lt;/CommonWrapper&gt;</span>
@@ -304,7 +322,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/116</span>
+                <span class='fraction'>0/127</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/116</span>
+                <span class='fraction'>0/127</span>
             </div>
         
             
@@ -179,7 +179,29 @@
 <a name='L114'></a><a href='#L114'>114</a>
 <a name='L115'></a><a href='#L115'>115</a>
 <a name='L116'></a><a href='#L116'>116</a>
-<a name='L117'></a><a href='#L117'>117</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -301,6 +323,7 @@
 <span class="cstat-no" title="statement not covered" >export enum ResourceType {</span>
 <span class="cstat-no" title="statement not covered" >  DATASET = 'dataset',</span>
 <span class="cstat-no" title="statement not covered" >  PAGE = 'page',</span>
+<span class="cstat-no" title="statement not covered" >  PAYMENTS = 'payments',</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export type TeamInfoType = {</span>
@@ -348,7 +371,6 @@
 <span class="cstat-no" title="statement not covered" > */</span>
 <span class="cstat-no" title="statement not covered" >export type ShareResourceConfig = {</span>
 <span class="cstat-no" title="statement not covered" >  type: ResourceType;</span>
-<span class="cstat-no" title="statement not covered" >  idPropName: string; // e.g., "datasetId" or "pageId"</span>
 <span class="cstat-no" title="statement not covered" >  accessPrivilegesList: ResourcePrivilege[];</span>
 <span class="cstat-no" title="statement not covered" >  displayName: string; // For UI display</span>
 <span class="cstat-no" title="statement not covered" >  toastMessages: {</span>
@@ -361,7 +383,7 @@
 <span class="cstat-no" title="statement not covered" > * Props for the shared component</span>
 <span class="cstat-no" title="statement not covered" > */</span>
 <span class="cstat-no" title="statement not covered" >export type ShareResourcePopupProps = {</span>
-<span class="cstat-no" title="statement not covered" >  resourceId: string;</span>
+<span class="cstat-no" title="statement not covered" >  resourceId?: string;</span>
 <span class="cstat-no" title="statement not covered" >  resourceType: ResourceType;</span>
 <span class="cstat-no" title="statement not covered" >  resourceAdminPrivilege: string;</span>
 <span class="cstat-no" title="statement not covered" >  resourceConfig: ShareResourceConfig;</span>
@@ -377,6 +399,21 @@
 <span class="cstat-no" title="statement not covered" >  resource_audience_id?: string;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export type ResourcePrivilege = {</span>
+<span class="cstat-no" title="statement not covered" >  kind: ResourceType;</span>
+<span class="cstat-no" title="statement not covered" >  label: string;</span>
+<span class="cstat-no" title="statement not covered" >  value: string;</span>
+<span class="cstat-no" title="statement not covered" >  desc: string;</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export type CombinedOptionListDataType = {</span>
+<span class="cstat-no" title="statement not covered" >  label: string;</span>
+<span class="cstat-no" title="statement not covered" >  value: string;</span>
+<span class="cstat-no" title="statement not covered" >  type?: string;</span>
+<span class="cstat-no" title="statement not covered" >  color?: string;</span>
+<span class="cstat-no" title="statement not covered" >  team_id?: string;</span>
+<span class="cstat-no" title="statement not covered" >};</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export enum PAGE_ACCESS_PRIVILEGES {</span>
 <span class="cstat-no" title="statement not covered" >  ADMIN = 'admin',</span>
 <span class="cstat-no" title="statement not covered" >  VIEWER = 'viewer',</span>
@@ -385,13 +422,6 @@
 <span class="cstat-no" title="statement not covered" >export type PageAccessPrivilegesType = {</span>
 <span class="cstat-no" title="statement not covered" >  label: string;</span>
 <span class="cstat-no" title="statement not covered" >  value: PAGE_ACCESS_PRIVILEGES;</span>
-<span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export type ResourcePrivilege = {</span>
-<span class="cstat-no" title="statement not covered" >  kind: ResourceType;</span>
-<span class="cstat-no" title="statement not covered" >  label: string;</span>
-<span class="cstat-no" title="statement not covered" >  value: string;</span>
-<span class="cstat-no" title="statement not covered" >  desc: string;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export enum DATASET_ACCESS_PRIVILEGES {</span>
@@ -404,12 +434,15 @@
 <span class="cstat-no" title="statement not covered" >  value: DATASET_ACCESS_PRIVILEGES;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >export type CombinedOptionListDataType = {</span>
+<span class="cstat-no" title="statement not covered" >export enum PAYMENT_ACCESS_PRIVILEGES {</span>
+<span class="cstat-no" title="statement not covered" >  ADMIN = 'admin',</span>
+<span class="cstat-no" title="statement not covered" >  INITIATOR = 'initiator',</span>
+<span class="cstat-no" title="statement not covered" >  VIEWER = 'viewer',</span>
+<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >export type PaymentAccessPrivilegesType = {</span>
 <span class="cstat-no" title="statement not covered" >  label: string;</span>
-<span class="cstat-no" title="statement not covered" >  value: string;</span>
-<span class="cstat-no" title="statement not covered" >  type?: string;</span>
-<span class="cstat-no" title="statement not covered" >  color?: string;</span>
-<span class="cstat-no" title="statement not covered" >  team_id?: string;</span>
+<span class="cstat-no" title="statement not covered" >  value: PAYMENT_ACCESS_PRIVILEGES;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;</pre></td></tr></table></pre>
 
@@ -418,7 +451,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/378</span>
+                <span class='fraction'>0/381</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/378</span>
+                <span class='fraction'>0/381</span>
             </div>
         
             
@@ -441,7 +441,13 @@
 <a name='L376'></a><a href='#L376'>376</a>
 <a name='L377'></a><a href='#L377'>377</a>
 <a name='L378'></a><a href='#L378'>378</a>
-<a name='L379'></a><a href='#L379'>379</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L379'></a><a href='#L379'>379</a>
+<a name='L380'></a><a href='#L380'>380</a>
+<a name='L381'></a><a href='#L381'>381</a>
+<a name='L382'></a><a href='#L382'>382</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -820,22 +826,22 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { DEFAULT_BANK } from 'constants/icons';</span>
 <span class="cstat-no" title="statement not covered" >import { useOnClickOutside } from 'hooks';</span>
 <span class="cstat-no" title="statement not covered" >import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';</span>
-<span class="cstat-no" title="statement not covered" >import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';</span>
 <span class="cstat-no" title="statement not covered" >import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';</span>
 <span class="cstat-no" title="statement not covered" >import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';</span>
-<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';</span>
+<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';</span>
 <span class="cstat-no" title="statement not covered" >import { useRouter } from 'next/router';</span>
 <span class="cstat-no" title="statement not covered" >import { SIZE_TYPES } from 'types/common/components';</span>
 <span class="cstat-no" title="statement not covered" >import { cn, snakeCaseToSentenceCase } from 'utils/common';</span>
 <span class="cstat-no" title="statement not covered" >import TabsV2 from '@/components/common/tabs/TabsV2';</span>
 <span class="cstat-no" title="statement not covered" >import CommonWrapper from '@/components/commonWrapper';</span>
 <span class="cstat-no" title="statement not covered" >import SkeletonElement from '@/components/skeletons/SkeletonElement';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from '@/components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" >import { KEYBOARD_KEYS } from '@/constants/shortcuts';</span>
 <span class="cstat-no" title="statement not covered" >import { TemplateDetailsType } from '@/types/api/paymentApi.types';</span>
+<span class="cstat-no" title="statement not covered" >import type { defaultFnType } from '@/types/commonTypes';</span>
 <span class="cstat-no" title="statement not covered" >import Input from 'components/common/input';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type SelectBeneDropdownProps = {</span>
@@ -851,7 +857,8 @@
 <span class="cstat-no" title="statement not covered" >  disabled?: boolean;</span>
 <span class="cstat-no" title="statement not covered" >  isLoading?: boolean;</span>
 <span class="cstat-no" title="statement not covered" >  showTemplate?: boolean;</span>
-<span class="cstat-no" title="statement not covered" >  setCreateTemplateType?: (type: MOVE_MONEY_TYPE | null) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  onCreateTemplate?: defaultFnType;</span>
+<span class="cstat-no" title="statement not covered" >  showCurrencyLogo?: boolean;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const SelectBeneDropdown: FC&lt;SelectBeneDropdownProps&gt; = ({</span>
@@ -866,7 +873,8 @@
 <span class="cstat-no" title="statement not covered" >  disabled = false,</span>
 <span class="cstat-no" title="statement not covered" >  isLoading = false,</span>
 <span class="cstat-no" title="statement not covered" >  showTemplate = false,</span>
-<span class="cstat-no" title="statement not covered" >  setCreateTemplateType,</span>
+<span class="cstat-no" title="statement not covered" >  onCreateTemplate,</span>
+<span class="cstat-no" title="statement not covered" >  showCurrencyLogo = false,</span>
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const containerRef = useRef&lt;HTMLDivElement&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const router = useRouter();</span>
@@ -915,8 +923,10 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const { filteredAccounts, templates } = useMemo(() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (isSearchActive) {</span>
-<span class="cstat-no" title="statement not covered" >      const filteredAccounts = accountsList.filter((val) =&gt;</span>
-<span class="cstat-no" title="statement not covered" >        val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()),</span>
+<span class="cstat-no" title="statement not covered" >      const filteredAccounts = accountsList.filter(</span>
+<span class="cstat-no" title="statement not covered" >        (val) =&gt;</span>
+<span class="cstat-no" title="statement not covered" >          val?.account_name?.toLowerCase()?.includes(searchValue?.toLowerCase()) ||</span>
+<span class="cstat-no" title="statement not covered" >          val?.masked_account_number?.toLowerCase()?.includes(searchValue?.toLowerCase()),</span>
 <span class="cstat-no" title="statement not covered" >      );</span>
 <span class="cstat-no" title="statement not covered" >      const templates = templateList?.filter((val) =&gt; val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -955,7 +965,6 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const onSearchFocus = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    setIsShowMenu(true);</span>
-<span class="cstat-no" title="statement not covered" >    setIsSearchActive(true);</span>
 <span class="cstat-no" title="statement not covered" >    setShowSearch(true);</span>
 <span class="cstat-no" title="statement not covered" >    inputRef.current?.focus();</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
@@ -989,6 +998,7 @@
 <span class="cstat-no" title="statement not covered" >  }, [shouldReset]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleKeyDown = (e: KeyboardEvent&lt;HTMLInputElement&gt;) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (disabled || !isInputEnabled) return;</span>
 <span class="cstat-no" title="statement not covered" >    const keyEvent = e.key;</span>
 <span class="cstat-no" title="statement not covered" >    const currentList = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? filteredAccounts : templates;</span>
 <span class="cstat-no" title="statement not covered" >    const currentRefs = currentTab === MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS ? accountRefs : templateRefs;</span>
@@ -1069,13 +1079,13 @@
 <span class="cstat-no" title="statement not covered" >              {filteredAccounts.map((account, index) =&gt; (</span>
 <span class="cstat-no" title="statement not covered" >                &lt;div key={`${account?.account_number}_${index}`} onMouseEnter={() =&gt; setHoveredIndex(index)}&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;AccountWithLogo</span>
-<span class="cstat-no" title="statement not covered" >                    className={cn('hover:bg-GRAY_100 rounded-md !p-2.5', {</span>
+<span class="cstat-no" title="statement not covered" >                    className={cn('rounded-md !p-2.5', {</span>
 <span class="cstat-no" title="statement not covered" >                      'bg-GRAY_100': hoveredIndex === index,</span>
 <span class="cstat-no" title="statement not covered" >                    })}</span>
-<span class="cstat-no" title="statement not covered" >                    tabIndex={-1}</span>
 <span class="cstat-no" title="statement not covered" >                    name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}</span>
 <span class="cstat-no" title="statement not covered" >                    onClick={() =&gt; handleAccountSelect(account)}</span>
-<span class="cstat-no" title="statement not covered" >                    logo={DEFAULT_BANK}</span>
+<span class="cstat-no" title="statement not covered" >                    logo={account?.banking_partner ?? DEFAULT_BANK}</span>
+<span class="cstat-no" title="statement not covered" >                    currencyCode={showCurrencyLogo ? account?.currency_code : ''}</span>
 <span class="cstat-no" title="statement not covered" >                  /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              ))}</span>
@@ -1112,12 +1122,12 @@
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div onFocus={onFocus}&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div onFocus={!disabled &amp;&amp; !isShowMenu ? onFocus : undefined} onKeyDown={handleKeyDown}&gt;</span>
 <span class="cstat-no" title="statement not covered" >      {label &amp;&amp; &lt;div className='text-GRAY_900 f-12-500 mb-2'&gt;{label}&lt;/div&gt;}</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div</span>
 <span class="cstat-no" title="statement not covered" >        className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {</span>
 <span class="cstat-no" title="statement not covered" >          'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,</span>
-<span class="cstat-no" title="statement not covered" >          'border-GRAY_500': isShowMenu,</span>
+<span class="cstat-no" title="statement not covered" >          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,</span>
 <span class="cstat-no" title="statement not covered" >          '!cursor-not-allowed bg-GRAY_100': disabled,</span>
 <span class="cstat-no" title="statement not covered" >        })}</span>
 <span class="cstat-no" title="statement not covered" >        ref={containerRef}</span>
@@ -1134,23 +1144,22 @@
 <span class="cstat-no" title="statement not covered" >              value={showSearch ? searchValue : accountDetails?.account_name}</span>
 <span class="cstat-no" title="statement not covered" >              disabled={!!contact_id || disabled}</span>
 <span class="cstat-no" title="statement not covered" >              onChange={handleSearch}</span>
-<span class="cstat-no" title="statement not covered" >              onKeyDown={handleKeyDown}</span>
 <span class="cstat-no" title="statement not covered" >              className='f-13-450 grow'</span>
 <span class="cstat-no" title="statement not covered" >              focusClassNames='!px-0'</span>
 <span class="cstat-no" title="statement not covered" >              placeholder='Search account name, number'</span>
 <span class="cstat-no" title="statement not covered" >            /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} /&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        ) : (</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div onFocus={onFocus}&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div onFocus={!disabled &amp;&amp; !isInputEnabled ? onFocus : undefined}&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;AccountWithLogo</span>
 <span class="cstat-no" title="statement not covered" >              className={cn('rounded-md !p-2.5', {</span>
 <span class="cstat-no" title="statement not covered" >                'bg-BACKGROUND_GRAY_2': disabled,</span>
 <span class="cstat-no" title="statement not covered" >              })}</span>
 <span class="cstat-no" title="statement not covered" >              name={accountName}</span>
 <span class="cstat-no" title="statement not covered" >              onClick={!disabled ? onClickSelectedAccount : undefined}</span>
-<span class="cstat-no" title="statement not covered" >              logo={DEFAULT_BANK}</span>
-<span class="cstat-no" title="statement not covered" >              subtitle={accountDetails?.account_name}</span>
+<span class="cstat-no" title="statement not covered" >              logo={accountDetails?.banking_partner ?? DEFAULT_BANK}</span>
+<span class="cstat-no" title="statement not covered" >              currencyCode={showCurrencyLogo ? accountDetails?.currency_code : ''}</span>
+<span class="cstat-no" title="statement not covered" >              subtitle={accountDetails?.bank_name}</span>
 <span class="cstat-no" title="statement not covered" >            /&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        )}</span>
@@ -1183,7 +1192,7 @@
 <span class="cstat-no" title="statement not covered" >            &lt;div className='border-t border-GRAY_400 px-1'&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div</span>
 <span class="cstat-no" title="statement not covered" >                className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer rounded-md'</span>
-<span class="cstat-no" title="statement not covered" >                onClick={() =&gt; setCreateTemplateType?.(MOVE_MONEY_TYPE.SINGLE_TRANSFER)}</span>
+<span class="cstat-no" title="statement not covered" >                onClick={onCreateTemplate}</span>
 <span class="cstat-no" title="statement not covered" >              &gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;SvgSpriteLoader size={12} id='plus' /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                Create template</span>
@@ -1204,7 +1213,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

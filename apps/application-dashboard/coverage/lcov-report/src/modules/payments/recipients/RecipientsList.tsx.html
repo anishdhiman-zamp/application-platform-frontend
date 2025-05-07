@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/98</span>
+                <span class='fraction'>0/95</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/98</span>
+                <span class='fraction'>0/95</span>
             </div>
         
             
@@ -158,13 +158,7 @@
 <a name='L93'></a><a href='#L93'>93</a>
 <a name='L94'></a><a href='#L94'>94</a>
 <a name='L95'></a><a href='#L95'>95</a>
-<a name='L96'></a><a href='#L96'>96</a>
-<a name='L97'></a><a href='#L97'>97</a>
-<a name='L98'></a><a href='#L98'>98</a>
-<a name='L99'></a><a href='#L99'>99</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -261,6 +255,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { FC, useMemo, useState } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import RecipientCard from 'modules/payments/recipients/components/RecipientCard';</span>
+<span class="cstat-no" title="statement not covered" >import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';</span>
 <span class="cstat-no" title="statement not covered" >import { SIZE_TYPES } from 'types/common/components';</span>
 <span class="cstat-no" title="statement not covered" >import { defaultFnType } from 'types/commonTypes';</span>
 <span class="cstat-no" title="statement not covered" >import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';</span>
@@ -303,7 +298,7 @@
 <span class="cstat-no" title="statement not covered" >  return (</span>
 <span class="cstat-no" title="statement not covered" >    &lt;div className='py-6 pl-4.5 pr-2'&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='w-full flex items-center justify-between mb-4.5'&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className='f-16-600'&gt;Recipients&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;div className='f-16-600 px-1.5'&gt;Recipients&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;Button</span>
 <span class="cstat-no" title="statement not covered" >          size={SIZE_TYPES.SMALL}</span>
 <span class="cstat-no" title="statement not covered" >          type={BUTTON_TYPES.SECONDARY}</span>
@@ -319,26 +314,22 @@
 <span class="cstat-no" title="statement not covered" >        &lt;/Button&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;Input</span>
+<span class="cstat-no" title="statement not covered" >        autoFocus</span>
 <span class="cstat-no" title="statement not covered" >        type='text'</span>
 <span class="cstat-no" title="statement not covered" >        placeholder='Search by name, account name, or last 4 digits of account number'</span>
 <span class="cstat-no" title="statement not covered" >        value={search}</span>
 <span class="cstat-no" title="statement not covered" >        onChange={(e) =&gt; setSearch(e.target.value)}</span>
-<span class="cstat-no" title="statement not covered" >        className='mb-4'</span>
-<span class="cstat-no" title="statement not covered" >        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs'</span>
+<span class="cstat-no" title="statement not covered" >        className='mb-3.5 px-1.5'</span>
+<span class="cstat-no" title="statement not covered" >        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs !py-0 !h-6 placeholder:!text-GRAY_500'</span>
 <span class="cstat-no" title="statement not covered" >        focusClassNames=''</span>
 <span class="cstat-no" title="statement not covered" >      /&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;CommonWrapper</span>
 <span class="cstat-no" title="statement not covered" >        isLoading={isLoading}</span>
 <span class="cstat-no" title="statement not covered" >        isError={isError}</span>
+<span class="cstat-no" title="statement not covered" >        isNoData={filteredRecipientList?.length === 0}</span>
 <span class="cstat-no" title="statement not covered" >        noDataBanner={&lt;div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'&gt;No recipients found&lt;/div&gt;}</span>
 <span class="cstat-no" title="statement not covered" >        skeletonType={SkeletonTypes.CUSTOM}</span>
-<span class="cstat-no" title="statement not covered" >        loader={</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className='flex flex-col gap-2'&gt;</span>
-<span class="cstat-no" title="statement not covered" >            {Array.from({ length: 8 }).map((_, index) =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div key={index} className='w-full h-9 bg-GRAY_200 rounded-md animate-pulse' /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            ))}</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        loader={&lt;RecipientCardSkeleton /&gt;}</span>
 <span class="cstat-no" title="statement not covered" >      &gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex flex-col gap-2'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          {filteredRecipientList?.map((recipient) =&gt; (</span>
@@ -364,7 +355,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/91</span>
+                <span class='fraction'>0/73</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/91</span>
+                <span class='fraction'>0/73</span>
             </div>
         
             
@@ -136,25 +136,7 @@
 <a name='L71'></a><a href='#L71'>71</a>
 <a name='L72'></a><a href='#L72'>72</a>
 <a name='L73'></a><a href='#L73'>73</a>
-<a name='L74'></a><a href='#L74'>74</a>
-<a name='L75'></a><a href='#L75'>75</a>
-<a name='L76'></a><a href='#L76'>76</a>
-<a name='L77'></a><a href='#L77'>77</a>
-<a name='L78'></a><a href='#L78'>78</a>
-<a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a>
-<a name='L81'></a><a href='#L81'>81</a>
-<a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a>
-<a name='L84'></a><a href='#L84'>84</a>
-<a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a>
-<a name='L87'></a><a href='#L87'>87</a>
-<a name='L88'></a><a href='#L88'>88</a>
-<a name='L89'></a><a href='#L89'>89</a>
-<a name='L90'></a><a href='#L90'>90</a>
-<a name='L91'></a><a href='#L91'>91</a>
-<a name='L92'></a><a href='#L92'>92</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L74'></a><a href='#L74'>74</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -227,31 +209,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { createPortal } from 'react-dom';</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { forwardRef, useMemo } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { MASK_DOTS } from 'modules/payments/payments.constant';</span>
-<span class="cstat-no" title="statement not covered" >import { inter } from '@/constants/common.constants';</span>
+<span class="cstat-no" title="statement not covered" >import TooltipV2 from '@/components/common/TooltipV2';</span>
 <span class="cstat-no" title="statement not covered" >import { TemplateDetailsType } from '@/types/api/paymentApi.types';</span>
+<span class="cstat-no" title="statement not covered" >import { SIDE_OPTIONS } from '@/types/commonTypes';</span>
 <span class="cstat-no" title="statement not covered" >import { cn, snakeCaseToSentenceCase } from '@/utils/common';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type MoveMoneyTemplateListCardProps = {</span>
 <span class="cstat-no" title="statement not covered" >  template: TemplateDetailsType;</span>
@@ -261,10 +225,6 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const MoveMoneyTemplateListCard = forwardRef&lt;HTMLDivElement, MoveMoneyTemplateListCardProps&gt;(</span>
 <span class="cstat-no" title="statement not covered" >  ({ template, onSelect, className }, ref) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    const [isHover, setIsHover] = useState(false);</span>
-<span class="cstat-no" title="statement not covered" >    const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });</span>
-<span class="cstat-no" title="statement not covered" >    const elementRef = useRef&lt;HTMLDivElement&gt;(null);</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const sourceAccount = template?.details?.[0]?.source_account;</span>
 <span class="cstat-no" title="statement not covered" >    const destinationAccount = template?.details?.[0]?.destination_account;</span>
 <span class="cstat-no" title="statement not covered" >    const sourceAccountName = useMemo(() =&gt; {</span>
@@ -274,61 +234,47 @@
 <span class="cstat-no" title="statement not covered" >      return `${snakeCaseToSentenceCase(destinationAccount?.account_name ?? '')} ${MASK_DOTS} ${destinationAccount?.account_number.slice(-4)}`;</span>
 <span class="cstat-no" title="statement not covered" >    }, [destinationAccount]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      if (isHover &amp;&amp; elementRef.current) {</span>
-<span class="cstat-no" title="statement not covered" >        const rect = elementRef.current.getBoundingClientRect();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        setTooltipPosition({</span>
-<span class="cstat-no" title="statement not covered" >          top: rect.top + window.scrollY,</span>
-<span class="cstat-no" title="statement not covered" >          left: rect.right + window.scrollX + 20, // 8px offset from the element</span>
-<span class="cstat-no" title="statement not covered" >        });</span>
-<span class="cstat-no" title="statement not covered" >      }</span>
-<span class="cstat-no" title="statement not covered" >    }, [isHover]);</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    return (</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div</span>
-<span class="cstat-no" title="statement not covered" >        ref={ref}</span>
-<span class="cstat-no" title="statement not covered" >        onClick={() =&gt; onSelect(template)}</span>
-<span class="cstat-no" title="statement not covered" >        onMouseEnter={() =&gt; setIsHover(true)}</span>
-<span class="cstat-no" title="statement not covered" >        onMouseLeave={() =&gt; setIsHover(false)}</span>
-<span class="cstat-no" title="statement not covered" >        className={cn(</span>
-<span class="cstat-no" title="statement not covered" >          'flex items-center gap-1.5 text-GRAY_900 px-2.5 py-2 rounded-md hover:bg-GRAY_100 cursor-pointer',</span>
-<span class="cstat-no" title="statement not covered" >          className,</span>
-<span class="cstat-no" title="statement not covered" >        )}</span>
-<span class="cstat-no" title="statement not covered" >      &gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;SvgSpriteLoader id='file-06' size={14} /&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className='f-12-500 text-GRAY_950 grow'&gt;{template?.name}&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;SvgSpriteLoader id='send-03' size={14} /&gt;</span>
-<span class="cstat-no" title="statement not covered" >        {isHover &amp;&amp;</span>
-<span class="cstat-no" title="statement not covered" >          createPortal(</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div</span>
-<span class="cstat-no" title="statement not covered" >              className={cn('fixed z-50 bg-white border border-GRAY_400 rounded-md p-2.5 shadow-lg', inter.className)}</span>
-<span class="cstat-no" title="statement not covered" >              style={{</span>
-<span class="cstat-no" title="statement not covered" >                top: `${tooltipPosition.top}px`,</span>
-<span class="cstat-no" title="statement not covered" >                left: `${tooltipPosition.left}px`,</span>
-<span class="cstat-no" title="statement not covered" >              }}</span>
-<span class="cstat-no" title="statement not covered" >            &gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className='flex flex-col gap-3 min-w-[185px]'&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Source Account&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-12-500 text-GRAY_950'&gt;{sourceAccountName}&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Recipient&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-12-500 text-GRAY_950'&gt;{destinationAccount?.account_name}&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Recipient Account&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className='f-12-500 text-GRAY_950'&gt;{destinationAccountName}&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  Created by {template?.created_by}</span>
-<span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;TooltipV2</span>
+<span class="cstat-no" title="statement not covered" >        side={SIDE_OPTIONS.RIGHT}</span>
+<span class="cstat-no" title="statement not covered" >        key={template?.id}</span>
+<span class="cstat-no" title="statement not covered" >        className='w-full'</span>
+<span class="cstat-no" title="statement not covered" >        tooltipClassName='bg-transparent shadow-tableFilterMenu bg-white border border-GRAY_400 rounded-md p-2.5 ml-3'</span>
+<span class="cstat-no" title="statement not covered" >        tooltipBody={</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className='flex flex-col gap-3 min-w-[185px]'&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Source Account&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-12-500 text-GRAY_950'&gt;{sourceAccountName}&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;,</span>
-<span class="cstat-no" title="statement not covered" >            document.body,</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Recipient&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-12-500 text-GRAY_950'&gt;{destinationAccount?.account_name}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-11-400 text-GRAY_700 mb-0.5'&gt;Recipient Account&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className='f-12-500 text-GRAY_950'&gt;{destinationAccountName}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'&gt;</span>
+<span class="cstat-no" title="statement not covered" >                Created by {template?.created_by}</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;div</span>
+<span class="cstat-no" title="statement not covered" >          ref={ref}</span>
+<span class="cstat-no" title="statement not covered" >          onClick={() =&gt; onSelect(template)}</span>
+<span class="cstat-no" title="statement not covered" >          className={cn(</span>
+<span class="cstat-no" title="statement not covered" >            'flex  gap-1.5 text-GRAY_900 px-2.5 py-2 rounded-md hover:bg-GRAY_100 cursor-pointer w-full',</span>
+<span class="cstat-no" title="statement not covered" >            className,</span>
 <span class="cstat-no" title="statement not covered" >          )}</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;SvgSpriteLoader id='file-06' size={14} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className='f-12-500 text-GRAY_950 grow text-left'&gt;{template?.name}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;SvgSpriteLoader id='send-03' size={14} /&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/TooltipV2&gt;</span>
 <span class="cstat-no" title="statement not covered" >    );</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" >);</span>
@@ -343,7 +289,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

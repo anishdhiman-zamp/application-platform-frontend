@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/463</span>
+                <span class='fraction'>0/464</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/463</span>
+                <span class='fraction'>0/464</span>
             </div>
         
             
@@ -526,7 +526,9 @@
 <a name='L461'></a><a href='#L461'>461</a>
 <a name='L462'></a><a href='#L462'>462</a>
 <a name='L463'></a><a href='#L463'>463</a>
-<a name='L464'></a><a href='#L464'>464</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L464'></a><a href='#L464'>464</a>
+<a name='L465'></a><a href='#L465'>465</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -990,9 +992,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useCallback, useMemo, useRef, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import {</span>
 <span class="cstat-no" title="statement not covered" >  useDeleteAudienceFromResourceMutation,</span>
-<span class="cstat-no" title="statement not covered" >  useGetAudiencesByResourceIdQuery,</span>
 <span class="cstat-no" title="statement not covered" >  usePatchChangeAudienceRoleInResourceMutation,</span>
 <span class="cstat-no" title="statement not covered" >  usePostShareResourceToAudiencesMutation,</span>
 <span class="cstat-no" title="statement not covered" >} from 'apis/collaboration';</span>
@@ -1001,6 +1003,7 @@
 <span class="cstat-no" title="statement not covered" >import { useOnClickOutside } from 'hooks';</span>
 <span class="cstat-no" title="statement not covered" >import { useAppSelector } from 'hooks/toolkit';</span>
 <span class="cstat-no" title="statement not covered" >import AudienceAccess from 'modules/shareResource/AudienceAccess';</span>
+<span class="cstat-no" title="statement not covered" >import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';</span>
 <span class="cstat-no" title="statement not covered" >import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { RootState } from 'store';</span>
 <span class="cstat-no" title="statement not covered" >import { ResourceAudienceType } from 'types/api/auth.types';</span>
@@ -1010,14 +1013,17 @@
 <span class="cstat-no" title="statement not covered" >import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';</span>
 <span class="cstat-no" title="statement not covered" >import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';</span>
-<span class="cstat-no" title="statement not covered" >import { useGetAudiencesByOrganisationIdQuery, useGetTeamsByOrganizationIdQuery } from '@/apis/people';</span>
+<span class="cstat-no" title="statement not covered" >import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';</span>
 <span class="cstat-no" title="statement not covered" >import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';</span>
 <span class="cstat-no" title="statement not covered" >import {</span>
 <span class="cstat-no" title="statement not covered" >  CombinedOptionListDataType,</span>
+<span class="cstat-no" title="statement not covered" >  DATASET_ACCESS_PRIVILEGES,</span>
+<span class="cstat-no" title="statement not covered" >  PAGE_ACCESS_PRIVILEGES,</span>
+<span class="cstat-no" title="statement not covered" >  PAYMENT_ACCESS_PRIVILEGES,</span>
+<span class="cstat-no" title="statement not covered" >  ResourceType,</span>
 <span class="cstat-no" title="statement not covered" >  ShareResourcePopupProps,</span>
 <span class="cstat-no" title="statement not covered" >  ValidationResult,</span>
 <span class="cstat-no" title="statement not covered" >} from '@/modules/shareResource/shareResource.types';</span>
-<span class="cstat-no" title="statement not covered" >import { adminAccessPermissionForResource } from '@/utils/accessPermission/accessPermission';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from 'components/common/button/Button';</span>
 <span class="cstat-no" title="statement not covered" >import { toast } from 'components/common/toast/Toast';</span>
 <span class="cstat-no" title="statement not covered" >import CommonWrapper from 'components/commonWrapper';</span>
@@ -1026,9 +1032,10 @@
 <span class="cstat-no" title="statement not covered" >import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';</span>
 <span class="cstat-no" title="statement not covered" >import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';</span>
 <span class="cstat-no" title="statement not covered" >import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const ShareResourcePopup: FC&lt;ShareResourcePopupProps&gt; = ({ resourceId, resourceType, resourceConfig }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >const ShareResourcePopup: FC&lt;ShareResourcePopupProps&gt; = (props) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  const { resourceType, resourceConfig } = props;</span>
+<span class="cstat-no" title="statement not covered" >  const resourceId = props.resourceId || '';</span>
 <span class="cstat-no" title="statement not covered" >  const popupRef = useRef&lt;HTMLDivElement&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const [selectedRole, setSelectedRole] = useState&lt;string | Record&lt;number, string&gt;&gt;(</span>
 <span class="cstat-no" title="statement not covered" >    resourceConfig.accessPrivilegesList[0].value,</span>
@@ -1040,19 +1047,11 @@
 <span class="cstat-no" title="statement not covered" >  const [openPopup, setOpenPopup] = useState&lt;boolean&gt;(false);</span>
 <span class="cstat-no" title="statement not covered" >  const organizationId = useAppSelector((state: RootState) =&gt; state?.user?.user?.orgs?.[0]?.organization_id) ?? '';</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =</span>
+<span class="cstat-no" title="statement not covered" >    useResourceAccess(resourceType, props.resourceId || '');</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // get teams and users data in the organization</span>
 <span class="cstat-no" title="statement not covered" >  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // get existing audiences for the resource</span>
-<span class="cstat-no" title="statement not covered" >  const {</span>
-<span class="cstat-no" title="statement not covered" >    data: audiencesData,</span>
-<span class="cstat-no" title="statement not covered" >    isLoading: isLoadingAudiencesData,</span>
-<span class="cstat-no" title="statement not covered" >    refetch: refetchAudiencesData,</span>
-<span class="cstat-no" title="statement not covered" >  } = useGetAudiencesByResourceIdQuery(</span>
-<span class="cstat-no" title="statement not covered" >    { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },</span>
-<span class="cstat-no" title="statement not covered" >    { skip: !resourceId },</span>
-<span class="cstat-no" title="statement not covered" >  );</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // post invite audiences</span>
 <span class="cstat-no" title="statement not covered" >  const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostShareResourceToAudiencesMutation();</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1061,9 +1060,6 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // delete audience</span>
 <span class="cstat-no" title="statement not covered" >  const [deleteAudience, { isLoading: isDeletingAudience }] = useDeleteAudienceFromResourceMutation();</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  // get all teams in the organization</span>
-<span class="cstat-no" title="statement not covered" >  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // get user access to resource list</span>
 <span class="cstat-no" title="statement not covered" >  const userAccessToResourceList = audiencesData ?? [];</span>
@@ -1075,18 +1071,18 @@
 <span class="cstat-no" title="statement not covered" >  const userPrivilege =</span>
 <span class="cstat-no" title="statement not covered" >    (audiencesData || [])?.find((audience) =&gt; audience?.user?.email === user_email)?.privilege ?? user_role ?? '';</span>
 <span class="cstat-no" title="statement not covered" >  const currentUserHasAdminAccess = useMemo(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return adminAccessPermissionForResource(</span>
-<span class="cstat-no" title="statement not covered" >      userAccessToResourceList,</span>
-<span class="cstat-no" title="statement not covered" >      resourceType,</span>
-<span class="cstat-no" title="statement not covered" >      organizationId,</span>
-<span class="cstat-no" title="statement not covered" >      user_id,</span>
-<span class="cstat-no" title="statement not covered" >      allTeamsData</span>
-<span class="cstat-no" title="statement not covered" >        ?.map((t) =&gt; t.team_memberships)</span>
-<span class="cstat-no" title="statement not covered" >        .flat()</span>
-<span class="cstat-no" title="statement not covered" >        .filter((tm) =&gt; tm.user_id === user_id)</span>
-<span class="cstat-no" title="statement not covered" >        .map((tm) =&gt; tm.team_id) ?? [],</span>
-<span class="cstat-no" title="statement not covered" >    );</span>
-<span class="cstat-no" title="statement not covered" >  }, [userAccessToResourceList, organizationId, user_id, allTeamsData]);</span>
+<span class="cstat-no" title="statement not covered" >    switch (resourceType) {</span>
+<span class="cstat-no" title="statement not covered" >      case ResourceType.DATASET:</span>
+<span class="cstat-no" title="statement not covered" >        return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);</span>
+<span class="cstat-no" title="statement not covered" >      case ResourceType.PAGE:</span>
+<span class="cstat-no" title="statement not covered" >        return checkUserPrivilege(PAGE_ACCESS_PRIVILEGES.ADMIN);</span>
+<span class="cstat-no" title="statement not covered" >      case ResourceType.PAYMENTS:</span>
+<span class="cstat-no" title="statement not covered" >        return checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN);</span>
+<span class="cstat-no" title="statement not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >  }, [checkUserPrivilege, resourceType]);</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const isResourceSharable = !showValidationError &amp;&amp; selectedItems?.length &gt; 0 &amp;&amp; currentUserHasAdminAccess;</span>
 <span class="cstat-no" title="statement not covered" >  const orgName = useAppSelector((state: RootState) =&gt; state?.user?.user?.orgs?.[0]?.name);</span>
 <span class="cstat-no" title="statement not covered" >  const orgLabel = `Everyone in ${orgName}`;</span>
@@ -1153,8 +1149,8 @@
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  const handleRoleChange = async (resourceAudienceId: string, role: string) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    await changeRole({</span>
+<span class="cstat-no" title="statement not covered" >  const handleRoleChange = async (resourceAudienceId: string, role: string): Promise&lt;boolean&gt; =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    const success = await changeRole({</span>
 <span class="cstat-no" title="statement not covered" >      resourceRoute: resourceTypeRouteMap[resourceType],</span>
 <span class="cstat-no" title="statement not covered" >      resourceId,</span>
 <span class="cstat-no" title="statement not covered" >      body: {</span>
@@ -1168,10 +1164,16 @@
 <span class="cstat-no" title="statement not covered" >      .then(() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        refetchAudiencesData();</span>
 <span class="cstat-no" title="statement not covered" >        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        return true;</span>
 <span class="cstat-no" title="statement not covered" >      })</span>
 <span class="cstat-no" title="statement not covered" >      .catch((err) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    return success;</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleDeleteAudience = async (resourceAudienceId: string, userName: string) =&gt; {</span>
@@ -1421,9 +1423,9 @@
 <span class="cstat-no" title="statement not covered" >                  isLoading={isLoadingAudiencesData}</span>
 <span class="cstat-no" title="statement not covered" >                  loader={&lt;WhoHasAccessSkeletonLoader /&gt;}</span>
 <span class="cstat-no" title="statement not covered" >                &gt;</span>
-<span class="cstat-no" title="statement not covered" >                  {updatedUserAccessList?.map((audience, index) =&gt; (</span>
+<span class="cstat-no" title="statement not covered" >                  {updatedUserAccessList?.map((audience) =&gt; (</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;AudienceAccess</span>
-<span class="cstat-no" title="statement not covered" >                      key={index}</span>
+<span class="cstat-no" title="statement not covered" >                      key={audience?.resource_audience_id}</span>
 <span class="cstat-no" title="statement not covered" >                      resourceType={resourceType}</span>
 <span class="cstat-no" title="statement not covered" >                      privilege={audience?.privilege}</span>
 <span class="cstat-no" title="statement not covered" >                      resourceAudienceId={audience?.resource_audience_id}</span>
@@ -1439,6 +1441,7 @@
 <span class="cstat-no" title="statement not covered" >                      privilegeList={resourceConfig.accessPrivilegesList}</span>
 <span class="cstat-no" title="statement not covered" >                      isDeletingAudience={isDeletingAudience}</span>
 <span class="cstat-no" title="statement not covered" >                      isChangingRole={isChangingRole}</span>
+<span class="cstat-no" title="statement not covered" >                      currentUserId={user_id}</span>
 <span class="cstat-no" title="statement not covered" >                    /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  ))}</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/CommonWrapper&gt;</span>
@@ -1459,7 +1462,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

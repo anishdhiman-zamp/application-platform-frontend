@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/62</span>
+                <span class='fraction'>0/63</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/62</span>
+                <span class='fraction'>0/63</span>
             </div>
         
             
@@ -125,7 +125,9 @@
 <a name='L60'></a><a href='#L60'>60</a>
 <a name='L61'></a><a href='#L61'>61</a>
 <a name='L62'></a><a href='#L62'>62</a>
-<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -188,24 +190,24 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useMemo } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { useGetRulesByRuleIdsQuery } from 'apis/dataset';</span>
+<span class="cstat-no" title="statement not covered" >import { RuleConfigType } from 'modules/data/RowProperties/rowProperties.types';</span>
 <span class="cstat-no" title="statement not covered" >import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';</span>
 <span class="cstat-no" title="statement not covered" >import { cn } from 'utils/common';</span>
 <span class="cstat-no" title="statement not covered" >import CommonWrapper from 'components/commonWrapper';</span>
-<span class="cstat-no" title="statement not covered" >import { getTagLabel } from 'components/filter/filter.utils';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type RulesProps = {</span>
-<span class="cstat-no" title="statement not covered" >  ruleIds: string[];</span>
+<span class="cstat-no" title="statement not covered" >  ruleConfigs: RuleConfigType[];</span>
 <span class="cstat-no" title="statement not covered" >  selectedRuleId: string;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const Rules: FC&lt;RulesProps&gt; = ({ ruleIds, selectedRuleId }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >const Rules: FC&lt;RulesProps&gt; = ({ ruleConfigs, selectedRuleId }) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
 <span class="cstat-no" title="statement not covered" >    data: rulesData,</span>
 <span class="cstat-no" title="statement not covered" >    isLoading,</span>
 <span class="cstat-no" title="statement not covered" >    isError,</span>
-<span class="cstat-no" title="statement not covered" >  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleIds }, { skip: !ruleIds?.length });</span>
+<span class="cstat-no" title="statement not covered" >  } = useGetRulesByRuleIdsQuery({ rule_ids: ruleConfigs.map((config) =&gt; config.id) }, { skip: !ruleConfigs?.length });</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const listOfFilters: RuleCardProps[] = useMemo(</span>
 <span class="cstat-no" title="statement not covered" >    () =&gt;</span>
@@ -224,8 +226,8 @@
 <span class="cstat-no" title="statement not covered" >    &lt;CommonWrapper</span>
 <span class="cstat-no" title="statement not covered" >      isLoading={isLoading}</span>
 <span class="cstat-no" title="statement not covered" >      isError={isError}</span>
-<span class="cstat-no" title="statement not covered" >      isNoData={!ruleIds?.length}</span>
-<span class="cstat-no" title="statement not covered" >      className={cn({ 'h-full': !ruleIds?.length })}</span>
+<span class="cstat-no" title="statement not covered" >      isNoData={!ruleConfigs?.length}</span>
+<span class="cstat-no" title="statement not covered" >      className={cn({ 'h-full': !ruleConfigs?.length })}</span>
 <span class="cstat-no" title="statement not covered" >      noDataBanner={</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;SvgSpriteLoader id='lightning-01' width={24} height={24} /&gt;</span>
@@ -238,9 +240,10 @@
 <span class="cstat-no" title="statement not covered" >          &lt;RuleCard</span>
 <span class="cstat-no" title="statement not covered" >            filters={filter?.filters}</span>
 <span class="cstat-no" title="statement not covered" >            key={index}</span>
-<span class="cstat-no" title="statement not covered" >            value={getTagLabel(filter?.value ?? '')}</span>
+<span class="cstat-no" title="statement not covered" >            value={filter?.value}</span>
 <span class="cstat-no" title="statement not covered" >            createdOn={filter?.createdOn}</span>
 <span class="cstat-no" title="statement not covered" >            defaultExpanded={filter?.defaultExpanded}</span>
+<span class="cstat-no" title="statement not covered" >            labelColor={ruleConfigs?.[index]?.tagColorMap?.[filter?.value ?? '']}</span>
 <span class="cstat-no" title="statement not covered" >          /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        ))}</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
@@ -256,7 +259,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

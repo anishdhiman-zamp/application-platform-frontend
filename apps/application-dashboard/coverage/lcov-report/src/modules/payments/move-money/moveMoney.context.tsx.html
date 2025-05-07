@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/117</span>
+                <span class='fraction'>0/142</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/117</span>
+                <span class='fraction'>0/142</span>
             </div>
         
             
@@ -180,7 +180,57 @@
 <a name='L115'></a><a href='#L115'>115</a>
 <a name='L116'></a><a href='#L116'>116</a>
 <a name='L117'></a><a href='#L117'>117</a>
-<a name='L118'></a><a href='#L118'>118</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -298,7 +348,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';</span></span></span>
-<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, ContactType } from 'modules/payments/payments.types';</span>
+<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, ContactType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';</span>
 <span class="cstat-no" title="statement not covered" >import { UploadFileResponseType } from 'types/api/fileUpload.types';</span>
 <span class="cstat-no" title="statement not covered" >import { MenuItem } from 'types/common/components';</span>
 <span class="cstat-no" title="statement not covered" >import { MapAny } from 'types/commonTypes';</span>
@@ -317,6 +367,7 @@
 <span class="cstat-no" title="statement not covered" >  RESET_STATE = 'RESET_STATE',</span>
 <span class="cstat-no" title="statement not covered" >  TEMPLATE_DETAILS = 'TEMPLATE_DETAILS',</span>
 <span class="cstat-no" title="statement not covered" >  SOURCE_ACCOUNT_DETAILS = 'SOURCE_ACCOUNT_DETAILS',</span>
+<span class="cstat-no" title="statement not covered" >  RESET = 'RESET',</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" >interface InitialStateType {</span>
 <span class="cstat-no" title="statement not covered" >  currentStep: number;</span>
@@ -337,6 +388,7 @@
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" >  recipientDetails?: RecipientDetailsType | undefined;</span>
 <span class="cstat-no" title="statement not covered" >  counterParties?: ContactType[];</span>
+<span class="cstat-no" title="statement not covered" >  reset: boolean;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export interface ActionType {</span>
@@ -346,6 +398,7 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const initialState: InitialStateType = {</span>
 <span class="cstat-no" title="statement not covered" >  currentStep: 0,</span>
+<span class="cstat-no" title="statement not covered" >  reset: false,</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const context = createContext&lt;{</span>
@@ -372,6 +425,8 @@
 <span class="cstat-no" title="statement not covered" >          sourceAccountDetails: action?.payload?.sourceAccountDetails,</span>
 <span class="cstat-no" title="statement not covered" >          templateDetails: undefined,</span>
 <span class="cstat-no" title="statement not covered" >          destinationAccountDetails: undefined,</span>
+<span class="cstat-no" title="statement not covered" >          recipientDetails: undefined,</span>
+<span class="cstat-no" title="statement not covered" >          reset: false,</span>
 <span class="cstat-no" title="statement not covered" >        };</span>
 <span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.MORE_DETAILS:</span>
 <span class="cstat-no" title="statement not covered" >        return { ...state, moreDetails: action?.payload?.moreDetails };</span>
@@ -384,16 +439,36 @@
 <span class="cstat-no" title="statement not covered" >        };</span>
 <span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.RESET_STATE:</span>
 <span class="cstat-no" title="statement not covered" >        return initialState;</span>
+<span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.RESET:</span>
+<span class="cstat-no" title="statement not covered" >        return {</span>
+<span class="cstat-no" title="statement not covered" >          ...initialState,</span>
+<span class="cstat-no" title="statement not covered" >          currentStep: 0,</span>
+<span class="cstat-no" title="statement not covered" >          reset: true,</span>
+<span class="cstat-no" title="statement not covered" >        };</span>
 <span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.AMOUNT_DETAILS:</span>
 <span class="cstat-no" title="statement not covered" >        return { ...state, amountDetails: action?.payload?.amountDetails };</span>
-<span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.TEMPLATE_DETAILS:</span>
+<span class="cstat-no" title="statement not covered" >      case moveMoneyContextActions.TEMPLATE_DETAILS: {</span>
+<span class="cstat-no" title="statement not covered" >        const templateDetails: TemplateDetailsType = action?.payload?.templateDetails;</span>
+<span class="cstat-no" title="statement not covered" >        const destinationAccountDetails = templateDetails?.details[0]?.destination_account;</span>
+<span class="cstat-no" title="statement not covered" >        const sourceAccountDetails = templateDetails?.details[0]?.source_account;</span>
+<span class="cstat-no" title="statement not covered" >        const recipientDetails: RecipientDetailsType | undefined =</span>
+<span class="cstat-no" title="statement not covered" >          templateDetails?.type === MOVE_MONEY_TYPE.SINGLE_TRANSFER</span>
+<span class="cstat-no" title="statement not covered" >            ? {</span>
+<span class="cstat-no" title="statement not covered" >                name: destinationAccountDetails?.recipient_name ?? '',</span>
+<span class="cstat-no" title="statement not covered" >                id: destinationAccountDetails?.recipient_id ?? '',</span>
+<span class="cstat-no" title="statement not covered" >                accounts: [destinationAccountDetails],</span>
+<span class="cstat-no" title="statement not covered" >              }</span>
+<span class="cstat-no" title="statement not covered" >            : undefined;</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        return {</span>
 <span class="cstat-no" title="statement not covered" >          ...state,</span>
-<span class="cstat-no" title="statement not covered" >          templateDetails: action?.payload?.templateDetails,</span>
-<span class="cstat-no" title="statement not covered" >          destinationAccountDetails: action?.payload?.templateDetails?.details[0]?.destination_account,</span>
-<span class="cstat-no" title="statement not covered" >          sourceAccountDetails: action?.payload?.templateDetails?.details[0]?.source_account,</span>
-<span class="cstat-no" title="statement not covered" >          currentStep: 1,</span>
+<span class="cstat-no" title="statement not covered" >          templateDetails: templateDetails,</span>
+<span class="cstat-no" title="statement not covered" >          destinationAccountDetails: destinationAccountDetails,</span>
+<span class="cstat-no" title="statement not covered" >          sourceAccountDetails: sourceAccountDetails,</span>
+<span class="cstat-no" title="statement not covered" >          recipientDetails: recipientDetails,</span>
+<span class="cstat-no" title="statement not covered" >          currentStep: templateDetails?.type === MOVE_MONEY_TYPE.SINGLE_TRANSFER ? 2 : 1,</span>
 <span class="cstat-no" title="statement not covered" >        };</span>
+<span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      default:</span>
 <span class="cstat-no" title="statement not covered" >        return state;</span>
@@ -421,7 +496,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/338</span>
+                <span class='fraction'>0/346</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/338</span>
+                <span class='fraction'>0/346</span>
             </div>
         
             
@@ -401,7 +401,23 @@
 <a name='L336'></a><a href='#L336'>336</a>
 <a name='L337'></a><a href='#L337'>337</a>
 <a name='L338'></a><a href='#L338'>338</a>
-<a name='L339'></a><a href='#L339'>339</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L339'></a><a href='#L339'>339</a>
+<a name='L340'></a><a href='#L340'>340</a>
+<a name='L341'></a><a href='#L341'>341</a>
+<a name='L342'></a><a href='#L342'>342</a>
+<a name='L343'></a><a href='#L343'>343</a>
+<a name='L344'></a><a href='#L344'>344</a>
+<a name='L345'></a><a href='#L345'>345</a>
+<a name='L346'></a><a href='#L346'>346</a>
+<a name='L347'></a><a href='#L347'>347</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -740,11 +756,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ChangeEvent, FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { useOnClickOutside } from 'hooks';</span>
 <span class="cstat-no" title="statement not covered" >import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';</span>
 <span class="cstat-no" title="statement not covered" >import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';</span>
 <span class="cstat-no" title="statement not covered" >import RecipientCard from 'modules/payments/move-money/components/RecipientCard';</span>
-<span class="cstat-no" title="statement not covered" >import { TEMPLATES } from 'modules/payments/move-money/move-money.dummy';</span>
 <span class="cstat-no" title="statement not covered" >import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';</span>
 <span class="cstat-no" title="statement not covered" >import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';</span>
 <span class="cstat-no" title="statement not covered" >import { useRouter } from 'next/router';</span>
@@ -756,7 +772,6 @@
 <span class="cstat-no" title="statement not covered" >import Input from 'components/common/input';</span>
 <span class="cstat-no" title="statement not covered" >import { Tabs } from 'components/common/tabs/Tabs';</span>
 <span class="cstat-no" title="statement not covered" >import CommonWrapper from 'components/commonWrapper';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type SelectBeneDropdownProps = {</span>
 <span class="cstat-no" title="statement not covered" >  autoFocus?: boolean;</span>
@@ -805,12 +820,11 @@
 <span class="cstat-no" title="statement not covered" >      const counterParties = recipientList?.filter(</span>
 <span class="cstat-no" title="statement not covered" >        (recipient) =&gt; recipient?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()) ?? [],</span>
 <span class="cstat-no" title="statement not covered" >      );</span>
-<span class="cstat-no" title="statement not covered" >      const templates = TEMPLATES.filter((val) =&gt; val?.name?.toLowerCase()?.includes(searchValue?.toLowerCase()));</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      return { counterParties: counterParties ?? [], templates: templates ?? [] };</span>
+<span class="cstat-no" title="statement not covered" >      return { counterParties: counterParties ?? [], templates: [] };</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    return { counterParties: recipientList ?? [], templates: TEMPLATES };</span>
+<span class="cstat-no" title="statement not covered" >    return { counterParties: recipientList ?? [], templates: [] };</span>
 <span class="cstat-no" title="statement not covered" >  }, [isSearchActive, searchValue, recipientList]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const dropdownHeight = useMemo(() =&gt; {</span>
@@ -916,7 +930,13 @@
 <span class="cstat-no" title="statement not covered" >  }, [templateDetails]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (inputRef.current &amp;&amp; autoFocus) {</span>
+<span class="cstat-no" title="statement not covered" >    if (isShowMenu) {</span>
+<span class="cstat-no" title="statement not covered" >      inputRef.current?.focus();</span>
+<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >  }, [isShowMenu]);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (inputRef.current &amp;&amp; autoFocus &amp;&amp; !disabled) {</span>
 <span class="cstat-no" title="statement not covered" >      inputRef.current.focus();</span>
 <span class="cstat-no" title="statement not covered" >      setIsSearchActive(true);</span>
 <span class="cstat-no" title="statement not covered" >      setIsShowMenu(true);</span>
@@ -927,12 +947,14 @@
 <span class="cstat-no" title="statement not covered" >    if (defaultSelectedRecipient) {</span>
 <span class="cstat-no" title="statement not covered" >      handleRecipientSelect(defaultSelectedRecipient);</span>
 <span class="cstat-no" title="statement not covered" >    } else {</span>
-<span class="cstat-no" title="statement not covered" >      setIsSearchActive(false);</span>
-<span class="cstat-no" title="statement not covered" >      setIsShowMenu(true);</span>
-<span class="cstat-no" title="statement not covered" >      setSelectedRecipient(null);</span>
-<span class="cstat-no" title="statement not covered" >      setSearchValue('');</span>
+<span class="cstat-no" title="statement not covered" >      if (!disabled) {</span>
+<span class="cstat-no" title="statement not covered" >        setIsSearchActive(false);</span>
+<span class="cstat-no" title="statement not covered" >        setIsShowMenu(true);</span>
+<span class="cstat-no" title="statement not covered" >        setSelectedRecipient(null);</span>
+<span class="cstat-no" title="statement not covered" >        setSearchValue('');</span>
+<span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >  }, [defaultSelectedRecipient]);</span>
+<span class="cstat-no" title="statement not covered" >  }, [defaultSelectedRecipient, disabled]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const getDropdownBody = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    switch (currentTab.value) {</span>
@@ -971,7 +993,7 @@
 <span class="cstat-no" title="statement not covered" >            &gt;</span>
 <span class="cstat-no" title="statement not covered" >              {templates?.map((template, index) =&gt; (</span>
 <span class="cstat-no" title="statement not covered" >                &lt;MoveMoneyTemplateListCard</span>
-<span class="cstat-no" title="statement not covered" >                  key={`${template?.id}_${index}`}</span>
+<span class="cstat-no" title="statement not covered" >                  key={`_${index}`}</span>
 <span class="cstat-no" title="statement not covered" >                  ref={(el) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    templateRefs.current[index] = el;</span>
 <span class="cstat-no" title="statement not covered" >                  }}</span>
@@ -995,6 +1017,7 @@
 <span class="cstat-no" title="statement not covered" >    if (shouldReset) {</span>
 <span class="cstat-no" title="statement not covered" >      setSearchValue('');</span>
 <span class="cstat-no" title="statement not covered" >      setIsShowMenu(true);</span>
+<span class="cstat-no" title="statement not covered" >      setSelectedRecipient(null);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >  }, [shouldReset]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1013,13 +1036,14 @@
 <span class="cstat-no" title="statement not covered" >    &lt;div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      {label &amp;&amp; &lt;div className='text-GRAY_900 f-12-500 mb-2'&gt;{label}&lt;/div&gt;}</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div</span>
-<span class="cstat-no" title="statement not covered" >        className={cn('rounded-md border border-GRAY_500 bg-white shadow-selectAccountDropdown', {</span>
+<span class="cstat-no" title="statement not covered" >        className={cn('relative rounded-md border border-GRAY_500 bg-white', {</span>
 <span class="cstat-no" title="statement not covered" >          'border-GRAY_400 overflow-hidden': !isShowMenu,</span>
-<span class="cstat-no" title="statement not covered" >          'border-GRAY_500': isShowMenu,</span>
+<span class="cstat-no" title="statement not covered" >          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,</span>
 <span class="cstat-no" title="statement not covered" >          '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,</span>
 <span class="cstat-no" title="statement not covered" >        })}</span>
 <span class="cstat-no" title="statement not covered" >        ref={containerRef}</span>
 <span class="cstat-no" title="statement not covered" >      &gt;</span>
+<span class="cstat-no" title="statement not covered" >        {disabled &amp;&amp; &lt;div className='absolute top-0 right-0 w-full h-full bg-GRAY_100 z-10 opacity-20'&gt;&lt;/div&gt;}</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex items-center gap-1.5 pr-3 w-full cursor-pointer'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;Input</span>
 <span class="cstat-no" title="statement not covered" >            tabIndex={0}</span>
@@ -1084,7 +1108,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

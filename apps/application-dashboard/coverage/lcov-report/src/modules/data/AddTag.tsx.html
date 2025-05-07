@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/184</span>
+                <span class='fraction'>0/196</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/184</span>
+                <span class='fraction'>0/196</span>
             </div>
         
             
@@ -247,7 +247,31 @@
 <a name='L182'></a><a href='#L182'>182</a>
 <a name='L183'></a><a href='#L183'>183</a>
 <a name='L184'></a><a href='#L184'>184</a>
-<a name='L185'></a><a href='#L185'>185</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -432,6 +456,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ChangeEvent, useMemo, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { captureException } from '@sentry/browser';</span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { IServerSideGetRowsRequest } from 'ag-grid-community';</span>
 <span class="cstat-no" title="statement not covered" >import { useUpdateDatasetDataMutation } from 'apis/dataset';</span>
 <span class="cstat-no" title="statement not covered" >import { ICON_SPRITE_TYPES } from 'constants/icons';</span>
@@ -440,16 +466,17 @@
 <span class="cstat-no" title="statement not covered" >import { DatasetUpdateResponseType } from 'types/api/dataset.types';</span>
 <span class="cstat-no" title="statement not covered" >import { SIZE_TYPES } from 'types/common/components';</span>
 <span class="cstat-no" title="statement not covered" >import { defaultFnType } from 'types/commonTypes';</span>
+<span class="cstat-no" title="statement not covered" >import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from 'components/common/button/Button';</span>
 <span class="cstat-no" title="statement not covered" >import Input from 'components/common/input';</span>
 <span class="cstat-no" title="statement not covered" >import { MenuWrapper } from 'components/common/MenuWrapper';</span>
 <span class="cstat-no" title="statement not covered" >import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';</span>
 <span class="cstat-no" title="statement not covered" >import TagWithHierarchy from 'components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';</span>
 <span class="cstat-no" title="statement not covered" >import { convertToFilterModel, getFilterModelFromGroupAndFilterModel } from 'components/common/table/table.utils';</span>
+<span class="cstat-no" title="statement not covered" >import { toast } from 'components/common/toast/Toast';</span>
 <span class="cstat-no" title="statement not covered" >import ToggleSwitch from 'components/common/toggleSwitch';</span>
 <span class="cstat-no" title="statement not covered" >import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';</span>
 <span class="cstat-no" title="statement not covered" >import { useFiltersContextStore } from 'components/filter/filters.context';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" >const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const AddTag = ({</span>
@@ -501,6 +528,10 @@
 <span class="cstat-no" title="statement not covered" >      .then((data) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        onClose();</span>
 <span class="cstat-no" title="statement not covered" >        handleSuccessfulUpdate(data);</span>
+<span class="cstat-no" title="statement not covered" >      })</span>
+<span class="cstat-no" title="statement not covered" >      .catch((error) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        captureException(error);</span>
+<span class="cstat-no" title="statement not covered" >        toast.error(TOAST_MESSAGES.ERROR_TAGGING);</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -528,7 +559,12 @@
 <span class="cstat-no" title="statement not covered" >    if (value?.includes('.')) return;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    setSearchValue(value);</span>
-<span class="cstat-no" title="statement not covered" >    setSearchResults(tagList?.filter((tag) =&gt; tag?.toLowerCase()?.includes(value?.toLowerCase())));</span>
+<span class="cstat-no" title="statement not covered" >    const cleanedValue = value</span>
+<span class="cstat-no" title="statement not covered" >      ?.split('/')</span>
+<span class="cstat-no" title="statement not covered" >      .map((str) =&gt; str.trim())</span>
+<span class="cstat-no" title="statement not covered" >      .join('.');</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    setSearchResults(tagList?.filter((tag) =&gt; tag?.toLowerCase()?.includes(cleanedValue)));</span>
 <span class="cstat-no" title="statement not covered" >    if (value) {</span>
 <span class="cstat-no" title="statement not covered" >      setIsOpen(true);</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -622,7 +658,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

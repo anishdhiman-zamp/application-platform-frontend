@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/343</span>
+                <span class='fraction'>0/355</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/343</span>
+                <span class='fraction'>0/355</span>
             </div>
         
             
@@ -406,7 +406,31 @@
 <a name='L341'></a><a href='#L341'>341</a>
 <a name='L342'></a><a href='#L342'>342</a>
 <a name='L343'></a><a href='#L343'>343</a>
-<a name='L344'></a><a href='#L344'>344</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L344'></a><a href='#L344'>344</a>
+<a name='L345'></a><a href='#L345'>345</a>
+<a name='L346'></a><a href='#L346'>346</a>
+<a name='L347'></a><a href='#L347'>347</a>
+<a name='L348'></a><a href='#L348'>348</a>
+<a name='L349'></a><a href='#L349'>349</a>
+<a name='L350'></a><a href='#L350'>350</a>
+<a name='L351'></a><a href='#L351'>351</a>
+<a name='L352'></a><a href='#L352'>352</a>
+<a name='L353'></a><a href='#L353'>353</a>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a>
+<a name='L356'></a><a href='#L356'>356</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -751,6 +775,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { Responsive, WidthProvider } from 'react-grid-layout';</span>
+<span class="cstat-no" title="statement not covered" >import { captureException } from '@sentry/browser';</span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';</span>
 <span class="cstat-no" title="statement not covered" >import { DRAG_ICON } from 'constants/icons';</span>
 <span class="cstat-no" title="statement not covered" >import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';</span>
@@ -760,19 +786,19 @@
 <span class="cstat-no" title="statement not covered" >import Image from 'next/image';</span>
 <span class="cstat-no" title="statement not covered" >import { DatasetUpdateResponseType } from 'types/api/dataset.types';</span>
 <span class="cstat-no" title="statement not covered" >import { SIZE_TYPES } from 'types/common/components';</span>
-<span class="cstat-no" title="statement not covered" >import { defaultFnType } from 'types/commonTypes';</span>
+<span class="cstat-no" title="statement not covered" >import { defaultFnType, MapAny } from 'types/commonTypes';</span>
 <span class="cstat-no" title="statement not covered" >import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';</span>
 <span class="cstat-no" title="statement not covered" >import { OrderType } from 'types/components/table.type';</span>
 <span class="cstat-no" title="statement not covered" >import { getUserId } from 'utils/accessPermission/accessPermission.utils';</span>
+<span class="cstat-no" title="statement not covered" >import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from 'components/common/button/Button';</span>
 <span class="cstat-no" title="statement not covered" >import Input from 'components/common/input';</span>
 <span class="cstat-no" title="statement not covered" >import Popup from 'components/common/popup/Popup';</span>
 <span class="cstat-no" title="statement not covered" >import SideDrawer from 'components/common/SideDrawer/SideDrawer';</span>
+<span class="cstat-no" title="statement not covered" >import { toast } from 'components/common/toast/Toast';</span>
 <span class="cstat-no" title="statement not covered" >import CommonWrapper from 'components/commonWrapper';</span>
 <span class="cstat-no" title="statement not covered" >import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';</span>
 <span class="cstat-no" title="statement not covered" >import DynamicLottiePlayer from 'components/DynamicLottiePlayer';</span>
-<span class="cstat-no" title="statement not covered" >import { getTagLabel } from 'components/filter/filter.utils';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const ResponsiveGridLayout = WidthProvider(Responsive);</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -782,6 +808,8 @@
 <span class="cstat-no" title="statement not covered" >  column: string;</span>
 <span class="cstat-no" title="statement not covered" >  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) =&gt; void;</span>
 <span class="cstat-no" title="statement not covered" >  onDeleteRuleId: (ruleId: string) =&gt; void;</span>
+<span class="cstat-no" title="statement not covered" >  columnLabel: string;</span>
+<span class="cstat-no" title="statement not covered" >  tagColorMap: MapAny;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const RulesListingSideDrawer: FC&lt;RulesListingSideDrawerProps&gt; = ({</span>
@@ -790,6 +818,8 @@
 <span class="cstat-no" title="statement not covered" >  column,</span>
 <span class="cstat-no" title="statement not covered" >  handleSuccessfulUpdate,</span>
 <span class="cstat-no" title="statement not covered" >  onDeleteRuleId,</span>
+<span class="cstat-no" title="statement not covered" >  columnLabel,</span>
+<span class="cstat-no" title="statement not covered" >  tagColorMap,</span>
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const [searchTerm, setSearchTerm] = useState('');</span>
 <span class="cstat-no" title="statement not covered" >  const [rules, setRules] = useState&lt;RuleCardProps[]&gt;([]);</span>
@@ -855,7 +885,7 @@
 <span class="cstat-no" title="statement not covered" >      .slice()</span>
 <span class="cstat-no" title="statement not covered" >      .sort((a: any, b: any) =&gt; a.y - b.y)</span>
 <span class="cstat-no" title="statement not covered" >      .map((l: any) =&gt; rules.find((rule) =&gt; rule?.id === l.i))</span>
-<span class="cstat-no" title="statement not covered" >      .filter((rule: RuleCardProps | undefined): rule is RuleCardProps =&gt; rule !== undefined);</span>
+<span class="cstat-no" title="statement not covered" >      ?.filter((rule: RuleCardProps | undefined): rule is RuleCardProps =&gt; rule !== undefined);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const isOrderSame = orderedItems.every((rule, index) =&gt; rule?.id === listOfRules[index]?.id);</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -905,11 +935,16 @@
 <span class="cstat-no" title="statement not covered" >            priority: prioritySorting === OrderType.ASC ? index + 1 : listOfRules?.length - index,</span>
 <span class="cstat-no" title="statement not covered" >          })),</span>
 <span class="cstat-no" title="statement not covered" >        },</span>
-<span class="cstat-no" title="statement not covered" >      }).then((res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        handleApplyChangesPopupClose();</span>
-<span class="cstat-no" title="statement not covered" >        onClose();</span>
-<span class="cstat-no" title="statement not covered" >        handleSuccessfulUpdate(res?.data as DatasetUpdateResponseType);</span>
-<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >      })</span>
+<span class="cstat-no" title="statement not covered" >        .then((res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >          handleApplyChangesPopupClose();</span>
+<span class="cstat-no" title="statement not covered" >          onClose();</span>
+<span class="cstat-no" title="statement not covered" >          handleSuccessfulUpdate(res?.data as DatasetUpdateResponseType);</span>
+<span class="cstat-no" title="statement not covered" >        })</span>
+<span class="cstat-no" title="statement not covered" >        .catch((error) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >          captureException(error);</span>
+<span class="cstat-no" title="statement not covered" >          toast.error(TOAST_MESSAGES.ERROR_RULE_PRIORITY_UPDATE);</span>
+<span class="cstat-no" title="statement not covered" >        });</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -966,7 +1001,7 @@
 <span class="cstat-no" title="statement not covered" >      &lt;div className='h-full mt-2'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='px-6'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;div className='flex justify-between items-center'&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className='f-16-600'&gt;{column}&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className='f-16-600'&gt;{columnLabel}&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            {isApplyChangesEnabled &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >              &lt;Button</span>
 <span class="cstat-no" title="statement not covered" >                type={BUTTON_TYPES.SECONDARY}</span>
@@ -1004,7 +1039,7 @@
 <span class="cstat-no" title="statement not covered" >        &lt;CommonWrapper</span>
 <span class="cstat-no" title="statement not covered" >          isLoading={isLoading}</span>
 <span class="cstat-no" title="statement not covered" >          isError={isError}</span>
-<span class="cstat-no" title="statement not covered" >          className='h-[calc(100vh-120px)] overflow-auto pl-1.5'</span>
+<span class="cstat-no" title="statement not covered" >          className='h-[calc(100vh-180px)] overflow-auto pl-1.5'</span>
 <span class="cstat-no" title="statement not covered" >          skeletonType={SkeletonTypes.CUSTOM}</span>
 <span class="cstat-no" title="statement not covered" >          loader={</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className='flex justify-center items-center h-full'&gt;</span>
@@ -1026,7 +1061,7 @@
 <span class="cstat-no" title="statement not covered" >            isResizable={false} // Disable resizing</span>
 <span class="cstat-no" title="statement not covered" >            onLayoutChange={handleLayoutChange} // Handle drag-and-drop reordering</span>
 <span class="cstat-no" title="statement not covered" >            draggableHandle='.drag-handle' // Restrict drag to the handle</span>
-<span class="cstat-no" title="statement not covered" >            rowHeight={118}</span>
+<span class="cstat-no" title="statement not covered" >            rowHeight={148}</span>
 <span class="cstat-no" title="statement not covered" >            margin={[14, 14]}</span>
 <span class="cstat-no" title="statement not covered" >            containerPadding={[0, 0]}</span>
 <span class="cstat-no" title="statement not covered" >          &gt;</span>
@@ -1041,7 +1076,8 @@
 <span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;RuleCard</span>
 <span class="cstat-no" title="statement not covered" >                  filters={rule?.filters}</span>
-<span class="cstat-no" title="statement not covered" >                  value={getTagLabel(rule?.value ?? '')}</span>
+<span class="cstat-no" title="statement not covered" >                  value={rule?.value ?? ''}</span>
+<span class="cstat-no" title="statement not covered" >                  labelColor={tagColorMap?.[rule?.value ?? '']}</span>
 <span class="cstat-no" title="statement not covered" >                  createdOn={rule?.createdOn}</span>
 <span class="cstat-no" title="statement not covered" >                  key={rule?.id}</span>
 <span class="cstat-no" title="statement not covered" >                  className='w-[428px]'</span>
@@ -1099,7 +1135,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

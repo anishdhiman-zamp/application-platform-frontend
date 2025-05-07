@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/196</span>
+                <span class='fraction'>0/206</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/196</span>
+                <span class='fraction'>0/206</span>
             </div>
         
             
@@ -259,7 +259,17 @@
 <a name='L194'></a><a href='#L194'>194</a>
 <a name='L195'></a><a href='#L195'>195</a>
 <a name='L196'></a><a href='#L196'>196</a>
-<a name='L197'></a><a href='#L197'>197</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -455,7 +465,18 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { FC, useRef, useState } from 'react';</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useRef, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { COLORS } from 'constants/colors';</span>
 <span class="cstat-no" title="statement not covered" >import { JOINED_DATASET_ICON } from 'constants/icons';</span>
 <span class="cstat-no" title="statement not covered" >import { useOnClickOutside } from 'hooks';</span>
@@ -470,12 +491,11 @@
 <span class="cstat-no" title="statement not covered" >import Avatar from 'components/common/avatar';</span>
 <span class="cstat-no" title="statement not covered" >import { toast } from 'components/common/toast/Toast';</span>
 <span class="cstat-no" title="statement not covered" >import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >type AudienceAccessPropsType = {</span>
 <span class="cstat-no" title="statement not covered" >  resourceType: ResourceType;</span>
 <span class="cstat-no" title="statement not covered" >  privilege: string;</span>
-<span class="cstat-no" title="statement not covered" >  changeRole: (resourceAudienceId: string, role: string) =&gt; Promise&lt;void&gt;;</span>
+<span class="cstat-no" title="statement not covered" >  changeRole: (resourceAudienceId: string, role: string) =&gt; Promise&lt;boolean&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  deleteAudience: (resourceAudienceId: string, userName: string) =&gt; Promise&lt;void&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  privilegeList: ResourcePrivilege[];</span>
 <span class="cstat-no" title="statement not covered" >  resourceAudienceId: string;</span>
@@ -491,6 +511,7 @@
 <span class="cstat-no" title="statement not covered" >  teamInfo: TeamInfoType;</span>
 <span class="cstat-no" title="statement not covered" >  isDeletingAudience: boolean;</span>
 <span class="cstat-no" title="statement not covered" >  isChangingRole: boolean;</span>
+<span class="cstat-no" title="statement not covered" >  currentUserId: string;</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const AudienceAccess: FC&lt;AudienceAccessPropsType&gt; = ({</span>
@@ -507,6 +528,7 @@
 <span class="cstat-no" title="statement not covered" >  customerName,</span>
 <span class="cstat-no" title="statement not covered" >  teamInfo,</span>
 <span class="cstat-no" title="statement not covered" >  isDeletingAudience,</span>
+<span class="cstat-no" title="statement not covered" >  currentUserId,</span>
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const dropdownRef = useRef&lt;HTMLDivElement&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" >  const role = privilegeList.find((r) =&gt; r.value === privilege);</span>
@@ -523,7 +545,9 @@
 <span class="cstat-no" title="statement not covered" >      ? teamInfo?.name</span>
 <span class="cstat-no" title="statement not covered" >      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';</span>
 <span class="cstat-no" title="statement not covered" >  const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';</span>
-<span class="cstat-no" title="statement not covered" >  const showRoleChangeDropdown = currentUserHasAdminAccess &amp;&amp; !checkIfResourceTypeOrg;</span>
+<span class="cstat-no" title="statement not covered" >  const showRoleChangeDropdown =</span>
+<span class="cstat-no" title="statement not covered" >    currentUserHasAdminAccess &amp;&amp;</span>
+<span class="cstat-no" title="statement not covered" >    !(currentUserId == resourceAudienceId &amp;&amp; resourceAudienceType === ResourceAudienceType.USER);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleOpenChangeRoleDropdown = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    setOpenChangeRoleDropdown(true);</span>
@@ -543,7 +567,12 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleRoleChange = async (selectedOption: OptionsType) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    await changeRole(resourceAudienceId, selectedOption.value.toString())</span>
-<span class="cstat-no" title="statement not covered" >      .then(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >      .then((success) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        if (!success) {</span>
+<span class="cstat-no" title="statement not covered" >          setSelectedRole(role as ResourcePrivilege);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >          return;</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >        setSelectedRole(</span>
 <span class="cstat-no" title="statement not covered" >          privilegeList.find((r) =&gt; r.value === selectedOption.value &amp;&amp; r.kind === resourceType) as ResourcePrivilege,</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
@@ -552,6 +581,7 @@
 <span class="cstat-no" title="statement not covered" >      })</span>
 <span class="cstat-no" title="statement not covered" >      .catch((err) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);</span>
+<span class="cstat-no" title="statement not covered" >        setSelectedRole(role as ResourcePrivilege);</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -589,7 +619,7 @@
 <span class="cstat-no" title="statement not covered" >              )}</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div</span>
 <span class="cstat-no" title="statement not covered" >                className={cn(</span>
-<span class="cstat-no" title="statement not covered" >                  'flex justify-center items-center gap-1',</span>
+<span class="cstat-no" title="statement not covered" >                  'flex justify-center items-center gap-1 whitespace-nowrap',</span>
 <span class="cstat-no" title="statement not covered" >                  checkIfResourceTypeTeam &amp;&amp; 'px-1.5 py-0.5 rounded',</span>
 <span class="cstat-no" title="statement not covered" >                )}</span>
 <span class="cstat-no" title="statement not covered" >                style={{</span>
@@ -658,7 +688,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

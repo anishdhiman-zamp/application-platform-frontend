@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/103</span>
+                <span class='fraction'>0/116</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/103</span>
+                <span class='fraction'>0/116</span>
             </div>
         
             
@@ -166,7 +166,20 @@
 <a name='L101'></a><a href='#L101'>101</a>
 <a name='L102'></a><a href='#L102'>102</a>
 <a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -269,10 +282,24 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useEffect, useMemo } from 'react';</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { FC, useEffect, useMemo, useState } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';</span>
 <span class="cstat-no" title="statement not covered" >import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';</span>
-<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';</span>
+<span class="cstat-no" title="statement not covered" >import { AccountDetailsType, MOVE_MONEY_TYPE, TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';</span>
+<span class="cstat-no" title="statement not covered" >import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';</span>
 <span class="cstat-no" title="statement not covered" >import { useGetSourceAccountsQuery, useGetTemplateListQuery } from '@/apis/payments';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from '@/components/common/button/Button';</span>
 <span class="cstat-no" title="statement not covered" >import { TemplateDetailsType } from '@/types/api/paymentApi.types';</span>
@@ -293,14 +320,19 @@
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
 <span class="cstat-no" title="statement not covered" >    dispatch,</span>
-<span class="cstat-no" title="statement not covered" >    state: { sourceAccountDetails, currentStep },</span>
+<span class="cstat-no" title="statement not covered" >    state: { sourceAccountDetails, currentStep, reset },</span>
 <span class="cstat-no" title="statement not covered" >  } = useMoveMoneyContextStore();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  const [createTemplateType, setCreateTemplateType] = useState&lt;MOVE_MONEY_TYPE | null&gt;(null);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({ recipient_id: recipientId });</span>
 <span class="cstat-no" title="statement not covered" >  const { data: templateList } = useGetTemplateListQuery(undefined, { refetchOnMountOrArgChange: false });</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const filteredTemplateList = useMemo(</span>
-<span class="cstat-no" title="statement not covered" >    () =&gt; templateList?.templates?.filter((template) =&gt; template?.type === transferType),</span>
+<span class="cstat-no" title="statement not covered" >    () =&gt;</span>
+<span class="cstat-no" title="statement not covered" >      templateList?.templates?.filter(</span>
+<span class="cstat-no" title="statement not covered" >        (template) =&gt; template?.type === transferType &amp;&amp; template?.status === TEMPLATE_STATUS_TYPES.ACTIVE,</span>
+<span class="cstat-no" title="statement not covered" >      ),</span>
 <span class="cstat-no" title="statement not covered" >    [templateList, transferType],</span>
 <span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -331,7 +363,7 @@
 <span class="cstat-no" title="statement not covered" >  }, [templateId]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div className='h-screen overflow-y-scroll pt-34'&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div className='h-screen overflow-y-scroll pt-20'&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='max-w-75 m-auto'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='f-22-550 mb-5'&gt;Where are you paying from?&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex flex-col gap-5'&gt;</span>
@@ -339,13 +371,13 @@
 <span class="cstat-no" title="statement not covered" >            autoFocus</span>
 <span class="cstat-no" title="statement not covered" >            accountsList={sourceAccounts?.accounts ?? []}</span>
 <span class="cstat-no" title="statement not covered" >            templateList={filteredTemplateList ?? []}</span>
-<span class="cstat-no" title="statement not covered" >            shouldReset={false}</span>
+<span class="cstat-no" title="statement not covered" >            shouldReset={reset}</span>
 <span class="cstat-no" title="statement not covered" >            accountDetails={sourceAccountDetails}</span>
 <span class="cstat-no" title="statement not covered" >            onAccountSelect={handleSourceAccountSelect}</span>
 <span class="cstat-no" title="statement not covered" >            onTemplateSelect={handleTemplateSelect}</span>
-<span class="cstat-no" title="statement not covered" >            label='Send from'</span>
 <span class="cstat-no" title="statement not covered" >            isLoading={isLoading}</span>
 <span class="cstat-no" title="statement not covered" >            showTemplate</span>
+<span class="cstat-no" title="statement not covered" >            onCreateTemplate={() =&gt; setCreateTemplateType(transferType)}</span>
 <span class="cstat-no" title="statement not covered" >          /&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex gap-3 mt-10'&gt;</span>
@@ -367,6 +399,13 @@
 <span class="cstat-no" title="statement not covered" >          &lt;/Button&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >      {createTemplateType &amp;&amp; (</span>
+<span class="cstat-no" title="statement not covered" >        &lt;CreateTemplatePopover</span>
+<span class="cstat-no" title="statement not covered" >          isOpen={!!createTemplateType}</span>
+<span class="cstat-no" title="statement not covered" >          onClose={() =&gt; setCreateTemplateType(null)}</span>
+<span class="cstat-no" title="statement not covered" >          paymentType={createTemplateType}</span>
+<span class="cstat-no" title="statement not covered" >        /&gt;</span>
+<span class="cstat-no" title="statement not covered" >      )}</span>
 <span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >  );</span>
 <span class="cstat-no" title="statement not covered" >};</span>
@@ -379,7 +418,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

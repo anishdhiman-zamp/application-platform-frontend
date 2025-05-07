@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/132</span>
+                <span class='fraction'>0/138</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/132</span>
+                <span class='fraction'>0/138</span>
             </div>
         
             
@@ -195,7 +195,13 @@
 <a name='L130'></a><a href='#L130'>130</a>
 <a name='L131'></a><a href='#L131'>131</a>
 <a name='L132'></a><a href='#L132'>132</a>
-<a name='L133'></a><a href='#L133'>133</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -327,7 +333,14 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useState } from 'react';</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import React, { DragEventHandler, FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import { SvgSpriteLoader } from '@zamp-platform/ui/assets';</span>
 <span class="cstat-no" title="statement not covered" >import { COLORS } from 'constants/colors';</span>
 <span class="cstat-no" title="statement not covered" >import { KEYBOARD_KEYS } from 'constants/shortcuts';</span>
 <span class="cstat-no" title="statement not covered" >import { FILE_IMPORT_STATUS_MSG } from 'modules/data/components/importDataset/importData.constants';</span>
@@ -337,7 +350,6 @@
 <span class="cstat-no" title="statement not covered" >import { cn } from 'utils/common';</span>
 <span class="cstat-no" title="statement not covered" >import { toast } from '@/components/common/toast/Toast';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from 'components/common/button/Button';</span>
-<span class="cstat-no" title="statement not covered" >import SvgSpriteLoader from 'components/SvgSpriteLoader';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const FileUploader: FC&lt;FileUploaderPropsType&gt; = ({</span>
 <span class="cstat-no" title="statement not covered" >  isLoading,</span>
@@ -356,6 +368,12 @@
 <span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const errorTitle = error ?? FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR;</span>
 <span class="cstat-no" title="statement not covered" >  const [isDragOver, setIsDragOver] = useState&lt;boolean&gt;(false);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  const helperText = useMemo(() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    const supportedFilesList = supportedFiles?.replaceAll('.', ' ');</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    return `We only accept ${supportedFilesList} format files here`;</span>
+<span class="cstat-no" title="statement not covered" >  }, [supportedFiles]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleFileDrop: DragEventHandler&lt;HTMLDivElement&gt; = (event) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (isLoading) return null;</span>
@@ -420,7 +438,7 @@
 <span class="cstat-no" title="statement not covered" >        )}</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex flex-col gap-1 f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;span&gt;{footer}&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;span&gt;{`We only accept ${supportedFiles} format files here`}&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;span&gt;{helperText}&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >    );</span>
@@ -466,7 +484,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

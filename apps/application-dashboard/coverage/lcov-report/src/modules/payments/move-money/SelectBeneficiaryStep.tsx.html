@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/121</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/121</span>
+                <span class='fraction'>0/123</span>
             </div>
         
             
@@ -184,7 +184,11 @@
 <a name='L119'></a><a href='#L119'>119</a>
 <a name='L120'></a><a href='#L120'>120</a>
 <a name='L121'></a><a href='#L121'>121</a>
-<a name='L122'></a><a href='#L122'>122</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -313,18 +317,17 @@
 <span class="cstat-no" title="statement not covered" >import { SIZE_TYPES } from 'types/common/components';</span>
 <span class="cstat-no" title="statement not covered" >import { BUTTON_TYPES } from 'types/components/button.type';</span>
 <span class="cstat-no" title="statement not covered" >import { useGetRecipientBySourceAccountQuery } from '@/apis/payments';</span>
-<span class="cstat-no" title="statement not covered" >import { RecipientDetailsType, TemplateDetailsType } from '@/types/api/paymentApi.types';</span>
+<span class="cstat-no" title="statement not covered" >import { RecipientDetailsType } from '@/types/api/paymentApi.types';</span>
 <span class="cstat-no" title="statement not covered" >import { Button } from 'components/common/button/Button';</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >interface SelectBeneficiaryStepProps {</span>
 <span class="cstat-no" title="statement not covered" >  handleStepChange: (step: number) =&gt; void;</span>
-<span class="cstat-no" title="statement not covered" >  defaultTemplate?: TemplateDetailsType;</span>
 <span class="cstat-no" title="statement not covered" >  recipientId?: string;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const SelectBeneficiaryStep: FC&lt;SelectBeneficiaryStepProps&gt; = ({ handleStepChange, defaultTemplate, recipientId }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >const SelectBeneficiaryStep: FC&lt;SelectBeneficiaryStepProps&gt; = ({ handleStepChange, recipientId }) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const {</span>
-<span class="cstat-no" title="statement not covered" >    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails },</span>
+<span class="cstat-no" title="statement not covered" >    state: { sourceAccountDetails, currentStep, templateDetails, recipientDetails, destinationAccountDetails, reset },</span>
 <span class="cstat-no" title="statement not covered" >    dispatch,</span>
 <span class="cstat-no" title="statement not covered" >  } = useMoveMoneyContextStore();</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -339,12 +342,13 @@
 <span class="cstat-no" title="statement not covered" >    );</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleBeneficiarySelect = (beneficiary: RecipientDetailsType) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    dispatch({</span>
-<span class="cstat-no" title="statement not covered" >      type: moveMoneyContextActions.RECIPIENT_DETAILS,</span>
-<span class="cstat-no" title="statement not covered" >      payload: {</span>
-<span class="cstat-no" title="statement not covered" >        recipientDetails: beneficiary,</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
+<span class="cstat-no" title="statement not covered" >    if (!templateDetails)</span>
+<span class="cstat-no" title="statement not covered" >      dispatch({</span>
+<span class="cstat-no" title="statement not covered" >        type: moveMoneyContextActions.RECIPIENT_DETAILS,</span>
+<span class="cstat-no" title="statement not covered" >        payload: {</span>
+<span class="cstat-no" title="statement not covered" >          recipientDetails: beneficiary,</span>
+<span class="cstat-no" title="statement not covered" >        },</span>
+<span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  const handleAccountSelect = (account: AccountDetailsType) =&gt; {</span>
@@ -365,31 +369,33 @@
 <span class="cstat-no" title="statement not covered" >  }, [recipientId, recipientBySourceAccount]);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div className='h-screen overflow-y-scroll pt-34'&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div className='h-screen overflow-y-scroll pt-20'&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className='max-w-75 m-auto'&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='f-22-550 mb-5'&gt;Who are you paying?&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className='flex flex-col gap-5'&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;SelectBeneDropdown</span>
 <span class="cstat-no" title="statement not covered" >            autoFocus={currentStep === 1 || !!recipientId}</span>
-<span class="cstat-no" title="statement not covered" >            disabled={!!recipientId}</span>
-<span class="cstat-no" title="statement not covered" >            defaultSelectedRecipient={selectedBeneficiary}</span>
+<span class="cstat-no" title="statement not covered" >            disabled={!!recipientId || !!templateDetails}</span>
+<span class="cstat-no" title="statement not covered" >            defaultSelectedRecipient={selectedBeneficiary ?? recipientDetails}</span>
 <span class="cstat-no" title="statement not covered" >            onSelect={handleBeneficiarySelect}</span>
-<span class="cstat-no" title="statement not covered" >            shouldReset={false}</span>
+<span class="cstat-no" title="statement not covered" >            shouldReset={reset}</span>
 <span class="cstat-no" title="statement not covered" >            isLoading={isRecipientBySourceAccountLoading}</span>
-<span class="cstat-no" title="statement not covered" >            templateDetails={defaultTemplate}</span>
+<span class="cstat-no" title="statement not covered" >            templateDetails={templateDetails}</span>
 <span class="cstat-no" title="statement not covered" >            recipientList={recipientBySourceAccount?.recipients ?? []}</span>
 <span class="cstat-no" title="statement not covered" >          /&gt;</span>
-<span class="cstat-no" title="statement not covered" >          {!templateDetails &amp;&amp; recipientDetails &amp;&amp; (</span>
+<span class="cstat-no" title="statement not covered" >          {recipientDetails &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >            &lt;SelectAccountDropdown</span>
 <span class="cstat-no" title="statement not covered" >              autoFocus</span>
-<span class="cstat-no" title="statement not covered" >              accountsList={recipientDetails?.accounts}</span>
-<span class="cstat-no" title="statement not covered" >              shouldReset={false}</span>
+<span class="cstat-no" title="statement not covered" >              accountsList={recipientDetails?.accounts ?? []}</span>
+<span class="cstat-no" title="statement not covered" >              shouldReset={reset}</span>
 <span class="cstat-no" title="statement not covered" >              accountDetails={destinationAccountDetails}</span>
 <span class="cstat-no" title="statement not covered" >              onAccountSelect={handleAccountSelect}</span>
 <span class="cstat-no" title="statement not covered" >              label='Recipient account'</span>
+<span class="cstat-no" title="statement not covered" >              disabled={!!templateDetails}</span>
+<span class="cstat-no" title="statement not covered" >              showCurrencyLogo</span>
 <span class="cstat-no" title="statement not covered" >            /&gt;</span>
 <span class="cstat-no" title="statement not covered" >          )}</span>
-<span class="cstat-no" title="statement not covered" >          {!templateDetails &amp;&amp; destinationAccountDetails?.account_name &amp;&amp; (</span>
+<span class="cstat-no" title="statement not covered" >          {destinationAccountDetails?.account_name &amp;&amp; (</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className='flex flex-col gap-4'&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div className='grid grid-cols-2'&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;div className='f-12-400 text-GRAY_700'&gt;Bank name&lt;/div&gt;</span>
@@ -433,7 +439,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-22T12:15:25.536Z
+                at 2025-05-07T09:44:22.965Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
