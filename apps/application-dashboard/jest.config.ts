@@ -93,6 +93,7 @@ const config: Config = {
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
     '^@zamp-platform/ui$': '<rootDir>/../../packages/ui/src/components/index.ts',
+    '^@zamp-platform/ui/assets$': '<rootDir>/../../packages/ui/src/components/assets/index.ts',
     '^@zamp-platform/ui/(.*)$': '<rootDir>/../../packages/ui/src/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^utils/(.*)$': '<rootDir>/src/utils/$1',
