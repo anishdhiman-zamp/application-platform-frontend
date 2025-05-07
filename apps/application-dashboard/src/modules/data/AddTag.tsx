@@ -1,4 +1,5 @@
 import { ChangeEvent, useMemo, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { useUpdateDatasetDataMutation } from 'apis/dataset';
@@ -8,12 +9,14 @@ import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import { DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';
 import TagWithHierarchy from 'components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';
 import { convertToFilterModel, getFilterModelFromGroupAndFilterModel } from 'components/common/table/table.utils';
+import { toast } from 'components/common/toast/Toast';
 import ToggleSwitch from 'components/common/toggleSwitch';
 import { getFilterStatementValues, getTagLabel } from 'components/filter/filter.utils';
 import { useFiltersContextStore } from 'components/filter/filters.context';
@@ -68,6 +71,10 @@ const AddTag = ({
       .then((data) => {
         onClose();
         handleSuccessfulUpdate(data);
+      })
+      .catch((error) => {
+        captureException(error);
+        toast.error(TOAST_MESSAGES.ERROR_TAGGING);
       });
   };
 

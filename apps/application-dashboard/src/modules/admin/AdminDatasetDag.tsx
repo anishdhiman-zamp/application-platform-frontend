@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
 import { type Edge, type Node, ReactFlow, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
 import { useGetAllDatasetsQuery, useGetDatasetDagQuery } from 'apis/admin';
 import { useLazyGetActionStatusQuery } from 'apis/dataset';
@@ -19,6 +18,7 @@ import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/a
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { Button } from 'components/common/button/Button';
+import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
