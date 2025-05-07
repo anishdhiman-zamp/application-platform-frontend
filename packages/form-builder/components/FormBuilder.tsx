@@ -29,7 +29,14 @@ export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schem
 
   useImperativeHandle(ref, () => ({
     submit: () => {
-      methods.handleSubmit(onSubmit)();
+      console.log('FormBuilder submit called');
+      console.log('onSubmit function:', onSubmit);
+      console.log('methods:', methods);
+      console.log('handleSubmit function:', methods.handleSubmit);
+      console.log('Current form values:', methods.getValues());
+      methods.handleSubmit(onSubmit, (err) => {
+        console.log('Error:', err);
+      })();
     },
   }));
 

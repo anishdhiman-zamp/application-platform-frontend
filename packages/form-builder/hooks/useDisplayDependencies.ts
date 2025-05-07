@@ -38,7 +38,7 @@ export const useDisplayDependencies = (field: FormField): DisplayDependencyResul
       // Evaluate each dependency's expressions
       for (const dependency of field.display_dependencies!) {
         for (const expression of dependency.expressions) {
-          if (evaluateExpression(expression, valuesToWatch)) {
+          if (evaluateExpression(expression.expression, valuesToWatch)) {
             setFieldConfig(expression.config);
             // If should_show is explicitly false, keep the field hidden but populate the value
             if (expression.config.should_show === false) {

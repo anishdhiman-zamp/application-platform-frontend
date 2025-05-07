@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
 import { PolicyQuorum } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type PolicyQuorumDropdownProps = {
   value: PolicyQuorum;

@@ -11,6 +11,10 @@ export type SubmitFormRequestType = {
   payload: Record<string, string | string[]>;
 };
 
+export type SubmitFormResponseType = {
+  form_submission_id: string;
+};
+
 const Forms = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFormConfig: builder.query<FormSchema, GetFormConfigRequestType>({
@@ -19,7 +23,7 @@ const Forms = baseApi.injectEndpoints({
         params,
       }),
     }),
-    submitForm: builder.mutation<void, SubmitFormRequestType>({
+    submitForm: builder.mutation<SubmitFormResponseType, SubmitFormRequestType>({
       query: (body) => ({
         url: API_ENDPOINTS.FORMS_SUBMIT,
         method: REQUEST_TYPES.POST,

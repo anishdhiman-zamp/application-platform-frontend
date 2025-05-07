@@ -79,7 +79,7 @@ export const API_ENDPOINTS = {
   PAYMENT_LIST_GET: `payments/`,
   PAYMENT_DETAILS_GET: `payments/{{paymentId}}`,
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
-  RECIPIENT_CREATE_POST: `recipients/540fb621-5f39-46ec-80bc-9df6d4f4e08b/create-recipient-and-account`,
+  RECIPIENT_CREATE_POST: `recipients/{{recipientId}}/create-recipient-and-account`,
 
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,

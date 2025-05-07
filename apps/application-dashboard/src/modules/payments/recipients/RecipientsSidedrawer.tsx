@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import { Sheet, SheetContent } from '@zamp-platform/ui';
-import AddRecipientAccount from 'modules/payments/recipients/AddRecipientAccount';
+import AddRecipient from 'modules/payments/recipients/AddRecipient';
 import RecipientDetails from 'modules/payments/recipients/RecipientDetails';
 import RecipientsList from 'modules/payments/recipients/RecipientsList';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
@@ -30,7 +30,7 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className='p-0 h-screen overflow-hidden'>
         <div className='overflow-y-scroll h-full'>{renderStep()}</div>
-        <AddRecipientAccount open={isAddRecipient} onOpenChange={setIsAddRecipient} />
+        <AddRecipient open={isAddRecipient} onOpenChange={setIsAddRecipient} />
       </SheetContent>
     </Sheet>
   );

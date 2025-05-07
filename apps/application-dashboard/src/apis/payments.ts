@@ -37,6 +37,7 @@ const Payments = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.RECIPIENT_LIST_GET,
       }),
+      providesTags: [APITags.GET_RECIPIENT_LIST],
     }),
     getDestinationAccounts: builder.query<SourceAccountResponseType, DestinationAccountPayloadType>({
       query: (params) => ({
@@ -79,11 +80,12 @@ const Payments = baseApi.injectEndpoints({
         body,
       }),
     }),
-    addRecipient: builder.mutation<void, void>({
-      query: () => ({
-        url: API_ENDPOINTS.RECIPIENT_CREATE_POST,
+    addRecipient: builder.mutation<void, string>({
+      query: (formId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.RECIPIENT_CREATE_POST, { recipientId: formId }),
         method: REQUEST_TYPES.POST,
       }),
+      invalidatesTags: [APITags.GET_RECIPIENT_LIST],
     }),
     getPaymentListDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], void>({
       query: () => ({

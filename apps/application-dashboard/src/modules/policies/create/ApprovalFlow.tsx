@@ -1,10 +1,10 @@
 import { FC } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalStep from 'modules/policies/create/ApprovalStep';
 import { ApprovalFlowStep } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type ApprovalFlowProps = {
   onChange?: (steps: ApprovalFlowStep[]) => void;

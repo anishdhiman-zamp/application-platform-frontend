@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { StepCard } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import SequenceStep from 'modules/policies/create/SequenceStep';
 import { ApprovalFlowCondition, ApprovalFlowStep, PolicyQuorum } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { defaultFnType } from '@/types/commonTypes';
 
 type ApprovalStepProps = {

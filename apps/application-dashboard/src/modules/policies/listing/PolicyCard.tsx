@@ -37,7 +37,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
           <h2 className='f-13-550'>{policy.name}</h2>
           <PolicyAttributeTags
             creatorLength={policy.policy_configurations.creator?.length}
-            conditions={policy.policy_configurations.conditions.conditions}
+            conditions={policy.policy_configurations.conditions?.conditions}
             action={policy.policy_configurations.action}
           />
         </div>

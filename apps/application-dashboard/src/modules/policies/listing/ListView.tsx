@@ -1,8 +1,8 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import PolicyCard from 'modules/policies/listing/PolicyCard';
 import { AnimatePresence, motion } from 'motion/react';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 

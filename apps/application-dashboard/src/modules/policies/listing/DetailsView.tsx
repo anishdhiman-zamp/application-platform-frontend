@@ -1,9 +1,9 @@
 import { FC } from 'react';
 import { Button, StepCard } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
 import AudienceMember from '@/components/audience-member';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 
@@ -31,7 +31,7 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
         <div className='space-y-4'>
           <PolicyAttributeTags
             creatorLength={policy.policy_configurations.creator?.length}
-            conditions={policy.policy_configurations.conditions.conditions}
+            conditions={policy.policy_configurations.conditions?.conditions}
             action={policy.policy_configurations.action}
           />
           {/* Approval Flow Section */}

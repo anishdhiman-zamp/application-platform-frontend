@@ -24,7 +24,11 @@ const evaluateCondition = (condition: Condition, values: FormValues): boolean =>
 };
 
 export const evaluateExpression = (expression: Expression, values: FormValues): boolean => {
-  const results = expression.conditions.map((condition) => evaluateCondition(condition, values));
+  if (!expression.conditions || expression.conditions.length === 0) {
+    return true;
+  }
+
+  const results = expression.conditions.map((condition: Condition) => evaluateCondition(condition, values));
 
   return expression.logical_operator === 'AND' ? results.every((result) => result) : results.some((result) => result);
 };

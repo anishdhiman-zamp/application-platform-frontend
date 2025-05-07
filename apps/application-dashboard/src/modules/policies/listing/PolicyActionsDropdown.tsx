@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { Ellipsis } from 'lucide-react';
 import CreatePolicyDialog from 'modules/policies/create';
 import PolicyDeleteConfirmPopup from 'modules/policies/listing/PolicyDeleteConfirmPopup';
 import { PolicyActionType } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 

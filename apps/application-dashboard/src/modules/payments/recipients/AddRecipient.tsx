@@ -1,54 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { toast as reactToastify } from 'react-toastify';
-import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
+import { FormBuilder, FormBuilderRef, schema } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import { useGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
 import { FORM_TYPES } from '@/constants/forms';
-import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 
-const RenderRecipientDetails = ({ recipientDetails }: { recipientDetails: RecipientDetailsType }) => {
-  const details = [
-    {
-      label: 'Account holder name',
-      value: recipientDetails.name,
-    },
-    {
-      label: 'Contact',
-      value: recipientDetails.email,
-    },
-    ...(recipientDetails.recipient_details || []),
-  ];
-
-  return (
-    <div className='flex flex-col gap-2.5 mb-4'>
-      {details.map((detail) => (
-        <div key={detail.label} className='grid grid-cols-[1fr_1fr] items-center'>
-          <p className='f-12-400 text-gray-700'>{detail.label}</p>
-          <p className='f-12-400 text-primary'>{detail.value}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const AddRecipientAccount = ({
-  open,
-  onOpenChange,
-  recipientDetails,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  recipientDetails: RecipientDetailsType;
-}) => {
+const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const { data: formConfig } = useGetFormConfigQuery({
-    form_id: FORM_TYPES.RECIPIENT_ACCOUNT,
+    form_id: FORM_TYPES.RECIPIENT,
   });
   const messageToastId = useRef<string | number>('');
-  const [submitForm, { data: submitFormData, status: submitFormStatus, error: submitFormError }] =
-    useSubmitFormMutation();
-  const [addRecipient, { status: addRecipientStatus, error: addRecipientError }] = useAddRecipientMutation();
+  const [
+    submitForm,
+    { data: submitFormData, status: submitFormStatus, error: submitFormError, reset: resetSubmitForm },
+  ] = useSubmitFormMutation();
+  const [addRecipient, { status: addRecipientStatus, error: addRecipientError, reset: resetAddRecipient }] =
+    useAddRecipientMutation();
   const formRef = useRef<FormBuilderRef>(null);
 
   const onFailure = (error: any) => {
@@ -58,19 +27,21 @@ const AddRecipientAccount = ({
   const onSubmit = async (data: any) => {
     onOpenChange(false);
 
-    console.log(data);
+    console.log('data', data);
 
     messageToastId.current = toast.loading('Recipient creation in progress');
-    await submitForm({
-      form_type: FORM_TYPES.RECIPIENT_ACCOUNT,
+    submitForm({
+      form_type: FORM_TYPES.RECIPIENT,
       payload: data,
     });
   };
 
   useEffect(() => {
     if (submitFormStatus === 'fulfilled') {
+      resetSubmitForm();
       addRecipient(submitFormData.form_submission_id);
     } else if (submitFormStatus === 'rejected') {
+      resetSubmitForm();
       reactToastify.dismiss(messageToastId.current);
       onFailure(submitFormError);
     }
@@ -79,8 +50,10 @@ const AddRecipientAccount = ({
   useEffect(() => {
     reactToastify.dismiss(messageToastId.current);
     if (addRecipientStatus === 'fulfilled') {
+      resetAddRecipient();
       toast.success('Recipient account added successfully');
     } else if (addRecipientStatus === 'rejected') {
+      resetAddRecipient();
       onFailure(addRecipientError);
     }
   }, [addRecipientStatus]);
@@ -99,8 +72,7 @@ const AddRecipientAccount = ({
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='max-w-[400px] w-[45%]'>
-            <RenderRecipientDetails recipientDetails={recipientDetails} />
-            <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
+            <FormBuilder ref={formRef} schema={schema} onSubmit={onSubmit} />
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>
@@ -116,4 +88,4 @@ const AddRecipientAccount = ({
   );
 };
 
-export default AddRecipientAccount;
+export default AddRecipient;

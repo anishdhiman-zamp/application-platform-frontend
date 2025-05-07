@@ -1,3 +1,5 @@
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+
 import { FormSchema } from './types';
 
 export const schema: FormSchema = {
@@ -14,8 +16,8 @@ export const schema: FormSchema = {
           layout: [
             [
               {
-                field: 'recipient_name',
                 col_span: 8,
+                field: 'recipient_name',
               },
             ],
           ],
@@ -26,18 +28,18 @@ export const schema: FormSchema = {
           layout: [
             [
               {
-                field: 'recipient_email',
                 col_span: 8,
+                field: 'recipient_email',
               },
             ],
             [
               {
-                field: 'recipient_contact_country_code',
                 col_span: 2,
+                field: 'recipient_contact_country_code',
               },
               {
-                field: 'recipient_contact_number',
                 col_span: 6,
+                field: 'recipient_contact_number',
               },
             ],
           ],
@@ -48,34 +50,34 @@ export const schema: FormSchema = {
           layout: [
             [
               {
+                col_span: 8,
                 field: 'recipient_address_line_1',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_address_line_2',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 4,
                 field: 'recipient_country_code',
-                col_span: 4,
               },
               {
-                field: 'recipient_state',
                 col_span: 4,
+                field: 'recipient_state',
               },
             ],
             [
               {
-                field: 'recipient_city',
                 col_span: 4,
+                field: 'recipient_city',
               },
               {
-                field: 'recipient_postal_code',
                 col_span: 4,
+                field: 'recipient_postal_code',
               },
             ],
           ],
@@ -92,72 +94,78 @@ export const schema: FormSchema = {
           layout: [
             [
               {
-                field: 'recipient_account_country_code',
                 col_span: 4,
-              },
-              {
                 field: 'recipient_account_currency',
+              },
+              {
                 col_span: 4,
+                field: 'recipient_account_country_code',
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'transfer_type',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
+                field: 'recipient_account_bank_name',
+              },
+            ],
+            [
+              {
+                col_span: 8,
                 field: 'recipient_account_number',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_type_1',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_value_1',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_type_2',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_value_2',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_value_3',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'recipient_account_routing_code_value_3',
-                col_span: 8,
               },
             ],
             [
               {
-                field: 'recipient_account_routing_code_value_4',
                 col_span: 8,
+                field: 'recipient_account_routing_code_value_4',
               },
             ],
             [
               {
-                field: 'recipient_account_routing_code_value_4',
                 col_span: 8,
+                field: 'recipient_account_routing_code_value_4',
               },
             ],
           ],
@@ -168,56 +176,44 @@ export const schema: FormSchema = {
           layout: [
             [
               {
+                col_span: 8,
                 field: 'account_holder_name',
-                col_span: 8,
               },
             ],
             [
               {
-                field: 'account_holder_city',
                 col_span: 8,
-              },
-            ],
-            [
-              {
                 field: 'account_holder_country',
-                col_span: 8,
               },
             ],
             [
               {
-                field: 'account_holder_postal_code',
                 col_span: 8,
-              },
-            ],
-            [
-              {
                 field: 'account_holder_state',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
+                field: 'account_holder_city',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'account_holder_postal_code',
+              },
+            ],
+            [
+              {
+                col_span: 8,
                 field: 'account_holder_address_line_1',
-                col_span: 8,
               },
             ],
             [
               {
+                col_span: 8,
                 field: 'account_holder_address_line_2',
-                col_span: 8,
-              },
-            ],
-          ],
-        },
-        {
-          id: 'bank_details',
-          title: 'Bank Details',
-          layout: [
-            [
-              {
-                field: 'recipient_account_bank_name',
-                col_span: 8,
               },
             ],
           ],
@@ -230,7 +226,6 @@ export const schema: FormSchema = {
       id: 'account_holder_address_line_1',
       type: 'text',
       label: 'Account Holder Address Line 1',
-      placeholder: 'Address Line 1',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
@@ -240,6 +235,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -259,6 +255,32 @@ export const schema: FormSchema = {
           ],
         },
       ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder Address Line 1',
+              },
+            },
+          ],
+        },
+      ],
       validations: [
         {
           type: 'maxLength',
@@ -273,7 +295,32 @@ export const schema: FormSchema = {
       id: 'account_holder_address_line_2',
       type: 'text',
       label: 'Account Holder Address Line 2',
-      placeholder: 'Address Line 2',
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder Address Line 2',
+              },
+            },
+          ],
+        },
+      ],
       validations: [
         {
           type: 'maxLength',
@@ -297,6 +344,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -312,6 +360,32 @@ export const schema: FormSchema = {
                   },
                 },
               ],
+            },
+          ],
+        },
+      ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder City',
+              },
             },
           ],
         },
@@ -336,13 +410,61 @@ export const schema: FormSchema = {
         params: {
           form_type: 'recipient',
         },
+        body: null,
       },
-      validations: [
+      validation_dependencies: [
         {
-          type: 'required',
-          config: {
-            message: 'Account holder country is required',
-          },
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              validations: [
+                {
+                  type: 'required',
+                  config: {
+                    message: 'Country is required for US accounts',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder Country',
+              },
+            },
+          ],
         },
       ],
     },
@@ -386,6 +508,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -423,6 +546,7 @@ export const schema: FormSchema = {
         params: {
           country_code: '${account_holder_country}',
         },
+        body: null,
         triggers: [
           {
             field: 'account_holder_country',
@@ -438,6 +562,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -503,13 +628,22 @@ export const schema: FormSchema = {
       id: 'recipient_account_currency',
       type: 'select',
       label: 'Account Currency',
-      placeholder: 'Currency',
       options: [
         {
+          icon: {
+            category: ICON_SPRITE_TYPES.FIAT_CURRENCIES,
+            id: 'USD',
+            type: 'sprite',
+          },
           label: 'USD',
           value: 'USD',
         },
         {
+          icon: {
+            category: ICON_SPRITE_TYPES.FIAT_CURRENCIES,
+            id: 'EUR',
+            type: 'sprite',
+          },
           label: 'EUR',
           value: 'EUR',
         },
@@ -534,7 +668,6 @@ export const schema: FormSchema = {
       id: 'recipient_account_number',
       type: 'text',
       label: 'Account Number',
-      placeholder: 'Account Number',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
@@ -544,6 +677,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -566,6 +700,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'in',
                     value: ['DE', 'FR', 'ES', 'IT', 'NL'],
@@ -596,9 +731,9 @@ export const schema: FormSchema = {
       ],
     },
     recipient_account_routing_code_type_1: {
-      id: 'routing_code_type_1',
+      id: 'recipient_account_routing_code_type_1',
       type: 'select',
-      label: 'Routing Code Type 1',
+      label: '',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
@@ -608,6 +743,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'eq',
                     value: 'US',
@@ -636,6 +772,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'in',
                     value: ['DE', 'FR', 'ES', 'IT', 'NL', 'GB'],
@@ -662,6 +799,51 @@ export const schema: FormSchema = {
           ],
         },
       ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: 'ABA',
+                should_show: false,
+                label: '',
+              },
+            },
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'in',
+                    value: ['DE', 'FR', 'ES', 'IT', 'NL'],
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: 'IBAN',
+                should_show: false,
+                label: '',
+              },
+            },
+          ],
+        },
+      ],
       validations: [
         {
           type: 'required',
@@ -670,48 +852,11 @@ export const schema: FormSchema = {
           },
         },
       ],
-      display_dependencies: [
-        {
-          fields: ['recipient_account_country_code'],
-          expressions: [
-            {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'eq',
-                  value: 'US',
-                },
-              ],
-              config: {
-                default_value: 'ABA',
-                label: '',
-                should_show: false,
-              },
-            },
-            {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'eq',
-                  value: 'EU',
-                },
-              ],
-              config: {
-                default_value: 'IBAN',
-                label: '',
-                should_show: false,
-              },
-            },
-          ],
-        },
-      ],
     },
     recipient_account_routing_code_type_2: {
-      id: 'routing_code_type_2',
+      id: 'recipient_account_routing_code_type_2',
       type: 'select',
-      label: 'Routing Code Type 2',
+      label: '',
       validation_dependencies: [
         {
           fields: ['recipient_account_country_code'],
@@ -721,6 +866,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_country_code',
                     operator: 'in',
                     value: ['DE', 'FR', 'ES', 'IT', 'NL'],
@@ -752,18 +898,22 @@ export const schema: FormSchema = {
           fields: ['recipient_account_country_code'],
           expressions: [
             {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'in',
-                  value: ['DE', 'FR', 'ES', 'IT', 'NL'],
-                },
-              ],
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'in',
+                    value: ['DE', 'FR', 'ES', 'IT', 'NL'],
+                    conditions: null,
+                  },
+                ],
+              },
               config: {
                 default_value: 'BIC',
-                label: '',
                 should_show: false,
+                label: '',
               },
             },
           ],
@@ -771,9 +921,9 @@ export const schema: FormSchema = {
       ],
     },
     recipient_account_routing_code_value_1: {
-      id: 'routing_code_value_1',
+      id: 'recipient_account_routing_code_value_1',
       type: 'text',
-      label: 'Routing Code Value 1',
+      label: '',
       validation_dependencies: [
         {
           fields: ['recipient_account_routing_code_type_1'],
@@ -783,6 +933,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_routing_code_type_1',
                     operator: 'eq',
                     value: 'ABA',
@@ -805,6 +956,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_routing_code_type_1',
                     operator: 'eq',
                     value: 'IBAN',
@@ -825,6 +977,51 @@ export const schema: FormSchema = {
           ],
         },
       ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'ABA',
+              },
+            },
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'in',
+                    value: ['DE', 'FR', 'ES', 'IT', 'NL'],
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'IBAN',
+              },
+            },
+          ],
+        },
+      ],
       validations: [
         {
           type: 'required',
@@ -833,48 +1030,11 @@ export const schema: FormSchema = {
           },
         },
       ],
-      display_dependencies: [
-        {
-          fields: ['recipient_account_country_code'],
-          expressions: [
-            {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'eq',
-                  value: 'US',
-                },
-              ],
-              config: {
-                default_value: '',
-                label: 'ABA',
-                should_show: true,
-              },
-            },
-            {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'eq',
-                  value: 'EU',
-                },
-              ],
-              config: {
-                default_value: '',
-                label: 'IBAN',
-                should_show: true,
-              },
-            },
-          ],
-        },
-      ],
     },
     recipient_account_routing_code_value_2: {
-      id: 'routing_code_value_2',
+      id: 'recipient_account_routing_code_value_2',
       type: 'text',
-      label: 'Routing Code Value 2 (BIC/SWIFT)',
+      label: 'Routing Code Value 2',
       validation_dependencies: [
         {
           fields: ['recipient_account_routing_code_type_2'],
@@ -884,6 +1044,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_account_routing_code_type_2',
                     operator: 'eq',
                     value: 'BIC',
@@ -915,18 +1076,22 @@ export const schema: FormSchema = {
           fields: ['recipient_account_country_code'],
           expressions: [
             {
-              logical_operator: 'AND',
-              conditions: [
-                {
-                  field: 'recipient_account_country_code',
-                  operator: 'in',
-                  value: ['DE', 'FR', 'ES', 'IT', 'NL'],
-                },
-              ],
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'in',
+                    value: ['DE', 'FR', 'ES', 'IT', 'NL'],
+                    conditions: null,
+                  },
+                ],
+              },
               config: {
                 default_value: '',
-                label: 'BIC',
                 should_show: true,
+                label: 'BIC',
               },
             },
           ],
@@ -982,6 +1147,8 @@ export const schema: FormSchema = {
       data_source: {
         endpoint: 'v1/forms/contact-codes',
         method: 'GET',
+        params: null,
+        body: null,
       },
     },
     recipient_contact_number: {
@@ -997,6 +1164,7 @@ export const schema: FormSchema = {
                 logical_operator: 'AND',
                 conditions: [
                   {
+                    logical_operator: null,
                     field: 'recipient_contact_country_code',
                     operator: 'neq',
                     value: '',
@@ -1033,6 +1201,8 @@ export const schema: FormSchema = {
       data_source: {
         endpoint: 'v1/forms/countries',
         method: 'GET',
+        params: null,
+        body: null,
       },
     },
     recipient_email: {
@@ -1086,6 +1256,7 @@ export const schema: FormSchema = {
         params: {
           country_code: '${recipient_country_code}',
         },
+        body: null,
         triggers: [
           {
             field: 'recipient_country_code',

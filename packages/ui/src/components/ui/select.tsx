@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Skeleton } from './skeleton';
 import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
@@ -8,14 +8,19 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { SvgSpriteLoader } from '../assets';
 
 export interface SelectOption {
+  id?: string;
   label: string;
   richLabel?: React.ReactNode;
   value: string | boolean | { type: string; id: string };
-  icon?: {
-    type: 'sprite' | 'icon';
-    category?: ICON_SPRITE_TYPES;
-    id?: string;
-  };
+  icon?: SelectIcon;
+  displayValue?: React.ReactNode;
+}
+
+export interface SelectIcon {
+  type: 'sprite' | 'icon';
+  category?: ICON_SPRITE_TYPES;
+  id?: string;
+  name?: string;
 }
 
 export interface SelectProps {
@@ -32,8 +37,17 @@ export interface SelectProps {
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;
 }
 
-const RenderIcon = ({ icon }: { icon: SelectOption['icon'] }) => {
-  if (icon?.id) return <SvgSpriteLoader id={icon.id} iconCategory={icon.category} />;
+const RenderIcon = ({ icon, className }: { icon: SelectIcon; className?: string }) => {
+  if (icon?.type === 'sprite') {
+    return (
+      <SvgSpriteLoader
+        lazyLoading={true}
+        id={icon.id ?? ''}
+        iconCategory={icon.category ?? ICON_SPRITE_TYPES.COUNTRY_FLAGS}
+        className={className}
+      />
+    );
+  }
   return null;
 };
 
@@ -235,7 +249,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                 role='option'
                 aria-selected={idx === highlightedIndex}
               >
-                {option.icon && <RenderIcon icon={option.icon} />}
+                {option.icon && <RenderIcon icon={option.icon} className='mr-2' />}
                 {option.richLabel || option.label}
               </div>
             ))}

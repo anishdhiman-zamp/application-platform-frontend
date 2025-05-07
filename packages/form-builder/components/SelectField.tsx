@@ -77,6 +77,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       },
       {} as Record<string, any>,
     );
+    console.log('currentFieldValues', currentFieldValues);
     return loadOptions(currentFieldValues, page);
   };
 
@@ -93,6 +94,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
                   ? field?.options?.map((option) => ({
                       label: option.label ?? '',
                       value: option.value,
+                      icon: option.icon,
                     }))
                   : []
               }

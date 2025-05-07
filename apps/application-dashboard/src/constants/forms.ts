@@ -1,3 +1,4 @@
 export enum FORM_TYPES {
-  RECIPIENT_ACCOUNTS_ROBINHOOD = 'recipient',
+  RECIPIENT = 'recipient',
+  RECIPIENT_ACCOUNT = 'recipient-account',
 }

@@ -1,3 +1,4 @@
+import { SelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
 
 export type ValidationType =
@@ -25,8 +26,8 @@ export interface Validation {
 export interface DataSource {
   endpoint: string;
   method: 'GET' | 'POST';
-  params?: Record<string, string>;
-  body?: Record<string, any>;
+  params?: null | Record<string, string>;
+  body?: null | Record<string, any>;
   triggers?: Array<{
     field: string;
   }>;
@@ -39,11 +40,12 @@ export interface Condition {
   operator: 'in' | 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte';
   value: string | string[];
   conditions?: [] | Condition[] | null;
+  logical_operator?: 'AND' | 'OR' | null;
 }
 
 export interface Expression {
-  logical_operator: 'AND' | 'OR';
-  conditions: [] | Condition[];
+  logical_operator: '' | 'AND' | 'OR' | null;
+  conditions: null | [] | Condition[];
 }
 
 export interface ValidationDependency {
@@ -63,20 +65,12 @@ export interface FieldConfig {
 
 export interface DisplayDependency {
   fields: string[];
-  expressions: Array<Expression & { config: FieldConfig }>;
+  expressions: Array<{ expression: Expression; config: FieldConfig }>;
 }
 
 export type FieldType = 'text' | 'select' | 'input' | 'multi-select';
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
-export interface SelectOption {
-  id?: string;
-  label: string;
-  richLabel?: React.ReactNode;
-  value: SelectOptionValue;
-  icon?: React.ReactNode;
-  displayValue?: string;
-}
 
 export interface FormField {
   id: string;

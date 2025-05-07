@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { SelectOption, validateField } from '@zamp-platform/form-builder';
-import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter } from '@zamp-platform/ui';
+import { validateField } from '@zamp-platform/form-builder';
+import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, SelectOption } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/lib/utils';
 import { defaultConditions, getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
@@ -48,7 +48,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
     updatedMap.creator.defaultValue = policyData.policy_configurations.creator;
     updatedMap.initiator.defaultValue = policyData.policy_configurations.creator;
 
-    policyData.policy_configurations.conditions.conditions
+    policyData.policy_configurations.conditions?.conditions
       .filter((condition) => condition.field !== 'currency')
       .forEach((condition) => {
         const attribute = updatedMap[condition.field];

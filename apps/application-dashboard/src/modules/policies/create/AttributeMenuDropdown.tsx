@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { DataSource, fetchDataSource, SelectOption } from '@zamp-platform/form-builder';
+import { DataSource, fetchDataSource } from '@zamp-platform/form-builder';
 import {
   Attribute,
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
+  SelectOption,
   Skeleton,
 } from '@zamp-platform/ui';
 import { AttributeType } from 'modules/policies/types';

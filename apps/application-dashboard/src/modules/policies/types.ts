@@ -1,4 +1,5 @@
-import { DataSource, SelectOption, SelectOptionValue } from '@zamp-platform/form-builder';
+import { DataSource, SelectOptionValue } from '@zamp-platform/form-builder';
+import { SelectOption } from '@zamp-platform/ui';
 import { LOGICAL_OPERATOR_CONDITIONS } from 'modules/widgets/displayConfig/displayConfig.types';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
@@ -48,7 +49,7 @@ export interface CreatePolicyConfigPayload {
     type: string;
     id: string;
   }>;
-  conditions: {
+  conditions?: {
     logical_operator: string;
     conditions: Array<{
       field: string;

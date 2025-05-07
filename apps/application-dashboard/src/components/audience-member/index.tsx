@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tag } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
 import { COLORS } from '@/constants/colors';
 import { JOINED_DATASET_ICON } from '@/constants/icons';
@@ -8,7 +9,6 @@ import { ResourceAudienceType } from '@/types/api/auth.types';
 import { checkIfCurrentUser } from '@/utils/accessPermission/accessPermission.utils';
 import AudienceMemberName from 'components/audience-member/Name';
 import Avatar from 'components/common/avatar';
-import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface AudienceMemberProps {
   teamInfo: TeamInfoType;

@@ -5,7 +5,7 @@ import { snakeCaseToSentenceCase } from '@/utils/common';
 
 interface PolicyAttributeTagsProps {
   creatorLength?: number;
-  conditions: { field: string; value: any; operator: string }[];
+  conditions?: { field: string; value: any; operator: string }[];
   action: string;
 }
 
@@ -16,7 +16,7 @@ const hasOptions = (attr: any): attr is { options: Array<{ value: string; label:
 const PolicyAttributeTags: FC<PolicyAttributeTagsProps> = ({ creatorLength, conditions, action }) => (
   <div className='flex gap-1.5 flex-wrap'>
     <Tag variant='gray'>{creatorLength ?? 'Any'} Creator</Tag>
-    {conditions.map((condition) => (
+    {conditions?.map((condition) => (
       <Tag variant='gray' key={condition.field}>
         {Array.isArray(condition.value)
           ? `${condition.value.length} ${snakeCaseToSentenceCase(condition.field)}`

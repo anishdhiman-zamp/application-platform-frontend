@@ -1,8 +1,8 @@
 import { FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApproverList from 'modules/policies/create/ApproverList';
 import PolicyQuorumDropdown from 'modules/policies/create/PolicyQuorumDropdown';
 import { ApprovalFlowCondition, ApproverDetail, PolicyQuorum } from 'modules/policies/types';
-import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 
 type SequenceStepProps = {
   sequence: ApprovalFlowCondition;

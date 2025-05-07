@@ -1,4 +1,4 @@
-import { SelectOption } from '@zamp-platform/form-builder';
+import { SelectOption } from '@zamp-platform/ui';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
@@ -166,12 +166,16 @@ export const transformFormDataToApiPayload = (
 
   const action = (data.action as SelectOption[])[0]?.value as string;
 
+  const transformedConditions = [...(conditions ?? []), ...defaultConditions];
+
   return {
     creator: creator.length > 0 ? creator : undefined,
-    conditions: {
-      logical_operator: '&&',
-      conditions: [...(conditions ?? []), ...defaultConditions],
-    },
+    ...(transformedConditions.length > 0 && {
+      conditions: {
+        logical_operator: '&&',
+        conditions: transformedConditions,
+      },
+    }),
     action,
     approval_flow: action === 'BLOCK' ? undefined : approval_flow,
   };
