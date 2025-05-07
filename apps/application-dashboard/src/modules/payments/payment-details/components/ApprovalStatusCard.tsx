@@ -1,7 +1,9 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApprovalDetailsBadge from 'modules/payments/payment-details/components/ApprovalDetailsBadge';
 import type { AudiencesByOrganisationIdResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
-import type { PolicyStepType } from '@/types/api/policies.types';
+import { PolicyResultStatus, PolicyStepType } from '@/types/api/policies.types';
+import { cn } from '@/utils/common';
 
 type ApprovalStatusCardProps = {
   step: number;
@@ -9,7 +11,8 @@ type ApprovalStatusCardProps = {
   teamsData: GetTeamsByOrganizationIdResponseType[];
   orgMembers: AudiencesByOrganisationIdResponse[];
   orgName: string;
-  isApproved: boolean;
+  currentApprovalStep: number;
+  status: PolicyResultStatus;
 };
 
 const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
@@ -18,13 +21,45 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
   teamsData,
   orgMembers,
   orgName,
-  isApproved,
+  currentApprovalStep,
+  status,
 }) => {
+  const isCurrentStepPending = useMemo(() => {
+    return step === currentApprovalStep && status === PolicyResultStatus.PENDING_APPROVAL;
+  }, [step, currentApprovalStep, status]);
+
+  const renderApprovalStatus = () => {
+    if (step < currentApprovalStep) {
+      return (
+        <div className='bg-GREEN_700 f-12-500 flex items-center justify-center h-6 w-6 text-white'>
+          <SvgSpriteLoader id='check' size={16} />
+        </div>
+      );
+    }
+
+    if (isCurrentStepPending) {
+      return <div className='bg-BLUE_700 f-12-500 flex items-center justify-center h-6 w-6 text-white'>{step + 1}</div>;
+    }
+
+    if (step === currentApprovalStep) {
+      return (
+        <div className='bg-RED_800 f-12-500 flex items-center justify-center h-6 w-6 text-white'>
+          <SvgSpriteLoader id='x-close' size={16} />
+        </div>
+      );
+    }
+
+    return <div className='bg-GRAY_1000 f-12-500  flex items-center justify-center h-6 w-6 text-white'>{step + 1}</div>;
+  };
+
   return (
-    <div className='flex rounded-lg overflow-hidden border border-GRAY_500 w-full'>
-      <div className='bg-GRAY_100'>
-        <div className='bg-GRAY_1000 f-12-500  flex items-center justify-center h-6 w-6 text-white'>{step + 1}</div>
-      </div>
+    <div
+      className={cn(
+        'flex rounded-lg overflow-hidden border w-full',
+        isCurrentStepPending ? 'border-BLUE_700' : 'border-GRAY_500',
+      )}
+    >
+      <div className='bg-GRAY_100'>{renderApprovalStatus()}</div>
       <div className='p-5 w-full'>
         {approvalDetails?.conditions?.map((condition, index) => (
           <div key={index}>
@@ -39,7 +74,7 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
                   teamsData={teamsData}
                   orgMembers={orgMembers ?? []}
                   orgName={orgName}
-                  isApproved={isApproved}
+                  isApproved={currentApprovalStep > index}
                 />
               ))}
             </div>
