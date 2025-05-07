@@ -94,6 +94,9 @@ export const API_ENDPOINTS = {
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
 
   PROCESSES_GET: `processes/`,
+  ACTIVITY_RUNS_FILTER_CONFIG_GET: `processes/{{processId}}/activity-runs/filter-config`,
+  ACTIVITY_RUNS_SUMMARY_GET: `processes/{{processId}}/activity-runs/status-summary`,
+  ACTIVITY_RUNS_GET: `processes/{{processId}}/activity-runs`,
 };
 
 export const enum REQUEST_TYPES {

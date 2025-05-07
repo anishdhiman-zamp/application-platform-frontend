@@ -1,4 +1,4 @@
-import { getActivityRouteByProcessId } from 'constants/routeConfig';
+import { getProcessRouteById } from 'constants/routeConfig';
 import { useRouter } from 'next/router';
 import { cn } from 'utils/common';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
@@ -10,8 +10,6 @@ interface ProcessNavTabProps {
   isSelected?: boolean;
   disable?: boolean;
 }
-
-//Todo:remove the disable prop
 
 const ProcessNavTab = ({ label, processId, isSelected, disable = false }: ProcessNavTabProps) => {
   const router = useRouter();
@@ -25,7 +23,7 @@ const ProcessNavTab = ({ label, processId, isSelected, disable = false }: Proces
       )}
       onClick={() => {
         if (!disable) {
-          router.push(getActivityRouteByProcessId(processId));
+          router.push(getProcessRouteById(processId, label));
         }
       }}
     >

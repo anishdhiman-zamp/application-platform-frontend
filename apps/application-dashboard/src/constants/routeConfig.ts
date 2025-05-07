@@ -19,7 +19,7 @@ export const ROUTES_PATH = {
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
-  ACTIVITY: '/activity/:processId',
+  PROCESS: '/processes/:processId/:label',
 };
 
 export const getPageRouteById = (pageId: string) => {
@@ -50,8 +50,8 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.ADMIN_DATASETS}/${datasetId}`;
 };
 
-export const getActivityRouteByProcessId = (processId: string) => {
-  return `${ROUTES_PATH.ACTIVITY.replace(':processId', processId)}`;
+export const getProcessRouteById = (processId: string, label: string) => {
+  return `${ROUTES_PATH.PROCESS.replace(':processId', processId).replace(':label', label)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

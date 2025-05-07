@@ -61,7 +61,7 @@ const Sidebar = () => {
               name={item.label}
               path={item.path}
               iconId={item.iconId}
-              isSelected={!params?.pageId && !params?.activityId && pathname.includes(item?.path)}
+              isSelected={!params?.pageId && !params?.processId && pathname.includes(item?.path)}
             />
           ))}
         </div>
@@ -84,7 +84,7 @@ const Sidebar = () => {
                     key={process?.id}
                     label={process?.display_name}
                     processId={process?.id}
-                    isSelected={params?.activityId === process?.id}
+                    isSelected={params?.processId === process?.id}
                     disable
                   />
                 ))}
