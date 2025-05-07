@@ -1,5 +1,4 @@
 import { type FC, useRef, useState } from 'react';
-import { toast } from 'react-toastify';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { TEMPLATE_APPROVAL_ACTION_ITEMS } from 'modules/payments/payments.constant';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
@@ -9,6 +8,7 @@ import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
 import { useOnClickOutside } from '@/hooks';
 import type { defaultFnType } from '@/types/commonTypes';
+import { toast } from 'components/common/toast/Toast';
 
 type TemplateApprovalCardProps = {
   canApprove: boolean;

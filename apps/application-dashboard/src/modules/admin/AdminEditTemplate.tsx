@@ -1,16 +1,18 @@
 import { FC, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import MonacoEditor from '@monaco-editor/react';
+import { captureException } from '@sentry/browser';
 import { type Edge } from '@xyflow/react';
 import { useGetTemplatesMutation, useUpsertTemplateMutation } from '@/apis/admin';
 import { Button } from '@/components/common/button/Button';
 import Input from '@/components/common/input';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
 import FullScreenPopup from '@/components/FullScreenPopup';
 import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
 import { SIZE_TYPES } from '@/types/common/components';
+import { toast } from 'components/common/toast/Toast';
 
 type AdminEditTemplateProps = {
   isOpen: boolean;
@@ -36,11 +38,11 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
     })
       .unwrap()
       .then(() => {
-        toast.success('Template updated successfully');
+        toast.success(TOAST_MESSAGES.SUCCESS_TEMPLATE_UPDATED);
       })
       .catch((error) => {
-        console.error(error);
-        toast.error('Error updating template');
+        captureException(error);
+        toast.error(TOAST_MESSAGES.ERROR_TEMPLATE_UPDATED);
       });
   };
 
@@ -56,6 +58,10 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
             setName(template?.name);
             setTemplateId(template?.id);
           }
+        })
+        .catch((error) => {
+          captureException(error);
+          toast.error(TOAST_MESSAGES.ERROR_TEMPLATE_FETCH);
         });
     }
   }, [edge]);

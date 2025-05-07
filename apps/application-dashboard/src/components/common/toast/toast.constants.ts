@@ -32,6 +32,15 @@ export enum TOAST_MESSAGES {
   SUCCESS_RULE_DELETION = 'Rule deleted successfully',
   ERROR_RULE_DELETION = 'Rule deletion failed',
   IN_PROGRESS_RULE_DELETION = 'Rule deletion in progress',
+
+  FAILED_DATASET_UPDATE = 'Dataset update failed',
+
+  SUCCESS_TEMPLATE_UPDATED = 'Template updated successfully',
+  ERROR_TEMPLATE_UPDATED = 'Template update failed',
+  ERROR_TEMPLATE_FETCH = 'Template fetch failed',
+
+  ERROR_RULE_PRIORITY_UPDATE = 'Rule priority update failed',
+  ERROR_FETCHING_ACCOUNTS = 'Failed to fetch accounts',
 }
 
 export const TaggingMessages = {

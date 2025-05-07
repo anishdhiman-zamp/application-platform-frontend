@@ -1,5 +1,4 @@
 import { FC, useMemo } from 'react';
-import { toast } from 'react-toastify';
 import { DEFAULT_BANK } from 'constants/icons';
 import AccountWithLogo from 'modules/payments/move-money/components/AccountWithLogo';
 import { useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
@@ -12,6 +11,7 @@ import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/comm
 import { useInitiatePaymentMutation } from '@/apis/payments';
 import { UploadFileResponseType } from '@/types/api/fileUpload.types';
 import { Button } from 'components/common/button/Button';
+import { toast } from 'components/common/toast/Toast';
 import SvgSpriteLoader from 'components/SvgSpriteLoader';
 
 interface ReviewMoneyTransferProps {

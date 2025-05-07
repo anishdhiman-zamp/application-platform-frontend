@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { toast } from 'react-toastify';
+import { captureException } from '@sentry/browser';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
 import { defaultAccountData } from 'modules/payments/payments.constant';
@@ -13,11 +13,13 @@ import {
 } from '@/apis/payments';
 import Input from '@/components/common/input';
 import Dialogue from '@/components/common/popup/Dialogue';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import SvgSpriteLoader from '@/components/SvgSpriteLoader';
 import { COLORS } from '@/constants/colors';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 import { SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
+import { toast } from 'components/common/toast/Toast';
 
 type CreateTemplatePopoverProps = {
   isOpen: boolean;
@@ -74,6 +76,10 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
         .unwrap()
         .then((res) => {
           setDestinationAccountList(res.accounts);
+        })
+        .catch((error) => {
+          captureException(error);
+          toast.error(TOAST_MESSAGES.ERROR_FETCHING_ACCOUNTS);
         });
     } else if (isSingleTransfer && account.id) {
       getRecipientBySourceAccount({ source_account_id: account.id ?? '' });

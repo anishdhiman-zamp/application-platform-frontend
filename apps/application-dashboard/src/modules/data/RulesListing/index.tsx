@@ -1,5 +1,6 @@
 import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { captureException } from '@sentry/browser';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON } from 'constants/icons';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
@@ -13,10 +14,12 @@ import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { getUserId } from 'utils/accessPermission/accessPermission.utils';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import Popup from 'components/common/popup/Popup';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
+import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -157,11 +160,16 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
             priority: prioritySorting === OrderType.ASC ? index + 1 : listOfRules?.length - index,
           })),
         },
-      }).then((res) => {
-        handleApplyChangesPopupClose();
-        onClose();
-        handleSuccessfulUpdate(res?.data as DatasetUpdateResponseType);
-      });
+      })
+        .then((res) => {
+          handleApplyChangesPopupClose();
+          onClose();
+          handleSuccessfulUpdate(res?.data as DatasetUpdateResponseType);
+        })
+        .catch((error) => {
+          captureException(error);
+          toast.error(TOAST_MESSAGES.ERROR_RULE_PRIORITY_UPDATE);
+        });
     }
   };
 

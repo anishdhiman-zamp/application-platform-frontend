@@ -1,10 +1,13 @@
+import { captureException } from '@sentry/browser';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { useDeleteRuleMutation } from '@/apis/dataset';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { DatasetUpdateResponseType } from '@/types/api/dataset.types';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
+import { toast } from 'components/common/toast/Toast';
 
 type RuleDeleteProps = {
   isOpen: boolean;
@@ -17,7 +20,14 @@ const RuleDelete = ({ isOpen, onClose, ruleId, onSuccess }: RuleDeleteProps) => 
   const [deleteRule, { isLoading }] = useDeleteRuleMutation();
 
   const handleApplyChanges = () => {
-    deleteRule({ ruleId }).unwrap().then(onSuccess).finally(onClose);
+    deleteRule({ ruleId })
+      .unwrap()
+      .then(onSuccess)
+      .catch((error) => {
+        captureException(error);
+        toast.error(TOAST_MESSAGES.ERROR_RULE_DELETION);
+      })
+      .finally(onClose);
   };
 
   return (
