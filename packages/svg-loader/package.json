@@ -1,0 +1,42 @@
+{
+  "name": "@zamp-platform/svg-loader",
+  "version": "1.0.0",
+  "description": "SVG loader for client-side usage",
+  "main": "./dist/svg-loader.js",
+  "module": "./dist/svg-loader.js",
+  "types": "./dist/svg-loader.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/svg-loader.d.ts",
+      "import": "./dist/svg-loader.js",
+      "require": "./dist/svg-loader.js",
+      "default": "./dist/svg-loader.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development",
+    "dev:watch": "webpack watch --mode development"
+  },
+  "peerDependencies": {
+    "idb-keyval": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@zamp-platform/config": "*",
+    "terser-webpack-plugin": "^5.3.10",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
+  },
+  "keywords": [
+    "svg",
+    "loader",
+    "client-side"
+  ],
+  "license": "MIT"
+}
