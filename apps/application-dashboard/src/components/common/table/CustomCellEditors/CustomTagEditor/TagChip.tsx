@@ -5,7 +5,17 @@ import { cn, getTagColor } from 'utils/common';
 type TagChipProps = { item: string; existingList?: string[]; showIcon?: boolean; externalColor?: string };
 
 const TagChip: FC<TagChipProps> = ({ item, existingList, showIcon = false, externalColor }) => {
-  const isExisting = useMemo(() => existingList?.includes(item), [existingList, item]);
+  const isExisting = useMemo(() => {
+    const flattenedList: string[] = [];
+
+    existingList?.forEach((listItem) => {
+      listItem?.split('.')?.forEach((item) => {
+        flattenedList.push(item);
+      });
+    });
+
+    return flattenedList?.includes(item);
+  }, [existingList, item]);
 
   const backgroundColor = useMemo(getTagColor, [item]);
 

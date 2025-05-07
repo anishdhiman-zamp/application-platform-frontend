@@ -3,9 +3,10 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES, PIVOT_HEADER_BG } from 'constants/icons';
 import AddTag from 'modules/data/AddTag';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
+import Image from 'next/image';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
@@ -35,6 +36,8 @@ type CustomHeaderProps = {
     colDef: ColDef;
   };
   filterComponentProps?: MapAny;
+  className?: string;
+  headerBackgroundNeeded?: boolean;
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
   metadata,
@@ -46,6 +49,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   options,
   column,
   filterComponentProps,
+  className,
+  headerBackgroundNeeded = false,
 }) => {
   const { colId, colDef } = column;
 
@@ -196,8 +201,18 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         className={cn(
           'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
+          className,
         )}
       >
+        {headerBackgroundNeeded && (
+          <Image
+            src={PIVOT_HEADER_BG}
+            alt='header-background'
+            fill
+            priority
+            className='shrink-0 object-cover object-center'
+          />
+        )}
         <div className='flex items-center gap-1 truncate self-stretch flex-auto'>
           <span className='truncate'>{colDef?.headerName ?? colId}</span>
           {!!sortState && (

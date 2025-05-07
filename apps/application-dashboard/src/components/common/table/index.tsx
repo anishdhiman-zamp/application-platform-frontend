@@ -47,6 +47,7 @@ import {
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { MapAny } from 'types/commonTypes';
+import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
 import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
 import CustomNoRowsOverlay from 'components/common/table/CustomNoRowsOverlay';
@@ -126,6 +127,8 @@ interface TableProps {
     | SizeColumnsToContentStrategy;
   onColumnMoved?: (event: ColumnMovedEvent) => void;
   columnLevelStats?: MapAny;
+  cellClass?: string;
+  headerClass?: string;
 }
 
 export type TableColumnType = {
@@ -162,6 +165,8 @@ const Table: FC<TableProps> = ({
   autoSizeStrategy,
   onColumnMoved,
   columnLevelStats,
+  cellClass,
+  headerClass,
 }) => {
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
@@ -171,8 +176,12 @@ const Table: FC<TableProps> = ({
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
       floatingFilter: false,
-      headerClass: 'f-12-600 text-GRAY_1000',
-      cellClass: `f-11-400 text-GRAY_1000 content-center !px-2 py-1 ${onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : ''}`,
+      headerClass: cn('f-12-600 text-GRAY_1000', headerClass),
+      cellClass: cn(
+        'f-11-400 text-GRAY_1000 content-center !px-2 py-1',
+        cellClass,
+        onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '',
+      ),
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       flex: 1,
       cellStyle: (params: MapAny) => {

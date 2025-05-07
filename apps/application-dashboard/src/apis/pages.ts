@@ -13,7 +13,7 @@ import {
   SheetResponseType,
 } from 'types/api/pagesApi.types';
 import { formRequestUrlWithParams } from 'utils/common';
-import type { ProcessesResponseType } from '@/types/api/processes.types';
+import type { ProcessesResponseType } from '@/types/api/processApi.types';
 
 const Pages = baseApi.injectEndpoints({
   endpoints: (builder) => ({

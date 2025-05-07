@@ -3,6 +3,7 @@ import { defaultFnType } from 'types/commonTypes';
 
 export enum DISPLAY_CONFIG_HEADERS {
   COLUMN = 'column',
+  ALIAS = 'alias',
   IS_HIDDEN = 'is_hidden',
   IS_EDITABLE = 'is_editable',
   TYPE = 'type',

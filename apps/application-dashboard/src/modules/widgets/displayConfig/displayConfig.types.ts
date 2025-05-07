@@ -103,4 +103,22 @@ export type GetCellStyleParamsType = {
   currentWidgetInstanceId?: string;
   displayConfigStyle?: Partial<Record<DISPLAY_CONFIG_CELL_TYPE, { rules: MapAny[] }>>;
   colGroupDef?: MapAny;
+  colGroupHeaderName?: string;
 };
+
+export type CheckPeriodColumnOptionsPropsType = {
+  period: DisplayConfigRulesConditionsPeriodType;
+  colGroupHeaderName?: string;
+  headerName?: string;
+  date?: string;
+};
+
+export type ColVisibilityConfigType = {
+  colId?: string;
+  hide?: boolean;
+};
+
+export enum DisplayConfigToggleType {
+  HIDE_WEEKENDS = 'hide_weekends',
+  SHOW_HISTORICAL_FORECAST = 'show_historical_forecast',
+}

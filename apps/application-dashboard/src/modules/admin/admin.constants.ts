@@ -9,6 +9,10 @@ export const DisplayConfigHeadersList = [
     value: 'Column',
   },
   {
+    key: DISPLAY_CONFIG_HEADERS.ALIAS,
+    value: 'Alias',
+  },
+  {
     key: DISPLAY_CONFIG_HEADERS.IS_HIDDEN,
     value: 'Is Hidden',
   },

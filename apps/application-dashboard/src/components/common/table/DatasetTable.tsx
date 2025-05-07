@@ -1,4 +1,4 @@
-import React, { FC, RefObject } from 'react';
+import { FC, RefObject } from 'react';
 import {
   CellDoubleClickedEvent,
   CellEditRequestEvent,
@@ -8,6 +8,7 @@ import {
   FillEndEvent,
   IServerSideDatasource,
   RowClickedEvent,
+  Theme,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';
@@ -31,6 +32,11 @@ interface DatasetTableProps {
   containerStyle?: MapAny;
   gridStyle?: MapAny;
   onRowClicked?: (event: RowClickedEvent) => void;
+  customTheme?: Theme;
+  headerClass?: string;
+  cellClass?: string;
+  suppressCellFocus?: boolean;
+  enableCellSelection?: boolean;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -51,6 +57,11 @@ const DatasetTable: FC<DatasetTableProps> = ({
   containerStyle,
   gridStyle,
   onRowClicked,
+  customTheme,
+  headerClass,
+  cellClass,
+  suppressCellFocus = false,
+  enableCellSelection = true,
 }) => {
   return (
     <div id='dataset-table'>
@@ -64,7 +75,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
         serverSideDatasource={serverSideDatasource}
         onCellEditRequest={onCellEditRequest}
         showStatusBar
-        enableCellSelection
+        enableCellSelection={enableCellSelection}
+        suppressCellFocus={suppressCellFocus}
         onColumnVisible={onColumnVisible}
         onFillEnd={onFillEnd}
         onDrilldownClick={onDrilldownClick}
@@ -74,6 +86,9 @@ const DatasetTable: FC<DatasetTableProps> = ({
         containerStyle={containerStyle}
         gridStyle={gridStyle}
         onRowClicked={onRowClicked}
+        customTheme={customTheme}
+        headerClass={headerClass}
+        cellClass={cellClass}
       />
     </div>
   );

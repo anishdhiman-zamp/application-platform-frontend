@@ -9,9 +9,17 @@ type ApprovalStatusCardProps = {
   teamsData: GetTeamsByOrganizationIdResponseType[];
   orgMembers: AudiencesByOrganisationIdResponse[];
   orgName: string;
+  isApproved: boolean;
 };
 
-const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({ step, approvalDetails, teamsData, orgMembers, orgName }) => {
+const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
+  step,
+  approvalDetails,
+  teamsData,
+  orgMembers,
+  orgName,
+  isApproved,
+}) => {
   return (
     <div className='flex rounded-lg overflow-hidden border border-GRAY_500 w-full'>
       <div className='bg-GRAY_100'>
@@ -31,6 +39,7 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({ step, approvalDetails
                   teamsData={teamsData}
                   orgMembers={orgMembers ?? []}
                   orgName={orgName}
+                  isApproved={isApproved}
                 />
               ))}
             </div>

@@ -45,6 +45,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
             type={BUTTON_TYPES.SECONDARY}
             id='recipient-card-action'
             size={SIZE_TYPES.XSMALL}
+            className='hidden'
             iconProps={{ id: 'filter-lines', size: 14 }}
             onClick={handleSendMoney}
           />

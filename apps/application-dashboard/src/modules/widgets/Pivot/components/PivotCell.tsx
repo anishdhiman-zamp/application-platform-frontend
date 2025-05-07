@@ -1,6 +1,9 @@
-import { FC, memo, useMemo, useRef, useState } from 'react';
+import { type Dispatch, FC, memo, type SetStateAction, useMemo, useRef, useState } from 'react';
 import { Column, GridApi, IRowNode } from 'ag-grid-community';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
+import { getCellStyle } from 'modules/widgets/displayConfig/DisplayConfig';
+import { DISPLAY_CONFIG_CELL_TYPE, DisplayConfigStyleType } from 'modules/widgets/displayConfig/displayConfig.types';
+import { AllPivotColumnsToHideType } from 'modules/widgets/Pivot/pivot.types';
 import { MapAny } from 'types/commonTypes';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 
@@ -12,9 +15,28 @@ interface PivotCellProps {
   column?: Column;
   api?: GridApi;
   currency?: string;
+  childIndex?: number;
+  groupData?: MapAny;
+  hiddenColIds?: string[];
+  gridApi?: GridApi;
+  setAllPivotColumnsToHide: Dispatch<SetStateAction<AllPivotColumnsToHideType[]>>;
+  currentWidgetInstanceId?: string;
+  displayConfigStyle?: DisplayConfigStyleType;
 }
 
-const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPercentage, api, column, currency }) => {
+const PivotCell: FC<PivotCellProps> = ({
+  node,
+  value,
+  maxGroupingLevel,
+  showPercentage,
+  api,
+  column,
+  currency,
+  childIndex,
+  setAllPivotColumnsToHide,
+  currentWidgetInstanceId,
+  displayConfigStyle = {},
+}) => {
   const [toggledRows, setToggledRows] = useState<Record<string, boolean>>({});
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -83,6 +105,23 @@ const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPerc
     }
   };
 
+  const resultantConfigStyles = getCellStyle({
+    node: node,
+    level: node?.level,
+    childIndex: childIndex,
+    column: column,
+    value: value,
+    rowParentFieldGreaterByOne: node?.parent?.key,
+    rowGroupField: node?.key,
+    columnId: column?.getColId(),
+    columnGroupId: column?.getParent()?.getGroupId(),
+    cellType: DISPLAY_CONFIG_CELL_TYPE.DATA_CELL,
+    setAllPivotColumnsToHide: setAllPivotColumnsToHide,
+    currentWidgetInstanceId: currentWidgetInstanceId,
+    displayConfigStyle: displayConfigStyle,
+    colGroupHeaderName: column?.getColDef()?.headerName,
+  });
+
   return (
     <div
       className={cn(
@@ -93,6 +132,7 @@ const PivotCell: FC<PivotCellProps> = ({ node, value, maxGroupingLevel, showPerc
           'border-b-0': isRootLevel,
         },
       )}
+      style={resultantConfigStyles}
       onClick={handleToggle}
     >
       {getCommaSeparatedNumber(displayValue, 2)}

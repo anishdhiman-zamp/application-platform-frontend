@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
