@@ -3,7 +3,7 @@ import SelectAccountDropdown from 'modules/payments/move-money/components/Select
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { PAYMENT_PROCESSING_MODES } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
-import { SIZE_TYPES } from 'types/common/components';
+import { type MenuItem, SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { getCommaSeparatedNumberForInput } from 'utils/common';
@@ -29,7 +29,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
     [currentStep, isSelfTransfer],
   );
   const [amount, setAmount] = useState(amountDetails?.amount);
-  const [paymentProcessingMode, setPaymentProcessingMode] = useState(PAYMENT_PROCESSING_MODES[0]);
+  const [paymentProcessingMode, setPaymentProcessingMode] = useState<MenuItem>();
 
   const { data: destinationAccounts, isLoading } = useGetDestinationAccountsQuery(
     {
@@ -80,9 +80,18 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
   useEffect(() => {
     if (reset) {
       setAmount('');
-      setPaymentProcessingMode(PAYMENT_PROCESSING_MODES[0]);
     }
   }, [reset]);
+
+  useEffect(() => {
+    if (destinationAccountDetails?.currency_code) {
+      setPaymentProcessingMode(
+        PAYMENT_PROCESSING_MODES[
+          destinationAccountDetails?.currency_code?.toUpperCase() as keyof typeof PAYMENT_PROCESSING_MODES
+        ]?.[0],
+      );
+    }
+  }, [destinationAccountDetails?.currency_code]);
 
   return (
     <div className='h-screen pt-20 w-75 m-auto'>
@@ -120,23 +129,29 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
         </div>
         <div className='w-full'>
           <div className='f-12-500 text-GRAY_900 mb-2'>Payment processing mode</div>
-          <Dropdown
-            options={PAYMENT_PROCESSING_MODES}
-            id='payment-processing-mode-dropdown'
-            eventCallback={defaultFn}
-            onChange={setPaymentProcessingMode}
-            value={paymentProcessingMode}
-            defaultValue={paymentProcessingMode}
-            placeholder='Payment processing mode'
-            isSearchable={false}
-            customClassNames={{
-              placeholder: 'f-13-450 !w-75',
-            }}
-            menuOptionClasses={{
-              contentWrapper: 'w-[260px]',
-            }}
-            customDropdownIndicatorSize={14}
-          />
+          {paymentProcessingMode && (
+            <Dropdown
+              options={
+                PAYMENT_PROCESSING_MODES[
+                  sourceAccountDetails?.currency_code?.toUpperCase() as keyof typeof PAYMENT_PROCESSING_MODES
+                ]
+              }
+              id='payment-processing-mode-dropdown'
+              eventCallback={defaultFn}
+              onChange={setPaymentProcessingMode}
+              value={paymentProcessingMode}
+              defaultValue={paymentProcessingMode}
+              placeholder='Payment processing mode'
+              isSearchable={false}
+              customClassNames={{
+                placeholder: 'f-13-450 !w-75',
+              }}
+              menuOptionClasses={{
+                contentWrapper: 'w-[260px]',
+              }}
+              customDropdownIndicatorSize={14}
+            />
+          )}
         </div>
       </div>
       <div className='flex gap-3 mt-10'>

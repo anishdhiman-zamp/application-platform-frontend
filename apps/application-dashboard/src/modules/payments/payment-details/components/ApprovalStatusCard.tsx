@@ -29,7 +29,7 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
   }, [step, currentApprovalStep, status]);
 
   const renderApprovalStatus = () => {
-    if (step < currentApprovalStep) {
+    if (step < currentApprovalStep || status === PolicyResultStatus.APPROVED) {
       return (
         <div className='bg-GREEN_700 f-12-500 flex items-center justify-center h-6 w-6 text-white'>
           <SvgSpriteLoader id='check' size={16} />

@@ -146,11 +146,13 @@ const Payments = baseApi.injectEndpoints({
       query: (paymentId) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_APPROVALS_INFO_GET, { paymentId }),
       }),
+      providesTags: [APITags.GET_PAYMENT_APPROVALS_INFO],
     }),
     getTemplateApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
       query: (templateId) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENTS_TEMPLATE_APPROVALS_INFO_GET, { templateId }),
       }),
+      providesTags: [APITags.GET_PAYMENT_APPROVALS_INFO],
     }),
   }),
 });

@@ -59,7 +59,9 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { FILTER_TYPES } from '@/components/filter/filter.types';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -401,7 +403,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
                 key: column.column,
                 label: column.alias ?? snakeCaseToSentenceCase(column?.column),
                 values: column.options,
-                type: column.type,
+                type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
               })),
           },
         });

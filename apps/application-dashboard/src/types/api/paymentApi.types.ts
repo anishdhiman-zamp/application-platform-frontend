@@ -25,6 +25,7 @@ export type TemplateDetailsType = {
   status?: STATUS_TYPES;
   can_approve: boolean;
   policy_result_id?: string;
+  approval_id?: string;
 };
 
 export type TemplateListResponseType = {

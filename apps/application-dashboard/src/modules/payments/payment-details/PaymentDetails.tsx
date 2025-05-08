@@ -44,6 +44,11 @@ const cardStyleByStatus = {
     borderColor: 'border-RED_800',
     textColor: 'text-RED_800',
   },
+  [PAYMENT_STATUS_TYPES.REJECTED]: {
+    backgroundColor: 'bg-[#FFE6E6]',
+    borderColor: 'border-RED_800',
+    textColor: 'text-RED_800',
+  },
 };
 
 const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {

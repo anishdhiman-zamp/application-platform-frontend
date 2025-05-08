@@ -26,7 +26,7 @@ const TemplateApproval: FC<TemplateApprovalProps> = ({ template, onBackClick }) 
         <SvgSpriteLoader id='arrow-left' size={14} onClick={onBackClick} />
         <TemplateCard template={template} />
       </div>
-      {template?.can_approve && <ApproveActionCard approvalId={template?.id} />}
+      {paymentApprovalsInfo?.approval_id && <ApproveActionCard approvalId={paymentApprovalsInfo?.approval_id} />}
 
       <div className='px-4 py-4 bg-BG_GRAY_2 flex-1 overflow-y-auto'>
         <PaymentApprovals

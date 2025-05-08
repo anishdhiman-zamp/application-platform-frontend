@@ -104,8 +104,9 @@ const AddTag = ({
     setSearchValue(value);
     const cleanedValue = value
       ?.split('/')
-      .map((str) => str.trim())
-      .join('.');
+      ?.map((str) => str.trim())
+      ?.join('.')
+      ?.toLowerCase();
 
     setSearchResults(tagList?.filter((tag) => tag?.toLowerCase()?.includes(cleanedValue)));
     if (value) {

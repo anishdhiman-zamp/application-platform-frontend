@@ -12,6 +12,7 @@ import {
   FILTER_KEYS,
   MULTI_SELECT_FILTER_OPTIONS,
   SEARCH_FILTER_OPTIONS,
+  TAGS_SELECT_FILTER_OPTIONS,
 } from 'components/filter/filters.constants';
 
 export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfigType[], selectedFilters: MapAny) => {
@@ -118,6 +119,31 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
       if (!filter) {
         title = '';
+      }
+
+      return {
+        ...config,
+        title,
+      };
+    }
+
+    case FILTER_TYPES.TAGS: {
+      const selectedFilter = selectedFilters[key];
+      const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
+      const operatorLabel =
+        TAGS_SELECT_FILTER_OPTIONS.find((option) => option.value === selectedFilter?.type)?.label ?? '';
+
+      let title = '';
+      const count = Array.isArray(selectedFilter?.values) ? selectedFilter?.values?.length : 0;
+
+      title = isNull
+        ? TAGS_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
+        : Array.isArray(selectedFilter?.values)
+          ? selectedFilter?.values?.map((v: string) => v.split('.')?.pop())?.join(', ')
+          : (selectedFilter?.values?.split('.')?.pop() ?? '');
+
+      if (count) {
+        title = `${operatorLabel} ${selectedFilter?.values[0]?.split('.')?.pop()} ${count > 1 ? `+${count - 1}` : ''}`;
       }
 
       return {

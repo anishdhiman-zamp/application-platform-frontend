@@ -12,6 +12,7 @@ const badgeStyles = {
   [PAYMENT_STATUS_TYPES.SUCCEEDED]: 'bg-GREEN_100 text-GREEN_800',
   [PAYMENT_STATUS_TYPES.SENT_TO_BANK]: 'bg-ORANGE_100 text-ORANGE_800',
   [PAYMENT_STATUS_TYPES.APPROVAL_PENDING]: 'bg-ORANGE_100 text-ORANGE_800',
+  [PAYMENT_STATUS_TYPES.REJECTED]: 'bg-RED_100 text-RED_800',
 };
 
 const StatusBadgeCell = ({ value }: StatusBadgeCellProps) => {

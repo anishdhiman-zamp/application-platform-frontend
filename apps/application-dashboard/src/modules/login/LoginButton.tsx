@@ -47,7 +47,7 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo 
           {showSigningIn ? (
             <div className='flex gap-1.5 items-center justify-center text-white f-14-500 animate-opacity'>
               <span>Signing in with</span>
-              <Image src={providerLogo} alt='provider logo' width={20} height={20} />
+              <Image src={providerLogo} alt='provider logo' width={40} height={20} style={{ maxHeight: '20px' }} />
             </div>
           ) : (
             <span className='mr-10'>Login</span>
