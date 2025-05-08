@@ -22,7 +22,9 @@ import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdo
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
-const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePolicyDialogProps) => {
+const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicyDialogProps) => {
+  const policyData = useMemo(() => (isOpen ? policy : null), [isOpen, policy]);
+
   const messageToastId = useRef<number | string>(0);
   const isEdit = !!policyData;
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {

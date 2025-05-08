@@ -24,6 +24,7 @@ const PoliciesListSideDrawer: FC<PoliciesListSideDrawerProps> = ({
   type,
   handlePolicyDialogOpenChange,
 }) => {
+  const [selectedPolicy, setSelectedPolicy] = useState<PolicyDetailsType | null>(null);
   const { data: audienceMembersData } = useAudienceMembers({
     resourceType: ResourceType.PAYMENTS,
     resourceId: '',
@@ -44,10 +45,14 @@ const PoliciesListSideDrawer: FC<PoliciesListSideDrawerProps> = ({
     handlePolicyDialogOpenChange(type);
   };
 
-  const [selectedPolicy, setSelectedPolicy] = useState<PolicyDetailsType | null>(null);
-
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() => {
+        setSelectedPolicy(null);
+        onClose();
+      }}
+    >
       <SheetContent className='p-0 h-screen overflow-hidden'>
         <div className='py-6 px-4.5'>
           <AnimatePresence mode='wait'>

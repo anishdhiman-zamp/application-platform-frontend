@@ -60,7 +60,7 @@ const PolicyActionsDropdown = ({
         type={policy.action_type === PolicyActionType.CREATE_PAYMENT ? 'payout' : 'template'}
         isOpen={isEditPolicyDialogOpen}
         onOpenChange={setIsEditPolicyDialogOpen}
-        policyData={policy}
+        policy={policy}
       />
     </>
   );

@@ -78,7 +78,7 @@ export interface CreatePolicyDialogProps {
   type: PolicyDialogType;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  policyData?: PolicyDetailsType;
+  policy?: PolicyDetailsType;
 }
 
 export type PolicyQuorumOption = {
