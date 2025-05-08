@@ -71,8 +71,8 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
 
   const methods = useForm<PolicyFormData>({
     defaultValues: {
-      policyName: policyData?.name || '',
-      approvalSteps: policyData?.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
+      policyName: '',
+      approvalSteps: [DEFAULT_APPROVAL_STEP],
       creator: [],
       ...getAttributes(type)
         .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
@@ -85,6 +85,26 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
         ),
     },
   });
+
+  useEffect(() => {
+    if (policyData) {
+      methods.reset({
+        policyName: policyData.name || '',
+        approvalSteps: policyData.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
+        creator: policyData.policy_configurations.creator || [],
+        ...getAttributes(type)
+          .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
+          .reduce<Record<string, SelectOption[]>>((acc, attr) => {
+            const condition = policyData.policy_configurations.conditions?.conditions.find((c) => c.field === attr);
+
+            return {
+              ...acc,
+              [attr]: condition ? [condition.value] : [],
+            };
+          }, {}),
+      });
+    }
+  }, [policyData, type, methods, updatedAttributeMap]);
 
   const onSubmit = (data: PolicyFormData) => {
     // Validate each field

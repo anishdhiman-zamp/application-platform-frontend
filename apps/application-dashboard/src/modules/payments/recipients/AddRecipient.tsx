@@ -67,7 +67,7 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton size='large'>
+      <DialogContent showCloseButton>
         <DialogHeader>New Recipient</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           {isFormConfigLoading || !formConfig ? (

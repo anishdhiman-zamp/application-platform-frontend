@@ -103,7 +103,7 @@ const AddRecipientAccount = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton size='large'>
+      <DialogContent showCloseButton>
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='max-w-[400px] w-[45%]'>

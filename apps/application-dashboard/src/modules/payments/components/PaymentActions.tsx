@@ -61,7 +61,7 @@ const PaymentActions = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='z-[1000]' sideOffset={5}>
           <DropdownMenuItem className='flex items-center justify-between'>
-            <span>Template creation approval</span>
+            <span>Templates</span>
             <div className='flex items-center gap-2'>
               <Button
                 variant='ghost'
@@ -70,7 +70,7 @@ const PaymentActions = () => {
                 onClick={() => setSideDrawerConfig('template')}
                 disabled={templatePolicies.length === 0}
               >
-                {templatePolicies.length} policies
+                {templatePolicies.length} {templatePolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
               <Button
                 variant='ghost'
@@ -83,7 +83,7 @@ const PaymentActions = () => {
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem className='flex items-center justify-between'>
-            <span>Payout approval</span>
+            <span>Payouts</span>
             <div className='flex items-center gap-2'>
               <Button
                 variant='ghost'
@@ -92,7 +92,7 @@ const PaymentActions = () => {
                 disabled={paymentPolicies.length === 0}
                 onClick={() => setSideDrawerConfig('payout')}
               >
-                {paymentPolicies.length} policies
+                {paymentPolicies.length} {paymentPolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
               <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange('payout')}>
                 <Plus className='h-3 w-3' />

@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, Fragment, useEffect, useRef, useState } from 'react';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { formatAudienceMembers } from 'modules/policies/create/constants';
 import { ApproverDetail, ApproverListOption } from 'modules/policies/types';
@@ -63,7 +63,9 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className='flex flex-wrap gap-2.5 border p-1.5 rounded-md w-full min-h-[40px] items-center cursor-text'>
-          {selectedApprovers.map((approver) => currentOptions.find((o) => o.value.id === approver.id)?.richLabel)}
+          {selectedApprovers.map((approver, idx) => (
+            <Fragment key={idx}>{currentOptions.find((o) => o.value.id === approver.id)?.richLabel}</Fragment>
+          ))}
           <input
             ref={inputRef}
             className='flex-1 min-w-[80px] border-none outline-none bg-transparent f-14-500'
