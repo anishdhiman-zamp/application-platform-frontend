@@ -86,7 +86,7 @@ export const schema: FormSchema = {
     },
     {
       id: 'recipient_account_information',
-      title: 'Account Information',
+      title: '',
       sections: [
         {
           id: 'account_details',
@@ -526,11 +526,37 @@ export const schema: FormSchema = {
                 {
                   type: 'regex',
                   config: {
-                    value: '^[0-9]{5}(-[0-9]{4})?$',
+                    value: '^[0-9]{5,9}$',
                     message: 'Please enter a valid US ZIP code',
                   },
                 },
               ],
+            },
+          ],
+        },
+      ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder Postal Code',
+              },
             },
           ],
         },
@@ -578,6 +604,32 @@ export const schema: FormSchema = {
                   },
                 },
               ],
+            },
+          ],
+        },
+      ],
+      display_dependencies: [
+        {
+          fields: ['recipient_account_country_code'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'recipient_account_country_code',
+                    operator: 'eq',
+                    value: 'US',
+                    conditions: null,
+                  },
+                ],
+              },
+              config: {
+                default_value: '',
+                should_show: true,
+                label: 'Account Holder State',
+              },
             },
           ],
         },
@@ -1062,7 +1114,7 @@ export const schema: FormSchema = {
                 {
                   type: 'regex',
                   config: {
-                    value: '^[A-Z]{6}[A-Z2-9][A-NP-Z0-9]([A-Z0-9]{3})?$',
+                    value: '^[A-Z0-9]{8,11}$',
                     message: 'Please enter a valid BIC/SWIFT code',
                   },
                 },
@@ -1221,7 +1273,7 @@ export const schema: FormSchema = {
     },
     recipient_name: {
       id: 'recipient_name',
-      type: 'text',
+      type: 'header-text',
       label: 'Recipient Name',
       validations: [
         {
@@ -1246,6 +1298,20 @@ export const schema: FormSchema = {
         },
       ],
     },
+    recipient_postal_code: {
+      id: 'recipient_postal_code',
+      type: 'text',
+      label: 'Postal Code',
+      validations: [
+        {
+          type: 'regex',
+          config: {
+            value: '^[0-9]{5,9}$',
+            message: 'Please enter a valid postal code',
+          },
+        },
+      ],
+    },
     recipient_state: {
       id: 'recipient_state',
       type: 'select',
@@ -1263,40 +1329,6 @@ export const schema: FormSchema = {
           },
         ],
       },
-    },
-    transfer_type: {
-      id: 'transfer_type',
-      type: 'select',
-      label: 'Transfer Type',
-      options: [
-        {
-          label: 'SWIFT',
-          value: 'SWIFT',
-        },
-        {
-          label: 'RTP',
-          value: 'RTP',
-        },
-        {
-          label: 'WIRE',
-          value: 'WIRE',
-        },
-      ],
-      validations: [
-        {
-          type: 'required',
-          config: {
-            message: 'Transfer type is required',
-          },
-        },
-        {
-          type: 'enums',
-          config: {
-            values: ['SWIFT', 'RTP', 'WIRE'],
-            message: 'Invalid transfer type',
-          },
-        },
-      ],
     },
   },
 };

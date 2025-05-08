@@ -3,6 +3,7 @@ import React from 'react';
 
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { FormField as FormFieldType } from '../types';
+import { HeaderTextField } from './HeaderTextField';
 import { SelectField } from './SelectField';
 import { TextField } from './TextField';
 
@@ -35,6 +36,8 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
       >
         {(() => {
           switch (fieldWithConfig.type) {
+            case 'header-text':
+              return <HeaderTextField className={className} field={fieldWithConfig} name={name} />;
             case 'text':
               return <TextField className={className} field={fieldWithConfig} name={name} />;
             case 'select':

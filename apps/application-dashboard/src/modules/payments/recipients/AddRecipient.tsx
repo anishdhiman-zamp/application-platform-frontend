@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { toast as reactToastify } from 'react-toastify';
-import { FormBuilder, FormBuilderRef, schema } from '@zamp-platform/form-builder';
+import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import { useGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientMutation } from '@/apis/payments';
@@ -72,7 +72,7 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='max-w-[400px] w-[45%]'>
-            <FormBuilder ref={formRef} schema={schema} onSubmit={onSubmit} />
+            <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>

@@ -68,7 +68,7 @@ export interface DisplayDependency {
   expressions: Array<{ expression: Expression; config: FieldConfig }>;
 }
 
-export type FieldType = 'text' | 'select' | 'input' | 'multi-select';
+export type FieldType = 'text' | 'select' | 'input' | 'multi-select' | 'header-text';
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
 
