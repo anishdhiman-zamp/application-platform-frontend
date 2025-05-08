@@ -129,20 +129,24 @@ export const MOVE_MONEY_ATTACHMENTS_FILE_FORMATS = [
 
 export const MASK_DOTS = '••';
 
-export const PAYMENT_PROCESSING_MODES = [
-  {
-    label: 'WIRE',
-    value: 'WIRE',
-  },
-  {
-    label: 'SEPA',
-    value: 'SEPA',
-  },
-  {
-    label: 'RTP',
-    value: 'RTP',
-  },
-];
+export const PAYMENT_PROCESSING_MODES = {
+  USD: [
+    {
+      label: 'WIRE',
+      value: 'WIRE',
+    },
+    {
+      label: 'RTP',
+      value: 'RTP',
+    },
+  ],
+  EUR: [
+    {
+      label: 'SEPA',
+      value: 'SEPA',
+    },
+  ],
+};
 
 export const TEMPLATE_APPROVAL_ACTION_ITEMS = [
   {

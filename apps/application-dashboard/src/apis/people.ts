@@ -153,7 +153,12 @@ const People = baseApi.injectEndpoints({
           body: {},
         };
       },
-      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS, APITags.GET_POLICY_APPROVALS],
+      invalidatesTags: [
+        APITags.GET_PEOPLE_INVITATIONS,
+        APITags.GET_PAYMENT_TEMPLATE_LIST,
+        APITags.GET_PAYMENT_APPROVALS_INFO,
+        APITags.GET_POLICY_APPROVALS,
+      ],
     }),
     rejectPolicy: builder.mutation<ProcessApprovalResponse, ProcessApprovalRequest>({
       query: (params) => {
@@ -166,7 +171,12 @@ const People = baseApi.injectEndpoints({
           body: {},
         };
       },
-      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS, APITags.GET_POLICY_APPROVALS],
+      invalidatesTags: [
+        APITags.GET_PEOPLE_INVITATIONS,
+        APITags.GET_POLICY_APPROVALS,
+        APITags.GET_PAYMENT_TEMPLATE_LIST,
+        APITags.GET_PAYMENT_APPROVALS_INFO,
+      ],
     }),
     getAllPolicies: builder.query<GetPoliciesResponse, { resourceType?: string; actionType?: string }>({
       query: (params) => {

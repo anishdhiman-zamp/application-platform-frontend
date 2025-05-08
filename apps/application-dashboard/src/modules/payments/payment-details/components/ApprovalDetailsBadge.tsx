@@ -18,7 +18,7 @@ type ApprovalDetailsBadgeProps = {
 const STATUS_ICON_MAP = {
   APPROVED: <SvgSpriteLoader id='check' color={COLORS.GRAY_1000} size={12} />,
   PENDING: <SvgSpriteLoader id='clock' color={COLORS.GRAY_700} size={12} />,
-  REJECTED: <SvgSpriteLoader id='x-close' color={COLORS.ORANGE_200} size={12} />,
+  REJECTED: <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={12} />,
 };
 
 const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
@@ -91,7 +91,8 @@ const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
           })}
           style={{ background: backgroundColor, borderColor }}
         >
-          {(!isApproved || (isApproved && status === ApprovalStatus.APPROVED)) &&
+          {(!isApproved ||
+            (isApproved && (status === ApprovalStatus.APPROVED || status === ApprovalStatus.REJECTED))) &&
             STATUS_ICON_MAP[status as keyof typeof STATUS_ICON_MAP]}
           <div className='f-12-500 text-GRAY_1000 select-none'>{label}</div>
         </div>

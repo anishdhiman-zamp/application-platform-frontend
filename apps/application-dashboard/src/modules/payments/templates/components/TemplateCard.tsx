@@ -15,7 +15,8 @@ interface TemplateCardProps {
 const TemplateCard: FC<TemplateCardProps> = ({ onSendClick, template, onTemplateClick }) => {
   const source = template?.details[0]?.source_account;
   const destination = template?.details[0]?.destination_account;
-  const isApprovalPending = template?.status !== TEMPLATE_STATUS_TYPES.DRAFTED;
+  const isApprovalPending =
+    template?.status !== TEMPLATE_STATUS_TYPES.DRAFTED && template?.status !== TEMPLATE_STATUS_TYPES.PENDING;
 
   const handleSendClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -62,7 +63,7 @@ const TemplateCard: FC<TemplateCardProps> = ({ onSendClick, template, onTemplate
         (!isApprovalPending ? (
           <TemplateApprovalCard
             canApprove={template?.can_approve}
-            approvalId={template?.policy_result_id || ''}
+            approvalId={template?.approval_id || ''}
             onViewAllApprovals={onTemplateClick}
           />
         ) : (

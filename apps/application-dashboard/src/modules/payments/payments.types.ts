@@ -54,6 +54,7 @@ export const TEMPLATE_STATUS_TYPES = {
   DRAFTED: 'drafted',
   ACTIVE: 'active',
   DECLINED: 'declined',
+  PENDING: 'pending',
 };
 
 export enum PAYMENT_STATUS_TYPES {
@@ -63,6 +64,7 @@ export enum PAYMENT_STATUS_TYPES {
   SUCCEEDED = 'Succeeded',
   SENT_TO_BANK = 'Sent to Bank',
   APPROVAL_PENDING = 'Approval Pending',
+  REJECTED = 'Rejected',
 }
 
 export const PAYMENT_TABS = {
