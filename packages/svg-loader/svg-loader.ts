@@ -121,7 +121,7 @@ const renderBody = (elem: SVGElement, options: RenderOptions, body: string): voi
   const fragment = isSpriteIcon ? doc.getElementById(spriteIconId) : doc.querySelector('svg');
 
   if (!fragment) {
-    console.log('No SVG element found in the loaded content', spriteIconId);
+    console.warn('No SVG element found in the loaded content');
     return;
   }
 
