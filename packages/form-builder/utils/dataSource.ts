@@ -34,14 +34,10 @@ export const fetchDataSource = async <T = any>(
 ): Promise<DataSourceResult<T>> => {
   const { fieldValues, onLoadingChange } = options;
 
-  console.log('fieldValues', fieldValues);
-
   try {
     onLoadingChange?.(true);
 
     const { endpoint, method, params = {}, body } = dataSource;
-
-    console.log('params', params);
 
     const processedParams = Object.entries(params || {}).reduce(
       (acc, [key, value]) => {
@@ -50,8 +46,6 @@ export const fetchDataSource = async <T = any>(
       },
       {} as Record<string, string>,
     );
-
-    console.log('processedParams', processedParams);
 
     const queryParams = new URLSearchParams(processedParams).toString();
     const url = `${API_DOMAIN()}/${endpoint}?${queryParams}`;

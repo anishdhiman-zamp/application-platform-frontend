@@ -10,19 +10,6 @@ interface AttributeInputDropdownProps {
   error?: string;
 }
 
-const getInputType = (type: string) => {
-  switch (type) {
-    case 'number':
-      return 'number';
-    case 'date':
-      return 'date';
-    case 'datetime':
-      return 'datetime-local';
-    default:
-      return 'text';
-  }
-};
-
 const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdownProps) => {
   const { control, setValue } = useFormContext();
 
@@ -65,7 +52,7 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
             <Input
               id={attribute.id}
               name={attribute.id}
-              type={getInputType(inputConfig.type)}
+              type={inputConfig.type}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder={inputConfig.placeholder}

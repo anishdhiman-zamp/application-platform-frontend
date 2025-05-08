@@ -8,11 +8,19 @@ import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
 import AttributeInputDropdown from 'modules/policies/create/AttributeInputDropdown';
 import { attributesMap } from 'modules/policies/create/constants';
-import { CreatePolicyDialogProps, PolicyActionType, PolicyFormData } from 'modules/policies/types';
+import {
+  CreatePolicyDialogProps,
+  PolicyActionType,
+  PolicyAttributeAction,
+  PolicyFormData,
+} from 'modules/policies/types';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
+import { formRequestUrlWithParams } from '@/utils/common';
 
 const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePolicyDialogProps) => {
   const messageToastId = useRef<number | string>(0);
@@ -108,7 +116,9 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
 
       return;
     }
-    messageToastId.current = toast.loading('Policy creation in progress');
+    messageToastId.current = toast.loading(
+      isEdit ? TOAST_MESSAGES.LOADING_POLICY_UPDATE : TOAST_MESSAGES.LOADING_POLICY_CREATION,
+    );
     const policyConfig = transformFormDataToApiPayload(data, type === 'payout' ? defaultConditions : []);
 
     if (!paymentConfig?.id) {
@@ -117,7 +127,7 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       return;
     }
     const apiPayload: CreatePolicyPayloadType = {
-      templateFor: type,
+      url: type === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
       name: data.policyName,
       resource_id: paymentConfig?.id,
       resource_type: 'payments',
@@ -127,7 +137,13 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
 
     console.log('API Payload:', apiPayload);
     if (isEdit) {
-      updatePolicy({ ...apiPayload, policyId: policyData?.id });
+      updatePolicy({
+        ...apiPayload,
+        url: formRequestUrlWithParams(
+          type === 'payout' ? API_ENDPOINTS.POLICY_UPDATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_UPDATE_POST,
+          { policyId: policyData?.id },
+        ),
+      });
     } else {
       createPolicy(apiPayload);
     }
@@ -138,14 +154,14 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
       toast.dismiss(messageToastId.current);
     }
     if (createPolicySuccess || updatePolicySuccess) {
-      toast.success(isEdit ? 'Policy updated successfully' : 'Policy created successfully', {
+      toast.success(isEdit ? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE : TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
         autoClose: 2000,
       });
       resetCreatePolicy();
       resetUpdatePolicy();
       handleOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
-      toast.error(isEdit ? 'Failed to update policy' : 'Failed to create policy', {
+      toast.error(isEdit ? TOAST_MESSAGES.ERROR_POLICY_UPDATE : TOAST_MESSAGES.ERROR_POLICY_CREATION, {
         autoClose: 2000,
       });
       resetCreatePolicy();
@@ -214,7 +230,9 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policyData }: CreatePo
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${(() => {
                   const actionValue = (methods.watch('action') as SelectOption[])?.[0]?.value;
 
-                  return actionValue !== 'BLOCK' ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0';
+                  return actionValue !== PolicyAttributeAction.BLOCK
+                    ? 'max-h-[1000px] opacity-100'
+                    : 'max-h-0 opacity-0';
                 })()}`}
               >
                 <ApprovalFlow />

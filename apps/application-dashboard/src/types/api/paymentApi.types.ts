@@ -1,6 +1,6 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
-import { CreatePolicyConfigPayload, PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
+import { CreatePolicyConfigPayload, PolicyActionType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
 import type { PolicyConfigType, PolicyResultStatus } from '@/types/api/policies.types';
 import { MenuItem } from '@/types/common/components';
@@ -133,7 +133,7 @@ export type PaymentDetailsResponseType = {
 
 export interface CreatePolicyPayloadType {
   policyId?: string;
-  templateFor: PolicyDialogType;
+  url: string;
   name: string;
   description?: string;
   resource_id: string;

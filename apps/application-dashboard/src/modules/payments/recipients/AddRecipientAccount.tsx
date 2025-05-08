@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
+import { captureException } from '@sentry/browser';
 import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import { useLazyGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientAccountMutation } from '@/apis/payments';
 import { Loader } from '@/components/common/loader/Loader';
 import { toast } from '@/components/common/toast/Toast';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { FORM_TYPES } from '@/constants/forms';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
-
 const RenderRecipientDetails = ({ recipientDetails }: { recipientDetails: RecipientDetailsType }) => {
   const details = [
     {
@@ -37,10 +38,12 @@ const AddRecipientAccount = ({
   open,
   onOpenChange,
   recipientDetails,
+  onRecipientUpdate,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   recipientDetails: RecipientDetailsType;
+  onRecipientUpdate?: (recipient: RecipientDetailsType) => void;
 }) => {
   const [getFormConfig, { data: formConfig, isLoading: isFormConfigLoading }] = useLazyGetFormConfigQuery();
   const messageToastId = useRef<string | number>('');
@@ -51,15 +54,13 @@ const AddRecipientAccount = ({
   const formRef = useRef<FormBuilderRef>(null);
 
   const onFailure = (error: any) => {
-    console.log('zzz', error);
-    toast.error('Failed to add recipient account');
+    captureException(error);
+    toast.error(TOAST_MESSAGES.ERROR_RECIPIENT_ACCOUNT_CREATION);
   };
   const onSubmit = async (data: any) => {
     onOpenChange(false);
 
-    console.log(data);
-
-    messageToastId.current = toast.loading('Recipient creation in progress');
+    messageToastId.current = toast.loading(TOAST_MESSAGES.LOADING_RECIPIENT_ACCOUNT_CREATION);
     await submitForm({
       form_type: FORM_TYPES.RECIPIENT_ACCOUNT,
       payload: data,
@@ -81,7 +82,10 @@ const AddRecipientAccount = ({
   useEffect(() => {
     toast.dismiss(messageToastId.current);
     if (addRecipientAccountStatus === 'fulfilled') {
-      toast.success('Recipient account added successfully');
+      toast.success(TOAST_MESSAGES.SUCCESS_RECIPIENT_ACCOUNT_CREATION);
+      if (onRecipientUpdate) {
+        onRecipientUpdate(recipientDetails);
+      }
     } else if (addRecipientAccountStatus === 'rejected') {
       onFailure(addRecipientAccountError);
     }

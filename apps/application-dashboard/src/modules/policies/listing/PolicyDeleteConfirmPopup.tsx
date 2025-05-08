@@ -42,7 +42,6 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({
         size='small'
         onCloseAutoFocus={(e) => {
           e.preventDefault();
-          e.preventDefault();
         }}
       >
         <DialogHeader className='f-16-600'>Are you sure you want to delete this policy?</DialogHeader>

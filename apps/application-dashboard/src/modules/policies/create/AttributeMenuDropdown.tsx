@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { captureException } from '@sentry/browser';
 import { DataSource, fetchDataSource } from '@zamp-platform/form-builder';
 import {
   Attribute,
@@ -58,7 +59,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
 
       return { options };
     } catch (err) {
-      console.log('Failed to load options. Please try again later.', err);
+      captureException(err);
 
       return { options: [] };
     } finally {
@@ -103,7 +104,6 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
         }
       }
     }
-    console.log('defaultValues', attribute.label, defaultValues, currentOptions, attribute.defaultValue);
 
     if (defaultValues.length > 0) {
       setValue(name, defaultValues);

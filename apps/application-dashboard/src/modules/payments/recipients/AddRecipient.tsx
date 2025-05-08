@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { captureException } from '@sentry/browser';
 import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import { useLazyGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientMutation } from '@/apis/payments';
 import { Loader } from '@/components/common/loader/Loader';
 import { toast } from '@/components/common/toast/Toast';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { FORM_TYPES } from '@/constants/forms';
-
 const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [getFormConfig, { data: formConfig, isLoading: isFormConfigLoading }] = useLazyGetFormConfigQuery();
   const messageToastId = useRef<string | number>('');
@@ -19,15 +20,13 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const formRef = useRef<FormBuilderRef>(null);
 
   const onFailure = (error: any) => {
-    console.log('zzz', error);
-    toast.error('Failed to add recipient account');
+    captureException(error);
+    toast.error(TOAST_MESSAGES.ERROR_RECIPIENT_CREATION);
   };
   const onSubmit = async (data: any) => {
     onOpenChange(false);
 
-    console.log('data', data);
-
-    messageToastId.current = toast.loading('Recipient creation in progress');
+    messageToastId.current = toast.loading(TOAST_MESSAGES.LOADING_RECIPIENT_CREATION);
     submitForm({
       form_type: FORM_TYPES.RECIPIENT,
       payload: data,
@@ -49,7 +48,7 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     toast.dismiss(messageToastId.current);
     if (addRecipientStatus === 'fulfilled') {
       resetAddRecipient();
-      toast.success('Recipient account added successfully');
+      toast.success(TOAST_MESSAGES.SUCCESS_RECIPIENT_CREATION);
     } else if (addRecipientStatus === 'rejected') {
       resetAddRecipient();
       onFailure(addRecipientError);

@@ -113,19 +113,16 @@ const Payments = baseApi.injectEndpoints({
       }),
     }),
     updatePolicy: builder.mutation<void, CreatePolicyPayloadType>({
-      query: ({ policyId, config, name, templateFor }) => ({
-        url: formRequestUrlWithParams(
-          templateFor === 'payout' ? API_ENDPOINTS.POLICY_UPDATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_UPDATE_POST,
-          { policyId: policyId },
-        ),
+      query: ({ config, name, url }) => ({
+        url,
         method: REQUEST_TYPES.PATCH,
         body: { config, name },
       }),
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
-      query: ({ templateFor, ...body }) => ({
-        url: templateFor === 'payout' ? API_ENDPOINTS.POLICY_CREATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_CREATE_POST,
+      query: ({ url, ...body }) => ({
+        url,
         method: REQUEST_TYPES.POST,
         body,
       }),

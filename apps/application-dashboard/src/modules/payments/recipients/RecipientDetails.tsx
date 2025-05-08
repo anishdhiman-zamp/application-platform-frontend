@@ -88,7 +88,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails,
                   id: 'plus',
                   size: 14,
                 }}
-                onClick={() => onAddRecipientAccount()}
+                onClick={onAddRecipientAccount}
               >
                 Add
               </Button>

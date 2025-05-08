@@ -1,5 +1,5 @@
 import { getAccountWithLogo, getAudienceLabel, getAudienceMember, getAudienceName } from 'modules/policies/commons';
-import { AttributeType } from 'modules/policies/types';
+import { AttributeType, PolicyAttributeAction } from 'modules/policies/types';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { MASK_DOTS } from '@/modules/payments/payments.constant';
 import { ResourceType } from '@/modules/shareResource';
@@ -110,7 +110,7 @@ export const attributesMap: Record<string, AttributeType> = {
     id: 'action',
     operator: '==',
     formFieldType: 'input',
-    defaultValue: 'REQUIRE_APPROVAL',
+    defaultValue: PolicyAttributeAction.REQUIRE_APPROVAL,
     validations: [
       {
         type: 'required',
@@ -123,13 +123,13 @@ export const attributesMap: Record<string, AttributeType> = {
       {
         id: 'Send for Approval',
         label: 'Send for Approval',
-        value: 'REQUIRE_APPROVAL',
+        value: PolicyAttributeAction.REQUIRE_APPROVAL,
         display_value: 'Send for Approval',
       },
       {
         id: 'Block',
         label: 'Block',
-        value: 'BLOCK',
+        value: PolicyAttributeAction.BLOCK,
         display_value: 'Block',
       },
     ],

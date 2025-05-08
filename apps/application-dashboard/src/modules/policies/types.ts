@@ -12,7 +12,7 @@ export enum PolicyQuorum {
 export type AttributeValue = string | Record<string, string>;
 
 export interface InputConfig {
-  type: 'number' | 'text' | 'date' | 'datetime';
+  type: 'number' | 'text' | 'date' | 'datetime' | 'select';
   placeholder?: string;
   label?: string;
   suffix_text?: string;
@@ -123,4 +123,9 @@ export type PolicyFormData = {
 export enum PolicyActionType {
   CREATE_PAYMENT = 'CREATE_PAYMENT',
   CREATE_TEMPLATE = 'CREATE_TEMPLATE',
+}
+
+export enum PolicyAttributeAction {
+  REQUIRE_APPROVAL = 'REQUIRE_APPROVAL',
+  BLOCK = 'BLOCK',
 }

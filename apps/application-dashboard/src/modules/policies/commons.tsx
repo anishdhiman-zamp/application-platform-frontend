@@ -3,7 +3,12 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { AccountDetailsType } from 'modules/payments/payments.types';
 import { attributesMap, payoutAttributes, templateAttributes } from 'modules/policies/create/constants';
-import { CreatePolicyConfigPayload, PolicyDialogType, PolicyFormData } from 'modules/policies/types';
+import {
+  CreatePolicyConfigPayload,
+  PolicyAttributeAction,
+  PolicyDialogType,
+  PolicyFormData,
+} from 'modules/policies/types';
 import { ResourceType } from 'modules/shareResource';
 import { store } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail, snakeCaseToSentenceCase } from 'utils/common';
@@ -177,7 +182,7 @@ export const transformFormDataToApiPayload = (
       },
     }),
     action,
-    approval_flow: action === 'BLOCK' ? undefined : approval_flow,
+    approval_flow: action === PolicyAttributeAction.BLOCK ? undefined : approval_flow,
   };
 };
 
