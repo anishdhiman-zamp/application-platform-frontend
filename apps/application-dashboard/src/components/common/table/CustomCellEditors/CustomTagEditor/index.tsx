@@ -16,7 +16,12 @@ const CustomTagEditor = (props: MapAny) => {
 
     if (value?.includes('.')) return;
     setSearchValue(value);
-    let filteredSearchResults = values.filter((tag: string) => tag?.toLowerCase()?.includes(value?.toLowerCase()));
+    const cleanedValue = value
+      ?.split('/')
+      ?.map((str) => str.trim())
+      ?.join('.')
+      ?.toLowerCase();
+    let filteredSearchResults = values.filter((tag: string) => tag?.toLowerCase()?.includes(cleanedValue));
 
     if (filteredSearchResults.includes(initialValue)) {
       filteredSearchResults = moveToTop(filteredSearchResults, initialValue);
