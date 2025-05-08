@@ -60,6 +60,7 @@ export interface FieldConfig {
   default_value?: string;
   label?: string;
   should_show?: boolean;
+  placeholder?: string;
   options?: SelectOption[];
 }
 
@@ -75,7 +76,7 @@ export type SelectOptionValue = string | boolean | { type: string; id: string };
 export interface FormField {
   id: string;
   type: FieldType;
-  label: string;
+  label?: string;
   placeholder?: string;
   default_value?: any;
   name?: string;

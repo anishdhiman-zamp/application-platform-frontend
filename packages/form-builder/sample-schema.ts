@@ -1274,7 +1274,7 @@ export const schema: FormSchema = {
     recipient_name: {
       id: 'recipient_name',
       type: 'header-text',
-      label: 'Recipient Name',
+      placeholder: 'Recipient Name',
       validations: [
         {
           type: 'required',

@@ -22,8 +22,7 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
 
   const fieldWithConfig = {
     ...field,
-    label: fieldConfig?.label || field.label,
-    default_value: fieldConfig?.default_value || field.default_value,
+    ...fieldConfig,
   };
 
   return (

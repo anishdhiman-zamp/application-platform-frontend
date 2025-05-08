@@ -1,4 +1,4 @@
-import { Select } from '@zamp-platform/ui';
+import { Label, Select } from '@zamp-platform/ui';
 import React, { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -87,6 +87,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       control={control}
       render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
         <div className={`space-y-2 ${className}`}>
+          {field.label && <Label>{field.label}</Label>}
           <div className='relative'>
             <Select
               options={
@@ -99,7 +100,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
                   : []
               }
               className={fieldError ? 'border-destructive focus-visible:ring-destructive' : ''}
-              placeholder={field.placeholder || field.label}
+              placeholder={field.placeholder}
               fetchOptions={field.data_source ? fetchOptions : undefined}
               value={value}
               onValueChange={onChange}
