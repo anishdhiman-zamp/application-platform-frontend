@@ -129,6 +129,7 @@ interface TableProps {
   columnLevelStats?: MapAny;
   cellClass?: string;
   headerClass?: string;
+  onGridReady?: () => void;
 }
 
 export type TableColumnType = {
@@ -167,6 +168,7 @@ const Table: FC<TableProps> = ({
   columnLevelStats,
   cellClass,
   headerClass,
+  onGridReady,
 }) => {
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
@@ -301,6 +303,7 @@ const Table: FC<TableProps> = ({
           maintainColumnOrder
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}
+          onGridReady={onGridReady}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

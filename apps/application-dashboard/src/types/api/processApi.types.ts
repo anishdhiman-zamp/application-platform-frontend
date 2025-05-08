@@ -1,7 +1,9 @@
 import type { MapAny } from 'types/commonTypes';
 export type StatusSummaryItem = {
-  status: string;
-  count: number;
+  status_summary: {
+    status: string;
+    count: number;
+  }[];
 };
 
 export type ProcessActivityRunsRequestType = {

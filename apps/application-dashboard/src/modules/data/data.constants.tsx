@@ -9,6 +9,9 @@ import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/Cu
 import RecipientNameCell from '@/components/common/table/CustomCellRenderers/RecipientNameCell';
 import StatusBadgeCell from '@/components/common/table/CustomCellRenderers/StatusBadgeCell';
 import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
+import ActivityCurrentStatus from '@/modules/process/activity-runs/components/ActivityCurrentStatus';
+import ActivityStatus from '@/modules/process/activity-runs/components/ActivityStatus';
+import DocumentPill from '@/modules/process/activity-runs/components/DocumentPill';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
 import { DATA_TABLE_CONFIG } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
@@ -52,6 +55,11 @@ export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRend
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
   [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,
   [CUSTOM_COLUMNS_TYPE.USER_AVATAR]: (props: ICellRendererParams) => <RecipientNameCell value={props.value} />,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: (props: ICellRendererParams) => <DocumentPill value={props.value} />,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS]: (props: ICellRendererParams) => (
+    <ActivityCurrentStatus value={props.value} data={props.data} />
+  ),
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: (props: ICellRendererParams) => <ActivityStatus value={props.value} />,
 };
 
 export enum TEAM_OPTIONS {
@@ -93,3 +101,12 @@ export const DatasetActionMessages = {
   [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,
   [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,
 };
+
+export const COLUMN_WIDTHS = {
+  ACTIVITY_ARTIFACT: 835,
+  ACTIVITY_STATUS: 44,
+  ACTIVITY_DOCUMENT: 230,
+  BASE: 150,
+  EXTRA_CHAR_WIDTH: 7,
+  CHAR_THRESHOLD: 17,
+} as const;

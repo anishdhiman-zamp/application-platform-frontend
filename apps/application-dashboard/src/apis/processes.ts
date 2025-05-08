@@ -18,10 +18,11 @@ const Processes = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUNS_FILTER_CONFIG_GET, { processId }),
       }),
     }),
-    getActivityRunsSummary: builder.query<StatusSummaryItem[], { processId: string }>({
-      query: ({ processId }) => {
+    getActivityRunsSummary: builder.query<StatusSummaryItem, ProcessActivityRunsRequestType>({
+      query: ({ processId, query_config }) => {
         return {
           url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUNS_SUMMARY_GET, { processId }),
+          params: { query_config },
         };
       },
     }),
@@ -37,6 +38,7 @@ const Processes = baseApi.injectEndpoints({
 export const {
   useGetFilterConfigByProcessIdQuery,
   useGetActivityRunsSummaryQuery,
+  useLazyGetActivityRunsSummaryQuery,
   useGetActivityRunsQuery,
   useLazyGetActivityRunsQuery,
 } = Processes;

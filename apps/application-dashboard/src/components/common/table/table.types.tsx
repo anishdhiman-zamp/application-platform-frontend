@@ -3,6 +3,9 @@ export enum CUSTOM_COLUMNS_TYPE {
   CHIP = 'chips',
   STATUS_BADGE = 'status-tag',
   USER_AVATAR = 'user-avatar',
+  ACTIVITY_DOCUMENT = 'activity_document',
+  ACTIVITY_CURRENT_STATUS = 'activity_current_status',
+  ACTIVITY_STATUS = 'activity_status',
 }
 
 export enum DISPLAY_OPTIONS {

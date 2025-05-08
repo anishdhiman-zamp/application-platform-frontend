@@ -38,6 +38,7 @@ type CustomHeaderProps = {
   filterComponentProps?: MapAny;
   className?: string;
   headerBackgroundNeeded?: boolean;
+  hideFloatingFilter?: boolean;
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
   metadata,
@@ -51,6 +52,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   filterComponentProps,
   className,
   headerBackgroundNeeded = false,
+  hideFloatingFilter = false,
 }) => {
   const { colId, colDef } = column;
 
@@ -188,18 +190,20 @@ const CustomHeader: FC<CustomHeaderProps> = ({
 
   // Track column header clicked
   useEffect(() => {
-    tableRef?.current?.api?.addEventListener('columnHeaderClicked', toggleMenu);
+    if (!hideFloatingFilter) {
+      tableRef?.current?.api?.addEventListener('columnHeaderClicked', toggleMenu);
+    }
 
     return () => {
       tableRef?.current?.api?.removeEventListener('columnHeaderClicked', toggleMenu);
     };
-  }, [colId, tableRef, toggleMenu]);
+  }, [colId, tableRef, toggleMenu, hideFloatingFilter]);
 
   return (
     <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
       <div
         className={cn(
-          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center justify-between px-2 group pt-5 pb-1',
+          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center overflow-hidden justify-between px-2 group pt-5 pb-1',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
           className,
         )}
@@ -207,9 +211,9 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         {headerBackgroundNeeded && (
           <Image
             src={PIVOT_HEADER_BG}
-            alt='header-background'
-            fill
+            alt='Header Background'
             priority
+            fill
             className='shrink-0 object-cover object-center'
           />
         )}
@@ -231,7 +235,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
             </span>
           )}
         </div>
-        <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />
+        {!hideFloatingFilter && <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />}
       </div>
       {isMenuOpen && (
         <PositionedMenuWrapper

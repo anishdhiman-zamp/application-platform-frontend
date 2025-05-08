@@ -3,7 +3,7 @@ import { useParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { getProcessRouteById } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
-import ProcessById from '@/modules/process/ProcessById';
+import ProcessById from '@/modules/process/activity-runs/ProcessById';
 import { resetBreadcrumb } from '@/store/slices/layout-configs';
 
 const Process = () => {
@@ -23,7 +23,7 @@ const Process = () => {
 
 Process.getLayout = function getLayout(page: ReactElement) {
   return (
-    <div>
+    <div className='h-full'>
       <DashboardLayout>{page}</DashboardLayout>
     </div>
   );
