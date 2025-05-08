@@ -1,0 +1,41 @@
+import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
+import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
+import { decodeBase64, snakeCaseToSentenceCase } from 'utils/common';
+import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
+import { DATE_FORMATS } from '@/constants/date.constants';
+import { getFormattedDate } from '@/modules/data/data.utils';
+import ArtifactPill from '@/modules/process/activity-runs/components/ArtifactPill';
+import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
+import type { MapAny } from '@/types/commonTypes';
+
+type ActivityCurrentStatusProps = {
+  value: string;
+  data: MapAny;
+};
+
+const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
+  const artifactsData = decodeBase64(data?.artifacts_metadata);
+  const message = decodeBase64(value)?.message;
+
+  return (
+    <div className='flex items-center justify-between w-full'>
+      <div className='flex items-center gap-2'>
+        <TabStatusIcon
+          status={data.status as ACTIVITY_RUN_STATUS}
+          fillColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor}
+          strokeColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
+        />
+        <span className='w-2 h-[1px] rounded-full bg-GRAY_400' />
+        <p className='f-13-500 text-GRAY_950 truncate'>{snakeCaseToSentenceCase(message)}</p>
+      </div>
+      <div className='flex items-center gap-2'>
+        <p className='f-13-450 text-GRAY_900'>
+          {getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM }, data?.updated_at)}
+        </p>
+        <ArtifactPill count={artifactsData?.length} artifacts={artifactsData} />
+      </div>
+    </div>
+  );
+};
+
+export default ActivityCurrentStatus;

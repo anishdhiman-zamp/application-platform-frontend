@@ -37,6 +37,7 @@ interface DatasetTableProps {
   cellClass?: string;
   suppressCellFocus?: boolean;
   enableCellSelection?: boolean;
+  onGridReady?: () => void;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -62,6 +63,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   cellClass,
   suppressCellFocus = false,
   enableCellSelection = true,
+  onGridReady,
 }) => {
   return (
     <div id='dataset-table'>
@@ -89,6 +91,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         customTheme={customTheme}
         headerClass={headerClass}
         cellClass={cellClass}
+        onGridReady={onGridReady}
       />
     </div>
   );

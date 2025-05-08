@@ -10,7 +10,7 @@ import {
   format,
   isValid,
 } from 'date-fns';
-import { CustomColumnsMapping } from 'modules/data/data.constants';
+import { COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
 import {
   ColumnOrderingVisibilityType,
   type DatasetTabType,
@@ -76,6 +76,26 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
+export const getColumnMinWidth = (
+  columnNameLength: number,
+  isActivityArtifactColumn: boolean,
+  isActivityDocumentColumn: boolean,
+  isActivityStatusColumn: boolean,
+): number => {
+  switch (true) {
+    case isActivityArtifactColumn:
+      return COLUMN_WIDTHS.ACTIVITY_ARTIFACT;
+    case isActivityStatusColumn:
+      return COLUMN_WIDTHS.ACTIVITY_STATUS;
+    case isActivityDocumentColumn:
+      return COLUMN_WIDTHS.ACTIVITY_DOCUMENT;
+    case columnNameLength > COLUMN_WIDTHS.CHAR_THRESHOLD:
+      return COLUMN_WIDTHS.BASE + COLUMN_WIDTHS.EXTRA_CHAR_WIDTH * (columnNameLength - COLUMN_WIDTHS.CHAR_THRESHOLD);
+    default:
+      return COLUMN_WIDTHS.BASE;
+  }
+};
+
 export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
   isInitiatedAction: boolean,
@@ -85,6 +105,7 @@ export const formatColumns = (
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
   sortColumn?: string,
   sortOrder?: string,
+  isProcess?: boolean,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -94,6 +115,9 @@ export const formatColumns = (
     const columnNameLength = column?.alias?.length ?? column?.column?.length;
     const columnWidth =
       columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column)?.width ?? 0;
+    const isActivityDocumentColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT;
+    const isActivityCurrentStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS;
+    const isActivityStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS;
 
     let formattedColumn: ColDef = {
       field: column?.column,
@@ -106,12 +130,19 @@ export const formatColumns = (
       filterParams: {
         values: column?.options,
       },
-      headerName: column?.alias ?? snakeCaseToSentenceCase(column?.column),
-      minWidth: columnNameLength > 17 ? 150 + 7 * (columnNameLength - 17) : 150,
-      initialWidth: columnWidth > 0 ? columnWidth : 150,
+      headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias ?? column?.column),
+      minWidth: getColumnMinWidth(
+        columnNameLength,
+        isActivityCurrentStatusColumn,
+        isActivityDocumentColumn,
+        isActivityStatusColumn,
+      ),
+      maxWidth: isActivityStatusColumn ? COLUMN_WIDTHS.ACTIVITY_STATUS : undefined,
+      initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,
     };
 
-    formattedColumn.cellRenderer = CustomColumnsMapping[column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE];
+    formattedColumn.cellRenderer =
+      CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     formattedColumn.headerComponentParams = {
@@ -122,6 +153,9 @@ export const formatColumns = (
       tableRef,
       handleRulesListingSideDrawerOpen,
       filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+      headerBackgroundNeeded: false,
+      className: isProcess && 'py-2 px-4 hover:bg-transparent',
+      hideFloatingFilter: isActivityCurrentStatusColumn || isActivityStatusColumn,
     };
 
     if (column?.metadata?.config?.value_format) {
@@ -372,7 +406,7 @@ export const getValueFormatter = (
   return valueFormatter;
 };
 
-const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
+export const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
   const date = new Date(createDateObjectFromUTCString(value));
