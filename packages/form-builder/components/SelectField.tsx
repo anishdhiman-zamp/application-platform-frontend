@@ -96,6 +96,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
                       label: option.label ?? '',
                       value: option.value,
                       icon: option.icon,
+                      display_value: option.display_value,
                     }))
                   : []
               }
@@ -103,7 +104,13 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
               placeholder={field.placeholder}
               fetchOptions={field.data_source ? fetchOptions : undefined}
               value={value}
-              onValueChange={onChange}
+              onValueChange={(newValue) => {
+                onChange(newValue);
+                // Clear error when value changes
+                if (fieldError) {
+                  fieldError.message = '';
+                }
+              }}
               onBlur={onBlur}
               clearOptions={shouldClearOptions}
               setShouldClearOptions={setShouldClearOptions}

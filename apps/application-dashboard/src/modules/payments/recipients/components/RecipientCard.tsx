@@ -1,7 +1,6 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { RECIPIENT_CARD_ACTION_ITEMS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_ACTION_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import AddRecipientAccount from 'modules/payments/recipients/AddRecipientAccount';
 import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { Button } from '@/components/common/button/Button';
@@ -13,18 +12,18 @@ import { getFirstLetters } from '@/utils/common';
 
 type RecipientCardProps = {
   recipient: RecipientDetailsType;
+  onAddRecipientAccount: (recipientDetails: RecipientDetailsType) => void;
 };
 
-const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
+const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccount }) => {
   const router = useRouter();
-  const [isAddRecipientAccount, setIsAddRecipientAccount] = useState(false);
 
   const handleActionClick = (action: MOVE_MONEY_ACTION_TYPE, e?: React.MouseEvent<HTMLButtonElement>) => {
     e?.stopPropagation();
 
     switch (action) {
       case MOVE_MONEY_ACTION_TYPE.ADD_ACCOUNT:
-        setIsAddRecipientAccount(true);
+        onAddRecipientAccount(recipient);
         break;
       case MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS:
         //filter payments
@@ -81,11 +80,6 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
           </TooltipV2>
         ))}
       </div>
-      <AddRecipientAccount
-        recipientDetails={recipient}
-        open={isAddRecipientAccount}
-        onOpenChange={setIsAddRecipientAccount}
-      />
     </div>
   );
 };

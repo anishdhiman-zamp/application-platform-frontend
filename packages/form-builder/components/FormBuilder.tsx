@@ -44,7 +44,7 @@ export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schem
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className='flex flex-col gap-5 pb-5'>
         {schema.sections.map((section) => (
-          <div className='form-section flex flex-col gap-5'>
+          <div className='form-section flex flex-col'>
             <Label>{section.title}</Label>
             {section.sections && (
               <div className='nested-sections flex flex-col gap-5'>

@@ -87,6 +87,14 @@ const Payments = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_RECIPIENT_LIST],
     }),
+    addRecipientAccount: builder.mutation<void, { recipient_id: string; form_submission_id: string }>({
+      query: (body) => ({
+        url: API_ENDPOINTS.RECIPIENT_ACCOUNT_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.GET_RECIPIENT_LIST],
+    }),
     getPaymentListDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], void>({
       query: () => ({
         url: API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET,
@@ -162,6 +170,7 @@ export const {
   useInitiatePaymentMutation,
   useGetPaymentConfigQuery,
   useAddRecipientMutation,
+  useAddRecipientAccountMutation,
   useGetPaymentListDatasetFilterConfigQuery,
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,

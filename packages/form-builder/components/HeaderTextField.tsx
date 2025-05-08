@@ -25,7 +25,7 @@ export const HeaderTextField: React.FC<HeaderTextFieldProps> = ({ field, name, c
               type='text'
               name={name}
               className={cn(
-                'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent min-w-[fit-content]',
+                'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent min-w-[fit-content] bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset]',
                 fieldState.error && 'border-destructive focus-visible:ring-destructive',
               )}
               placeholder={field.placeholder || field.label}
@@ -42,7 +42,7 @@ export const HeaderTextField: React.FC<HeaderTextFieldProps> = ({ field, name, c
               ref={ref}
               aria-invalid={fieldState.error ? 'true' : 'false'}
             />
-            <SvgSpriteLoader id='edit-03' className='text-gray-900' size={14} />
+            {!value && <SvgSpriteLoader id='edit-03' className='text-gray-900' size={14} />}
           </div>
           {fieldState.error?.message ? (
             <span

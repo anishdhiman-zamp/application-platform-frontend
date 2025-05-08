@@ -128,8 +128,8 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
     }
 
     return selectedOptions.map((option) => {
-      if (option.displayValue) {
-        return option.displayValue;
+      if (option.display_value) {
+        return option.display_value;
       }
       if (typeof option.value === 'string') {
         return option.value;

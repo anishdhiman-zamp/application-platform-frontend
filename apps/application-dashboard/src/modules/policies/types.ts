@@ -110,7 +110,7 @@ export type ApproverListOption = {
   id: string;
   label: string;
   richLabel: JSX.Element;
-  displayValue: JSX.Element;
+  display_value: JSX.Element;
   value: { type: ResourceAudienceType; id: string };
 };
 

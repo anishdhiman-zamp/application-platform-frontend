@@ -33,4 +33,4 @@ const Forms = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetFormConfigQuery, useSubmitFormMutation } = Forms;
+export const { useLazyGetFormConfigQuery, useGetFormConfigQuery, useSubmitFormMutation } = Forms;

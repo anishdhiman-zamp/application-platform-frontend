@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { toast as reactToastify } from 'react-toastify';
 import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
-import { useGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
-import { useAddRecipientMutation } from '@/apis/payments';
+import { useLazyGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
+import { useAddRecipientAccountMutation } from '@/apis/payments';
+import { Loader } from '@/components/common/loader/Loader';
 import { toast } from '@/components/common/toast/Toast';
 import { FORM_TYPES } from '@/constants/forms';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
@@ -42,13 +42,12 @@ const AddRecipientAccount = ({
   onOpenChange: (open: boolean) => void;
   recipientDetails: RecipientDetailsType;
 }) => {
-  const { data: formConfig } = useGetFormConfigQuery({
-    form_id: FORM_TYPES.RECIPIENT_ACCOUNT,
-  });
+  const [getFormConfig, { data: formConfig, isLoading: isFormConfigLoading }] = useLazyGetFormConfigQuery();
   const messageToastId = useRef<string | number>('');
   const [submitForm, { data: submitFormData, status: submitFormStatus, error: submitFormError }] =
     useSubmitFormMutation();
-  const [addRecipient, { status: addRecipientStatus, error: addRecipientError }] = useAddRecipientMutation();
+  const [addRecipientAccount, { status: addRecipientAccountStatus, error: addRecipientAccountError }] =
+    useAddRecipientAccountMutation();
   const formRef = useRef<FormBuilderRef>(null);
 
   const onFailure = (error: any) => {
@@ -69,29 +68,34 @@ const AddRecipientAccount = ({
 
   useEffect(() => {
     if (submitFormStatus === 'fulfilled') {
-      addRecipient(submitFormData.form_submission_id);
+      addRecipientAccount({
+        recipient_id: recipientDetails.id,
+        form_submission_id: submitFormData.form_submission_id,
+      });
     } else if (submitFormStatus === 'rejected') {
-      reactToastify.dismiss(messageToastId.current);
+      toast.dismiss(messageToastId.current);
       onFailure(submitFormError);
     }
   }, [submitFormStatus]);
 
   useEffect(() => {
-    reactToastify.dismiss(messageToastId.current);
-    if (addRecipientStatus === 'fulfilled') {
+    toast.dismiss(messageToastId.current);
+    if (addRecipientAccountStatus === 'fulfilled') {
       toast.success('Recipient account added successfully');
-    } else if (addRecipientStatus === 'rejected') {
-      onFailure(addRecipientError);
+    } else if (addRecipientAccountStatus === 'rejected') {
+      onFailure(addRecipientAccountError);
     }
-  }, [addRecipientStatus]);
+  }, [addRecipientAccountStatus]);
 
   const handleSave = () => {
     formRef.current?.submit();
   };
 
-  if (!formConfig) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    if (open && !formConfig) {
+      getFormConfig({ form_id: FORM_TYPES.RECIPIENT_ACCOUNT });
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,8 +103,16 @@ const AddRecipientAccount = ({
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
           <div className='max-w-[400px] w-[45%]'>
-            <RenderRecipientDetails recipientDetails={recipientDetails} />
-            <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
+            {isFormConfigLoading || !formConfig ? (
+              <div className='flex justify-center items-center h-full'>
+                <Loader className='border-gray-800 border-b-transparent' />
+              </div>
+            ) : (
+              <>
+                <RenderRecipientDetails recipientDetails={recipientDetails} />
+                <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
+              </>
+            )}
           </div>
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>

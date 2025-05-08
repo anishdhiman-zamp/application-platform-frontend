@@ -13,7 +13,7 @@ export interface SelectOption {
   richLabel?: React.ReactNode;
   value: string | boolean | { type: string; id: string };
   icon?: SelectIcon;
-  displayValue?: React.ReactNode;
+  display_value?: React.ReactNode;
 }
 
 export interface SelectIcon {
@@ -30,8 +30,8 @@ export interface SelectProps {
   className?: string;
   label?: string;
   fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>;
-  value?: string | { type: string; id: string } | boolean;
-  onValueChange?: (value: string | { type: string; id: string } | boolean) => void;
+  value?: SelectOption['display_value'] | SelectOption['value'];
+  onValueChange?: (value: SelectOption['display_value'] | SelectOption['value']) => void;
   onBlur?: () => void;
   clearOptions?: boolean;
   setShouldClearOptions?: (shouldClearOptions: boolean) => void;
@@ -120,7 +120,11 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
 
     const handleOptionClick = (option: SelectOption) => {
       onValueChange?.(option.value);
-      setSearchQuery(option.label);
+      if (option.display_value?.toString()) {
+        setSearchQuery(option.display_value.toString());
+      } else {
+        setSearchQuery(option.label);
+      }
       setIsOpen(false);
     };
 
@@ -153,7 +157,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     useEffect(() => {
       if (value !== undefined && value !== null) {
         const selected = options.find((o) => o.value === value);
-        if (selected) setSearchQuery(selected.label);
+        if (selected) setSearchQuery(selected.display_value?.toString() || selected.label);
       }
     }, [value, options]);
 

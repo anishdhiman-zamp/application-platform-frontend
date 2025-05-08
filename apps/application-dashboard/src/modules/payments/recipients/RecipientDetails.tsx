@@ -15,9 +15,10 @@ import { Button } from 'components/common/button/Button';
 type RecipientDetailsProps = {
   onBack: defaultFnType;
   recipientDetails: RecipientDetailsType;
+  onAddRecipientAccount: defaultFnType;
 };
 
-const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails }) => {
+const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails, onAddRecipientAccount }) => {
   const router = useRouter();
 
   const handleSendMoney = () => {
@@ -87,6 +88,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails 
                   id: 'plus',
                   size: 14,
                 }}
+                onClick={() => onAddRecipientAccount()}
               >
                 Add
               </Button>

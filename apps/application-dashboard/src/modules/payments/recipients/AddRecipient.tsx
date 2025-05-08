@@ -1,16 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { toast as reactToastify } from 'react-toastify';
 import { FormBuilder, FormBuilderRef } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
-import { useGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
+import { useLazyGetFormConfigQuery, useSubmitFormMutation } from '@/apis/forms';
 import { useAddRecipientMutation } from '@/apis/payments';
+import { Loader } from '@/components/common/loader/Loader';
 import { toast } from '@/components/common/toast/Toast';
 import { FORM_TYPES } from '@/constants/forms';
 
 const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
-  const { data: formConfig } = useGetFormConfigQuery({
-    form_id: FORM_TYPES.RECIPIENT,
-  });
+  const [getFormConfig, { data: formConfig, isLoading: isFormConfigLoading }] = useLazyGetFormConfigQuery();
   const messageToastId = useRef<string | number>('');
   const [
     submitForm,
@@ -42,13 +40,13 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       addRecipient(submitFormData.form_submission_id);
     } else if (submitFormStatus === 'rejected') {
       resetSubmitForm();
-      reactToastify.dismiss(messageToastId.current);
+      toast.dismiss(messageToastId.current);
       onFailure(submitFormError);
     }
   }, [submitFormStatus]);
 
   useEffect(() => {
-    reactToastify.dismiss(messageToastId.current);
+    toast.dismiss(messageToastId.current);
     if (addRecipientStatus === 'fulfilled') {
       resetAddRecipient();
       toast.success('Recipient account added successfully');
@@ -58,22 +56,30 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     }
   }, [addRecipientStatus]);
 
+  useEffect(() => {
+    if (open && !formConfig) {
+      getFormConfig({ form_id: FORM_TYPES.RECIPIENT });
+    }
+  }, [open]);
+
   const handleSave = () => {
     formRef.current?.submit();
   };
 
-  if (!formConfig) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton size='large'>
-        <DialogHeader>New Recipient Account</DialogHeader>
+        <DialogHeader>New Recipient</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
-          <div className='max-w-[400px] w-[45%]'>
-            <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
-          </div>
+          {isFormConfigLoading || !formConfig ? (
+            <div className='flex justify-center items-center h-full'>
+              <Loader className='border-gray-800 border-b-transparent' />
+            </div>
+          ) : (
+            <div className='max-w-[400px] w-[45%]'>
+              <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
+            </div>
+          )}
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>
           <Button size='small' variant='secondary' onClick={() => onOpenChange(false)}>

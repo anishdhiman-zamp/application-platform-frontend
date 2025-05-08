@@ -26,7 +26,7 @@ export const TextField: React.FC<TextFieldProps> = ({ field, name, className }) 
             value={value || ''}
             onChange={(e) => {
               onChange(e);
-              if (!e.target.value) {
+              if (e.target.value) {
                 clearErrors(name);
               }
             }}
