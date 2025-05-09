@@ -64,7 +64,7 @@ export interface CreatePolicyConfigPayload {
       conditions: Array<{
         mode: PolicyQuorum;
         approver_details: Array<{
-          type: string;
+          type: ResourceAudienceType;
           id: string;
         }>;
       }>;
