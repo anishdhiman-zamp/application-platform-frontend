@@ -79,6 +79,8 @@ export const API_ENDPOINTS = {
   PAYMENT_LIST_GET: `payments/`,
   PAYMENT_DETAILS_GET: `payments/{{paymentId}}`,
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
+  RECIPIENT_CREATE_POST: `recipients/{{recipientId}}/create-recipient-and-account`,
+  RECIPIENT_ACCOUNT_CREATE_POST: `recipients/account`,
 
   USER_INVITATIONS_GET: `/organizations/invitations`,
   ACCEPT_INVITATION_POST: `/organizations/invitations/{{invitationId}}/accept`,
@@ -92,6 +94,15 @@ export const API_ENDPOINTS = {
   SHARE_RESOURCE_TO_AUDIENCES_POST: `{{resourceRoute}}/{{resourceId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH: `{{resourceRoute}}/{{resourceId}}/audiences`,
   DELETE_RESOURCE_FROM_AUDIENCES: `{{resourceRoute}}/{{resourceId}}/audiences`,
+  FORMS_CONFIG_GET: `v1/forms/config`,
+  FORMS_SUBMIT: `v1/forms/submissions`,
+
+  POLICY_CREATE_POST: '/policy',
+  POLICY_UPDATE_POST: '/policy/{{policyId}}',
+  POLICY_CREATE_POST_PAYMENTS: '/payments/policy',
+  POLICY_UPDATE_POST_PAYMENTS: '/payments/policy/{{policyId}}',
+  POLICIES_GET: '/policy/list',
+  POLICY_DELETE: '/policy/{{policyId}}',
 
   PROCESSES_GET: `processes/`,
   ACTIVITY_RUNS_FILTER_CONFIG_GET: `processes/{{processId}}/activity-runs/filter-config`,

@@ -1,5 +1,7 @@
 import { STATUS_TYPES } from '@/modules/data/components/importDataset/importData.types';
 import { AccountDetailsType, MOVE_MONEY_TYPE, PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
+import { CreatePolicyConfigPayload, PolicyActionType } from '@/modules/policies/types';
+import { ResourceType } from '@/modules/shareResource';
 import type { PolicyConfigType, PolicyResultStatus } from '@/types/api/policies.types';
 import { MenuItem } from '@/types/common/components';
 
@@ -130,8 +132,43 @@ export type PaymentDetailsResponseType = {
   }[];
 };
 
+export interface CreatePolicyPayloadType {
+  policyId?: string;
+  url: string;
+  name: string;
+  description?: string;
+  resource_id: string;
+  resource_type: string;
+  action_type: PolicyActionType;
+  config: CreatePolicyConfigPayload;
+}
 export type PaymentApprovalsInfoResponseType = {
   approval_id: string;
   policy_evaluation_data: PolicyConfigType;
   status: PolicyResultStatus;
+};
+
+export type GetPoliciesParamsType = {
+  resource_id?: string;
+  resource_type?: ResourceType;
+  action_type?: string;
+};
+
+export type PolicyDetailsType = {
+  id: string;
+  name: string;
+  description: string;
+  resource_action_type_id: string;
+  organisation_id: string;
+  policy_configurations: CreatePolicyConfigPayload;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  status: string;
+  action_type: PolicyActionType;
+};
+
+export type GetPoliciesResponseType = {
+  data: PolicyDetailsType[];
 };

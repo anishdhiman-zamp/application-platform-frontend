@@ -14,9 +14,10 @@ import Input from 'components/common/input';
 type RecipientsListProps = {
   onRecipientDetails: (recipientDetails: RecipientDetailsType) => void;
   onAddRecipient: defaultFnType;
+  onAddRecipientAccount: (recipientDetails: RecipientDetailsType) => void;
 };
 
-const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddRecipient }) => {
+const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddRecipient, onAddRecipientAccount }) => {
   const [search, setSearch] = useState('');
 
   const {
@@ -83,7 +84,7 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
               onClick={() => onRecipientDetails(recipient)}
               className='hover:z-1000 cursor-pointer'
             >
-              <RecipientCard recipient={recipient} />
+              <RecipientCard recipient={recipient} onAddRecipientAccount={onAddRecipientAccount} />
             </div>
           ))}
         </div>

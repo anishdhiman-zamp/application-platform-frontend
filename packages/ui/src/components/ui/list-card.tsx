@@ -1,7 +1,5 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { Ellipsis } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './dropdown-menu';
 
 interface ListCardProps extends React.HTMLAttributes<HTMLDivElement> {
   header: React.ReactNode;

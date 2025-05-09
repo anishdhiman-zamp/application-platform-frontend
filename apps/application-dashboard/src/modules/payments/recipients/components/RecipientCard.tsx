@@ -12,9 +12,10 @@ import { getFirstLetters } from '@/utils/common';
 
 type RecipientCardProps = {
   recipient: RecipientDetailsType;
+  onAddRecipientAccount: (recipientDetails: RecipientDetailsType) => void;
 };
 
-const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
+const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccount }) => {
   const router = useRouter();
 
   const handleActionClick = (action: MOVE_MONEY_ACTION_TYPE, e?: React.MouseEvent<HTMLButtonElement>) => {
@@ -22,7 +23,7 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient }) => {
 
     switch (action) {
       case MOVE_MONEY_ACTION_TYPE.ADD_ACCOUNT:
-        //add account
+        onAddRecipientAccount(recipient);
         break;
       case MOVE_MONEY_ACTION_TYPE.FILTER_PAYMENTS:
         //filter payments

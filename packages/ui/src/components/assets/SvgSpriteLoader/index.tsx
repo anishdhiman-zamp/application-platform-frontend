@@ -21,6 +21,7 @@ export interface SvgSpriteLoaderProps {
   onClick?: MouseEventHandler<HTMLDivElement>;
   customSpriteUrl?: string;
   fallback?: React.ReactNode;
+  lazyLoading?: boolean;
 }
 
 const SvgSpriteLoaderBaseComponent: FC<SvgSpriteLoaderProps> = ({
@@ -39,6 +40,7 @@ const SvgSpriteLoaderBaseComponent: FC<SvgSpriteLoaderProps> = ({
   onClick,
   customSpriteUrl,
   fallback,
+  lazyLoading = false,
 }) => {
   // Memoize the category lookup
   const category = useMemo(() => iconCategory ?? SPRITE_CATEGORY_BY_ID[id], [iconCategory, id]);
@@ -74,6 +76,7 @@ const SvgSpriteLoaderBaseComponent: FC<SvgSpriteLoaderProps> = ({
           color={color}
           data-src={spriteUrl}
           data-cache={dataCache}
+          data-loading={lazyLoading ? 'lazy' : 'eager'}
           onError={(e) => {
             console.error(`Failed to load SVG sprite: ${spriteUrl}`);
             if (fallback) {
@@ -101,7 +104,8 @@ const arePropsEqual = (prevProps: SvgSpriteLoaderProps, nextProps: SvgSpriteLoad
     prevProps.dataCache === nextProps.dataCache &&
     prevProps.version === nextProps.version &&
     prevProps.className === nextProps.className &&
-    prevProps.customSpriteUrl === nextProps.customSpriteUrl
+    prevProps.customSpriteUrl === nextProps.customSpriteUrl &&
+    prevProps.lazyLoading === nextProps.lazyLoading
   );
 };
 

@@ -33,6 +33,9 @@ export enum TOAST_MESSAGES {
   ERROR_RULE_DELETION = 'Rule deletion failed',
   IN_PROGRESS_RULE_DELETION = 'Rule deletion in progress',
 
+  ERROR_FETCHING_POLICIES = 'Error fetching policies',
+  ERROR_DELETING_POLICY = 'Failed to delete policy',
+  SUCCESS_POLICY_DELETED = 'Policy deleted successfully',
   FAILED_DATASET_UPDATE = 'Dataset update failed',
 
   SUCCESS_TEMPLATE_UPDATED = 'Template updated successfully',
@@ -41,6 +44,27 @@ export enum TOAST_MESSAGES {
 
   ERROR_RULE_PRIORITY_UPDATE = 'Rule priority update failed',
   ERROR_FETCHING_ACCOUNTS = 'Failed to fetch accounts',
+
+  ERROR_RECIPIENT_CREATION = 'Failed to create recipient',
+  ERROR_RECIPIENT_ACCOUNT_CREATION = 'Failed to create recipient account',
+  ERROR_RECIPIENT_ACCOUNT_UPDATE = 'Failed to update recipient account',
+
+  SUCCESS_RECIPIENT_CREATION = 'Recipient created successfully',
+  SUCCESS_RECIPIENT_ACCOUNT_CREATION = 'Recipient account created successfully',
+  SUCCESS_RECIPIENT_ACCOUNT_UPDATE = 'Recipient account updated successfully',
+
+  LOADING_RECIPIENT_CREATION = 'Recipient creation in progress',
+  LOADING_RECIPIENT_ACCOUNT_CREATION = 'Recipient account creation in progress',
+  LOADING_RECIPIENT_ACCOUNT_UPDATE = 'Recipient account update in progress',
+
+  ERROR_POLICY_CREATION = 'Failed to create policy',
+  ERROR_POLICY_UPDATE = 'Failed to update policy',
+
+  SUCCESS_POLICY_CREATION = 'Policy created successfully',
+  SUCCESS_POLICY_UPDATE = 'Policy updated successfully',
+
+  LOADING_POLICY_CREATION = 'Policy creation in progress',
+  LOADING_POLICY_UPDATE = 'Policy update in progress',
 }
 
 export const TaggingMessages = {

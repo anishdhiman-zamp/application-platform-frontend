@@ -15,7 +15,7 @@ const nextConfig = {
 
     return config;
   },
-  transpilePackages: ['@zamp-platform/ui'],
+  transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder'],
 };
 
 module.exports = withSentryConfig(nextConfig, {

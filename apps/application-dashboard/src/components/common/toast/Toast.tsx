@@ -46,6 +46,16 @@ const GetToastIcon = (type: string) => {
             color={COLORS.ORANGE_SECONDARY}
           />
         );
+      case 'loading':
+        return (
+          <SvgSpriteLoader
+            id='alert-circle'
+            iconCategory={ICON_SPRITE_TYPES.GENERAL}
+            width={16}
+            height={16}
+            color={COLORS.GREEN_PRIMARY}
+          />
+        );
       default:
         return (
           <SvgSpriteLoader
@@ -102,5 +112,11 @@ export const toast = {
   },
   warn: (message: string, options?: ToastOptions) => {
     reactToastify.warn(<CustomToast text={message} type='warn' />, { ...defaultToastOptions, ...options });
+  },
+  loading: (message: string, options?: ToastOptions) => {
+    return reactToastify.loading(<CustomToast text={message} type='loading' />, { ...defaultToastOptions, ...options });
+  },
+  dismiss: (toastId: string | number) => {
+    reactToastify.dismiss(toastId);
   },
 };

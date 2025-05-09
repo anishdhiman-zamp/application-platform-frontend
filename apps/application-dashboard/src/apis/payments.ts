@@ -7,8 +7,11 @@ import {
   DatasetFilterConfigResponseType,
 } from '@/types/api/dataset.types';
 import {
+  CreatePolicyPayloadType,
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
+  GetPoliciesParamsType,
+  GetPoliciesResponseType,
   InitiatePaymentPayloadType,
   type PaymentApprovalsInfoResponseType,
   PaymentConfigResponseType,
@@ -34,6 +37,7 @@ const Payments = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.RECIPIENT_LIST_GET,
       }),
+      providesTags: [APITags.GET_RECIPIENT_LIST],
     }),
     getDestinationAccounts: builder.query<SourceAccountResponseType, DestinationAccountPayloadType>({
       query: (params) => ({
@@ -76,6 +80,21 @@ const Payments = baseApi.injectEndpoints({
         body,
       }),
     }),
+    addRecipient: builder.mutation<void, string>({
+      query: (formId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.RECIPIENT_CREATE_POST, { recipientId: formId }),
+        method: REQUEST_TYPES.POST,
+      }),
+      invalidatesTags: [APITags.GET_RECIPIENT_LIST],
+    }),
+    addRecipientAccount: builder.mutation<void, { recipient_id: string; form_submission_id: string }>({
+      query: (body) => ({
+        url: API_ENDPOINTS.RECIPIENT_ACCOUNT_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.GET_RECIPIENT_LIST],
+    }),
     getPaymentListDatasetFilterConfig: builder.query<DatasetFilterConfigResponseType[], void>({
       query: () => ({
         url: API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET,
@@ -92,6 +111,36 @@ const Payments = baseApi.injectEndpoints({
       query: (paymentId) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
       }),
+    }),
+    updatePolicy: builder.mutation<void, CreatePolicyPayloadType>({
+      query: ({ config, name, url }) => ({
+        url,
+        method: REQUEST_TYPES.PATCH,
+        body: { config, name },
+      }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
+    }),
+    createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
+      query: ({ url, ...body }) => ({
+        url,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
+    }),
+    getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.POLICIES_GET,
+        params,
+      }),
+      providesTags: [APITags.GET_POLICY_LIST],
+    }),
+    deletePolicy: builder.mutation<void, string>({
+      query: (policyId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_DELETE, { policyId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({
       query: (paymentId) => ({
@@ -119,9 +168,15 @@ export const {
   useLazyGetRecipientBySourceAccountQuery,
   useInitiatePaymentMutation,
   useGetPaymentConfigQuery,
+  useAddRecipientMutation,
+  useAddRecipientAccountMutation,
   useGetPaymentListDatasetFilterConfigQuery,
   useLazyGetPaymentListQuery,
   useGetPaymentDetailsQuery,
+  useCreatePolicyMutation,
+  useUpdatePolicyMutation,
   useGetPaymentApprovalsInfoQuery,
+  useLazyGetPoliciesQuery,
+  useDeletePolicyMutation,
   useGetTemplateApprovalsInfoQuery,
 } = Payments;
