@@ -11,6 +11,7 @@ export type PageResponseType = {
   updated_at: string;
   fractional_index: number;
   organization_id: string;
+  sheets: SheetDetailsResponseType[];
 };
 
 export type SheetResponseType = {
