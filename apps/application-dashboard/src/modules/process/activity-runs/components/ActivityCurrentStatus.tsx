@@ -1,6 +1,6 @@
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { decodeBase64, snakeCaseToSentenceCase } from 'utils/common';
+import { snakeCaseToSentenceCase } from 'utils/common';
 import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { getFormattedDate } from '@/modules/data/data.utils';
@@ -9,13 +9,16 @@ import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import type { MapAny } from '@/types/commonTypes';
 
 type ActivityCurrentStatusProps = {
-  value: string;
+  value: {
+    message: string;
+    sender_type: string;
+  };
   data: MapAny;
 };
 
 const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
-  const artifactsData = decodeBase64(data?.artifacts_metadata);
-  const message = decodeBase64(value)?.message;
+  const artifactsData = data?.artifacts_metadata;
+  const message = value?.message;
 
   return (
     <div className='flex items-center justify-between w-full'>
