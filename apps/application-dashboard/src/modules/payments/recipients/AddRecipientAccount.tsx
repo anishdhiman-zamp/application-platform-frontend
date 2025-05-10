@@ -106,7 +106,7 @@ const AddRecipientAccount = ({
       <DialogContent showCloseButton>
         <DialogHeader>New Recipient Account</DialogHeader>
         <DialogBody className='p-6 flex justify-center'>
-          <div className='max-w-[400px] w-[45%]'>
+          <div className='w-[50%] max-w-[400px]'>
             {isFormConfigLoading || !formConfig ? (
               <div className='flex justify-center items-center h-full'>
                 <Loader className='border-gray-800 border-b-transparent' />

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
+import TooltipV2 from '@/components/common/TooltipV2';
 import CreatePolicyDialog from '@/modules/policies/create';
 import PoliciesListSideDrawer from '@/modules/policies/listing/PoliciesListSideDrawer';
 import { PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
@@ -50,15 +51,17 @@ const PaymentActions = () => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='h-8 w-8 text-GRAY_900 focus-visible:ring-0 focus-visible:ring-offset-0 hover:text-GRAY_900 data-[state=open]:bg-GRAY_300'
-          >
-            <ShieldCheck className='h-4 w-4' />
-          </Button>
-        </DropdownMenuTrigger>
+        <TooltipV2 tooltipBody='Policies'>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8 text-GRAY_900 focus-visible:ring-0 focus-visible:ring-offset-0 hover:text-GRAY_900 data-[state=open]:bg-GRAY_300'
+            >
+              <ShieldCheck className='h-4 w-4' />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipV2>
         <DropdownMenuContent align='end' className='z-[1000]' sideOffset={5}>
           <DropdownMenuItem className='flex items-center justify-between'>
             <span>Templates</span>

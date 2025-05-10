@@ -75,7 +75,7 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
               <Loader className='border-gray-800 border-b-transparent' />
             </div>
           ) : (
-            <div className='max-w-[400px] w-[45%]'>
+            <div className='w-[50%] max-w-[400px]'>
               <FormBuilder ref={formRef} schema={formConfig} onSubmit={onSubmit} />
             </div>
           )}
