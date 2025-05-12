@@ -16,6 +16,7 @@ const nextConfig = {
     return config;
   },
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder'],
+  productionBrowserSourceMaps: true,
 };
 
 module.exports = withSentryConfig(nextConfig, {
@@ -59,4 +60,5 @@ module.exports = withSentryConfig(nextConfig, {
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 });
