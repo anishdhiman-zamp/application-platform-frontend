@@ -2,11 +2,14 @@ import { cn } from '@zamp-platform/ui/lib/utils';
 import * as React from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { SelectOption } from './select';
+import { Skeleton } from './skeleton';
+
+type ComboboxOption = Omit<SelectOption, 'icon'> & { icon?: React.ReactNode };
 
 type ComboboxProps = {
-  options: Array<{ value: string; label: string; icon?: React.ReactNode }>;
-  value: string;
-  onChange: (value: string) => void;
+  options: Array<ComboboxOption>;
+  onSelect: (option: ComboboxOption) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   placeholder?: string;
@@ -18,12 +21,12 @@ type ComboboxProps = {
   children: React.ReactNode;
   itemClassName?: string;
   overLayContent?: React.ReactNode;
+  optionsLoading?: boolean;
 };
 
 export function Combobox({
   options,
-  value,
-  onChange,
+  onSelect,
   open,
   onOpenChange,
   triggerClassName,
@@ -32,6 +35,7 @@ export function Combobox({
   itemClassName,
   searchPlaceholder = 'Search...',
   emptyText = 'No results found.',
+  optionsLoading = false,
   children,
   overLayContent,
 }: ComboboxProps) {
@@ -40,28 +44,40 @@ export function Combobox({
       <PopoverTrigger asChild className={triggerClassName}>
         {children}
       </PopoverTrigger>
-      <PopoverContent className={cn('w-[200px] p-0 relative', contentClassName)} align='start' sideOffset={4}>
+      <PopoverContent
+        align='start'
+        sideOffset={5}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+        }}
+        autoFocus={false}
+        onWheel={(e) => e.stopPropagation()}
+        className={cn('z-[1003] p-0 pointer-events-auto min-w-[var(--radix-popover-trigger-width)] ', contentClassName)}
+      >
         <Command shouldFilter={true}>
           <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
           <CommandList className={cn(overLayContent && 'pb-12')}>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
-              {options?.map((option) => (
-                <CommandItem
-                  key={option?.value}
-                  value={option?.label}
-                  onSelect={(currentValue: string) => {
-                    const selectedOption = options.find((opt) => opt?.label === currentValue);
-                    if (selectedOption) {
-                      onChange(selectedOption.value === value ? '' : selectedOption.value);
-                    }
-                  }}
-                  className={itemClassName}
-                >
-                  {option?.icon && option?.icon}
-                  {option?.label}
-                </CommandItem>
-              ))}
+            {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
+            <CommandGroup className='max-h-60 overflow-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent'>
+              {optionsLoading && (
+                <div className='space-y-2'>
+                  {Array.from({ length: 10 }).map((_, index) => (
+                    <Skeleton key={index} className='h-8 w-full' />
+                  ))}
+                </div>
+              )}
+              {!optionsLoading &&
+                options?.map((option) => (
+                  <CommandItem
+                    key={option?.id ?? option?.value.toString()}
+                    value={option?.label}
+                    onSelect={() => onSelect(option)}
+                    className={cn('flex items-center', itemClassName)}
+                  >
+                    {option?.icon && option?.icon}
+                    {option?.label}
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </CommandList>
           {overLayContent && (

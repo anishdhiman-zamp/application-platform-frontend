@@ -1,5 +1,5 @@
 import { type DialogProps } from '@radix-ui/react-dialog';
-import { Command as CommandPrimitive } from 'cmdk';
+import { CommandLoading, Command as CommandPrimitive } from 'cmdk';
 import * as React from 'react';
 
 import { cn } from '@zamp-platform/ui/lib/utils';
@@ -125,4 +125,5 @@ export {
   CommandList,
   CommandSeparator,
   CommandShortcut,
+  CommandLoading,
 };

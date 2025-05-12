@@ -28,8 +28,9 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
         label: artifact.display_name,
         icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact.artifact_type].id} width={12} height={12} />,
       }))}
-      value={value}
-      onChange={setValue}
+      onSelect={(option) => {
+        setValue(option.id === value ? '' : (option.id ?? ''));
+      }}
       open={open}
       onOpenChange={setOpen}
       searchPlaceholder='Search artifacts'
