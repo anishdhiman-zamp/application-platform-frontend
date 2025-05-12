@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import TemplateFilter from 'modules/payments/move-money/components/TemplateFilter';
 import { MOVE_MONEY_TEMPLATE_FILTER_ITEMS } from 'modules/payments/payments.constant';
-import type { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
+import { type MOVE_MONEY_TYPE, TEMPLATE_STATUS_TYPES } from 'modules/payments/payments.types';
 import RecipientCardSkeleton from 'modules/payments/recipients/components/RecipientCardSkeleton';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
@@ -36,11 +36,13 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
   };
 
   const templates = useMemo(() => {
-    const currentTypeTemplates = templateList?.templates?.filter(
-      (template) =>
-        template?.type === currentTab &&
-        (selectedFilter?.value !== 'all' ? template?.status === selectedFilter?.value : true),
-    );
+    const currentTypeTemplates = templateList?.templates?.filter((template) => {
+      if (selectedFilter?.value === 'all') return template?.type === currentTab;
+      if (selectedFilter?.value === TEMPLATE_STATUS_TYPES.DRAFTED)
+        return template?.status === TEMPLATE_STATUS_TYPES.DRAFTED || template?.status === TEMPLATE_STATUS_TYPES.PENDING;
+
+      return template?.type === currentTab && template?.status === selectedFilter?.value;
+    });
 
     if (!search.length) return currentTypeTemplates;
 

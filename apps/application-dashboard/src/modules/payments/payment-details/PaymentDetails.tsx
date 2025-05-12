@@ -1,11 +1,16 @@
 import { FC } from 'react';
+import { toast } from 'react-toastify';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
 import { PAYMENT_STATUS_TYPES } from 'modules/payments/payments.types';
+import { useRouter } from 'next/router';
+import { useLazyDownloadFileQuery } from '@/apis/dataset';
 import { useGetPaymentDetailsQuery } from '@/apis/payments';
+import ProgressBar from '@/components/common/RingProgress';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { COLORS } from '@/constants/colors';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { cn, createDateObjectFromUTCString, getCommaSeparatedNumber } from '@/utils/common';
 
@@ -61,6 +66,20 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
     refetchOnMountOrArgChange: false,
     skip: !paymentDetailsId,
   });
+  const router = useRouter();
+
+  const [downloadFile, { isLoading: isDownloading }] = useLazyDownloadFileQuery();
+
+  const handleDownloadFile = (fileImportId: string) => {
+    downloadFile({ fileImportId })
+      .unwrap()
+      .then((res) => {
+        router.push(res.download_url);
+      })
+      .catch(() => {
+        toast.error('Failed to download file');
+      });
+  };
 
   return (
     <CommonWrapper
@@ -144,12 +163,28 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             <div className='f-12-400 mb-3'>Attachments</div>
             <div className='flex flex-col gap-2'>
               {paymentDetails?.attachments?.map((attachment) => (
-                <div key={attachment?.label} className='flex justify-between items-center'>
+                <div key={attachment?.file_name} className='flex justify-between items-center gap-4'>
                   <div className='flex gap-1.5 items-center f-12-400 min-w-60 bg-GRAY_100 rounded-md px-2 py-1.5'>
                     <SvgSpriteLoader id='file-05' size={14} />
-                    <div>{attachment?.label}</div>
+                    <div className='truncate'>{attachment?.file_name}</div>
                   </div>
-                  <SvgSpriteLoader id='download-02' size={14} />
+                  {isDownloading ? (
+                    <ProgressBar
+                      trackColor={COLORS.BLACK}
+                      indicatorColor={COLORS.WHITE}
+                      indicatorWidth={2.5}
+                      trackWidth={2.5}
+                      size={14}
+                      className='animate-spin'
+                      progress={30}
+                    />
+                  ) : (
+                    <SvgSpriteLoader
+                      id='download-02'
+                      size={14}
+                      onClick={() => handleDownloadFile(attachment?.file_import_id)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

@@ -67,14 +67,14 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
               {condition?.mode?.replaceAll('_', ' ').toLowerCase()}
             </div>
             <div className='flex flex-wrap gap-1.5 '>
-              {condition?.approver_details?.map((approver, index) => (
+              {condition?.approver_details?.map((approver, userIndex) => (
                 <ApprovalDetailsBadge
-                  key={index}
+                  key={userIndex}
                   approvalDetails={approver}
                   teamsData={teamsData}
                   orgMembers={orgMembers ?? []}
                   orgName={orgName}
-                  isApproved={currentApprovalStep > index}
+                  isApproved={currentApprovalStep > step}
                 />
               ))}
             </div>

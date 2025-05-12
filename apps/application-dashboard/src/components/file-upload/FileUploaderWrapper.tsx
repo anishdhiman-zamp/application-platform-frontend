@@ -8,6 +8,7 @@ import {
   FileMimeType,
 } from 'modules/data/components/importDataset/importData.constants';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
+import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
 import { SignedUrlResponseType } from '@/types/api/fileUpload.types';
@@ -40,6 +41,8 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   const [fileUploaderKey, setFileUploaderKey] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [currentUploadFileName, setCurrentUploadFileName] = useState<string | null>(null);
+
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
@@ -131,7 +134,9 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           getSignedUrl(signedUrlPayload)
             .unwrap()
             .then((data: SignedUrlResponseType) => {
-              uploadFileToSignedUrl(data, filesToUpload, fileExtension);
+              uploadFileToSignedUrl(data, filesToUpload, fileExtension).then(() => {
+                postFormsSignedUploadAck({ fileImportId: data?.file_upload_id ?? '' });
+              });
             })
             .catch(() => {
               setIsLoading(false);

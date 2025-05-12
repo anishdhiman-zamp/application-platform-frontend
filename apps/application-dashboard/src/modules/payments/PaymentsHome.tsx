@@ -132,7 +132,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
   const handleRowClicked = (event: RowClickedEvent) => {
     setPaymentDetailsId(event?.data?.payment_id);
     tableRef.current?.api?.clearFocusedCell();
-    // console.log('event', event.payment_id);
   };
 
   const handleColumnMoved = (event: ColumnMovedEvent) => {
@@ -298,6 +297,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
               columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
               totalRows={totalRows}
               onColumnMoved={handleColumnMoved}
+              cellClass='!py-0'
               onRowClicked={handleRowClicked}
             />
           </div>

@@ -315,3 +315,15 @@ export type GetFileImportHistoryResponseType = {
     uploaded_by_user: userDetailsType;
   }[];
 };
+
+export type DownloadFileRequestType = {
+  download_url: string;
+  file_name: string;
+  file_upload_id: string;
+};
+
+export type DownloadFileResponseType = {
+  download_url: string;
+  file_name: string;
+  file_upload_id: string;
+};

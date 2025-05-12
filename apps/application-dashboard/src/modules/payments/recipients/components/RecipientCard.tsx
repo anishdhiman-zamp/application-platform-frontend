@@ -13,9 +13,10 @@ import { getFirstLetters } from '@/utils/common';
 type RecipientCardProps = {
   recipient: RecipientDetailsType;
   onAddRecipientAccount: (recipientDetails: RecipientDetailsType) => void;
+  allowActions?: boolean;
 };
 
-const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccount }) => {
+const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccount, allowActions = true }) => {
   const router = useRouter();
 
   const handleActionClick = (action: MOVE_MONEY_ACTION_TYPE, e?: React.MouseEvent<HTMLButtonElement>) => {
@@ -67,18 +68,19 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccoun
             <p>{recipient?.accounts?.length} Accounts</p>
           </TooltipV2>
         </div>
-        {RECIPIENT_CARD_ACTION_ITEMS.map((item) => (
-          <TooltipV2 key={item?.id} tooltipBody={item?.tooltipBody}>
-            <Button
-              type={BUTTON_TYPES.SECONDARY}
-              id='recipient-card-action'
-              size={SIZE_TYPES.XSMALL}
-              className='border-none !bg-transparent hover:!bg-GRAY_300'
-              iconProps={item?.icon}
-              onClick={(e) => handleActionClick(item?.action, e)}
-            />
-          </TooltipV2>
-        ))}
+        {allowActions &&
+          RECIPIENT_CARD_ACTION_ITEMS.map((item) => (
+            <TooltipV2 key={item?.id} tooltipBody={item?.tooltipBody}>
+              <Button
+                type={BUTTON_TYPES.SECONDARY}
+                id='recipient-card-action'
+                size={SIZE_TYPES.XSMALL}
+                className='border-none !bg-transparent hover:!bg-GRAY_300'
+                iconProps={item?.icon}
+                onClick={(e) => handleActionClick(item?.action, e)}
+              />
+            </TooltipV2>
+          ))}
       </div>
     </div>
   );
