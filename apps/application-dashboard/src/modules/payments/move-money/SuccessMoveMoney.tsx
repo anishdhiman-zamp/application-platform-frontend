@@ -79,7 +79,7 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
       {isTemplateCreated ? (
         <div className='flex gap-1.5 p-5 f-14-400 border border-GRAY_400 bg-BG_GRAY_2 rounded-md'>
           <SvgSpriteLoader size={16} id='check-circle' className='text-GREEN_800' />
-          <div className='f-14-400 text-GRAY_950'>Your template have been submitted for approval</div>
+          <div className='f-14-400 text-GRAY_950'>Your template has been created</div>
         </div>
       ) : (
         <div className='rounded-md border border-GRAY_400 bg-BG_GRAY_2 p-5 flex flex-col gap-4'>

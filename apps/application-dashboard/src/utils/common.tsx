@@ -547,16 +547,3 @@ export const getUserDisplayName = (user?: { name?: string; email?: string }) => 
 
   return 'Unknown';
 };
-
-/**
- * Decodes a base64 encoded string
- * @param base64 - The base64 encoded string to decode
- * @returns The decoded string or the original string if it is not valid base64
- */
-export const decodeBase64 = (base64: string) => {
-  try {
-    return JSON.parse(atob(base64));
-  } catch (e) {
-    return base64;
-  }
-};

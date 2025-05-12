@@ -37,7 +37,7 @@ const MoveMoneyButton = () => {
               className='flex items-center gap-1.5 p-2.5 hover:bg-GRAY_100 rounded-md cursor-pointer'
             >
               <SvgSpriteLoader size={12} id={item?.icon?.id} />
-              <div className='text-sm whitespace-nowrap'>{item?.label}</div>
+              <div className='text-sm whitespace-nowrap f-12-500'>{item?.label}</div>
             </Link>
           ))}
         </div>

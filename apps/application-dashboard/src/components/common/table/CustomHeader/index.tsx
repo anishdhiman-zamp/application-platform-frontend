@@ -203,7 +203,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
       <div
         className={cn(
-          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center overflow-hidden justify-between px-2 group pt-5 pb-1',
+          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center overflow-hidden justify-between px-2 group pt-5 pb-1 capitalize',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
           className,
         )}

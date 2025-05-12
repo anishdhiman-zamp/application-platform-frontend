@@ -210,7 +210,7 @@ export const getChartOptions = (
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
   const categoryAxis = getCategoryAxis(periodicity);
   const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
-  const currencyDecimalPlaces = currencySymbol ? 2 : 0;
+  const currencyDecimalPlaces = 2;
 
   const navigatorConfig =
     baseOptions?.data && baseOptions?.data?.length > 5

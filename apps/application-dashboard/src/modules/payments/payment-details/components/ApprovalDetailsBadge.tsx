@@ -106,7 +106,7 @@ const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
           {teamList?.map((user) => (
             <DropdownMenuItem key={user?.user_id} className='flex items-center justify-between py-1 cursor-default'>
               <div className='f-12-450 text-GRAY_1000 px-2.5 py-0.5 border border-GRAY_400 rounded'>
-                {user?.name ?? ''}
+                {user?.name || user?.email || ''}
               </div>
               {getUserStatusIcon(user?.user_id)}
             </DropdownMenuItem>

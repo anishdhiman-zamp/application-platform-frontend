@@ -2,6 +2,7 @@ import React, { FC, useState } from 'react';
 import { Sheet, SheetContent } from '@zamp-platform/ui';
 import TemplateApproval from 'modules/payments/templates/components/TemplateApproval';
 import TemplateList from 'modules/payments/templates/components/TemplateList';
+import { AnimatePresence, motion } from 'motion/react';
 import { defaultFnType } from 'types/commonTypes';
 import { TemplateDetailsType } from '@/types/api/paymentApi.types';
 
@@ -16,11 +17,30 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent size='large' tabIndex={-1} className='p-0 h-screen overflow-hidden'>
-        {templateApprove ? (
-          <TemplateApproval onBackClick={() => setTemplateApprove(undefined)} template={templateApprove} />
-        ) : (
-          <TemplateList onTemplateClick={setTemplateApprove} />
-        )}
+        <div className='h-full test'>
+          <AnimatePresence mode='wait'>
+            {templateApprove ? (
+              <motion.div
+                key='details'
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, type: 'spring' }}
+                className='h-full'
+              >
+                <TemplateApproval onBackClick={() => setTemplateApprove(undefined)} template={templateApprove} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key='list'
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, type: 'spring' }}
+              >
+                <TemplateList onTemplateClick={setTemplateApprove} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </SheetContent>
     </Sheet>
   );

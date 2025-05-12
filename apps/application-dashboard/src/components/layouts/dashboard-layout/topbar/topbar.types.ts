@@ -10,4 +10,5 @@ export const enum SHARE_BTN_ALLOWED_ROUTES {
   DATASETS = '/datasets/',
   DATASET = '/datasets',
   PAYMENTS = '/payments',
+  PROCESSES = '/processes/',
 }

@@ -15,9 +15,15 @@ type RecipientsListProps = {
   onRecipientDetails: (recipientDetails: RecipientDetailsType) => void;
   onAddRecipient: defaultFnType;
   onAddRecipientAccount: (recipientDetails: RecipientDetailsType) => void;
+  allowActions?: boolean;
 };
 
-const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddRecipient, onAddRecipientAccount }) => {
+const RecipientsList: FC<RecipientsListProps> = ({
+  onRecipientDetails,
+  onAddRecipient,
+  onAddRecipientAccount,
+  allowActions = true,
+}) => {
   const [search, setSearch] = useState('');
 
   const {
@@ -45,19 +51,21 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
     <div className='py-6 pl-4.5 pr-2'>
       <div className='w-full flex items-center justify-between mb-4.5'>
         <div className='f-16-600 px-1.5'>Recipients</div>
-        <Button
-          size={SIZE_TYPES.SMALL}
-          type={BUTTON_TYPES.SECONDARY}
-          iconPosition={ICON_POSITION_TYPES.LEFT}
-          id='add-recipient'
-          onClick={onAddRecipient}
-          iconProps={{
-            id: 'plus',
-            size: 14,
-          }}
-        >
-          Add
-        </Button>
+        {allowActions && (
+          <Button
+            size={SIZE_TYPES.SMALL}
+            type={BUTTON_TYPES.SECONDARY}
+            iconPosition={ICON_POSITION_TYPES.LEFT}
+            id='add-recipient'
+            onClick={onAddRecipient}
+            iconProps={{
+              id: 'plus',
+              size: 14,
+            }}
+          >
+            Add
+          </Button>
+        )}
       </div>
       <Input
         autoFocus
@@ -84,7 +92,11 @@ const RecipientsList: FC<RecipientsListProps> = ({ onRecipientDetails, onAddReci
               onClick={() => onRecipientDetails(recipient)}
               className='hover:z-1000 cursor-pointer'
             >
-              <RecipientCard recipient={recipient} onAddRecipientAccount={onAddRecipientAccount} />
+              <RecipientCard
+                recipient={recipient}
+                allowActions={allowActions}
+                onAddRecipientAccount={onAddRecipientAccount}
+              />
             </div>
           ))}
         </div>

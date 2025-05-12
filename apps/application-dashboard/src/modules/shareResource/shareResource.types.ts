@@ -5,6 +5,7 @@ export enum ResourceType {
   DATASET = 'dataset',
   PAGE = 'page',
   PAYMENTS = 'payments',
+  ACTIVITY = 'activity',
 }
 
 export type TeamInfoType = {
