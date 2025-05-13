@@ -8,9 +8,14 @@ import { filtersContextActions, useFiltersContextStore } from 'components/filter
 interface DateRangeFilterMenuItemProps {
   column: { colId: string };
   isPeriodicityEnabled?: boolean;
+  isDisabled?: boolean;
 }
 
-const DateRangeFilterMenuItem = ({ column, isPeriodicityEnabled = false }: DateRangeFilterMenuItemProps) => {
+const DateRangeFilterMenuItem = ({
+  column,
+  isPeriodicityEnabled = false,
+  isDisabled = false,
+}: DateRangeFilterMenuItemProps) => {
   const { state, dispatch } = useFiltersContextStore();
   const columnId = column?.colId;
 
@@ -40,7 +45,7 @@ const DateRangeFilterMenuItem = ({ column, isPeriodicityEnabled = false }: DateR
           start_date: new Date(state.selectedFilters[columnId]?.dateFrom ?? new Date()),
           end_date: new Date(state.selectedFilters[columnId]?.dateTo ?? new Date()),
         }}
-        disabled={false}
+        disabled={isDisabled}
         controlClassName='px-2 py-1.5 border-DIVIDER_SAIL_2 rounded-lg h-auto mr-3 cursor-pointer'
         isSingle={false}
         disableFutureDate={false}

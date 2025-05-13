@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { RuleFilters } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
+import { MultiSelectFilterValue } from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import {
   AMOUNT_RANGE_FILTER_OPTIONS,
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,
@@ -41,6 +42,8 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
     case FILTER_TYPES.SINGLE_SELECT:
     case FILTER_TYPES.MULTI_SELECT: {
+      const options: MultiSelectFilterValue[] = config.values;
+      const isObjectOptions = options.some((option) => typeof option === 'object');
       const selectedFilter = selectedFilters[key];
       const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
       const operatorLabel =
@@ -56,7 +59,13 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
           : (selectedFilter?.values ?? '');
 
       if (count) {
-        title = `${operatorLabel} ${selectedFilter?.values[0]} ${count > 1 ? `+${count - 1}` : ''}`;
+        const displayLabel = isObjectOptions
+          ? ((options as { label: string; value: string }[]).find(
+              (option) => option.value === selectedFilter?.values[0],
+            )?.label ?? '')
+          : selectedFilter?.values[0];
+
+        title = `${operatorLabel} ${displayLabel} ${count > 1 ? `+${count - 1}` : ''}`;
       }
 
       return {
@@ -232,4 +241,16 @@ export const getFilterStatementValues = (filter: RuleFilters | null): JSX.Elemen
   });
 
   return Statement;
+};
+
+export const isObjectValue = (value: MultiSelectFilterValue): value is { label: string; value: string } => {
+  return typeof value === 'object' && value !== null && 'label' in value && 'value' in value;
+};
+
+export const getValueString = (value: MultiSelectFilterValue): string => {
+  return isObjectValue(value) ? value.value : value;
+};
+
+export const getDisplayString = (value: MultiSelectFilterValue): string => {
+  return isObjectValue(value) ? value.label : value;
 };

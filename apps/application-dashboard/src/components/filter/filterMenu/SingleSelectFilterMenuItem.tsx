@@ -20,6 +20,7 @@ interface SingleSelectFilterMenuItemProps {
   isOpen?: boolean;
   updateContextOnChange?: boolean;
   showColumnLabel?: boolean;
+  isDisabled?: boolean;
 }
 
 const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
@@ -34,6 +35,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   isOpen = false,
   updateContextOnChange = false,
   showColumnLabel = true,
+  isDisabled = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
@@ -124,6 +126,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
             value={inputValue}
             placeholder='Search...'
             onChange={onSearchChange}
+            disabled={isDisabled}
           />
         </div>
       )}
@@ -134,7 +137,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
             .map((item) => (
               <div
                 key={item}
-                onClick={() => onChange(item)}
+                onClick={() => !isDisabled && onChange(item)}
                 className={cn(
                   'py-2 px-2.5 border-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100',
                   selectedValue === item && 'bg-GRAY_200',

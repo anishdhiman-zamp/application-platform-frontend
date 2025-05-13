@@ -17,9 +17,15 @@ interface AmountRangeFilterMenuItemProps {
   className?: string;
   label?: string;
   showColumnLabel?: boolean;
+  isDisabled?: boolean;
 }
 
-const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column, className, label }) => {
+const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({
+  column,
+  className,
+  label,
+  isDisabled = false,
+}) => {
   const ref = useRef(null);
   const columnId = column?.colId;
   const {
@@ -98,7 +104,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-4'
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => !isDisabled && setIsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}
@@ -143,7 +149,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
             value={startValue}
             placeholder='type a value...'
             onChange={(e) => onChange(true, e.target.value)}
-            disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL}
+            disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL || isDisabled}
             autoFocus
           />
         </Tooltip>
@@ -156,6 +162,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({ column,
             value={endValue}
             placeholder='type a value...'
             onChange={(e) => onChange(false, e.target.value)}
+            disabled={isDisabled}
           />
         )}
       </div>

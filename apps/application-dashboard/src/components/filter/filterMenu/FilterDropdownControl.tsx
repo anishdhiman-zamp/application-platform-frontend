@@ -14,6 +14,7 @@ interface FilterDropdownControlProps {
   isMenuDropdownOpen?: boolean;
   allowClear?: boolean;
   isOpen?: boolean;
+  titleClassName?: string;
 }
 
 const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
@@ -25,6 +26,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   isMenuDropdownOpen,
   allowClear,
   isOpen,
+  titleClassName = '',
 }) => {
   const handleRemoveFilter = (e: MouseEvent) => {
     if (allowClear) {
@@ -47,7 +49,9 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
         <div className='f-12-400 text-GRAY_900 whitespace-nowrap max-w-[200px] truncate'>
           {formatToNormalText(filterConfig?.label)}
         </div>
-        <div className='f-12-500 text-GRAY_1000 whitespace-nowrap max-w-[200px] truncate'>{filterConfig?.title}</div>
+        <div className={cn('f-12-500 text-GRAY_1000 whitespace-nowrap max-w-[200px] truncate', titleClassName)}>
+          {filterConfig?.title}
+        </div>
         <div onClick={handleRemoveFilter}>
           {allowClear ? (
             <SvgSpriteLoader

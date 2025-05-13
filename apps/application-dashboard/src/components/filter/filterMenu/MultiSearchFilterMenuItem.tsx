@@ -20,6 +20,7 @@ interface MultiSearchFilterMenuItemProps {
   placeholder?: string;
   className?: string;
   showColumnLabel?: boolean;
+  isDisabled?: boolean;
 }
 
 const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
@@ -27,6 +28,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
   isOpen,
   forView = 'table_header',
   className = '',
+  isDisabled = false,
 }) => {
   const columnId = column?.colId;
   const inputWrapperRef = useRef<HTMLDivElement>(null);
@@ -225,6 +227,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
         operator={selectedOperator}
         updateOperator={updateOperator}
         label={camelCaseToNormalText(columnId)}
+        isDisabled={isDisabled}
       />
 
       <div
@@ -251,6 +254,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
           inputClassName='w-full !min-w-[160px] flex-1 outline-none border-none focus:!shadow-none !shadow-none'
           inputSizeClassName='p-0'
           autoFocus
+          disabled={isDisabled}
         />
       </div>
     </div>
