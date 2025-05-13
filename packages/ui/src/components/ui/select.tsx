@@ -117,7 +117,6 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
           optionsLoading={loading}
           options={comboboxOptions}
           onSelect={(selectedOption) => {
-            console.log('selectedOption', selectedOption);
             onValueChange?.(selectedOption.value);
             setSelectedOption({
               value: selectedOption.value,
