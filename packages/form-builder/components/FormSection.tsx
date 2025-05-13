@@ -20,7 +20,11 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields }) => 
                 fields[field]?.type ? (
                   <div
                     key={field}
-                    style={{ flexBasis: `${(col_span / 8) * 100}%`, maxWidth: `${(col_span / 8) * 100}%` }}
+                    style={{
+                      flexBasis: `${(col_span / 8) * 100}%`,
+                      width: `${(col_span / 8) * 100}%`,
+                      maxWidth: `${(col_span / 8) * 100}%`,
+                    }}
                     className='flex-1'
                   >
                     <FormField className='mb-2' field={fields[field]} name={field} />
