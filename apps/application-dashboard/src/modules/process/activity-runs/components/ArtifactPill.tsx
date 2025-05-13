@@ -23,10 +23,10 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
 
   return (
     <Combobox
-      options={artifacts.map((artifact) => ({
-        value: artifact.id,
-        label: artifact.display_name,
-        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact.artifact_type].id} width={12} height={12} />,
+      options={artifacts?.map((artifact) => ({
+        value: artifact?.id,
+        label: artifact?.display_name,
+        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact?.artifact_type].id} width={12} height={12} />,
       }))}
       onSelect={(option) => {
         setValue(option.id === value ? '' : (option.id ?? ''));

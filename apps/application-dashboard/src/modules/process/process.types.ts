@@ -16,6 +16,6 @@ export type ArtifactType = {
 export enum ARTIFACT_TYPE {
   DOCUMENT = 'document',
   VIDEO = 'video',
-  DATASET = 'PDF_DATASET',
+  PDF_DATASET = 'PDF_DATASET',
   EMAIL = 'email',
 }

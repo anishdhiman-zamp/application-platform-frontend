@@ -6,7 +6,6 @@ import {
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
-  type RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
@@ -41,7 +40,6 @@ type ActivityByStatusProps = {
 
 const ActivityByStatus: FC<ActivityByStatusProps> = ({
   processId,
-
   status,
   filterConfigData,
   isFilterConfigLoading,
@@ -291,8 +289,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     }
   }, [processId, status]);
 
-  const handleRowClicked = (event: RowClickedEvent) => {
-    const activityId = event?.data?.id;
+  const handleRowClicked = (data: MapAny) => {
+    const activityId = data?.id;
     const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId);
 
     router.push(`${path}?status=${status}`);
@@ -331,7 +329,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}
-            onRowClicked={handleRowClicked}
+            onRowPropertiesClick={handleRowClicked}
+            menuTitle='Activity properties'
           />
         </div>
       </CommonWrapper>

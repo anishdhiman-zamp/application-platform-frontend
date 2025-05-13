@@ -154,7 +154,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn, 'date', 'desc');
+      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn);
 
       if (columns?.length > 0) {
         setColumns(columns);

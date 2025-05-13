@@ -52,7 +52,7 @@ const TemplateCard: FC<TemplateCardProps> = ({ onSendClick, template, onTemplate
                   {index === 0 ? 'Source' : 'Recipient'}
                 </div>
                 <div className='f-11-450  whitespace-nowrap flex items-center'>
-                  <div className='text-ellipsis overflow-hidden max-w-[60px]'>{item?.account_name}</div>{' '}
+                  <div className='text-ellipsis overflow-hidden max-w-[60px] mr-1'>{item?.account_name}</div>
                   <div>{`${MASK_DOTS} ${item?.masked_account_number}`}</div>
                 </div>
               </div>
