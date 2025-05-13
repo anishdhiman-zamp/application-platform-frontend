@@ -130,6 +130,7 @@ interface TableProps {
   cellClass?: string;
   headerClass?: string;
   onGridReady?: () => void;
+  menuTitle?: string;
 }
 
 export type TableColumnType = {
@@ -169,6 +170,7 @@ const Table: FC<TableProps> = ({
   cellClass,
   headerClass,
   onGridReady,
+  menuTitle,
 }) => {
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
@@ -258,7 +260,7 @@ const Table: FC<TableProps> = ({
       }
       if (onRowPropertiesClick) {
         result.push({
-          name: 'Row properties',
+          name: menuTitle ?? 'Row properties',
           action: () => {
             onRowPropertiesClick?.(params?.node?.data);
           },
@@ -271,7 +273,7 @@ const Table: FC<TableProps> = ({
 
       return result;
     },
-    [onDrilldownClick, onRowPropertiesClick, window],
+    [onDrilldownClick, onRowPropertiesClick, menuTitle],
   );
 
   return (
