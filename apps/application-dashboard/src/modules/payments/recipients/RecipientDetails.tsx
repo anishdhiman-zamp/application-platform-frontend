@@ -16,9 +16,15 @@ type RecipientDetailsProps = {
   onBack: defaultFnType;
   recipientDetails: RecipientDetailsType;
   onAddRecipientAccount: defaultFnType;
+  allowActions?: boolean;
 };
 
-const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails, onAddRecipientAccount }) => {
+const RecipientDetails: FC<RecipientDetailsProps> = ({
+  onBack,
+  recipientDetails,
+  onAddRecipientAccount,
+  allowActions = true,
+}) => {
   const router = useRouter();
 
   const handleSendMoney = () => {
@@ -32,7 +38,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails,
   };
 
   return (
-    <div className='px-4.5 py-6.5 flex flex-col gap-8 overflow-y-scroll'>
+    <div className='pl-4.5 pr-2 py-6.5 flex flex-col gap-8'>
       <div className='flex items-center gap-3 '>
         <SvgSpriteLoader id='arrow-narrow-left' size={14} onClick={onBack} />
         <div className='flex items-center gap-2.5 grow'>
@@ -51,19 +57,21 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails,
             onClick={handleSendMoney}
           />
         </TooltipV2>
-        <Button
-          id='send-money'
-          onClick={handleSendMoney}
-          className='!px-3'
-          iconProps={{
-            id: 'send-03',
-            size: 14,
-          }}
-          iconPosition={ICON_POSITION_TYPES.LEFT}
-          size={SIZE_TYPES.XSMALL}
-        >
-          Send money
-        </Button>
+        {allowActions && (
+          <Button
+            id='send-money'
+            onClick={handleSendMoney}
+            className='!px-3'
+            iconProps={{
+              id: 'send-03',
+              size: 14,
+            }}
+            iconPosition={ICON_POSITION_TYPES.LEFT}
+            size={SIZE_TYPES.XSMALL}
+          >
+            Send money
+          </Button>
+        )}
       </div>
       <CommonWrapper>
         <div className=''>
@@ -79,19 +87,21 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({ onBack, recipientDetails,
           <div className='flex flex-col gap-3 mt-8'>
             <div className=' flex justify-between items-center f-13-500'>
               Accounts ({recipientDetails?.accounts?.length})
-              <Button
-                id='add-account'
-                size={SIZE_TYPES.XSMALL}
-                type={BUTTON_TYPES.SECONDARY}
-                iconPosition={ICON_POSITION_TYPES.LEFT}
-                iconProps={{
-                  id: 'plus',
-                  size: 14,
-                }}
-                onClick={onAddRecipientAccount}
-              >
-                Add
-              </Button>
+              {allowActions && (
+                <Button
+                  id='add-account'
+                  size={SIZE_TYPES.XSMALL}
+                  type={BUTTON_TYPES.SECONDARY}
+                  iconPosition={ICON_POSITION_TYPES.LEFT}
+                  iconProps={{
+                    id: 'plus',
+                    size: 14,
+                  }}
+                  onClick={onAddRecipientAccount}
+                >
+                  Add
+                </Button>
+              )}
             </div>
             {recipientDetails?.accounts?.map((account, index) => (
               <RecipientAccountCard key={index} account={account} />

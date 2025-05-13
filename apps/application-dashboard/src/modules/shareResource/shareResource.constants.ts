@@ -75,6 +75,9 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.PAYMENTS]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.PAYMENTS,
   ),
+  [ResourceType.ACTIVITY]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
+    (privilege) => privilege.kind === ResourceType.ACTIVITY,
+  ),
 };
 
 /**
@@ -110,8 +113,19 @@ export const paymentsConfig: ShareResourceConfig = {
   },
 };
 
+export const activityConfig: ShareResourceConfig = {
+  type: ResourceType.ACTIVITY,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.ACTIVITY],
+  displayName: 'activity',
+  toastMessages: {
+    success: TOAST_MESSAGES.SUCCESS_ACTIVITY_SHARED,
+    failed: TOAST_MESSAGES.FAILED_ACTIVITY_SHARED,
+  },
+};
+
 export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
   [ResourceType.PAYMENTS]: 'payments',
+  [ResourceType.ACTIVITY]: 'activities',
 };

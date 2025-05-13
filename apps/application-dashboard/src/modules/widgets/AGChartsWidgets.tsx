@@ -139,7 +139,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       >
         {chartOptions && (
           <div className='h-full w-full relative'>
-            {yAxisTitle && (
+            {!widgetDetails?.display_config?.hide_y_axis_title && yAxisTitle && (
               <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
                 {snakeCaseToSentenceCase(yAxisTitle)}
                 <div

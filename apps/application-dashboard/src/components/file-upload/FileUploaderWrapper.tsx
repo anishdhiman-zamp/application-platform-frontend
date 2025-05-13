@@ -1,6 +1,5 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import { useAppSelector } from 'hooks/toolkit';
 import {
   FILE_IMPORT_STATUS_MSG,
   FILE_SIZE,
@@ -9,7 +8,7 @@ import {
   FileMimeType,
 } from 'modules/data/components/importDataset/importData.constants';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
-import { RootState } from 'store';
+import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
 import { SignedUrlResponseType } from '@/types/api/fileUpload.types';
@@ -36,13 +35,14 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   uploadPath = API_ENDPOINTS.DATASET_SIGNED_UPLOAD_URL_POST,
 }) => {
   const hiddenFileInput = useRef<HTMLInputElement>(null);
-  const user_id = useAppSelector((state: RootState) => state?.user)?.user?.user_id;
   const [getSignedUrl] = useGetSignedUrlMutation();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileUploaderKey, setFileUploaderKey] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [currentUploadFileName, setCurrentUploadFileName] = useState<string | null>(null);
+
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
@@ -113,7 +113,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
         setError(err);
       } else {
         const fileExtension: string = filesToUpload?.name?.split('.')?.pop()?.toLowerCase() ?? '';
-        const fileName = user_id + '_' + Date.now() + '.' + (FileMimeType[getFileType(filesToUpload)] ?? fileExtension);
+        const fileName = filesToUpload.name + '.' + (FileMimeType[getFileType(filesToUpload)] ?? fileExtension);
         const fileType = FileMimeType[getFileType(filesToUpload)] ?? fileExtension;
         const acceptedFormatsArr = acceptedFormats.split(',').map((item) => item.trim());
         const isAllowedFormat = acceptedFormatsArr.includes(FileExtensionToInputFormatMapping[fileExtension]);
@@ -134,7 +134,9 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           getSignedUrl(signedUrlPayload)
             .unwrap()
             .then((data: SignedUrlResponseType) => {
-              uploadFileToSignedUrl(data, filesToUpload, fileExtension);
+              uploadFileToSignedUrl(data, filesToUpload, fileExtension).then(() => {
+                postFormsSignedUploadAck({ fileImportId: data?.file_upload_id ?? '' });
+              });
             })
             .catch(() => {
               setIsLoading(false);

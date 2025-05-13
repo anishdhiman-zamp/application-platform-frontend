@@ -19,6 +19,7 @@ import {
   DatasetUpdateRequestType,
   DatasetUpdateResponseType,
   DeleteAudienceFromDatasetAccessType,
+  type DownloadFileResponseType,
   GetAiTransformationRequestType,
   GetAiTransformationResponseType,
   GetFileImportHistoryResponseType,
@@ -169,6 +170,17 @@ const Dataset = baseApi.injectEndpoints({
         method: REQUEST_TYPES.DELETE,
       }),
     }),
+    downloadFile: builder.query<DownloadFileResponseType, { fileImportId: string }>({
+      query: ({ fileImportId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DOWNLOAD_FILE_GET, { fileImportId }),
+      }),
+    }),
+    postFormsSignedUploadAck: builder.mutation<void, { fileImportId: string }>({
+      query: ({ fileImportId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FORMS_SIGNED_UPLOAD_ACK_POST, { fileImportId }),
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
   }),
 });
 
@@ -198,4 +210,6 @@ export const {
   usePostAiTransformationConfirmMutation,
   useGetFileImportHistoryQuery,
   useDeleteRuleMutation,
+  useLazyDownloadFileQuery,
+  usePostFormsSignedUploadAckMutation,
 } = Dataset;

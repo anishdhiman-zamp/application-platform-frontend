@@ -129,6 +129,8 @@ export type PaymentDetailsResponseType = {
   attachments: {
     label: string;
     file_upload_id: string;
+    file_import_id: string;
+    file_name: string;
   }[];
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { useGetSheetDetailsQuery } from 'apis/pages';
+import { useGetPagesQuery } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
@@ -45,14 +45,17 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
   };
 
   const {
-    data: sheetDetails,
+    data: pages,
     isFetching: isSheetLoading,
     isError: isSheetDetailsError,
     refetch: refetchSheetDetails,
-  } = useGetSheetDetailsQuery(
-    { pageId: pageId as string, sheetId: sheetId as string },
-    { skip: !pageId || !sheetId, refetchOnMountOrArgChange: false },
-  );
+  } = useGetPagesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+
+  const sheetDetails = useMemo(() => {
+    return pages?.find((page) => page.page_id === pageId)?.sheets?.find((sheet) => sheet.sheet_id === sheetId);
+  }, [pages, pageId, sheetId]);
 
   //converts the pixel height from pivot-table into grid-layout height
   const getHfromWidgetHeight = (widgetHeight: number): number => {

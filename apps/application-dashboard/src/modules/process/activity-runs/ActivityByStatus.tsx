@@ -6,9 +6,11 @@ import {
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
+  type RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
+import { useParams, useRouter } from 'next/navigation';
 import { defaultFn, type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetActivityRunsQuery } from '@/apis/processes';
@@ -16,6 +18,7 @@ import { myThemeWithProcess } from '@/components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
+import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import type { ActivityRunsDataResponseType } from '@/types/api/processApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -38,6 +41,7 @@ type ActivityByStatusProps = {
 
 const ActivityByStatus: FC<ActivityByStatusProps> = ({
   processId,
+
   status,
   filterConfigData,
   isFilterConfigLoading,
@@ -48,6 +52,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const firstLoadDone = useRef(false);
+  const router = useRouter();
+  const { process } = useParams();
 
   const {
     dispatch,
@@ -285,6 +291,13 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     }
   }, [processId, status]);
 
+  const handleRowClicked = (event: RowClickedEvent) => {
+    const activityId = event?.data?.id;
+    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId);
+
+    router.push(`${path}?status=${status}`);
+  };
+
   return (
     <>
       <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
@@ -318,6 +331,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}
+            onRowClicked={handleRowClicked}
           />
         </div>
       </CommonWrapper>

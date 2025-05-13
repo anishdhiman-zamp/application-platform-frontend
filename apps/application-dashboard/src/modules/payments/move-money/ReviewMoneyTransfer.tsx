@@ -9,8 +9,10 @@ import { useRouter } from 'next/router';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
+import { useLazyDownloadFileQuery } from '@/apis/dataset';
 import { useInitiatePaymentMutation } from '@/apis/payments';
-import { UploadFileResponseType } from '@/types/api/fileUpload.types';
+import ProgressBar from '@/components/common/RingProgress';
+import { COLORS } from '@/constants/colors';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 
@@ -36,6 +38,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
   const showRecipientDetails = useMemo(() => {
     return transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && destinationAccountDetails?.account_number;
   }, [transferType, destinationAccountDetails?.account_number]);
+  const [downloadFile, { isLoading: isDownloading }] = useLazyDownloadFileQuery();
 
   const sourceAccountName = useMemo(
     () => `${sourceAccountDetails?.account_name} ${MASK_DOTS} ${sourceAccountDetails?.masked_account_number}`,
@@ -46,8 +49,15 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
     [destinationAccountDetails],
   );
 
-  const handleDownloadFile = (file: UploadFileResponseType) => {
-    router.push(file?.downloadableUrl);
+  const handleDownloadFile = (fileImportId: string) => {
+    downloadFile({ fileImportId })
+      .unwrap()
+      .then((res) => {
+        router.push(res.download_url);
+      })
+      .catch(() => {
+        toast.error('Failed to download file');
+      });
   };
 
   const handleBackClick = () => handleStepChange(currentStep - 1);
@@ -148,7 +158,23 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
                     <SvgSpriteLoader size={14} id='file-02' />
                     <div className='f-12-400'>{attachment?.fileName}</div>
                   </div>
-                  <SvgSpriteLoader size={14} id='download-02' onClick={() => handleDownloadFile(attachment)} />
+                  {isDownloading ? (
+                    <ProgressBar
+                      trackColor={COLORS.BLACK}
+                      indicatorColor={COLORS.WHITE}
+                      indicatorWidth={2.5}
+                      trackWidth={2.5}
+                      size={14}
+                      className='animate-spin'
+                      progress={30}
+                    />
+                  ) : (
+                    <SvgSpriteLoader
+                      size={14}
+                      id='download-02'
+                      onClick={() => handleDownloadFile(attachment?.identifier)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

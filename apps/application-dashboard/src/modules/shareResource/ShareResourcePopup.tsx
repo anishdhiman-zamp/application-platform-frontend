@@ -45,7 +45,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const resourceId = props.resourceId || '';
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
-    resourceConfig.accessPrivilegesList[0].value,
+    resourceConfig.accessPrivilegesList[0]?.value ?? '',
   );
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);

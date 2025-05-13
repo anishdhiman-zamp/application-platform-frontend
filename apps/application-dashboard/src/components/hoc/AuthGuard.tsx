@@ -27,6 +27,7 @@ export const AuthGuard: FC<Props> = (props) => {
 
   useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
+    skip: !session,
   });
 
   useEffect(() => {
