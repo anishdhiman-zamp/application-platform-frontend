@@ -5,7 +5,9 @@ import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
 import { cn } from 'utils/common';
+import BankNameCell from '@/components/common/table/CustomCellRenderers/BankNameCell';
 import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
+import PaymentsAccountStatusCell from '@/components/common/table/CustomCellRenderers/PaymentsAccountStatus';
 import RecipientNameCell from '@/components/common/table/CustomCellRenderers/RecipientNameCell';
 import StatusBadgeCell from '@/components/common/table/CustomCellRenderers/StatusBadgeCell';
 import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
@@ -60,6 +62,8 @@ export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRend
     <ActivityCurrentStatus value={props.value} data={props.data} />
   ),
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: (props: ICellRendererParams) => <ActivityStatus value={props.value} />,
+  [CUSTOM_COLUMNS_TYPE.BANK_NAME]: BankNameCell,
+  [CUSTOM_COLUMNS_TYPE.PAYMENTS_ACCOUNT_STATUS]: PaymentsAccountStatusCell,
 };
 
 export enum TEAM_OPTIONS {

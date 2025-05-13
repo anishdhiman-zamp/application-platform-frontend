@@ -1,6 +1,7 @@
 import { FC, useRef, useState } from 'react';
 import { RowClickedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { COLORS } from 'constants/colors';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { LOADER_STATUS } from 'modules/data/data.types';
@@ -19,10 +20,9 @@ import { withFiltersContext } from 'components/filter/filters.context';
 
 type PaymentsListProps = {
   id: string;
-  zampIds?: string[];
 };
 
-const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
+const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
   const tableRef = useRef<AgGridReact>(null);
 
   const { checkUserPrivilege } = useResourceAccess(ResourceType.PAYMENTS, '');
@@ -50,10 +50,13 @@ const PaymentsList: FC<PaymentsListProps> = ({ id, zampIds }) => {
     <>
       <CommonFilterTable
         id={id}
-        zampIds={zampIds}
         handleRowClicked={handleRowClicked}
         tableRef={tableRef}
         cellClass='!py-0'
+        filterConfigUrl={API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET}
+        dataUrl={API_ENDPOINTS.PAYMENT_LIST_GET}
+        sortColumn='date'
+        sortOrder='desc'
         actionElements={
           <div className='relative flex items-center gap-3'>
             <TooltipButton
