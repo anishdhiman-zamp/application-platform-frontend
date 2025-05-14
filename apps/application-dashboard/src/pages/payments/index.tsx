@@ -1,9 +1,9 @@
 import React, { ReactElement, useEffect } from 'react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch } from 'hooks/toolkit';
-import PaymentsHome from 'modules/payments/PaymentsHome';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
-import DashboardLayout from 'components/layouts/dashboard-layout';
+import PaymentsLayout from '@/components/layouts/payments-layout';
+
 const Payments = () => {
   const appDispatch = useAppDispatch();
 
@@ -11,15 +11,11 @@ const Payments = () => {
     appDispatch(resetBreadcrumb([{ title: 'Payments', href: ROUTES_PATH.PAYMENTS }]));
   }, []);
 
-  return <PaymentsHome />;
+  return null;
 };
 
 Payments.getLayout = function getLayout(page: ReactElement) {
-  return (
-    <div>
-      <DashboardLayout>{page}</DashboardLayout>
-    </div>
-  );
+  return <PaymentsLayout>{page}</PaymentsLayout>;
 };
 
 export default Payments;

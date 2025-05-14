@@ -17,15 +17,18 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
     data: allTeamsData,
     isLoading: isLoadingAllTeamsData,
     error: errorAllTeamsData,
-  } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+  } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId, refetchOnMountOrArgChange: false });
   const {
     data: audiencesData,
     isLoading: isLoadingAudiencesData,
     error: errorAudiencesData,
-  } = useGetAudiencesByResourceIdQuery({
-    resourceRoute: resourceTypeRouteMap[args.resourceType],
-    resourceId: args.resourceId,
-  });
+  } = useGetAudiencesByResourceIdQuery(
+    {
+      resourceRoute: resourceTypeRouteMap[args.resourceType],
+      resourceId: args.resourceId,
+    },
+    { refetchOnMountOrArgChange: false },
+  );
 
   const loading = useMemo(() => {
     return Boolean(isLoadingAudiencesData || isLoadingAllTeamsData);

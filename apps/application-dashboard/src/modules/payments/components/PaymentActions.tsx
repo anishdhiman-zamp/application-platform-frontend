@@ -1,10 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { DialogWithRoute } from '@/components/DialogWithRoute';
 import CreatePolicyDialog from '@/modules/policies/create';
 import PoliciesListSideDrawer from '@/modules/policies/listing/PoliciesListSideDrawer';
+import PolicyDeleteConfirmPopup from '@/modules/policies/listing/PolicyDeleteConfirmPopup';
 import { PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
@@ -14,20 +17,20 @@ const PaymentActions = () => {
     refetchOnMountOrArgChange: false,
   });
   const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
-  const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState<boolean>(false);
+  const router = useRouter();
   const [policyType, setPolicyType] = useState<PolicyDialogType>('template');
   const [sideDrawerConfig, setSideDrawerConfig] = useState<PolicyDialogType>();
 
   const handlePolicyDialogOpenChange = (type: PolicyDialogType) => {
-    setIsPolicyDialogOpen(true);
     setPolicyType(type);
+    router.push(`/payments/policies/create`);
   };
 
   const handlePolicyListClose = () => {
     setSideDrawerConfig(undefined);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (paymentConfig?.id) {
       getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS });
     }
@@ -104,7 +107,28 @@ const PaymentActions = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <CreatePolicyDialog type={policyType} isOpen={isPolicyDialogOpen} onOpenChange={setIsPolicyDialogOpen} />
+
+      <DialogWithRoute routes={['/payments/policies/delete/:policyId']}>
+        {({ open, onOpenChange }) => (
+          <PolicyDeleteConfirmPopup
+            policiesData={policiesData?.data}
+            isOpen={open}
+            onClose={() => onOpenChange(false)}
+          />
+        )}
+      </DialogWithRoute>
+
+      <DialogWithRoute routes={['/payments/policies/create', '/payments/policies/create/:policyId']}>
+        {({ open, onOpenChange }) => (
+          <CreatePolicyDialog
+            type={policyType}
+            policiesData={policiesData?.data}
+            isOpen={open}
+            onOpenChange={onOpenChange}
+          />
+        )}
+      </DialogWithRoute>
+
       {sideDrawerConfig && (
         <PoliciesListSideDrawer
           isOpen={!!sideDrawerConfig}
