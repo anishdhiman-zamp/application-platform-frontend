@@ -97,9 +97,9 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<RecipientCardSkeleton className='mb-4' />}
           >
-            {templates?.map((template, index) => (
+            {templates?.map((template) => (
               <TemplateCard
-                key={index}
+                key={template?.id}
                 template={template}
                 onSendClick={() => handleTemplateSendClick(template)}
                 onTemplateClick={() => onTemplateClick(template)}
