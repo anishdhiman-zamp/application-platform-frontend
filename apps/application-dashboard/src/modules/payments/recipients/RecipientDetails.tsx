@@ -97,6 +97,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
                     id: 'plus',
                     size: 14,
                   }}
+                  // this onClick is intentional to not pass any arguments to the function
                   onClick={() => onAddRecipientAccount()}
                 >
                   Add
