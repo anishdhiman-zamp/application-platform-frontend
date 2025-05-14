@@ -3,16 +3,16 @@ import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizableP
 import { useParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { useAppDispatch } from '@/hooks/toolkit';
-import Artifacts from '@/modules/process/activity-logs/Artifacts';
-import Logs from '@/modules/process/activity-logs/Logs';
+import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/Summary';
+import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { addBreadcrumb } from '@/store/slices/layout-configs';
 import { cn } from '@/utils/common';
 
-const ActivityLogs = () => {
+const Activity = () => {
   const { processId, process, rowid } = useParams();
-  const ref = useRef<ImperativePanelHandle>(null);
+  const panelRef = useRef<ImperativePanelHandle>(null);
   const appDispatch = useAppDispatch();
 
   console.log('processId', processId, process, rowid);
@@ -40,7 +40,7 @@ const ActivityLogs = () => {
 
   useEffect(() => {
     if (!isExpanded) {
-      ref.current?.resize(50);
+      panelRef.current?.resize(50);
     }
   }, [isExpanded]);
 
@@ -55,7 +55,7 @@ const ActivityLogs = () => {
         className={cn('transition-all duration-300 ease-in-out', {
           '!transition-none': isDragging,
         })}
-        ref={ref}
+        ref={panelRef}
       >
         <Logs setShowSummary={setShowSummary} />
       </ResizablePanel>
@@ -107,10 +107,10 @@ const ActivityLogs = () => {
   );
 };
 
-ActivityLogs.getLayout = (page: ReactElement) => (
+Activity.getLayout = (page: ReactElement) => (
   <div className='h-full'>
     <DashboardLayout>{page}</DashboardLayout>
   </div>
 );
 
-export default ActivityLogs;
+export default Activity;

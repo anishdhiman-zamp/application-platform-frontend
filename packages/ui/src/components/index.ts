@@ -16,4 +16,5 @@ export * from './ui/skeleton';
 export * from './ui/step-card';
 export * from './ui/tabs';
 export * from './ui/tags';
+export * from './ui/textarea';
 export * from './ui/tooltip';

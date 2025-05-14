@@ -13,6 +13,7 @@ interface FullScreenPopupProps {
   children?: any;
   hideCloseButton?: boolean;
   isOpen: boolean;
+  hideHeader?: boolean;
 }
 
 const FullScreenPopup: FC<FullScreenPopupProps> = ({
@@ -23,29 +24,32 @@ const FullScreenPopup: FC<FullScreenPopupProps> = ({
   children = null,
   hideCloseButton = false,
   isOpen,
+  hideHeader = false,
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className={`h-screen w-screen fixed top-0 left-0 overflow-y-auto bg-white z-1000  ${className}`}>
-      <div className='flex items-center justify-between p-4'>
-        {!hideLogo && (
-          <Image
-            width={16}
-            height={16}
-            alt='zamp logo'
-            className='w-4 align-middle cursor-pointer'
-            src={ZAMP_ICON}
-            priority
-          />
-        )}
+    <div className={cn('h-screen w-screen fixed top-0 left-0 overflow-y-auto bg-white z-1000', className)}>
+      {!hideHeader && (
+        <div className='flex items-center justify-between p-4'>
+          {!hideLogo && (
+            <Image
+              width={16}
+              height={16}
+              alt='zamp logo'
+              className='w-4 align-middle cursor-pointer'
+              src={ZAMP_ICON}
+              priority
+            />
+          )}
 
-        {!!onClose && !hideCloseButton && (
-          <div className='p-2 rounded-full cursor-pointer' onClick={onClose}>
-            <SvgSpriteLoader id='x-close' size={16} />
-          </div>
-        )}
-      </div>
+          {!!onClose && !hideCloseButton && (
+            <div className='p-2 rounded-full cursor-pointer' onClick={onClose}>
+              <SvgSpriteLoader id='x-close' size={16} />
+            </div>
+          )}
+        </div>
+      )}
       <div className={cn('overflow-y-auto w-full', childrenClassName)}>{children}</div>
     </div>
   );

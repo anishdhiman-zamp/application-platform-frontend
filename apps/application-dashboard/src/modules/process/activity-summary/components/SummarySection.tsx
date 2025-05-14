@@ -22,7 +22,7 @@ const SummarySection = ({
             <p className='f-12-450 text-GRAY_900 truncate max-w-[180px]' title={field.label}>
               {field.label}
             </p>
-            <p className='f-12-450 text-GRAY_1000 py-1.5 px-2 truncate max-w-[140px]' title={field.value}>
+            <p className='f-12-450 text-GRAY_1000 py-1.5 px-2 truncate max-w-full' title={field.value}>
               {field.value}
             </p>
           </div>

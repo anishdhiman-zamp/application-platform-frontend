@@ -42,7 +42,7 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
     >
       <div
         className={cn(
-          'flex items-center py-1 px-1.5 gap-1.5 border border-GRAY_400 rounded-[4px] hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 cursor-pointer',
+          'flex items-center py-1 px-1.5 gap-1.5 border border-GRAY_400 rounded-[4px] transition-colors hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 cursor-pointer',
           count === 0 && 'opacity-50 cursor-none',
         )}
       >
