@@ -1,3 +1,4 @@
+import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
 import InvitationApprovalStatus from 'modules/team/components/members/InvitationApprovalStatus';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
@@ -92,3 +93,16 @@ export enum TEAM_PERMISSION_TOAST_MSG {
   TEAM_REMOVE_SUCCESS = 'Team removed successfully',
   TEAM_REMOVE_ERROR = 'Failed to remove team',
 }
+
+export const DUAL_ADMIN_APPROVAL_POLICY_OPTIONS = [
+  {
+    label: 'Approval',
+    value: TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE,
+    icon: 'check',
+  },
+  {
+    label: 'Reject',
+    value: TEMPLATE_APPROVAL_ACTION_TYPES.REJECT,
+    icon: 'x-close',
+  },
+];

@@ -82,6 +82,11 @@ type DatasetByIdProps = {
   isReadOnly?: boolean;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
+  headerClassName?: string;
+  updateDatasetTitleInParent?: (title: string) => void;
+  updateFiltersInParent?: (filters: MapAny) => void;
+  updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
+  parentSelectedFilters?: MapAny;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -92,6 +97,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
   isReadOnly = false,
   containerStyle,
   gridStyle,
+  headerClassName,
+  updateDatasetTitleInParent,
+  updateFiltersInParent,
+  updateFilterConfigInParent,
+  parentSelectedFilters,
 }) => {
   const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
 
@@ -390,28 +400,40 @@ const DatasetById: FC<DatasetByIdProps> = ({
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
+        undefined,
+        undefined,
+        false,
       );
 
       if (columns?.length > 0) {
         setColumns(columns);
+        const filtersConfig = filterConfigData?.data
+          ?.filter((item) => !item?.metadata?.is_hidden)
+          ?.map((column) => ({
+            key: column.column,
+            label: column.alias ?? snakeCaseToSentenceCase(column?.column),
+            values: column.options,
+            type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+          }));
+
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
           payload: {
-            filtersConfig: filterConfigData?.data
-              ?.filter((item) => !item?.metadata?.is_hidden)
-              ?.map((column) => ({
-                key: column.column,
-                label: column.alias ?? snakeCaseToSentenceCase(column?.column),
-                values: column.options,
-                type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
-              })),
+            filtersConfig,
           },
         });
+        updateFilterConfigInParent?.(filtersConfig);
         if (filters) {
           firstLoadDone.current = false;
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: { selectedFilters: getFilters(filters, filterConfigData.data) ?? {} },
+          });
+        }
+        if (parentSelectedFilters) {
+          dispatch({
+            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+            payload: { selectedFilters: parentSelectedFilters },
           });
         }
 
@@ -465,6 +487,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   useEffect(() => {
     tableRef.current?.api?.setFilterModel(selectedFilters);
+    updateFiltersInParent?.(selectedFilters);
   }, [selectedFilters, fxCurrency]);
 
   useEffect(() => {
@@ -581,6 +604,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
       });
   }, [filters, drilldownFilters, id]);
 
+  useEffect(() => {
+    updateDatasetTitleInParent?.(datasetTitle);
+  }, [datasetTitle, updateDatasetTitleInParent]);
+
   useOnClickOutside(datasetTableRef, removeCellFocus);
 
   return (
@@ -605,7 +632,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8 z-1000'>
+        <div className={cn('flex items-center justify-between pr-8 z-1000', headerClassName)}>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
@@ -631,18 +658,22 @@ const DatasetById: FC<DatasetByIdProps> = ({
               />
             )}
             {!isReadOnly && <DatasetHistory />}
-            <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-            <div className='flex items-center gap-2'>
-              <div className='border-r border-GRAY_400 h-7'></div>
-              <SingleSelectFilter
-                onFilterChange={handleFilterChange}
-                value={fxCurrency}
-                filterKey='fx_currency'
-                label='Currency'
-                showColumnLabel={false}
-                options={PAGE_CURRENCY_OPTIONS}
-              />
-            </div>
+            {!isReadOnly && (
+              <>
+                <DisplayOptions tableRef={tableRef} datasetId={id as string} />
+                <div className='flex items-center gap-2'>
+                  <div className='border-r border-GRAY_400 h-7'></div>
+                  <SingleSelectFilter
+                    onFilterChange={handleFilterChange}
+                    value={fxCurrency}
+                    filterKey='fx_currency'
+                    label='Currency'
+                    showColumnLabel={false}
+                    options={PAGE_CURRENCY_OPTIONS}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 

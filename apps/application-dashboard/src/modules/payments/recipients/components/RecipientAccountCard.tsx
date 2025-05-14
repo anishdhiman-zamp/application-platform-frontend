@@ -24,7 +24,7 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
 
       <div
         className={cn(
-          'px-2.5  flex flex-col gap-3.5 duration-100 transition-all overflow-hidden',
+          'px-2.5 flex flex-col gap-3.5 duration-200 transition-all overflow-hidden',
           isDetailsOpen ? 'max-h-[500px] py-3' : 'max-h-0',
         )}
       >

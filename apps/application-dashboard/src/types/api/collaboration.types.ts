@@ -1,4 +1,5 @@
 import { ResourceAudienceType } from 'types/api/auth.types';
+import { FilterModelType } from 'types/components/table.type';
 
 export type AudiencesByResourceIdRequest = {
   resourceRoute: string;
@@ -10,6 +11,7 @@ export type AddAudiencesToResourcePayload = {
     audience_type: string;
     audience_id: string;
     role: string;
+    fgac_filters?: FilterModelType | null;
   }[];
 };
 
@@ -22,6 +24,7 @@ type withResource<T> = T & AudiencesByResourceIdRequest;
 export type ChangeAudienceRoleInResourcePayload = withResource<{
   audience_id: string;
   role: string;
+  fgac_filters?: FilterModelType | null;
 }>;
 
 export type PostShareResourceToAudiencesType = withResource<{
@@ -47,5 +50,8 @@ export type AudiencesByResourceResponse = {
     email?: string;
     user_id?: string;
     name?: string;
+  };
+  metadata?: {
+    fgac_filters?: FilterModelType;
   };
 };

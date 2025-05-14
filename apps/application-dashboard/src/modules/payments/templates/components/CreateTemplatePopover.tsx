@@ -155,7 +155,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
               onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
               label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
               isLoading={isDestinationAccountsLoading || isRecipientBySourceAccountLoading}
-              showCurrencyLogo
+              showCurrencyLogo={isSingleTransfer}
             />
           )}
         </div>
