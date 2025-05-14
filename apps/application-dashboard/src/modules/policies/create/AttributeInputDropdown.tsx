@@ -34,8 +34,18 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
       control={control}
       defaultValue=''
       render={({ field: { value, onChange } }) => (
-        <Popover>
-          <PopoverTrigger>
+        <Popover
+          onOpenChange={(open) => {
+            const parentElement = document.getElementById(attribute.id)?.parentElement;
+
+            if (open && parentElement) {
+              parentElement.style.pointerEvents = 'none';
+            } else if (parentElement) {
+              parentElement.style.pointerEvents = 'auto';
+            }
+          }}
+        >
+          <PopoverTrigger id={attribute.id}>
             <Attribute
               className={cn({
                 'border border-red-500 rounded-md': error,
@@ -44,7 +54,7 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
               displayValue={`${inputConfig.prefix_text} ${(formatter?.(Number(value)) || value) ?? 0} ${inputConfig.suffix_text}`}
             />
           </PopoverTrigger>
-          <PopoverContent className='p-2.5 space-y-2' sideOffset={6} align='start' side='bottom'>
+          <PopoverContent className='p-2.5 space-y-2 pointer-events-auto' sideOffset={6} align='start' side='bottom'>
             <div className='flex items-center gap-2'>
               <p className='f-11-400 text-gray-700'>{inputConfig.label}</p>
               {inputConfig.suffix_text && <p className='f-11-500 text-blue-700'>{inputConfig.prefix_text}</p>}
