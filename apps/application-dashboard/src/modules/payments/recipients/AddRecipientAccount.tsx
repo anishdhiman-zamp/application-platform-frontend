@@ -12,7 +12,7 @@ import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 const RenderRecipientDetails = ({ recipientDetails }: { recipientDetails: RecipientDetailsType }) => {
   const details = [
     {
-      label: 'Account holder name',
+      label: 'Recipient Name',
       value: recipientDetails.name,
     },
     {

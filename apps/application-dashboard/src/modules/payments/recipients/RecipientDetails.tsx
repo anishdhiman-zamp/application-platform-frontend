@@ -97,7 +97,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
                     id: 'plus',
                     size: 14,
                   }}
-                  onClick={onAddRecipientAccount}
+                  onClick={() => onAddRecipientAccount()}
                 >
                   Add
                 </Button>
