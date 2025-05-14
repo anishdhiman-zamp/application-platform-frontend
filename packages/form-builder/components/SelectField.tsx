@@ -77,7 +77,6 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       },
       {} as Record<string, any>,
     );
-    console.log('currentFieldValues', currentFieldValues);
     return loadOptions(currentFieldValues, page);
   };
 

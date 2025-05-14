@@ -38,6 +38,7 @@ export interface DatasetTableProps {
   suppressCellFocus?: boolean;
   enableCellSelection?: boolean;
   onGridReady?: () => void;
+  menuTitle?: string;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -64,6 +65,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   suppressCellFocus = false,
   enableCellSelection = true,
   onGridReady,
+  menuTitle,
 }) => {
   return (
     <div id='dataset-table'>
@@ -92,6 +94,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         headerClass={headerClass}
         cellClass={cellClass}
         onGridReady={onGridReady}
+        menuTitle={menuTitle}
       />
     </div>
   );

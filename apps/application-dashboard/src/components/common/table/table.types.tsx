@@ -6,6 +6,8 @@ export enum CUSTOM_COLUMNS_TYPE {
   ACTIVITY_DOCUMENT = 'activity_document',
   ACTIVITY_CURRENT_STATUS = 'activity_current_status',
   ACTIVITY_STATUS = 'activity_status',
+  BANK_NAME = 'bank-name',
+  PAYMENTS_ACCOUNT_STATUS = 'payments-account-status',
 }
 
 export enum DISPLAY_OPTIONS {

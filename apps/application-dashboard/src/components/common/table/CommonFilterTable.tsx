@@ -7,7 +7,7 @@ import {
   RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { useGetPaymentListDatasetFilterConfigQuery, useLazyGetPaymentListQuery } from 'apis/payments';
+import { useGetFilterConfigQuery, useLazyGetDataQuery } from 'apis/filterTable';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset, getFilters } from 'modules/data/data.utils';
@@ -16,34 +16,56 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
 import { defaultFn, MapAny } from 'types/commonTypes';
-import { cn } from 'utils/common';
+import { FilterModelType } from 'types/components/table.type';
+import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
+import { FILTER_TYPES } from 'components/filter/filter.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface CommonFilterTableProps {
-  handleRowClicked: (event: RowClickedEvent) => void;
+  handleRowClicked?: (event: RowClickedEvent) => void;
   actionElements?: ReactElement;
   id: string;
-  zampIds?: string[];
   tableRef: React.RefObject<AgGridReact>;
   cellClass?: string;
+  filterConfigUrl: string;
+  dataUrl: string;
+  isHeaderMenuDisabled?: boolean;
+  updateFiltersInParent?: (filters: MapAny) => void;
+  updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
+  parentSelectedFilters?: MapAny;
+  disableFilterActions?: boolean;
+  drilldownFilters?: FilterModelType;
+  sortColumn?: string;
+  sortOrder?: string;
+  isProcess?: boolean;
 }
 
 const CommonFilterTable: FC<CommonFilterTableProps> = ({
   handleRowClicked,
   actionElements,
   id,
-  zampIds,
   tableRef,
   cellClass,
+  disableFilterActions = false,
+  filterConfigUrl,
+  dataUrl,
+  isHeaderMenuDisabled,
+  updateFiltersInParent,
+  updateFilterConfigInParent,
+  parentSelectedFilters,
+  drilldownFilters,
+  sortColumn,
+  sortOrder,
+  isProcess = false,
 }) => {
   const router = useRouter();
   const datasetTableRef = useRef<HTMLDivElement>(null);
@@ -63,28 +85,20 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
 
-  const [getPaymentList, { data: paymentListData, isError: isPaymentListError }] = useLazyGetPaymentListQuery();
-  const { data: filterConfigData, isFetching, isError } = useGetPaymentListDatasetFilterConfigQuery();
-  const filterConfig = filterConfigData;
+  const [getData, { data, isError }] = useLazyGetDataQuery();
+  const {
+    data: filterConfig,
+    isFetching: isFilterConfigFetching,
+    isError: isFilterConfigError,
+  } = useGetFilterConfigQuery({ url: filterConfigUrl });
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        const filtersFromZampIds = {
-          column: '_zamp_id',
-          operator: CONDITION_OPERATOR_TYPE.IN,
-          value: zampIds,
-        };
-        const queryConfig = getEncodedRequest(
-          parameters.request,
-          '',
-          false,
-          false,
-          false,
-          zampIds && zampIds?.length > 0 ? filtersFromZampIds : undefined,
-        );
+        const queryConfig = getEncodedRequest(parameters.request, '', false, false, false, undefined, drilldownFilters);
 
-        getPaymentList({
+        getData({
+          url: dataUrl || '',
           query_config: queryConfig,
         })
           .unwrap()
@@ -108,7 +122,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
           });
       },
     };
-  }, [getPaymentList, id, zampIds]);
+  }, [getData, id, dataUrl]);
 
   const handleColumnMoved = (event: ColumnMovedEvent) => {
     const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(id);
@@ -154,23 +168,41 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(filterConfig, false, id as string, undefined, tableRef, defaultFn, 'date', 'desc');
+      const columns = formatColumns(
+        filterConfig,
+        false,
+        id as string,
+        undefined,
+        tableRef,
+        defaultFn,
+        sortColumn,
+        sortOrder,
+        isProcess,
+        isHeaderMenuDisabled,
+      );
 
       if (columns?.length > 0) {
         setColumns(columns);
+        const formattedFilterConfig = filterConfig
+          ?.filter((item) => !item?.metadata?.is_hidden)
+          ?.map((column) => ({
+            key: column.column,
+            label: column.alias ?? snakeCaseToSentenceCase(column?.column),
+            values: column.options,
+            type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+          }));
+
         dispatch({
           type: filtersContextActions.SET_FILTERS_CONFIG,
           payload: {
-            filtersConfig: filterConfig
-              ?.filter((item) => !item?.metadata?.is_hidden)
-              ?.map((column) => ({
-                key: column.column,
-                label: column.column,
-                values: column.options,
-                type: column.type,
-              })),
+            filtersConfig: formattedFilterConfig,
           },
         });
+
+        if (updateFilterConfigInParent) {
+          updateFilterConfigInParent(formattedFilterConfig);
+        }
+
         if (filters)
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
@@ -178,11 +210,14 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
           });
       }
     }
-  }, [filterConfig, filters]);
+  }, [filterConfig, filters, updateFilterConfigInParent]);
 
   useEffect(() => {
-    tableRef.current?.api?.setFilterModel(selectedFilters);
-  }, [selectedFilters]);
+    tableRef.current?.api?.setFilterModel(parentSelectedFilters || selectedFilters);
+    if (updateFiltersInParent && selectedFilters) {
+      updateFiltersInParent(selectedFilters);
+    }
+  }, [selectedFilters, parentSelectedFilters, updateFiltersInParent]);
 
   useEffect(() => {
     if (isNoRowsOverlayVisible) {
@@ -202,9 +237,9 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
     <>
       <CommonWrapper
         className={cn('h-full', {
-          'flex flex-col items-center justify-center': isFetching,
+          'flex flex-col items-center justify-center': isFilterConfigFetching,
         })}
-        isLoading={isFetching}
+        isLoading={isFilterConfigFetching}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
           <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
@@ -220,12 +255,19 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
       >
         <div className='flex items-center justify-between pr-8 py-3'>
           <div className='flex items-center justify-between w-full'>
-            {!isError && <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />}
+            {!isFilterConfigError && (
+              <FiltersWrapper
+                label='Filter'
+                filterConfig={filtersConfig ?? []}
+                allowActions={!disableFilterActions}
+                allowClear={!disableFilterActions}
+              />
+            )}
             {actionElements}
           </div>
         </div>
 
-        <CommonWrapper isError={isPaymentListError} refetchFunction={() => router.refresh()}>
+        <CommonWrapper isError={isError} refetchFunction={() => router.refresh()}>
           <div className='z-10 w-full h-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
@@ -245,7 +287,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
           data={rowPropertiesData}
           onClose={() => setRowPropertiesData(undefined)}
           datasetId={id as string}
-          isDrillDownEnabled={paymentListData?.data?.config?.is_drilldown_enabled}
+          isDrillDownEnabled={data?.data?.config?.is_drilldown_enabled}
           columns={columns}
         />
       )}

@@ -10,6 +10,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.ORANGE_300,
     },
+    label: 'Needs attention',
   },
   [ACTIVITY_RUN_STATUS.VOID]: {
     tabStatusIcon: {
@@ -19,6 +20,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.GRAY_700,
     },
+    label: 'Void',
   },
   [ACTIVITY_RUN_STATUS.IN_PROGRESS]: {
     tabStatusIcon: {
@@ -28,6 +30,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.BLUE_700,
     },
+    label: 'In progress',
   },
   [ACTIVITY_RUN_STATUS.DONE]: {
     tabStatusIcon: {
@@ -37,6 +40,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.GREEN_300,
     },
+    label: 'Done',
   },
   [ACTIVITY_RUN_STATUS.PAUSED]: {
     tabStatusIcon: {
@@ -46,6 +50,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.YELLOW_200,
     },
+    label: 'Paused',
   },
   [ACTIVITY_RUN_STATUS.FAILED]: {
     tabStatusIcon: {
@@ -55,6 +60,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.RED_800,
     },
+    label: 'Failed',
   },
 };
 
@@ -65,10 +71,35 @@ export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.VIDEO]: {
     id: 'file-05',
   },
-  [ARTIFACT_TYPE.DATASET]: {
+  [ARTIFACT_TYPE.PDF_DATASET]: {
     id: 'coins-stacked-04',
   },
   [ARTIFACT_TYPE.EMAIL]: {
     id: 'mail-01',
   },
 };
+
+export enum RESIZABLE_PANEL_ID {
+  SUMMARY = 'summary',
+  ARTIFACTS = 'artifacts',
+  LOGS = 'logs',
+}
+
+export const RESIZABLE_PANEL_MAPPING = {
+  [RESIZABLE_PANEL_ID.SUMMARY]: {
+    id: 'summary',
+    defaultSize: 30,
+  },
+  [RESIZABLE_PANEL_ID.ARTIFACTS]: {
+    id: 'artifacts',
+    defaultSize: 50,
+  },
+  [RESIZABLE_PANEL_ID.LOGS]: {
+    id: 'logs',
+    defaultSize: 70,
+    minSize: 30,
+    maxSize: 70,
+  },
+};
+
+export const MAX_TEXTAREA_HEIGHT = 192;

@@ -1,4 +1,5 @@
 import { Label } from '@zamp-platform/ui';
+import { motion } from 'framer-motion';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -38,17 +39,34 @@ export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schem
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className='flex flex-col gap-5 pb-5'>
-        {schema.sections.map((section) => (
-          <div className='form-section flex flex-col'>
+        {schema.sections.map((section, index) => (
+          <motion.div
+            key={section.id || index}
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.25,
+              delay: index * 0.15,
+            }}
+            className='form-section flex flex-col'
+          >
             <Label>{section.title}</Label>
             {section.sections && (
-              <div className='nested-sections flex flex-col gap-5'>
+              <motion.div
+                className='nested-sections flex flex-col gap-5'
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.3,
+                  delay: 0.1,
+                }}
+              >
                 {section.sections.map((nestedSection) => (
                   <FormSection key={nestedSection.id} section={nestedSection} fields={schema.fields} />
                 ))}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         ))}
       </form>
     </FormProvider>

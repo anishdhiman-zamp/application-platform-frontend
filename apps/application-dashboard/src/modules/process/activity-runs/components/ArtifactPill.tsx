@@ -23,13 +23,14 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
 
   return (
     <Combobox
-      options={artifacts.map((artifact) => ({
-        value: artifact.id,
-        label: artifact.display_name,
-        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact.artifact_type].id} width={12} height={12} />,
+      options={artifacts?.map((artifact) => ({
+        value: artifact?.id,
+        label: artifact?.display_name,
+        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact?.artifact_type].id} width={12} height={12} />,
       }))}
-      value={value}
-      onChange={setValue}
+      onSelect={(option) => {
+        setValue(option.id === value ? '' : (option.id ?? ''));
+      }}
       open={open}
       onOpenChange={setOpen}
       searchPlaceholder='Search artifacts'
@@ -41,7 +42,7 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
     >
       <div
         className={cn(
-          'flex items-center py-1 px-1.5 gap-1.5 border border-GRAY_400 rounded-[4px] hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 cursor-pointer',
+          'flex items-center py-1 px-1.5 gap-1.5 border border-GRAY_400 rounded-[4px] transition-colors hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 cursor-pointer',
           count === 0 && 'opacity-50 cursor-none',
         )}
       >

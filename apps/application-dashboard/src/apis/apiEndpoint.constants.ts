@@ -80,6 +80,8 @@ export const API_ENDPOINTS = {
   PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,
   PAYMENT_LIST_GET: `payments/`,
   PAYMENT_DETAILS_GET: `payments/{{paymentId}}`,
+  PAYMENTS_ACCOUNTS_GET: `payments/accounts`,
+  PAYMENTS_ACCOUNT_FILTER_CONFIG_GET: `payments/accounts/filter-config`,
   RECIPIENT_LIST_GET: `recipients/filtered-accounts`,
   RECIPIENT_CREATE_POST: `recipients/{{recipientId}}/create-recipient-and-account`,
   RECIPIENT_ACCOUNT_CREATE_POST: `recipients/account`,

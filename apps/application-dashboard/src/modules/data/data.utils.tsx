@@ -106,6 +106,7 @@ export const formatColumns = (
   sortColumn?: string,
   sortOrder?: string,
   isProcess?: boolean,
+  isMenuDisabled?: boolean,
 ): ColDef[] => {
   const columns: ColDef[] = [];
 
@@ -155,7 +156,7 @@ export const formatColumns = (
       filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
       headerBackgroundNeeded: false,
       className: isProcess && 'py-2 px-4 hover:bg-transparent',
-      hideFloatingFilter: isActivityCurrentStatusColumn || isActivityStatusColumn,
+      hideFloatingFilter: isActivityCurrentStatusColumn || isActivityStatusColumn || isMenuDisabled,
     };
 
     if (column?.metadata?.config?.value_format) {

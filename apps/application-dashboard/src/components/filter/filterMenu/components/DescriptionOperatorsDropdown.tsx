@@ -12,6 +12,7 @@ interface DescriptionOperatorsDropdownProps {
   isLoading?: boolean;
   label?: string;
   operatorOptions?: OptionsType[];
+  isDisabled?: boolean;
 }
 
 const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
@@ -20,6 +21,7 @@ const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
   isLoading,
   label = 'Description',
   operatorOptions = DESCRIPTION_OPERATORS,
+  isDisabled = false,
 }) => {
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +34,7 @@ const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
   };
 
   const onToggleDropdown = () => {
-    if (isLoading) return;
+    if (isLoading || isDisabled) return;
 
     setIsOpen(!isOpen);
   };
