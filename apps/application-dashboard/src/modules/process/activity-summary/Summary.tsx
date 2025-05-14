@@ -4,7 +4,7 @@ import { ACTIVITY_LOGS_SUMMARY_MOCK_DATA } from 'modules/process/mock.data';
 
 const Summary = () => {
   return (
-    <div className='flex flex-col items-start justify-start h-full w-full overflow-auto'>
+    <div className='flex flex-col items-start justify-start h-full min-w-max overflow-x-auto'>
       <div className='px-6 pt-5 pb-6 flex flex-col justify-start items-start w-full gap-y-3'>
         <p className='f-13-550'>Key Details</p>
         {ACTIVITY_LOGS_SUMMARY_MOCK_DATA?.summary?.map((section) => <SummarySection key={section.id} data={section} />)}

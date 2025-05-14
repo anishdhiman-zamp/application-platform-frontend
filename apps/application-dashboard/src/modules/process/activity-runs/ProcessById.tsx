@@ -97,9 +97,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
             <TabsTrigger
               key={item?.status}
               value={item?.status}
-              className={cn('!rounded-[4px] !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 active:bg-GRAY_200', {
-                '!bg-GRAY_100': activeTab === item?.status,
-              })}
+              className={cn(
+                '!rounded-[4px] !px-2 !py-1 border-none gap-1.5 transition-colors hover:bg-GRAY_50 active:bg-GRAY_200',
+                {
+                  '!bg-GRAY_100': activeTab === item?.status,
+                },
+              )}
             >
               <TabStatusIcon
                 status={item?.status as ACTIVITY_RUN_STATUS}
