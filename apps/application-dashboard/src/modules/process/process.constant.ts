@@ -65,10 +65,33 @@ export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.VIDEO]: {
     id: 'file-05',
   },
-  [ARTIFACT_TYPE.DATASET]: {
+  [ARTIFACT_TYPE.PDF_DATASET]: {
     id: 'coins-stacked-04',
   },
   [ARTIFACT_TYPE.EMAIL]: {
     id: 'mail-01',
+  },
+};
+
+export enum RESIZABLE_PANEL_ID {
+  SUMMARY = 'summary',
+  ARTIFACTS = 'artifacts',
+  LOGS = 'logs',
+}
+
+export const RESIZABLE_PANEL_MAPPING = {
+  [RESIZABLE_PANEL_ID.SUMMARY]: {
+    id: 'summary',
+    defaultSize: 30,
+  },
+  [RESIZABLE_PANEL_ID.ARTIFACTS]: {
+    id: 'artifacts',
+    defaultSize: 50,
+  },
+  [RESIZABLE_PANEL_ID.LOGS]: {
+    id: 'logs',
+    defaultSize: 70,
+    minSize: 30,
+    maxSize: 70,
   },
 };

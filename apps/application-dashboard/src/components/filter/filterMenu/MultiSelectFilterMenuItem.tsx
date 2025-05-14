@@ -8,18 +8,21 @@ import TooltipV2 from '@/components/common/TooltipV2';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+import { getDisplayString, getValueString } from 'components/filter/filter.utils';
 import { CONDITION_OPERATOR_TYPE, MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
+export type MultiSelectFilterValue = string | { label: string; value: string };
 interface MultiSelectFilterMenuItemProps {
   column: { colId: string };
-  values: string[];
+  values: MultiSelectFilterValue[];
   className?: string;
-  LabelComponent?: (item: string) => ReactNode;
+  LabelComponent?: (item: MultiSelectFilterValue) => ReactNode;
   operatorOptions?: OptionsType[];
   isOpen?: boolean;
   showSelectAll?: boolean;
   label?: string;
+  isDisabled?: boolean;
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -31,6 +34,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   isOpen = false,
   showSelectAll = false,
   label,
+  isDisabled = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -81,12 +85,13 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
     setInputValue(event.target.value);
   };
 
-  const onChange = (value: string) => {
+  const onChange = (value: MultiSelectFilterValue) => {
     if (isNullOperator) return;
 
-    const updatedValues = selectedValues.includes(value)
-      ? selectedValues.filter((item) => item !== value)
-      : [...selectedValues, value];
+    const valueStr = getValueString(value);
+    const updatedValues = selectedValues.includes(valueStr)
+      ? selectedValues.filter((item) => item !== valueStr)
+      : [...selectedValues, valueStr];
 
     setSelectedValues(updatedValues);
     handleSetValues(selectedOperator.value as string, updatedValues);
@@ -122,17 +127,23 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   const filteredValues = useMemo(() => {
     const lowerCasedInput = inputValue?.toLowerCase();
 
-    return values.filter((item) => item && item?.toLowerCase().includes(lowerCasedInput));
+    return values.filter((item) => {
+      const displayStr = getDisplayString(item);
+
+      return displayStr && displayStr.toLowerCase().includes(lowerCasedInput);
+    });
   }, [values, inputValue]);
 
   useEffect(() => {
-    setIsSelectAll(filteredValues?.length > 0 && filteredValues.every((item) => selectedValues.includes(item)));
+    setIsSelectAll(
+      filteredValues?.length > 0 && filteredValues.every((item) => selectedValues.includes(getValueString(item))),
+    );
   }, [filteredValues, selectedValues]);
 
   const onSelectAll = () => {
     const newSelectedValues = isSelectAll
-      ? selectedValues.filter((val) => !filteredValues.includes(val))
-      : Array.from(new Set([...selectedValues, ...filteredValues]));
+      ? selectedValues.filter((val) => !filteredValues.some((item) => getValueString(item) === val))
+      : Array.from(new Set([...selectedValues, ...filteredValues.map(getValueString)]));
 
     setSelectedValues(newSelectedValues);
     handleSetValues(selectedOperator.value as string, newSelectedValues);
@@ -151,7 +162,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
         </div>
         <div
           className='flex items-center gap-[2px] cursor-pointer relative select-none grow'
-          onClick={() => setIsConditionOpen(!isConditionOpen)}
+          onClick={() => !isDisabled && setIsConditionOpen(!isConditionOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
             {selectedOperator?.label || 'is equal to'}
@@ -197,11 +208,12 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
           placeholder='type a value...'
           onChange={onSearchChange}
           autoFocus
+          disabled={isDisabled}
         />
       </div>
       {showSelectAll && (
         <div
-          onClick={() => onSelectAll()}
+          onClick={() => !isDisabled && onSelectAll()}
           className='flex items-center gap-2 justify-between mx-1 py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
         >
           <div className='f-12-400 text-GRAY_1000'>Select All</div>
@@ -221,22 +233,30 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
         {!!filteredValues?.length &&
           filteredValues.map((item) => (
             <div
-              key={item}
-              onClick={() => onChange(item)}
+              key={getValueString(item)}
+              onClick={() => !isDisabled && onChange(item)}
               className='flex items-center gap-2 justify-between py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100'
             >
-              {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{String(item)}</div>}
+              {LabelComponent ? (
+                LabelComponent(item)
+              ) : (
+                <div className='f-12-400 text-GRAY_1000'>{getDisplayString(item)}</div>
+              )}
               <TooltipV2
                 side={SIDE_OPTIONS.RIGHT}
-                key={item}
+                key={getValueString(item)}
                 tooltipBody={
                   isNullOperator
-                    ? `condition set to “${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}”`
+                    ? `condition set to "${operatorOptions.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label}"`
                     : ''
                 }
               >
                 <div className='min-w-[14px]'>
-                  <CheckBox checked={selectedValues?.includes(item)} id='checkbox-1' disabled={isNullOperator} />
+                  <CheckBox
+                    checked={selectedValues?.includes(getValueString(item))}
+                    id='checkbox-1'
+                    disabled={isNullOperator}
+                  />
                 </div>
               </TooltipV2>
             </div>
