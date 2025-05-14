@@ -3,7 +3,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApprovalDetailsBadge from 'modules/payments/payment-details/components/ApprovalDetailsBadge';
 import type { AudiencesByOrganisationIdResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import { PolicyResultStatus, PolicyStepType } from '@/types/api/policies.types';
-import { cn } from '@/utils/common';
+import { cn, snakeCaseToSentenceCase } from '@/utils/common';
 
 type ApprovalStatusCardProps = {
   step: number;
@@ -63,8 +63,8 @@ const ApprovalStatusCard: FC<ApprovalStatusCardProps> = ({
       <div className='p-5 w-full'>
         {approvalDetails?.conditions?.map((condition, index) => (
           <div key={index}>
-            <div className='f-12-500 text-GRAY_700 capitalize mb-1.5'>
-              {condition?.mode?.replaceAll('_', ' ').toLowerCase()}
+            <div className='f-12-500 text-GRAY_700 mb-1.5'>
+              {snakeCaseToSentenceCase(condition?.mode.toLowerCase() ?? '')}
             </div>
             <div className='flex flex-wrap gap-1.5 '>
               {condition?.approver_details?.map((approver, userIndex) => (

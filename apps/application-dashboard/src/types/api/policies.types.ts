@@ -1,3 +1,5 @@
+import type { PolicyDetailsType } from 'types/api/paymentApi.types';
+
 /**
  * Types for policy-related API responses and requests
  */
@@ -18,6 +20,7 @@ export enum ActionType {
 
 export enum ApprovalStatus {
   PENDING = 'PENDING',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
 }
@@ -42,9 +45,24 @@ export type GetPolicyResultApprovalsResponse = {
   data: Approval[];
 };
 
+export type GetDualAdminPolicyResponse = {
+  name: string;
+  description: string;
+  resource_id: string;
+  resource_type: string;
+  action_type: string;
+  icon_id: string;
+  policy: PolicyDetailsType;
+};
+
 export type ProcessApprovalRequest = {
   ids: string[];
   comments?: string;
+};
+
+export type PolicyApprovalRequest = {
+  action: string;
+  approval_ids: string[];
 };
 
 export type ProcessApprovalResponse = {

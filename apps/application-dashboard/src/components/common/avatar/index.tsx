@@ -19,7 +19,7 @@ const Avatar: FC<AvatarProps> = ({
     className={cn('flex justify-center items-center rounded-full relative text-white', className)}
     style={{ backgroundColor: backgroundColor || getRandomColor() }}
   >
-    {imageUrl ? <Image src={imageUrl} alt={name} fill /> : <>{getFirstLetters(name)}</>}
+    {imageUrl ? <Image src={imageUrl} alt={name} fill /> : <>{getFirstLetters(name, 1)}</>}
   </div>
 );
 

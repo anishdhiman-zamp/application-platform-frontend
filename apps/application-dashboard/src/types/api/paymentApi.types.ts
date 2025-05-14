@@ -4,6 +4,7 @@ import { CreatePolicyConfigPayload, PolicyActionType } from '@/modules/policies/
 import { ResourceType } from '@/modules/shareResource';
 import type { PolicyConfigType, PolicyResultStatus } from '@/types/api/policies.types';
 import { MenuItem } from '@/types/common/components';
+import type { MapAny } from '@/types/commonTypes';
 
 export type SourceAccountResponseType = {
   accounts: AccountDetailsType[];
@@ -156,6 +157,26 @@ export type GetPoliciesParamsType = {
   action_type?: string;
 };
 
+export enum PolicyMutateActionType {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}
+
+export type PolicyStatusType = {
+  status: PolicyResultStatus;
+  policy_result_id: string;
+  resource_action_metadata: {
+    mutate_action: PolicyMutateActionType;
+    data: MapAny;
+  };
+  can_approve: true;
+  approval: {
+    id: string;
+    status: PolicyResultStatus;
+  };
+};
+
 export type PolicyDetailsType = {
   id: string;
   name: string;
@@ -168,6 +189,7 @@ export type PolicyDetailsType = {
   updated_at: string;
   deleted_at: string;
   status: string;
+  status_details: PolicyStatusType;
   action_type: PolicyActionType;
 };
 

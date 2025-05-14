@@ -76,6 +76,10 @@ export const API_ENDPOINTS = {
   FORMS_SIGNED_UPLOAD_URL_POST: `v1/forms/file-upload/init`,
   FORMS_SIGNED_UPLOAD_ACK_POST: `v1/forms/file-upload/{{fileImportId}}/ack`,
   DOWNLOAD_FILE_GET: `v1/forms/file-upload/{{fileImportId}}/download`,
+  PAYMENTS_AUDIENCES_GET: `payments/audiences`,
+
+  DUAL_ADMIN_POLICY_GET: `/dual-admin-policy`,
+  APPROVAL_ACTION_POST: '/approval/action',
 
   PAYMENT_LIST_FILTER_CONFIG_GET: `payments/filter-config`,
   PAYMENT_LIST_GET: `payments/`,
