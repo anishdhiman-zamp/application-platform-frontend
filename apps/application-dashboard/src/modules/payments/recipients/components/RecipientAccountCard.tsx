@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { AccountDetailsType } from 'modules/payments/payments.types';
+import { cn } from '@/utils/common';
 
 type RecipientAccountCardProps = {
   account: AccountDetailsType;
@@ -20,16 +21,20 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
         <div className='grow'>Account Name {account?.masked_account_number}</div>
         <DropdownToggle isShowMenu={isDetailsOpen} setIsShowMenu={setIsDetailsOpen} />
       </div>
-      {isDetailsOpen && (
-        <div className='px-2.5 py-3 flex flex-col gap-3.5'>
-          {account?.account_details?.map((detail, index) => (
-            <div key={index} className='flex items-center gap-4'>
-              <div className='f-12-400 text-GRAY_700 w-[150px]'>{detail.label}</div>
-              <div className='f-11-400'>{detail.value}</div>
-            </div>
-          ))}
-        </div>
-      )}
+
+      <div
+        className={cn(
+          'px-2.5  flex flex-col gap-3.5 duration-100 transition-all overflow-hidden',
+          isDetailsOpen ? 'max-h-[500px] py-3' : 'max-h-0',
+        )}
+      >
+        {account?.account_details?.map((detail, index) => (
+          <div key={index} className='flex items-center gap-4'>
+            <div className='f-12-400 text-GRAY_700 w-[150px]'>{detail.label}</div>
+            <div className='f-11-400'>{detail.value}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
