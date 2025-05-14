@@ -1,13 +1,18 @@
 import { FC, useRef, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
+import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
+import { FilterModelType } from 'types/components/table.type';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { convertToFilterModel } from '@/components/common/table/table.utils';
+import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
 import { OptionsType } from '@/types/commonTypes';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
@@ -18,7 +23,7 @@ import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 type AudienceAccessPropsType = {
   resourceType: ResourceType;
   privilege: string;
-  changeRole: (resourceAudienceId: string, role: string) => Promise<boolean>;
+  changeRole: (resourceAudienceId: string, role: string, fgacFilters?: FilterModelType | null) => Promise<boolean>;
   deleteAudience: (resourceAudienceId: string, userName: string) => Promise<void>;
   privilegeList: ResourcePrivilege[];
   resourceAudienceId: string;
@@ -35,6 +40,9 @@ type AudienceAccessPropsType = {
   isDeletingAudience: boolean;
   isChangingRole: boolean;
   currentUserId: string;
+  isCustomiseAccess?: boolean;
+  fgacFilters?: FilterModelType;
+  resourceId: string;
 };
 
 const AudienceAccess: FC<AudienceAccessPropsType> = ({
@@ -52,13 +60,22 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   teamInfo,
   isDeletingAudience,
   currentUserId,
+  isCustomiseAccess = false,
+  fgacFilters,
+  resourceId,
+  isChangingRole = false,
 }) => {
+  const {
+    state: { selectedFilters },
+  } = useFiltersContextStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<ResourcePrivilege>(role as ResourcePrivilege);
+  const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
+
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
   const checkIfResourceTypeOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
   const checkIfResourceTypeTeam = resourceAudienceType === ResourceAudienceType.TEAM;
@@ -89,7 +106,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleRoleChange = async (selectedOption: OptionsType) => {
-    await changeRole(resourceAudienceId, selectedOption.value.toString())
+    await changeRole(resourceAudienceId, selectedOption.value.toString(), fgacFilters)
       .then((success) => {
         if (!success) {
           setSelectedRole(role as ResourcePrivilege);
@@ -116,6 +133,22 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
       .catch((err) => {
         handleCloseRemoveFromTeamPopup();
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
+      });
+  };
+
+  const handleToggleCustomiseAccess = () => {
+    if (showRoleChangeDropdown) {
+      setShowCustomiseAccess((prev) => !prev);
+    }
+  };
+
+  const handleSaveCustomiseAccess = async () => {
+    await changeRole(resourceAudienceId, role?.value || '', convertToFilterModel(selectedFilters))
+      .then(() => {
+        handleToggleCustomiseAccess();
+      })
+      .catch((err) => {
+        toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_CUSTOMISE_ACCESS);
       });
   };
 
@@ -163,6 +196,36 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             )}
           </span>
         </div>
+        {isCustomiseAccess && (
+          <div className='w-[86px]'>
+            {fgacFilters?.conditions && fgacFilters.conditions.length > 0 ? (
+              <Button
+                variant='ghost'
+                size='xxsmall'
+                className='f-12-450 text-GRAY_1000 px-1 py-0.5 flex items-center gap-1.5 group'
+                onClick={handleToggleCustomiseAccess}
+                disabled={!showRoleChangeDropdown}
+              >
+                {/* TODO: Add logic for same set of filters to have the same color and different for others. Colors to be picked from TEAMS_COLORS */}
+                <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: COLORS.BLUE_150 }} />
+                <span>Custom</span>
+                {showRoleChangeDropdown && (
+                  <SvgSpriteLoader
+                    id='arrow-narrow-right'
+                    size={12}
+                    color={COLORS.GRAY_1000}
+                    className='group-hover:opacity-100 opacity-0'
+                  />
+                )}
+              </Button>
+            ) : (
+              <div className='flex items-center gap-1.5 px-1'>
+                <SvgSpriteLoader id='coins-stacked-04' size={8} color={COLORS.GRAY_900} />
+                <span className='f-12-450 text-GRAY_1000'>All Data</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {showRoleChangeDropdown ? (
           <AsyncDropdown
@@ -179,11 +242,12 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             isHoveredDropdown={isHoveredDropdown}
             setIsHoveredDropdown={setIsHoveredDropdown}
             isOverflowStyle
+            parentWrapperClassName='w-28 justify-end'
           />
         ) : (
           <span
             className={cn(
-              'flex justify-between items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2',
+              'flex justify-end items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2 w-28',
               !showRoleChangeDropdown && 'pr-4 text-GRAY_600',
             )}
           >
@@ -199,8 +263,19 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
         feature='remove-access-from-page'
         warningDescription={`${userName} will be immediately removed from ${resourceType} and lose all access`}
       />
+      {showCustomiseAccess && (
+        <CustomiseAccess
+          isOpen={showCustomiseAccess}
+          onClose={handleToggleCustomiseAccess}
+          datasetId={resourceId}
+          resourceType={resourceType}
+          fgacFilters={fgacFilters}
+          onSave={handleSaveCustomiseAccess}
+          isSaving={isChangingRole}
+        />
+      )}
     </>
   );
 };
 
-export default AudienceAccess;
+export default withFiltersContext(AudienceAccess);

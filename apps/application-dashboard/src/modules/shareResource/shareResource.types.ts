@@ -69,6 +69,7 @@ export type ShareResourcePopupProps = {
   resourceType: ResourceType;
   resourceAdminPrivilege: string;
   resourceConfig: ShareResourceConfig;
+  isCustomiseAccess?: boolean;
 };
 
 /**
@@ -109,6 +110,7 @@ export type PageAccessPrivilegesType = {
 export enum DATASET_ACCESS_PRIVILEGES {
   ADMIN = 'admin',
   VIEWER = 'viewer',
+  DATA_EDITOR = 'editor',
 }
 
 export type DatasetAccessPrivilegesType = {
