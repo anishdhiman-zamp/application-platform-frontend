@@ -8,7 +8,7 @@ import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 
 interface ListViewProps {
   policies: PolicyDetailsType[];
-  audienceMembersData: AudiencesByResourceResponse[];
+  audienceMembersData?: Array<AudiencesByResourceResponse & { team_name: string; team_color: string }>;
   onPolicyClick: (policy: PolicyDetailsType) => void;
   heading: string;
   onNew: () => void;

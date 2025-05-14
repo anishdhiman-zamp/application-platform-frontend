@@ -20,6 +20,7 @@ export const ROUTES_PATH = {
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId/:label',
+  POLICIES: '/dual-admin',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/:label/:activityId',
 };
 
@@ -61,6 +62,20 @@ export const getProcessActivityLogsRouteById = (processId: string, label: string
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
 
+export const SETTING_SIDEBAR_ITEMS = [
+  {
+    label: 'People',
+    id: 'people',
+    iconId: 'users-02',
+    path: ROUTES_PATH.TEAM,
+  },
+  {
+    label: 'Policies',
+    id: 'policies',
+    iconId: 'shield-zap',
+    path: ROUTES_PATH.POLICIES,
+  },
+];
 export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
   {
     label: 'Data',

@@ -21,9 +21,11 @@ import {
   RemoveTeamFromAudienceRequestType,
 } from 'types/api/people.types';
 import {
+  type GetDualAdminPolicyResponse,
   GetPendingApprovalsResponse,
   GetPoliciesResponse,
   GetPolicyResultApprovalsResponse,
+  type PolicyApprovalRequest,
   ProcessApprovalRequest,
   ProcessApprovalResponse,
 } from 'types/api/policies.types';
@@ -178,6 +180,21 @@ const People = baseApi.injectEndpoints({
         APITags.GET_PAYMENT_APPROVALS_INFO,
       ],
     }),
+    approvalAction: builder.mutation<ProcessApprovalResponse, PolicyApprovalRequest>({
+      query: (params) => {
+        return {
+          url: API_ENDPOINTS.APPROVAL_ACTION_POST,
+          method: REQUEST_TYPES.POST,
+          body: params,
+        };
+      },
+      invalidatesTags: [
+        APITags.GET_PEOPLE_INVITATIONS,
+        APITags.GET_POLICY_APPROVALS,
+        APITags.GET_PAYMENT_TEMPLATE_LIST,
+        APITags.GET_PAYMENT_APPROVALS_INFO,
+      ],
+    }),
     getAllPolicies: builder.query<GetPoliciesResponse, { resourceType?: string; actionType?: string }>({
       query: (params) => {
         return {
@@ -195,6 +212,12 @@ const People = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_RESULT_APPROVALS_GET, { policyResultId }),
       }),
       providesTags: [APITags.GET_POLICY_APPROVALS],
+    }),
+    getDualAdminPolicy: builder.query<GetDualAdminPolicyResponse[], void>({
+      query: () => ({
+        url: API_ENDPOINTS.DUAL_ADMIN_POLICY_GET,
+      }),
+      transformResponse: ({ data }) => data,
     }),
   }),
 });
@@ -218,4 +241,6 @@ export const {
   useRejectPolicyMutation,
   useGetAllPoliciesQuery,
   useGetPolicyResultApprovalsQuery,
+  useGetDualAdminPolicyQuery,
+  useApprovalActionMutation,
 } = People;

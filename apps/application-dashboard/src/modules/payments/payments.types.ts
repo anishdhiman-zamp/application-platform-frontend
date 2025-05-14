@@ -52,9 +52,9 @@ export enum MOVE_MONEY_ACTION_TYPE {
 
 export const TEMPLATE_STATUS_TYPES = {
   DRAFTED: 'drafted',
+  PENDING: 'pending',
   ACTIVE: 'active',
   DECLINED: 'declined',
-  PENDING: 'pending',
 };
 
 export enum PAYMENT_STATUS_TYPES {
@@ -72,8 +72,8 @@ export const PAYMENT_TABS = {
   APPROVALS: 'approvals',
 };
 
-export const TEMPLATE_APPROVAL_ACTION_TYPES = {
-  APPROVE: 'approve',
-  REJECT: 'reject',
-  VIEW_ALL_APPROVALS: 'view-all-approvals',
-};
+export enum TEMPLATE_APPROVAL_ACTION_TYPES {
+  APPROVE = 'approve',
+  REJECT = 'reject',
+  VIEW_ALL_APPROVALS = 'view-all-approvals',
+}

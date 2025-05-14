@@ -11,7 +11,7 @@ type PolicyDeleteConfirmPopupProps = {
   isOpen: boolean;
   onClose: defaultFnType;
   policy: PolicyDetailsType;
-  audienceMembersData?: AudiencesByResourceResponse[];
+  audienceMembersData?: Array<AudiencesByResourceResponse & { team_name: string; team_color: string }>;
 };
 
 const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({

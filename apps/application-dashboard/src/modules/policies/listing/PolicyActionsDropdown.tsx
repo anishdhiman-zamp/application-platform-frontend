@@ -13,7 +13,7 @@ const PolicyActionsDropdown = ({
   audienceMembersData,
 }: {
   policy: PolicyDetailsType;
-  audienceMembersData?: AudiencesByResourceResponse[];
+  audienceMembersData?: Array<AudiencesByResourceResponse & { team_name: string; team_color: string }>;
 }) => {
   const [isDeleteConfirmPopupOpen, setIsDeleteConfirmPopupOpen] = useState(false);
   const [isEditPolicyDialogOpen, setIsEditPolicyDialogOpen] = useState(false);

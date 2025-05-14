@@ -44,6 +44,17 @@ export type AttributeType = {
   | { input_config: InputConfig }
 );
 
+export type PolicyApprovalStep = {
+  logical_operator: LOGICAL_OPERATOR_CONDITIONS;
+  conditions: Array<{
+    mode: PolicyQuorum;
+    approver_details: Array<{
+      type: ResourceAudienceType;
+      id: string;
+    }>;
+  }>;
+};
+
 export interface CreatePolicyConfigPayload {
   creator?: Array<{
     type: string;
@@ -59,16 +70,7 @@ export interface CreatePolicyConfigPayload {
   };
   action: string;
   approval_flow?: {
-    steps: Array<{
-      logical_operator: LOGICAL_OPERATOR_CONDITIONS;
-      conditions: Array<{
-        mode: PolicyQuorum;
-        approver_details: Array<{
-          type: ResourceAudienceType;
-          id: string;
-        }>;
-      }>;
-    }>;
+    steps: PolicyApprovalStep[];
   };
 }
 
