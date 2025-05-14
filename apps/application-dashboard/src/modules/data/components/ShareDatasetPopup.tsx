@@ -1,4 +1,6 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { datasetConfig, ResourceType, ShareResourcePopup } from '@/modules/shareResource';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 
@@ -12,12 +14,28 @@ type ShareDatasetPopupProps = {
 };
 
 const ShareDatasetPopup: FC<ShareDatasetPopupProps> = ({ datasetId }) => {
+  const [isCustomiseAccess, setIsCustomiseAccess] = useState<boolean>(false);
+  const { evaluate, ldClient } = useFeatureFlags();
+
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.FGAC)
+        .then((res) => {
+          setIsCustomiseAccess(res);
+        })
+        .catch(() => {
+          setIsCustomiseAccess(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
   return (
     <ShareResourcePopup
       resourceId={datasetId}
       resourceType={ResourceType.DATASET}
       resourceConfig={datasetConfig}
       resourceAdminPrivilege={PERMISSION_ROLES.ADMIN}
+      isCustomiseAccess={isCustomiseAccess}
     />
   );
 };

@@ -9,19 +9,22 @@ import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
+import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
-import { AudiencesDatasetShareData } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
+import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
+import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   CombinedOptionListDataType,
   DATASET_ACCESS_PRIVILEGES,
@@ -31,6 +34,8 @@ import {
   ShareResourcePopupProps,
   ValidationResult,
 } from '@/modules/shareResource/shareResource.types';
+import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
+import { FilterModelType } from '@/types/components/table.type';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -41,7 +46,7 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig } = props;
+  const { resourceType, resourceConfig, isCustomiseAccess = false } = props;
   const resourceId = props.resourceId || '';
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
@@ -52,11 +57,16 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
+  const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
+
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
   const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =
     useResourceAccess(resourceType, props.resourceId || '');
 
+  const {
+    state: { selectedFilters },
+  } = useFiltersContextStore();
   // get teams and users data in the organization
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
   // post invite audiences
@@ -119,6 +129,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   };
 
   const handleClosePopup = () => {
+    if (showCustomiseAccess) return;
     setOpenPopup(false);
     setShowValidationError(false);
     setSelectedItems([]);
@@ -136,11 +147,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   useOnClickOutside(popupRef, handleClosePopup);
 
   const handleShareResource = () => {
-    const shareData: AudiencesDatasetShareData = {
+    const shareData: AddAudiencesToResourcePayload = {
       audiences: selectedItems?.map((item) => ({
         audience_type: item?.resource_audience_type ?? '',
         audience_id: (item?.resource_audience_id || item?.team_id) ?? '',
         role: (selectedRole as string) ?? item?.role,
+        fgac_filters: convertToFilterModel(selectedFilters),
       })),
     };
 
@@ -156,7 +168,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       });
   };
 
-  const handleRoleChange = async (resourceAudienceId: string, role: string): Promise<boolean> => {
+  const handleRoleChange = async (
+    resourceAudienceId: string,
+    role: string,
+    fgacFilters?: FilterModelType,
+    isRoleChange?: boolean,
+  ): Promise<boolean> => {
     const success = await changeRole({
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
@@ -165,12 +182,17 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         resourceId,
         audience_id: resourceAudienceId,
         role,
+        fgac_filters: fgacFilters,
       },
     })
       .unwrap()
       .then(() => {
         refetchAudiencesData();
-        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+        toast.success(
+          isRoleChange
+            ? TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED
+            : TOAST_MESSAGES.SUCCESS_AUDIENCE_CUSTOMISE_ACCESS,
+        );
 
         return true;
       })
@@ -346,6 +368,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       })) || []),
   ];
 
+  const handleToggleCustomiseAccess = () => {
+    setShowCustomiseAccess((prev) => !prev);
+  };
+
   return (
     <div ref={popupRef} className='flex w-fit'>
       <div
@@ -375,7 +401,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
               <div className='flex flex-col rounded-b-3.5 w-[400px]'>
-                <div className='pt-0 px-4 pb-5'>
+                <div className='pt-0 px-4 pb-5 space-y-4'>
                   <MultiSelectInput
                     id={`share-${resourceType.toLowerCase()}`}
                     search={search}
@@ -397,6 +423,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     optionalOpenDropdownOptions={showInitialDropdownOptions}
                     selectOnlyFromList
                   />
+                  {isCustomiseAccess && (
+                    <AccessFilters
+                      onClick={handleToggleCustomiseAccess}
+                      currentUserHasAdminAccess={currentUserHasAdminAccess}
+                    />
+                  )}
                 </div>
                 <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
                   <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
@@ -449,6 +481,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       isDeletingAudience={isDeletingAudience}
                       isChangingRole={isChangingRole}
                       currentUserId={user_id}
+                      isCustomiseAccess={isCustomiseAccess}
+                      fgacFilters={audience?.metadata?.fgac_filters}
+                      resourceId={resourceId}
                     />
                   ))}
                 </CommonWrapper>
@@ -457,8 +492,17 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           </div>
         )}
       </div>
+      {showCustomiseAccess && (
+        <CustomiseAccess
+          isOpen={showCustomiseAccess}
+          onClose={handleToggleCustomiseAccess}
+          datasetId={resourceId}
+          resourceType={resourceType}
+          onSave={handleToggleCustomiseAccess}
+        />
+      )}
     </div>
   );
 };
 
-export default ShareResourcePopup;
+export default withFiltersContext(ShareResourcePopup);

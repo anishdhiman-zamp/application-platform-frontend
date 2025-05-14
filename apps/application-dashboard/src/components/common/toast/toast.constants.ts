@@ -6,6 +6,7 @@ export enum TOAST_MESSAGES {
   SUCCESS_AUDIENCE_ROLE_CHANGED = 'Role changed successfully',
   SUCCESS_AUDIENCE_DELETED = 'Audience deleted successfully',
   SUCCESS_AUDIENCE_INVITED = 'Done',
+  SUCCESS_AUDIENCE_CUSTOMISE_ACCESS = 'Custom access filters updated successfully',
 
   FAILED_DATASET_SHARED = 'Failed to shared dataset',
   FAILED_PAGE_SHARED = 'Failed to share page',
@@ -14,6 +15,7 @@ export enum TOAST_MESSAGES {
   FAILED_AUDIENCE_ROLE_CHANGED = 'Failed to change role',
   FAILED_AUDIENCE_DELETED = 'Failed to delete audience',
   FAILED_AUDIENCE_INVITED = 'Failed to send invitation',
+  FAILED_AUDIENCE_CUSTOMISE_ACCESS = 'Failed to update custom access filters',
 
   SUCCESS_APPROVED = 'Approved',
   SUCCESS_REJECTED = 'Rejected',
