@@ -7,14 +7,12 @@ import { toast } from '@/components/common/toast/Toast';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
-import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 type PolicyDeleteConfirmPopupProps = {
   isOpen: boolean;
   onClose: defaultFnType;
   policiesData?: PolicyDetailsType[];
-  audienceMembersData?: AudiencesByResourceResponse[];
 };
 
 const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, onClose, policiesData }) => {
