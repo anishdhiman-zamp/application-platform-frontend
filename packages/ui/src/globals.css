@@ -40,7 +40,6 @@ body {
     'lnum' on; /* Tabular numerals and lining numerals */
 }
 
-
 /* Colors */
 
 @layer base {
@@ -78,8 +77,8 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --menu-shadow: 1px 2px 10px 0px rgba(166,166,166,0.10);
-    --drawer-shadow: 10px 0px 50px 0px rgba(0,0,0,0.05);
+    --menu-shadow: 1px 2px 10px 0px rgba(166, 166, 166, 0.1);
+    --drawer-shadow: 10px 0px 50px 0px rgba(0, 0, 0, 0.05);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -184,6 +183,8 @@ body {
   --RED_800: #e10909;
   --RED_900: #a40000;
   --RED_1000: #5f0808;
+
+  --VIOLET_100: #f4daff;
 }
 
 .dark-mode {
@@ -869,6 +870,12 @@ body {
 
 .f-10-300 {
   font-weight: 300;
+  font-size: 10px;
+  line-height: 13px;
+}
+
+.f-10-450 {
+  font-weight: 450;
   font-size: 10px;
   line-height: 13px;
 }

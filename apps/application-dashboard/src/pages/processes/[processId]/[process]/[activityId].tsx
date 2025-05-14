@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
-import Summary from '@/modules/process/activity-summary/Summary';
+import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { addBreadcrumb } from '@/store/slices/layout-configs';

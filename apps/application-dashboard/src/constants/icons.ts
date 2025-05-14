@@ -105,7 +105,10 @@ export const VENMO = IMAGE_PREFIX + '/icons/bank-icons/venmo.svg';
 export const VISA = IMAGE_PREFIX + '/icons/bank-icons/visa.svg';
 export const WILMINGTON_TRUST = IMAGE_PREFIX + '/icons/bank-icons/wilmington_trust.svg';
 export const ZID = IMAGE_PREFIX + '/icons/bank-icons/zid.svg';
+
 export const HAND_ICON = IMAGE_PREFIX + '/icons/hand.svg';
+export const ADAM_ICON = IMAGE_PREFIX + '/icons/agents/adam-icon.svg';
+export const ACCORDION_LIST = IMAGE_PREFIX + '/icons/agents/accordion-list.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

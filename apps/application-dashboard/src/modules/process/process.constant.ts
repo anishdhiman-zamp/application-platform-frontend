@@ -1,4 +1,4 @@
-import { ACTIVITY_RUN_STATUS, ARTIFACT_TYPE } from 'modules/process/process.types';
+import { ACTIVITY_RUN_STATUS, ARTIFACT_TYPE, LOG_STATUS } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
 
 export const STATUS_ICON_COLOR_MAPPING = {
@@ -99,6 +99,41 @@ export const RESIZABLE_PANEL_MAPPING = {
     defaultSize: 70,
     minSize: 30,
     maxSize: 70,
+  },
+};
+
+export const LOG_STATUS_ICON_COLOR_MAPPING = {
+  [LOG_STATUS.FAILED]: {
+    fillColor: COLORS.RED_300,
+    strokeColor: COLORS.RED_300,
+  },
+  [LOG_STATUS.NEEDS_ATTENTION]: {
+    fillColor: COLORS.ORANGE_200,
+    strokeColor: COLORS.ORANGE_600,
+  },
+  [LOG_STATUS.LOADING]: {
+    fillColor: COLORS.GRAY_300,
+    strokeColor: COLORS.GRAY_300,
+  },
+  [LOG_STATUS.DONE]: {
+    fillColor: COLORS.GREEN_400,
+    strokeColor: COLORS.GREEN_400,
+  },
+  [LOG_STATUS.SUCCESSFUL]: {
+    fillColor: COLORS.GREEN_400,
+    strokeColor: COLORS.GREEN_400,
+  },
+  [LOG_STATUS.MESSAGE_FROM_USER]: {
+    fillColor: COLORS.BLUE_200,
+    strokeColor: COLORS.BLUE_500,
+  },
+  [LOG_STATUS.MESSAGE_FROM_ADAM]: {
+    fillColor: COLORS.VIOLET_200,
+    strokeColor: COLORS.VIOLET_300,
+  },
+  [LOG_STATUS.VOID]: {
+    fillColor: COLORS.GRAY_400,
+    strokeColor: COLORS.GRAY_700,
   },
 };
 

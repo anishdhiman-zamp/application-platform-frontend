@@ -49,7 +49,7 @@ const LogInput = () => {
   };
 
   return (
-    <div className='absolute bottom-0 w-full px-4 pb-4 z-10'>
+    <div className='w-full px-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
       <div className='border border-GRAY_400 rounded-xl overflow-hidden shadow-sm bg-white pt-2'>
         <Textarea
           ref={textareaRef}
