@@ -162,7 +162,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: Create
       config: policyConfig,
     };
 
-    console.log('API Payload:', apiPayload);
     if (isEdit) {
       updatePolicy({
         ...apiPayload,
