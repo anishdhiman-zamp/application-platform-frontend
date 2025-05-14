@@ -5,6 +5,7 @@ import { useGetTeamsByOrganizationIdQuery } from '@/apis/people';
 import { resourceTypeRouteMap } from '@/modules/shareResource/shareResource.constants';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
 import { RootState } from '@/store';
+import { ResourceAudienceType } from '@/types/api/auth.types';
 
 export const getAudienceByTeamId = (audiences: any[], teamId: string) => {
   return audiences?.find((audience) => audience.resource_audience_id === teamId) ?? null;
@@ -40,7 +41,11 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
       return (
         audiencesData
           ?.map((audience) => {
-            const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
+            let matchingTeam = null;
+
+            if (audience.resource_audience_type === ResourceAudienceType.TEAM) {
+              matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
+            }
 
             return {
               ...audience,

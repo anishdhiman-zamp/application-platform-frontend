@@ -22,7 +22,7 @@ export const getAccountWithLogo = (account: AccountDetailsType) => {
     <AccountWithLogo
       className='p-0 py-1'
       name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
-      logo={DEFAULT_BANK}
+      logo={account?.banking_partner ?? DEFAULT_BANK}
     />
   );
 };
