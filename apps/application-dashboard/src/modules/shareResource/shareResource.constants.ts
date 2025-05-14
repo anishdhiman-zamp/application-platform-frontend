@@ -22,6 +22,12 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     desc: 'Can read data only',
   },
   {
+    kind: ResourceType.DATASET,
+    label: 'Data editor',
+    value: DATASET_ACCESS_PRIVILEGES.DATA_EDITOR,
+    desc: 'Can update existing data',
+  },
+  {
     kind: ResourceType.PAGE,
     label: 'Admin',
     value: PAGE_ACCESS_PRIVILEGES.ADMIN,
