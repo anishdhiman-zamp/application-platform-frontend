@@ -64,7 +64,7 @@ const DialogContent = React.forwardRef<
       )}
       onCloseAutoFocus={(event) => {
         event.preventDefault();
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && window.document) {
           window.document.body.style.pointerEvents = '';
         }
       }}
