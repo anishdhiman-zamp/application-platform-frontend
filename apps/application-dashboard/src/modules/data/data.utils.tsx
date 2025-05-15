@@ -98,7 +98,7 @@ export const getColumnMinWidth = (
 
 export const formatColumns = (
   filterConfig: DatasetFilterConfigResponseType[],
-  isInitiatedAction: boolean,
+  currentUserHasEditAccess: boolean,
   datasetId: string,
   handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
   tableRef: RefObject<AgGridReact>,
@@ -124,7 +124,7 @@ export const formatColumns = (
       field: column?.column,
       hide: column?.metadata?.is_hidden,
       cellRendererParams: column?.metadata,
-      editable: column?.metadata?.is_editable && !isInitiatedAction,
+      editable: column?.metadata?.is_editable && currentUserHasEditAccess,
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,

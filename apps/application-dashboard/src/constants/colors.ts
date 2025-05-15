@@ -98,3 +98,14 @@ export const TEAMS_COLORS: string[] = [
   COLORS.GRAY_150,
   COLORS.YELLOW_100,
 ];
+
+export const CUSTOM_FILTER_COLORS: string[] = [
+  '#4F7980',
+  '#5683D2',
+  '#C0A2EE',
+  '#66B06A',
+  '#DEB1B9',
+  '#694162',
+  '#B2C8EB',
+  '#C8D882',
+];

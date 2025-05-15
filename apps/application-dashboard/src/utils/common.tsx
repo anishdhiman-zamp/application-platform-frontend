@@ -1,6 +1,6 @@
 import { MouseEventHandler } from 'react';
 import { type ClassValue, clsx } from 'clsx';
-import { CHIP_COLORS } from 'constants/colors';
+import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
@@ -315,11 +315,10 @@ export const cyclicIterator = (arr: any[]) => {
 };
 
 /**
- * Get a color from the predefined list of colors using a cyclic iterator
- * @param colorArray
+ * Get a color from CHART_PALETTE_COLORS using a cyclic iterator
  * @returns a new iterator instance each time
  */
-export const getChipColor = (colorArray: string[]) => cyclicIterator(colorArray);
+export const getCustomFilterColor: () => string = cyclicIterator(CUSTOM_FILTER_COLORS);
 
 /**
  * Get a color from CHIP_COLORS using a cyclic iterator

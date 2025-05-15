@@ -1,20 +1,31 @@
 import { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import TooltipV2 from '@/components/common/TooltipV2';
 import FiltersWrapper from '@/components/filter/filterMenu/FiltersWrapper';
 import { defaultFnType } from '@/types/commonTypes';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 import { checkIsObjectEmpty } from '@/utils/common';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 
 type AccessFiltersProps = {
   onClick: defaultFnType;
   currentUserHasAdminAccess: boolean;
+  selectedRole: string;
 };
 
-const AccessFilters: FC<AccessFiltersProps> = ({ onClick, currentUserHasAdminAccess }) => {
+const AccessFilters: FC<AccessFiltersProps> = ({ onClick, currentUserHasAdminAccess, selectedRole }) => {
   const {
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
+
+  const tooltipText = !currentUserHasAdminAccess
+    ? 'Only admins can customise access'
+    : selectedRole === PERMISSION_ROLES.ADMIN
+      ? 'Admin will have access to all data'
+      : '';
+
+  const disabled = !currentUserHasAdminAccess || selectedRole === PERMISSION_ROLES.ADMIN;
 
   return (
     <div className='space-y-2'>
@@ -29,21 +40,21 @@ const AccessFilters: FC<AccessFiltersProps> = ({ onClick, currentUserHasAdminAcc
               filterConfig={filtersConfig ?? []}
               allowActions={false}
               className=''
-              titleClassName='max-w-[130px]'
-              controlClassName='bg-[#F7F7F7]'
+              controlClassName='bg-gray-80 max-w-[250px]'
             />
           )}
         </div>
-        <Button
-          variant='ghost'
-          className='flex items-center gap-1 text-GRAY_900 cursor-pointer'
-          onClick={onClick}
-          size='xxsmall'
-          disabled={!currentUserHasAdminAccess}
-        >
-          <span>Customise</span>
-          <SvgSpriteLoader id='arrow-right' size={12} />
-        </Button>
+        <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
+          <Button
+            variant='ghost'
+            className='flex items-center gap-1 text-GRAY_900'
+            onClick={disabled ? undefined : onClick}
+            size='xxsmall'
+          >
+            <span>Customise</span>
+            <SvgSpriteLoader id='arrow-right' size={12} />
+          </Button>
+        </TooltipV2>
       </div>
     </div>
   );
