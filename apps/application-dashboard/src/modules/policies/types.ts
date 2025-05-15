@@ -55,6 +55,13 @@ export type PolicyApprovalStep = {
   }>;
 };
 
+export interface CreatePolicyCondition {
+  field: string;
+  value: any;
+  operator: string;
+  display_name: string;
+}
+
 export interface CreatePolicyConfigPayload {
   creator?: Array<{
     type: string;
@@ -62,11 +69,7 @@ export interface CreatePolicyConfigPayload {
   }>;
   conditions?: {
     logical_operator: string;
-    conditions: Array<{
-      field: string;
-      value: any;
-      operator: string;
-    }>;
+    conditions: Array<CreatePolicyCondition>;
   };
   action: string;
   approval_flow?: {

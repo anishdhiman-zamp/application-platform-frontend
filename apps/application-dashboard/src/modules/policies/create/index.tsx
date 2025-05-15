@@ -23,8 +23,6 @@ import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdo
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
-  console.log('create policy dialog', isOpen);
-
   const { policyId } = useParams();
 
   const policyData = useMemo(
