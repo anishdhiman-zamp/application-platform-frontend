@@ -1,12 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { type FC, useEffect, useRef, useState } from 'react';
+import { format } from 'date-fns';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
-import { LOG_STATUS } from 'modules/process/process.types';
+import type { LOG_STATUS } from 'modules/process/process.types';
+import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 
-const Log = ({ isLastLog = false }: { isLastLog?: boolean }) => {
+type LogProps = {
+  isLastLog?: boolean;
+  data: ActivityLogsItemType;
+};
+
+const Log: FC<LogProps> = ({ isLastLog = false, data }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(0);
 
@@ -29,21 +36,23 @@ const Log = ({ isLastLog = false }: { isLastLog?: boolean }) => {
   return (
     <div className='min-w-max flex justify-start items-start gap-x-5 pt-1'>
       <div className='flex items-start justify-start'>
-        <span className='f-12-450 text-GRAY_700'>10:00</span>
+        <span className='f-12-450 text-GRAY_700'>{format(new Date(data?.updated_at), 'h:mm a')}</span>
       </div>
       <div className='flex flex-col items-center justify-start h-full gap-y-2 pt-[2px]'>
         <LogStatusIndicator
-          status={LOG_STATUS.NEEDS_ATTENTION}
-          fillColor={LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.NEEDS_ATTENTION]?.fillColor}
-          strokeColor={LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.NEEDS_ATTENTION]?.strokeColor}
+          status={data?.status as LOG_STATUS}
+          fillColor={LOG_STATUS_ICON_COLOR_MAPPING[data?.status as LOG_STATUS]?.fillColor}
+          strokeColor={LOG_STATUS_ICON_COLOR_MAPPING[data?.status as LOG_STATUS]?.strokeColor}
         />
-        {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 28}px` }} />}
+        {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 40}px` }} />}
       </div>
       <div className='flex flex-col items-start justify-center' ref={containerRef}>
-        <p className='f-13-450 text-GRAY_1000'>Logged into Visa chargeback portal</p>
-        <ReasoningAccordion />
-        <LogCta />
-        <SenderInfo />
+        <p className='f-13-450 text-GRAY_1000'>{data?.content?.message}</p>
+        {data?.content?.thought_steps && <ReasoningAccordion thoughtSteps={data?.content?.thought_steps} />}
+        {data?.content?.ctas && <LogCta ctas={data?.content?.ctas} />}
+        {data?.content?.sender_type && (
+          <SenderInfo senderType={data?.content?.sender_type as 'USER' | 'SYSTEM'} status={data?.status} />
+        )}
       </div>
     </div>
   );

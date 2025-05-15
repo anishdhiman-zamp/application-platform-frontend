@@ -28,6 +28,7 @@ const LogStatusIndicator = ({ fillColor, strokeColor, status }: LogStatusIndicat
         </svg>
       );
     case LOG_STATUS.VOID:
+    case LOG_STATUS.SUCCESS:
     case LOG_STATUS.MESSAGE_FROM_USER:
     case LOG_STATUS.MESSAGE_FROM_ADAM:
     case LOG_STATUS.DONE:
