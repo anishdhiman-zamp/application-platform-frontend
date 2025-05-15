@@ -177,3 +177,8 @@ export enum APPROVAL_TYPE {
   USER = 'user',
   ORGANIZATION = 'organization',
 }
+
+export enum POLICY_STATUS_LABEL {
+  ACTIVE = 'Active',
+  INACTIVE = 'Inactive',
+}

@@ -5,7 +5,6 @@ import { TEMPLATE_APPROVAL_ACTION_ITEMS } from 'modules/payments/payments.consta
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
 import { useApprovePolicyMutation, useRejectPolicyMutation } from '@/apis/people';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { COLORS } from '@/constants/colors';
 import { useOnClickOutside } from '@/hooks';
 import type { defaultFnType } from '@/types/commonTypes';
 import { toast } from 'components/common/toast/Toast';
@@ -85,7 +84,6 @@ const TemplateApprovalCard: FC<TemplateApprovalCardProps> = ({ canApprove, appro
             isLoading={isApprovePolicyLoading || isRejectPolicyLoading}
             isShowMenu={isMoveMoneyActionMenuOpen}
             setIsShowMenu={setIsMoveMoneyActionMenuOpen}
-            indicatorColor={COLORS.ORANGE_SECONDARY}
           />
         </div>
       </div>

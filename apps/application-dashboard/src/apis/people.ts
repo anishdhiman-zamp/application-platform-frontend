@@ -218,6 +218,7 @@ const People = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.DUAL_ADMIN_POLICY_GET,
       }),
+      providesTags: [APITags.GET_POLICY_LIST],
       transformResponse: ({ data }) => data,
     }),
   }),

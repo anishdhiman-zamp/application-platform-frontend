@@ -6,6 +6,7 @@ export enum ResourceType {
   PAGE = 'page',
   PAYMENTS = 'payments',
   ACTIVITY = 'activity',
+  ORGANIZATION = 'organization',
 }
 
 export type TeamInfoType = {

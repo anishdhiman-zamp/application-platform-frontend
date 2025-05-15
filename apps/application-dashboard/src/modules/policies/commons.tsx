@@ -125,17 +125,18 @@ export const transformFormDataToApiPayload = (
   defaultConditions: any[],
 ): CreatePolicyConfigPayload => {
   // Transform creator data
-  const creator = (data.creator as SelectOption[]).map((option) => {
-    if (typeof option.value === 'string' || typeof option.value === 'boolean') {
-      return { type: 'user', id: option.value.toString() };
-    }
+  const creator =
+    (data.creator as SelectOption[])?.map((option) => {
+      if (typeof option.value === 'string' || typeof option.value === 'boolean') {
+        return { type: 'user', id: option.value.toString() };
+      }
 
-    return { type: option.value.type, id: option.value.id };
-  });
+      return { type: option.value.type, id: option.value.id };
+    }) ?? [];
 
   // Transform conditions
   const conditions = Object.entries(data)
-    .filter(([key]) => attributesMap[key]?.formFieldType === 'condition')
+    ?.filter(([key]) => attributesMap[key]?.formFieldType === 'condition')
     .map(([key, value]) => {
       const attribute = attributesMap[key];
       const payloadValue = getValue(key, value as SelectOption[]);
@@ -169,7 +170,7 @@ export const transformFormDataToApiPayload = (
     })),
   };
 
-  const action = (data.action as SelectOption[])[0]?.value as string;
+  const action = (data?.action as SelectOption[])?.[0]?.value as string;
 
   const transformedConditions = [...(conditions ?? []), ...defaultConditions];
 
