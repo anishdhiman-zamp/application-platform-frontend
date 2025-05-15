@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
@@ -27,7 +27,7 @@ const PaymentActions = () => {
     setSideDrawerConfig(undefined);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (paymentConfig?.id) {
       getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS });
     }

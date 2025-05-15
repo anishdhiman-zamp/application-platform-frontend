@@ -1,4 +1,5 @@
 import { type FC, useState } from 'react';
+import { toast } from 'react-toastify';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import UpdatePolicyCard from 'modules/policies/components/UpdatePolicyCard';
 import { useApprovalActionMutation } from '@/apis/people';
@@ -23,14 +24,22 @@ const ReviewPolicyUpdatePopover: FC<ReviewPolicyUpdatePopoverProps> = ({
   const [approvePolicy, { isLoading }] = useApprovalActionMutation();
 
   const handleApproveAction = (action: TEMPLATE_APPROVAL_ACTION_TYPES) => {
-    if (action === TEMPLATE_APPROVAL_ACTION_TYPES.REJECT) {
-      setIsRejected(true);
-    } else {
-      approvePolicy({
-        action: action.toString().toUpperCase(),
-        approval_ids: [policy.status_details.approval.id],
+    if (action === TEMPLATE_APPROVAL_ACTION_TYPES.REJECT) setIsRejected(true);
+
+    approvePolicy({
+      action: action.toString().toUpperCase(),
+      approval_ids: [policy.status_details.approval.id],
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Approval action successful');
+      })
+      .catch(() => {
+        toast.error('Approval action failed');
+      })
+      .finally(() => {
+        onClose();
       });
-    }
   };
 
   return (
@@ -58,23 +67,33 @@ const ReviewPolicyUpdatePopover: FC<ReviewPolicyUpdatePopoverProps> = ({
             audienceMembersData={audienceMembersData}
           />
         </DialogBody>
-        <DialogFooter className='flex justify-end gap-2'>
-          <Button
-            size='small'
-            variant='secondary'
-            onClick={() => handleApproveAction(TEMPLATE_APPROVAL_ACTION_TYPES.REJECT)}
-            disabled={isLoading && isRejected}
-          >
-            Reject
-          </Button>
-          <Button
-            size='small'
-            onClick={() => handleApproveAction(TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE)}
-            disabled={isLoading && !isRejected}
-          >
-            Approve
-          </Button>
-        </DialogFooter>
+        {policy?.status_details?.can_approve ? (
+          <DialogFooter className='flex justify-end gap-2'>
+            <Button
+              size='small'
+              variant='secondary'
+              className='min-w-16'
+              onClick={() => handleApproveAction(TEMPLATE_APPROVAL_ACTION_TYPES.REJECT)}
+              isLoading={isLoading && isRejected}
+            >
+              Reject
+            </Button>
+            <Button
+              size='small'
+              className='min-w-16'
+              onClick={() => handleApproveAction(TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE)}
+              isLoading={isLoading && !isRejected}
+            >
+              Approve
+            </Button>
+          </DialogFooter>
+        ) : (
+          <DialogFooter className='flex justify-end gap-2'>
+            <Button size='small' className='min-w-16' onClick={onClose}>
+              Close
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

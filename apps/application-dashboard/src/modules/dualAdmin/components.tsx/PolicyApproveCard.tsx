@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { Loader2 } from 'lucide-react';
 import { useApprovalActionMutation } from '@/apis/people';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
@@ -45,8 +44,7 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
         <DropdownMenuTrigger asChild>
           <div className='f-11-450 text-ORANGE_800 flex items-center gap-1 justify-end select-none cursor-pointer whitespace-nowrap'>
             Awaiting your approval
-            <DropdownToggle isShowMenu={isShowMenu} setIsShowMenu={setIsShowMenu} />
-            {isLoading && <Loader2 className='animate-spin' />}
+            <DropdownToggle isShowMenu={isShowMenu} isLoading={isLoading} setIsShowMenu={setIsShowMenu} />
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent

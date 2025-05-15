@@ -113,7 +113,6 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
         setError(err);
       } else {
         const fileExtension: string = filesToUpload?.name?.split('.')?.pop()?.toLowerCase() ?? '';
-        const fileName = filesToUpload.name + '.' + (FileMimeType[getFileType(filesToUpload)] ?? fileExtension);
         const fileType = FileMimeType[getFileType(filesToUpload)] ?? fileExtension;
         const acceptedFormatsArr = acceptedFormats.split(',').map((item) => item.trim());
         const isAllowedFormat = acceptedFormatsArr.includes(FileExtensionToInputFormatMapping[fileExtension]);
@@ -121,7 +120,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
         const signedUrlPayload = {
           path: uploadPath,
           payload: {
-            file_name: fileName,
+            file_name: filesToUpload?.name,
             file_type: fileType,
           },
         };

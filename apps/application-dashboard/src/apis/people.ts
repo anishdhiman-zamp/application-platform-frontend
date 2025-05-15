@@ -193,6 +193,7 @@ const People = baseApi.injectEndpoints({
         APITags.GET_POLICY_APPROVALS,
         APITags.GET_PAYMENT_TEMPLATE_LIST,
         APITags.GET_PAYMENT_APPROVALS_INFO,
+        APITags.GET_POLICY_LIST,
       ],
     }),
     getAllPolicies: builder.query<GetPoliciesResponse, { resourceType?: string; actionType?: string }>({

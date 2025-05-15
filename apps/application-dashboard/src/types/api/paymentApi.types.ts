@@ -166,6 +166,7 @@ export enum PolicyMutateActionType {
 export type PolicyStatusType = {
   status: PolicyResultStatus;
   policy_result_id: string;
+  policy_result_created_by: string;
   resource_action_metadata: {
     mutate_action: PolicyMutateActionType;
     data: MapAny;
