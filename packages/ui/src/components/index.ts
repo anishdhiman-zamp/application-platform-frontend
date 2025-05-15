@@ -10,6 +10,7 @@ export * from './ui/input';
 export * from './ui/label';
 export * from './ui/list-card';
 export * from './ui/popover';
+export * from './ui/radio';
 export * from './ui/resizable';
 export * from './ui/select';
 export * from './ui/sheet';
