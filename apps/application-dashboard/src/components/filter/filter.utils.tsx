@@ -42,18 +42,18 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
     case FILTER_TYPES.SINGLE_SELECT:
     case FILTER_TYPES.MULTI_SELECT: {
-      const options: MultiSelectFilterValue[] = config.values;
-      const isObjectOptions = options.some((option) => typeof option === 'object');
+      const options: MultiSelectFilterValue[] = config.values?.filter(Boolean);
+      const isObjectOptions = options?.some((option) => typeof option === 'object');
       const selectedFilter = selectedFilters[key];
       const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
       const operatorLabel =
-        MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === selectedFilter?.type)?.label ?? '';
+        MULTI_SELECT_FILTER_OPTIONS.find((option) => option?.value === selectedFilter?.type)?.label ?? '';
 
       let title = '';
       const count = Array.isArray(selectedFilter?.values) ? selectedFilter?.values?.length : 0;
 
       title = isNull
-        ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
+        ? MULTI_SELECT_FILTER_OPTIONS.find((option) => option?.value === CONDITION_OPERATOR_TYPE.IS_NULL)?.label
         : Array.isArray(selectedFilter?.values)
           ? selectedFilter?.values?.join(', ')
           : (selectedFilter?.values ?? '');
