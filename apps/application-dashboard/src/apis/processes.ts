@@ -2,6 +2,10 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
+  ActivityArtifactsRequestType,
+  ActivityArtifactsResponseType,
+  ActivityLogsRequestType,
+  ActivityLogsResponseType,
   ActivityRunsDataResponseType,
   ProcessActivityRunsRequestType,
   StatusSummaryItem,
@@ -32,6 +36,16 @@ const Processes = baseApi.injectEndpoints({
         params: { query_config },
       }),
     }),
+    getActivityArtifacts: builder.query<ActivityArtifactsResponseType, ActivityArtifactsRequestType>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_ARTIFACTS_GET, { processId, activityRunId }),
+      }),
+    }),
+    getActivityLogs: builder.query<ActivityLogsResponseType, ActivityLogsRequestType>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUN_LOGS_GET, { processId, activityRunId }),
+      }),
+    }),
   }),
 });
 
@@ -41,4 +55,8 @@ export const {
   useLazyGetActivityRunsSummaryQuery,
   useGetActivityRunsQuery,
   useLazyGetActivityRunsQuery,
+  useGetActivityArtifactsQuery,
+  useLazyGetActivityArtifactsQuery,
+  useGetActivityLogsQuery,
+  useLazyGetActivityLogsQuery,
 } = Processes;

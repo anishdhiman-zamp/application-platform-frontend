@@ -102,7 +102,7 @@ export const formRequestUrlWithParams = (url: string, params: MapAny) => {
   let formattedUrl = url;
 
   Object.keys(params).forEach((key) => {
-    formattedUrl = formattedUrl.replace(`{{${key}}}`, params[key]);
+    formattedUrl = formattedUrl?.replace(`{{${key}}}`, params[key]);
   });
 
   return formattedUrl;
