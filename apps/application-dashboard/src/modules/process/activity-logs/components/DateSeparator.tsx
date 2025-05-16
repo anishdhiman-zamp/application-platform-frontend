@@ -22,9 +22,9 @@ const DateSeparator = ({ date }: DateSeparatorProps) => {
   }, [dateObj]);
 
   return (
-    <div className='min-w-max flex justify-center items-center gap-x-4 pt-5 pb-6'>
+    <div className='w-full flex justify-center items-center gap-x-4 pt-5 pb-6'>
       <div className='w-full h-px bg-GRAY_100' />
-      <span className='f-13-450 text-GRAY_1000 whitespace-nowrap'>{displayText}</span>
+      <span className='f-13-450 text-GRAY_1000 whitespace-nowrap shrink-0'>{displayText}</span>
       <div className='w-full h-px bg-GRAY_100' />
     </div>
   );

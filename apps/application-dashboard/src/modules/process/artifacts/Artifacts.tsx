@@ -1,15 +1,24 @@
+import { Tabs, TabsContent } from '@zamp-platform/ui';
+import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
+
 interface ArtifactsProps {
   onClose: () => void;
   onExpand: () => void;
+  isExpanded: boolean;
 }
 
-// TODO: Implement the artifacts component
-
-const Artifacts = ({ onClose, onExpand }: ArtifactsProps) => {
+const Artifacts = ({ onClose, onExpand, isExpanded }: ArtifactsProps) => {
   return (
-    <div>
-      <button onClick={onClose}>Close</button>
-      <button onClick={onExpand}>Expand</button>
+    <div className='overflow-auto max-w-full h-full flex flex-col'>
+      <Tabs defaultValue='tab-1'>
+        <ArtifactTopbar onClose={onClose} onExpand={onExpand} isExpanded={isExpanded} />
+        <TabsContent value='tab-1'>
+          <div className='h-full flex-1 p-4'>Tab 1</div>
+        </TabsContent>
+        <TabsContent value='tab-2'>
+          <div className='h-full flex-1 p-4'>Tab 2</div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

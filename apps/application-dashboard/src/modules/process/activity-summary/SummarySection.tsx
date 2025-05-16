@@ -10,9 +10,10 @@ import ArtifactTag from '@/modules/process/common/ArtifactTag';
 type SummarySectionProps = {
   processId: string;
   activityId: string;
+  handleShowArtifacts: () => void;
 };
 
-const SummarySection: FC<SummarySectionProps> = ({ processId, activityId }) => {
+const SummarySection: FC<SummarySectionProps> = ({ processId, activityId, handleShowArtifacts }) => {
   const {
     data: artifacts,
     isLoading: isLoadingArtifacts,
@@ -50,6 +51,7 @@ const SummarySection: FC<SummarySectionProps> = ({ processId, activityId }) => {
             key={artifact?.id}
             displayName={artifact?.artifact_data?.display_name}
             type={artifact?.artifact_type}
+            handleShowArtifacts={handleShowArtifacts}
           />
         ))}
       </CommonWrapper>

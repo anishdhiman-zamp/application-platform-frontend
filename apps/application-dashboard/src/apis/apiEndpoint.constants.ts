@@ -118,6 +118,7 @@ export const API_ENDPOINTS = {
   ACTIVITY_RUNS_GET: `processes/{{processId}}/activity-runs`,
   ACTIVITY_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/artifacts`,
   ACTIVITY_RUN_LOGS_GET: `processes/{{processId}}/activity-logs/{{activityRunId}}/logs`,
+  EMIT_ACTIVITY_LOGS_POST: `processes/{{processId}}/activity-logs/{{activityRunId}}`,
 };
 
 export const enum REQUEST_TYPES {

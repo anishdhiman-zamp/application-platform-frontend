@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
@@ -7,6 +7,7 @@ import type {
   ActivityLogsRequestType,
   ActivityLogsResponseType,
   ActivityRunsDataResponseType,
+  EmitActivityLogsRequestType,
   ProcessActivityRunsRequestType,
   StatusSummaryItem,
 } from '@/types/api/processApi.types';
@@ -46,6 +47,13 @@ const Processes = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUN_LOGS_GET, { processId, activityRunId }),
       }),
     }),
+    emitActivityLogs: builder.mutation<void, EmitActivityLogsRequestType>({
+      query: ({ processId, activityRunId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.EMIT_ACTIVITY_LOGS_POST, { processId, activityRunId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -59,4 +67,5 @@ export const {
   useLazyGetActivityArtifactsQuery,
   useGetActivityLogsQuery,
   useLazyGetActivityLogsQuery,
+  useEmitActivityLogsMutation,
 } = Processes;

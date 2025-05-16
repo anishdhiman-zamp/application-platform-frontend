@@ -20,7 +20,7 @@ export enum ARTIFACT_TYPE {
 }
 
 export enum LOG_STATUS {
-  LOADING = 'LOADING',
+  LOADING = 'INITIATED',
   MESSAGE_FROM_ADAM = 'MESSAGE_FROM_ADAM',
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
@@ -33,6 +33,11 @@ export enum LOG_STATUS {
 export enum SENDER_TYPE {
   USER = 'USER',
   SYSTEM = 'SYSTEM',
+}
+
+export enum CONTENT_TYPE {
+  MESSAGE_SECTION = 'MESSAGE_SECTION',
+  REPLY_SECTION = 'REPLY_SECTION',
 }
 
 export enum DATE_SEPARATOR {

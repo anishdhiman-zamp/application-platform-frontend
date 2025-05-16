@@ -121,3 +121,14 @@ export type ActivityLogsRequestType = {
   processId: string;
   activityRunId: string;
 };
+
+export type EmitActivityLogsRequestType = {
+  processId: string;
+  activityRunId: string;
+  payload: {
+    content: LogsContentType;
+    log_group_id: string;
+    content_type: string;
+    status: string;
+  };
+};

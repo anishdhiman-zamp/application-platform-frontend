@@ -36,9 +36,10 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
       searchPlaceholder='Search artifacts'
       emptyText='No artifacts found'
       inputClassName='placeholder:text-GRAY_500 placeholder:f-12-400'
-      contentClassName='w-[300px] h-[334px] rounded-[6px] border-[0.5px] border-GRAY_500 shadow-md'
-      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-[6px]'
+      contentClassName=' w-[300px] h-[334px] rounded-md border-[0.5px] border-GRAY_500 shadow-md'
+      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-md'
       overLayContent={<OverlayContent />}
+      isPortalNeeded={true}
     >
       <div
         className={cn(
@@ -61,7 +62,7 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
 
 const OverlayContent = () => {
   return (
-    <div className='flex flex-col gap-2 items-start justify-center w-full'>
+    <div className='flex flex-col gap-2 items-start justify-center w-full overflow-hidden text-wrap break-words'>
       <SvgSpriteLoader
         id='stand'
         iconCategory={ICON_SPRITE_TYPES.EDUCATION}
