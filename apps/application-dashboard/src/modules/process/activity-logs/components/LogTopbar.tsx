@@ -13,7 +13,7 @@ interface LogTopbarProps {
 
 const LogTopbar: FC<LogTopbarProps> = ({ status }) => {
   return (
-    <div className='flex justify-between items-center w-full border-b border-GRAY_100 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+    <div className='flex justify-between items-center w-full h-15 border-b border-GRAY_100 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
       <div className='flex justify-center items-center gap-x-2 p-4 min-w-max'>
         <div className='flex items-center gap-x-1'>
           <span className='f-13-550 text-GRAY_700'>Invoice number</span>

@@ -25,6 +25,7 @@ export const DATE_FORMATS = {
   ddMMyyyyHHmmss: 'dd/MM/yyyy, HH:mm:ss',
   HMMAAA: 'h:mmaaa',
   DD_MMM: 'dd MMM',
+  HH_MM_A: 'h:mm a',
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);

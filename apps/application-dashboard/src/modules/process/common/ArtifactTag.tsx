@@ -2,11 +2,20 @@ import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 
-const ArtifactTag = ({ displayName, type }: { displayName: string; type: string }) => {
+const ArtifactTag = ({
+  displayName,
+  type,
+  handleShowArtifacts,
+}: {
+  displayName: string;
+  type: string;
+  handleShowArtifacts: () => void;
+}) => {
   return (
     <Button
       variant={'ghost'}
       className='flex items-center h-6 justify-start gap-x-1.5 px-2 py-1 bg-GRAY_100 rounded-[4px] cursor-pointer'
+      onClick={handleShowArtifacts}
     >
       <SvgSpriteLoader
         id={ARTIFACT_ICON_MAPPING[type as keyof typeof ARTIFACT_ICON_MAPPING]?.id ?? 'file-02'}

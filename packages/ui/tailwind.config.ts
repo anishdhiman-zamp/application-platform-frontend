@@ -234,6 +234,7 @@ const config = {
           '700': 'var(--RED_700)',
           '800': 'var(--RED_800)',
           '900': 'var(--RED_900)',
+          '950': 'var(--RED_950)',
           '1000': 'var(--RED_1000)',
         },
       },
@@ -665,6 +666,22 @@ const config = {
             opacity: '1',
           },
         },
+        'fade-in': {
+          '0%': {
+            opacity: '0',
+          },
+          '100%': {
+            opacity: '1',
+          },
+        },
+        'fade-out': {
+          '0%': {
+            opacity: '1',
+          },
+          '100%': {
+            opacity: '0',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -681,6 +698,8 @@ const config = {
         slide: 'slide 1.5s linear infinite',
         slideInOut: 'slideInOut 5s cubic-bezier(0.85, 0, 0.15, 1) forwards',
         'slide-in': 'slideIn 0.5s ease-in-out',
+        'fade-in': 'fade-in 0.5s ease-in-out',
+        'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
       },
     },
   },
