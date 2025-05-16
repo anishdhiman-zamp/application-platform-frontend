@@ -43,7 +43,7 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
     case FILTER_TYPES.SINGLE_SELECT:
     case FILTER_TYPES.MULTI_SELECT: {
       const options: MultiSelectFilterValue[] = config.values?.filter(Boolean);
-      const isObjectOptions = options.some((option) => typeof option === 'object');
+      const isObjectOptions = options?.some((option) => typeof option === 'object');
       const selectedFilter = selectedFilters[key];
       const isNull = selectedFilter?.type === CONDITION_OPERATOR_TYPE.IS_NULL;
       const operatorLabel =
