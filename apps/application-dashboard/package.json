@@ -18,7 +18,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.4.0",
     "@sentry/browser": "^9.1.0",
-    "@sentry/nextjs": "^9.5.0",
+    "@sentry/nextjs": "^9.19.0",
     "@vercel/speed-insights": "^1.2.0",
     "@xyflow/react": "^12.5.5",
     "@zamp-platform/config": "*",
