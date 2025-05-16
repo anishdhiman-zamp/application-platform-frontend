@@ -18,16 +18,14 @@ const PaymentActions = () => {
   });
   const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
   const router = useRouter();
-  const [policyType, setPolicyType] = useState<PolicyDialogType>('template');
-  const [sideDrawerConfig, setSideDrawerConfig] = useState<PolicyDialogType>();
+  const [sideDrawerConfigType, setSideDrawerConfigType] = useState<PolicyDialogType>();
 
-  const handlePolicyDialogOpenChange = (type: PolicyDialogType) => {
-    setPolicyType(type);
+  const handlePolicyDialogOpenChange = () => {
     router.push(`/payments/policies/create`);
   };
 
   const handlePolicyListClose = () => {
-    setSideDrawerConfig(undefined);
+    setSideDrawerConfigType(undefined);
   };
 
   useEffect(() => {
@@ -73,17 +71,12 @@ const PaymentActions = () => {
                 variant='ghost'
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
-                onClick={() => setSideDrawerConfig('template')}
+                onClick={() => setSideDrawerConfigType('template')}
                 disabled={templatePolicies.length === 0}
               >
                 {templatePolicies.length} {templatePolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
-              <Button
-                variant='ghost'
-                size='xxsmall'
-                className=''
-                onClick={() => handlePolicyDialogOpenChange('template')}
-              >
+              <Button variant='ghost' size='xxsmall' className='' onClick={() => handlePolicyDialogOpenChange()}>
                 <Plus className='h-3 w-3' />
               </Button>
             </div>
@@ -96,11 +89,11 @@ const PaymentActions = () => {
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
                 disabled={paymentPolicies.length === 0}
-                onClick={() => setSideDrawerConfig('payout')}
+                onClick={() => setSideDrawerConfigType('payout')}
               >
                 {paymentPolicies.length} {paymentPolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
-              <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange('payout')}>
+              <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange()}>
                 <Plus className='h-3 w-3' />
               </Button>
             </div>
@@ -121,7 +114,7 @@ const PaymentActions = () => {
       <DialogWithRoute routes={['/payments/policies/create', '/payments/policies/create/:policyId']}>
         {({ open, onOpenChange }) => (
           <CreatePolicyDialog
-            type={policyType}
+            type={sideDrawerConfigType ?? 'template'}
             policiesData={policiesData?.data}
             isOpen={open}
             onOpenChange={onOpenChange}
@@ -129,12 +122,12 @@ const PaymentActions = () => {
         )}
       </DialogWithRoute>
 
-      {sideDrawerConfig && (
+      {sideDrawerConfigType && (
         <PoliciesListSideDrawer
-          isOpen={!!sideDrawerConfig}
+          isOpen={!!sideDrawerConfigType}
           onClose={handlePolicyListClose}
-          policies={sideDrawerConfig === 'payout' ? paymentPolicies : templatePolicies}
-          type={sideDrawerConfig}
+          policies={sideDrawerConfigType === 'payout' ? paymentPolicies : templatePolicies}
+          type={sideDrawerConfigType}
           handlePolicyDialogOpenChange={handlePolicyDialogOpenChange}
         />
       )}
