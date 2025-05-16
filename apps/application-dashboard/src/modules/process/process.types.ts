@@ -14,19 +14,34 @@ export type ArtifactType = {
 }[];
 
 export enum ARTIFACT_TYPE {
-  DOCUMENT = 'document',
-  VIDEO = 'video',
   PDF_DATASET = 'PDF_DATASET',
-  EMAIL = 'email',
+  EMAIL = 'EMAIL',
+  BROWSER = 'BROWSER',
 }
 
 export enum LOG_STATUS {
   LOADING = 'LOADING',
   MESSAGE_FROM_ADAM = 'MESSAGE_FROM_ADAM',
-  SUCCESSFUL = 'SUCCESSFUL',
+  SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
   VOID = 'VOID',
   DONE = 'DONE',
   MESSAGE_FROM_USER = 'MESSAGE_FROM_HUMAN',
+}
+
+export enum SENDER_TYPE {
+  USER = 'USER',
+  SYSTEM = 'SYSTEM',
+}
+
+export enum DATE_SEPARATOR {
+  TODAY = 'TODAY',
+  YESTERDAY = 'YESTERDAY',
+  OTHER = 'OTHER',
+}
+
+export enum CTA_COMPONENT_TYPE {
+  ARTIFACT = 'ARTIFACT',
+  BUTTON = 'BUTTON',
 }
