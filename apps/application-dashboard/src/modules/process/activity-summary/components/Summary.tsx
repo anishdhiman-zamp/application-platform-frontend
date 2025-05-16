@@ -1,6 +1,6 @@
 import SectionTitle from 'modules/process/activity-summary/components/SectionTitle';
 
-const SummarySection = ({
+const Summary = ({
   data,
 }: {
   data: {
@@ -32,4 +32,4 @@ const SummarySection = ({
   );
 };
 
-export default SummarySection;
+export default Summary;

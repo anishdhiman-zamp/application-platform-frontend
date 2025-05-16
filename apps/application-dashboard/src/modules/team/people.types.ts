@@ -4,11 +4,13 @@ import { defaultFnType } from 'types/commonTypes';
 export enum TEAM_TABS_TYPES {
   TEAM_MEMBERS = 'team_members',
   INVITED_MEMBERS = 'invited_members',
+  APPROVAL_PENDING = 'approval_pending',
 }
 
 export const TeamTabsList = [
   { label: 'Team members', value: TEAM_TABS_TYPES.TEAM_MEMBERS },
   { label: 'Invited', value: TEAM_TABS_TYPES.INVITED_MEMBERS },
+  // { label: 'Approval pending', value: TEAM_TABS_TYPES.APPROVAL_PENDING },
 ];
 
 export type InviteMembersPopupPropsType = {

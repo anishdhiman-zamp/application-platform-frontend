@@ -1,21 +1,21 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
-import Summary from '@/modules/process/activity-summary/Summary';
+import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { addBreadcrumb } from '@/store/slices/layout-configs';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
-  const { processId, process, rowid } = useParams();
+  const { processId, activityId } = useParams();
+  const searchParams = useSearchParams();
+  const status = searchParams.get('status');
   const panelRef = useRef<ImperativePanelHandle>(null);
   const appDispatch = useAppDispatch();
-
-  console.log('processId', processId, process, rowid);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -57,7 +57,12 @@ const Activity = () => {
         })}
         ref={panelRef}
       >
-        <Logs setShowSummary={setShowSummary} />
+        <Logs
+          processId={processId as string}
+          activityId={activityId as string}
+          status={status as string}
+          setShowSummary={setShowSummary}
+        />
       </ResizablePanel>
 
       <ResizableHandle
@@ -100,7 +105,7 @@ const Activity = () => {
             '!transition-none': isDragging,
           })}
         >
-          <Summary />
+          <Summary processId={processId as string} activityId={activityId as string} />
         </ResizablePanel>
       )}
     </ResizablePanelGroup>

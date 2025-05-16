@@ -15,6 +15,7 @@ import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
 import { OptionsType } from '@/types/commonTypes';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import Avatar from 'components/common/avatar';
 import { toast } from 'components/common/toast/Toast';
@@ -43,6 +44,7 @@ type AudienceAccessPropsType = {
   isCustomiseAccess?: boolean;
   fgacFilters?: FilterModelType;
   resourceId: string;
+  fgacColor?: string;
 };
 
 const AudienceAccess: FC<AudienceAccessPropsType> = ({
@@ -64,6 +66,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   fgacFilters,
   resourceId,
   isChangingRole = false,
+  fgacColor,
 }) => {
   const {
     state: { selectedFilters },
@@ -106,7 +109,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleRoleChange = async (selectedOption: OptionsType) => {
-    await changeRole(resourceAudienceId, selectedOption.value.toString(), fgacFilters)
+    const roleValue = selectedOption.value.toString();
+
+    await changeRole(resourceAudienceId, roleValue, roleValue !== PERMISSION_ROLES.ADMIN ? fgacFilters : null)
       .then((success) => {
         if (!success) {
           setSelectedRole(role as ResourcePrivilege);
@@ -206,8 +211,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
                 onClick={handleToggleCustomiseAccess}
                 disabled={!showRoleChangeDropdown}
               >
-                {/* TODO: Add logic for same set of filters to have the same color and different for others. Colors to be picked from TEAMS_COLORS */}
-                <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: COLORS.BLUE_150 }} />
+                <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: fgacColor ?? COLORS.BLUE_150 }} />
                 <span>Custom</span>
                 {showRoleChangeDropdown && (
                   <SvgSpriteLoader

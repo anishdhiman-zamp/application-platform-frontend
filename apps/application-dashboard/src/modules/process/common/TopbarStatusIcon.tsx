@@ -1,5 +1,6 @@
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
+import { COLORS } from '@/constants/colors';
 
 type TopbarStatusIconProps = {
   fillColor: string;
@@ -34,7 +35,7 @@ const TopbarStatusIcon = ({ fillColor, strokeColor, status }: TopbarStatusIconPr
         <svg width='10' height='12' viewBox='0 0 10 12' fill='none' xmlns='http://www.w3.org/2000/svg'>
           <path
             d='M9 2.5C9 3.32843 7.20914 4 5 4C2.79086 4 1 3.32843 1 2.5M9 2.5C9 1.67157 7.20914 1 5 1C2.79086 1 1 1.67157 1 2.5M9 2.5V9.5C9 10.3284 7.20914 11 5 11C2.79086 11 1 10.3284 1 9.5V2.5M9 4.8333C9 5.66173 7.20914 6.3333 5 6.3333C2.79086 6.3333 1 5.66173 1 4.8333M9 7.165C9 7.99343 7.20914 8.665 5 8.665C2.79086 8.665 1 7.99343 1 7.165'
-            stroke='#666666'
+            stroke={COLORS.GRAY_900}
             strokeLinecap='round'
             strokeLinejoin='round'
           />

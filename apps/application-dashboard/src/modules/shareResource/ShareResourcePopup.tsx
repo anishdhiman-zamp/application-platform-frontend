@@ -19,11 +19,11 @@ import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { cn, getUserNameFromEmail, validateEmail } from 'utils/common';
+import { cn, getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
+import { filtersContextActions, useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   CombinedOptionListDataType,
@@ -36,6 +36,7 @@ import {
 } from '@/modules/shareResource/shareResource.types';
 import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
 import { FilterModelType } from '@/types/components/table.type';
+import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -49,9 +50,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const { resourceType, resourceConfig, isCustomiseAccess = false } = props;
   const resourceId = props.resourceId || '';
   const popupRef = useRef<HTMLDivElement>(null);
-  const [selectedRole, setSelectedRole] = useState<string | Record<number, string>>(
-    resourceConfig.accessPrivilegesList[0]?.value ?? '',
-  );
+  const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
@@ -66,6 +65,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
   const {
     state: { selectedFilters },
+    dispatch,
   } = useFiltersContextStore();
   // get teams and users data in the organization
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
@@ -104,25 +104,46 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const orgLabel = `Everyone in ${orgName}`;
 
-  const updatedUserAccessList = userAccessToResourceList
-    ?.map((audience) => {
-      const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
+  const audienceFgacColorMap = useMemo(() => {
+    const fgacColorMap: Record<string, string> = {};
 
-      return {
-        ...audience,
-        team_name: matchingTeam?.name ?? '',
-        team_color: matchingTeam?.metadata?.color_hex_code ?? '',
-      };
-    })
-    .filter(
-      (item, index, self) =>
-        index ===
-        self.findIndex(
-          (t) =>
-            t.resource_audience_type === item.resource_audience_type &&
-            t.resource_audience_id === item.resource_audience_id,
+    userAccessToResourceList?.forEach((audience) => {
+      if (audience?.metadata?.fgac_filters) {
+        const fgacString = JSON.stringify(audience?.metadata?.fgac_filters);
+
+        if (!fgacColorMap[fgacString]) {
+          fgacColorMap[fgacString] = getCustomFilterColor();
+        }
+      }
+    });
+
+    return fgacColorMap;
+  }, [userAccessToResourceList]);
+
+  const updatedUserAccessList = useMemo(
+    () =>
+      userAccessToResourceList
+        ?.map((audience) => {
+          const matchingTeam = allTeamsData?.find((team) => team?.team_id === audience?.resource_audience_id);
+
+          return {
+            ...audience,
+            team_name: matchingTeam?.name ?? '',
+            team_color: matchingTeam?.metadata?.color_hex_code ?? '',
+            fgac_color: audienceFgacColorMap[JSON.stringify(audience?.metadata?.fgac_filters)] ?? '',
+          };
+        })
+        .filter(
+          (item, index, self) =>
+            index ===
+            self.findIndex(
+              (t) =>
+                t.resource_audience_type === item.resource_audience_type &&
+                t.resource_audience_id === item.resource_audience_id,
+            ),
         ),
-    );
+    [userAccessToResourceList, allTeamsData, audienceFgacColorMap],
+  );
 
   const handleOpenPopup = () => {
     setOpenPopup(true);
@@ -372,6 +393,15 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     setShowCustomiseAccess((prev) => !prev);
   };
 
+  const handleSelectedRoleChange = (role: string) => {
+    setSelectedRole(role);
+    if (role === PERMISSION_ROLES.ADMIN) {
+      dispatch({
+        type: filtersContextActions.RESET_ALL_FILTERS,
+      });
+    }
+  };
+
   return (
     <div ref={popupRef} className='flex w-fit'>
       <div
@@ -407,7 +437,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     search={search}
                     setSearch={setSearch}
                     selectedRole={selectedRole as string}
-                    setSelectedRole={setSelectedRole}
+                    setSelectedRole={handleSelectedRoleChange}
                     isOpen={openPopup}
                     placeholderText={placeholderText}
                     roleOptions={resourceConfig.accessPrivilegesList}
@@ -427,6 +457,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     <AccessFilters
                       onClick={handleToggleCustomiseAccess}
                       currentUserHasAdminAccess={currentUserHasAdminAccess}
+                      selectedRole={selectedRole as string}
                     />
                   )}
                 </div>
@@ -484,6 +515,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       isCustomiseAccess={isCustomiseAccess}
                       fgacFilters={audience?.metadata?.fgac_filters}
                       resourceId={resourceId}
+                      fgacColor={audience?.fgac_color}
                     />
                   ))}
                 </CommonWrapper>

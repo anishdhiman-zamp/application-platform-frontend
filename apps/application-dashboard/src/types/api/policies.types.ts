@@ -1,4 +1,5 @@
 import type { PolicyDetailsType } from 'types/api/paymentApi.types';
+import type { PolicyActionType } from '@/modules/policies/types';
 
 /**
  * Types for policy-related API responses and requests
@@ -50,7 +51,7 @@ export type GetDualAdminPolicyResponse = {
   description: string;
   resource_id: string;
   resource_type: string;
-  action_type: string;
+  action_type: PolicyActionType;
   icon_id: string;
   policy: PolicyDetailsType;
 };

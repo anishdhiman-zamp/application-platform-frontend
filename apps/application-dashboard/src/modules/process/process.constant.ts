@@ -1,4 +1,4 @@
-import { ACTIVITY_RUN_STATUS, ARTIFACT_TYPE } from 'modules/process/process.types';
+import { ACTIVITY_RUN_STATUS, ARTIFACT_TYPE, DATE_SEPARATOR, LOG_STATUS } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
 
 export const STATUS_ICON_COLOR_MAPPING = {
@@ -65,17 +65,14 @@ export const STATUS_ICON_COLOR_MAPPING = {
 };
 
 export const ARTIFACT_ICON_MAPPING = {
-  [ARTIFACT_TYPE.DOCUMENT]: {
-    id: 'file-05',
-  },
-  [ARTIFACT_TYPE.VIDEO]: {
-    id: 'file-05',
-  },
   [ARTIFACT_TYPE.PDF_DATASET]: {
     id: 'coins-stacked-04',
   },
   [ARTIFACT_TYPE.EMAIL]: {
     id: 'mail-01',
+  },
+  [ARTIFACT_TYPE.BROWSER]: {
+    id: 'file-02',
   },
 };
 
@@ -102,4 +99,45 @@ export const RESIZABLE_PANEL_MAPPING = {
   },
 };
 
+export const LOG_STATUS_ICON_COLOR_MAPPING = {
+  [LOG_STATUS.FAILED]: {
+    fillColor: COLORS.RED_300,
+    strokeColor: COLORS.RED_300,
+  },
+  [LOG_STATUS.NEEDS_ATTENTION]: {
+    fillColor: COLORS.ORANGE_200,
+    strokeColor: COLORS.ORANGE_600,
+  },
+  [LOG_STATUS.LOADING]: {
+    fillColor: COLORS.GRAY_300,
+    strokeColor: COLORS.GRAY_300,
+  },
+  [LOG_STATUS.DONE]: {
+    fillColor: COLORS.GREEN_400,
+    strokeColor: COLORS.GREEN_400,
+  },
+  [LOG_STATUS.SUCCESS]: {
+    fillColor: COLORS.GREEN_400_ALPHA,
+    strokeColor: COLORS.GREEN_400,
+  },
+  [LOG_STATUS.MESSAGE_FROM_USER]: {
+    fillColor: COLORS.BLUE_200,
+    strokeColor: COLORS.BLUE_500,
+  },
+  [LOG_STATUS.MESSAGE_FROM_ADAM]: {
+    fillColor: COLORS.VIOLET_200,
+    strokeColor: COLORS.VIOLET_300,
+  },
+  [LOG_STATUS.VOID]: {
+    fillColor: COLORS.GRAY_400,
+    strokeColor: COLORS.GRAY_700,
+  },
+};
+
 export const MAX_TEXTAREA_HEIGHT = 192;
+
+export const DATE_SEPARATOR_MAPPING = {
+  [DATE_SEPARATOR.TODAY]: 'Today',
+  [DATE_SEPARATOR.YESTERDAY]: 'Yesterday',
+  [DATE_SEPARATOR.OTHER]: 'Other',
+};

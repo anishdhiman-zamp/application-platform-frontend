@@ -53,7 +53,7 @@ export type MultiSelectInputPropsType = {
   setIsCustomInputFocused?: Dispatch<SetStateAction<boolean>>;
   customOptionsListDropdown?: ElementType;
   selectedRole?: string;
-  setSelectedRole?: Dispatch<SetStateAction<Record<number, string> | string>>;
+  setSelectedRole?: (role: string) => void;
   onCustomDeleteFn?: (item: MapAny) => void;
   optionalOpenDropdownOptions?: boolean;
 };

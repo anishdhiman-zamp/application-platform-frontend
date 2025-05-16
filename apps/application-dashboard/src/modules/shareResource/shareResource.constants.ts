@@ -84,6 +84,9 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.ACTIVITY]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.ACTIVITY,
   ),
+  [ResourceType.ORGANIZATION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
+    (privilege) => privilege.kind === ResourceType.ORGANIZATION,
+  ),
 };
 
 /**
@@ -134,4 +137,5 @@ export const resourceTypeRouteMap = {
   [ResourceType.PAGE]: 'pages',
   [ResourceType.PAYMENTS]: 'payments',
   [ResourceType.ACTIVITY]: 'activities',
+  [ResourceType.ORGANIZATION]: 'organizations',
 };

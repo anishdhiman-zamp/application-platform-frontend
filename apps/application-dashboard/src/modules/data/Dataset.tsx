@@ -45,6 +45,8 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
+import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -109,6 +111,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const params = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
+  const { checkUserPrivilege } = useResourceAccess(ResourceType.DATASET, id);
+
+  const currentUserHasEditAccess = useMemo(() => {
+    return (
+      checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.DATA_EDITOR)
+    );
+  }, [checkUserPrivilege]);
 
   const {
     data: filterConfigData,
@@ -395,14 +404,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
       const columns = formatColumns(
         filterConfigData?.data,
-        false,
+        currentUserHasEditAccess,
         id as string,
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
-        undefined,
-        undefined,
-        false,
       );
 
       if (columns?.length > 0) {
