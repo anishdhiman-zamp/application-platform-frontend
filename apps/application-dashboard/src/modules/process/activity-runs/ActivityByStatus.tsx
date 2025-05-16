@@ -145,6 +145,27 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     const { column, toIndex = 0 } = event;
 
     if (!column) return;
+
+    // If the moved column is non-movable, prevent the move
+    if (column?.getColDef()?.suppressMovable) {
+      const fromIndex = latestColumns.findIndex((col) => col.getColId() === column.getColId());
+
+      event.api?.moveColumns([column], fromIndex);
+
+      return;
+    }
+
+    // Check if the target position is valid (not in a non-movable column's position)
+    const targetColumn = latestColumns[toIndex];
+
+    if (targetColumn?.getColDef()?.suppressMovable) {
+      const fromIndex = latestColumns.findIndex((col) => col.getColId() === column.getColId());
+
+      event.api?.moveColumns([column], fromIndex);
+
+      return;
+    }
+
     const columnOrderingVisibility: { colId: string; isVisible: boolean }[] = columnOrderingFromLocalStorage?.length
       ? columnOrderingFromLocalStorage
       : latestColumns.map((column) => ({
@@ -290,7 +311,11 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   }, [processId, status]);
 
   const handleRowClicked = (data: MapAny) => {
-    const activityId = data?.id;
+    const target = data?.event?.target as HTMLElement;
+
+    if (target.closest('.combobox-trigger')) return;
+
+    const activityId = data?.data?.id;
     const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId);
 
     router.push(`${path}?status=${status}`);
@@ -304,7 +329,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
           <div className='relative flex items-center gap-2.5'>
-            <DisplayOptions tableRef={tableRef} datasetId={processId as string} />
+            <DisplayOptions isGroupByDisabled tableRef={tableRef} datasetId={processId as string} />
           </div>
         </div>
       </CommonWrapper>
@@ -329,7 +354,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}
-            onRowPropertiesClick={handleRowClicked}
+            onRowClicked={handleRowClicked}
             menuTitle='Activity properties'
           />
         </div>

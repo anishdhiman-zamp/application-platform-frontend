@@ -85,7 +85,7 @@ const Sidebar = () => {
                     label={process?.display_name}
                     processId={process?.id}
                     isSelected={params?.processId === process?.id}
-                    disable
+                    // disable
                   />
                 ))}
             </CommonWrapper>

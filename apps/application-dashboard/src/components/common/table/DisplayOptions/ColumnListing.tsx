@@ -46,7 +46,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
+    const latestColumns =
+      tableRef?.current?.api?.getColumns()?.filter((column) => !column?.getColDef()?.suppressMovable) ?? [];
 
     setSearchTerm(value);
     if (value) {
@@ -71,16 +72,27 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     if (inputFocused || searchTerm) return;
 
     setLayout(newLayout);
-    // Optional: Update item order based on layout
-    const orderedItems: Column[] = newLayout
+
+    // Get all columns and separate movable from non-movable
+    const allColumns = tableRef?.current?.api?.getColumns() ?? [];
+    const nonMovableColumns = allColumns.filter((column) => column?.getColDef()?.suppressMovable);
+    const movableColumns = allColumns.filter((column) => !column?.getColDef()?.suppressMovable);
+
+    // Get ordered movable columns based on layout
+    const orderedMovableColumns: Column[] = newLayout
       .slice()
       .sort((a: any, b: any) => a.y - b.y)
-      .map((l: any) => columns.find((column) => column?.getColId() === l.i))
+      .map((l: any) => movableColumns.find((column) => column?.getColId() === l.i))
       .filter((column: Column | undefined): column is Column => column !== undefined);
 
-    setColumns(orderedItems);
-    tableRef?.current?.api?.moveColumns(orderedItems, 0);
-    const columnOrderingVisibility = orderedItems.map((column) => ({
+    // Combine non-movable columns with ordered movable columns
+    const finalOrderedColumns = [...nonMovableColumns, ...orderedMovableColumns];
+
+    // Apply the new column order
+    tableRef?.current?.api?.moveColumns(finalOrderedColumns, 0);
+
+    // Update storage with new ordering
+    const columnOrderingVisibility = finalOrderedColumns.map((column) => ({
       colId: column.getColId(),
       isVisible: column.isVisible(),
       width: column.getActualWidth(),
@@ -109,17 +121,27 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   };
 
   useEffect(() => {
-    const latestColumns = tableRef?.current?.api?.getColumns() ?? [];
-    // re-order columns based on the columnOrderingVisibilityForCurrentDataset
-    const orderedColumns: Column[] =
-      getColumnOrderingVisibilityForCurrentDataset(datasetId)
-        ?.map((column) => latestColumns?.find((col) => col.getColId() === column.colId))
+    const allColumns = tableRef?.current?.api?.getColumns() ?? [];
+    // Only get movable columns for display
+    const movableColumns = allColumns.filter((column) => !column?.getColDef()?.suppressMovable);
+
+    // Get stored ordering for movable columns
+    const storedOrdering = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+
+    // Re-order movable columns based on stored ordering
+    const orderedMovableColumns: Column[] =
+      storedOrdering
+        ?.map((column) => movableColumns?.find((col) => col.getColId() === column.colId))
         .filter((col): col is Column => col !== undefined) ?? [];
 
-    const finalColumns = orderedColumns?.length ? orderedColumns : latestColumns;
+    const finalColumns = orderedMovableColumns?.length ? orderedMovableColumns : movableColumns;
 
     if (searchTerm) {
-      const filteredColumns = finalColumns?.filter((column) => column.getColId()?.includes(searchTerm));
+      const filteredColumns = finalColumns?.filter(
+        (column) =>
+          column.getColId()?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          column.getColDef()?.headerName?.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
 
       setColumns(filteredColumns);
     } else {

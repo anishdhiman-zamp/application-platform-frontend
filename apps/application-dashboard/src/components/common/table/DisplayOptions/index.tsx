@@ -14,9 +14,10 @@ import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 type DisplayOptionsProps = {
   tableRef: RefObject<AgGridReact>;
   datasetId: string;
+  isGroupByDisabled?: boolean;
 };
 
-const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
+const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupByDisabled = false }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
@@ -73,15 +74,18 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
       >
         Display
       </Button>
+
       {isOpen && (
         <MenuWrapper
           id='display-options'
           className='!absolute z-10 p-1 right-0 mt-1 w-[180px]'
           childrenWrapperClassName='text-GRAY_900 !overflow-y-auto'
         >
-          {DisplayOptionsList.map((option) => (
-            <DisplayOptionItem key={option.id} {...option} onClick={handleClick} />
-          ))}
+          {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
+            (option) => (
+              <DisplayOptionItem key={option.id} {...option} onClick={handleClick} />
+            ),
+          )}
         </MenuWrapper>
       )}
       {isColumnListingOpen && (
