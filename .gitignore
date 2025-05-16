@@ -44,3 +44,5 @@ local-build
 
 coverage
 apps/application-dashboard/coverage
+# Sentry Config File
+.env.sentry-build-plugin
