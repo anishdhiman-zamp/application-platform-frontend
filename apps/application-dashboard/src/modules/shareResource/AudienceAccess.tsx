@@ -24,14 +24,21 @@ import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 type AudienceAccessPropsType = {
   resourceType: ResourceType;
   privilege: string;
-  changeRole: (resourceAudienceId: string, role: string, fgacFilters?: FilterModelType | null) => Promise<boolean>;
-  deleteAudience: (resourceAudienceId: string, userName: string) => Promise<void>;
+  changeRole: (
+    resourceAudienceId: string,
+    role: string,
+    fgacFilters?: FilterModelType | null,
+    isRoleChange?: boolean,
+    audienceType?: string,
+  ) => Promise<boolean>;
+  deleteAudience: (resourceAudienceId: string, userName: string, resourceAudienceType: string) => Promise<void>;
   privilegeList: ResourcePrivilege[];
   resourceAudienceId: string;
   resourceAudienceType: string;
   user: {
     name?: string;
     email?: string;
+    type?: string;
   };
   userPrivilege: string;
   currentUserHasAdminAccess: boolean;
@@ -111,7 +118,13 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const handleRoleChange = async (selectedOption: OptionsType) => {
     const roleValue = selectedOption.value.toString();
 
-    await changeRole(resourceAudienceId, roleValue, roleValue !== PERMISSION_ROLES.ADMIN ? fgacFilters : null)
+    await changeRole(
+      resourceAudienceId,
+      roleValue,
+      roleValue !== PERMISSION_ROLES.ADMIN ? fgacFilters : null,
+      false,
+      user.type,
+    )
       .then((success) => {
         if (!success) {
           setSelectedRole(role as ResourcePrivilege);
@@ -131,7 +144,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleDeleteAudience = async () => {
-    deleteAudience(resourceAudienceId, userName || '')
+    deleteAudience(resourceAudienceId, userName || '', resourceAudienceType)
       .then(() => {
         handleCloseRemoveFromTeamPopup();
       })

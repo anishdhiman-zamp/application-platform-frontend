@@ -47,7 +47,7 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig, isCustomiseAccess = false } = props;
+  const { resourceType, resourceConfig, isCustomiseAccess = false, title } = props;
   const resourceId = props.resourceId || '';
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
@@ -80,7 +80,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
-  const showInitialDropdownOptions = !isLoadingAudiencesData && !!(userAccessToResourceList?.length <= 1);
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_id = getUserId();
@@ -194,6 +193,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     role: string,
     fgacFilters?: FilterModelType,
     isRoleChange?: boolean,
+    audienceType?: string,
   ): Promise<boolean> => {
     const success = await changeRole({
       resourceRoute: resourceTypeRouteMap[resourceType],
@@ -204,6 +204,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         audience_id: resourceAudienceId,
         role,
         fgac_filters: fgacFilters,
+        audience_type: audienceType ?? '',
       },
     })
       .unwrap()
@@ -226,12 +227,17 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     return success;
   };
 
-  const handleDeleteAudience = async (resourceAudienceId: string, userName: string) => {
+  const handleDeleteAudience = async (
+    resourceAudienceId: string,
+    userName: string,
+    audience_type: ResourceAudienceType,
+  ) => {
     await deleteAudience({
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
       body: {
         audience_id: resourceAudienceId,
+        audience_type,
       },
     })
       .unwrap()
@@ -419,7 +425,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
-                <span className='f-16-600 text-GRAY_950'>Share this {resourceConfig.displayName}</span>
+                <span className='f-16-600 text-GRAY_950'>{title || `Share this {resourceConfig.displayName}`}</span>
                 <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
                   <SvgSpriteLoader
                     id='x-close'
@@ -450,7 +456,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     optionsList={filteredOptionListsData}
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
-                    optionalOpenDropdownOptions={showInitialDropdownOptions}
+                    optionalOpenDropdownOptions={false}
                     selectOnlyFromList
                   />
                   {isCustomiseAccess && (
@@ -499,7 +505,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       resourceType={resourceType}
                       privilege={audience?.privilege}
                       resourceAudienceId={audience?.resource_audience_id}
-                      user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
+                      user={{
+                        ...audience?.user,
+                        email: audience?.user?.email ?? '',
+                        type: audience?.resource_audience_type,
+                      }}
                       resourceAudienceType={audience?.resource_audience_type}
                       userPrivilege={userPrivilege}
                       orgName={orgLabel}
