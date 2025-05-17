@@ -425,7 +425,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
-                <span className='f-16-600 text-GRAY_950'>{title || `Share this {resourceConfig.displayName}`}</span>
+                <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig.displayName}`}</span>
                 <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
                   <SvgSpriteLoader
                     id='x-close'
