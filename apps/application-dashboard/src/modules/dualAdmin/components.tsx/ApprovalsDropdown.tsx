@@ -1,16 +1,16 @@
 import { type FC, useState } from 'react';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
-import type { ApproverListOption } from '@/modules/policies/types';
+import type { AudienceMembersDataType } from 'modules/dualAdmin/DualAdminHome';
+import AudienceMember from '@/components/audience-member';
 import type { MapAny } from '@/types/commonTypes';
-import { getFirstLetters } from '@/utils/common';
-
 type ApprovalDropdownProps = {
-  selectedApprovers: ApproverListOption[];
-  onChange: (approvers: ApproverListOption[]) => void;
-  approversList: ApproverListOption[];
+  selectedApprovers: AudienceMembersDataType[];
+  onChange: (approvers: AudienceMembersDataType[]) => void;
+  approversList: AudienceMembersDataType[];
+  disabled: boolean;
 };
 
-const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChange, approversList }) => {
+const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChange, approversList, disabled }) => {
   const [open, setOpen] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
@@ -18,7 +18,9 @@ const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChan
   };
 
   const isChecked = (option: MapAny, selectedOptions: MapAny[]) => {
-    return selectedOptions?.some((selectedOption) => selectedOption?.id === option?.id);
+    return selectedOptions?.some(
+      (selectedOption) => selectedOption?.resource_audience_id === option?.resource_audience_id,
+    );
   };
 
   return (
@@ -26,13 +28,20 @@ const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChan
       <DropdownMenuTrigger asChild>
         <div className='relative'>
           {selectedApprovers?.length > 0 ? (
-            <div className='flex items-center gap-1'>
-              <div className='w-4 h-4 bg-GRAY_1000 flex justify-center items-center f-8-500 rounded-full text-white'>
-                {getFirstLetters(selectedApprovers[0]?.label as string, 1).toLocaleUpperCase()}
-              </div>
-              <div className=' text-GRAY_1000 grow f-12-450'>{`${selectedApprovers?.[0]?.label}  ${
-                selectedApprovers?.length > 1 ? `+${selectedApprovers?.length - 1}` : ''
-              }`}</div>
+            <div className='flex items-center gap-1 text-GRAY_1000'>
+              <AudienceMember
+                resourceType={selectedApprovers?.[0]?.resource_type}
+                user={{ ...selectedApprovers?.[0]?.user, email: selectedApprovers?.[0]?.user?.email ?? '' }}
+                currentUserHasAdminAccess={false}
+                teamInfo={{
+                  name: selectedApprovers?.[0]?.team_name,
+                  color: selectedApprovers?.[0]?.team_color,
+                }}
+                resourceAudienceType={selectedApprovers?.[0]?.resource_audience_type}
+                showAvatar
+                tagClassName='border-none'
+              />
+              {`${selectedApprovers?.length > 1 ? `+${selectedApprovers?.length - 1}` : ''}`}
             </div>
           ) : (
             <div className='text-GRAY_600 f-12-450 cursor-pointer whitespace-nowrap'>Select approver</div>
@@ -50,17 +59,32 @@ const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChan
       >
         {approversList?.map((audience, index) => (
           <DropdownMenuCheckboxItem
-            key={audience.id ?? index}
+            key={audience?.resource_audience_id ?? index}
             checked={isChecked(audience, selectedApprovers)}
+            disabled={disabled}
             onCheckedChange={(checked) => {
               if (checked) {
                 onChange([...selectedApprovers, audience]);
               } else {
-                onChange(selectedApprovers.filter((selectedOption) => selectedOption.id !== audience.id));
+                onChange(
+                  selectedApprovers.filter(
+                    (selectedOption) => selectedOption?.resource_audience_id !== audience?.resource_audience_id,
+                  ),
+                );
               }
             }}
           >
-            {audience.richLabel || audience.label}
+            <AudienceMember
+              resourceType={audience?.resource_type}
+              user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
+              currentUserHasAdminAccess={false}
+              teamInfo={{
+                name: audience?.team_name,
+                color: audience?.team_color,
+              }}
+              resourceAudienceType={audience?.resource_audience_type}
+              showAvatar={false}
+            />
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>

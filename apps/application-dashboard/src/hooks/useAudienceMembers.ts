@@ -24,8 +24,8 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
     isLoading: isLoadingAudiencesData,
     error: errorAudiencesData,
   } = useGetAudiencesByResourceIdQuery({
-    resourceRoute: resourceTypeRouteMap[args.resourceType],
-    resourceId: args.resourceId,
+    resourceRoute: resourceTypeRouteMap[args?.resourceType],
+    resourceId: args?.resourceType === ResourceType.ORGANIZATION ? organizationId : args?.resourceId,
   });
 
   const loading = useMemo(() => {
@@ -58,8 +58,8 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
               index ===
               self.findIndex(
                 (t) =>
-                  t.resource_audience_type === item.resource_audience_type &&
-                  t.resource_audience_id === item.resource_audience_id,
+                  t?.resource_audience_type === item?.resource_audience_type &&
+                  t?.resource_audience_id === item?.resource_audience_id,
               ),
           ) ?? []
       );
@@ -70,6 +70,8 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
 
   return {
     data,
+    allTeamsData,
+    audiencesData,
     loading,
     error,
   };

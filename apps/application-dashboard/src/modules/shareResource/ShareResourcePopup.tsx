@@ -11,6 +11,7 @@ import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
+import SharePopupPageApprovals from 'modules/shareResource/components/SharePopupPageApprovals';
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
@@ -160,6 +161,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     if (openPopup) {
       handleClosePopup();
     } else {
+      refetchAudiencesData();
       handleOpenPopup();
     }
   }, [openPopup]);
@@ -425,7 +427,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
           <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
               <div className='flex w-full justify-between items-center p-5'>
-                <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig.displayName}`}</span>
+                <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
                 <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
                   <SvgSpriteLoader
                     id='x-close'
@@ -531,6 +533,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </CommonWrapper>
               </div>
             </div>
+            <SharePopupPageApprovals resourceType={resourceType} resourceId={resourceId} />
           </div>
         )}
       </div>

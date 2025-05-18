@@ -17,6 +17,9 @@ export const API_ENDPOINTS = {
   ADD_TEAMS_TO_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/add`,
   REMOVE_TEAMS_FROM_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/remove`,
 
+  TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
+  TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,
+
   DATASET_FILTER_CONFIG_GET: `datasets/{{datasetId}}/filter-config`,
   DATASET_DATA_GET: `datasets/{{datasetId}}/data`,
   DATASET_EXPORT_GET: `datasets/{{datasetId}}/export`,

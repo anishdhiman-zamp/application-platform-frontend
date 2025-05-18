@@ -33,6 +33,7 @@ const SharePaymentsPopup: FC<SharePaymentsPopupProps> = ({ paymentConfigId }) =>
       resourceId={paymentConfigId}
       resourceType={ResourceType.PAYMENTS}
       resourceConfig={paymentsConfig}
+      title='Share Payments'
       resourceAdminPrivilege={PAYMENT_ACCESS_PRIVILEGES.ADMIN}
       isCustomiseAccess={isCustomiseAccess}
     />

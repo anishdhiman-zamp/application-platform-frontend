@@ -6,9 +6,10 @@ import { cn } from 'utils/common';
 
 interface NoWidgetDataProps {
   className?: string;
+  text?: string;
 }
 
-const NoWidgetData: FC<NoWidgetDataProps> = ({ className }) => {
+const NoWidgetData: FC<NoWidgetDataProps> = ({ className, text }) => {
   return (
     <div className={cn('top-0 right-0 w-full h-full flex justify-center items-center z-1000 bg-white', className)}>
       <div className='flex items-center flex-col gap-3'>
@@ -19,7 +20,7 @@ const NoWidgetData: FC<NoWidgetDataProps> = ({ className }) => {
           height={24}
           color={COLORS.GRAY_700}
         />
-        <div className='text-GRAY_700 f-12-450'>No data available, try again with different filters</div>
+        <div className='text-GRAY_700 f-12-450'>{text || 'No data available, try again with different filters'}</div>
       </div>
     </div>
   );

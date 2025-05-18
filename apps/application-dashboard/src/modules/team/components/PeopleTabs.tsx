@@ -28,7 +28,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
 
   const handleTabSelect = (item?: MenuItem) => {
     setSelectedTab(item?.value as TEAM_TABS_TYPES);
-    router.replace(`${ROUTES_PATH.TEAM}#${item?.value}`);
+    router.replace(ROUTES_PATH.TEAM, { query: { tab: item?.value } });
   };
 
   const renderTeamListing = () => {
@@ -50,7 +50,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   };
 
   useEffect(() => {
-    const tab = router.asPath.split('#')[1];
+    const tab = router.query.tab;
 
     setSelectedTab((tab as TEAM_TABS_TYPES) ?? TEAM_TABS_TYPES.TEAM_MEMBERS);
   }, []);

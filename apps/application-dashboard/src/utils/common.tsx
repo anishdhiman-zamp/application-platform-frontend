@@ -5,6 +5,7 @@ import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
+import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 
 declare type MapAny = Record<string, any>;
@@ -546,3 +547,6 @@ export const getUserDisplayName = (user?: { name?: string; email?: string }) => 
 
   return 'Unknown';
 };
+
+export const getUserNameFromAudience = (user?: AudiencesByResourceResponse) =>
+  user?.user?.name || user?.user?.email?.split('@')[0] || '';
