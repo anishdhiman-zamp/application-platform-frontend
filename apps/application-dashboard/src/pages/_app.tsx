@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Toaster } from '@zamp-platform/ui';
 import { LicenseManager as LicenseManagerCharts } from 'ag-charts-enterprise';
 import { LicenseManager } from 'ag-grid-enterprise';
 import { inter } from 'constants/common.constants';
@@ -20,7 +20,6 @@ import { RouteGuard } from 'components/hoc/RouteGuard';
 import NetworkStatus from 'components/NetWorkStatus';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import 'react-toastify/dist/ReactToastify.css';
 import 'styles/ag-styles.css';
 import 'styles/common.css';
 import 'styles/react-datepicker.css';
@@ -58,10 +57,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
             <PostHogProvider client={posthogJs}>
               <AuthGuard loginRoute='/login'>
                 <FeatureFlagsProvider>
-                  <ToastContainer />
                   <RouteGuard>
                     <div className={'h-screen light-mode'}>{getComponent()}</div>
                   </RouteGuard>
+                  <Toaster />
                 </FeatureFlagsProvider>
               </AuthGuard>
             </PostHogProvider>

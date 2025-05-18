@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { toast } from 'react-toastify';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useApprovalActionMutation } from '@/apis/people';
+import { toast } from '@/components/common/toast/Toast';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
 import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/modules/policies/constants';

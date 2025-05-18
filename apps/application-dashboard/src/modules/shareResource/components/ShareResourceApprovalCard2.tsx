@@ -1,9 +1,9 @@
 import { type FC, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { Loader2 } from 'lucide-react';
 import { useApprovalActionMutation } from '@/apis/people';
 import AudienceMember from '@/components/audience-member';
+import { toast } from '@/components/common/toast/Toast';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
 import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/modules/policies/constants';
 import { RESOURCE_ACTION_TYPE } from '@/modules/policies/types';
