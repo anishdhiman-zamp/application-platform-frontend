@@ -4,6 +4,7 @@ import RequestApprovalDialogue, {
 } from 'modules/dualAdmin/components.tsx/RequestApprovalDialogue';
 import DualAdminCard from 'modules/dualAdmin/DualAdminCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
+import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -108,6 +109,8 @@ const DualAdminHome = () => {
           isLoading={isLoading}
           skeletonType={SkeletonTypes.CUSTOM}
           loader={<SkeletonLoaderListing columns={4} length={4} />}
+          noDataBanner={<NoWidgetData className='h-[400px]' text='No policies found' />}
+          isNoData={dualAdminPolicy?.length === 0}
           isError={isError}
           refetchFunction={refetch}
         >

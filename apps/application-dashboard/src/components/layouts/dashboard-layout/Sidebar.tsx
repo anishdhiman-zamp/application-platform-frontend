@@ -115,23 +115,25 @@ const Sidebar = () => {
                   </CommonWrapper>
                 </div>
               )}
-              <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
-                <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
-                <CommonWrapper
-                  isLoading={isLoading}
-                  skeletonType={SkeletonTypes.CUSTOM}
-                  loader={<SkeletonLoaderSidebarPages />}
-                >
-                  {pages?.map((item) => (
-                    <PageNavTab
-                      key={item?.page_id}
-                      label={item?.name}
-                      pageId={item?.page_id}
-                      isSelected={params?.pageId === item?.page_id}
-                    />
-                  ))}
-                </CommonWrapper>
-              </div>
+              {!!pages?.length && (
+                <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
+                  <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
+                  <CommonWrapper
+                    isLoading={isLoading}
+                    skeletonType={SkeletonTypes.CUSTOM}
+                    loader={<SkeletonLoaderSidebarPages />}
+                  >
+                    {pages?.map((item) => (
+                      <PageNavTab
+                        key={item?.page_id}
+                        label={item?.name}
+                        pageId={item?.page_id}
+                        isSelected={params?.pageId === item?.page_id}
+                      />
+                    ))}
+                  </CommonWrapper>
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
