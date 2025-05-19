@@ -2,6 +2,7 @@ import { type FC, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import UpdatePolicyCard from 'modules/policies/components/UpdatePolicyCard';
+import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from 'modules/policies/constants';
 import { useApprovalActionMutation } from '@/apis/people';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
@@ -32,10 +33,10 @@ const ReviewPolicyUpdatePopover: FC<ReviewPolicyUpdatePopoverProps> = ({
     })
       .unwrap()
       .then(() => {
-        toast.success('Approval action successful');
+        toast.success(APPROVAL_POLICY_TOAST);
       })
       .catch(() => {
-        toast.error('Approval action failed');
+        toast.error(APPROVAL_FAILED_TOAST);
       })
       .finally(() => {
         onClose();

@@ -2,10 +2,12 @@ import { useEffect, useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { ROUTES_PATH, SETTING_SIDEBAR_ITEMS, SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
+import { AnimatePresence, motion } from 'motion/react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
@@ -23,6 +25,7 @@ const Sidebar = () => {
   const params = useParams();
   const router = useRouter();
   const pathname = router?.pathname;
+
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -51,63 +54,116 @@ const Sidebar = () => {
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
+  useEffect(() => {
+    SETTING_SIDEBAR_ITEMS.forEach((item) => {
+      if (router.asPath.includes(item.path)) {
+        router.prefetch(item.path);
+      }
+    });
+  }, []);
+
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
-        <div className='px-2 border-b border-GRAY_400 pb-4'>
-          {filteredSidebarItems.map((item) => (
-            <SidebarTab
-              key={item.label}
-              name={item.label}
-              path={item.path}
-              iconId={item.iconId}
-              isSelected={!params?.pageId && !params?.processId && pathname.includes(item?.path)}
-            />
-          ))}
-        </div>
-        {processes && processes?.length > 0 && (
-          <div className='px-2 py-2.5'>
-            <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
-            <CommonWrapper
-              isLoading={isLoading}
-              skeletonType={SkeletonTypes.CUSTOM}
-              loader={<SkeletonLoaderSidebarPages />}
+        <AnimatePresence mode='wait'>
+          {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
+            <motion.div
+              key='details'
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, type: 'spring' }}
+              className='h-full'
             >
-              {processes
-                ?.map((process) => ({
-                  ...process,
-                  fractionalIndex: process?.fractional_index,
-                }))
-                .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
-                .map((process) => (
-                  <ProcessNavTab
-                    key={process?.id}
-                    label={process?.display_name}
-                    processId={process?.id}
-                    isSelected={params?.processId === process?.id}
-                    disable
-                  />
+              <div className='px-2 border-b border-GRAY_400 pb-4'>
+                {filteredSidebarItems.map((item) => (
+                  <Link href={item.path} key={item.label} className='cursor-pointer'>
+                    <SidebarTab
+                      key={item?.label}
+                      name={item?.label}
+                      iconId={item?.iconId}
+                      isSelected={!params?.pageId && !params?.processId && pathname.includes(item?.path)}
+                    />
+                  </Link>
                 ))}
-            </CommonWrapper>
-          </div>
-        )}
-        <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
-          <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
-          <CommonWrapper
-            isLoading={isLoading}
-            skeletonType={SkeletonTypes.CUSTOM}
-            loader={<SkeletonLoaderSidebarPages />}
-          >
-            {pages?.map((item) => (
-              <PageNavTab
-                key={item?.page_id}
-                label={item?.name}
-                pageId={item?.page_id}
-                isSelected={params?.pageId === item?.page_id}
-              />
-            ))}
-          </CommonWrapper>
-        </div>
+                <div onClick={() => router.push(SETTING_SIDEBAR_ITEMS[0]?.path)}>
+                  <SidebarTab name='Setting' iconId='settings-01' className='cursor-pointer' />
+                </div>
+              </div>
+              {processes && processes?.length > 0 && (
+                <div className='px-2 py-2.5'>
+                  <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
+                  <CommonWrapper
+                    isLoading={isLoading}
+                    skeletonType={SkeletonTypes.CUSTOM}
+                    loader={<SkeletonLoaderSidebarPages />}
+                  >
+                    {processes
+                      ?.map((process) => ({
+                        ...process,
+                        fractionalIndex: process?.fractional_index,
+                      }))
+                      .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
+                      .map((process) => (
+                        <ProcessNavTab
+                          key={process?.id}
+                          label={process?.display_name}
+                          processId={process?.id}
+                          isSelected={params?.processId === process?.id}
+                          // disable
+                        />
+                      ))}
+                  </CommonWrapper>
+                </div>
+              )}
+              {!!pages?.length && (
+                <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
+                  <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
+                  <CommonWrapper
+                    isLoading={isLoading}
+                    skeletonType={SkeletonTypes.CUSTOM}
+                    loader={<SkeletonLoaderSidebarPages />}
+                  >
+                    {pages?.map((item) => (
+                      <PageNavTab
+                        key={item?.page_id}
+                        label={item?.name}
+                        pageId={item?.page_id}
+                        isSelected={params?.pageId === item?.page_id}
+                      />
+                    ))}
+                  </CommonWrapper>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key='list'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, type: 'spring' }}
+            >
+              <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
+                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500'>
+                  <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
+                  Settings
+                </div>
+                <div className='flex flex-col '>
+                  {SETTING_SIDEBAR_ITEMS.map((item) => (
+                    <button className='inline' key={item.id} onClick={() => router.replace(item?.path)}>
+                      <SidebarTab
+                        key={item?.id}
+                        name={item?.label}
+                        iconId={item?.iconId}
+                        isSelected={router.asPath.includes(item?.path)}
+                        className='text-GRAY_1000'
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div
           className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px] flex items-center gap-2.5 text-GRAY_900'
           onClick={logout}

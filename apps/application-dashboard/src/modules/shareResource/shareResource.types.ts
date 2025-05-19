@@ -71,6 +71,7 @@ export type ShareResourcePopupProps = {
   resourceAdminPrivilege: string;
   resourceConfig: ShareResourceConfig;
   isCustomiseAccess?: boolean;
+  title?: string;
 };
 
 /**

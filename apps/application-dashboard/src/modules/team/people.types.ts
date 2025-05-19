@@ -10,7 +10,7 @@ export enum TEAM_TABS_TYPES {
 export const TeamTabsList = [
   { label: 'Team members', value: TEAM_TABS_TYPES.TEAM_MEMBERS },
   { label: 'Invited', value: TEAM_TABS_TYPES.INVITED_MEMBERS },
-  // { label: 'Approval pending', value: TEAM_TABS_TYPES.APPROVAL_PENDING },
+  { label: 'Approval pending', value: TEAM_TABS_TYPES.APPROVAL_PENDING },
 ];
 
 export type InviteMembersPopupPropsType = {
@@ -57,6 +57,9 @@ export enum TEAM_MEMBERS_PRIVILEGES {
   SYSTEM_ADMIN = 'system_admin',
   MEMBER = 'member',
   REMOVE = 'remove',
+  INITIATOR = 'initiator',
+  VIEWER = 'viewer',
+  ADMIN = 'admin',
 }
 
 export type TeamMemberAccessPrivilegesType = {

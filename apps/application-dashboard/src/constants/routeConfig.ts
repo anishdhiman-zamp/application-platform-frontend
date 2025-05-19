@@ -4,7 +4,6 @@ export const ROUTES_PATH = {
   HOME: '/',
   LOGIN: '/login',
   DATA: '/datasets',
-  TEAM: '/team',
   DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages/',
@@ -20,8 +19,10 @@ export const ROUTES_PATH = {
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId/:label',
-  POLICIES: '/dual-admin',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/:label/:activityId',
+  POLICIES: '/settings#dual-admin',
+  TEAM: '/settings#team',
+  SETTINGS: '/settings',
 };
 
 export const getPageRouteById = (pageId: string) => {
@@ -88,11 +89,5 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     id: 'payments',
     iconId: 'send-01',
     path: ROUTES_PATH.PAYMENTS,
-  },
-  {
-    label: 'Team',
-    id: 'team',
-    iconId: 'users-02',
-    path: ROUTES_PATH.TEAM,
   },
 ];

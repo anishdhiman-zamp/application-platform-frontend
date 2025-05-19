@@ -4,7 +4,9 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
 import { COLORS } from '@/constants/colors';
 import { JOINED_DATASET_ICON } from '@/constants/icons';
+import { useAppSelector } from '@/hooks/toolkit';
 import { TeamInfoType } from '@/modules/shareResource';
+import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import { checkIfCurrentUser } from '@/utils/accessPermission/accessPermission.utils';
 import AudienceMemberName from 'components/audience-member/Name';
@@ -22,6 +24,7 @@ interface AudienceMemberProps {
     email?: string;
   };
   showAvatar?: boolean;
+  tagClassName?: string;
 }
 
 const AudienceMember = ({
@@ -32,11 +35,13 @@ const AudienceMember = ({
   resourceType,
   user,
   showAvatar = true,
+  tagClassName,
 }: AudienceMemberProps) => {
+  const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
   const checkIfUser = checkIfCurrentUser(user?.email ?? '');
   const isTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const isOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
-  const customAvatarWord = isOrg && customerName ? customerName : (user?.email ?? '');
+  const customAvatarWord = isOrg ? customerName || orgName || '' : (user?.email ?? '');
 
   return (
     <div className='flex items-center justify-start'>
@@ -59,6 +64,7 @@ const AudienceMember = ({
           ) : null}
           <Tag
             variant={isTeam ? 'blue' : 'outline'}
+            className={tagClassName}
             style={{
               backgroundColor: isTeam ? teamInfo?.color : 'transparent',
             }}

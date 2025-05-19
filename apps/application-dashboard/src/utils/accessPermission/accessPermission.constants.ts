@@ -18,6 +18,9 @@ export enum VALIDATION_ERROR_MESSAGES {
   CANNOT_INVITE_SELF = 'You cannot invite yourself.',
 }
 
+export const APPROVAL_REQUEST_TOAST = 'Request sent successfully';
+export const APPROVAL_REQUEST_FAIL_TOAST = 'Failed to send request';
+
 export const acceptableRolesForAdminPurpose = [
   PERMISSION_ROLES.ADMIN,
   PERMISSION_ROLES.SYSTEM_ADMIN,

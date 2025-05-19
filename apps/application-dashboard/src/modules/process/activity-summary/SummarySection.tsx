@@ -43,6 +43,7 @@ const SummarySection: FC<SummarySectionProps> = ({ processId, activityId, handle
         loader={<ArtifactsSkeleton />}
         isError={isErrorArtifacts}
         refetchFunction={refetchArtifacts}
+        errorCardStyle='w-full'
         className='px-6 py-5 flex flex-col justify-start items-start w-full gap-y-3'
       >
         <p className='f-13-550'>Artifacts</p>

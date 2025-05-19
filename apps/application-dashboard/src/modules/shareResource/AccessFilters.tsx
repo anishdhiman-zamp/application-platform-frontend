@@ -1,6 +1,10 @@
 import { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import {
+  ACCESS_MESSAGES_ADMIN_ROLE,
+  ACCESS_MESSAGES_CUSTOMISE_ACCESS,
+} from 'modules/shareResource/shareResource.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import FiltersWrapper from '@/components/filter/filterMenu/FiltersWrapper';
 import { defaultFnType } from '@/types/commonTypes';
@@ -12,17 +16,23 @@ type AccessFiltersProps = {
   onClick: defaultFnType;
   currentUserHasAdminAccess: boolean;
   selectedRole: string;
+  emptyFiltersTitle: string;
 };
 
-const AccessFilters: FC<AccessFiltersProps> = ({ onClick, currentUserHasAdminAccess, selectedRole }) => {
+const AccessFilters: FC<AccessFiltersProps> = ({
+  onClick,
+  currentUserHasAdminAccess,
+  selectedRole,
+  emptyFiltersTitle,
+}) => {
   const {
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
 
   const tooltipText = !currentUserHasAdminAccess
-    ? 'Only admins can customise access'
+    ? ACCESS_MESSAGES_CUSTOMISE_ACCESS
     : selectedRole === PERMISSION_ROLES.ADMIN
-      ? 'Admin will have access to all data'
+      ? ACCESS_MESSAGES_ADMIN_ROLE
       : '';
 
   const disabled = !currentUserHasAdminAccess || selectedRole === PERMISSION_ROLES.ADMIN;
@@ -33,7 +43,7 @@ const AccessFilters: FC<AccessFiltersProps> = ({ onClick, currentUserHasAdminAcc
       <div className='border border-GRAY_400 rounded-md px-3 py-2.5 f-12-400 flex items-center justify-between'>
         <div className='w-[260px]'>
           {checkIsObjectEmpty(selectedFilters) ? (
-            <span className='border border-GRAY_400 py-0.5 px-1.5 rounded-sm'>All Data</span>
+            <span className='border border-GRAY_400 py-0.5 px-1.5 rounded-sm'>{emptyFiltersTitle}</span>
           ) : (
             <FiltersWrapper
               label='Filter'

@@ -10,3 +10,6 @@ export const DEFAULT_APPROVAL_STEP: ApprovalFlowStep = {
   logical_operator: LOGICAL_OPERATOR_CONDITIONS.OR,
   conditions: [{ mode: PolicyQuorum.ONE, approver_details: [] }],
 };
+
+export const APPROVAL_POLICY_TOAST = 'Approval action successful';
+export const APPROVAL_FAILED_TOAST = 'Approval action failed';

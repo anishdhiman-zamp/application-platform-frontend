@@ -1,12 +1,11 @@
 import { FC, RefObject, useRef, useState } from 'react';
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
-import { MenuWrapper } from 'components/common/MenuWrapper';
+import { COLORS } from '@/constants/colors';
+import type { MapAny } from '@/types/commonTypes';
 import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing';
-import DisplayOptionItem from 'components/common/table/DisplayOptions/DisplayOptionItem';
 import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
@@ -14,9 +13,10 @@ import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 type DisplayOptionsProps = {
   tableRef: RefObject<AgGridReact>;
   datasetId: string;
+  isGroupByDisabled?: boolean;
 };
 
-const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
+const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupByDisabled = false }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
@@ -61,29 +61,38 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId }) => {
 
   return (
     <div className='relative' ref={menuRef}>
-      <Button
-        id='display-options'
-        onClick={() => setIsOpen(!isOpen)}
-        type={BUTTON_TYPES.SECONDARY}
-        size={SIZE_TYPES.XSMALL}
-        iconPosition={ICON_POSITION_TYPES.LEFT}
-        iconProps={{
-          id: 'settings-04',
-        }}
-      >
-        Display
-      </Button>
-      {isOpen && (
-        <MenuWrapper
-          id='display-options'
-          className='!absolute z-10 p-1 right-0 mt-1 w-[180px]'
-          childrenWrapperClassName='text-GRAY_900 !overflow-y-auto'
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            className='focus-visible:outline-none !ring-0 !ring-offset-0 select-none flex items-center gap-1'
+            size='small'
+            variant='outline'
+          >
+            <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={12} />
+            Display
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align='end'
+          className='z-[9999] !min-w-[180px]  max-h-[300px] overflow-y-auto'
+          sideOffset={5}
         >
-          {DisplayOptionsList.map((option) => (
-            <DisplayOptionItem key={option.id} {...option} onClick={handleClick} />
-          ))}
-        </MenuWrapper>
-      )}
+          {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
+            (option: MapAny) => (
+              <DropdownMenuItem
+                key={option?.id}
+                onClick={() => handleClick(option?.id)}
+                className='cursor-default hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 rounded px-2.5 py-2'
+              >
+                <div className='flex items-center gap-1.5 w-full cursor-pointer '>
+                  <SvgSpriteLoader id={option?.iconId} size={12} />
+                  <div>{option?.label}</div>
+                </div>
+              </DropdownMenuItem>
+            ),
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
       {isColumnListingOpen && (
         <ColumnListing tableRef={tableRef} onClose={handleCloseColumnListing} datasetId={datasetId} />
       )}

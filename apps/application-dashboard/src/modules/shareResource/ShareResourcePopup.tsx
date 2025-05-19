@@ -1,5 +1,4 @@
-import { FC, useMemo, useState } from 'react';
-import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useDeleteAudienceFromResourceMutation,
@@ -8,16 +7,20 @@ import {
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
+import SharePopupPageApprovals from 'modules/shareResource/components/SharePopupPageApprovals';
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
+import { SIZE_TYPES } from 'types/common/components';
+import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
+import { cn, getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
@@ -35,6 +38,7 @@ import {
 import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
 import { FilterModelType } from '@/types/components/table.type';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
+import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -44,8 +48,9 @@ import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.ty
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
-  const { resourceType, resourceConfig, isCustomiseAccess = false } = props;
+  const { resourceType, resourceConfig, isCustomiseAccess = false, title } = props;
   const resourceId = props.resourceId || '';
+  const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
@@ -76,7 +81,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
-  const showInitialDropdownOptions = !isLoadingAudiencesData && !!(userAccessToResourceList?.length <= 1);
   const placeholderText = 'Share with people and teams';
   const user_email = getUserEmail();
   const user_id = getUserId();
@@ -141,6 +145,38 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     [userAccessToResourceList, allTeamsData, audienceFgacColorMap],
   );
 
+  const emptyFiltersTitle = useMemo(() => {
+    switch (resourceType) {
+      case ResourceType.PAYMENTS:
+        return 'All Accounts';
+      default:
+        return 'All Data';
+    }
+  }, [resourceType]);
+
+  const handleOpenPopup = () => {
+    setOpenPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    if (showCustomiseAccess) return;
+    setOpenPopup(false);
+    setShowValidationError(false);
+    setSelectedItems([]);
+    setSearch('');
+  };
+
+  const handleTogglePopup = useCallback(() => {
+    if (openPopup) {
+      handleClosePopup();
+    } else {
+      refetchAudiencesData();
+      handleOpenPopup();
+    }
+  }, [openPopup]);
+
+  useOnClickOutside(popupRef, handleClosePopup);
+
   const handleShareResource = () => {
     const shareData: AddAudiencesToResourcePayload = {
       audiences: selectedItems?.map((item) => ({
@@ -168,6 +204,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     role: string,
     fgacFilters?: FilterModelType,
     isRoleChange?: boolean,
+    audienceType?: string,
   ): Promise<boolean> => {
     const success = await changeRole({
       resourceRoute: resourceTypeRouteMap[resourceType],
@@ -178,6 +215,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         audience_id: resourceAudienceId,
         role,
         fgac_filters: fgacFilters,
+        audience_type: audienceType ?? '',
       },
     })
       .unwrap()
@@ -200,12 +238,17 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     return success;
   };
 
-  const handleDeleteAudience = async (resourceAudienceId: string, userName: string) => {
+  const handleDeleteAudience = async (
+    resourceAudienceId: string,
+    userName: string,
+    audience_type: ResourceAudienceType,
+  ) => {
     await deleteAudience({
       resourceRoute: resourceTypeRouteMap[resourceType],
       resourceId,
       body: {
         audience_id: resourceAudienceId,
+        audience_type,
       },
     })
       .unwrap()
@@ -376,133 +419,135 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     }
   };
 
-  const handlePopupChange = (open: boolean) => {
-    if (open) {
-      setOpenPopup(true);
-    } else {
-      if (showCustomiseAccess) return;
-      setOpenPopup(false);
-      setShowValidationError(false);
-      setSelectedItems([]);
-      setSearch('');
-    }
-  };
-
   return (
-    <div className='flex w-fit'>
-      <Popover open={openPopup} onOpenChange={handlePopupChange}>
-        <PopoverTrigger asChild>
-          <Button id={`share-${resourceType.toLowerCase()}-to-audience-btn`} variant='secondary' size='small'>
-            Share
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align='end' sideOffset={8} className='bg-transparent p-0 border-none shadow-none'>
-          <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
-            <div className='flex w-full justify-between items-center p-5'>
-              <span className='f-16-600 text-GRAY_950'>Share this {resourceConfig.displayName}</span>
-              <div className='p-1 cursor-pointer' onClick={() => handlePopupChange(false)}>
-                <SvgSpriteLoader
-                  id='x-close'
-                  iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                  width={16}
-                  height={16}
-                  className='text-GRAY_800 hover:text-GRAY_1000'
-                />
-              </div>
-            </div>
-            <div className='flex flex-col rounded-b-3.5 w-[400px]'>
-              <div className='pt-0 px-4 pb-5 space-y-4'>
-                <MultiSelectInput
-                  id={`share-${resourceType.toLowerCase()}`}
-                  search={search}
-                  isOpen={openPopup}
-                  setSearch={setSearch}
-                  selectedRole={selectedRole as string}
-                  setSelectedRole={handleSelectedRoleChange}
-                  placeholderText={placeholderText}
-                  roleOptions={resourceConfig.accessPrivilegesList}
-                  inputArrayList={selectedItems}
-                  setInputArrayList={setSelectedItems}
-                  validationErrorText={validationErrorText}
-                  showValidationError={showValidationError}
-                  setShowValidationError={setShowValidationError}
-                  onValidateAndAdd={handleValidateAndAdd}
-                  optionsList={filteredOptionListsData}
-                  onSelectOption={handleOptionSelection}
-                  transformLabel={getUserNameFromEmail}
-                  optionalOpenDropdownOptions={showInitialDropdownOptions}
-                  selectOnlyFromList
-                />
-                {isCustomiseAccess && (
-                  <AccessFilters
-                    onClick={handleToggleCustomiseAccess}
-                    currentUserHasAdminAccess={currentUserHasAdminAccess}
-                    selectedRole={selectedRole as string}
-                  />
-                )}
-              </div>
-              <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
-                <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
+    <div ref={popupRef} className='flex w-fit'>
+      <div
+        id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
+        onClick={handleTogglePopup}
+        className={cn(
+          openPopup && '!border !border-GRAY_400 !bg-GRAY_100',
+          'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-BG_GRAY_2 active:bg-GRAY_400 border border-GRAY_400 bg-white',
+        )}
+      >
+        Share
+      </div>
+      <div className='relative'>
+        {openPopup && (
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
+            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
+              <div className='flex w-full justify-between items-center p-5'>
+                <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
+                <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
                   <SvgSpriteLoader
-                    id='link-03'
+                    id='x-close'
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                    width={12}
-                    height={12}
-                    color={COLORS.GRAY_1000}
+                    width={16}
+                    height={16}
+                    className='text-GRAY_800 hover:text-GRAY_1000'
                   />
-                  <CopyToClipboardBrowserUrl />
-                </span>
-                <Button
-                  id='send-user-invite-btn'
-                  variant='secondary'
-                  size='small'
-                  disabled={!isResourceSharable}
-                  onClick={handleShareResource}
-                  isLoading={postInviteAudiencesIsLoading}
-                >
-                  Share
-                </Button>
+                </div>
+              </div>
+              <div className='flex flex-col rounded-b-3.5 w-[400px]'>
+                <div className='pt-0 px-4 pb-5 space-y-4'>
+                  <MultiSelectInput
+                    id={`share-${resourceType.toLowerCase()}`}
+                    search={search}
+                    setSearch={setSearch}
+                    selectedRole={selectedRole as string}
+                    setSelectedRole={handleSelectedRoleChange}
+                    isOpen={openPopup}
+                    placeholderText={placeholderText}
+                    roleOptions={resourceConfig.accessPrivilegesList}
+                    inputArrayList={selectedItems}
+                    setInputArrayList={setSelectedItems}
+                    validationErrorText={validationErrorText}
+                    showValidationError={showValidationError}
+                    setShowValidationError={setShowValidationError}
+                    onValidateAndAdd={handleValidateAndAdd}
+                    optionsList={filteredOptionListsData}
+                    onSelectOption={handleOptionSelection}
+                    transformLabel={getUserNameFromEmail}
+                    optionalOpenDropdownOptions={false}
+                    selectOnlyFromList
+                  />
+                  {isCustomiseAccess && (
+                    <AccessFilters
+                      onClick={handleToggleCustomiseAccess}
+                      currentUserHasAdminAccess={currentUserHasAdminAccess}
+                      selectedRole={selectedRole as string}
+                      emptyFiltersTitle={emptyFiltersTitle}
+                    />
+                  )}
+                </div>
+                <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
+                  <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
+                    <SvgSpriteLoader
+                      id='link-03'
+                      iconCategory={ICON_SPRITE_TYPES.GENERAL}
+                      width={12}
+                      height={12}
+                      color={COLORS.GRAY_1000}
+                    />
+                    <CopyToClipboardBrowserUrl />
+                  </span>
+                  <Button
+                    type={BUTTON_TYPES.PRIMARY}
+                    id='send-user-invite-btn'
+                    size={SIZE_TYPES.SMALL}
+                    disabled={!isResourceSharable}
+                    onClick={handleShareResource}
+                    isLoading={postInviteAudiencesIsLoading}
+                  >
+                    Share
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
-            <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-            <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-              <CommonWrapper
-                skeletonType={SkeletonTypes.CUSTOM}
-                isLoading={isLoadingAudiencesData}
-                loader={<WhoHasAccessSkeletonLoader />}
-              >
-                {updatedUserAccessList?.map((audience) => (
-                  <AudienceAccess
-                    key={audience?.resource_audience_id}
-                    resourceType={resourceType}
-                    privilege={audience?.privilege}
-                    resourceAudienceId={audience?.resource_audience_id}
-                    user={{ ...audience?.user, email: audience?.user?.email ?? '' }}
-                    resourceAudienceType={audience?.resource_audience_type}
-                    userPrivilege={userPrivilege}
-                    orgName={orgLabel}
-                    currentUserHasAdminAccess={currentUserHasAdminAccess}
-                    customerName={orgName ?? ''}
-                    teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
-                    changeRole={handleRoleChange}
-                    deleteAudience={handleDeleteAudience}
-                    privilegeList={resourceConfig.accessPrivilegesList}
-                    isDeletingAudience={isDeletingAudience}
-                    isChangingRole={isChangingRole}
-                    currentUserId={user_id}
-                    isCustomiseAccess={isCustomiseAccess}
-                    fgacFilters={audience?.metadata?.fgac_filters}
-                    resourceId={resourceId}
-                    fgacColor={audience?.fgac_color}
-                  />
-                ))}
-              </CommonWrapper>
+            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
+              <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
+              <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+                <CommonWrapper
+                  skeletonType={SkeletonTypes.CUSTOM}
+                  isLoading={isLoadingAudiencesData}
+                  loader={<WhoHasAccessSkeletonLoader />}
+                >
+                  {updatedUserAccessList?.map((audience) => (
+                    <AudienceAccess
+                      key={audience?.resource_audience_id}
+                      resourceType={resourceType}
+                      privilege={audience?.privilege}
+                      resourceAudienceId={audience?.resource_audience_id}
+                      user={{
+                        ...audience?.user,
+                        email: audience?.user?.email ?? '',
+                        type: audience?.resource_audience_type,
+                      }}
+                      resourceAudienceType={audience?.resource_audience_type}
+                      userPrivilege={userPrivilege}
+                      orgName={orgLabel}
+                      currentUserHasAdminAccess={currentUserHasAdminAccess}
+                      customerName={orgName ?? ''}
+                      teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
+                      changeRole={handleRoleChange}
+                      deleteAudience={handleDeleteAudience}
+                      privilegeList={resourceConfig.accessPrivilegesList}
+                      isDeletingAudience={isDeletingAudience}
+                      isChangingRole={isChangingRole}
+                      currentUserId={user_id}
+                      isCustomiseAccess={isCustomiseAccess}
+                      fgacFilters={audience?.metadata?.fgac_filters}
+                      resourceId={resourceId}
+                      fgacColor={audience?.fgac_color}
+                      emptyFiltersTitle={emptyFiltersTitle}
+                    />
+                  ))}
+                </CommonWrapper>
+              </div>
             </div>
+            <SharePopupPageApprovals resourceType={resourceType} resourceId={resourceId} />
           </div>
-        </PopoverContent>
-      </Popover>
+        )}
+      </div>
       {showCustomiseAccess && (
         <CustomiseAccess
           isOpen={showCustomiseAccess}

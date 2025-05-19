@@ -10,6 +10,8 @@ import {
   GetMembershipRequestsByOrganizationIdRequest,
   GetMembershipRequestsByOrganizationIdResponse,
   GetMyInvitationsResponseType,
+  type GetTeamPendingApprovalsByResourceIdPayload,
+  type GetTeamPendingApprovalsResponse,
   GetTeamsByOrganizationIdRequestType,
   GetTeamsByOrganizationIdResponseType,
   InvitedAudiencesByOrganisationIdResponse,
@@ -194,6 +196,7 @@ const People = baseApi.injectEndpoints({
         APITags.GET_PAYMENT_TEMPLATE_LIST,
         APITags.GET_PAYMENT_APPROVALS_INFO,
         APITags.GET_POLICY_LIST,
+        APITags.GET_TEAM_PENDING_APPROVALS,
       ],
     }),
     getAllPolicies: builder.query<GetPoliciesResponse, { resourceType?: string; actionType?: string }>({
@@ -221,6 +224,22 @@ const People = baseApi.injectEndpoints({
       providesTags: [APITags.GET_POLICY_LIST],
       transformResponse: ({ data }) => data,
     }),
+    getTeamPendingApprovals: builder.query<GetTeamPendingApprovalsResponse[], void>({
+      query: () => ({
+        url: API_ENDPOINTS.TEAM_PENDING_APPROVALS_GET,
+      }),
+      providesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
+    }),
+    getTeamPendingApprovalsByResourceId: builder.query<
+      GetTeamPendingApprovalsResponse[],
+      GetTeamPendingApprovalsByResourceIdPayload
+    >({
+      query: (params) => ({
+        url: API_ENDPOINTS.TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET,
+        params,
+      }),
+      providesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
+    }),
   }),
 });
 
@@ -245,4 +264,6 @@ export const {
   useGetPolicyResultApprovalsQuery,
   useGetDualAdminPolicyQuery,
   useApprovalActionMutation,
+  useGetTeamPendingApprovalsQuery,
+  useGetTeamPendingApprovalsByResourceIdQuery,
 } = People;
