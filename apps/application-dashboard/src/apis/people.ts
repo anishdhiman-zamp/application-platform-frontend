@@ -115,7 +115,7 @@ const People = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_ALL_TEAMS],
     }),
-    postAddTeamToAudience: builder.mutation<void, PostAddTeamToAudienceRequestType>({
+    postAddTeamToAudience: builder.mutation<PostResponseType, PostAddTeamToAudienceRequestType>({
       query: ({ organizationId, teamId, payload }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.ADD_TEAMS_TO_AUDIENCE_POST, { organizationId, teamId }),
         method: REQUEST_TYPES.POST,
@@ -123,7 +123,7 @@ const People = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_ALL_TEAMS],
     }),
-    removeTeamFromAudience: builder.mutation<void, RemoveTeamFromAudienceRequestType>({
+    removeTeamFromAudience: builder.mutation<PostResponseType, RemoveTeamFromAudienceRequestType>({
       query: ({ organizationId, teamId, payload }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.REMOVE_TEAMS_FROM_AUDIENCE_POST, { organizationId, teamId }),
         method: REQUEST_TYPES.POST,
