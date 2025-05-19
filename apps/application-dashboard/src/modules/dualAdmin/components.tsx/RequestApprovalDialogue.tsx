@@ -34,18 +34,19 @@ const RequestApprovalDialogue: FC<RequestApprovalDialogueProps> = ({ handleOpenC
   const handleRequestApproval = () => {
     if (!policyConfig) return;
 
-    const config = transformFormDataToApiPayload(policyConfig?.data, []);
-
-    const apiPayload: CreatePolicyPayloadType = {
-      url: API_ENDPOINTS.POLICY_CREATE_POST,
-      name: policyConfig?.data.policyName,
-      resource_id: policyConfig?.resource_id,
-      resource_type: policyConfig?.resource_type,
-      action_type: policyConfig?.action_type,
-      config: config,
-    };
-
     if (policyConfig?.status !== PolicyResultStatus.APPROVED) {
+      const epochTime = new Date().getTime();
+      const config = transformFormDataToApiPayload(policyConfig?.data, []);
+
+      const apiPayload: CreatePolicyPayloadType = {
+        url: API_ENDPOINTS.POLICY_CREATE_POST,
+        name: `${policyConfig?.data.policyName}${epochTime}`,
+        resource_id: policyConfig?.resource_id,
+        resource_type: policyConfig?.resource_type,
+        action_type: policyConfig?.action_type,
+        config: config,
+      };
+
       createPolicy(apiPayload)
         .unwrap()
         .then(() => {
