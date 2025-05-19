@@ -68,6 +68,7 @@ export type PolicyApprovalRequest = {
 
 export type ProcessApprovalResponse = {
   data: string;
+  message: string;
 };
 
 export enum PolicyResultStatus {

@@ -7,23 +7,70 @@ import PolicyApproveCard from 'modules/dualAdmin/components.tsx/PolicyApproveCar
 import type { RequestApprovalPolicyConfig } from 'modules/dualAdmin/components.tsx/RequestApprovalDialogue';
 import type { AudienceMembersDataType } from 'modules/dualAdmin/DualAdminHome';
 import { POLICY_STATUS_LABEL } from 'modules/payments/payments.constant';
+import { transformFormDataToApiPayload } from 'modules/policies/commons';
 import { LOGICAL_OPERATOR_CONDITIONS } from 'modules/widgets/displayConfig/displayConfig.types';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { useCreatePolicyMutation, useDeletePolicyMutation } from '@/apis/payments';
+import { toast } from '@/components/common/toast/Toast';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { PolicyAttributeAction, PolicyQuorum } from '@/modules/policies/types';
-import { PolicyMutateActionType } from '@/types/api/paymentApi.types';
+import { type CreatePolicyPayloadType, PolicyMutateActionType } from '@/types/api/paymentApi.types';
 import { type GetDualAdminPolicyResponse, PolicyResultStatus } from '@/types/api/policies.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { APPROVAL_REQUEST_FAIL_TOAST } from '@/utils/accessPermission/accessPermission.constants';
 
 type DualAdminCardProps = {
   item: GetDualAdminPolicyResponse;
   setRequestApprovalPolicyConfig: (policyConfig: RequestApprovalPolicyConfig) => void;
   approversList: AudienceMembersDataType[];
+  hasPolicy: boolean;
 };
 
-const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyConfig, approversList }) => {
+const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyConfig, approversList, hasPolicy }) => {
   const [selectedApprovers, setSelectedApprovers] = useState<AudienceMembersDataType[]>([]);
 
+  const [createPolicy, { isLoading: createPolicyLoading }] = useCreatePolicyMutation();
+  const [deletePolicy, { isLoading: deletePolicyLoading }] = useDeletePolicyMutation();
+
+  const onPolicyAction = (policyConfig: RequestApprovalPolicyConfig) => {
+    if (!policyConfig) return;
+
+    if (policyConfig?.status !== PolicyResultStatus.APPROVED) {
+      const epochTime = new Date().getTime();
+      const config = transformFormDataToApiPayload(policyConfig?.data, []);
+
+      const apiPayload: CreatePolicyPayloadType = {
+        url: API_ENDPOINTS.POLICY_CREATE_POST,
+        name: `${policyConfig?.data.policyName}${epochTime}`,
+        resource_id: policyConfig?.resource_id,
+        resource_type: policyConfig?.resource_type,
+        action_type: policyConfig?.action_type,
+        config: config,
+      };
+
+      createPolicy(apiPayload)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+        })
+        .catch(() => {
+          toast.error(APPROVAL_REQUEST_FAIL_TOAST);
+        });
+    } else {
+      deletePolicy(policyConfig?.policy_id)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+        })
+        .catch(() => {
+          toast.error(APPROVAL_REQUEST_FAIL_TOAST);
+        });
+    }
+  };
+
   const handleRequestApproval = () => {
+    if (createPolicyLoading || deletePolicyLoading) return;
+
     const approvalSteps = [
       {
         logical_operator: LOGICAL_OPERATOR_CONDITIONS.OR,
@@ -42,7 +89,7 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
       },
     ];
 
-    setRequestApprovalPolicyConfig({
+    const config = {
       data: {
         approvalSteps,
         policyName: item?.name,
@@ -52,8 +99,14 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
       action_type: item?.action_type,
       resource_id: item?.resource_id,
       resource_type: item?.resource_type,
-      policy_id: item.policy?.id,
-    });
+      policy_id: item?.policy?.id,
+    };
+
+    if (hasPolicy) {
+      setRequestApprovalPolicyConfig(config);
+    } else {
+      onPolicyAction(config);
+    }
   };
 
   const { isToggleOn, isUpdateUserAllowed, isToggleDisabled } = useMemo(() => {
@@ -134,7 +187,11 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
             side={SIDE_OPTIONS.LEFT}
             tooltipBody={!selectedApprovers.length ? 'Select approvers to enable this policy' : ''}
           >
-            <Switch checked={isToggleOn} onClick={handleRequestApproval} disabled={isToggleDisabled} />
+            <Switch
+              checked={isToggleOn}
+              onClick={handleRequestApproval}
+              disabled={isToggleDisabled || createPolicyLoading || deletePolicyLoading}
+            />
           </TooltipV2>
         </div>
       </td>

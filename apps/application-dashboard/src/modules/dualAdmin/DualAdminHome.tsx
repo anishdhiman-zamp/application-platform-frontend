@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import RequestApprovalDialogue, {
   type RequestApprovalPolicyConfig,
 } from 'modules/dualAdmin/components.tsx/RequestApprovalDialogue';
 import DualAdminCard from 'modules/dualAdmin/DualAdminCard';
+import { PolicyActionType } from 'modules/policies/types';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
@@ -38,6 +39,10 @@ const DualAdminHome = () => {
     resourceType: ResourceType.ORGANIZATION,
     resourceId: user?.orgs[0]?.organization_id ?? '',
   });
+
+  const hasPolicy = useMemo(() => {
+    return !!dualAdminPolicy?.find((policy) => policy.action_type === PolicyActionType.MUTATE_POLICY)?.policy;
+  }, [dualAdminPolicy]);
 
   useEffect(() => {
     if (!loading && audiences) {
@@ -100,6 +105,7 @@ const DualAdminHome = () => {
                 setRequestApprovalPolicyConfig={setRequestApprovalPolicyConfig}
                 key={index}
                 item={policy}
+                hasPolicy={hasPolicy}
                 approversList={approversList}
               />
             ))}
