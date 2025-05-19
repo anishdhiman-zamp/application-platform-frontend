@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button, Toaster, toast } from '..';
+import { X } from 'lucide-react';
 
 const meta: Meta<typeof Toaster> = {
   title: 'UI/Toast',
@@ -81,6 +82,26 @@ export const PromiseToast: Story = {
         }}
       >
         Promise Toast
+      </Button>
+      <Toaster />
+    </div>
+  ),
+};
+
+export const CustomToast: Story = {
+  render: () => (
+    <div className='flex flex-col gap-4'>
+      <Button
+        onClick={() =>
+          toast.custom((t) => (
+            <div className='flex items-center justify-between gap-1.5 p-5'>
+              <p className='f-14-400 text-gray-950'>The evil rabbit jumped over the fence.</p>
+              <X size={16} onClick={() => toast.dismiss(t)} className='cursor-pointer' />
+            </div>
+          ))
+        }
+      >
+        Custom Toast
       </Button>
       <Toaster />
     </div>
