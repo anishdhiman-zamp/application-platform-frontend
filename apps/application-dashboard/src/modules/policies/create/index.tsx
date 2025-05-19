@@ -147,8 +147,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: Create
     const policyConfig = transformFormDataToApiPayload(data, type === 'payout' ? defaultConditions : []);
 
     if (!paymentConfig?.id) {
-      console.log('No payment config found skipping policy creation');
-
       return;
     }
     const apiPayload: CreatePolicyPayloadType = {

@@ -8,6 +8,17 @@ import { PolicyDetailsType } from '@/types/api/paymentApi.types';
 const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const handleEdit = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsOpen(false);
+    router.push(`/payments/policies/create/${policy.id}`);
+  };
+
+  const handleDelete = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsOpen(false);
+    router.push(`/payments/policies/delete/${policy.id}`);
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -23,22 +34,14 @@ const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
       <PopoverContent className='z-[1001] max-h-60 overflow-y-auto' align='end'>
         <PopoverMenuItem
           className='hover:bg-gray-100 rounded-md flex gap-1.5 text-primary flex-1 f-12-500 items-center'
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen(false);
-            router.push(`/payments/policies/create/${policy.id}`);
-          }}
+          onClick={handleEdit}
         >
           <SvgSpriteLoader id='edit-03' size={12} />
           <span>Edit</span>
         </PopoverMenuItem>
         <PopoverMenuItem
           className='hover:bg-gray-100 rounded-md flex gap-1.5 text-red-800 flex-1 f-12-500 items-center'
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen(false);
-            router.push(`/payments/policies/delete/${policy.id}`);
-          }}
+          onClick={handleDelete}
         >
           <SvgSpriteLoader id='trash-03' size={12} />
           <span>Delete</span>

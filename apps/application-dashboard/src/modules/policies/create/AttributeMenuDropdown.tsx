@@ -83,8 +83,6 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
   useEffect(() => {
     let defaultValues: Array<SelectOption | undefined> = [];
 
-    console.log(attribute.id, attribute.defaultValue);
-
     if (attribute.defaultValue?.toString() && currentOptions.length > 0) {
       if (
         attribute.formFieldType === 'creator' &&
@@ -188,7 +186,6 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
                   checked={isChecked(option, value)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      console.log('checked', checked, value, option);
                       onChange([...(value ?? []), option]);
                     } else {
                       onChange(value?.filter((selectedOption: SelectOption) => selectedOption.id !== option.id));

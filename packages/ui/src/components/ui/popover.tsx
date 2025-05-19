@@ -37,7 +37,7 @@ const PopoverMenuItem = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'flex items-center gap-[6px] gap-x-4 px-[10px] py-[8px] self-stretch cursor-pointer outline-none text-GRAY_900 f-12-500 font-inter',
+      'flex items-center gap-1.5 gap-x-4 px-2.5 py-2.5 self-stretch cursor-pointer outline-none text-GRAY_900 f-12-500 font-inter',
       inset && 'pl-8',
       className,
     )}
