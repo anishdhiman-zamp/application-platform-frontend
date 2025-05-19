@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button, Toaster, toast } from '..';
 import { X } from 'lucide-react';
+import { SvgSpriteLoader } from '../assets';
 
 const meta: Meta<typeof Toaster> = {
   title: 'UI/Toast',
@@ -19,7 +20,14 @@ export const Default: Story = {
     <div className='flex flex-col gap-4'>
       <div className='flex gap-2'>
         <Button onClick={() => toast('This is a default toast')}>Default Toast</Button>
-        <Button onClick={() => toast.success('This is a success toast')} variant='outline'>
+        <Button
+          onClick={() =>
+            toast.success(
+              'The evil rabbit jumped over the fence.The evil rabbit jumped over the fence.The evil rabbit jumped over the fence.',
+            )
+          }
+          variant='outline'
+        >
           Success Toast
         </Button>
         <Button onClick={() => toast.error('This is an error toast')} variant='destructive'>
@@ -94,9 +102,13 @@ export const CustomToast: Story = {
       <Button
         onClick={() =>
           toast.custom((t) => (
-            <div className='flex items-center justify-between gap-1.5 p-5'>
-              <p className='f-14-400 text-gray-950'>The evil rabbit jumped over the fence.</p>
-              <X size={16} onClick={() => toast.dismiss(t)} className='cursor-pointer' />
+            <div className='flex items-center justify-between gap-1.5 p-5 border rounded-2.5'>
+              <SvgSpriteLoader id='check-circle' size={16} />
+              <p className='f-14-400 text-gray-950'>
+                The evil rabbit jumped over the fence.The evil rabbit jumped over the fence.The evil rabbit jumped over
+                the fence.
+              </p>
+              <X size={16} onClick={() => toast.dismiss(t)} className='cursor-pointer min-w-4' />
             </div>
           ))
         }
