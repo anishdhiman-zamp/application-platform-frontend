@@ -1,18 +1,45 @@
-import { Button } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import MembersName from 'modules/team/components/members/MembersName';
+import TeamMemberApprovalCard from 'modules/team/components/members/TeamMemberApprovalCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
+import { RootState } from 'store';
+import { useGetTeamPendingApprovalsQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useAppSelector } from '@/hooks/toolkit';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { ResourceType } from '@/modules/shareResource';
-import { defaultFn } from '@/types/commonTypes';
+import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
+import { getUserNameFromAudience } from '@/utils/common';
 
 const ApprovalPendingListing = () => {
-  const { data: audienceMembersData, loading } = useAudienceMembers({
-    resourceType: ResourceType.PAYMENTS,
+  const organizationName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name) ?? '';
+
+  const { loading, audiencesData, allTeamsData } = useAudienceMembers({
+    resourceType: ResourceType.ORGANIZATION,
     resourceId: '',
   });
+
+  const {
+    data: pendingApprovalsList,
+    isLoading: isPendingApprovalsLoading,
+    isError,
+    refetch,
+  } = useGetTeamPendingApprovalsQuery();
+
+  const getUserDetails = (id: string) => {
+    const user = audiencesData?.find((member) => member?.resource_audience_id === id);
+
+    return {
+      name: getUserNameFromAudience(user),
+      email: user?.user?.email || '',
+      privilege: user?.privilege || '',
+    };
+  };
+
+  const getTeamDetails = (id: string) => {
+    const team = allTeamsData?.find((team) => team?.team_id === id);
+
+    return { name: team?.name || '', color: team?.metadata?.color_hex_code || '' };
+  };
 
   return (
     <div>
@@ -23,28 +50,25 @@ const ApprovalPendingListing = () => {
         <div className='py-2.5 px-2'>Approval Status</div>
       </div>
       <CommonWrapper
-        isLoading={loading}
+        isLoading={loading || isPendingApprovalsLoading}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<SkeletonLoaderListing length={4} columns={4} />}
+        noDataBanner={<NoWidgetData className='h-[400px]' text='No pending approvals' />}
+        isNoData={pendingApprovalsList?.length === 0}
+        isError={isError}
+        className='min-h-[500px]'
+        refetchFunction={refetch}
       >
-        {audienceMembersData?.map((member) => (
-          <div key={member.resource_audience_id} className='grid grid-cols-4 gap-4 f-12-450 border-b border-GRAY_100'>
-            <div className='flex items-center'>
-              <MembersName value={member.user?.name ?? ''} />
-            </div>
-            <div className='flex items-center'>{member.user?.email}</div>
-            <div className='flex items-center'>{member.privilege}</div>
-            <div className='flex items-center gap-3 px-2 py-2'>
-              <Button variant='outline' size='xsmall' onClick={defaultFn} className='gap-1 min-w-[88px]'>
-                <SvgSpriteLoader id='check' size={14} />
-                Approve
-              </Button>
-              <Button variant='outline' size='xsmall' onClick={defaultFn} className='gap-1 min-w-[88px]'>
-                <SvgSpriteLoader id='x-close' size={14} />
-                Reject
-              </Button>
-            </div>
-          </div>
+        {pendingApprovalsList?.map((member) => (
+          <TeamMemberApprovalCard
+            key={member?.approval_id}
+            name={getUserDetails(member?.audience_id ?? '')?.name || member?.email?.split('@')[0]}
+            email={getUserDetails(member?.audience_id ?? '')?.email || member?.email}
+            role={getUserDetails(member?.audience_id ?? '')?.privilege ?? ''}
+            details={member}
+            organization={organizationName}
+            teamDetails={getTeamDetails(member?.team_id ?? '')}
+          />
         ))}
       </CommonWrapper>
     </div>

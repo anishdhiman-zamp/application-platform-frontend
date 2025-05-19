@@ -1,6 +1,7 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
 import {
   AudiencesByResourceIdRequest,
   AudiencesByResourceResponse,
@@ -23,6 +24,7 @@ const Collaboration = baseApi.injectEndpoints({
       query: ({ resourceRoute, resourceId }) => ({
         url: buildUrl(API_ENDPOINTS.RESOURCE_AUDIENCES_BY_RESOURCE_ID_GET, resourceRoute, resourceId),
       }),
+      providesTags: [APITags.GET_AUDIENCE_BY_RESOURCE_ID],
     }),
     postShareResourceToAudiences: builder.mutation<void, PostShareResourceToAudiencesType>({
       query: ({ resourceRoute, resourceId, body }) => ({
@@ -30,6 +32,7 @@ const Collaboration = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: body,
       }),
+      invalidatesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
     }),
     patchChangeAudienceRoleInResource: builder.mutation<void, ChangeAudienceRoleInResourceType>({
       query: ({ resourceRoute, resourceId, body }) => ({

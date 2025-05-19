@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Button, StepCard } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { POLICY_APPROVAL_STEP_MODIFIERS } from 'modules/policies/constants';
 import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
 import AudienceMember from '@/components/audience-member';
@@ -30,13 +31,13 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
       <div className='overflow-y-auto h-[calc(100vh-92px)] pb-6 [&::-webkit-scrollbar]:hidden'>
         <div className='space-y-4'>
           <PolicyAttributeTags
-            creatorLength={policy.policy_configurations.creator?.length}
-            conditions={policy.policy_configurations.conditions?.conditions}
-            action={policy.policy_configurations.action}
+            creatorLength={policy?.policy_configurations?.creator?.length}
+            conditions={policy?.policy_configurations?.conditions?.conditions}
+            action={policy?.policy_configurations?.action}
           />
           {/* Approval Flow Section */}
           <div className='space-y-4'>
-            {policy.policy_configurations.approval_flow?.steps.map((step, idx) => (
+            {policy?.policy_configurations?.approval_flow?.steps?.map((step, idx) => (
               <StepCard key={idx} stepNumber={idx + 1} className='p-0'>
                 <div className='space-y-4'>
                   {step.conditions.map((cond, cidx) => (
@@ -48,10 +49,12 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
                         </div>
                       )}
                       <div className='flex items-center gap-2 mb-2'>
-                        <span className='f-12-500 text-gray-700'>Any of</span>
-                        {cond.approver_details.map((approver, idx) => {
+                        <span className='f-12-500 text-gray-700'>
+                          {POLICY_APPROVAL_STEP_MODIFIERS.find((modifier) => modifier?.value === cond.mode)?.label}
+                        </span>
+                        {cond?.approver_details.map((approver, idx) => {
                           const audienceMember = audienceMembersData?.find(
-                            (member) => member.resource_audience_id === approver.id,
+                            (member) => member?.resource_audience_id === approver?.id,
                           );
 
                           if (!audienceMember) return null;

@@ -17,6 +17,9 @@ export const API_ENDPOINTS = {
   ADD_TEAMS_TO_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/add`,
   REMOVE_TEAMS_FROM_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/remove`,
 
+  TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
+  TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,
+
   DATASET_FILTER_CONFIG_GET: `datasets/{{datasetId}}/filter-config`,
   DATASET_DATA_GET: `datasets/{{datasetId}}/data`,
   DATASET_EXPORT_GET: `datasets/{{datasetId}}/export`,
@@ -116,6 +119,9 @@ export const API_ENDPOINTS = {
   ACTIVITY_RUNS_FILTER_CONFIG_GET: `processes/{{processId}}/activity-runs/filter-config`,
   ACTIVITY_RUNS_SUMMARY_GET: `processes/{{processId}}/activity-runs/status-summary`,
   ACTIVITY_RUNS_GET: `processes/{{processId}}/activity-runs`,
+  ACTIVITY_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/artifacts`,
+  ACTIVITY_RUN_LOGS_GET: `processes/{{processId}}/activity-logs/{{activityRunId}}/logs`,
+  EMIT_ACTIVITY_LOGS_POST: `processes/{{processId}}/activity-logs/{{activityRunId}}`,
 };
 
 export const enum REQUEST_TYPES {

@@ -17,6 +17,7 @@ export type AddAudiencesToResourcePayload = {
 
 export type DeleteAudiencesFromResourcePayload = {
   audience_id: string;
+  audience_type: ResourceAudienceType;
 };
 
 type withResource<T> = T & AudiencesByResourceIdRequest;
@@ -25,6 +26,7 @@ export type ChangeAudienceRoleInResourcePayload = withResource<{
   audience_id: string;
   role: string;
   fgac_filters?: FilterModelType | null;
+  audience_type: string;
 }>;
 
 export type PostShareResourceToAudiencesType = withResource<{

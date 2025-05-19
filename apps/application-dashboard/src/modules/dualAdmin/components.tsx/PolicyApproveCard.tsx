@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { toast } from 'react-toastify';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useApprovalActionMutation } from '@/apis/people';
+import { toast } from '@/components/common/toast/Toast';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
+import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/modules/policies/constants';
 import { DUAL_ADMIN_APPROVAL_POLICY_OPTIONS } from '@/modules/team/people.constants';
 import type { MapAny } from '@/types/commonTypes';
 import { stopPropagationAction } from '@/utils/common';
@@ -26,11 +27,11 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
       approval_ids: [approvalId],
     })
       .unwrap()
-      .then(() => {
-        toast.success('Approval action successful');
+      .then((res) => {
+        toast.success(res?.message || APPROVAL_POLICY_TOAST);
       })
       .catch(() => {
-        toast.error('Approval action failed');
+        toast.error(APPROVAL_FAILED_TOAST);
       });
   };
 

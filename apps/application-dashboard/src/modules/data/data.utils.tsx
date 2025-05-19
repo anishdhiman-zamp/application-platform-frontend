@@ -131,6 +131,7 @@ export const formatColumns = (
       filterParams: {
         values: column?.options,
       },
+      suppressMovable: column?.metadata?.config?.movable,
       headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias ?? column?.column),
       minWidth: getColumnMinWidth(
         columnNameLength,

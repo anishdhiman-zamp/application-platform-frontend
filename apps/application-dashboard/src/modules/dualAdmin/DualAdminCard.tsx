@@ -5,56 +5,125 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ApprovalsDropdown from 'modules/dualAdmin/components.tsx/ApprovalsDropdown';
 import PolicyApproveCard from 'modules/dualAdmin/components.tsx/PolicyApproveCard';
 import type { RequestApprovalPolicyConfig } from 'modules/dualAdmin/components.tsx/RequestApprovalDialogue';
+import type { AudienceMembersDataType } from 'modules/dualAdmin/DualAdminHome';
 import { POLICY_STATUS_LABEL } from 'modules/payments/payments.constant';
-import { formatAudienceMembers } from 'modules/policies/create/constants';
+import { transformFormDataToApiPayload } from 'modules/policies/commons';
 import { LOGICAL_OPERATOR_CONDITIONS } from 'modules/widgets/displayConfig/displayConfig.types';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { useCreatePolicyMutation, useDeletePolicyMutation } from '@/apis/payments';
+import { toast } from '@/components/common/toast/Toast';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { useAppSelector } from '@/hooks/toolkit';
-import useAudienceMembers from '@/hooks/useAudienceMembers';
-import { type ApproverListOption, PolicyAttributeAction, PolicyQuorum } from '@/modules/policies/types';
-import { type GetDualAdminPolicyResponse, PolicyResultStatus, ResourceType } from '@/types/api/policies.types';
+import { PolicyAttributeAction, PolicyQuorum } from '@/modules/policies/types';
+import { type CreatePolicyPayloadType, PolicyMutateActionType } from '@/types/api/paymentApi.types';
+import { type GetDualAdminPolicyResponse, PolicyResultStatus } from '@/types/api/policies.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { APPROVAL_REQUEST_FAIL_TOAST } from '@/utils/accessPermission/accessPermission.constants';
 
 type DualAdminCardProps = {
   item: GetDualAdminPolicyResponse;
   setRequestApprovalPolicyConfig: (policyConfig: RequestApprovalPolicyConfig) => void;
+  approversList: AudienceMembersDataType[];
+  hasPolicy: boolean;
 };
 
-const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyConfig }) => {
-  const [selectedApprovers, setSelectedApprovers] = useState<ApproverListOption[]>([]);
-  const [approversList, setApproversList] = useState<ApproverListOption[]>([]);
+const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyConfig, approversList, hasPolicy }) => {
+  const [selectedApprovers, setSelectedApprovers] = useState<AudienceMembersDataType[]>([]);
 
-  const { user } = useAppSelector((state) => state.user);
+  const [createPolicy, { isLoading: createPolicyLoading }] = useCreatePolicyMutation();
+  const [deletePolicy, { isLoading: deletePolicyLoading }] = useDeletePolicyMutation();
 
-  const { data: audiences, loading } = useAudienceMembers({
-    resourceType: ResourceType.ORGANIZATION,
-    resourceId: user?.orgs[0]?.organization_id ?? '',
-  });
+  const onPolicyAction = (policyConfig: RequestApprovalPolicyConfig) => {
+    if (!policyConfig) return;
+
+    if (policyConfig?.status !== PolicyResultStatus.APPROVED) {
+      const epochTime = new Date().getTime();
+      const config = transformFormDataToApiPayload(policyConfig?.data, []);
+
+      const apiPayload: CreatePolicyPayloadType = {
+        url: API_ENDPOINTS.POLICY_CREATE_POST,
+        name: `${policyConfig?.data.policyName}${epochTime}`,
+        resource_id: policyConfig?.resource_id,
+        resource_type: policyConfig?.resource_type,
+        action_type: policyConfig?.action_type,
+        config: config,
+      };
+
+      createPolicy(apiPayload)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+        })
+        .catch(() => {
+          toast.error(APPROVAL_REQUEST_FAIL_TOAST);
+        });
+    } else {
+      deletePolicy(policyConfig?.policy_id)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message);
+        })
+        .catch(() => {
+          toast.error(APPROVAL_REQUEST_FAIL_TOAST);
+        });
+    }
+  };
 
   const handleRequestApproval = () => {
+    if (createPolicyLoading || deletePolicyLoading) return;
+
     const approvalSteps = [
       {
         logical_operator: LOGICAL_OPERATOR_CONDITIONS.OR,
         conditions: [
           {
             mode: PolicyQuorum.ONE,
-            approver_details: selectedApprovers.map((approver) => approver.value),
+            approver_details: selectedApprovers?.map((approver) => ({
+              id: approver?.resource_audience_id,
+              type: approver?.resource_audience_type,
+              email: approver?.user?.email ?? '',
+              name: approver?.user?.name ?? '',
+              role: approver?.user?.role ?? '',
+            })),
           },
         ],
       },
     ];
 
-    setRequestApprovalPolicyConfig({
+    const config = {
       data: {
         approvalSteps,
         policyName: item?.name,
         action: [{ label: '', value: PolicyAttributeAction.REQUIRE_APPROVAL.toString() }],
       },
-      action_type: item.action_type,
-      resource_id: item.resource_id,
-      resource_type: item.resource_type,
-    });
+      status: item?.policy?.status_details?.status,
+      action_type: item?.action_type,
+      resource_id: item?.resource_id,
+      resource_type: item?.resource_type,
+      policy_id: item?.policy?.id,
+    };
+
+    if (hasPolicy) {
+      setRequestApprovalPolicyConfig(config);
+    } else {
+      onPolicyAction(config);
+    }
   };
+
+  const { isToggleOn, isUpdateUserAllowed, isToggleDisabled } = useMemo(() => {
+    const isToggleOn =
+      item?.policy?.status_details?.status === PolicyResultStatus.APPROVED ||
+      (item?.policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL &&
+        item?.policy?.status_details?.resource_action_metadata?.mutate_action === PolicyMutateActionType.DELETE);
+
+    const isToggleDisabled =
+      !selectedApprovers?.length || item?.policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL;
+
+    const isUpdateUserAllowed =
+      item?.policy?.status_details?.status === PolicyResultStatus.APPROVED ||
+      item?.policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL;
+
+    return { isToggleOn, isUpdateUserAllowed, isToggleDisabled };
+  }, [item, selectedApprovers]);
 
   const getPolicyStatus = useMemo(() => {
     if (item?.policy?.status_details?.status === PolicyResultStatus.APPROVED) {
@@ -62,41 +131,38 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
     }
 
     if (item?.policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL) {
-      const member = audiences?.find(
-        (audience) => audience.resource_audience_id === item?.policy?.status_details?.policy_result_created_by,
+      const member = approversList?.find(
+        (audience) => audience?.resource_audience_id === item?.policy?.status_details?.policy_result_created_by,
       );
 
-      return `${member?.user?.name || member?.user?.email?.split('@')[0]} requested to enable/disable this policy`;
+      return `${member?.user?.name || member?.user?.email?.split('@')[0]} requested to ${
+        item?.policy?.status_details?.resource_action_metadata?.mutate_action === PolicyMutateActionType.DELETE
+          ? 'disable'
+          : 'enable'
+      } this policy`;
     }
 
     return POLICY_STATUS_LABEL.INACTIVE;
-  }, [item?.policy?.status_details?.status]);
+  }, [item?.policy?.status_details?.status, approversList]);
 
   useEffect(() => {
-    if (!loading && audiences) {
-      const options = formatAudienceMembers(audiences);
+    if (approversList?.length && item?.policy?.status_details?.status) {
+      const approval = item?.policy?.policy_configurations?.approval_flow?.steps?.[0].conditions?.[0]?.approver_details;
 
-      setApproversList(options);
-    }
-    if (item?.policy?.status_details?.status) {
-      const approval = item.policy.policy_configurations.approval_flow?.steps[0].conditions[0].approver_details;
-
-      const defaultAudience = audiences?.filter((audience) =>
-        approval?.find((approver) => approver.id === audience?.resource_audience_id),
+      const defaultAudience = approversList?.filter((audience: AudienceMembersDataType) =>
+        approval?.find((approver) => approver?.id === audience?.resource_audience_id),
       );
 
-      const options = formatAudienceMembers(defaultAudience);
-
-      setSelectedApprovers(options);
+      setSelectedApprovers(defaultAudience);
     }
-  }, [item, audiences]);
+  }, [approversList, item]);
 
   return (
     <tr className='border-b border-GRAY_100'>
       <td className='px-2 py-3'>
         <div className='flex items-center gap-2'>
           <div className='p-2 bg-GRAY_100 rounded-md text-GRAY_1000'>
-            <SvgSpriteLoader id={'users-02'} size={14} />
+            <SvgSpriteLoader id={item?.icon_id} size={14} />
           </div>
           <div>
             <div className='f-12-450 text-GRAY_1000 mb-0.5'>{item?.name}</div>
@@ -110,6 +176,7 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
             selectedApprovers={selectedApprovers}
             onChange={setSelectedApprovers}
             approversList={approversList}
+            disabled={isUpdateUserAllowed}
           />
         </div>
       </td>
@@ -121,12 +188,9 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
             tooltipBody={!selectedApprovers.length ? 'Select approvers to enable this policy' : ''}
           >
             <Switch
-              checked={item?.policy?.status_details?.status === PolicyResultStatus.APPROVED}
+              checked={isToggleOn}
               onClick={handleRequestApproval}
-              disabled={
-                !selectedApprovers.length ||
-                item?.policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL
-              }
+              disabled={isToggleDisabled || createPolicyLoading || deletePolicyLoading}
             />
           </TooltipV2>
         </div>
@@ -137,7 +201,10 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
       <td className='px-2 py-2.5 text-end'>
         <div className='min-w-24'>
           {item?.policy && item?.policy?.status_details?.status !== PolicyResultStatus.APPROVED && (
-            <PolicyApproveCard approvalId='' canApprove={item?.policy?.status_details?.can_approve} />
+            <PolicyApproveCard
+              approvalId={item?.policy?.status_details?.approval?.id}
+              canApprove={item?.policy?.status_details?.can_approve}
+            />
           )}
         </div>
       </td>

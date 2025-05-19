@@ -1,5 +1,8 @@
 import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from 'modules/team/people.types';
+import type { ResourceAudienceType } from 'types/api/auth.types';
 import { PolicyResultStatus } from 'types/api/policies.types';
+import { ResourceType } from '@/modules/shareResource/shareResource.types';
+
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
 };
@@ -116,4 +119,21 @@ export type AcceptInvitationRequestType = {
 
 export type AcceptInvitationResponseType = {
   message: string;
+};
+
+export type GetTeamPendingApprovalsResponse = {
+  audience_type: ResourceAudienceType;
+  audience_id: string;
+  privilege: string;
+  resource_action: string;
+  can_approve: boolean;
+  approval_id: string;
+  email: string;
+  team_id: string;
+  action: string;
+};
+
+export type GetTeamPendingApprovalsByResourceIdPayload = {
+  resourceId: string;
+  resourceType: ResourceType;
 };

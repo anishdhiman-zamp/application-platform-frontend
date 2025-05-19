@@ -4,12 +4,13 @@ import { format } from 'date-fns';
 import ReviewPolicyUpdatePopover from 'modules/policies/components/ReviewPolicyUpdatePopover';
 import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import PolicyApproveCard from '@/modules/dualAdmin/components.tsx/PolicyApproveCard';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType, PolicyMutateActionType } from '@/types/api/paymentApi.types';
 import { PolicyResultStatus } from '@/types/api/policies.types';
-import { stopPropagationAction } from '@/utils/common';
+import { cn, stopPropagationAction } from '@/utils/common';
 
 type PolicyCardProps = {
   policy: PolicyDetailsType;
@@ -27,6 +28,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
   const isUpdatedPolicy =
     policy?.status_details?.resource_action_metadata?.mutate_action === PolicyMutateActionType.UPDATE;
   const isShowReviewAction = isUpdatedPolicy && policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL;
+  const isPolicyPendingApproval = policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL;
 
   const teamMember = useMemo(() => {
     const memberId = isUpdatedPolicy ? policy?.status_details?.policy_result_created_by : policy.created_by;
@@ -34,6 +36,10 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
 
     return member?.user?.name?.length ? member?.user?.name : (member?.user?.email?.split('@')[0] ?? '');
   }, [audienceMembersData, policy, isUpdatedPolicy]);
+
+  const cardTitle = useMemo(() => {
+    return `${isUpdatedPolicy ? 'Edited on' : 'Created on'} ${format(new Date(isUpdatedPolicy ? policy?.updated_at : policy.created_at), DATE_FORMATS.ddMMMyyyy)}  by ${teamMember}`;
+  }, [isUpdatedPolicy, policy, teamMember]);
 
   const getStatus = (isPendingApproval: boolean) => {
     if (isPendingApproval) {
@@ -61,12 +67,16 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
     <>
       <ListCard
         header={
-          <div className='flex items-center gap-2'>
-            <span className='f-11-400 text-gray-700 whitespace-nowrap'>
-              {isUpdatedPolicy ? 'Edited on' : 'Created on'}{' '}
-              {format(new Date(isUpdatedPolicy ? policy?.updated_at : policy.created_at), DATE_FORMATS.ddMMMyyyy)}
-              {isUpdatedPolicy && ` by ${teamMember}`}
-            </span>
+          <div className='flex items-center gap-2 w-full'>
+            <TooltipV2 tooltipBody={isPolicyPendingApproval ? cardTitle : ''}>
+              <div
+                className={cn('f-11-400 text-gray-700 whitespace-nowrap ', {
+                  'overflow-hidden text-ellipsis max-w-[170px]': isPolicyPendingApproval,
+                })}
+              >
+                {cardTitle}
+              </div>
+            </TooltipV2>
             {isShowReviewAction && (
               <div
                 className='f-11-450 border-b border-BG_GRAY_2 hover:border-primary select-none'
@@ -75,7 +85,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
                 Review
               </div>
             )}
-            {getStatus(policy?.status_details?.status === PolicyResultStatus.PENDING_APPROVAL)}
+            {getStatus(isPolicyPendingApproval)}
           </div>
         }
         rightComponent={<PolicyActionsDropdown policy={policy} audienceMembersData={audienceMembersData} />}

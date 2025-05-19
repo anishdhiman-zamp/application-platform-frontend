@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { captureException } from '@sentry/browser';
+import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import SelectBeneDropdown from 'modules//payments/move-money/components/SelectBeneDropdown';
 import SelectAccountDropdown from 'modules/payments/move-money/components/SelectAccountDropdown';
@@ -13,7 +14,6 @@ import {
   useLazyGetRecipientBySourceAccountQuery,
 } from '@/apis/payments';
 import Input from '@/components/common/input';
-import Dialogue from '@/components/common/popup/Dialogue';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { COLORS } from '@/constants/colors';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
@@ -96,70 +96,72 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
 
   return (
     <div>
-      <Dialogue
-        isOpen={isOpen}
-        onClose={onClose}
-        title={TITLE_MAP[paymentType as keyof typeof TITLE_MAP] ?? ''}
-        titleClassName='f-16-600 text-GRAY_950'
-        nextButtonTitle='Create'
-        backButtonTitle='Discard'
-        childrenClassName='mt-12'
-        wrapperClassName='w-[1000px]'
-        parentWrapperClassName='z-[1002]'
-        onCancel={onClose}
-        onSubmit={handleSubmit}
-        closeOnClickOutside={false}
-        isNextButtonLoading={isCreateTemplateLoading}
-        isNextButtonDisabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
-        nextButtonClassName='!min-w-[62px]'
-      >
-        <div className='flex flex-col gap-5 w-[300px] mx-auto min-h-[400px]'>
-          <div className='flex items-end gap-2'>
-            <Input
-              id='ADD_ACCOUNT_SEARCH_BANK'
-              size={SIZE_TYPES.LARGE}
-              autoFocus
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              focusClassNames=''
-              placeholder='New Template'
-              inputWrapperClassName='border-b border-dashed border-GRAY_1000'
-              inputFontClassName='f-22-550 !px-0 !pb-0 font-medium'
-            />
-            <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
-          </div>
-          <SelectAccountDropdown
-            accountsList={sourceAccounts?.accounts ?? []}
-            shouldReset={false}
-            accountDetails={sourceAccountDetails}
-            onAccountSelect={handleSourceAccountSelect}
-            label='Source account'
-            isLoading={isLoading}
-          />
-          {sourceAccountDetails && isSingleTransfer && (
-            <SelectBeneDropdown
-              onSelect={handleRecipientSelect}
-              defaultSelectedRecipient={recipientDetails}
-              shouldReset={false}
-              label='Recipient'
-              showTemplate={false}
-              recipientList={recipientBySourceAccount?.recipients ?? []}
-              isLoading={isRecipientBySourceAccountLoading}
-            />
-          )}
-          {((isSingleTransfer && recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
-            <SelectAccountDropdown
-              accountsList={destinationAccountList}
-              shouldReset={false}
-              accountDetails={destinationAccountDetails}
-              onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
-              label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
-              isLoading={isDestinationAccountsLoading || isRecipientBySourceAccountLoading}
-              showCurrencyLogo={isSingleTransfer}
-            />
-          )}
-        </div>
-      </Dialogue>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent showCloseButton className='min-h-[600px]'>
+          <DialogHeader>{TITLE_MAP[paymentType as keyof typeof TITLE_MAP] ?? ''}</DialogHeader>
+          <DialogBody className='p-6 flex justify-center '>
+            <div className='flex flex-col gap-5 w-[300px] mx-auto'>
+              <div className='flex items-end gap-2'>
+                <Input
+                  id='ADD_ACCOUNT_SEARCH_BANK'
+                  size={SIZE_TYPES.LARGE}
+                  autoFocus
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  focusClassNames=''
+                  placeholder='New Template'
+                  inputWrapperClassName='border-b border-dashed border-GRAY_1000'
+                  inputFontClassName='f-22-550 !px-0 !pb-0 font-medium'
+                />
+                <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
+              </div>
+              <SelectAccountDropdown
+                accountsList={sourceAccounts?.accounts ?? []}
+                shouldReset={false}
+                accountDetails={sourceAccountDetails}
+                onAccountSelect={handleSourceAccountSelect}
+                label='Source account'
+                isLoading={isLoading}
+              />
+              {sourceAccountDetails && isSingleTransfer && (
+                <SelectBeneDropdown
+                  onSelect={handleRecipientSelect}
+                  defaultSelectedRecipient={recipientDetails}
+                  shouldReset={false}
+                  label='Recipient'
+                  showTemplate={false}
+                  recipientList={recipientBySourceAccount?.recipients ?? []}
+                  isLoading={isRecipientBySourceAccountLoading}
+                />
+              )}
+              {((isSingleTransfer && recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
+                <SelectAccountDropdown
+                  accountsList={destinationAccountList}
+                  shouldReset={false}
+                  accountDetails={destinationAccountDetails}
+                  onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
+                  label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
+                  isLoading={isDestinationAccountsLoading || isRecipientBySourceAccountLoading}
+                  showCurrencyLogo={isSingleTransfer}
+                />
+              )}
+            </div>
+          </DialogBody>
+          <DialogFooter className='flex justify-end gap-2'>
+            <Button size='small' variant='secondary' onClick={onClose}>
+              Discard
+            </Button>
+            <Button
+              disabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
+              isLoading={isCreateTemplateLoading}
+              size='small'
+              onClick={handleSubmit}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

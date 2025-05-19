@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
-import { useAppSelector } from 'hooks/toolkit';
+import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import PeopleHeader from 'modules/team/components/PeopleHeader';
 import PeopleTabs from 'modules/team/components/PeopleTabs';
 import { RootState } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { resetBreadcrumb } from '@/store/slices/layout-configs';
 
 const PeoplePage = () => {
+  const appDispatch = useAppDispatch();
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData, isLoading: isLoadingTeamMembersData } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -51,6 +54,10 @@ const PeoplePage = () => {
     debouncedFilterTeamMembers(search);
     debouncedFilterInvitedMembers(search);
   }, [search, debouncedFilterTeamMembers, debouncedFilterInvitedMembers]);
+
+  useEffect(() => {
+    appDispatch(resetBreadcrumb([{ title: 'People', href: ROUTES_PATH.TEAM }]));
+  }, []);
 
   return (
     <div className='p-10 w-full h-full'>

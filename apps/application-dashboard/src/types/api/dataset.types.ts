@@ -20,6 +20,7 @@ export type DatasetFilterConfigMetadataType = {
     currency_value?: string;
     format?: string;
     value_format?: ValueFormatType[];
+    movable?: boolean;
   };
   is_editable?: boolean;
 };
