@@ -5,6 +5,10 @@ import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
+import {
+  ACCESS_MESSAGES_ADMIN_ROLE,
+  ACCESS_MESSAGES_CUSTOMISE_ACCESS,
+} from 'modules/shareResource/shareResource.constants';
 import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
@@ -12,6 +16,7 @@ import { FilterModelType } from 'types/components/table.type';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
 import { OptionsType } from '@/types/commonTypes';
@@ -48,6 +53,7 @@ type AudienceAccessPropsType = {
   isDeletingAudience: boolean;
   isChangingRole: boolean;
   currentUserId: string;
+  emptyFiltersTitle: string;
   isCustomiseAccess?: boolean;
   fgacFilters?: FilterModelType;
   resourceId: string;
@@ -69,6 +75,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   teamInfo,
   isDeletingAudience,
   currentUserId,
+  emptyFiltersTitle,
   isCustomiseAccess = false,
   fgacFilters,
   resourceId,
@@ -155,7 +162,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   };
 
   const handleToggleCustomiseAccess = () => {
-    if (showRoleChangeDropdown) {
+    if (showRoleChangeDropdown && role?.value !== PERMISSION_ROLES.ADMIN && showRoleChangeDropdown) {
       setShowCustomiseAccess((prev) => !prev);
     }
   };
@@ -169,6 +176,14 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_CUSTOMISE_ACCESS);
       });
   };
+
+  const tooltipText = checkIfUser
+    ? ''
+    : !currentUserHasAdminAccess
+      ? ACCESS_MESSAGES_CUSTOMISE_ACCESS
+      : role?.value === PERMISSION_ROLES.ADMIN
+        ? ACCESS_MESSAGES_ADMIN_ROLE
+        : '';
 
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
@@ -215,8 +230,8 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
           </span>
         </div>
         {isCustomiseAccess && (
-          <div className='w-[86px]'>
-            {fgacFilters?.conditions && fgacFilters.conditions.length > 0 ? (
+          <div className='w-28'>
+            {fgacFilters?.conditions && fgacFilters?.conditions?.length > 0 ? (
               <Button
                 variant='ghost'
                 size='xxsmall'
@@ -236,10 +251,26 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
                 )}
               </Button>
             ) : (
-              <div className='flex items-center gap-1.5 px-1'>
-                <SvgSpriteLoader id='coins-stacked-04' size={8} color={COLORS.GRAY_900} />
-                <span className='f-12-450 text-GRAY_1000'>All Data</span>
-              </div>
+              <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
+                <div
+                  className={cn(
+                    'cursor-pointer flex items-center gap-1.5 px-1 group rounded-sm w-fit f-12-450 text-GRAY_1000',
+                    !showRoleChangeDropdown ? 'text-GRAY_600' : 'hover:bg-accent hover:text-accent-foreground',
+                  )}
+                  onClick={handleToggleCustomiseAccess}
+                >
+                  <SvgSpriteLoader id='coins-stacked-04' size={8} color={COLORS.GRAY_900} />
+                  <span>{emptyFiltersTitle}</span>
+                  {showRoleChangeDropdown && (
+                    <SvgSpriteLoader
+                      id='arrow-narrow-right'
+                      size={12}
+                      color={COLORS.GRAY_1000}
+                      className='group-hover:opacity-100 opacity-0'
+                    />
+                  )}
+                </div>
+              </TooltipV2>
             )}
           </div>
         )}

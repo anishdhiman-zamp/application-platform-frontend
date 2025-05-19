@@ -145,6 +145,15 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     [userAccessToResourceList, allTeamsData, audienceFgacColorMap],
   );
 
+  const emptyFiltersTitle = useMemo(() => {
+    switch (resourceType) {
+      case ResourceType.PAYMENTS:
+        return 'All Accounts';
+      default:
+        return 'All Data';
+    }
+  }, [resourceType]);
+
   const handleOpenPopup = () => {
     setOpenPopup(true);
   };
@@ -466,6 +475,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       onClick={handleToggleCustomiseAccess}
                       currentUserHasAdminAccess={currentUserHasAdminAccess}
                       selectedRole={selectedRole as string}
+                      emptyFiltersTitle={emptyFiltersTitle}
                     />
                   )}
                 </div>
@@ -528,6 +538,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       fgacFilters={audience?.metadata?.fgac_filters}
                       resourceId={resourceId}
                       fgacColor={audience?.fgac_color}
+                      emptyFiltersTitle={emptyFiltersTitle}
                     />
                   ))}
                 </CommonWrapper>

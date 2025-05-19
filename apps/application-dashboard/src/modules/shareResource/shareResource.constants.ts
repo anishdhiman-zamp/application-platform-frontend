@@ -139,3 +139,6 @@ export const resourceTypeRouteMap = {
   [ResourceType.ACTIVITY]: 'activities',
   [ResourceType.ORGANIZATION]: 'organizations',
 };
+
+export const ACCESS_MESSAGES_ADMIN_ROLE = 'Admin will have access to all data';
+export const ACCESS_MESSAGES_CUSTOMISE_ACCESS = 'Only admins can customise access';

@@ -10,14 +10,19 @@ import { AgGridReact } from 'ag-grid-react';
 import { useGetFilterConfigQuery, useLazyGetDataQuery } from 'apis/filterTable';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
-import { formatColumns, getColumnOrderingVisibilityForCurrentDataset, getFilters } from 'modules/data/data.utils';
+import {
+  formatColumns,
+  formatDrilldownFilters,
+  getColumnOrderingVisibilityForCurrentDataset,
+  getFilters,
+} from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
 import { defaultFn, MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -95,7 +100,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
-        const queryConfig = getEncodedRequest(parameters.request, '', false, false, false, undefined, drilldownFilters);
+        const queryConfig = getEncodedRequest(parameters.request);
 
         getData({
           url: dataUrl || '',
@@ -209,15 +214,29 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
             payload: { selectedFilters: getFilters(filters, filterConfig) ?? {} },
           });
       }
+      if (parentSelectedFilters) {
+        dispatch({
+          type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+          payload: { selectedFilters: parentSelectedFilters },
+        });
+      }
+
+      if (drilldownFilters) {
+        const { selectedDrilldownFilters } = formatDrilldownFilters(drilldownFilters, filterConfig);
+
+        if (!checkIsObjectEmpty(selectedDrilldownFilters))
+          dispatch({
+            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
+            payload: { selectedFilters: selectedDrilldownFilters },
+          });
+      }
     }
-  }, [filterConfig, filters, updateFilterConfigInParent]);
+  }, [filterConfig, filters]);
 
   useEffect(() => {
-    tableRef.current?.api?.setFilterModel(parentSelectedFilters || selectedFilters);
-    if (updateFiltersInParent && selectedFilters) {
-      updateFiltersInParent(selectedFilters);
-    }
-  }, [selectedFilters, parentSelectedFilters, updateFiltersInParent]);
+    tableRef.current?.api?.setFilterModel(selectedFilters);
+    updateFiltersInParent?.(selectedFilters);
+  }, [selectedFilters]);
 
   useEffect(() => {
     if (isNoRowsOverlayVisible) {
