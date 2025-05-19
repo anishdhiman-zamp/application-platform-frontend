@@ -118,9 +118,9 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
 
     postInviteAudiences({ organizationId, body: { invitations } })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         refetchAudiencesByOrganizationId();
-        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_INVITED);
+        toast.success(res?.message || TOAST_MESSAGES.SUCCESS_AUDIENCE_INVITED);
         handleCloseInviteMembersPopup();
       })
       .catch((err) => {

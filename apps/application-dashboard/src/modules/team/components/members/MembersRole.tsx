@@ -60,12 +60,12 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
         },
       })
         .unwrap()
-        .then(() => {
+        .then((res) => {
           setSelectedRole(selectedOption);
           setOpenChangeRoleDropdown(false);
           setIsHoveredDropdown(false);
           refetchAudiencesByOrganizationId();
-          toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
+          toast.success(res?.message || TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
         })
         .catch((err) => {
           toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_ROLE_CHANGED);
@@ -94,10 +94,10 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false }) => {
         },
       })
         .unwrap()
-        .then(() => {
+        .then((res) => {
           handleCloseRemoveFromTeamPopup();
           refetchAudiencesByOrganizationId();
-          toast.success(`Removed ${userName} successfully`);
+          toast.success(res?.message || `Removed ${userName} successfully`);
         })
         .catch((err) => {
           handleCloseRemoveFromTeamPopup();

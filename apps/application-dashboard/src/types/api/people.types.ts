@@ -41,6 +41,10 @@ export type PatchChangeAudienceRoleInOrganizationType = {
   body: { user_id: string; role: string };
 };
 
+export type PostResponseType = {
+  message: string;
+};
+
 export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };
 
 export type GetMembershipRequestsByOrganizationIdRequest = { organizationId: string };

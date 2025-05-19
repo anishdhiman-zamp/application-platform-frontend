@@ -82,10 +82,9 @@ const DualAdminHome = () => {
   return (
     <div className='p-10'>
       <div className='mb-5'>
-        <div className='f-20-600 text-GRAY_1000 mb-1'>Dual-admin approval policy</div>
+        <div className='f-20-600 text-GRAY_1000 mb-1'>Dual-admin policies</div>
         <div className='f-11-450 text-GRAY_700'>
-          Enable dual-admin approval for critical actions like creating or modifying pages, policies, teams, and
-          datasets
+          Enable dual-admin policies for critical actions like managing policies, and access control
         </div>
       </div>
       <div>
