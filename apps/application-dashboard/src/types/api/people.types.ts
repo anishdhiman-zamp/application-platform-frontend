@@ -102,7 +102,7 @@ export type PostAddTeamToAudienceRequestType = {
 export type RemoveTeamFromAudienceRequestType = {
   organizationId: string;
   teamId: string;
-  payload: { team_id: string; team_membership_id: string };
+  payload: { team_id: string; team_membership_id: string; user_id: string };
 };
 
 export type GetMyInvitationsResponseType = {

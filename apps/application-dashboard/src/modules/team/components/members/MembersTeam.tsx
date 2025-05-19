@@ -100,6 +100,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
     const payload = {
       team_id: teamId,
       team_membership_id: membershipId,
+      user_id: userId,
     };
 
     removeTeamFromAudience({ organizationId, teamId, payload })
