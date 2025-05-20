@@ -48,9 +48,9 @@ const SharePopupPageApprovals = ({ resourceType, resourceId, emptyFiltersTitle }
           {!!pendingApprovalList?.length && (
             <div>
               <span className='f-12-500 text-GRAY_700 p-2'>Your approval needed</span>
-              {pendingApprovalList?.map((audience, index) => (
+              {pendingApprovalList?.map((audience) => (
                 <ShareResourceApprovalCard
-                  key={index}
+                  key={audience?.audience_id}
                   allTeams={allTeamsData ?? []}
                   allAudience={audiencesData ?? []}
                   audiencesData={data ?? []}
@@ -64,9 +64,9 @@ const SharePopupPageApprovals = ({ resourceType, resourceId, emptyFiltersTitle }
           {!!sentForApprovalList?.length && (
             <div>
               <span className='f-12-500 text-GRAY_700 p-2'>Sent for approval</span>
-              {sentForApprovalList?.map((audience, index) => (
+              {sentForApprovalList?.map((audience) => (
                 <ShareResourceApprovalCard
-                  key={index}
+                  key={audience?.audience_id}
                   allTeams={allTeamsData ?? []}
                   allAudience={audiencesData ?? []}
                   audiencesData={data ?? []}
