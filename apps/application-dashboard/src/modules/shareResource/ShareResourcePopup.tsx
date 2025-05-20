@@ -145,6 +145,15 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     [userAccessToResourceList, allTeamsData, audienceFgacColorMap],
   );
 
+  const emptyFiltersTitle = useMemo(() => {
+    switch (resourceType) {
+      case ResourceType.PAYMENTS:
+        return 'All Accounts';
+      default:
+        return 'All Data';
+    }
+  }, [resourceType]);
+
   const handleOpenPopup = () => {
     setOpenPopup(true);
   };
@@ -180,10 +189,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
     postInviteAudiences({ resourceRoute: resourceTypeRouteMap[resourceType], resourceId, body: shareData })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         setSelectedItems([]);
         refetchAudiencesData();
-        toast.success(resourceConfig.toastMessages.success);
+        toast.success(res?.message || resourceConfig.toastMessages.success);
       })
       .catch((err) => {
         toast.error(err?.data?.error || resourceConfig.toastMessages.failed);
@@ -210,13 +219,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         refetchAudiencesData();
-        toast.success(
-          isRoleChange
-            ? TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED
-            : TOAST_MESSAGES.SUCCESS_AUDIENCE_CUSTOMISE_ACCESS,
-        );
+        toast.success(res?.message);
 
         return true;
       })
@@ -243,9 +248,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         refetchAudiencesData();
-        toast.success(`Removed ${userName} successfully`);
+        toast.success(res?.message || `Removed ${userName} successfully`);
       })
       .catch((err) => {
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
@@ -466,6 +471,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       onClick={handleToggleCustomiseAccess}
                       currentUserHasAdminAccess={currentUserHasAdminAccess}
                       selectedRole={selectedRole as string}
+                      emptyFiltersTitle={emptyFiltersTitle}
                     />
                   )}
                 </div>
@@ -528,6 +534,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                       fgacFilters={audience?.metadata?.fgac_filters}
                       resourceId={resourceId}
                       fgacColor={audience?.fgac_color}
+                      emptyFiltersTitle={emptyFiltersTitle}
                     />
                   ))}
                 </CommonWrapper>

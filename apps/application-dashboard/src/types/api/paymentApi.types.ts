@@ -145,6 +145,11 @@ export interface CreatePolicyPayloadType {
   action_type: PolicyActionType;
   config: CreatePolicyConfigPayload;
 }
+
+export type CreatePolicyResponseType = {
+  message: string;
+};
+
 export type PaymentApprovalsInfoResponseType = {
   approval_id: string;
   policy_evaluation_data: PolicyConfigType;

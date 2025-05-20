@@ -7,10 +7,7 @@ import { transformFormDataToApiPayload } from '@/modules/policies/commons';
 import { PolicyActionType, type PolicyFormData } from '@/modules/policies/types';
 import type { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { PolicyResultStatus } from '@/types/api/policies.types';
-import {
-  APPROVAL_REQUEST_FAIL_TOAST,
-  APPROVAL_REQUEST_TOAST,
-} from '@/utils/accessPermission/accessPermission.constants';
+import { APPROVAL_REQUEST_FAIL_TOAST } from '@/utils/accessPermission/accessPermission.constants';
 
 export type RequestApprovalPolicyConfig = {
   data: PolicyFormData;
@@ -34,23 +31,25 @@ const RequestApprovalDialogue: FC<RequestApprovalDialogueProps> = ({ handleOpenC
   const handleRequestApproval = () => {
     if (!policyConfig) return;
 
-    const config = transformFormDataToApiPayload(policyConfig?.data, []);
-
-    const apiPayload: CreatePolicyPayloadType = {
-      url: API_ENDPOINTS.POLICY_CREATE_POST,
-      name: policyConfig?.data.policyName,
-      resource_id: policyConfig?.resource_id,
-      resource_type: policyConfig?.resource_type,
-      action_type: policyConfig?.action_type,
-      config: config,
-    };
-
     if (policyConfig?.status !== PolicyResultStatus.APPROVED) {
+      const epochTime = new Date().getTime();
+      const config = transformFormDataToApiPayload(policyConfig?.data, []);
+
+      const apiPayload: CreatePolicyPayloadType = {
+        url: API_ENDPOINTS.POLICY_CREATE_POST,
+        name: `${policyConfig?.data.policyName}${epochTime}`,
+        resource_id: policyConfig?.resource_id,
+        resource_type: policyConfig?.resource_type,
+        action_type: policyConfig?.action_type,
+        config: config,
+      };
+
       createPolicy(apiPayload)
         .unwrap()
-        .then(() => {
+        .then((res) => {
           handleOpenChange(false);
-          toast.success(APPROVAL_REQUEST_TOAST);
+
+          toast.success(res?.message);
         })
         .catch(() => {
           toast.error(APPROVAL_REQUEST_FAIL_TOAST);
@@ -58,9 +57,9 @@ const RequestApprovalDialogue: FC<RequestApprovalDialogueProps> = ({ handleOpenC
     } else {
       deletePolicy(policyConfig?.policy_id)
         .unwrap()
-        .then(() => {
+        .then((res) => {
           handleOpenChange(false);
-          toast.success(APPROVAL_REQUEST_TOAST);
+          toast.success(res?.message);
         })
         .catch(() => {
           toast.error(APPROVAL_REQUEST_FAIL_TOAST);

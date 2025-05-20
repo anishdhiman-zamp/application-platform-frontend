@@ -37,8 +37,8 @@ const TeamMemberApprovalCard = ({
       approval_ids: [approvalId],
     })
       .unwrap()
-      .then(() => {
-        toast.success(APPROVAL_POLICY_TOAST);
+      .then((res) => {
+        toast.success(res?.message ?? APPROVAL_POLICY_TOAST);
       })
       .catch(() => {
         toast.error(APPROVAL_FAILED_TOAST);
@@ -52,6 +52,11 @@ const TeamMemberApprovalCard = ({
 
   const getChangeType = () => {
     switch (details?.action) {
+      case USER_APPROVAL_ACTION_TYPES.CREATE_USER_INVITATION: {
+        const currentROle = PRIVILEGES_LIST.find((item) => item.value === details.privilege);
+
+        return `Invited as ${currentROle?.label}`;
+      }
       case USER_APPROVAL_ACTION_TYPES.REMOVE_USER_FROM_TEAM:
         return (
           <div className='flex items-center gap-1.5 whitespace-nowrap'>
@@ -100,7 +105,7 @@ const TeamMemberApprovalCard = ({
       <div className='flex items-center'>{email}</div>
       <div className='flex items-center'>{getChangeType()}</div>
       <div className='flex items-center gap-3 px-2 py-2'>
-        {details?.can_approve && (
+        {details?.can_approve ? (
           <>
             <Button
               variant='outline'
@@ -123,6 +128,8 @@ const TeamMemberApprovalCard = ({
               Reject
             </Button>
           </>
+        ) : (
+          <div className='f-11-450 text-ORANGE_800 whitespace-nowrap'>Pending approval</div>
         )}
       </div>
     </div>

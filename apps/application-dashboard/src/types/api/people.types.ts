@@ -41,6 +41,10 @@ export type PatchChangeAudienceRoleInOrganizationType = {
   body: { user_id: string; role: string };
 };
 
+export type PostResponseType = {
+  message: string;
+};
+
 export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };
 
 export type GetMembershipRequestsByOrganizationIdRequest = { organizationId: string };
@@ -98,7 +102,7 @@ export type PostAddTeamToAudienceRequestType = {
 export type RemoveTeamFromAudienceRequestType = {
   organizationId: string;
   teamId: string;
-  payload: { team_id: string; team_membership_id: string };
+  payload: { team_id: string; team_membership_id: string; user_id: string };
 };
 
 export type GetMyInvitationsResponseType = {

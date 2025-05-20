@@ -9,6 +9,7 @@ import {
   DeleteResourceFromAudiencesType,
   PostShareResourceToAudiencesType,
 } from '@/types/api/collaboration.types';
+import type { PostResponseType } from '@/types/api/people.types';
 
 export const buildUrl = (urlTemplate: string, resourceRoute: string, resourceId: string) => {
   if (resourceId === '') {
@@ -26,7 +27,7 @@ const Collaboration = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_AUDIENCE_BY_RESOURCE_ID],
     }),
-    postShareResourceToAudiences: builder.mutation<void, PostShareResourceToAudiencesType>({
+    postShareResourceToAudiences: builder.mutation<PostResponseType, PostShareResourceToAudiencesType>({
       query: ({ resourceRoute, resourceId, body }) => ({
         url: buildUrl(API_ENDPOINTS.SHARE_RESOURCE_TO_AUDIENCES_POST, resourceRoute, resourceId),
         method: REQUEST_TYPES.POST,
@@ -34,14 +35,14 @@ const Collaboration = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
     }),
-    patchChangeAudienceRoleInResource: builder.mutation<void, ChangeAudienceRoleInResourceType>({
+    patchChangeAudienceRoleInResource: builder.mutation<PostResponseType, ChangeAudienceRoleInResourceType>({
       query: ({ resourceRoute, resourceId, body }) => ({
         url: buildUrl(API_ENDPOINTS.CHANGE_AUDIENCE_ROLE_IN_RESOURCE_PATCH, resourceRoute, resourceId),
         method: REQUEST_TYPES.PATCH,
         body: body,
       }),
     }),
-    deleteAudienceFromResource: builder.mutation<void, DeleteResourceFromAudiencesType>({
+    deleteAudienceFromResource: builder.mutation<PostResponseType, DeleteResourceFromAudiencesType>({
       query: ({ resourceRoute, resourceId, body }) => ({
         url: buildUrl(API_ENDPOINTS.DELETE_RESOURCE_FROM_AUDIENCES, resourceRoute, resourceId),
         method: REQUEST_TYPES.DELETE,

@@ -27,8 +27,8 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
       approval_ids: [approvalId],
     })
       .unwrap()
-      .then(() => {
-        toast.success(APPROVAL_POLICY_TOAST);
+      .then((res) => {
+        toast.success(res?.message || APPROVAL_POLICY_TOAST);
       })
       .catch(() => {
         toast.error(APPROVAL_FAILED_TOAST);

@@ -86,7 +86,7 @@ const Sidebar = () => {
                   </Link>
                 ))}
                 <div onClick={() => router.push(SETTING_SIDEBAR_ITEMS[0]?.path)}>
-                  <SidebarTab name='Setting' iconId='settings-01' className='cursor-pointer' />
+                  <SidebarTab name='Settings' iconId='settings-01' className='cursor-pointer' />
                 </div>
               </div>
               {processes && processes?.length > 0 && (
