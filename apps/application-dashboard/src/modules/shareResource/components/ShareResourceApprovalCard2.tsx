@@ -84,6 +84,7 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
       case RESOURCE_ACTION_TYPE.ADD_RESOURCE_AUDIENCE_POLICY: {
         return (
           <div className='flex items-center gap-1.5 text-GRAY_1000'>
+            {getPreviousPrivilege(audience?.privilege || '')} +
             <ShareResourceAccessDetails
               fgacFilters={audience?.fgac_filters ?? {}}
               showRoleChangeDropdown
@@ -91,7 +92,6 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
               tooltipText={''}
               emptyFiltersTitle={emptyFiltersTitle}
             />
-            {getPreviousPrivilege(audience?.privilege || '')}
           </div>
         );
       }
