@@ -2,6 +2,7 @@ import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from '
 import type { ResourceAudienceType } from 'types/api/auth.types';
 import { PolicyResultStatus } from 'types/api/policies.types';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import type { FilterModelType } from '@/types/components/table.type';
 
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
@@ -135,6 +136,7 @@ export type GetTeamPendingApprovalsResponse = {
   email: string;
   team_id: string;
   action: string;
+  fgac_filters: FilterModelType;
 };
 
 export type GetTeamPendingApprovalsByResourceIdPayload = {

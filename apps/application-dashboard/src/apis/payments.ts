@@ -24,6 +24,7 @@ import {
   SourceAccountResponseType,
   TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
+import type { PostResponseType } from '@/types/api/people.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
 const Payments = baseApi.injectEndpoints({
@@ -113,7 +114,7 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
       }),
     }),
-    updatePolicy: builder.mutation<void, CreatePolicyPayloadType>({
+    updatePolicy: builder.mutation<PostResponseType, CreatePolicyPayloadType>({
       query: ({ config, name, url }) => ({
         url,
         method: REQUEST_TYPES.PATCH,

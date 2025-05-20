@@ -1,21 +1,26 @@
+import { useState } from 'react';
 import ShareResourceApprovalCard from 'modules/shareResource/components/ShareResourceApprovalCard2';
 import { useGetTeamPendingApprovalsByResourceIdQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import WhoHasAccessSkeletonLoader from '@/components/skeletons/WhoHasAccessSkeletonLoader';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
+import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import type { FilterModelType } from '@/types/components/table.type';
 
 type SharePopupPageApprovalsProps = {
   resourceType: ResourceType;
   resourceId: string;
+  emptyFiltersTitle?: string;
 };
 
-const SharePopupPageApprovals = ({ resourceType, resourceId }: SharePopupPageApprovalsProps) => {
+const SharePopupPageApprovals = ({ resourceType, resourceId, emptyFiltersTitle }: SharePopupPageApprovalsProps) => {
   const { audiencesData, allTeamsData } = useAudienceMembers({
     resourceType: ResourceType.ORGANIZATION,
     resourceId: '',
   });
+  const [fgacFilters, setFgacFilters] = useState<FilterModelType>({});
 
   const { loading, data } = useAudienceMembers({
     resourceType: resourceType,
@@ -41,8 +46,19 @@ const SharePopupPageApprovals = ({ resourceType, resourceId }: SharePopupPageApp
               allAudience={audiencesData ?? []}
               audiencesData={data ?? []}
               audience={audience}
+              onViewDetails={() => setFgacFilters(audience?.fgac_filters ?? {})}
+              emptyFiltersTitle={emptyFiltersTitle ?? ''}
             />
           ))}
+          {!!Object.keys(fgacFilters)?.length && (
+            <CustomiseAccess
+              isOpen={!!fgacFilters}
+              onClose={() => setFgacFilters({})}
+              datasetId={resourceId}
+              resourceType={resourceType}
+              fgacFilters={fgacFilters}
+            />
+          )}
         </CommonWrapper>
       </div>
     </div>

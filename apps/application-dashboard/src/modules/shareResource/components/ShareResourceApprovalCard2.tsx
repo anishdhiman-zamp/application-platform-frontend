@@ -1,6 +1,7 @@
 import { type FC, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { Loader2 } from 'lucide-react';
+import ShareResourceAccessDetails from 'modules/shareResource/components/ShareResourceAccessDetails';
 import { useApprovalActionMutation } from '@/apis/people';
 import AudienceMember from '@/components/audience-member';
 import { toast } from '@/components/common/toast/Toast';
@@ -10,6 +11,7 @@ import { RESOURCE_ACTION_TYPE } from '@/modules/policies/types';
 import { PRIVILEGES_LIST } from '@/modules/team/people.constants';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import type { GetTeamPendingApprovalsResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
+import type { defaultFnType } from '@/types/commonTypes';
 import { getUserNameFromAudience, snakeCaseToSentenceCase } from '@/utils/common';
 
 type ShareResourceApprovalCardProps = {
@@ -17,6 +19,8 @@ type ShareResourceApprovalCardProps = {
   allAudience: AudiencesByResourceResponse[];
   audience: GetTeamPendingApprovalsResponse;
   audiencesData: AudiencesByResourceResponse[];
+  onViewDetails: defaultFnType;
+  emptyFiltersTitle: string;
 };
 
 const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
@@ -24,6 +28,8 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
   allAudience,
   audience,
   audiencesData,
+  emptyFiltersTitle,
+  onViewDetails,
 }) => {
   const [isRejected, setIsRejected] = useState(false);
   const [approvePolicy, { isLoading }] = useApprovalActionMutation();
@@ -76,7 +82,18 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
         return <div className='flex items-center gap-1.5'>Revoked access</div>;
       }
       case RESOURCE_ACTION_TYPE.ADD_RESOURCE_AUDIENCE_POLICY: {
-        return <div className='flex items-center gap-1.5'>Invited as {audience?.privilege}</div>;
+        return (
+          <div className='flex items-center gap-1.5 text-GRAY_1000'>
+            <ShareResourceAccessDetails
+              fgacFilters={audience?.fgac_filters ?? {}}
+              showRoleChangeDropdown
+              handleToggleCustomiseAccess={onViewDetails}
+              tooltipText={''}
+              emptyFiltersTitle={emptyFiltersTitle}
+            />
+            {getPreviousPrivilege(audience?.privilege || '')}
+          </div>
+        );
       }
       case RESOURCE_ACTION_TYPE.UPDATE_RESOURCE_AUDIENCE_POLICY:
       case RESOURCE_ACTION_TYPE.MUTATE_USER: {

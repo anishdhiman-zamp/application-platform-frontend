@@ -540,7 +540,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </CommonWrapper>
               </div>
             </div>
-            <SharePopupPageApprovals resourceType={resourceType} resourceId={resourceId} />
+            <SharePopupPageApprovals
+              emptyFiltersTitle={emptyFiltersTitle}
+              resourceType={resourceType}
+              resourceId={resourceId}
+            />
           </div>
         )}
       </div>
