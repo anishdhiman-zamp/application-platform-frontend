@@ -917,3 +917,7 @@ body {
   font-size: 8px;
   line-height: 10px;
 }
+
+[data-sonner-toast][data-expanded=false][data-front=false][data-styled=false]>* {
+     opacity: 0;
+ }
