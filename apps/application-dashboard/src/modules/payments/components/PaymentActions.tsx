@@ -16,7 +16,9 @@ const PaymentActions = () => {
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
+
+  const [getPolicies, { data: policiesData, currentData: currentPoliciesData }] = useLazyGetPoliciesQuery();
+
   const router = useRouter();
   const [sideDrawerConfigType, setSideDrawerConfigType] = useState<PolicyDialogType>();
 
@@ -29,24 +31,24 @@ const PaymentActions = () => {
   };
 
   useEffect(() => {
-    if (paymentConfig?.id) {
-      getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS });
+    if (paymentConfig?.id && !currentPoliciesData?.data) {
+      getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS }, true);
     }
-  }, [paymentConfig?.id, getPolicies]);
+  }, [paymentConfig?.id, getPolicies, currentPoliciesData?.data]);
 
   const paymentPolicies = useMemo(
     () =>
-      policiesData?.data?.filter(
+      (currentPoliciesData?.data ?? policiesData?.data)?.filter(
         (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_PAYMENT,
       ) ?? [],
-    [policiesData?.data],
+    [currentPoliciesData?.data, policiesData?.data],
   );
   const templatePolicies = useMemo(
     () =>
-      policiesData?.data?.filter(
+      (currentPoliciesData?.data ?? policiesData?.data)?.filter(
         (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_TEMPLATE,
       ) ?? [],
-    [policiesData?.data],
+    [currentPoliciesData?.data, policiesData?.data],
   );
 
   return (
@@ -109,7 +111,7 @@ const PaymentActions = () => {
       <DialogWithRoute routes={['/payments/policies/delete/:policyId']}>
         {({ open, onOpenChange }) => (
           <PolicyDeleteConfirmPopup
-            policiesData={policiesData?.data}
+            policiesData={currentPoliciesData?.data ?? policiesData?.data ?? []}
             isOpen={open}
             onClose={() => onOpenChange(false)}
           />
@@ -120,7 +122,7 @@ const PaymentActions = () => {
         {({ open, onOpenChange }) => (
           <CreatePolicyDialog
             type={sideDrawerConfigType}
-            policiesData={policiesData?.data}
+            policiesData={currentPoliciesData?.data ?? policiesData?.data ?? []}
             isOpen={open}
             onOpenChange={onOpenChange}
           />

@@ -56,10 +56,13 @@ export const useResourceAccess = (resourceType: ResourceType, resourceId: string
     refetch: refetchAudiencesData,
   } = useGetAudiencesByResourceIdQuery(
     { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
-    { skip: shouldSkipAudiencesQuery },
+    { skip: shouldSkipAudiencesQuery, refetchOnMountOrArgChange: false },
   );
 
-  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+  const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery(
+    { organizationId },
+    { skip: !organizationId, refetchOnMountOrArgChange: false },
+  );
 
   const userTeams =
     allTeamsData
