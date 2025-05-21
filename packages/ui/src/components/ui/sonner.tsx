@@ -28,7 +28,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
         warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.GRAY_900} />,
         close: <SvgSpriteLoader id='x-close' size={16} color={COLORS.GRAY_900} />,
       }}
-      duration={100000}
       {...props}
     />
   );
