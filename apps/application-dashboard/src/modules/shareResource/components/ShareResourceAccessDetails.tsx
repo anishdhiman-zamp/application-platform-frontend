@@ -1,0 +1,72 @@
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { cn } from '@zamp-platform/ui/lib/utils';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { COLORS } from '@/constants/colors';
+import { defaultFnType } from '@/types/commonTypes';
+import type { FilterModelType } from '@/types/components/table.type';
+type ShareResourceAccessDetailsProps = {
+  fgacFilters: FilterModelType;
+  showRoleChangeDropdown: boolean;
+  handleToggleCustomiseAccess: defaultFnType;
+  fgacColor?: string;
+  tooltipText: string;
+  emptyFiltersTitle: string;
+};
+
+const ShareResourceAccessDetails = ({
+  fgacFilters,
+  showRoleChangeDropdown,
+  handleToggleCustomiseAccess,
+  fgacColor,
+  tooltipText,
+  emptyFiltersTitle,
+}: ShareResourceAccessDetailsProps) => {
+  return (
+    <div className='w-28'>
+      {fgacFilters?.conditions && fgacFilters?.conditions?.length > 0 ? (
+        <Button
+          variant='ghost'
+          size='xxsmall'
+          className='f-12-450 text-GRAY_1000 px-1 py-0.5 flex items-center gap-1.5 group'
+          onClick={handleToggleCustomiseAccess}
+          disabled={!showRoleChangeDropdown}
+        >
+          <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: fgacColor ?? COLORS.BLUE_150 }} />
+          <span>Custom</span>
+          {showRoleChangeDropdown && (
+            <SvgSpriteLoader
+              id='arrow-narrow-right'
+              size={12}
+              color={COLORS.GRAY_1000}
+              className='group-hover:opacity-100 opacity-0'
+            />
+          )}
+        </Button>
+      ) : (
+        <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
+          <div
+            className={cn(
+              'cursor-pointer flex items-center gap-1.5 px-1 group rounded-sm w-fit f-12-450 text-GRAY_1000',
+              !showRoleChangeDropdown ? 'text-GRAY_600' : 'hover:bg-accent hover:text-accent-foreground',
+            )}
+            onClick={handleToggleCustomiseAccess}
+          >
+            <SvgSpriteLoader id='coins-stacked-04' size={8} color={COLORS.GRAY_900} />
+            <span>{emptyFiltersTitle}</span>
+            {showRoleChangeDropdown && (
+              <SvgSpriteLoader
+                id='arrow-narrow-right'
+                size={12}
+                color={COLORS.GRAY_1000}
+                className='group-hover:opacity-100 opacity-0'
+              />
+            )}
+          </div>
+        </TooltipV2>
+      )}
+    </div>
+  );
+};
+
+export default ShareResourceAccessDetails;

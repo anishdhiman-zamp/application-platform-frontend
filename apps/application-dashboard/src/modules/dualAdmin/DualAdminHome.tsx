@@ -5,6 +5,7 @@ import RequestApprovalDialogue, {
 import DualAdminCard from 'modules/dualAdmin/DualAdminCard';
 import { PolicyActionType } from 'modules/policies/types';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
+import { TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
@@ -13,7 +14,6 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
 import { resetBreadcrumb } from '@/store/slices/layout-configs';
-import { ResourceAudienceType } from '@/types/api/auth.types';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { ResourceType } from '@/types/api/policies.types';
 
@@ -31,11 +31,7 @@ const DualAdminHome = () => {
   );
   const [approversList, setApproversList] = useState<AudienceMembersDataType[]>([]);
 
-  const {
-    data: audiences,
-    loading,
-    allTeamsData,
-  } = useAudienceMembers({
+  const { data: audiences, loading } = useAudienceMembers({
     resourceType: ResourceType.ORGANIZATION,
     resourceId: user?.orgs[0]?.organization_id ?? '',
   });
@@ -46,34 +42,11 @@ const DualAdminHome = () => {
 
   useEffect(() => {
     if (!loading && audiences) {
-      const formattedTeams =
-        allTeamsData?.map((team) => ({
-          label: team?.name,
-          resource_audience_type: ResourceAudienceType.TEAM,
-          resource_audience_id: team?.team_id,
-          name: team.name,
-          resource_type: ResourceType.ORGANIZATION,
-          team_name: team?.name,
-          team_color: team?.metadata?.color_hex_code,
-          privilege: '',
-          resource_id: user?.orgs[0]?.organization_id ?? '',
-        })) ?? [];
+      const systemAdmin = audiences?.filter((audience) => audience?.privilege === TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN);
 
-      const organization = {
-        label: user?.orgs[0]?.name ?? '',
-        resource_audience_type: ResourceAudienceType.ORGANIZATION,
-        resource_audience_id: user?.orgs[0]?.organization_id ?? '',
-        name: user?.orgs[0]?.name ?? '',
-        resource_type: ResourceType.ORGANIZATION,
-        team_name: user?.orgs[0]?.name ?? '',
-        team_color: '',
-        privilege: '',
-        resource_id: user?.orgs[0]?.organization_id ?? '',
-      };
-
-      setApproversList([...audiences, ...formattedTeams, organization]);
+      setApproversList(systemAdmin ?? []);
     }
-  }, [audiences, allTeamsData, loading]);
+  }, [audiences, loading]);
 
   useEffect(() => {
     appDispatch(resetBreadcrumb([{ title: 'Policies', href: ROUTES_PATH.POLICIES }]));

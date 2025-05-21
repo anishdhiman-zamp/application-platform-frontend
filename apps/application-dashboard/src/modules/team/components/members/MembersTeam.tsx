@@ -106,7 +106,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
     removeTeamFromAudience({ organizationId, teamId, payload })
       .unwrap()
       .then((res) => {
-        toast.success(res?.message || TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
+        toast.success(res?.message ?? TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
       })
       .catch(() => {
         toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_ERROR);
