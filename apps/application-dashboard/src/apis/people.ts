@@ -103,6 +103,7 @@ const People = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),
       providesTags: [APITags.GET_ALL_TEAMS],
+      keepUnusedDataFor: 10,
     }),
     postAddTeamToOrganization: builder.mutation<
       PostTeamsByOrganizationIdResponseType,

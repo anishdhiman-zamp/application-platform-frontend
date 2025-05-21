@@ -80,7 +80,7 @@ export interface CreatePolicyConfigPayload {
 export type PolicyDialogType = 'payout' | 'template';
 
 export interface CreatePolicyDialogProps {
-  type: PolicyDialogType;
+  type?: PolicyDialogType;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   policiesData?: PolicyDetailsType[];

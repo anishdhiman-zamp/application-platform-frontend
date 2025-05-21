@@ -20,8 +20,8 @@ const PaymentActions = () => {
   const router = useRouter();
   const [sideDrawerConfigType, setSideDrawerConfigType] = useState<PolicyDialogType>();
 
-  const handlePolicyDialogOpenChange = () => {
-    router.push(`/payments/policies/create`);
+  const handlePolicyDialogOpenChange = (type?: PolicyDialogType) => {
+    router.push(`/payments/policies/create?type=${type}`);
   };
 
   const handlePolicyListClose = () => {
@@ -76,7 +76,12 @@ const PaymentActions = () => {
               >
                 {templatePolicies.length} {templatePolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
-              <Button variant='ghost' size='xxsmall' className='' onClick={() => handlePolicyDialogOpenChange()}>
+              <Button
+                variant='ghost'
+                size='xxsmall'
+                className=''
+                onClick={() => handlePolicyDialogOpenChange('template')}
+              >
                 <Plus className='h-3 w-3' />
               </Button>
             </div>
@@ -93,7 +98,7 @@ const PaymentActions = () => {
               >
                 {paymentPolicies.length} {paymentPolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
-              <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange()}>
+              <Button variant='ghost' size='xxsmall' onClick={() => handlePolicyDialogOpenChange('payout')}>
                 <Plus className='h-3 w-3' />
               </Button>
             </div>
@@ -114,7 +119,7 @@ const PaymentActions = () => {
       <DialogWithRoute routes={['/payments/policies/create', '/payments/policies/create/:policyId']}>
         {({ open, onOpenChange }) => (
           <CreatePolicyDialog
-            type={sideDrawerConfigType ?? 'template'}
+            type={sideDrawerConfigType}
             policiesData={policiesData?.data}
             isOpen={open}
             onOpenChange={onOpenChange}

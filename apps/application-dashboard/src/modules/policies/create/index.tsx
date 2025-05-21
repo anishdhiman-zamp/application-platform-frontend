@@ -12,9 +12,10 @@ import {
   CreatePolicyDialogProps,
   PolicyActionType,
   PolicyAttributeAction,
+  PolicyDialogType,
   PolicyFormData,
 } from 'modules/policies/types';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
@@ -22,9 +23,10 @@ import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
-const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
+const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
   const { policyId } = useParams();
-
+  const searchParams = useSearchParams();
+  const type = argType || (searchParams?.get('type') as PolicyDialogType) || 'template';
   const policyData = useMemo(
     () => (isOpen ? policiesData?.find((policy) => policy.id === policyId) : null),
     [isOpen, policiesData, policyId],
