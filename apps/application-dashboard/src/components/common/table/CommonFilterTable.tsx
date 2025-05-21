@@ -118,19 +118,17 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         if (cachedData) {
           if (parameters.request.startRow === 0) {
             setDatasetTitle(cachedData.title);
-            setTotalRows(cachedData.data.total_count);
-            setIsNoRowsOverlayVisible(cachedData.data.total_count === 0);
+            setTotalRows(cachedData.data?.total_count);
+            setIsNoRowsOverlayVisible(cachedData.data?.total_count === 0);
             dispatch({
               type: filtersContextActions.SET_TOTAL_ROWS,
-              payload: { totalRows: cachedData.data.total_count },
+              payload: { totalRows: cachedData.data?.total_count },
             });
           }
           parameters.success({
-            rowData: cachedData.data.rows,
-            ...(parameters.request.startRow === 0 ? { rowCount: cachedData.data.total_count } : {}),
+            rowData: cachedData.data?.rows,
+            ...(parameters.request.startRow === 0 ? { rowCount: cachedData.data?.total_count } : {}),
           });
-
-          return;
         }
 
         getData({
