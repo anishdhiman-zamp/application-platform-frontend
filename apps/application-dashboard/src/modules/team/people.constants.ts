@@ -123,7 +123,7 @@ export enum TEAM_PERMISSION_TOAST_MSG {
 
 export const DUAL_ADMIN_APPROVAL_POLICY_OPTIONS = [
   {
-    label: 'Approval',
+    label: 'Approve',
     value: TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE,
     icon: 'check',
   },
