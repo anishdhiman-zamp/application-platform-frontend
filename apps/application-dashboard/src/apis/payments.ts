@@ -8,6 +8,7 @@ import {
 } from '@/types/api/dataset.types';
 import {
   CreatePolicyPayloadType,
+  type CreatePolicyResponseType,
   CreateTemplatePayloadType,
   DestinationAccountPayloadType,
   GetPoliciesParamsType,
@@ -23,6 +24,7 @@ import {
   SourceAccountResponseType,
   TemplateListResponseType,
 } from '@/types/api/paymentApi.types';
+import type { PostResponseType } from '@/types/api/people.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
 const Payments = baseApi.injectEndpoints({
@@ -112,7 +114,7 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAYMENT_DETAILS_GET, { paymentId }),
       }),
     }),
-    updatePolicy: builder.mutation<void, CreatePolicyPayloadType>({
+    updatePolicy: builder.mutation<PostResponseType, CreatePolicyPayloadType>({
       query: ({ config, name, url }) => ({
         url,
         method: REQUEST_TYPES.PATCH,
@@ -120,12 +122,13 @@ const Payments = baseApi.injectEndpoints({
       }),
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
-    createPolicy: builder.mutation<void, CreatePolicyPayloadType>({
+    createPolicy: builder.mutation<CreatePolicyResponseType, CreatePolicyPayloadType>({
       query: ({ url, ...body }) => ({
         url,
         method: REQUEST_TYPES.POST,
         body,
       }),
+      transformResponse: (data) => data?.data,
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
@@ -135,11 +138,12 @@ const Payments = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_POLICY_LIST],
     }),
-    deletePolicy: builder.mutation<void, string>({
+    deletePolicy: builder.mutation<CreatePolicyResponseType, string>({
       query: (policyId) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_DELETE, { policyId }),
         method: REQUEST_TYPES.DELETE,
       }),
+      transformResponse: (data) => data?.data,
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({

@@ -2,6 +2,7 @@ import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from '
 import type { ResourceAudienceType } from 'types/api/auth.types';
 import { PolicyResultStatus } from 'types/api/policies.types';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import type { FilterModelType } from '@/types/components/table.type';
 
 export type AudiencesByOrganisationIdRequest = {
   organizationId: string;
@@ -39,6 +40,10 @@ export type PostAudiencesInviteData = {
 export type PatchChangeAudienceRoleInOrganizationType = {
   organizationId: string;
   body: { user_id: string; role: string };
+};
+
+export type PostResponseType = {
+  message: string;
 };
 
 export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };
@@ -98,7 +103,7 @@ export type PostAddTeamToAudienceRequestType = {
 export type RemoveTeamFromAudienceRequestType = {
   organizationId: string;
   teamId: string;
-  payload: { team_id: string; team_membership_id: string };
+  payload: { team_id: string; team_membership_id: string; user_id: string };
 };
 
 export type GetMyInvitationsResponseType = {
@@ -131,6 +136,7 @@ export type GetTeamPendingApprovalsResponse = {
   email: string;
   team_id: string;
   action: string;
+  fgac_filters: FilterModelType;
 };
 
 export type GetTeamPendingApprovalsByResourceIdPayload = {

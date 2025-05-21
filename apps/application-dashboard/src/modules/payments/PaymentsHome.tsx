@@ -55,8 +55,6 @@ const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
         cellClass='!py-0'
         filterConfigUrl={API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET}
         dataUrl={API_ENDPOINTS.PAYMENT_LIST_GET}
-        sortColumn='date'
-        sortOrder='desc'
         actionElements={
           <div className='relative flex items-center gap-3'>
             <TooltipButton

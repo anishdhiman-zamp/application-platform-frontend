@@ -165,9 +165,32 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: Create
           type === 'payout' ? API_ENDPOINTS.POLICY_UPDATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_UPDATE_POST,
           { policyId: policyData?.id },
         ),
-      });
+      })
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message ?? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE, {
+            autoClose: 2000,
+          });
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error ?? TOAST_MESSAGES.ERROR_POLICY_UPDATE, {
+            autoClose: 2000,
+          });
+        });
     } else {
-      createPolicy(apiPayload);
+      createPolicy(apiPayload)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message ?? TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
+            autoClose: 2000,
+          });
+        })
+        .catch((err) => {
+          console.log('err', err.data.error);
+          toast.error(err.data.error ?? TOAST_MESSAGES.ERROR_POLICY_CREATION, {
+            autoClose: 2000,
+          });
+        });
     }
   };
 
@@ -176,16 +199,10 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: Create
       toast.dismiss(messageToastId.current);
     }
     if (createPolicySuccess || updatePolicySuccess) {
-      toast.success(isEdit ? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE : TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
-        autoClose: 2000,
-      });
       resetCreatePolicy();
       resetUpdatePolicy();
       handleOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
-      toast.error(isEdit ? TOAST_MESSAGES.ERROR_POLICY_UPDATE : TOAST_MESSAGES.ERROR_POLICY_CREATION, {
-        autoClose: 2000,
-      });
       resetCreatePolicy();
       resetUpdatePolicy();
     }
@@ -270,8 +287,8 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policiesData }: Create
               </Button>
             </DialogClose>
             <Button
-              size='small'
               isLoading={createPolicyLoading || updatePolicyLoading}
+              size='small'
               onClick={() => methods.handleSubmit(onSubmit)()}
             >
               {isEdit ? 'Update' : 'Create'}

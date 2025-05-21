@@ -77,7 +77,7 @@ export const TEAM_MEMBERS_PRIVILEGES_LIST = [
 
 export const PRIVILEGES_LIST = [
   {
-    label: 'Admin',
+    label: 'System Admin',
     value: TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN,
   },
   {
@@ -123,7 +123,7 @@ export enum TEAM_PERMISSION_TOAST_MSG {
 
 export const DUAL_ADMIN_APPROVAL_POLICY_OPTIONS = [
   {
-    label: 'Approval',
+    label: 'Approve',
     value: TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE,
     icon: 'check',
   },
@@ -139,4 +139,5 @@ export enum USER_APPROVAL_ACTION_TYPES {
   ADD_USER_TO_TEAM = 'ADD_USER_TO_TEAM',
   UPDATE_USER_ACCESS = 'UPDATE_USER_ACCESS',
   REMOVE_USER_ACCESS = 'REMOVE_USER_ACCESS',
+  CREATE_USER_INVITATION = 'CREATE_USER_INVITATION',
 }

@@ -59,8 +59,8 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
   const handleAddTeamToAudience = async (payload: PostAddTeamToAudiencePayload) => {
     postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
       .unwrap()
-      .then(() => {
-        toast.success(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
+      .then((res) => {
+        toast.success(res?.message || TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
       })
       .catch(() => {
         toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_ERROR);
@@ -100,12 +100,13 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
     const payload = {
       team_id: teamId,
       team_membership_id: membershipId,
+      user_id: userId,
     };
 
     removeTeamFromAudience({ organizationId, teamId, payload })
       .unwrap()
-      .then(() => {
-        toast.success(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
+      .then((res) => {
+        toast.success(res?.message ?? TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
       })
       .catch(() => {
         toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_ERROR);

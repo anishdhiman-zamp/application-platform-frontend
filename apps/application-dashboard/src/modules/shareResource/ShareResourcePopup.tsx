@@ -189,10 +189,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
     postInviteAudiences({ resourceRoute: resourceTypeRouteMap[resourceType], resourceId, body: shareData })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         setSelectedItems([]);
         refetchAudiencesData();
-        toast.success(resourceConfig.toastMessages.success);
+        toast.success(res?.message || resourceConfig.toastMessages.success);
       })
       .catch((err) => {
         toast.error(err?.data?.error || resourceConfig.toastMessages.failed);
@@ -219,13 +219,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         refetchAudiencesData();
-        toast.success(
-          isRoleChange
-            ? TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED
-            : TOAST_MESSAGES.SUCCESS_AUDIENCE_CUSTOMISE_ACCESS,
-        );
+        toast.success(res?.message);
 
         return true;
       })
@@ -252,9 +248,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then(() => {
+      .then((res) => {
         refetchAudiencesData();
-        toast.success(`Removed ${userName} successfully`);
+        toast.success(res?.message || `Removed ${userName} successfully`);
       })
       .catch((err) => {
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
@@ -544,7 +540,11 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </CommonWrapper>
               </div>
             </div>
-            <SharePopupPageApprovals resourceType={resourceType} resourceId={resourceId} />
+            <SharePopupPageApprovals
+              emptyFiltersTitle={emptyFiltersTitle}
+              resourceType={resourceType}
+              resourceId={resourceId}
+            />
           </div>
         )}
       </div>

@@ -1,9 +1,9 @@
 import { FC, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
+import ShareResourceAccessDetails from 'modules/shareResource/components/ShareResourceAccessDetails';
 import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
 import {
   ACCESS_MESSAGES_ADMIN_ROLE,
@@ -16,7 +16,6 @@ import { FilterModelType } from 'types/components/table.type';
 import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
 import { ResourcePrivilege, ResourceType, TeamInfoType } from '@/modules/shareResource/shareResource.types';
 import { OptionsType } from '@/types/commonTypes';
@@ -230,49 +229,14 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
           </span>
         </div>
         {isCustomiseAccess && (
-          <div className='w-28'>
-            {fgacFilters?.conditions && fgacFilters?.conditions?.length > 0 ? (
-              <Button
-                variant='ghost'
-                size='xxsmall'
-                className='f-12-450 text-GRAY_1000 px-1 py-0.5 flex items-center gap-1.5 group'
-                onClick={handleToggleCustomiseAccess}
-                disabled={!showRoleChangeDropdown}
-              >
-                <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: fgacColor ?? COLORS.BLUE_150 }} />
-                <span>Custom</span>
-                {showRoleChangeDropdown && (
-                  <SvgSpriteLoader
-                    id='arrow-narrow-right'
-                    size={12}
-                    color={COLORS.GRAY_1000}
-                    className='group-hover:opacity-100 opacity-0'
-                  />
-                )}
-              </Button>
-            ) : (
-              <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
-                <div
-                  className={cn(
-                    'cursor-pointer flex items-center gap-1.5 px-1 group rounded-sm w-fit f-12-450 text-GRAY_1000',
-                    !showRoleChangeDropdown ? 'text-GRAY_600' : 'hover:bg-accent hover:text-accent-foreground',
-                  )}
-                  onClick={handleToggleCustomiseAccess}
-                >
-                  <SvgSpriteLoader id='coins-stacked-04' size={8} color={COLORS.GRAY_900} />
-                  <span>{emptyFiltersTitle}</span>
-                  {showRoleChangeDropdown && (
-                    <SvgSpriteLoader
-                      id='arrow-narrow-right'
-                      size={12}
-                      color={COLORS.GRAY_1000}
-                      className='group-hover:opacity-100 opacity-0'
-                    />
-                  )}
-                </div>
-              </TooltipV2>
-            )}
-          </div>
+          <ShareResourceAccessDetails
+            fgacFilters={fgacFilters ?? {}}
+            showRoleChangeDropdown={showRoleChangeDropdown}
+            handleToggleCustomiseAccess={handleToggleCustomiseAccess}
+            fgacColor={fgacColor ?? ''}
+            tooltipText={tooltipText}
+            emptyFiltersTitle={emptyFiltersTitle}
+          />
         )}
 
         {showRoleChangeDropdown ? (

@@ -8,8 +8,8 @@ import { defaultFnType } from '@/types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from '@/types/components/button.type';
 
 type CustomiseAccessHeaderProps = {
-  onCancel: defaultFnType;
-  onSave: defaultFnType;
+  onCancel?: defaultFnType;
+  onSave?: defaultFnType;
   datasetTitle: string;
   isSaving?: boolean;
 };
@@ -35,25 +35,29 @@ const CustomiseAccessHeader: FC<CustomiseAccessHeaderProps> = ({
           descriptionClassName='f-13-400 text-gray-700 ml-5'
         />
         <div className='flex gap-4'>
-          <Button
-            id='cancel-customise-access-btn'
-            type={BUTTON_TYPES.SECONDARY}
-            size={SIZE_TYPES.SMALL}
-            onClick={onCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            id='save-customise-access-btn'
-            type={BUTTON_TYPES.PRIMARY}
-            size={SIZE_TYPES.SMALL}
-            iconPosition={ICON_POSITION_TYPES.LEFT}
-            iconProps={{ id: 'check', size: 14 }}
-            onClick={onSave}
-            isLoading={isSaving}
-          >
-            Save
-          </Button>
+          {onCancel && (
+            <Button
+              id='cancel-customise-access-btn'
+              type={BUTTON_TYPES.SECONDARY}
+              size={SIZE_TYPES.SMALL}
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          )}
+          {onSave && (
+            <Button
+              id='save-customise-access-btn'
+              type={BUTTON_TYPES.PRIMARY}
+              size={SIZE_TYPES.SMALL}
+              iconPosition={ICON_POSITION_TYPES.LEFT}
+              iconProps={{ id: 'check', size: 14 }}
+              onClick={onSave}
+              isLoading={isSaving}
+            >
+              Save
+            </Button>
+          )}
         </div>
       </div>
       <h2 className='f-13-500 text-gray-1000 px-5 py-4'>{datasetTitle}</h2>

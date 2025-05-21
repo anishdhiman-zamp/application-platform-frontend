@@ -128,6 +128,7 @@ export type PolicyFormData = {
 export enum PolicyActionType {
   CREATE_PAYMENT = 'CREATE_PAYMENT',
   CREATE_TEMPLATE = 'CREATE_TEMPLATE',
+  MUTATE_POLICY = 'MUTATE_POLICY',
 }
 
 export enum PolicyAttributeAction {

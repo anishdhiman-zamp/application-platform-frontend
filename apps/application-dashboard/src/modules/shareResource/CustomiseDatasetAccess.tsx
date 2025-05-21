@@ -9,10 +9,10 @@ import { filtersContextActions, useFiltersContextStore } from 'components/filter
 
 type CustomiseDatasetAccessProps = {
   isOpen: boolean;
-  onClose: defaultFnType;
+  onClose?: defaultFnType;
   datasetId: string;
   fgacFilters?: FilterModelType;
-  onSave: defaultFnType;
+  onSave?: defaultFnType;
   isSaving?: boolean;
 };
 
@@ -50,7 +50,7 @@ const CustomiseDatasetAccess: FC<CustomiseDatasetAccessProps> = ({
     dispatch({
       type: filtersContextActions.RESET_ALL_FILTERS,
     });
-    onClose();
+    onClose?.();
   };
 
   return (

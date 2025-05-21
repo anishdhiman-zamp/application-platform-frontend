@@ -43,7 +43,7 @@ const ApprovalPendingListing = () => {
 
   return (
     <div>
-      <div className='grid grid-cols-4 gap-4 text-GRAY_700 border-b border-GRAY_100 f-11-450'>
+      <div className='grid grid-cols-4 gap-4 text-GRAY_700 border-b border-GRAY_100 f-11-450 overflow-auto'>
         <div className='py-2.5 px-2'>Name</div>
         <div className='py-2.5 px-2'>Email</div>
         <div className='py-2.5 px-2'>Change</div>
@@ -56,7 +56,7 @@ const ApprovalPendingListing = () => {
         noDataBanner={<NoWidgetData className='h-[400px]' text='No pending approvals' />}
         isNoData={pendingApprovalsList?.length === 0}
         isError={isError}
-        className='min-h-[500px]'
+        className='min-h-[500px] overflow-y-auto h-[calc(100vh-270px)] [&::-webkit-scrollbar]:hidden'
         refetchFunction={refetch}
       >
         {pendingApprovalsList?.map((member) => (
