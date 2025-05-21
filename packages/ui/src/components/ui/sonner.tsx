@@ -23,10 +23,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       closeButton
       icons={{
-        success: <SvgSpriteLoader id='check-circle' size={20} color={COLORS.GRAY_950} />,
-        error: <SvgSpriteLoader id='x-circle' size={20} color={COLORS.GRAY_950} />,
-        warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.GRAY_950} />,
-        close: <SvgSpriteLoader id='x-close' size={16} color={COLORS.GRAY_950} />,
+        success: <SvgSpriteLoader id='check-circle' size={20} color={COLORS.GRAY_900} />,
+        error: <SvgSpriteLoader id='x-circle' size={20} color={COLORS.GRAY_900} />,
+        warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.GRAY_900} />,
+        close: <SvgSpriteLoader id='x-close' size={16} color={COLORS.GRAY_900} />,
       }}
       {...props}
     />
