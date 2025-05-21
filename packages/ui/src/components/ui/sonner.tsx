@@ -2,7 +2,7 @@
 
 import { Toaster as Sonner, toast } from 'sonner';
 import { SvgSpriteLoader } from '../assets';
-import { COLORS } from '@zamp-platform/ui/constants';
+import { COLORS } from '../../constants';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 

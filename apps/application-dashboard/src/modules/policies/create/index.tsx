@@ -177,14 +177,14 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
     }
     if (createPolicySuccess || updatePolicySuccess) {
       toast.success(isEdit ? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE : TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
-        autoClose: 2000,
+        duration: 2000,
       });
       resetCreatePolicy();
       resetUpdatePolicy();
       handleOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
       toast.error(isEdit ? TOAST_MESSAGES.ERROR_POLICY_UPDATE : TOAST_MESSAGES.ERROR_POLICY_CREATION, {
-        autoClose: 2000,
+        duration: 2000,
       });
       resetCreatePolicy();
       resetUpdatePolicy();
