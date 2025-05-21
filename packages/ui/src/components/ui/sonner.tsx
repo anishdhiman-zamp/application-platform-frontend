@@ -18,7 +18,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           description: 'group-[.toast]:text-muted-foreground',
           closeButton: 'group-[.toast]:order-3 group-[.toast]:ml-1.5',
           icon: 'group-[.toast]:mr-2.5',
-          content: 'group-[.toast]:w-full text-gray-950',
+          content: 'group-[.toast]:w-full group-[.toast]:text-gray-950 f-14-400',
         },
       }}
       closeButton
@@ -28,6 +28,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.GRAY_900} />,
         close: <SvgSpriteLoader id='x-close' size={16} color={COLORS.GRAY_900} />,
       }}
+      duration={100000}
       {...props}
     />
   );
