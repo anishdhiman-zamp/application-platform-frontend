@@ -113,7 +113,9 @@ const getValue = (key: string, selectedValue: string | number | SelectOption[]) 
       return false;
     default:
       if (Array.isArray(selectedValue)) {
-        return selectedValue.map((option) => option.value);
+        if (selectedValue?.[0]?.value) return selectedValue.map((option) => option.value);
+
+        return selectedValue[0];
       }
 
       return selectedValue;
@@ -126,8 +128,10 @@ export const transformFormDataToApiPayload = (
 ): CreatePolicyConfigPayload => {
   // Transform creator data
   const creator =
-    (data.creator as SelectOption[])?.map((option) => {
-      if (typeof option.value === 'string' || typeof option.value === 'boolean') {
+    (data.creator as SelectOption[] | { type: string; id: string }[]).map((option) => {
+      if (typeof option === 'object' && 'type' in option) {
+        return option;
+      } else if (typeof option.value === 'string' || typeof option.value === 'boolean') {
         return { type: 'user', id: option.value.toString() };
       }
 

@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { Skeleton } from './skeleton';
 import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '../assets';
 import { Combobox } from './combobox';
 
@@ -74,6 +73,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       SelectOption,
       'value' | 'display_value' | 'id' | 'label'
     > | null>(null);
+
     useEffect(() => {
       if (clearOptions) {
         setDynamicOptions([]);

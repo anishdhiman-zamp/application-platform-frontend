@@ -28,4 +28,22 @@ const PopoverContent = React.forwardRef<
 });
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverAnchor, PopoverContent, PopoverPortal, PopoverTrigger };
+const PopoverMenuItem = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    inset?: boolean;
+  }
+>(({ className, inset, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      'flex items-center gap-1.5 gap-x-4 px-2.5 py-2.5 self-stretch cursor-pointer outline-none text-GRAY_900 f-12-500 font-inter',
+      inset && 'pl-8',
+      className,
+    )}
+    {...props}
+  />
+));
+PopoverMenuItem.displayName = 'PopoverMenuItem';
+
+export { Popover, PopoverTrigger, PopoverAnchor, PopoverContent, PopoverPortal, PopoverMenuItem };

@@ -75,14 +75,6 @@ export interface InputProps
   iconPosition?: IconPosition;
 }
 
-export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {
-  error?: boolean;
-  icon?: React.ReactNode;
-  iconPosition?: IconPosition;
-}
-
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, size = 'medium', variant, error, type, icon, iconPosition = 'leading', ...props }, ref) => {
     const currentSize = size || 'medium';

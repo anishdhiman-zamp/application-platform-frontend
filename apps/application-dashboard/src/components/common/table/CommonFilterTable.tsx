@@ -1,4 +1,5 @@
 import { FC, type ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { GlobalCacheStore } from '@zamp-platform/utils';
 import {
   ColDef,
   ColumnMovedEvent,
@@ -54,6 +55,14 @@ interface CommonFilterTableProps {
   isProcess?: boolean;
 }
 
+interface DatasetResponse {
+  title: string;
+  data: {
+    total_count: number;
+    rows: any[];
+  };
+}
+
 const CommonFilterTable: FC<CommonFilterTableProps> = ({
   handleRowClicked,
   actionElements,
@@ -95,12 +104,32 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
     data: filterConfig,
     isFetching: isFilterConfigFetching,
     isError: isFilterConfigError,
-  } = useGetFilterConfigQuery({ url: filterConfigUrl });
+  } = useGetFilterConfigQuery({ url: filterConfigUrl }, { skip: !filterConfigUrl, refetchOnMountOrArgChange: false });
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         const queryConfig = getEncodedRequest(parameters.request);
+        const cacheKey = `DATASET_CACHE_${id}_${dataUrl}_${JSON.stringify(queryConfig)}`;
+
+        // Check if data exists in cache
+        const cachedData = GlobalCacheStore.get<DatasetResponse>(cacheKey);
+
+        if (cachedData) {
+          if (parameters.request.startRow === 0) {
+            setDatasetTitle(cachedData.title);
+            setTotalRows(cachedData.data?.total_count);
+            setIsNoRowsOverlayVisible(cachedData.data?.total_count === 0);
+            dispatch({
+              type: filtersContextActions.SET_TOTAL_ROWS,
+              payload: { totalRows: cachedData.data?.total_count },
+            });
+          }
+          parameters.success({
+            rowData: cachedData.data?.rows,
+            ...(parameters.request.startRow === 0 ? { rowCount: cachedData.data?.total_count } : {}),
+          });
+        }
 
         getData({
           url: dataUrl || '',
@@ -108,6 +137,9 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         })
           .unwrap()
           .then((response) => {
+            // Cache the response
+            GlobalCacheStore.set(cacheKey, response);
+
             if (parameters.request.startRow === 0) {
               setDatasetTitle(response?.title);
               setTotalRows(response?.data?.total_count);

@@ -88,7 +88,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
             {getStatus(isPolicyPendingApproval)}
           </div>
         }
-        rightComponent={<PolicyActionsDropdown policy={policy} audienceMembersData={audienceMembersData} />}
+        rightComponent={<PolicyActionsDropdown policy={policy} />}
       >
         <div className='space-y-2'>
           <h2 className='f-13-550'>{policy.name}</h2>

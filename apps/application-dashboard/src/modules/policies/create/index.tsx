@@ -12,8 +12,10 @@ import {
   CreatePolicyDialogProps,
   PolicyActionType,
   PolicyAttributeAction,
+  PolicyDialogType,
   PolicyFormData,
 } from 'modules/policies/types';
+import { useParams, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
@@ -21,9 +23,14 @@ import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
-
-const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicyDialogProps) => {
-  const policyData = useMemo(() => (isOpen ? policy : null), [isOpen, policy]);
+const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
+  const { policyId } = useParams();
+  const searchParams = useSearchParams();
+  const type = argType || (searchParams?.get('type') as PolicyDialogType) || 'template';
+  const policyData = useMemo(
+    () => (isOpen ? policiesData?.find((policy) => policy.id === policyId) : null),
+    [isOpen, policiesData, policyId],
+  );
 
   const messageToastId = useRef<number | string>(0);
   const isEdit = !!policyData;
@@ -87,23 +94,21 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
   });
 
   useEffect(() => {
-    if (policyData) {
-      methods.reset({
-        policyName: policyData.name || '',
-        approvalSteps: policyData.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
-        creator: policyData.policy_configurations.creator || [],
-        ...getAttributes(type)
-          .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
-          .reduce<Record<string, SelectOption[]>>((acc, attr) => {
-            const condition = policyData.policy_configurations.conditions?.conditions.find((c) => c.field === attr);
+    methods.reset({
+      policyName: policyData?.name || '',
+      approvalSteps: policyData?.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
+      creator: policyData?.policy_configurations.creator || [],
+      ...getAttributes(type)
+        .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
+        .reduce<Record<string, SelectOption[]>>((acc, attr) => {
+          const condition = policyData?.policy_configurations.conditions?.conditions.find((c) => c.field === attr);
 
-            return {
-              ...acc,
-              [attr]: condition ? [condition.value] : [],
-            };
-          }, {}),
-      });
-    }
+          return {
+            ...acc,
+            [attr]: condition ? [condition.value] : [],
+          };
+        }, {}),
+    });
   }, [policyData, type, methods, updatedAttributeMap]);
 
   const onSubmit = (data: PolicyFormData) => {
@@ -144,8 +149,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
     const policyConfig = transformFormDataToApiPayload(data, type === 'payout' ? defaultConditions : []);
 
     if (!paymentConfig?.id) {
-      console.log('No payment config found skipping policy creation');
-
       return;
     }
     const apiPayload: CreatePolicyPayloadType = {

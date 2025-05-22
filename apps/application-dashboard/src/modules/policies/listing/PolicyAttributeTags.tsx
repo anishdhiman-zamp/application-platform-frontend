@@ -1,11 +1,11 @@
 import { FC } from 'react';
 import { Tag } from '@zamp-platform/ui';
 import { attributesMap } from 'modules/policies/create/constants';
-import { snakeCaseToSentenceCase } from '@/utils/common';
+import { CreatePolicyCondition } from 'modules/policies/types';
 
 interface PolicyAttributeTagsProps {
   creatorLength?: number;
-  conditions?: { field: string; value: any; operator: string }[];
+  conditions?: CreatePolicyCondition[];
   action: string;
 }
 
@@ -15,12 +15,12 @@ const hasOptions = (attr: any): attr is { options: Array<{ value: string; label:
 
 const PolicyAttributeTags: FC<PolicyAttributeTagsProps> = ({ creatorLength, conditions, action }) => (
   <div className='flex gap-1.5 flex-wrap'>
-    <Tag variant='gray'>{creatorLength ?? 'Any'} Creator</Tag>
+    <Tag variant='gray'>
+      {creatorLength ?? 'Any'} {creatorLength && creatorLength > 1 ? 'Creators' : 'Creator'}
+    </Tag>
     {conditions?.map((condition) => (
       <Tag variant='gray' key={condition.field}>
-        {Array.isArray(condition.value)
-          ? `${condition.value.length} ${snakeCaseToSentenceCase(condition.field)}`
-          : `${snakeCaseToSentenceCase(condition.field)} ${condition.operator} ${condition.value}`}
+        {condition.display_name}
       </Tag>
     ))}
     <Tag variant='gray'>

@@ -66,8 +66,12 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
         <SvgSpriteLoader size={66} id='check-circle' color='#5AB570' />
       </div>
       <div className='f-32-500 mb-6'>
-        You’ve sent money to {recipientDetails?.name ?? `${destinationAccountDetails?.account_holder_name}`}
+        You&apos;ve initiated a payment to{' '}
+        {recipientDetails?.name ?? `${destinationAccountDetails?.account_holder_name}`}
       </div>
+      <p className='f-14-450 text-gray-700 mt-1'>
+        The payment has been initiated successfully. It will proceed to the next step for approval, if required.
+      </p>
       <div className='flex flex-col gap-4 mb-4'>
         {!!transactionDetails?.estimated_time && (
           <div className='grid grid-cols-2'>
