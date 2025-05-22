@@ -5,29 +5,35 @@
 import * as Sentry from '@sentry/nextjs';
 import { SENTRY_DSN } from 'constants/common.constants';
 
-Sentry.init({
-  dsn: SENTRY_DSN,
+const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+if (environment === 'production') {
+  Sentry.init({
+    dsn: SENTRY_DSN,
 
-  allowUrls: ['zamp.ai'],
+    // Add optional integrations for additional features
+    integrations: [Sentry.replayIntegration()],
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+    allowUrls: ['zamp.ai'],
 
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+    // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+    tracesSampleRate: 1,
 
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
+    // Define how likely Replay events are sampled.
+    // This sets the sample rate to be 10%. You may want this to be 100% while
+    // in development and sample at a lower rate in production
+    replaysSessionSampleRate: 0.1,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+    // Define how likely Replay events are sampled when an error occurs.
+    replaysOnErrorSampleRate: 1.0,
 
-  release: process.env.NEXT_PUBLIC_ENVIRONMENT,
-});
+    // Setting this option to true will print useful information to the console while you're setting up Sentry.
+    debug: false,
+
+    release: process.env.NEXT_PUBLIC_ENVIRONMENT,
+
+    environment,
+  });
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
