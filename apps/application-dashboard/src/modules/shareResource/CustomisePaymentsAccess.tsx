@@ -9,10 +9,10 @@ import { filtersContextActions, useFiltersContextStore } from 'components/filter
 
 type CustomisePaymentsAccessProps = {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: defaultFnType;
   fgacFilters?: FilterModelType;
   isSaving?: boolean;
-  onSave: defaultFnType;
+  onSave?: defaultFnType;
 };
 
 const CustomisePaymentsAccess: FC<CustomisePaymentsAccessProps> = ({
@@ -47,7 +47,7 @@ const CustomisePaymentsAccess: FC<CustomisePaymentsAccessProps> = ({
     dispatch({
       type: filtersContextActions.RESET_ALL_FILTERS,
     });
-    onClose();
+    onClose?.();
   };
 
   return (

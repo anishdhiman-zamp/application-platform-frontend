@@ -12,8 +12,10 @@ import {
   CreatePolicyDialogProps,
   PolicyActionType,
   PolicyAttributeAction,
+  PolicyDialogType,
   PolicyFormData,
 } from 'modules/policies/types';
+import { useParams, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { useCreatePolicyMutation, useGetPaymentConfigQuery, useUpdatePolicyMutation } from '@/apis/payments';
 import { toast } from '@/components/common/toast/Toast';
@@ -21,9 +23,14 @@ import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdown';
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
-
-const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicyDialogProps) => {
-  const policyData = useMemo(() => (isOpen ? policy : null), [isOpen, policy]);
+const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
+  const { policyId } = useParams();
+  const searchParams = useSearchParams();
+  const type = argType || (searchParams?.get('type') as PolicyDialogType) || 'template';
+  const policyData = useMemo(
+    () => (isOpen ? policiesData?.find((policy) => policy.id === policyId) : null),
+    [isOpen, policiesData, policyId],
+  );
 
   const messageToastId = useRef<number | string>(0);
   const isEdit = !!policyData;
@@ -87,23 +94,21 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
   });
 
   useEffect(() => {
-    if (policyData) {
-      methods.reset({
-        policyName: policyData.name || '',
-        approvalSteps: policyData.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
-        creator: policyData.policy_configurations.creator || [],
-        ...getAttributes(type)
-          .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
-          .reduce<Record<string, SelectOption[]>>((acc, attr) => {
-            const condition = policyData.policy_configurations.conditions?.conditions.find((c) => c.field === attr);
+    methods.reset({
+      policyName: policyData?.name || '',
+      approvalSteps: policyData?.policy_configurations.approval_flow?.steps || [DEFAULT_APPROVAL_STEP],
+      creator: policyData?.policy_configurations.creator || [],
+      ...getAttributes(type)
+        .filter((attrId) => updatedAttributeMap[attrId].formFieldType === 'condition')
+        .reduce<Record<string, SelectOption[]>>((acc, attr) => {
+          const condition = policyData?.policy_configurations.conditions?.conditions.find((c) => c.field === attr);
 
-            return {
-              ...acc,
-              [attr]: condition ? [condition.value] : [],
-            };
-          }, {}),
-      });
-    }
+          return {
+            ...acc,
+            [attr]: condition ? [condition.value] : [],
+          };
+        }, {}),
+    });
   }, [policyData, type, methods, updatedAttributeMap]);
 
   const onSubmit = (data: PolicyFormData) => {
@@ -144,8 +149,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
     const policyConfig = transformFormDataToApiPayload(data, type === 'payout' ? defaultConditions : []);
 
     if (!paymentConfig?.id) {
-      console.log('No payment config found skipping policy creation');
-
       return;
     }
     const apiPayload: CreatePolicyPayloadType = {
@@ -157,7 +160,6 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
       config: policyConfig,
     };
 
-    console.log('API Payload:', apiPayload);
     if (isEdit) {
       updatePolicy({
         ...apiPayload,
@@ -165,9 +167,32 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
           type === 'payout' ? API_ENDPOINTS.POLICY_UPDATE_POST_PAYMENTS : API_ENDPOINTS.POLICY_UPDATE_POST,
           { policyId: policyData?.id },
         ),
-      });
+      })
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message ?? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE, {
+            autoClose: 2000,
+          });
+        })
+        .catch((err) => {
+          toast.error(err?.data?.error ?? TOAST_MESSAGES.ERROR_POLICY_UPDATE, {
+            autoClose: 2000,
+          });
+        });
     } else {
-      createPolicy(apiPayload);
+      createPolicy(apiPayload)
+        .unwrap()
+        .then((res) => {
+          toast.success(res?.message ?? TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
+            autoClose: 2000,
+          });
+        })
+        .catch((err) => {
+          console.log('err', err.data.error);
+          toast.error(err.data.error ?? TOAST_MESSAGES.ERROR_POLICY_CREATION, {
+            autoClose: 2000,
+          });
+        });
     }
   };
 
@@ -176,16 +201,10 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
       toast.dismiss(messageToastId.current);
     }
     if (createPolicySuccess || updatePolicySuccess) {
-      toast.success(isEdit ? TOAST_MESSAGES.SUCCESS_POLICY_UPDATE : TOAST_MESSAGES.SUCCESS_POLICY_CREATION, {
-        autoClose: 2000,
-      });
       resetCreatePolicy();
       resetUpdatePolicy();
       handleOpenChange(false);
     } else if (createPolicyError || updatePolicyError) {
-      toast.error(isEdit ? TOAST_MESSAGES.ERROR_POLICY_UPDATE : TOAST_MESSAGES.ERROR_POLICY_CREATION, {
-        autoClose: 2000,
-      });
       resetCreatePolicy();
       resetUpdatePolicy();
     }
@@ -269,7 +288,11 @@ const CreatePolicyDialog = ({ type, isOpen, onOpenChange, policy }: CreatePolicy
                 Discard
               </Button>
             </DialogClose>
-            <Button size='small' onClick={() => methods.handleSubmit(onSubmit)()}>
+            <Button
+              isLoading={createPolicyLoading || updatePolicyLoading}
+              size='small'
+              onClick={() => methods.handleSubmit(onSubmit)()}
+            >
               {isEdit ? 'Update' : 'Create'}
             </Button>
           </div>

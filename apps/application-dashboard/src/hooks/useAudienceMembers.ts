@@ -18,7 +18,7 @@ const useAudienceMembers = (args: { resourceType: ResourceType; resourceId: stri
     data: allTeamsData,
     isLoading: isLoadingAllTeamsData,
     error: errorAllTeamsData,
-  } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId });
+  } = useGetTeamsByOrganizationIdQuery({ organizationId }, { skip: !organizationId, refetchOnMountOrArgChange: false });
   const {
     data: audiencesData,
     isLoading: isLoadingAudiencesData,

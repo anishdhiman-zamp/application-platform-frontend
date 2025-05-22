@@ -7,10 +7,10 @@ import { FilterModelType } from '@/types/components/table.type';
 type CustomiseAccessProps = {
   resourceType: ResourceType;
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   datasetId: string;
   fgacFilters?: FilterModelType;
-  onSave: defaultFnType;
+  onSave?: defaultFnType;
   isSaving?: boolean;
 };
 

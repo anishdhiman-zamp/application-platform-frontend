@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { DialogWithRoute } from '@/components/DialogWithRoute';
 import CreatePolicyDialog from '@/modules/policies/create';
 import PoliciesListSideDrawer from '@/modules/policies/listing/PoliciesListSideDrawer';
+import PolicyDeleteConfirmPopup from '@/modules/policies/listing/PolicyDeleteConfirmPopup';
 import { PolicyActionType, PolicyDialogType } from '@/modules/policies/types';
 import { ResourceType } from '@/modules/shareResource';
 import { PolicyDetailsType } from '@/types/api/paymentApi.types';
@@ -13,39 +16,39 @@ const PaymentActions = () => {
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const [getPolicies, { data: policiesData }] = useLazyGetPoliciesQuery();
-  const [isPolicyDialogOpen, setIsPolicyDialogOpen] = useState<boolean>(false);
-  const [policyType, setPolicyType] = useState<PolicyDialogType>('template');
-  const [sideDrawerConfig, setSideDrawerConfig] = useState<PolicyDialogType>();
 
-  const handlePolicyDialogOpenChange = (type: PolicyDialogType) => {
-    setIsPolicyDialogOpen(true);
-    setPolicyType(type);
+  const [getPolicies, { data: policiesData, currentData: currentPoliciesData }] = useLazyGetPoliciesQuery();
+
+  const router = useRouter();
+  const [sideDrawerConfigType, setSideDrawerConfigType] = useState<PolicyDialogType>();
+
+  const handlePolicyDialogOpenChange = (type?: PolicyDialogType) => {
+    router.push(`/payments/policies/create?type=${type}`);
   };
 
   const handlePolicyListClose = () => {
-    setSideDrawerConfig(undefined);
+    setSideDrawerConfigType(undefined);
   };
 
   useEffect(() => {
-    if (paymentConfig?.id) {
-      getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS });
+    if (paymentConfig?.id && !currentPoliciesData?.data) {
+      getPolicies({ resource_id: paymentConfig.id, resource_type: ResourceType.PAYMENTS }, true);
     }
-  }, [paymentConfig?.id, getPolicies]);
+  }, [paymentConfig?.id, getPolicies, currentPoliciesData?.data]);
 
   const paymentPolicies = useMemo(
     () =>
-      policiesData?.data?.filter(
+      (currentPoliciesData?.data ?? policiesData?.data)?.filter(
         (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_PAYMENT,
       ) ?? [],
-    [policiesData?.data],
+    [currentPoliciesData?.data, policiesData?.data],
   );
   const templatePolicies = useMemo(
     () =>
-      policiesData?.data?.filter(
+      (currentPoliciesData?.data ?? policiesData?.data)?.filter(
         (policy: PolicyDetailsType) => policy.action_type === PolicyActionType.CREATE_TEMPLATE,
       ) ?? [],
-    [policiesData?.data],
+    [currentPoliciesData?.data, policiesData?.data],
   );
 
   return (
@@ -70,7 +73,7 @@ const PaymentActions = () => {
                 variant='ghost'
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
-                onClick={() => setSideDrawerConfig('template')}
+                onClick={() => setSideDrawerConfigType('template')}
                 disabled={templatePolicies.length === 0}
               >
                 {templatePolicies.length} {templatePolicies.length > 1 ? 'policies' : 'policy'}
@@ -93,7 +96,7 @@ const PaymentActions = () => {
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
                 disabled={paymentPolicies.length === 0}
-                onClick={() => setSideDrawerConfig('payout')}
+                onClick={() => setSideDrawerConfigType('payout')}
               >
                 {paymentPolicies.length} {paymentPolicies.length > 1 ? 'policies' : 'policy'}
               </Button>
@@ -104,13 +107,34 @@ const PaymentActions = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <CreatePolicyDialog type={policyType} isOpen={isPolicyDialogOpen} onOpenChange={setIsPolicyDialogOpen} />
-      {sideDrawerConfig && (
+
+      <DialogWithRoute routes={['/payments/policies/delete/:policyId']}>
+        {({ open, onOpenChange }) => (
+          <PolicyDeleteConfirmPopup
+            policiesData={currentPoliciesData?.data ?? policiesData?.data ?? []}
+            isOpen={open}
+            onClose={() => onOpenChange(false)}
+          />
+        )}
+      </DialogWithRoute>
+
+      <DialogWithRoute routes={['/payments/policies/create', '/payments/policies/create/:policyId']}>
+        {({ open, onOpenChange }) => (
+          <CreatePolicyDialog
+            type={sideDrawerConfigType}
+            policiesData={currentPoliciesData?.data ?? policiesData?.data ?? []}
+            isOpen={open}
+            onOpenChange={onOpenChange}
+          />
+        )}
+      </DialogWithRoute>
+
+      {sideDrawerConfigType && (
         <PoliciesListSideDrawer
-          isOpen={!!sideDrawerConfig}
+          isOpen={!!sideDrawerConfigType}
           onClose={handlePolicyListClose}
-          policies={sideDrawerConfig === 'payout' ? paymentPolicies : templatePolicies}
-          type={sideDrawerConfig}
+          policies={sideDrawerConfigType === 'payout' ? paymentPolicies : templatePolicies}
+          type={sideDrawerConfigType}
           handlePolicyDialogOpenChange={handlePolicyDialogOpenChange}
         />
       )}

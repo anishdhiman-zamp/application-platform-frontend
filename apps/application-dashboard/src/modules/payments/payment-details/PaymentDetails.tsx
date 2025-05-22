@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { toast } from 'react-toastify';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
@@ -8,6 +7,7 @@ import { useRouter } from 'next/router';
 import { useLazyDownloadFileQuery } from '@/apis/dataset';
 import { useGetPaymentDetailsQuery } from '@/apis/payments';
 import ProgressBar from '@/components/common/RingProgress';
+import { toast } from '@/components/common/toast/Toast';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';

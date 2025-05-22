@@ -186,9 +186,9 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
                   checked={isChecked(option, value)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      onChange([...value, option]);
+                      onChange([...(value ?? []), option]);
                     } else {
-                      onChange(value.filter((selectedOption: SelectOption) => selectedOption.id !== option.id));
+                      onChange(value?.filter((selectedOption: SelectOption) => selectedOption.id !== option.id));
                     }
                   }}
                 >

@@ -1,12 +1,13 @@
 import { type FC, useState } from 'react';
-import { toast } from 'react-toastify';
 import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
 import UpdatePolicyCard from 'modules/policies/components/UpdatePolicyCard';
 import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from 'modules/policies/constants';
 import { useApprovalActionMutation } from '@/apis/people';
+import { toast } from '@/components/common/toast/Toast';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import type { PolicyDetailsType } from '@/types/api/paymentApi.types';
+
 type ReviewPolicyUpdatePopoverProps = {
   isOpen: boolean;
   onClose: () => void;

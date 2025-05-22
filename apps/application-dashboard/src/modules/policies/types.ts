@@ -55,6 +55,13 @@ export type PolicyApprovalStep = {
   }>;
 };
 
+export interface CreatePolicyCondition {
+  field: string;
+  value: any;
+  operator: string;
+  display_name: string;
+}
+
 export interface CreatePolicyConfigPayload {
   creator?: Array<{
     type: string;
@@ -62,11 +69,7 @@ export interface CreatePolicyConfigPayload {
   }>;
   conditions?: {
     logical_operator: string;
-    conditions: Array<{
-      field: string;
-      value: any;
-      operator: string;
-    }>;
+    conditions: Array<CreatePolicyCondition>;
   };
   action: string;
   approval_flow?: {
@@ -77,10 +80,10 @@ export interface CreatePolicyConfigPayload {
 export type PolicyDialogType = 'payout' | 'template';
 
 export interface CreatePolicyDialogProps {
-  type: PolicyDialogType;
+  type?: PolicyDialogType;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  policy?: PolicyDetailsType;
+  policiesData?: PolicyDetailsType[];
 }
 
 export type PolicyQuorumOption = {
