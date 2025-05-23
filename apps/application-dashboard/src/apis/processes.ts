@@ -2,11 +2,13 @@ import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
+  ActivityArtifactsByIdRequestType,
+  ActivityArtifactsByIdResponseType,
   ActivityArtifactsRequestType,
   ActivityArtifactsResponseType,
-  ActivityLogsRequestType,
   ActivityLogsResponseType,
   ActivityRunsDataResponseType,
+  ActivitySummaryResponseType,
   EmitActivityLogsRequestType,
   ProcessActivityRunsRequestType,
   StatusSummaryItem,
@@ -42,7 +44,7 @@ const Processes = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_ARTIFACTS_GET, { processId, activityRunId }),
       }),
     }),
-    getActivityLogs: builder.query<ActivityLogsResponseType, ActivityLogsRequestType>({
+    getActivityLogs: builder.query<ActivityLogsResponseType, ActivityArtifactsRequestType>({
       query: ({ processId, activityRunId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUN_LOGS_GET, { processId, activityRunId }),
       }),
@@ -52,6 +54,20 @@ const Processes = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.EMIT_ACTIVITY_LOGS_POST, { processId, activityRunId }),
         method: REQUEST_TYPES.POST,
         body: payload,
+      }),
+    }),
+    getActivitySummary: builder.query<ActivitySummaryResponseType, ActivityArtifactsRequestType>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_SUMMARY_GET, { processId, activityRunId }),
+      }),
+    }),
+    getArtifactsByArtifactId: builder.query<ActivityArtifactsByIdResponseType, ActivityArtifactsByIdRequestType>({
+      query: ({ processId, activityRunId, artifact_ids }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_ARTIFACTS_BY_ARTIFACT_ID_GET, {
+          processId,
+          activityRunId,
+        }),
+        params: { artifact_ids },
       }),
     }),
   }),
@@ -68,4 +84,7 @@ export const {
   useGetActivityLogsQuery,
   useLazyGetActivityLogsQuery,
   useEmitActivityLogsMutation,
+  useGetActivitySummaryQuery,
+  useLazyGetActivitySummaryQuery,
+  useGetArtifactsByArtifactIdQuery,
 } = Processes;

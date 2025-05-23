@@ -12,11 +12,11 @@ const TableStatusIcon = ({ color, status }: TableStatusIconProps) => {
     case ACTIVITY_RUN_STATUS.PAUSED:
     case ACTIVITY_RUN_STATUS.VOID:
     case ACTIVITY_RUN_STATUS.IN_PROGRESS:
-      return <SvgSpriteLoader id='activity' height={12} width={12} color={color} />;
+      return <SvgSpriteLoader id='activity' size={12} color={color} />;
     case ACTIVITY_RUN_STATUS.FAILED:
-      return <SvgSpriteLoader id='alert-triangle' height={12} width={12} color={color} />;
+      return <SvgSpriteLoader id='alert-triangle' size={12} color={color} />;
     case ACTIVITY_RUN_STATUS.DONE:
-      return <SvgSpriteLoader id='check' height={12} width={12} color={color} />;
+      return <SvgSpriteLoader id='check' size={12} color={color} />;
   }
 };
 

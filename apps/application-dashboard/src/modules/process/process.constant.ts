@@ -1,4 +1,11 @@
-import { ACTIVITY_RUN_STATUS, ARTIFACT_TYPE, DATE_SEPARATOR, LOG_STATUS } from 'modules/process/process.types';
+import {
+  ACTIVITY_RUN_STATUS,
+  ARTIFACT_TYPE,
+  CTA_ACTION,
+  DATE_SEPARATOR,
+  LOG_STATUS,
+  PDF_DATASET_TAB,
+} from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
 
 export const STATUS_ICON_COLOR_MAPPING = {
@@ -140,4 +147,10 @@ export const DATE_SEPARATOR_MAPPING = {
   [DATE_SEPARATOR.TODAY]: 'Today',
   [DATE_SEPARATOR.YESTERDAY]: 'Yesterday',
   [DATE_SEPARATOR.OTHER]: 'Other',
+};
+
+export const DEFAULT_ARTIFACT_TAB = PDF_DATASET_TAB.DATASET;
+export const ARTIFACT_TAB_MAPPING = {
+  [CTA_ACTION.VIEW_DATASET_PDF_FIRST]: PDF_DATASET_TAB.DATASET,
+  [CTA_ACTION.VIEW_DATASET_PDF_DATASET_FIRST]: PDF_DATASET_TAB.PDF,
 };

@@ -89,6 +89,7 @@ type DatasetByIdProps = {
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
+  updateBreadcrumb?: boolean;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -104,6 +105,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
+  updateBreadcrumb = true,
 }) => {
   const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
 
@@ -509,7 +511,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   useEffect(() => {
-    if (!isReadOnly && !isDrilldown && datasetTitle && !breadcrumbStack?.some((item) => item.title === datasetTitle)) {
+    if (
+      !isReadOnly &&
+      !isDrilldown &&
+      datasetTitle &&
+      !breadcrumbStack?.some((item) => item.title === datasetTitle) &&
+      updateBreadcrumb
+    ) {
       appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
     }
   }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);

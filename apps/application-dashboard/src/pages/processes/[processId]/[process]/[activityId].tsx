@@ -2,30 +2,44 @@ import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useLazyGetActivityArtifactsQuery, useLazyGetActivityLogsQuery } from '@/apis/processes';
+import {
+  useLazyGetActivityArtifactsQuery,
+  useLazyGetActivityLogsQuery,
+  useLazyGetActivitySummaryQuery,
+} from '@/apis/processes';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { API_DOMAIN } from '@/constants/api.constants';
+import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
-import { RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
+import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
+import { ARTIFACT_TYPE, CTA_ACTION, PDF_DATASET_TAB } from '@/modules/process/process.types';
 import { addBreadcrumb } from '@/store/slices/layout-configs';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
-  const { processId, activityId } = useParams();
+  const { processId, activityId, process } = useParams();
   const searchParams = useSearchParams();
-  const status = searchParams.get('status');
+  const artifactIdFromUrl = searchParams.get('artifactId');
+  const artifactTypeFromUrl = searchParams.get('artifactType');
+
   const panelRef = useRef<ImperativePanelHandle>(null);
   const appDispatch = useAppDispatch();
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showSummary, setShowSummary] = useState(true);
+  const [showSummary, setShowSummary] = useState(artifactIdFromUrl ? false : true);
+  const [activeTab, setActiveTab] = useState<PDF_DATASET_TAB>(PDF_DATASET_TAB.DATASET);
+  const [artifactType, setArtifactType] = useState<ARTIFACT_TYPE>(
+    (artifactTypeFromUrl as ARTIFACT_TYPE) ?? ARTIFACT_TYPE.PDF_DATASET,
+  );
+  const [artifactId, setArtifactId] = useState<string>(artifactIdFromUrl as string);
 
   const [getActivityLogs] = useLazyGetActivityLogsQuery();
-  const [getActivityArtifacts] = useLazyGetActivityArtifactsQuery();
+  const [getArtifacts] = useLazyGetActivityArtifactsQuery();
+  const [getActivitySummary] = useLazyGetActivitySummaryQuery();
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
 
@@ -39,9 +53,15 @@ const Activity = () => {
     panelRef.current?.resize(70);
   };
 
-  const handleShowArtifacts = () => {
+  const handleShowArtifacts = (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => {
     setShowSummary(false);
     panelRef.current?.resize(50);
+
+    setArtifactId(artifactId);
+    setArtifactType(artifactType);
+    if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
+      setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
+    }
   };
 
   const handleUpdate = (event: MessageEvent) => {
@@ -50,24 +70,22 @@ const Activity = () => {
     if (!data) return;
 
     getActivityLogs({ processId: processId as string, activityRunId: activityId as string });
-    getActivityArtifacts({ processId: processId as string, activityRunId: activityId as string });
+    getArtifacts({ processId: processId as string, activityRunId: activityId as string });
+    getActivitySummary({ processId: processId as string, activityRunId: activityId as string });
   };
 
   const { close: closeSSE } = useSSE({
     url: `${API_DOMAIN}/processes/events/${activityId}`,
-    reconnectIntervalMs: 2000,
-    idleTimeoutMs: 30000,
     eventListeners: {
       update: handleUpdate,
     },
-    onError: (err) => console.error('SSE error:', err),
-    onOpen: () => console.log('SSE connection opened'),
   });
 
   useEffect(() => {
     appDispatch(
       addBreadcrumb({
         title: 'Activity Logs',
+        href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
       }),
     );
   }, []);
@@ -100,11 +118,10 @@ const Activity = () => {
         <Logs
           processId={processId as string}
           activityId={activityId as string}
-          status={status as string}
           handleShowArtifacts={handleShowArtifacts}
           className={cn('', {
             'opacity-0': isExpanded,
-            'animate-fade-in': !isExpanded,
+            'opacity-100 transition-opacity duration-1000 ease-in-out': !isExpanded,
           })}
         />
       </ResizablePanel>
@@ -136,13 +153,17 @@ const Activity = () => {
         })}
       >
         {showSummary ? (
-          <Summary
-            processId={processId as string}
-            activityId={activityId as string}
-            handleShowArtifacts={handleShowArtifacts}
-          />
+          <Summary handleShowArtifacts={handleShowArtifacts} />
         ) : (
-          <Artifacts onClose={closeArtifacts} onExpand={toggleExpand} isExpanded={isExpanded} />
+          <Artifacts
+            onClose={closeArtifacts}
+            onExpand={toggleExpand}
+            isExpanded={isExpanded}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            artifactType={artifactType}
+            artifactId={artifactId}
+          />
         )}
       </ResizablePanel>
     </ResizablePanelGroup>

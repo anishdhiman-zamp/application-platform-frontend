@@ -44,10 +44,15 @@ export type ActivityArtifactsResponseType = {
   artifacts: ActivityArtifactsItemType[];
 };
 
+export type DatasetType = {
+  dataset_id: string;
+  dataset_name: string;
+};
+
 export type PdfArtifactsResponseType = {
   display_name: string;
   status: string;
-  dataset_ids: string[];
+  datasets: DatasetType[];
   file_name: string;
 };
 
@@ -104,7 +109,7 @@ export type ActivityLogsItemType = {
 export type CtasType = {
   id: string;
   display_name: string;
-  icon_url: string;
+  artifact_type: string;
   cta_component_type: string;
   cta_action: string;
 };
@@ -117,11 +122,6 @@ export type LogsContentType = {
   ctas: CtasType[];
 };
 
-export type ActivityLogsRequestType = {
-  processId: string;
-  activityRunId: string;
-};
-
 export type EmitActivityLogsRequestType = {
   processId: string;
   activityRunId: string;
@@ -131,4 +131,29 @@ export type EmitActivityLogsRequestType = {
     content_type: string;
     status: string;
   };
+};
+
+export type ActivitySummaryResponseType = {
+  summary: ActivitySummaryItemType;
+};
+
+export type ActivitySummaryItemType = {
+  header: string;
+  status: string;
+  summary_items: ActivitySummaryItem[];
+};
+
+export type ActivitySummaryItem = {
+  title: string;
+  values: Record<string, string>;
+};
+
+export type ActivityArtifactsByIdRequestType = {
+  processId: string;
+  activityRunId: string;
+  artifact_ids: string;
+};
+
+export type ActivityArtifactsByIdResponseType = {
+  artifacts: ActivityArtifactsItemType[];
 };

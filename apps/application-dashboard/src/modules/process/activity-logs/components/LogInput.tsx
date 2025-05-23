@@ -81,7 +81,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
   }, []);
 
   return (
-    <div className='w-full px-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+    <div className='w-full px-4 pb-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
       <div className='border border-GRAY_400 rounded-xl overflow-hidden shadow-sm bg-white pt-2'>
         <Textarea
           ref={textareaRef}
@@ -103,7 +103,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
             aria-label='Send message'
             className='bg-GRAY_100 !size-6 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_700} />
+            <SvgSpriteLoader id='arrow-up' size={14} color={COLORS.GRAY_700} />
           </Button>
         </div>
       </div>

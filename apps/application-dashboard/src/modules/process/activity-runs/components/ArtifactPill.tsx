@@ -2,38 +2,51 @@ import { useMemo, useState } from 'react';
 import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
+import { useParams, useRouter } from 'next/navigation';
 import { COLORS } from '@/constants/colors';
 import { ICON_SPRITE_TYPES } from '@/constants/icons';
+import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import { cn } from '@/utils/common';
 
 type Artifact = {
   id: string;
   display_name: string;
   artifact_type: keyof typeof ARTIFACT_ICON_MAPPING;
+  status: string;
 };
 
 type ArtifactPillProps = {
   count: number;
   artifacts: Artifact[];
+  status: string;
+  activityId: string;
 };
 
-const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
+const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProps) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
+  const { processId, process } = useParams();
+  const router = useRouter();
 
   const isDisabled = useMemo(() => {
     return count === 0;
   }, [count]);
+
+  const handleSelect = (value: string) => {
+    const artifact = artifacts?.find((artifact) => artifact?.id === value);
+    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId);
+
+    router.push(`${path}?status=${status}&artifactId=${artifact?.id}&artifactType=${artifact?.artifact_type}`);
+  };
 
   return (
     <Combobox
       options={artifacts?.map((artifact) => ({
         value: artifact?.id,
         label: artifact?.display_name,
-        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact?.artifact_type].id} width={12} height={12} />,
+        icon: <SvgSpriteLoader id={ARTIFACT_ICON_MAPPING[artifact?.artifact_type].id} size={12} />,
       }))}
       onSelect={(option) => {
-        setValue(option?.id === value ? '' : (option?.id ?? ''));
+        handleSelect(option?.value as string);
       }}
       open={open}
       onOpenChange={setOpen}
@@ -52,17 +65,12 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
           isDisabled && 'opacity-50',
         )}
         disabled={isDisabled}
-        onClick={(e) => {
-          // e.preventDefault();
-          e.stopPropagation();
-        }}
         variant='outline'
       >
         <SvgSpriteLoader
           id='stand'
           iconCategory={ICON_SPRITE_TYPES.EDUCATION}
-          width={12}
-          height={12}
+          size={12}
           color={COLORS.GRAY_900}
           className='scale-75'
         />
@@ -76,13 +84,7 @@ const ArtifactPill = ({ count, artifacts }: ArtifactPillProps) => {
 const OverlayContent = () => {
   return (
     <div className='flex flex-col gap-2 items-start justify-center w-full overflow-hidden text-wrap break-words'>
-      <SvgSpriteLoader
-        id='stand'
-        iconCategory={ICON_SPRITE_TYPES.EDUCATION}
-        width={16}
-        height={16}
-        color={COLORS.GRAY_900}
-      />
+      <SvgSpriteLoader id='stand' size={16} color={COLORS.GRAY_900} />
       <p className='f-11-450 text-GRAY_900'>
         Artifacts simplify working with key content that you may need to edit, expand upon, or refer to in the future.
       </p>

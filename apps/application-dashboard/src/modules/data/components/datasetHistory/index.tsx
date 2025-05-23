@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
@@ -18,7 +18,7 @@ const DatasetHistory = () => {
   return (
     <div>
       {isFileImportHistoryOpen && <ImportFileHistory onClose={handleCloseFileImportHistory} />}
-      <div className='relative z-[800]'>
+      <div className='relative z-50'>
         <Tooltip
           tooltipBody='Activity'
           position={TooltipPositions.BOTTOM}

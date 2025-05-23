@@ -71,3 +71,36 @@ export const ACTIVITY_LOGS_SUMMARY_MOCK_DATA = {
     },
   ],
 };
+
+export const MOCK_EMAIL_ARTIFACT = `<div>
+  <p>Hi <strong>John</strong>,</p>
+
+  <p>
+    Thank you for reaching out. We're excited to have you on board!
+  </p>
+
+  <p>
+    Here's a quick summary of your registration:
+  </p>
+
+  <ul>
+    <li><strong>Email:</strong> john.doe@example.com</li>
+    <li><strong>Plan:</strong> Pro (Monthly)</li>
+    <li><strong>Status:</strong> Active</li>
+  </ul>
+
+  <p>
+    You can manage your account by visiting your <a href="https://example.com/dashboard" target="_blank" style="color: #1a73e8;">dashboard</a>.
+  </p>
+
+  <p>Let us know if you need any help.</p>
+
+  <p>Best regards,<br>The Example Team</p>
+
+  <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;" />
+
+  <p style="font-size: 12px; color: #999;">
+    This email was sent to you as part of your subscription to Example.com. If you no longer wish to receive emails, you may
+    <a href="https://example.com/unsubscribe" style="color: #999;">unsubscribe here</a>.
+  </p>
+</div>`;

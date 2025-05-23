@@ -35,7 +35,12 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
         <p className='f-13-450 text-GRAY_900'>
           {getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM }, data?.updated_at)}
         </p>
-        <ArtifactPill count={artifactsData?.length ?? 0} artifacts={artifactsData} />
+        <ArtifactPill
+          count={artifactsData?.length ?? 0}
+          artifacts={artifactsData}
+          status={data?.status as ACTIVITY_RUN_STATUS}
+          activityId={data?.id}
+        />
       </div>
     </div>
   );

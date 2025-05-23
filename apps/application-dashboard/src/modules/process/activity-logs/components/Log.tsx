@@ -5,7 +5,13 @@ import LogStatusIndicator from 'modules/process/activity-logs/components/LogStat
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
-import { CONTENT_TYPE, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
+import {
+  type ARTIFACT_TYPE,
+  CONTENT_TYPE,
+  type CTA_ACTION,
+  LOG_STATUS,
+  SENDER_TYPE,
+} from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
@@ -13,7 +19,7 @@ import { cn } from '@/utils/common';
 type LogProps = {
   isLastLog?: boolean;
   data: ActivityLogsItemType;
-  handleShowArtifacts: () => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
   isExpanded?: boolean;
 };
 
@@ -52,23 +58,22 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
 
   return (
     <div className={cn('w-full flex justify-start items-start gap-x-5 pt-1')} data-log-id={data.id}>
-      <div className='flex items-start justify-start shrink-0'>
+      <div className='flex items-start justify-start shrink-0 w-14'>
         <span className='f-12-450 text-GRAY_700 whitespace-nowrap'>
           {format(new Date(updated_at), DATE_FORMATS.HH_MM_A)}
         </span>
       </div>
-      <div className={cn('flex flex-col items-center justify-start h-full gap-y-2 pt-[2px] shrink-0')}>
+      <div className={cn('flex flex-col items-center justify-start h-full w-2.5 gap-y-2 pt-[2px] shrink-0')}>
         <LogStatusIndicator
           status={status as LOG_STATUS}
           fillColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.fillColor}
           strokeColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.strokeColor}
         />
         {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 40}px` }} />}
-        {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 40}px` }} />}
       </div>
       <div className='flex flex-col items-start justify-center w-full min-w-0' ref={containerRef}>
         <p
-          className={cn('f-13-450 text-GRAY_1000 break-words w-full', {
+          className={cn('f-13-450 text-GRAY_1000 text-left break-words w-full', {
             'animate-pulse': status === LOG_STATUS.LOADING,
           })}
         >
