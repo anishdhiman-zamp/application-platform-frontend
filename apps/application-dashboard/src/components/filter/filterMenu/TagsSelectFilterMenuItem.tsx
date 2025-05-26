@@ -2,10 +2,9 @@ import React, { FC } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
+import { MultiSelectFilterValue } from 'components/filter/filter.types';
 import { getTagLabel, getTagParents, getValueString } from 'components/filter/filter.utils';
-import MultiSelectFilterMenuItem, {
-  MultiSelectFilterValue,
-} from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
+import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import { TAGS_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 
 interface TagsProps {

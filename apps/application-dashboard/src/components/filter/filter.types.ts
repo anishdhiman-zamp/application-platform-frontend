@@ -49,3 +49,5 @@ export interface FilterEntityMenuType extends FilterMenuType {
   amount_range_currencies?: FilterMenuType[];
   account_types?: FilterMenuType[];
 }
+
+export type MultiSelectFilterValue = string | { label: string; value: string };
