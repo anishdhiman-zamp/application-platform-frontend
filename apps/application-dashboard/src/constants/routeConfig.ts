@@ -21,7 +21,7 @@ export const ROUTES_PATH = {
   PROCESS: '/processes/:processId/:label',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/:label/:activityId',
   POLICIES: '/settings#dual-admin',
-  TEAM: '/settings#team',
+  TEAM: '/team',
   SETTINGS: '/settings',
 };
 
@@ -85,9 +85,9 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     path: ROUTES_PATH.DATA,
   },
   {
-    label: 'Payments',
-    id: 'payments',
-    iconId: 'send-01',
-    path: ROUTES_PATH.PAYMENTS,
+    label: 'People',
+    id: 'people',
+    iconId: 'users-02',
+    path: ROUTES_PATH.TEAM,
   },
 ];
