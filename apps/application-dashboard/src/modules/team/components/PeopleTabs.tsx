@@ -14,6 +14,7 @@ type PeopleTabsPropsType = {
   isLoadingTeamMembersData: boolean;
   filteredInvitedMembers: InvitedAudiencesByOrganisationIdResponse[];
   isLoadingInvitedTeamMembersData: boolean;
+  search: string;
 };
 
 const PeopleTabs: FC<PeopleTabsPropsType> = ({
@@ -21,6 +22,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   isLoadingTeamMembersData,
   filteredInvitedMembers,
   isLoadingInvitedTeamMembersData,
+  search,
 }) => {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<TEAM_TABS_TYPES>();
@@ -43,7 +45,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
           />
         );
       case TEAM_TABS_TYPES.APPROVAL_PENDING:
-        return <ApprovalPendingListing />;
+        return <ApprovalPendingListing search={search} />;
       default:
         return null;
     }

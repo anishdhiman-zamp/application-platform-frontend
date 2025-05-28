@@ -16,6 +16,7 @@ type TeamMemberApprovalCardProps = {
   details: GetTeamPendingApprovalsResponse;
   teamDetails: { name: string; color: string };
   organization: string;
+  search: string;
 };
 
 const TeamMemberApprovalCard = ({
@@ -25,6 +26,7 @@ const TeamMemberApprovalCard = ({
   details,
   teamDetails,
   organization,
+  search,
 }: TeamMemberApprovalCardProps) => {
   const [isRejected, setIsRejected] = useState(false);
   const [approvePolicy, { isLoading }] = useApprovalActionMutation();
@@ -96,6 +98,13 @@ const TeamMemberApprovalCard = ({
         return '';
     }
   };
+
+  if (
+    search &&
+    !email.toLowerCase().includes(search.toLowerCase()) &&
+    !name.toLowerCase().includes(search.toLowerCase())
+  )
+    return null;
 
   return (
     <div className='grid grid-cols-4 gap-4 f-12-450 border-b border-'>
