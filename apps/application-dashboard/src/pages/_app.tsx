@@ -18,13 +18,13 @@ import { AG_CHART_KEY, AG_GRID_KEY } from 'components/common/agGridTable/agGridT
 import { AuthGuard } from 'components/hoc/AuthGuard';
 import { RouteGuard } from 'components/hoc/RouteGuard';
 import NetworkStatus from 'components/NetWorkStatus';
+import '@zamp-platform/ui/globals.css';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import 'styles/ag-styles.css';
 import 'styles/common.css';
 import 'styles/react-datepicker.css';
 import 'styles/react-dates.css';
-import '@zamp-platform/ui/globals.css';
 
 LicenseManager.setLicenseKey(AG_GRID_KEY);
 LicenseManagerCharts.setLicenseKey(AG_CHART_KEY);

@@ -7,6 +7,7 @@ import {
   PDF_DATASET_TAB,
 } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
+import { BROWSER, DATASET, GMAIL } from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
@@ -73,13 +74,13 @@ export const STATUS_ICON_COLOR_MAPPING = {
 
 export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.PDF_DATASET]: {
-    id: 'coins-stacked-04',
+    icon_url: DATASET,
   },
   [ARTIFACT_TYPE.EMAIL]: {
-    id: 'mail-01',
+    icon_url: GMAIL,
   },
   [ARTIFACT_TYPE.BROWSER]: {
-    id: 'file-02',
+    icon_url: BROWSER,
   },
 };
 
@@ -150,7 +151,8 @@ export const DATE_SEPARATOR_MAPPING = {
 };
 
 export const DEFAULT_ARTIFACT_TAB = PDF_DATASET_TAB.DATASET;
+
 export const ARTIFACT_TAB_MAPPING = {
-  [CTA_ACTION.VIEW_DATASET_PDF_FIRST]: PDF_DATASET_TAB.DATASET,
-  [CTA_ACTION.VIEW_DATASET_PDF_DATASET_FIRST]: PDF_DATASET_TAB.PDF,
+  [CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST]: PDF_DATASET_TAB.PDF,
+  [CTA_ACTION.VIEW_DATASET_PDF_DATASET_FIRST]: PDF_DATASET_TAB.DATASET,
 };

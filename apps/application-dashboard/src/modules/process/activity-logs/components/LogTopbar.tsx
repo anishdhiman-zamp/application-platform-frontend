@@ -1,12 +1,16 @@
 import type { FC } from 'react';
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import TopbarStatusIcon from 'modules/process/common/TopbarStatusIcon';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { useParams } from 'next/navigation';
 import { useGetActivitySummaryQuery } from '@/apis/processes';
+import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
+import { COLORS } from '@/constants/colors';
 
 const LogTopbar: FC = () => {
   const { activityId, processId } = useParams();
@@ -31,10 +35,13 @@ const LogTopbar: FC = () => {
         }
         skeletonType={SkeletonTypes.CUSTOM}
       >
-        {/* <div className='flex items-center gap-x-1'>
-          <span className='f-13-550 text-GRAY_700'>{summaryData?.summary?.summary_items[0]?.title}</span>
-          <span className='f-13-550 text-GRAY_1000'>4626343</span>
-        </div> */}
+        {summaryData?.summary?.header &&
+          Object.entries(summaryData?.summary?.header).map(([key, value]) => (
+            <div key={key} className='flex items-center gap-x-1'>
+              <span className='f-13-550 text-GRAY_700 capitalize'>{key}</span>
+              <span className='f-13-550 text-GRAY_1000'>{value}</span>
+            </div>
+          ))}
 
         <div className='flex px-2 py-1 rounded-full items-center gap-x-1.5 border border-GRAY_400 bg-BG_GRAY_2'>
           <TopbarStatusIcon
@@ -70,7 +77,7 @@ const LogTopbar: FC = () => {
       </CommonWrapper>
 
       {/* TODO: Add back when we have the functionality */}
-      {/* <div className='flex items-center p-4 min-w-max'>
+      <div className='flex items-center p-4 min-w-max'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
         <TooltipV2 tooltipBody='Move to Next Run'>
           <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 mr-1.5 !mt-[2.5px]'>
@@ -83,7 +90,7 @@ const LogTopbar: FC = () => {
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
-      </div> */}
+      </div>
     </div>
   );
 };

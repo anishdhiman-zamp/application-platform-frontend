@@ -11,6 +11,8 @@ import type {
   ActivitySummaryResponseType,
   EmitActivityLogsRequestType,
   ProcessActivityRunsRequestType,
+  SignedUrlByArtifactIdRequestType,
+  SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
 } from '@/types/api/processApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
@@ -70,13 +72,21 @@ const Processes = baseApi.injectEndpoints({
         params: { artifact_ids },
       }),
     }),
+    getSignedUrlByArtifactId: builder.query<SignedUrlByArtifactIdResponseType, SignedUrlByArtifactIdRequestType>({
+      query: ({ processId, artifactId, fileId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_SIGNED_URL_BY_FILE_ID_GET, {
+          processId,
+          artifactId,
+          fileId,
+        }),
+      }),
+    }),
   }),
 });
 
 export const {
   useGetFilterConfigByProcessIdQuery,
   useGetActivityRunsSummaryQuery,
-  useLazyGetActivityRunsSummaryQuery,
   useGetActivityRunsQuery,
   useLazyGetActivityRunsQuery,
   useGetActivityArtifactsQuery,
@@ -87,4 +97,6 @@ export const {
   useGetActivitySummaryQuery,
   useLazyGetActivitySummaryQuery,
   useGetArtifactsByArtifactIdQuery,
+  useGetSignedUrlByArtifactIdQuery,
+  useLazyGetSignedUrlByArtifactIdQuery,
 } = Processes;

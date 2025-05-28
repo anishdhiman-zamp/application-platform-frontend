@@ -77,6 +77,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
             displayName={artifact?.artifact_data?.display_name}
             type={artifact?.artifact_type}
             onClick={() => handleShowArtifacts(artifact?.artifact_type as ARTIFACT_TYPE, artifact?.id ?? '')}
+            displayClassName='max-w-80'
           />
         ))}
       </CommonWrapper>

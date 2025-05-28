@@ -5,14 +5,19 @@ import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArti
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import DatasetArtifact from 'modules/process/artifacts/components/DatasetArtifact';
 import EmailArtifact from 'modules/process/artifacts/components/EmailArtifact';
-import PdfArtifact from 'modules/process/artifacts/components/PdfArtifact';
-import { ARTIFACT_TYPE, PDF_DATASET_TAB } from 'modules/process/process.types';
+import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
+import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType, PdfArtifactsResponseType } from '@/types/api/processApi.types';
+
+const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
+  ssr: false,
+});
+
 interface ArtifactsProps {
   onClose: () => void;
   onExpand: () => void;
@@ -21,6 +26,7 @@ interface ArtifactsProps {
   setActiveTab: (tab: PDF_DATASET_TAB) => void;
   artifactType: ARTIFACT_TYPE;
   artifactId: string;
+  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
 }
 
 const Artifacts = ({
@@ -31,6 +37,7 @@ const Artifacts = ({
   setActiveTab,
   artifactType,
   artifactId,
+  onArtifactClick,
 }: ArtifactsProps) => {
   const { processId, activityId } = useParams();
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
@@ -59,7 +66,7 @@ const Artifacts = ({
   return (
     <div className='h-full w-full relative animate-fade-in'>
       <Tabs
-        defaultValue={activeTab}
+        value={activeTab}
         onValueChange={(value) => setActiveTab(value as PDF_DATASET_TAB)}
         className='h-full max-w-full flex flex-col'
       >
@@ -84,7 +91,7 @@ const Artifacts = ({
           refetchFunction={refetch}
           className='h-full w-full'
         >
-          {artifactType === ARTIFACT_TYPE.PDF_DATASET && (
+          {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifacts && (
             <>
               <TabsContent value={PDF_DATASET_TAB.DATASET} className='h-full w-full flex-1 mt-0'>
                 <DatasetArtifact
@@ -100,15 +107,22 @@ const Artifacts = ({
                     artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
                       ?.artifact_data as PdfArtifactsResponseType
                   }
+                  artifactId={
+                    artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
+                      ?.id
+                  }
                 />
               </TabsContent>
             </>
           )}
-          {artifactType === ARTIFACT_TYPE.EMAIL && (
+          {artifactType === ARTIFACT_TYPE.EMAIL && artifacts && (
             <EmailArtifact
               emailArtifact={
                 artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.EMAIL)?.[0]
                   ?.artifact_data as EmailArtifactsResponseType
+              }
+              artifactId={
+                artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.EMAIL)?.[0]?.id
               }
             />
           )}
@@ -117,6 +131,7 @@ const Artifacts = ({
         <AllArtifactsSideDrawer
           onClose={() => setAllArtifactsSideDrawerOpen(false)}
           isOpen={allArtifactsSideDrawerOpen}
+          onArtifactClick={onArtifactClick}
         />
       </Tabs>
     </div>

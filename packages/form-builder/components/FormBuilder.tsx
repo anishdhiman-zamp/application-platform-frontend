@@ -1,6 +1,6 @@
 import { Label } from '@zamp-platform/ui';
 import { motion } from 'framer-motion';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormSchema } from '../types';

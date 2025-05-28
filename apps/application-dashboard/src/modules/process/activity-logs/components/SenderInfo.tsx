@@ -3,7 +3,7 @@ import { LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import Image from 'next/image';
 import { ADAM_ICON } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
-import { cn } from '@/utils/common';
+import { cn, getFirstLetters } from '@/utils/common';
 interface SenderInfoProps {
   senderType: keyof typeof SENDER_TYPE;
   status: string;
@@ -15,19 +15,13 @@ interface SenderConfig {
   displayName: string;
 }
 
-export const getFirstCharFromEmail = (email: string) => {
-  if (!email) return '';
-
-  return email?.split('@')[0];
-};
-
 const SenderInfo: FC<SenderInfoProps> = ({ senderType, status }) => {
   const { user } = useAppSelector((state) => state.user);
 
   const SENDER_CONFIG: Record<keyof typeof SENDER_TYPE, SenderConfig> = {
     [SENDER_TYPE.USER]: {
       iconBgColor: 'bg-BLUE_200',
-      iconContent: <span className='f-10-450'>{getFirstCharFromEmail(user?.user_email ?? '')}</span>,
+      iconContent: <span className='f-10-450'>{getFirstLetters(user?.user_email?.split('@')[0] ?? 'U', 1)}</span>,
       displayName: user?.user_email ?? '',
     },
     [SENDER_TYPE.SYSTEM]: {
@@ -48,7 +42,7 @@ const SenderInfo: FC<SenderInfoProps> = ({ senderType, status }) => {
       })}
     >
       <div
-        className={cn('size-4 rounded-[4px] flex justify-center items-center', config.iconBgColor, {
+        className={cn('size-4 rounded flex justify-center items-center', config.iconBgColor, {
           'bg-RED_950': status === LOG_STATUS.FAILED,
         })}
       >

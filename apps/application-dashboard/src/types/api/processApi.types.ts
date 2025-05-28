@@ -53,18 +53,28 @@ export type PdfArtifactsResponseType = {
   display_name: string;
   status: string;
   datasets: DatasetType[];
-  file_name: string;
+  pdf_file: {
+    file_display_name: string;
+    file_id: string;
+  };
 };
 
 export type EmailArtifactsResponseType = {
   display_name: string;
   status: string;
   heading: string;
-  body: string;
+  date: string;
+  from_mail_id: string;
+  from_name: string;
+  body_html: string;
+  body_plain_text: string;
   cc_mail_ids: string[];
   bcc_mail_ids: string[];
   to_mail_ids: string[];
-  attachments_url: string[];
+  attachments: {
+    file_id: string;
+    file_display_name: string;
+  }[];
 };
 
 export type BrowserArtifactsResponseType = {
@@ -138,7 +148,7 @@ export type ActivitySummaryResponseType = {
 };
 
 export type ActivitySummaryItemType = {
-  header: string;
+  header: Record<string, string>;
   status: string;
   summary_items: ActivitySummaryItem[];
 };
@@ -156,4 +166,14 @@ export type ActivityArtifactsByIdRequestType = {
 
 export type ActivityArtifactsByIdResponseType = {
   artifacts: ActivityArtifactsItemType[];
+};
+
+export type SignedUrlByArtifactIdRequestType = {
+  processId: string;
+  artifactId: string;
+  fileId: string;
+};
+
+export type SignedUrlByArtifactIdResponseType = {
+  signed_url: string;
 };

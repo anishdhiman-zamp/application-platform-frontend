@@ -1,4 +1,3 @@
-import { captureException } from '@sentry/browser';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface UseSSEOptions {
@@ -91,8 +90,6 @@ export const useSSE = ({
         }, 10000);
       }
     } catch (err) {
-      console.log('err', err);
-      captureException(err);
       cleanup();
       if (reconnectIntervalMs > 0) {
         reconnectTimeoutRef.current = window.setTimeout(() => {

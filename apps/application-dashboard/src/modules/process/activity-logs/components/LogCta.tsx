@@ -20,10 +20,11 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
           <ArtifactTag
             key={cta?.id}
             displayName={cta?.display_name}
-            type={cta?.cta_component_type}
+            type={cta?.artifact_type}
             onClick={() =>
               handleShowArtifacts(cta?.artifact_type as ARTIFACT_TYPE, cta?.id ?? '', cta?.cta_action as CTA_ACTION)
             }
+            displayClassName='max-w-40'
           />
         ))}
         {buttonTypeCta?.map((cta) => (

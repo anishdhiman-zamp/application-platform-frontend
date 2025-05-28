@@ -1,4 +1,5 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -79,6 +80,9 @@ const Activity = () => {
     eventListeners: {
       update: handleUpdate,
     },
+    onError: (error) => {
+      captureException(error);
+    },
   });
 
   useEffect(() => {
@@ -140,6 +144,7 @@ const Activity = () => {
         handleClassName={cn('bg-white', {
           'bg-black border-black': isDragging,
         })}
+        onDoubleClick={() => toggleExpand()}
       />
 
       <ResizablePanel
@@ -163,6 +168,7 @@ const Activity = () => {
             setActiveTab={setActiveTab}
             artifactType={artifactType}
             artifactId={artifactId}
+            onArtifactClick={handleShowArtifacts}
           />
         )}
       </ResizablePanel>

@@ -90,6 +90,7 @@ type DatasetByIdProps = {
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
   updateBreadcrumb?: boolean;
+  filterWrapperClassName?: string;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -106,6 +107,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFilterConfigInParent,
   parentSelectedFilters,
   updateBreadcrumb = true,
+  filterWrapperClassName,
 }) => {
   const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
 
@@ -648,7 +650,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       >
         <div className={cn('flex items-center justify-between pr-8 z-1000', headerClassName)}>
           <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
           <div className='relative flex items-center gap-2.5'>
             {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}

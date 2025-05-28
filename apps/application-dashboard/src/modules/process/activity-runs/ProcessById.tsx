@@ -5,7 +5,7 @@ import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { useRouter } from 'next/router';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ActivityByStatus from '@/modules/process/activity-runs/ActivityByStatus';
@@ -114,7 +114,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
               key={item?.status}
               value={item?.status}
               className={cn(
-                '!rounded-[4px] !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                '!rounded !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
               )}
             >
               <TabStatusIcon
@@ -126,7 +126,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                 {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
               </span>
               <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
-                {item?.count}
+                {formatNumber(item?.count, 0, true, false, true)}
               </span>
             </TabsTrigger>
           ))}

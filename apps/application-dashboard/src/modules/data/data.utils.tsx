@@ -79,8 +79,8 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
 export const getColumnMinWidth = (
   columnNameLength: number,
   isActivityArtifactColumn: boolean,
-  isActivityDocumentColumn: boolean,
   isActivityStatusColumn: boolean,
+  isActivityDocumentColumn: boolean,
 ): number => {
   switch (true) {
     case isActivityArtifactColumn:
@@ -136,8 +136,8 @@ export const formatColumns = (
       minWidth: getColumnMinWidth(
         columnNameLength,
         isActivityCurrentStatusColumn,
-        isActivityDocumentColumn,
         isActivityStatusColumn,
+        isActivityDocumentColumn,
       ),
       maxWidth: isActivityStatusColumn ? COLUMN_WIDTHS.ACTIVITY_STATUS : undefined,
       initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,

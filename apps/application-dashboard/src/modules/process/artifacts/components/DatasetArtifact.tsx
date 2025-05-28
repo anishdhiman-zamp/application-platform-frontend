@@ -25,7 +25,7 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
   const datasets = datasetArtifact?.datasets ?? [];
   const [activeTab, setActiveTab] = useState<string>('');
 
-  const [visibleTabs, setVisibleTabs] = useState(datasets.slice(0, MAX_VISIBLE_TABS));
+  const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
 
   useEffect(() => {
     if (datasets.length > 0) {
@@ -60,7 +60,7 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
               key={tab?.dataset_id}
               value={tab?.dataset_id}
               className={cn(
-                '!rounded-[4px] !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                '!rounded !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
               )}
             >
               <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
@@ -72,7 +72,7 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
           {hiddenTabs?.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className='rounded-[4px] flex items-center justify-center px-1.5 py-1 border-none cursor-pointer hover:bg-GRAY_50 data-[state=open]:bg-GRAY_200 overflow-hidden'>
+                <div className='rounded flex items-center justify-center px-1.5 py-1 border-none cursor-pointer hover:bg-GRAY_50 data-[state=open]:bg-GRAY_200 overflow-hidden'>
                   <span className='f-12-500 text-GRAY_900'>+{hiddenTabs?.length} more</span>
                 </div>
               </DropdownMenuTrigger>
@@ -93,8 +93,8 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
         </TabsList>
       </div>
 
-      <TabsContent key={activeTab} value={activeTab}>
-        <Dataset id={activeTab} isReadOnly />
+      <TabsContent key={activeTab} value={activeTab} className='h-full w-full'>
+        <Dataset id={activeTab} updateBreadcrumb={false} headerClassName='pr-4' filterWrapperClassName='pl-4' />
       </TabsContent>
     </Tabs>
   );
