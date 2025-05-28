@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -67,13 +67,7 @@ const Sidebar = () => {
       <div className='w-60'>
         <AnimatePresence mode='wait'>
           {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
-            <motion.div
-              key='details'
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, type: 'spring' }}
-              className='h-full'
-            >
+            <div key='details' className='h-full'>
               <div className='px-2 border-b border-GRAY_400 pb-4'>
                 {filteredSidebarItems.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer'>
@@ -133,7 +127,7 @@ const Sidebar = () => {
                   </CommonWrapper>
                 </div>
               )}
-            </motion.div>
+            </div>
           ) : (
             <motion.div
               key='list'
@@ -175,4 +169,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

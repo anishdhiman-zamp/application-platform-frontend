@@ -48,6 +48,11 @@ export type PostResponseType = {
 
 export type DeleteAudienceFromOrganizationAccessType = { organizationId: string; body: { user_id: string } };
 
+export type DeleteAudienceInvitationRequestType = {
+  organizationId: string;
+  invitationId: string;
+};
+
 export type GetMembershipRequestsByOrganizationIdRequest = { organizationId: string };
 
 export type GetMembershipRequestsByOrganizationIdResponse = {

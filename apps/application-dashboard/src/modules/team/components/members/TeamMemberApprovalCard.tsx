@@ -107,7 +107,7 @@ const TeamMemberApprovalCard = ({
     return null;
 
   return (
-    <div className='grid grid-cols-4 gap-4 f-12-450 border-b border-'>
+    <div className='grid grid-cols-4 gap-4 f-12-450 border-b border-GRAY_100'>
       <div className='flex items-center'>
         <MembersName value={name} />
       </div>

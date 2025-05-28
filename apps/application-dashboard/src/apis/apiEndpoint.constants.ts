@@ -2,6 +2,7 @@ export const API_ENDPOINTS = {
   MEMBERSHIP_REQUESTS_ALL_GET: `organizations/membership-requests`,
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,
+  DELETE_AUDIENCE_INVITATION: `organizations/{{organizationId}}/audiences/invitations/{{invitationId}}`,
   AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_ORGANIZATION_PATCH: `organizations/{{organizationId}}/audiences`,
   DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,

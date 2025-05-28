@@ -7,6 +7,7 @@ import {
   AudiencesByOrganisationIdRequest,
   AudiencesByOrganisationIdResponse,
   DeleteAudienceFromOrganizationAccessType,
+  type DeleteAudienceInvitationRequestType,
   GetMembershipRequestsByOrganizationIdRequest,
   GetMembershipRequestsByOrganizationIdResponse,
   GetMyInvitationsResponseType,
@@ -83,6 +84,13 @@ const People = baseApi.injectEndpoints({
         body: body,
       }),
       invalidatesTags: [APITags.GET_PEOPLE_TEAM_MEMBERS],
+    }),
+    deleteAudienceInvitation: builder.mutation<PostResponseType, DeleteAudienceInvitationRequestType>({
+      query: ({ organizationId, invitationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_AUDIENCE_INVITATION, { organizationId, invitationId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_PEOPLE_INVITATIONS],
     }),
     getMembershipRequestsByOrganizationId: builder.query<
       GetMembershipRequestsByOrganizationIdResponse,
@@ -271,4 +279,5 @@ export const {
   useApprovalActionMutation,
   useGetTeamPendingApprovalsQuery,
   useGetTeamPendingApprovalsByResourceIdQuery,
+  useDeleteAudienceInvitationMutation,
 } = People;
