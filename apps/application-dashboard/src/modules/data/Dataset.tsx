@@ -406,14 +406,14 @@ const DatasetById: FC<DatasetByIdProps> = ({
     if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
       syncFilterConfigHiddenColumnsInLocalStorage(id as string, filterConfigData?.data);
 
-      const columns = formatColumns(
-        filterConfigData?.data,
+      const columns = formatColumns({
+        filterConfig: filterConfigData?.data,
         currentUserHasEditAccess,
-        id as string,
+        datasetId: id,
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
-      );
+      });
 
       if (columns?.length > 0) {
         setColumns(columns);

@@ -58,12 +58,15 @@ const CustomisePaymentsAccess: FC<CustomisePaymentsAccessProps> = ({
       childrenClassName='overflow-visible'
     >
       <CustomiseAccessHeader onCancel={handleCancel} onSave={onSave} datasetTitle='Accounts' isSaving={isSaving} />
-      <AccountsList
-        updateFiltersInParent={handleUpdateFiltersInParent}
-        updateFilterConfigInParent={handleUpdateFilterConfigInParent}
-        parentSelectedFilters={selectedFilters}
-        fgacFilters={fgacFilters}
-      />
+      <div className='h-[calc(100vh-130px)]'>
+        <AccountsList
+          updateFiltersInParent={handleUpdateFiltersInParent}
+          updateFilterConfigInParent={handleUpdateFilterConfigInParent}
+          parentSelectedFilters={selectedFilters}
+          fgacFilters={fgacFilters}
+          gridStyle={{ width: '100%', height: 'calc(100vh - 186px)' }}
+        />
+      </div>
     </FullScreenPopup>
   );
 };

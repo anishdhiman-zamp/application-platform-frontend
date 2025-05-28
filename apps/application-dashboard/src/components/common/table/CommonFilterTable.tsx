@@ -21,7 +21,7 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb } from 'store/slices/layout-configs';
-import { defaultFn, MapAny } from 'types/commonTypes';
+import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
@@ -53,6 +53,7 @@ interface CommonFilterTableProps {
   sortColumn?: string;
   sortOrder?: string;
   isProcess?: boolean;
+  gridStyle?: MapAny;
 }
 
 interface DatasetResponse {
@@ -80,6 +81,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   sortColumn,
   sortOrder,
   isProcess = false,
+  gridStyle,
 }) => {
   const router = useRouter();
   const datasetTableRef = useRef<HTMLDivElement>(null);
@@ -205,18 +207,15 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
   useEffect(() => {
     if (filterConfig?.length) {
-      const columns = formatColumns(
+      const columns = formatColumns({
         filterConfig,
-        false,
-        id as string,
-        undefined,
+        datasetId: id,
         tableRef,
-        defaultFn,
         sortColumn,
         sortOrder,
         isProcess,
-        isHeaderMenuDisabled,
-      );
+        isMenuDisabled: isHeaderMenuDisabled,
+      });
 
       if (columns?.length > 0) {
         setColumns(columns);
@@ -329,6 +328,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
               onColumnMoved={handleColumnMoved}
               onRowClicked={handleRowClicked}
               cellClass={cellClass}
+              gridStyle={gridStyle}
             />
           </div>
         </CommonWrapper>

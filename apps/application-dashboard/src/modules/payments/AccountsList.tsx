@@ -12,6 +12,7 @@ type AccountsListProps = {
   parentSelectedFilters?: MapAny;
   fgacFilters?: FilterModelType;
   disableFilterActions?: boolean;
+  gridStyle?: MapAny;
 };
 
 const AccountsList: FC<AccountsListProps> = ({
@@ -20,6 +21,7 @@ const AccountsList: FC<AccountsListProps> = ({
   parentSelectedFilters,
   fgacFilters,
   disableFilterActions,
+  gridStyle,
 }) => {
   const tableRef = useRef<AgGridReact>(null);
 
@@ -34,6 +36,7 @@ const AccountsList: FC<AccountsListProps> = ({
       parentSelectedFilters={parentSelectedFilters}
       drilldownFilters={fgacFilters}
       disableFilterActions={disableFilterActions}
+      gridStyle={gridStyle}
     />
   );
 };

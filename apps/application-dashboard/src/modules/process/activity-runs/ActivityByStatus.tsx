@@ -10,7 +10,7 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
 import { useParams, useRouter } from 'next/navigation';
-import { defaultFn, type MapAny } from 'types/commonTypes';
+import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetActivityRunsQuery } from '@/apis/processes';
 import { myThemeWithProcess } from '@/components/common/table/table.constants';
@@ -223,17 +223,12 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
   useEffect(() => {
     if (filterConfigData?.data?.length && !isFilterConfigLoading && !isFilterConfigUninitialized) {
-      const columns = formatColumns(
-        filterConfigData?.data,
-        false,
-        processId as string,
-        undefined,
+      const columns = formatColumns({
+        filterConfig: filterConfigData?.data,
+        datasetId: processId,
         tableRef,
-        defaultFn,
-        undefined,
-        undefined,
-        true,
-      );
+        isProcess: true,
+      });
 
       if (columns?.length > 0) {
         setColumns(columns);
