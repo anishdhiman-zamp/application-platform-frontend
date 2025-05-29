@@ -37,6 +37,7 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
 
     if (policyConfig?.status !== PolicyResultStatus.APPROVED) {
       const epochTime = new Date().getTime();
+
       const config = transformFormDataToApiPayload(policyConfig?.data, []);
 
       const apiPayload: CreatePolicyPayloadType = {

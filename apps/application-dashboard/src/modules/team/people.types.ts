@@ -9,6 +9,7 @@ export enum TEAM_TABS_TYPES {
 
 export const TeamTabsList = [
   { label: 'Team members', value: TEAM_TABS_TYPES.TEAM_MEMBERS },
+  { label: 'Approval pending', value: TEAM_TABS_TYPES.APPROVAL_PENDING },
   { label: 'Invited', value: TEAM_TABS_TYPES.INVITED_MEMBERS },
 ];
 
@@ -50,6 +51,7 @@ export type MembersNamePropsType = {
 export type MembersRolePropsType = {
   value: { user_id: string; privilege: string; userEmail?: string };
   member?: boolean;
+  hasPeoplePolicy?: boolean;
 };
 
 export enum TEAM_MEMBERS_PRIVILEGES {
@@ -73,6 +75,7 @@ export type EmptyStateListingPropsType = {
 export type TeamMembersListingPropsType = {
   isLoadingTeamMembersData: boolean;
   data: AudiencesByOrganisationIdResponse[];
+  hasPeoplePolicy: boolean;
 };
 
 export type CustomTeamsDropdownPropsType = {
@@ -104,6 +107,7 @@ export type SelectedItemsType = {
 export type MembersTeamPropsType = {
   organizationId: string;
   userId: string;
+  hasPeoplePolicy: boolean;
   teamsData: {
     team_id: string;
     name: string;

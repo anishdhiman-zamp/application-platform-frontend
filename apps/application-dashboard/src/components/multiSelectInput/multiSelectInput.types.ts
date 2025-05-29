@@ -56,6 +56,7 @@ export type MultiSelectInputPropsType = {
   setSelectedRole?: (role: string) => void;
   onCustomDeleteFn?: (item: MapAny) => void;
   optionalOpenDropdownOptions?: boolean;
+  closeDropdownOnSelect?: boolean;
 };
 
 export const KEY_CODES = {

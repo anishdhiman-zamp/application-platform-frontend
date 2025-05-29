@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -12,6 +12,7 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { useGetPaymentConfigQuery } from '@/apis/payments';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
@@ -33,12 +34,23 @@ const Sidebar = () => {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
+  const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }
   }, [pages]);
+
+  const filteredSidebarItems = useMemo(
+    () =>
+      SIDEBAR_ITEMS.filter(
+        (item) => !item?.isHidden && (item?.id !== 'payments' || (item?.id === 'payments' && paymentConfig?.id)),
+      ),
+    [paymentConfig],
+  );
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -55,9 +67,15 @@ const Sidebar = () => {
       <div className='w-60'>
         <AnimatePresence mode='wait'>
           {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
-            <div key='details' className='h-full'>
+            <motion.div
+              key='details'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, type: 'spring' }}
+              className='h-full'
+            >
               <div className='px-2 border-b border-GRAY_400 pb-4'>
-                {SIDEBAR_ITEMS.map((item) => (
+                {filteredSidebarItems.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer'>
                     <SidebarTab
                       key={item?.label}
@@ -67,6 +85,9 @@ const Sidebar = () => {
                     />
                   </Link>
                 ))}
+                <div onClick={() => router.push(SETTING_SIDEBAR_ITEMS[0]?.path)}>
+                  <SidebarTab name='Settings' iconId='settings-01' className='cursor-pointer' />
+                </div>
               </div>
               {processes && processes?.length > 0 && (
                 <div className='px-2 py-2.5'>
@@ -112,7 +133,7 @@ const Sidebar = () => {
                   </CommonWrapper>
                 </div>
               )}
-            </div>
+            </motion.div>
           ) : (
             <motion.div
               key='list'
@@ -121,7 +142,7 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
             >
               <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
-                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500'>
+                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500 select-none'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>

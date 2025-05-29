@@ -3,7 +3,8 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useRouter } from 'next/router';
 import { resetBreadcrumb } from 'store/slices/layout-configs';
-import PaymentsLayout from '@/components/layouts/payments-layout';
+import DashboardLayout from '@/components/layouts/dashboard-layout';
+import PaymentsHome from '@/modules/payments/PaymentsHome';
 
 const Payments = () => {
   const appDispatch = useAppDispatch();
@@ -16,11 +17,15 @@ const Payments = () => {
     router.prefetch('/payments/policies/create');
   }, []);
 
-  return null;
+  return <PaymentsHome />;
 };
 
 Payments.getLayout = function getLayout(page: ReactElement) {
-  return <PaymentsLayout>{page}</PaymentsLayout>;
+  return (
+    <div>
+      <DashboardLayout>{page}</DashboardLayout>
+    </div>
+  );
 };
 
 export default Payments;
