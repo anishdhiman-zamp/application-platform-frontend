@@ -2,9 +2,9 @@ import { act, renderHook } from '@testing-library/react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useLogout } from 'hooks/useLogout';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-jest.mock('next/router', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 

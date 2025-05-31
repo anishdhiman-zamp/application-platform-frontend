@@ -1,4 +1,4 @@
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import * as React from 'react';
 
 interface AttributeProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

@@ -1,8 +1,10 @@
+'use client';
+
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { CommandLoading, Command as CommandPrimitive } from 'cmdk';
 import * as React from 'react';
 
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { Dialog, DialogContent } from './dialog';
 
 const Command = React.forwardRef<

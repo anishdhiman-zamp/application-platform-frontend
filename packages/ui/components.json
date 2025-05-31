@@ -13,7 +13,7 @@
   "aliases": {
     "components": "@zamp-platform/ui/components",
     "ui": "@zamp-platform/ui/components/ui",
-    "utils": "@zamp-platform/ui/lib/utils",
+    "utils": "@zamp-platform/ui/utils",
     "lib": "@zamp-platform/ui/lib",
     "hooks": "@zamp-platform/ui/hooks"
   },

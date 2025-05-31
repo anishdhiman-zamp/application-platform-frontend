@@ -6,7 +6,7 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import TabsV2 from '@/components/common/tabs/TabsV2';
@@ -50,12 +50,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   showCurrencyLogo = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const accountRefs = useRef<(HTMLDivElement | null)[]>([]);
   const templateRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const { contact_id } = router.query;
+  const searchParams = useSearchParams();
+  const contact_id = searchParams?.get('contact_id');
 
   const [searchValue, setSearchValue] = useState('');
   const [isShowMenu, setIsShowMenu] = useState(false);

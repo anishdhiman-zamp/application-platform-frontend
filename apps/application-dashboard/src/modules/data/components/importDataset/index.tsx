@@ -18,7 +18,7 @@ import {
 } from 'modules/data/components/importDataset/importData.types';
 import ImportFileWrapper from 'modules/data/components/importDataset/ImportFileWrapper';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { addDatasetBulkLoaders, removeDatasetBulkLoader } from 'store/slices/user';
 import { DatasetActionStatusResponseType, RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { cn } from 'utils/common';
@@ -26,10 +26,10 @@ import { toast } from '@/components/common/toast/Toast';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
-  const router = useRouter();
   const dispatch = useDispatch();
-  const isDatasetRoute = !!router?.query?.datasetId;
-  const datasetId = router?.query?.datasetId as string;
+  const searchParams = useSearchParams();
+  const isDatasetRoute = !!searchParams?.get('datasetId');
+  const datasetId = searchParams?.get('datasetId') as string;
   const { startPolling } = usePolling();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getAiTransformation] = useLazyGetAiTransformationQuery();

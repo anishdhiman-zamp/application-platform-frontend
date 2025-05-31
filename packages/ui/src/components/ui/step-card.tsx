@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 
 interface StepCardProps extends React.HTMLAttributes<HTMLDivElement> {

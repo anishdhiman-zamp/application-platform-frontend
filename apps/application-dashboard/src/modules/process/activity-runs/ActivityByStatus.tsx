@@ -51,7 +51,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const firstLoadDone = useRef(false);
   const router = useRouter();
-  const { process } = useParams();
+  const { process } = useParams<{ process: string }>() ?? {};
 
   const {
     dispatch,

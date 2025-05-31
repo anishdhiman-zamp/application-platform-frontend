@@ -21,7 +21,8 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
     resourceId: '',
   });
   const [deletePolicy, { isLoading }] = useDeletePolicyMutation();
-  const { policyId } = useParams();
+  const params = useParams();
+  const policyId = params?.policyId as string;
   const policy = policiesData?.find((policy) => policy.id === policyId);
 
   const handleDeletePolicy = (e: React.MouseEvent<HTMLButtonElement>) => {

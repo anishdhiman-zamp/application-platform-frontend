@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { validateField } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, SelectOption } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { defaultConditions, getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
@@ -24,7 +24,8 @@ import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdo
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
-  const { policyId } = useParams();
+  const params = useParams();
+  const policyId = params?.policyId as string;
   const searchParams = useSearchParams();
   const type = argType || (searchParams?.get('type') as PolicyDialogType) || 'template';
   const policyData = useMemo(

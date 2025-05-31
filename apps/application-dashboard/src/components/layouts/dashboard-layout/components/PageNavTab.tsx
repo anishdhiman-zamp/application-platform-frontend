@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import { getPageRouteById } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import { COLORS } from '@/constants/colors';
 

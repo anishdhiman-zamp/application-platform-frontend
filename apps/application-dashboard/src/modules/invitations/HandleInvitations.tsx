@@ -1,10 +1,12 @@
+'use client';
+
 import { FC, useEffect, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';

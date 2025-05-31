@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 interface ListCardProps extends React.HTMLAttributes<HTMLDivElement> {
   header: React.ReactNode;

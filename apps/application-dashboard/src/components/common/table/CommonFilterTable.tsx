@@ -84,7 +84,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   const router = useRouter();
   const datasetTableRef = useRef<HTMLDivElement>(null);
 
-  const filters = useSearchParams().get('filters');
+  const filters = useSearchParams()?.get('filters') ?? '';
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 

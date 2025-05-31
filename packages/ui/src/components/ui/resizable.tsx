@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import * as ResizablePrimitive from 'react-resizable-panels';
 import {
   disableGlobalCursorStyles,

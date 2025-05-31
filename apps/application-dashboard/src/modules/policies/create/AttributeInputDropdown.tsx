@@ -45,7 +45,7 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
             }
           }}
         >
-          <PopoverTrigger id={attribute.id}>
+          <PopoverTrigger id={attribute.id} asChild>
             <Attribute
               className={cn({
                 'border border-red-500 rounded-md': error,

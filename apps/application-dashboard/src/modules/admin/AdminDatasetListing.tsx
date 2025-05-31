@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useState } from 'react';
 import { ColDef } from 'ag-grid-community';
 import { useGetAllDatasetsQuery } from 'apis/admin';

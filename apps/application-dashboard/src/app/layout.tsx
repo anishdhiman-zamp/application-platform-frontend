@@ -1,0 +1,41 @@
+import { Providers } from 'app/_providers/providers';
+import { FAVICON } from 'constants/icons';
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+// Import global styles
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
+import 'styles/ag-styles.css';
+import 'styles/common.css';
+import 'styles/react-datepicker.css';
+import 'styles/react-dates.css';
+import '@zamp-platform/ui/globals.css';
+
+const inter = Inter({
+  subsets: ['latin'], // Specify subsets you need (e.g., 'latin', 'latin-ext').
+  variable: '--font-inter', // Define a CSS variable to use in your styles.
+  display: 'swap', // Controls font-display behavior.
+});
+
+export const metadata: Metadata = {
+  title: 'Zamp',
+  description: 'Zamp AI',
+  icons: {
+    icon: FAVICON,
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang='en' className={inter.className}>
+      <body className='antialiased light-mode'>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}

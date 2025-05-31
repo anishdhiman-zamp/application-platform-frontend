@@ -1,12 +1,3 @@
-import { Inter } from 'next/font/google';
-
-// Configure the Inter font
-export const inter = Inter({
-  subsets: ['latin'], // Specify subsets you need (e.g., 'latin', 'latin-ext').
-  variable: '--font-inter', // Define a CSS variable to use in your styles.
-  display: 'swap', // Controls font-display behavior.
-});
-
 export const SENTRY_DSN =
   'https://3129cf83b7bf9bd6c715ba81823cd0db@o4504767438520320.ingest.us.sentry.io/4508794285129728';
 

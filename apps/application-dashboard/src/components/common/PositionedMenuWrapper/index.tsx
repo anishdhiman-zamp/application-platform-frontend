@@ -1,7 +1,6 @@
 import React, { FC, ReactNode, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { inter } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { defaultFnType } from 'types/commonTypes';
@@ -44,11 +43,7 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
 
   return createPortal(
     <div
-      className={cn(
-        inter.className,
-        'bg-white abslolute z-[1202] shadow-menuList rounded-md border-0.5 border-GRAY_500',
-        className,
-      )}
+      className={cn('bg-white abslolute z-[1202] shadow-menuList rounded-md border-0.5 border-GRAY_500', className)}
       data-testid={`menu-wrapper-${id}`}
       style={{
         top: menuPosition?.top + 'px',

@@ -8,7 +8,7 @@ interface DialogWithRouteProps {
 
 // Custom hook to handle route matching
 const useRouteMatches = (routes: string[]) => {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   return React.useMemo(() => {
     return routes.some((route) => {

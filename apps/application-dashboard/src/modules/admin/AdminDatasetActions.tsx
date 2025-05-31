@@ -3,7 +3,7 @@ import { ICellRendererParams } from 'ag-grid-community';
 import { getAdminDatasetRouteById } from 'constants/routeConfig';
 import { DATASET_ACTIONS } from 'modules/admin/admin.constants';
 import { AdminDatasetActionTypes, AdminDeleteDatasetDetailsType } from 'modules/admin/admin.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import TooltipButton from 'components/common/button/TooltipButton';
 import { TooltipPositions } from 'components/common/tooltip';
 

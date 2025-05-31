@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { type Edge, type Node, ReactFlow, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
 import { useGetAllDatasetsQuery, useGetDatasetDagQuery } from 'apis/admin';
@@ -13,7 +15,7 @@ import AdminDatasetTransform from 'modules/admin/AdminDatasetTransform';
 import AdminEditTemplate from 'modules/admin/AdminEditTemplate';
 import CreateDataset from 'modules/admin/CreateDataset';
 import Notification from 'modules/data/Notification';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';

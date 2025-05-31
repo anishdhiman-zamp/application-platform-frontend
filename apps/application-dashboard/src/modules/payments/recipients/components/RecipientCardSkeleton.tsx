@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 type RecipientCardSkeletonProps = {
   length?: number;

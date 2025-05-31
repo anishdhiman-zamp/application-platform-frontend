@@ -75,11 +75,9 @@
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
-    "./types": {
-      "types": "./src/types/index.ts",
-      "default": "./src/types/index.ts"
-    },
-    "./assets": "./src/components/assets/index.ts"
+    "./types": "./src/types/index.ts",
+    "./assets": "./src/components/assets/index.ts",
+    "./utils": "./src/utils/index.ts"
   },
   "lint-staged": {
     "*.ts": "eslint --fix",

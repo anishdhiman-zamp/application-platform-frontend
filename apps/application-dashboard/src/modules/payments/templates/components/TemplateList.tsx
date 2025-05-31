@@ -8,7 +8,7 @@ import RecipientCardSkeleton from 'modules/payments/recipients/components/Recipi
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useGetTemplateListQuery } from '@/apis/payments';
 import Input from '@/components/common/input';
 import TabsV2 from '@/components/common/tabs/TabsV2';

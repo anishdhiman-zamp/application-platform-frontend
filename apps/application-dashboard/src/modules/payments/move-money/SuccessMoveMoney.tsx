@@ -4,7 +4,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { moveMoneyContextActions, useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { FAILED_TO_CREATE_TEMPLATE } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';

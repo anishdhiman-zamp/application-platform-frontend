@@ -10,7 +10,7 @@ import {
   TAG_SOURCE_TYPES,
 } from 'modules/data/RowProperties/rowProperties.types';
 import Rules from 'modules/data/RowProperties/Rules';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';

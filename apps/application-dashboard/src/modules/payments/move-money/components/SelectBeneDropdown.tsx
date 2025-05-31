@@ -6,7 +6,7 @@ import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/Mo
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -42,11 +42,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   disabled = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const recipientRefs = useRef<(HTMLDivElement | null)[]>([]);
   const templateRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const { contact_id } = router.query;
+  const searchParams = useSearchParams();
+  const contact_id = searchParams?.get('contact_id');
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState(templateDetails?.name || '');
   const [selectedRecipient, setSelectedRecipient] = useState<MenuItem | null>(null);

@@ -1,6 +1,8 @@
+'use client';
+
 import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '../assets';

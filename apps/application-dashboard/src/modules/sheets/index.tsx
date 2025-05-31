@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { useGetPagesQuery } from 'apis/pages';
@@ -154,7 +155,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
             <ResponsiveGridLayout
               className='layout'
               layout={sheetLayout}
-              cols={{ lg: 16, md: 16, sm: 16, xs: 16 }}
+              cols={{ lg: 16, md: 16, sm: 16, xs: 16, xxs: 16 }}
               breakpoints={SCREEN_BREAKPOINTS}
               rowHeight={ROW_HEIGHT}
               width={1200} // Adjust grid width as per container

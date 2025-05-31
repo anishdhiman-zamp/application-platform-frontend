@@ -1,11 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { getFromLocalStorage, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
 
-jest.mock('next/router', () => ({
+jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 

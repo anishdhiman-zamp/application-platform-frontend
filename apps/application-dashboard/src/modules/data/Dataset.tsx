@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import {
@@ -48,8 +50,7 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb, updateUrlForLastBreadcrumb } from 'store/slices/layout-configs';
 import {
@@ -105,9 +106,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFilterConfigInParent,
   parentSelectedFilters,
 }) => {
-  const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
+  const searchParams = useSearchParams();
+  const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
 
-  const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
+  const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
   const params = useParams();
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -381,7 +383,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(updateUrlForLastBreadcrumb(router.asPath));
+    appDispatch(updateUrlForLastBreadcrumb(window.location.href));
     if (params?.pageId) {
       router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {

@@ -7,7 +7,7 @@ import {
   FILE_IMPORT_STATUS_MSG,
 } from 'modules/data/components/importDataset/importData.constants';
 import { DataPreviewSidebarPropsType } from 'modules/data/components/importDataset/importData.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { Button } from 'components/common/button/Button';
@@ -20,8 +20,8 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
   onRefetch,
   setShowAiTransformationStatus,
 }) => {
-  const router = useRouter();
-  const datasetId = router?.query?.datasetId as string;
+  const searchParams = useSearchParams();
+  const datasetId = searchParams?.get('datasetId') as string;
   const [postAiTransformationConfirm, { isLoading: isLoadingPostAiTransformationConfirm }] =
     usePostAiTransformationConfirmMutation();
 

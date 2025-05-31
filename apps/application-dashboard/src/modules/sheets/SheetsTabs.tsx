@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useAppSelector } from 'hooks/toolkit';
-import { useRouter } from 'next/router';
+import { useParams, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { MenuItem, SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -20,7 +20,8 @@ interface SheetsTabsProps {
 
 const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
   const router = useRouter();
-  const pageId = router?.query?.pageId as string;
+  const params = useParams();
+  const pageId = params?.pageId as string;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   const handleTabSelect = (selected?: MenuItem) => {

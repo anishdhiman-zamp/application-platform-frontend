@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 const tagVariants = cva(
   'inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary',

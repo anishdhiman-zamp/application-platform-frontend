@@ -5,7 +5,7 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import { useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';

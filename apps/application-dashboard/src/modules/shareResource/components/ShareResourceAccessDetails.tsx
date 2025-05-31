@@ -1,6 +1,6 @@
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 import { defaultFnType } from '@/types/commonTypes';

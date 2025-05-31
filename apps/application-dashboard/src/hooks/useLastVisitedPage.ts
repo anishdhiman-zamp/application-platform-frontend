@@ -1,6 +1,8 @@
+'use client';
+
 import { useState } from 'react';
 import { getPageRouteById, ROUTES_PATH } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
 
@@ -11,18 +13,19 @@ const getLastVisitedPage = (): string => {
 export const persistLastVisitedPage = (pageId: string) => {
   setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID, pageId);
 };
+
 const clearLastVisitedPage = () => {
   removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID);
 };
 
 export const usePersistedPageNavigation = (pagesList: PageResponseType[]) => {
   const [firstNavigationDone, setFirstNavigationDone] = useState(false);
-
   const router = useRouter();
+  const pathname = usePathname();
 
   const pushToMostRelevantPage = () => {
     // navigate to the most relevant page when the user visits the home page
-    if (router.pathname === ROUTES_PATH.HOME) {
+    if (pathname === ROUTES_PATH.HOME) {
       // if the user has a last visited page, check if it exists in the pages list and navigate to it
       // if it doesn't exist, clear the last visited page
       const lastVisitedPageId = getLastVisitedPage();

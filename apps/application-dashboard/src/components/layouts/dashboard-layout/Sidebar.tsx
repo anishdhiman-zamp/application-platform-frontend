@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
@@ -8,8 +10,7 @@ import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { useGetPaymentConfigQuery } from '@/apis/payments';
@@ -24,7 +25,7 @@ const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const params = useParams();
   const router = useRouter();
-  const pathname = router?.pathname;
+  const pathname = usePathname();
 
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
@@ -56,17 +57,17 @@ const Sidebar = () => {
 
   useEffect(() => {
     SETTING_SIDEBAR_ITEMS.forEach((item) => {
-      if (router.asPath.includes(item.path)) {
+      if (pathname?.includes(item.path)) {
         router.prefetch(item.path);
       }
     });
-  }, []);
+  }, [pathname, router]);
 
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
         <AnimatePresence mode='wait'>
-          {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
+          {!pathname?.includes(ROUTES_PATH.SETTINGS) ? (
             <motion.div
               key='details'
               initial={{ opacity: 0, x: 20 }}
@@ -76,12 +77,12 @@ const Sidebar = () => {
             >
               <div className='px-2 border-b border-GRAY_400 pb-4'>
                 {filteredSidebarItems.map((item) => (
-                  <Link href={item.path} key={item.label} className='cursor-pointer'>
+                  <Link href={item.path} key={item.label} className='cursor-pointer' prefetch>
                     <SidebarTab
                       key={item?.label}
                       name={item?.label}
                       iconId={item?.iconId}
-                      isSelected={!params?.pageId && !params?.processId && pathname.includes(item?.path)}
+                      isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
                     />
                   </Link>
                 ))}
@@ -154,7 +155,7 @@ const Sidebar = () => {
                         key={item?.id}
                         name={item?.label}
                         iconId={item?.iconId}
-                        isSelected={router.asPath.includes(item?.path)}
+                        isSelected={pathname?.includes(item?.path)}
                         className='text-GRAY_1000'
                       />
                     </button>

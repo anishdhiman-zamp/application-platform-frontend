@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { useAppDispatch } from 'hooks/toolkit';

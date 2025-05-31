@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, ReactNode, useEffect } from 'react';
 import { useGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
@@ -7,7 +9,7 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { useFeatureFlags } from 'hooks/useFeatureFlags';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import ScreenSupport from 'modules/cards/ScreenSupport';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { checkScreenBreakpoint, getLeadingPathFromURL } from 'utils/common';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
@@ -17,34 +19,39 @@ type AuthGuardPropsType = {
 
 export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const router = useRouter();
-  const { pathname } = router;
-  const { id } = router.query;
+  const pathname = usePathname() || '';
+  const searchParams = useSearchParams();
+  const id = searchParams?.get('id');
+
   const currentPathName = getLeadingPathFromURL(pathname);
   const PAGES = getLeadingPathFromURL(ROUTES_PATH.PAGES);
   const DATASETS = getLeadingPathFromURL(ROUTES_PATH.DATASET);
-  const isAdminRoute = router.pathname.startsWith(ROUTES_PATH.ADMIN);
+  const isAdminRoute = pathname.startsWith(ROUTES_PATH.ADMIN);
+
   const { evaluate, ldClient } = useFeatureFlags();
   const { width, height } = useWindowDimensions();
+
   const { data: datasetListingData, isLoading: isDatasetListingLoading } = useGetDatasetListingQuery(
     { page: 1, pageSize: PAGE_SIZE },
     {
-      skip: currentPathName !== DATASETS || id === undefined,
+      skip: currentPathName !== DATASETS || !id,
       refetchOnMountOrArgChange: false,
     },
   );
+
   const { data: pages, isLoading: isPagesLoading } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
   useEffect(() => {
-    if (currentPathName === DATASETS && id !== undefined && !isDatasetListingLoading) {
+    if (currentPathName === DATASETS && id && !isDatasetListingLoading) {
       const pageExists = datasetListingData?.datasets?.some((dataset) => dataset?.id === id);
 
       if (!pageExists) {
         router.push(ROUTES_PATH.NO_ACCESS);
       }
     }
-  }, [currentPathName, id, isDatasetListingLoading, datasetListingData]);
+  }, [currentPathName, id, isDatasetListingLoading, datasetListingData, router]);
 
   useEffect(() => {
     if (currentPathName === PAGES && !isPagesLoading && id && pages) {
@@ -64,7 +71,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
         }
       });
     }
-  }, [isAdminRoute, evaluate, ldClient]);
+  }, [isAdminRoute, evaluate, ldClient, router]);
 
   const breakpoint = checkScreenBreakpoint(width, height);
 

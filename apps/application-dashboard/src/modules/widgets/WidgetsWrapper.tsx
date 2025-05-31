@@ -14,8 +14,7 @@ import {
   mergeFilters,
   transformFilterKeys,
 } from 'modules/widgets/widgets.utils';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useParams, useRouter } from 'next/navigation';
 import {
   type DrillDownConfigType,
   FieldsMappingType,

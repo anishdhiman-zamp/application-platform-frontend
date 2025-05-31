@@ -3,7 +3,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
 import { PAYMENT_STATUS_TYPES } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useLazyDownloadFileQuery } from '@/apis/dataset';
 import { useGetPaymentDetailsQuery } from '@/apis/payments';
 import ProgressBar from '@/components/common/RingProgress';

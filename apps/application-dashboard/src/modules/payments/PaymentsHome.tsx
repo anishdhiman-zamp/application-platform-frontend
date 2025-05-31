@@ -1,3 +1,4 @@
+'use client';
 import { FC, useRef, useState } from 'react';
 import { RowClickedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';

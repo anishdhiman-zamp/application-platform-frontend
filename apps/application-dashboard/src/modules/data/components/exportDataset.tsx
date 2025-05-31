@@ -9,7 +9,7 @@ import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import ProgressBar from 'components/common/RingProgress';
 import { toast } from 'components/common/toast/Toast';

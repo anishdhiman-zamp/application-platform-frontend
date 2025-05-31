@@ -5,7 +5,7 @@ import { LOGIN_METHODS } from 'constants/auth.constants';
 import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
@@ -28,7 +28,8 @@ const commonFetchConfig = {
 const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const router = useRouter();
-  const errorId = router.query.error?.toString() ?? '';
+  const searchParams = useSearchParams();
+  const errorId = searchParams?.get('error')?.toString() ?? '';
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

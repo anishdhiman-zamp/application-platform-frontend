@@ -1,7 +1,9 @@
+'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { Plus, ShieldCheck } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useGetPaymentConfigQuery, useLazyGetPoliciesQuery } from '@/apis/payments';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { DialogWithRoute } from '@/components/DialogWithRoute';
@@ -54,7 +56,7 @@ const PaymentActions = () => {
   return (
     <>
       <DropdownMenu>
-        <TooltipV2 tooltipBody='Policies'>
+        <TooltipV2 tooltipBody='Policies' asChildTrigger>
           <DropdownMenuTrigger asChild>
             <Button
               variant='ghost'

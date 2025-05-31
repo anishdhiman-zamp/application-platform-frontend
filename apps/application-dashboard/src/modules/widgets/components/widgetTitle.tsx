@@ -4,7 +4,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
-import { useRouter } from 'next/router';
+import { useParams, usePathname } from 'next/navigation';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -37,10 +37,13 @@ const WidgetTitle = ({
   const [isGroupWidgetOptionsOpen, setIsGroupWidgetOptionsOpen] = useState(false);
   const isGroupWidgetOptions = groupWidgetsOptions?.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
-  const router = useRouter();
-  const { id } = router.query;
 
-  const currentSheetId = useMemo(() => getSheetIdFromPath(router.asPath, id as string), [router.asPath, id]) ?? sheetId;
+  // App Router hooks
+  const params = useParams();
+  const pathname = usePathname() || '';
+  const id = params?.id as string | undefined;
+
+  const currentSheetId = useMemo(() => getSheetIdFromPath(pathname ?? '', id ?? ''), [pathname, id]) ?? sheetId;
 
   useOnClickOutside(dropdownRef, (event) => {
     if (titleRef?.current && titleRef.current.contains(event?.target as Node)) return;

@@ -1,3 +1,4 @@
+'use client';
 import React, { CSSProperties, FC } from 'react';
 import dynamic from 'next/dynamic';
 import { MapAny } from 'types/commonTypes';

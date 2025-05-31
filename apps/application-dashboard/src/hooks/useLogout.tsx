@@ -1,12 +1,15 @@
+'use client';
+
 import { useCallback } from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 import { resetPostHog } from 'utils/postHog';
 import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 
 export const useLogout = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: logoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
   const [logOut] = useLazyLogoutQuery();
   const [whoAmI] = useLazyWhoAmIQuery();
@@ -20,14 +23,14 @@ export const useLogout = () => {
           })
           .finally(() => {
             resetPostHog();
-            setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, router.pathname);
+            setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, pathname || '/');
             router.push(ROUTES_PATH.LOGIN);
           });
       })
       .catch(() => {
         refetchLogoutFlow();
       });
-  }, [logoutFlow, logOut, router, refetchLogoutFlow]);
+  }, [logoutFlow, logOut, router, refetchLogoutFlow, pathname]);
 
   return {
     logout: handleLogout,

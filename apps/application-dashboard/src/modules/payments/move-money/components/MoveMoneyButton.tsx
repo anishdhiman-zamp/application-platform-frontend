@@ -3,7 +3,7 @@ import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMe
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
 import { MOVE_MONEY_ACTION_ITEMS } from 'modules/payments/payments.constant';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import type { MapAny } from '@/types/commonTypes';
 
 const MoveMoneyButton = () => {

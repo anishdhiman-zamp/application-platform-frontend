@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientAccountCard from 'modules/payments/recipients/components/RecipientAccountCard';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -28,13 +28,9 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
   const router = useRouter();
 
   const handleSendMoney = () => {
-    router.push({
-      pathname: ROUTES_PATH.MONEY_TRANSFER,
-      query: {
-        type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
-        recipientId: recipientDetails?.id,
-      },
-    });
+    router.push(
+      `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SINGLE_TRANSFER}&recipientId=${recipientDetails?.id}`,
+    );
   };
 
   return (

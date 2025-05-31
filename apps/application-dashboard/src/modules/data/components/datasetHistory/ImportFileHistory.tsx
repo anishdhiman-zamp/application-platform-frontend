@@ -6,15 +6,15 @@ import HistoryBulkLoaders from 'modules/data/components/datasetHistory/HistoryBu
 import HistoryEmptyState from 'modules/data/components/datasetHistory/HistoryEmptyState';
 import HistoryList from 'modules/data/components/datasetHistory/HistoryList';
 import { ImportFileHistoryPropsType } from 'modules/data/components/importDataset/importData.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 
 const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
   const importFileHistoryRef = useRef<HTMLDivElement>(null);
   const [isHoveredLoaders, setIsHoveredLoaders] = useState(false);
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
-  const router = useRouter();
-  const datasetId = router?.query?.datasetId as string;
+  const searchParams = useSearchParams();
+  const datasetId = searchParams?.get('datasetId') as string;
   const { data } = useGetFileImportHistoryQuery({ datasetId });
   const fileImportHistoryData = data?.file_uploads || [];
 

@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { RECIPIENT_CARD_ACTION_ITEMS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_ACTION_TYPE, MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { Button } from '@/components/common/button/Button';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -30,13 +30,9 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccoun
         //filter payments
         break;
       case MOVE_MONEY_ACTION_TYPE.SEND_MONEY:
-        router.push({
-          pathname: ROUTES_PATH.MONEY_TRANSFER,
-          query: {
-            type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
-            recipientId: recipient?.id,
-          },
-        });
+        router.push(
+          `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SINGLE_TRANSFER}&recipientId=${recipient?.id}`,
+        );
         break;
     }
   };

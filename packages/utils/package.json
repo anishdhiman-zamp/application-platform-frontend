@@ -4,6 +4,9 @@
   "private": true,
   "main": "index.ts",
   "types": "index.ts",
+  "dependencies": {
+    "react": "^18.3.1"
+  },
   "files": [
     "./index.ts"
   ],

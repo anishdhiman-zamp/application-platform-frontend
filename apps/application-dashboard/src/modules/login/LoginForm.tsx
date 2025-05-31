@@ -175,7 +175,7 @@ export const LoginForm = () => {
         <span className='f-14-400 text-GRAY_1000'>Your browser does not support the video tag.</span>
       </video>
       <div className='bg-white z-50 w-[580px] rounded-4.5 shadow-tableFilterMenu px-16 py-[82px] border border-GRAY_100'>
-        <Image src={ZAMP_FULL_LOGO} alt='ZAMP' width={98} height={24} />
+        <Image src={ZAMP_FULL_LOGO} priority alt='ZAMP' width={98} height={24} />
         <form onSubmit={handleSubmit}>
           <Input
             id='login-email'

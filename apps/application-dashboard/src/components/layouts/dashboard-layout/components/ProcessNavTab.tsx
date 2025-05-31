@@ -1,6 +1,8 @@
+'use client';
+
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { getProcessRouteById } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import { ICON_SPRITE_TYPES } from '@/constants/icons';
 

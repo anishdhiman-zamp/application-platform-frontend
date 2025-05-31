@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
@@ -13,7 +15,7 @@ import SelectSourceAccount from 'modules/payments/move-money/SelectSourceAccount
 import SuccessMoveMoney from 'modules/payments/move-money/SuccessMoveMoney';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { defaultFn } from 'types/commonTypes';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
@@ -23,7 +25,10 @@ import { capitalizeFirstLetter } from '@/utils/common';
 const MoneyTransferHome = () => {
   const router = useRouter();
   const appDispatch = useAppDispatch();
-  const { type, templateId, recipientId } = router.query;
+  const searchParams = useSearchParams();
+  const type = searchParams?.get('type');
+  const templateId = searchParams?.get('templateId');
+  const recipientId = searchParams?.get('recipientId');
   const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
   const transferType = isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER;
   const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);

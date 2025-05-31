@@ -1,9 +1,10 @@
+'use client';
 import React, { FC, memo, MouseEventHandler, Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { SPRITE_CATEGORY_BY_ID } from './constants';
 import '@zamp-platform/svg-loader';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 export interface SvgSpriteLoaderProps {
   width?: number;

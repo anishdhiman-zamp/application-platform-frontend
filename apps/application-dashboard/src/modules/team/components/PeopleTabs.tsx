@@ -1,14 +1,17 @@
+'use client';
+
 import { FC, useEffect, useState } from 'react';
 import ApprovalPendingListing from 'modules/team/components/members/ApprovalPendingListing';
 import InvitedMembersListing from 'modules/team/components/members/InvitedMembersListing';
 import TeamMembersListing from 'modules/team/components/members/TeamMembersListing';
 import { TEAM_TABS_TYPES, TeamTabsList } from 'modules/team/people.types';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { checkIfCurrentUserIsMember } from 'utils/accessPermission/accessPermission.utils';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { Tabs } from 'components/common/tabs/Tabs';
+
 type PeopleTabsPropsType = {
   filteredTeamMembers: AudiencesByOrganisationIdResponse[];
   isLoadingTeamMembersData: boolean;
@@ -23,12 +26,23 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   isLoadingInvitedTeamMembersData,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTab, setSelectedTab] = useState<TEAM_TABS_TYPES>();
   const checkIfSystemAdmin = !checkIfCurrentUserIsMember();
 
+  useEffect(() => {
+    const tab = searchParams?.get('tab');
+
+    setSelectedTab((tab as TEAM_TABS_TYPES) ?? TEAM_TABS_TYPES.TEAM_MEMBERS);
+  }, []);
+
   const handleTabSelect = (item?: MenuItem) => {
-    setSelectedTab(item?.value as TEAM_TABS_TYPES);
-    router.replace(ROUTES_PATH.TEAM + `?tab=${item?.value}`);
+    if (!item?.value) return;
+    setSelectedTab(item.value as TEAM_TABS_TYPES);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+
+    params.set('tab', String(item.value));
+    router.replace(`${ROUTES_PATH.TEAM}?${params.toString()}`);
   };
 
   const renderTeamListing = () => {
@@ -48,12 +62,6 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
         return null;
     }
   };
-
-  useEffect(() => {
-    const tab = router.asPath.split('tab=')[1];
-
-    setSelectedTab((tab as TEAM_TABS_TYPES) ?? TEAM_TABS_TYPES.TEAM_MEMBERS);
-  }, []);
 
   return (
     <>
