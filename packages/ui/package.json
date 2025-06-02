@@ -39,6 +39,7 @@
     "react-docgen-typescript-plugin": "^1.0.8",
     "tailwindcss": "^4.1.8",
     "@tailwindcss/postcss": "^4.0.15",
+    "@tailwindcss/typography": "^0.5.15",
     "ts-api-utils": "^1.4.3",
     "ts-node": "^10.9.2",
     "typescript": "^5"

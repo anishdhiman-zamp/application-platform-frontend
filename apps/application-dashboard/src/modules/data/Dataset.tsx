@@ -90,6 +90,8 @@ type DatasetByIdProps = {
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
+  updateBreadcrumb?: boolean;
+  filterWrapperClassName?: string;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -105,6 +107,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
+  updateBreadcrumb = true,
+  filterWrapperClassName,
 }) => {
   const searchParams = useSearchParams();
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
@@ -404,14 +408,14 @@ const DatasetById: FC<DatasetByIdProps> = ({
     if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
       syncFilterConfigHiddenColumnsInLocalStorage(id as string, filterConfigData?.data);
 
-      const columns = formatColumns(
-        filterConfigData?.data,
+      const columns = formatColumns({
+        filterConfig: filterConfigData?.data,
         currentUserHasEditAccess,
-        id as string,
+        datasetId: id,
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
-      );
+      });
 
       if (columns?.length > 0) {
         setColumns(columns);
@@ -511,7 +515,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   useEffect(() => {
-    if (!isReadOnly && !isDrilldown && datasetTitle && !breadcrumbStack?.some((item) => item.title === datasetTitle)) {
+    if (
+      !isReadOnly &&
+      !isDrilldown &&
+      datasetTitle &&
+      !breadcrumbStack?.some((item) => item.title === datasetTitle) &&
+      updateBreadcrumb
+    ) {
       appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
     }
   }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);
@@ -642,7 +652,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       >
         <div className={cn('flex items-center justify-between pr-8 z-1000', headerClassName)}>
           <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
           <div className='relative flex items-center gap-2.5'>
             {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}

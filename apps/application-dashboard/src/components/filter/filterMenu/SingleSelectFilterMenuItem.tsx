@@ -1,11 +1,7 @@
-import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { SIZE_TYPES } from 'types/common/components';
-import { cn, debounce, formatToNormalText } from 'utils/common';
-import Input from 'components/common/input';
+import React, { FC, ReactNode } from 'react';
+import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
+import SingleSelectFilter from 'components/filter/filterMenu/components/SingleSelectFilter';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface SingleSelectFilterMenuItemProps {
@@ -37,117 +33,43 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   showColumnLabel = true,
   isDisabled = false,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const columnId = column?.colId;
   const {
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
-  const [selectedValue, setSelectedValue] = useState<string>(selectedFilters[columnId]?.values?.[0] || '');
-  const [inputValue, setInputValue] = useState('');
-  const onSearchChange = (value: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(value.target.value);
-  };
 
-  const setFilter = (updatedValue: string[]) => {
-    if (onFilterChange && !updateContextOnChange) onFilterChange(updatedValue);
-    else {
-      if (onFilterChange) onFilterChange(updatedValue, FILTER_TYPES.SINGLE_SELECT);
+  const setFilter = (value: MapAny) => {
+    if (onFilterChange && !updateContextOnChange) {
+      onFilterChange(value[columnId]?.values || []);
+    } else {
+      if (onFilterChange) {
+        onFilterChange(value[columnId]?.values || [], FILTER_TYPES.SINGLE_SELECT);
+      }
       dispatch({
         type: filtersContextActions.SET_SELECTED_FILTERS,
         payload: {
-          selectedFilters: {
-            [columnId]: {
-              filterType: FILTER_TYPES.SINGLE_SELECT,
-              type: CONDITION_OPERATOR_TYPE.EQUAL,
-              values: updatedValue,
-            },
-          },
+          selectedFilters: value,
         },
       });
     }
   };
 
-  const handleSetValues = useCallback(
-    debounce((updatedValue: string) => {
-      setFilter([updatedValue]);
-    }, debounceTime),
-    [],
-  );
-
-  const onChange = (value: string) => {
-    setSelectedValue(value);
-    handleSetValues(value);
-  };
-
-  const onReset = () => {
-    setSelectedValue('');
-    setInputValue('');
-    setFilter([]);
-  };
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current?.focus();
-    }
-  }, [isOpen]);
-
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-2 bg-white pt-2 pb-1 border border-GRAY_400 rounded-md shadow-table-filter-menu max-h-[330px] w-[218px] min-w-[218px]',
-        className,
-      )}
-    >
-      <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 px-2.5'>
-        {showColumnLabel && (
-          <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
-            {formatToNormalText(columnId)}
-          </div>
-        )}
-
-        {allowClear && (
-          <div className='flex justify-end text-GRAY_700 cursor-pointer'>
-            <SvgSpriteLoader
-              id='refresh-ccw-01'
-              iconCategory={ICON_SPRITE_TYPES.ARROWS}
-              height={14}
-              width={14}
-              onClick={onReset}
-            />
-          </div>
-        )}
-      </div>
-      {allowSearch && (
-        <div className='px-2.5'>
-          <Input
-            size={SIZE_TYPES.XSMALL}
-            inputRef={inputRef}
-            value={inputValue}
-            placeholder='Search...'
-            onChange={onSearchChange}
-            disabled={isDisabled}
-          />
-        </div>
-      )}
-      <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
-        {!!values?.length &&
-          values
-            .filter((item) => item?.toLowerCase()?.includes(inputValue?.toLowerCase()))
-            .map((item) => (
-              <div
-                key={item}
-                onClick={() => !isDisabled && onChange(item)}
-                className={cn(
-                  'py-2 px-2.5 border-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100',
-                  selectedValue === item && 'bg-GRAY_200',
-                )}
-              >
-                {LabelComponent ? LabelComponent(item) : <div className='f-12-400 text-GRAY_1000'>{item}</div>}
-              </div>
-            ))}
-      </div>
-    </div>
+    <SingleSelectFilter
+      filterKey={columnId}
+      values={values}
+      className={className}
+      LabelComponent={LabelComponent}
+      allowClear={allowClear}
+      allowSearch={allowSearch}
+      debounceTime={debounceTime}
+      isOpen={isOpen}
+      showColumnLabel={showColumnLabel}
+      isDisabled={isDisabled}
+      initialSelectedValue={selectedFilters[columnId]?.values?.[0] || ''}
+      onChange={setFilter}
+    />
   );
 };
 

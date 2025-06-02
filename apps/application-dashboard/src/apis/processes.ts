@@ -2,13 +2,17 @@ import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
 import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
+  ActivityArtifactsByIdRequestType,
+  ActivityArtifactsByIdResponseType,
   ActivityArtifactsRequestType,
   ActivityArtifactsResponseType,
-  ActivityLogsRequestType,
   ActivityLogsResponseType,
   ActivityRunsDataResponseType,
+  ActivitySummaryResponseType,
   EmitActivityLogsRequestType,
   ProcessActivityRunsRequestType,
+  SignedUrlByArtifactIdRequestType,
+  SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
 } from '@/types/api/processApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
@@ -42,7 +46,7 @@ const Processes = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_ARTIFACTS_GET, { processId, activityRunId }),
       }),
     }),
-    getActivityLogs: builder.query<ActivityLogsResponseType, ActivityLogsRequestType>({
+    getActivityLogs: builder.query<ActivityLogsResponseType, ActivityArtifactsRequestType>({
       query: ({ processId, activityRunId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_RUN_LOGS_GET, { processId, activityRunId }),
       }),
@@ -54,13 +58,35 @@ const Processes = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
+    getActivitySummary: builder.query<ActivitySummaryResponseType, ActivityArtifactsRequestType>({
+      query: ({ processId, activityRunId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_SUMMARY_GET, { processId, activityRunId }),
+      }),
+    }),
+    getArtifactsByArtifactId: builder.query<ActivityArtifactsByIdResponseType, ActivityArtifactsByIdRequestType>({
+      query: ({ processId, activityRunId, artifact_ids }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_ARTIFACTS_BY_ARTIFACT_ID_GET, {
+          processId,
+          activityRunId,
+        }),
+        params: { artifact_ids },
+      }),
+    }),
+    getSignedUrlByArtifactId: builder.query<SignedUrlByArtifactIdResponseType, SignedUrlByArtifactIdRequestType>({
+      query: ({ processId, artifactId, fileId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.ACTIVITY_SIGNED_URL_BY_FILE_ID_GET, {
+          processId,
+          artifactId,
+          fileId,
+        }),
+      }),
+    }),
   }),
 });
 
 export const {
   useGetFilterConfigByProcessIdQuery,
   useGetActivityRunsSummaryQuery,
-  useLazyGetActivityRunsSummaryQuery,
   useGetActivityRunsQuery,
   useLazyGetActivityRunsQuery,
   useGetActivityArtifactsQuery,
@@ -68,4 +94,9 @@ export const {
   useGetActivityLogsQuery,
   useLazyGetActivityLogsQuery,
   useEmitActivityLogsMutation,
+  useGetActivitySummaryQuery,
+  useLazyGetActivitySummaryQuery,
+  useGetArtifactsByArtifactIdQuery,
+  useGetSignedUrlByArtifactIdQuery,
+  useLazyGetSignedUrlByArtifactIdQuery,
 } = Processes;

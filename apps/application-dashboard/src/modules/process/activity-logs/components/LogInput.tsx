@@ -88,7 +88,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
           value={inputValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder='Work with Adam'
+          placeholder='Work with Pace'
           aria-label='Message input'
           className='w-full px-4 resize-none overflow-y-auto f-13-450 border-none shadow-none rounded-none'
           rows={1}
@@ -103,7 +103,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
             aria-label='Send message'
             className='bg-GRAY_100 size-6! disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_700} />
+            <SvgSpriteLoader id='arrow-up' size={14} color={COLORS.GRAY_700} />
           </Button>
         </div>
       </div>

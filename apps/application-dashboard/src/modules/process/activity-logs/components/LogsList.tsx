@@ -1,16 +1,18 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import DateSeparator from 'modules/process/activity-logs/components/DateSeparator';
 import Log from 'modules/process/activity-logs/components/Log';
+import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
 
 interface LogsListProps {
-  logs: ActivityLogsResponseType | undefined;
-  handleShowArtifacts: () => void;
+  logs: ActivityLogsResponseType;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
 }
 
 const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   const logsWithSeparators = useMemo(() => {
     let currentDate = '';
 
@@ -32,14 +34,29 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
     });
   }, [logs]);
 
+  useEffect(() => {
+    if (bottomRef.current) {
+      setTimeout(() => {
+        if (bottomRef.current) {
+          bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [bottomRef, logsWithSeparators]);
+
   return (
     <>
-      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, log }) => (
-        <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
-          {showDateSeparator && <DateSeparator date={log.updated_at} />}
-          <Log data={log} isLastLog={isLastLogOfDate} handleShowArtifacts={handleShowArtifacts} />
-        </div>
-      ))}
+      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, log }, index) => {
+        const isOverallLastLog = index === logsWithSeparators?.length - 1;
+
+        return (
+          <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
+            {showDateSeparator && <DateSeparator date={log?.updated_at} />}
+            {isOverallLastLog && <div ref={bottomRef} />}
+            <Log data={log} isLastLog={isLastLogOfDate} handleShowArtifacts={handleShowArtifacts} />
+          </div>
+        );
+      })}
     </>
   );
 };

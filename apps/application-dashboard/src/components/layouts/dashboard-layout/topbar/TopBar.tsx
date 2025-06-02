@@ -98,13 +98,9 @@ const Topbar = () => {
         </div>
       </div>
       <div
-        className={cn(
-          'flex items-center gap-2 w-full h-full transition-all z-1000 bg-BACKGROUND_GRAY_1',
-          !isSidebarOpen && 'pl-8',
-          {
-            'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
-          },
-        )}
+        className={cn('flex items-center gap-2 w-full h-full transition-all z-1000 bg-BACKGROUND_GRAY_1', {
+          'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
+        })}
       >
         {breadcrumbStack?.length > 1 && (
           <SvgSpriteLoader

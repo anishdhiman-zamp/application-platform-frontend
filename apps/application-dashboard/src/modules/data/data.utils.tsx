@@ -1,6 +1,4 @@
-import { RefObject } from 'react';
 import { ColDef, IServerSideGetRowsRequest, type SortDirection, ValueFormatterParams } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
   differenceInDays,
@@ -15,15 +13,9 @@ import {
   ColumnOrderingVisibilityType,
   type DatasetTabType,
   type DatasetUrlDataType,
-  RuleColumnDetailsType,
+  FormatColumnsParamsType,
 } from 'modules/data/data.types';
-import {
-  DatasetFilterConfigResponseType,
-  DatasetType,
-  DatasetUpdateResponseType,
-  RuleFilters,
-  ValueFormatType,
-} from 'types/api/dataset.types';
+import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
 import {
@@ -79,8 +71,8 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
 export const getColumnMinWidth = (
   columnNameLength: number,
   isActivityArtifactColumn: boolean,
-  isActivityDocumentColumn: boolean,
   isActivityStatusColumn: boolean,
+  isActivityDocumentColumn: boolean,
 ): number => {
   switch (true) {
     case isActivityArtifactColumn:
@@ -96,18 +88,18 @@ export const getColumnMinWidth = (
   }
 };
 
-export const formatColumns = (
-  filterConfig: DatasetFilterConfigResponseType[],
-  currentUserHasEditAccess: boolean,
-  datasetId: string,
-  handleSuccessfulUpdate: ((data: DatasetUpdateResponseType) => void) | undefined,
-  tableRef: RefObject<AgGridReact>,
-  handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void,
-  sortColumn?: string,
-  sortOrder?: string,
-  isProcess?: boolean,
-  isMenuDisabled?: boolean,
-): ColDef[] => {
+export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
+  filterConfig,
+  currentUserHasEditAccess,
+  datasetId,
+  handleSuccessfulUpdate,
+  tableRef,
+  handleRulesListingSideDrawerOpen,
+  sortColumn,
+  sortOrder,
+  isProcess,
+  isMenuDisabled,
+}) => {
   const columns: ColDef[] = [];
 
   const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId);
@@ -136,8 +128,8 @@ export const formatColumns = (
       minWidth: getColumnMinWidth(
         columnNameLength,
         isActivityCurrentStatusColumn,
-        isActivityDocumentColumn,
         isActivityStatusColumn,
+        isActivityDocumentColumn,
       ),
       maxWidth: isActivityStatusColumn ? COLUMN_WIDTHS.ACTIVITY_STATUS : undefined,
       initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,

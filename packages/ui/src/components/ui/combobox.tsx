@@ -21,8 +21,10 @@ type ComboboxProps = {
   children: React.ReactNode;
   itemClassName?: string;
   overLayContent?: React.ReactNode;
+  groupClassName?: string;
   optionsLoading?: boolean;
   isPortalNeeded?: boolean;
+  listClassName?: string;
 };
 
 export function Combobox({
@@ -40,6 +42,8 @@ export function Combobox({
   children,
   overLayContent,
   isPortalNeeded = false,
+  listClassName,
+  groupClassName,
 }: ComboboxProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -59,9 +63,14 @@ export function Combobox({
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
-            <CommandList className={cn(overLayContent && 'pb-12')}>
+            <CommandList className={cn('', listClassName)}>
               {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
-              <CommandGroup className='max-h-60 overflow-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent'>
+              <CommandGroup
+                className={cn(
+                  'max-h-60 overflow-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent',
+                  groupClassName,
+                )}
+              >
                 {optionsLoading && (
                   <div className='space-y-2'>
                     {Array.from({ length: 10 }).map((_, index) => (
@@ -83,10 +92,8 @@ export function Combobox({
                   ))}
               </CommandGroup>
             </CommandList>
-            {overLayContent && (
-              <div className='absolute bottom-0 left-0 right-0 bg-GRAY_50 py-4 px-[14px]'>{overLayContent}</div>
-            )}
           </Command>
+          {overLayContent && overLayContent}
         </PopoverContent>
       </Portal>
     </Popover>

@@ -1,5 +1,8 @@
+import { RefObject } from 'react';
 import { RowClickedEvent } from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
 import type { FilterConfig } from 'modules/widgets/Pivot/pivot.types';
+import { DatasetFilterConfigResponseType, DatasetUpdateResponseType } from '@/types/api/dataset.types';
 import { MapAny } from '@/types/commonTypes';
 
 export type UserAccessToDataSetType = {
@@ -60,4 +63,17 @@ export type DatasetTabType = {
   id: string;
   title: string;
   filters?: Record<string, FilterConfig>;
+};
+
+export type FormatColumnsParamsType = {
+  filterConfig: DatasetFilterConfigResponseType[];
+  currentUserHasEditAccess?: boolean;
+  datasetId: string;
+  handleSuccessfulUpdate?: ((data: DatasetUpdateResponseType) => void) | undefined;
+  tableRef: RefObject<AgGridReact>;
+  handleRulesListingSideDrawerOpen?: (ruleColumnDetailsValue: RuleColumnDetailsType) => void;
+  sortColumn?: string;
+  sortOrder?: string;
+  isProcess?: boolean;
+  isMenuDisabled?: boolean;
 };

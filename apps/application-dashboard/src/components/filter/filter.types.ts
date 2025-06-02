@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { MapAny } from 'types/commonTypes';
+import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export type FilterValueTypes = string | null | Array<MapAny> | MapAny;
 
@@ -49,3 +50,12 @@ export interface FilterEntityMenuType extends FilterMenuType {
   amount_range_currencies?: FilterMenuType[];
   account_types?: FilterMenuType[];
 }
+
+export type AmountRangeFilterValue = {
+  filterType: FILTER_TYPES;
+  type: CONDITION_OPERATOR_TYPE;
+  filter: string;
+  filterTo: string;
+};
+
+export type MultiSelectFilterValue = string | { label: string; value: string };

@@ -48,6 +48,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   selectedRole,
   setSelectedRole,
   onCustomDeleteFn,
+  closeDropdownOnSelect = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -245,8 +246,11 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       onSelectOption?.(option);
       setSearch('');
       handleSetInputFocus();
+      if (closeDropdownOnSelect) {
+        setOpenDropdownOptions(false);
+      }
     },
-    [onSelectOption, setSearch, inputRef, showValidationError],
+    [onSelectOption, setSearch, inputRef, showValidationError, closeDropdownOnSelect],
   );
 
   // if selectedRole is not object, finds the option from roleOptions, if yes, converts into { label, value } with a stringified version

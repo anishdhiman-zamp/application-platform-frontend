@@ -4,7 +4,8 @@ import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ActivityByStatus from '@/modules/process/activity-runs/ActivityByStatus';
@@ -16,10 +17,13 @@ import { useFiltersContextStore, withFiltersContext } from 'components/filter/fi
 
 type ProcessByIdProps = {
   processId: string;
+  status?: string;
 };
 
-const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
-  const [activeTab, setActiveTab] = useState<string>('');
+const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>(status || '');
   const initialLoadDone = useRef(false);
 
   const {
@@ -62,12 +66,21 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
     },
   );
 
-  useEffect(() => {
-    const statusSummary = activityRunsSummaryData?.status_summary;
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    router.push(`${window?.location?.pathname}?${searchParams?.toString()}&status=${value}`);
+  };
 
-    if (statusSummary && statusSummary?.length > 0 && !initialLoadDone.current) {
-      setActiveTab(statusSummary[0]?.status);
-      initialLoadDone.current = true;
+  useEffect(() => {
+    if (activityRunsSummaryData) {
+      const statusSummary = activityRunsSummaryData?.status_summary;
+
+      if (statusSummary && statusSummary?.length > 0 && !initialLoadDone.current) {
+        if (!activeTab) {
+          handleTabChange(statusSummary[0]?.status);
+        }
+        initialLoadDone.current = true;
+      }
     }
   }, [activityRunsSummaryData]);
 
@@ -88,9 +101,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
     >
       <Tabs
         onValueChange={(value) => {
-          setActiveTab(value);
+          handleTabChange(value);
         }}
-        defaultValue={activityRunsSummaryData?.status_summary?.[0]?.status}
+        value={activeTab}
+        key={activeTab}
       >
         <TabsList className='mx-3 my-3 gap-2.5 bg-white'>
           {activityRunsSummaryData?.status_summary?.map((item) => (
@@ -98,10 +112,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
               key={item?.status}
               value={item?.status}
               className={cn(
-                'rounded-[4px]! px-2! py-1! border-none gap-1.5 transition-colors hover:bg-GRAY_50 active:bg-GRAY_200',
-                {
-                  '!bg-GRAY_100': activeTab === item?.status,
-                },
+                'rounded-sm! px-2! py-1! border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
               )}
             >
               <TabStatusIcon
@@ -109,8 +120,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId }) => {
                 fillColor={STATUS_ICON_COLOR_MAPPING[item?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor}
                 strokeColor={STATUS_ICON_COLOR_MAPPING[item?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
               />
-              <span className='f-12-500 text-GRAY_1000'>{snakeCaseToSentenceCase(item?.status?.toLowerCase())}</span>
-              <span className='f-12-500 text-GRAY_1000'>{item?.count}</span>
+              <span className={cn('f-12-500 text-GRAY_900', { 'text-GRAY_1000': activeTab === item?.status })}>
+                {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
+              </span>
+              <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
+                {formatNumber(item?.count, 0, true, false, true)}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

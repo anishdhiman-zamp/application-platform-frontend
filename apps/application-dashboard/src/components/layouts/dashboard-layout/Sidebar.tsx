@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -70,7 +70,7 @@ const Sidebar = () => {
           {!pathname?.includes(ROUTES_PATH.SETTINGS) ? (
             <motion.div
               key='details'
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, type: 'spring' }}
               className='h-full'
@@ -110,7 +110,6 @@ const Sidebar = () => {
                           label={process?.display_name}
                           processId={process?.id}
                           isSelected={params?.processId === process?.id}
-                          // disable
                         />
                       ))}
                   </CommonWrapper>
@@ -144,7 +143,7 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
             >
               <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
-                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500'>
+                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500 select-none'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>
@@ -177,4 +176,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default memo(Sidebar);

@@ -1,4 +1,3 @@
-import { captureException } from '@sentry/browser';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface UseSSEOptions {
@@ -65,12 +64,6 @@ export const useSSE = ({
       if (onError) {
         eventSource.onerror = (event) => {
           onError(event);
-          cleanup();
-          if (reconnectIntervalMs > 0) {
-            reconnectTimeoutRef.current = window.setTimeout(() => {
-              initializeEventSource();
-            }, reconnectIntervalMs);
-          }
         };
       }
 
@@ -91,14 +84,12 @@ export const useSSE = ({
           const idleTime = now - lastMessageTimestamp.current;
 
           if (idleTime > idleTimeoutMs) {
-            console.warn('[SSE] Idle timeout exceeded. Reconnecting...');
             cleanup();
             initializeEventSource();
           }
         }, 10000);
       }
     } catch (err) {
-      captureException(err);
       cleanup();
       if (reconnectIntervalMs > 0) {
         reconnectTimeoutRef.current = window.setTimeout(() => {

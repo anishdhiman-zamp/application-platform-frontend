@@ -1,12 +1,12 @@
-import { FC, memo } from 'react';
+import { type FC, memo } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
-import { CTA_COMPONENT_TYPE } from 'modules/process/process.types';
+import { type ARTIFACT_TYPE, type CTA_ACTION, CTA_COMPONENT_TYPE } from 'modules/process/process.types';
 import type { CtasType } from '@/types/api/processApi.types';
 type LogCtaProps = {
   ctas: CtasType[];
-  handleShowArtifacts: () => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
 };
 
 const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
@@ -20,8 +20,11 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
           <ArtifactTag
             key={cta?.id}
             displayName={cta?.display_name}
-            type={cta?.cta_component_type}
-            handleShowArtifacts={handleShowArtifacts}
+            type={cta?.artifact_type}
+            onClick={() =>
+              handleShowArtifacts(cta?.artifact_type as ARTIFACT_TYPE, cta?.id ?? '', cta?.cta_action as CTA_ACTION)
+            }
+            displayClassName='max-w-40'
           />
         ))}
         {buttonTypeCta?.map((cta) => (

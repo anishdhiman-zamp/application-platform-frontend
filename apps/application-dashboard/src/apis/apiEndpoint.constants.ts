@@ -2,6 +2,7 @@ export const API_ENDPOINTS = {
   MEMBERSHIP_REQUESTS_ALL_GET: `organizations/membership-requests`,
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,
+  DELETE_AUDIENCE_INVITATION: `organizations/{{organizationId}}/audiences/invitations/{{invitationId}}`,
   AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_ORGANIZATION_PATCH: `organizations/{{organizationId}}/audiences`,
   DELETE_AUDIENCE_FROM_ORGANIZATION_ACCESS: `organizations/{{organizationId}}/audiences`,
@@ -122,6 +123,9 @@ export const API_ENDPOINTS = {
   ACTIVITY_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/artifacts`,
   ACTIVITY_RUN_LOGS_GET: `processes/{{processId}}/activity-logs/{{activityRunId}}/logs`,
   EMIT_ACTIVITY_LOGS_POST: `processes/{{processId}}/activity-logs/{{activityRunId}}`,
+  ACTIVITY_SUMMARY_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/summary`,
+  ACTIVITY_ARTIFACTS_BY_ARTIFACT_ID_GET: `processes/{{processId}}/activity-runs/artifacts`,
+  ACTIVITY_SIGNED_URL_BY_FILE_ID_GET: `processes/{{processId}}/artifacts/{{artifactId}}/signed-url/{{fileId}}`,
 };
 
 export const enum REQUEST_TYPES {

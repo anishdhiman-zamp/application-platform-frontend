@@ -1,3 +1,4 @@
+import { type FC } from 'react';
 import TeamMemberApprovalCard from 'modules/team/components/members/TeamMemberApprovalCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { RootState } from 'store';
@@ -10,7 +11,11 @@ import { ResourceType } from '@/modules/shareResource';
 import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 import { getUserNameFromAudience } from '@/utils/common';
 
-const ApprovalPendingListing = () => {
+type ApprovalPendingListingProps = {
+  search: string;
+};
+
+const ApprovalPendingListing: FC<ApprovalPendingListingProps> = ({ search }) => {
   const organizationName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name) ?? '';
 
   const { loading, audiencesData, allTeamsData } = useAudienceMembers({
@@ -61,11 +66,12 @@ const ApprovalPendingListing = () => {
       >
         {pendingApprovalsList?.map((member) => (
           <TeamMemberApprovalCard
-            key={member?.approval_id}
+            key={member?.audience_id + member?.approval_id}
             name={getUserDetails(member?.audience_id ?? '')?.name || member?.email?.split('@')[0]}
             email={getUserDetails(member?.audience_id ?? '')?.email || member?.email}
             role={getUserDetails(member?.audience_id ?? '')?.privilege ?? ''}
             details={member}
+            search={search}
             organization={organizationName}
             teamDetails={getTeamDetails(member?.team_id ?? '')}
           />

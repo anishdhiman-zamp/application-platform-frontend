@@ -93,7 +93,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                 <span className='f-13-400 text-GRAY_900'>Something&rsquo;s wrong</span>
               </span>
             </div>
-            <div className='p-1 hover:bg-GRAY_100 rounded-[4px]'>
+            <div className='p-1 hover:bg-GRAY_100 rounded'>
               <SvgSpriteLoader
                 id='refresh-ccw-01'
                 iconCategory={ICON_SPRITE_TYPES.ARROWS}

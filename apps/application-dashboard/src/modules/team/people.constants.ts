@@ -1,5 +1,4 @@
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
-import InvitationApprovalStatus from 'modules/team/components/members/InvitationApprovalStatus';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
 import MembersRole from 'modules/team/components/members/MembersRole';
@@ -39,22 +38,19 @@ export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
     headerName: 'Name',
     field: 'email',
     cellRenderer: MembersName,
+    className: 'col-span-3',
   },
   {
     headerName: 'Email',
     field: 'email',
     cellRenderer: MembersEmail,
+    className: 'col-span-3',
   },
   {
     headerName: 'Invited as',
     field: 'privilege',
     cellRenderer: MembersRole,
-  },
-  {
-    headerName: 'Status',
-    field: 'policy_metadata',
-    valueGetter: ({ data }: MapAny) => data?.policy_metadata?.status,
-    cellRenderer: InvitationApprovalStatus,
+    className: 'col-span-3',
   },
 ];
 

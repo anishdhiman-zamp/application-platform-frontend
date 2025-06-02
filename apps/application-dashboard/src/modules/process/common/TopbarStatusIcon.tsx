@@ -12,11 +12,11 @@ const TopbarStatusIcon = ({ fillColor, strokeColor, status }: TopbarStatusIconPr
   switch (status) {
     case ACTIVITY_RUN_STATUS.NEEDS_ATTENTION:
     case ACTIVITY_RUN_STATUS.IN_PROGRESS:
-      return <SvgSpriteLoader id='activity' height={12} width={12} color={strokeColor} />;
+      return <SvgSpriteLoader id='activity' size={12} color={strokeColor} />;
     case ACTIVITY_RUN_STATUS.FAILED:
-      return <SvgSpriteLoader id='alert-triangle' height={12} width={12} color={strokeColor} />;
+      return <SvgSpriteLoader id='alert-triangle' size={12} color={strokeColor} />;
     case ACTIVITY_RUN_STATUS.DONE:
-      return <SvgSpriteLoader id='check' height={12} width={12} color={strokeColor} />;
+      return <SvgSpriteLoader id='check' size={12} color={strokeColor} />;
     case ACTIVITY_RUN_STATUS.VOID:
       return (
         <svg width='8' height='8' viewBox='0 0 8 8' fill='none' xmlns='http://www.w3.org/2000/svg'>

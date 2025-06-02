@@ -3,8 +3,7 @@ import { DATE_FORMATS, PERIODICITY_OPTIONS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { RuleFilters } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
-import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
-import { MultiSelectFilterValue } from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
+import { FILTER_TYPES, FilterConfigType, MultiSelectFilterValue } from 'components/filter/filter.types';
 import {
   AMOUNT_RANGE_FILTER_OPTIONS,
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,

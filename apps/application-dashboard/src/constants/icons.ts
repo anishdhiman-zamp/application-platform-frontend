@@ -109,6 +109,18 @@ export const ZID = IMAGE_PREFIX + '/icons/bank-icons/zid.svg';
 export const HAND_ICON = IMAGE_PREFIX + '/icons/hand.svg';
 export const ADAM_ICON = IMAGE_PREFIX + '/icons/agents/adam-icon.svg';
 export const ACCORDION_LIST = IMAGE_PREFIX + '/icons/agents/accordion-list.svg';
+export const ACCORDION_CONTENT_BG = IMAGE_PREFIX + '/icons/agents/accordion-content-bg.svg';
+
+//Artifacts
+export const BROWSER = IMAGE_PREFIX + '/icons/agents/artifacts/browser.svg';
+export const COUPA = IMAGE_PREFIX + '/icons/agents/artifacts/coupon.svg';
+export const DATASET = IMAGE_PREFIX + '/icons/agents/artifacts/dataset.svg';
+export const DOCUSIGN = IMAGE_PREFIX + '/icons/agents/artifacts/docusign.svg';
+export const FILE = IMAGE_PREFIX + '/icons/agents/artifacts/file.svg';
+export const GMAIL = IMAGE_PREFIX + '/icons/agents/artifacts/gmail.svg';
+export const SALESFORCE = IMAGE_PREFIX + '/icons/agents/artifacts/salesforce.svg';
+export const SLACK = IMAGE_PREFIX + '/icons/agents/artifacts/slack.svg';
+export const VIDEO = IMAGE_PREFIX + '/icons/agents/artifacts/video.svg';
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',
