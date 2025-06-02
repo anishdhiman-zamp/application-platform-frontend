@@ -60,7 +60,7 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
               key={tab?.dataset_id}
               value={tab?.dataset_id}
               className={cn(
-                '!rounded !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                'rounded! px-2! py-1! border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
               )}
             >
               <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />

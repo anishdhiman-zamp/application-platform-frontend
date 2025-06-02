@@ -20,7 +20,7 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
       <DropdownMenuContent
         sideOffset={2}
         align='start'
-        className='z-[1001] min-w-[400px] py-2 px-3 flex flex-col gap-y-1'
+        className='z-1001 min-w-[400px] py-2 px-3 flex flex-col gap-y-1'
       >
         {emailArtifact?.from_mail_id && (
           <div className='flex items-start gap-2'>

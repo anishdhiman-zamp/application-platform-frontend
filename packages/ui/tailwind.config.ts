@@ -1,5 +1,4 @@
 import typography from '@tailwindcss/typography';
-import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
@@ -247,15 +246,15 @@ const config = {
       },
       boxShadow: {
         overlay: '1px 2px 10px rgba(197, 220, 255, 0.54)',
-        inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
-        inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_100)',
-        tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
-        pageBottomBar: '0px -4px 0px 0px #00000005',
-        sideDrawer: '-3px 0px 0px 0px #00000005',
-        sideDrawerInner: '10px 0px 50px 0px #0000000d',
-        menuList: '1px 2px 20px 0px #0000001A',
-        selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
-        menuShadow: 'var(--menu-shadow)',
+        'input-outline-shadow': '0px 0px 0px 3px var(--GRAY_400)',
+        'input-error-outline-shadow': '0px 0px 0px 3px var(--RED_100)',
+        'table-filter-menu': '1px 2px 10px 0px #A6A6A61A',
+        'page-bottom-bar': '0px -4px 0px 0px #00000005',
+        'side-drawer': '-3px 0px 0px 0px #00000005',
+        'side-drawer-inner': '10px 0px 50px 0px #0000000d',
+        'menu-list': '1px 2px 20px 0px #0000001A',
+        'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
+        'menu-shadow': 'var(--menu-shadow)',
       },
       fontSize: {
         '8': [
@@ -703,6 +702,6 @@ const config = {
     },
   },
   plugins: [tailwindcssAnimate, typography],
-} satisfies Config;
+};
 
 export default config;

@@ -109,7 +109,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
 
   return (
     <div
-      className={`px-2.5 py-2 w-[250px] min-w-[250px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
+      className={`px-2.5 py-2 w-[250px] min-w-[250px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-table-filter-menu ${className}`}
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
         <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
@@ -126,7 +126,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           {isOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
+              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-table-filter-menu rounded-md'
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div
@@ -154,7 +154,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
         <Tooltip
           tooltipBody={`condition set to “is blank”`}
           tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
-          className='z-1 !cursor-not-allowed'
+          className='z-1 cursor-not-allowed!'
           disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
         >
           <Input
