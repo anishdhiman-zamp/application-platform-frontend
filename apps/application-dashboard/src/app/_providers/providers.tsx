@@ -13,7 +13,7 @@ import NetworkStatus from 'components/NetWorkStatus';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div />}>
+    <Suspense fallback={null}>
       <Provider store={store}>
         <SpeedInsights />
         <AgChartInit />
