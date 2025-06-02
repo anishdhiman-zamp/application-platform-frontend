@@ -184,7 +184,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
         className='z-1 h-full w-full'
         tooltipBodystyle='f-10-400'
       >
-        <div className={cn('p-1 hover:bg-GRAY_100 !rounded cursor-pointer', isImportFilePopupOpen && 'bg-GRAY_100')}>
+        <div className={cn('p-1 hover:bg-GRAY_100 rounded! cursor-pointer', isImportFilePopupOpen && 'bg-GRAY_100')}>
           <Image
             src={COINS_STACKED_05}
             alt='coins-stacked-05'

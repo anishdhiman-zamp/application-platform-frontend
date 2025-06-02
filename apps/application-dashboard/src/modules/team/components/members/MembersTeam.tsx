@@ -252,7 +252,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
             isOpen={false}
             wrapperClassName='border-none rounded-none shadow-none f-12-400'
             inputWrapperClassName={cn(isCustomInputFocused ? 'flex-wrap' : 'flex-nowrap', 'p-0')}
-            multiSelectInputClassName='f-12-400 !rounded-none'
+            multiSelectInputClassName='f-12-400 rounded-none!'
             setIsCustomInputFocused={setIsCustomInputFocused}
             selectOnlyFromList
             onCustomDeleteFn={handleRemoveAudienceFromTeam}

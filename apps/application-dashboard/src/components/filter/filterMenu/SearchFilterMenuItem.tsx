@@ -90,7 +90,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
 
   return (
     <div
-      className={`px-2.5 py-2 min-w-[218px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
+      className={`px-2.5 py-2 min-w-[218px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-table-filter-menu ${className}`}
     >
       <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
         <div className='f-11-400 text-GRAY_700  whitespace-nowrap'>{label || camelCaseToNormalText(columnId)}</div>
@@ -105,7 +105,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
           {isConditionOptionsOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
+              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-table-filter-menu rounded-md'
             >
               {SEARCH_FILTER_OPTIONS.map((option) => (
                 <div

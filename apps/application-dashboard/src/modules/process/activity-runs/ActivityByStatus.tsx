@@ -349,7 +349,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             totalRows={totalRows}
             customTheme={myThemeWithProcess}
             headerClass='f-12-450 text-GRAY_700'
-            cellClass='!text-[13px] !font-[450] !px-4'
+            cellClass='text-[13px]! font-[450]! px-4!'
             suppressCellFocus
             enableCellSelection={false}
             onGridReady={handleGridReady}

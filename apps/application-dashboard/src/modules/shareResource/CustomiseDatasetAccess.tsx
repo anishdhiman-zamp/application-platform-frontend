@@ -56,7 +56,7 @@ const CustomiseDatasetAccess: FC<CustomiseDatasetAccessProps> = ({
   return (
     <FullScreenPopup
       isOpen={isOpen}
-      className='z-[1201] bg-BG_GRAY_1 overflow-visible'
+      className='z-1201 bg-BG_GRAY_1 overflow-visible'
       hideHeader
       childrenClassName='overflow-visible'
     >

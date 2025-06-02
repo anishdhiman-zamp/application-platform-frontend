@@ -3,7 +3,6 @@ import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
-  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
@@ -702,9 +701,6 @@ const config = {
         'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
       },
     },
-  },
-  variants: {
-    textColor: ['group-hover'],
   },
   plugins: [tailwindcssAnimate, typography],
 } satisfies Config;

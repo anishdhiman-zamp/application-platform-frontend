@@ -88,7 +88,7 @@ export const Tabs: FC<TabsPropsType> = ({
                       >
                         {tabItem?.label}
                         {!!tabItem?.metadata?.count && (
-                          <div className='f-12-300 border border-BORDER_7 text-GRAY_600 px-1 bg-white h-4 !leading-3.5'>
+                          <div className='f-12-300 border border-BORDER_7 text-GRAY_600 px-1 bg-white h-4 leading-3.5!'>
                             {tabItem?.metadata?.count}
                           </div>
                         )}

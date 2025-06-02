@@ -24,14 +24,14 @@ const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({
 
       <div className='flex'>
         <button
-          className='hover:border-DIVIDER_SAIL_4 border border-DIVIDER_SAIL_2 outline-none rounded-lg p-1.5 min-w-17.5 mr-3'
+          className='hover:border-DIVIDER_SAIL_4 border border-DIVIDER_SAIL_2 outline-hidden rounded-lg p-1.5 min-w-17.5 mr-3'
           onClick={onClick}
           data-testid='clear-filters-confirmation-popup-yes'
         >
           Yes
         </button>
         <button
-          className='hover:border-DIVIDER_SAIL_4 border border-DIVIDER_SAIL_2 outline-none rounded-lg p-1.5 min-w-17.5'
+          className='hover:border-DIVIDER_SAIL_4 border border-DIVIDER_SAIL_2 outline-hidden rounded-lg p-1.5 min-w-17.5'
           onClick={onCancel}
         >
           No

@@ -22,7 +22,7 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
     <div
       className={cn(
         !!datasetBulkLoaders?.length && 'mt-1.5',
-        'w-96 mr-4 mb-4 rounded-2.5 shadow-tableFilterMenu h-full max-h-fit bg-white',
+        'w-96 mr-4 mb-4 rounded-2.5 shadow-table-filter-menu h-full max-h-fit bg-white',
       )}
       style={{
         scrollbarWidth: 'none',

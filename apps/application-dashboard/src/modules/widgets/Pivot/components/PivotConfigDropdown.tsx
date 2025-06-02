@@ -177,7 +177,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
       {showDisplayConfig && (
         <div
           className={cn(
-            'absolute z-10 top-[72px] -left-2.5 bg-white flex flex-col  p-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',
+            'absolute z-10 top-[72px] -left-2.5 bg-white flex flex-col  p-1 border border-GRAY_400 rounded-md shadow-table-filter-menu max-h-[330px] min-w-[200px] ',
           )}
           ref={ref}
         >

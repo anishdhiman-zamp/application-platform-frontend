@@ -10,7 +10,7 @@ const ChooseRoleMembers = () => {
         Share
       </Button>
       <div className='z-1000 relative'>
-        <div className='absolute bottom-0 right-0 flex h-[10rem] w-[20rem] bg-red-400'>this is the dropdown</div>
+        <div className='absolute bottom-0 right-0 flex h-40 w-[20rem] bg-red-400'>this is the dropdown</div>
       </div>
     </div>
   );

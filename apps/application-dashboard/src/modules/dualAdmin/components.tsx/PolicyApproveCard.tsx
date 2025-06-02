@@ -48,11 +48,7 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
             <DropdownToggle isShowMenu={isShowMenu} isLoading={isLoading} setIsShowMenu={setIsShowMenu} />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align='end'
-          className='z-[1001] min-w-[170px]  max-h-[300px] overflow-y-auto'
-          sideOffset={5}
-        >
+        <DropdownMenuContent align='end' className='z-1001 min-w-[170px]  max-h-[300px] overflow-y-auto' sideOffset={5}>
           {DUAL_ADMIN_APPROVAL_POLICY_OPTIONS.map((item: MapAny) => (
             <DropdownMenuItem
               onClick={() => handleApproveAction(item?.value)}

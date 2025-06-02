@@ -252,7 +252,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               {filteredAccounts.map((account, index) => (
                 <div key={`${account?.account_number}_${index}`} onMouseEnter={() => setHoveredIndex(index)}>
                   <AccountWithLogo
-                    className={cn('rounded-md !p-2.5', {
+                    className={cn('rounded-md p-2.5!', {
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
                     name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
@@ -298,10 +298,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div onFocus={!disabled && !isShowMenu ? onFocus : undefined} onKeyDown={handleKeyDown}>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {
+        className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-hidden', {
           'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,
-          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
-          '!cursor-not-allowed bg-GRAY_100': disabled,
+          'border-GRAY_500 shadow-select-account-dropdown': isShowMenu,
+          'cursor-not-allowed! bg-GRAY_100': disabled,
         })}
         ref={containerRef}
       >
@@ -318,14 +318,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               disabled={!!contact_id || disabled}
               onChange={handleSearch}
               className='f-13-450 grow'
-              focusClassNames='!px-0'
+              focusClassNames='px-0!'
               placeholder='Search account name, number'
             />
           </div>
         ) : (
           <div onFocus={!disabled && !isInputEnabled ? onFocus : undefined}>
             <AccountWithLogo
-              className={cn('rounded-md !p-2.5', {
+              className={cn('rounded-md p-2.5!', {
                 'bg-BACKGROUND_GRAY_2': disabled,
               })}
               name={accountName}

@@ -33,7 +33,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
 
   return (
     <div
-      className={cn('bg-white relative z-1 shadow-menuList rounded-md border-0.5 border-GRAY_500', className)}
+      className={cn('bg-white relative z-1 shadow-menu-list rounded-md border-0.5 border-GRAY_500', className)}
       data-testid={`menu-wrapper-${id}`}
       style={style}
     >

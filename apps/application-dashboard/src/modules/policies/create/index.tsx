@@ -227,7 +227,7 @@ const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton onClick={(e) => e.stopPropagation()}>
-        <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden z-[1002]'>
+        <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden z-1002'>
           <div className='f-12-500 text-primary py-3 px-4 pb-0'>{isEdit ? 'Edit policy' : 'New policy'}</div>
           <FormProvider {...methods}>
             <form onSubmit={(e) => e.preventDefault()}>
@@ -237,7 +237,7 @@ const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData 
                   {...methods.register('policyName')}
                   name='policyName'
                   className={cn(
-                    'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit',
+                    'f-22-500 placeholder:text-gray-500 text-primary focus:outline-hidden border-b border-primary border-dotted not-placeholder-shown:border-transparent w-[120px] not-placeholder-shown:w-fit',
                     methods.formState.errors.policyName && 'border-red-500',
                   )}
                   placeholder='Policy Title'

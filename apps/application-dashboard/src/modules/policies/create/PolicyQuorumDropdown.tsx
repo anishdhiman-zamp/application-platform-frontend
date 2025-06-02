@@ -18,7 +18,7 @@ const PolicyQuorumDropdown: FC<PolicyQuorumDropdownProps> = ({ value, onChange }
           <SvgSpriteLoader id='chevron-down' size={14} />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='z-[1001]' align='start'>
+      <DropdownMenuContent className='z-1001' align='start'>
         {POLICY_APPROVAL_STEP_MODIFIERS.map((modifier) => (
           <DropdownMenuItem key={modifier.value} onClick={() => onChange(modifier.value)}>
             {modifier.label}

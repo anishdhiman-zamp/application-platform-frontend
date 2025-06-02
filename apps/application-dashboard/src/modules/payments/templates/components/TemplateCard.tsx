@@ -38,13 +38,13 @@ const TemplateCard: FC<TemplateCardProps> = ({ onSendClick, template, onTemplate
       </div>
       <div className='grow'>
         <div className='f-13-500 mb-1'>{template?.name}</div>
-        <div className='f-12-400 inline-flex divide-x-1 gap-2 divide-GRAY_400 overflow-hidden border border-GRAY_400 rounded-[4px]'>
+        <div className='f-12-400 inline-flex divide-x gap-2 divide-GRAY_400 overflow-hidden border border-GRAY_400 rounded-[4px]'>
           {source &&
             destination &&
             [source, destination].map((item, index) => (
               <div
                 key={index}
-                className={cn('flex items-center gap-2 py-1 px-1.5 divide-x-1  border-GRAY_400', {
+                className={cn('flex items-center gap-2 py-1 px-1.5 divide-x  border-GRAY_400', {
                   'border-l': index !== 0,
                 })}
               >

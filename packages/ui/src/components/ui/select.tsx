@@ -135,7 +135,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
         >
           <div
             className={cn(
-              'f-13-400 h-10 flex w-full items-center placeholder:text-gray-700 rounded-md border border-input focus:border-gray-600 bg-white px-3 outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
+              'f-13-400 h-10 flex w-full items-center placeholder:text-gray-700 rounded-md border border-input focus:border-gray-600 bg-white px-3 outline-hidden focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
               value ? 'text-primary' : 'text-gray-700',
             )}
           >

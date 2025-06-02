@@ -28,7 +28,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
         side={SIDE_OPTIONS.RIGHT}
         key={template?.id}
         className='w-full'
-        tooltipClassName='bg-transparent shadow-tableFilterMenu bg-white border border-GRAY_400 rounded-md p-2.5 ml-3'
+        tooltipClassName='bg-transparent shadow-table-filter-menu bg-white border border-GRAY_400 rounded-md p-2.5 ml-3'
         tooltipBody={
           <div>
             <div className='flex flex-col gap-3 min-w-[185px]'>

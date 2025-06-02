@@ -92,7 +92,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
       id='row-properties-side-drawer'
       onClose={onClose}
       hideCloseButton
-      headerClassName='!p-6'
+      headerClassName='p-6!'
       topBar={
         <div className='flex items-center justify-between flex-1'>
           <Tabs

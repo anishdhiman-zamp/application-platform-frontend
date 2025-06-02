@@ -28,7 +28,7 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
           fillColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor}
           strokeColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
         />
-        <span className='w-2 h-[1px] rounded-full bg-GRAY_400' />
+        <span className='w-2 h-px rounded-full bg-GRAY_400' />
         <p className='f-13-500 text-GRAY_950 truncate'>{snakeCaseToSentenceCase(message)}</p>
       </div>
       <div className='flex items-center gap-2'>

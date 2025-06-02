@@ -105,7 +105,7 @@ const RuleCard: FC<RuleCardProps> = ({
             <MenuWrapper
               id='rule-actions'
               className='!absolute z-10 p-1 right-0 mt-1 w-[180px]'
-              childrenWrapperClassName='text-GRAY_900 !overflow-y-auto'
+              childrenWrapperClassName='text-GRAY_900 overflow-y-auto!'
             >
               {RULE_ACTIONS.map((option) => (
                 <div

@@ -30,7 +30,7 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                   key={index}
                   className={cn(
                     !isHoveredLoaders && 'absolute ease-out delay-100',
-                    'flex gap-3 justify-between items-center w-96 px-5 py-3 bg-white border-[0.5px] border-GRAY_500 rounded-2.5 shadow-tableFilterMenu transition-transform duration-300 ease-out delay-100',
+                    'flex gap-3 justify-between items-center w-96 px-5 py-3 bg-white border-[0.5px] border-GRAY_500 rounded-2.5 shadow-table-filter-menu transition-transform duration-300 ease-out delay-100',
                   )}
                   style={{
                     transform: isHoveredLoaders

@@ -14,7 +14,7 @@ const Settings = () => {
     const tab = path.split('#')[1];
 
     setCurrentTab(tab as SETTINGS_TABS);
-  }, []);
+  }, [path]);
 
   switch (currentTab) {
     case SETTINGS_TABS.DUAL_ADMIN:

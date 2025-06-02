@@ -107,7 +107,7 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
         <Topbar />
         <div className={`w-full min-w-[768px] flex relative h-[calc(100vh-48px)]`}>
           <Sidebar />
-          <div ref={containerRef} className='flex flex-col flex-grow relative h-screen'>
+          <div ref={containerRef} className='flex flex-col grow relative h-screen'>
             <div
               className={cn('w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)]', {
                 'rounded-tl-xl': isSidebarOpen,

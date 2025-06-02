@@ -288,7 +288,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       <div
         className={cn(
           'flex justify-between items-start w-full rounded-md gap-1.5 border',
-          isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400',
+          isInputFocused ? 'border-GRAY_600 shadow-input-outline-shadow' : 'border-GRAY_400',
           wrapperClassName,
         )}
       >
@@ -329,16 +329,16 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             onKeyDown={handleClickKeyDown}
             className='flex-1 min-w-[20px] h-fit mt-[2px]'
             customPaddingClassName='p-0'
-            focusClassNames='focus:outline-none focus:border-none focus:shadow-none'
+            focusClassNames='focus:outline-hidden focus:border-none focus:shadow-none'
             cursorClassname='cursor-text'
-            inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 !rounded-none'}
+            inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 rounded-none!'}
             style={{
               maxWidth: '100%',
             }}
           />
         </div>
         {roleOptions && (
-          <div className='flex min-w-max h-fit !cursor-pointer'>
+          <div className='flex min-w-max h-fit cursor-pointer!'>
             <Dropdown
               options={roleOptions}
               id={`${id}-multi-select-input-dropdown`}
@@ -389,7 +389,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   } as Record<string, unknown>,
                 )
               : !!combinedOptions?.length && (
-                  <div className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'>
+                  <div className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-table-filter-menu'>
                     <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
                     <div
                       className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'

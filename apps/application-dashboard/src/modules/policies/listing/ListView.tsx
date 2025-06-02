@@ -40,7 +40,7 @@ const ListView: FC<ListViewProps> = ({ policies, audienceMembersData, onPolicyCl
           placeholder='Search'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className='f-12-400 text-primary placeholder:text-gray-500 w-60 focus:outline-none'
+          className='f-12-400 text-primary placeholder:text-gray-500 w-60 focus:outline-hidden'
         />
       </div>
       <div className='space-y-3.5 overflow-y-auto h-[calc(100vh-125px)] pb-6 [&::-webkit-scrollbar]:hidden'>

@@ -74,7 +74,7 @@ const RecipientsList: FC<RecipientsListProps> = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className='mb-3.5 px-1.5'
-        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs !py-0 !h-6 placeholder:!text-GRAY_500'
+        inputClassName='border-none! px-0! focus:outline-hidden placeholder:text-xs py-0! h-6! placeholder:!text-GRAY_500'
         focusClassNames=''
       />
       <CommonWrapper

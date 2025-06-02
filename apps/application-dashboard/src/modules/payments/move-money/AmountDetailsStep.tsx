@@ -120,7 +120,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
             onChange={handleAmountChange}
             className='f-13-450 grow'
             placeholder='Amount'
-            inputFontClassName='!px-3 placeholder:text-base bg-white placeholder:!text-GRAY_500 placeholder:text-[13px] w-full'
+            inputFontClassName='px-3! placeholder:text-base bg-white placeholder:!text-GRAY_500 placeholder:text-[13px] w-full'
             inputWrapperClassName='w-full '
           />
           <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>
@@ -144,7 +144,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
               placeholder='Payment processing mode'
               isSearchable={false}
               customClassNames={{
-                placeholder: 'f-13-450 !w-75',
+                placeholder: 'f-13-450 w-75!',
               }}
               menuOptionClasses={{
                 contentWrapper: 'w-[260px]',

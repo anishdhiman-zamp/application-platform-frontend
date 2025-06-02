@@ -46,7 +46,7 @@ const SelectFilterMenuItem = ({
       ref={menuRef}
       style={{ minWidth: menuWidth }}
       className={cn(
-        `absolute top-full min-w-[300px] left-0 mt-1  z-1000 shadow-tableFilterMenu border bg-white rounded-md`,
+        `absolute top-full min-w-[300px] left-0 mt-1  z-1000 shadow-table-filter-menu border bg-white rounded-md`,
         isOpen ? 'max-h-[500px] overflow-auto [&::-webkit-scrollbar]:hidden' : 'max-h-0 overflow-hidden border-0',
         getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : '',
       )}
@@ -56,7 +56,7 @@ const SelectFilterMenuItem = ({
         inputRef={searchRef}
         placeholder='Search...'
         className='sticky top-0 bg-white z-10'
-        inputClassName=' border-none w-full focus:outline-none focus:border-none focus:shadow-none'
+        inputClassName=' border-none w-full focus:outline-hidden focus:border-none focus:shadow-none'
         value={search}
         trailingIconProps={
           search

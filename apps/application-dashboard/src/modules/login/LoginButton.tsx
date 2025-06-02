@@ -33,13 +33,13 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo 
       type='submit'
       className={cn(
         'relative bg-BG_GRAY_3 h-12 w-full mt-4 rounded-md',
-        loading ? '!cursor-not-allowed' : '!cursor-pointer',
+        loading ? 'cursor-not-allowed!' : 'cursor-pointer!',
       )}
       onClick={onClick}
     >
       <div
         className={cn(
-          'relative z-10 color-transition before:transform before:translate-x-0 before:bg-BG_GRAY_3 after:transform after:-translate-x-1/2 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:transition-transform before:duration-[3000ms] before:ease-in-out before:rounded-[6px] after:absolute after:top-0 after:h-full after:w-full after:transition-transform after:duration-[3000ms] after:ease-in-out after:rounded-[6px] after:bg-BG_GRAY_4',
+          'relative z-10 color-transition before:transform before:translate-x-0 before:bg-BG_GRAY_3 after:transform after:-translate-x-1/2 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:transition-transform before:duration-3000 before:ease-in-out before:rounded-[6px] after:absolute after:top-0 after:h-full after:w-full after:transition-transform after:duration-3000 after:ease-in-out after:rounded-[6px] after:bg-BG_GRAY_4',
           { active: loading },
         )}
       >

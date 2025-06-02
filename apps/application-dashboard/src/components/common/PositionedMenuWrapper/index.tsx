@@ -43,7 +43,7 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
 
   return createPortal(
     <div
-      className={cn('bg-white abslolute z-[1202] shadow-menuList rounded-md border-0.5 border-GRAY_500', className)}
+      className={cn('bg-white abslolute z-1202 shadow-menu-list rounded-md border-0.5 border-GRAY_500', className)}
       data-testid={`menu-wrapper-${id}`}
       style={{
         top: menuPosition?.top + 'px',

@@ -53,7 +53,7 @@ const CustomisePaymentsAccess: FC<CustomisePaymentsAccessProps> = ({
   return (
     <FullScreenPopup
       isOpen={isOpen}
-      className='z-[1201] bg-BG_GRAY_1 overflow-visible'
+      className='z-1201 bg-BG_GRAY_1 overflow-visible'
       hideHeader
       childrenClassName='overflow-visible'
     >

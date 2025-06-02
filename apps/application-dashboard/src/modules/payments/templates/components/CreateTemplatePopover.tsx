@@ -111,7 +111,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
                   focusClassNames=''
                   placeholder='New Template'
                   inputWrapperClassName='border-b border-dashed border-GRAY_1000'
-                  inputFontClassName='f-22-550 !px-0 !pb-0 font-medium'
+                  inputFontClassName='f-22-550 px-0! pb-0! font-medium'
                 />
                 <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
               </div>

@@ -14,7 +14,7 @@ export const WidgetOptionDropdown = ({ options, onSelect, activeWidget, classNam
     <div
       ref={dropdownRef}
       className={cn(
-        'absolute z-40 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]',
+        'absolute z-40 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-table-filter-menu max-h-[330px] w-[200px]',
         className,
       )}
     >

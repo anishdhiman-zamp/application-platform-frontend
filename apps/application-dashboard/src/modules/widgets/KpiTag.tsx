@@ -94,7 +94,7 @@ const KpiTag: FC<KpiTagProps> = ({
 
   return (
     <div
-      className={cn('bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 z-[9999]', {
+      className={cn('bg-white h-full border border-GRAY_400 rounded-xl px-6 pt-4.5 pb-5 z-9999', {
         'opacity-85 animate-pulse': isFetching,
       })}
       ref={containerRef}
@@ -110,7 +110,7 @@ const KpiTag: FC<KpiTagProps> = ({
           disabled={isFetching || !showTooltip}
           tooltipBodyClassName='absolute -left-2 top-0 f-12-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
           position={TooltipPositions.BOTTOM_LEFT}
-          className='!cursor-text'
+          className='cursor-text!'
         >
           <div className='f-24-450 text-GRAY_950 truncate sensitive' ref={valueContainerRef}>
             {value}

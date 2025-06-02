@@ -18,10 +18,10 @@ const stackedClassNames: Record<number, string> = {
 
 const SIZE_CLASSNAMES: Record<SIZE_TYPES, string> = {
   [SIZE_TYPES.XSMALL]: 'w-sideDrawerXSmall',
-  [SIZE_TYPES.SMALL]: 'w-sideDrawer',
-  [SIZE_TYPES.MEDIUM]: 'w-sideDrawerMedium',
-  [SIZE_TYPES.LARGE]: 'w-sideDrawerLarge',
-  [SIZE_TYPES.XLARGE]: 'w-sideDrawerLarge',
+  [SIZE_TYPES.SMALL]: 'w-side-drawer',
+  [SIZE_TYPES.MEDIUM]: 'w-side-drawer-medium',
+  [SIZE_TYPES.LARGE]: 'w-side-drawer-large',
+  [SIZE_TYPES.XLARGE]: 'w-side-drawer-large',
 };
 
 const SIDE_DRAWER_TYPES_CLASSNAMES: Record<
@@ -29,27 +29,28 @@ const SIDE_DRAWER_TYPES_CLASSNAMES: Record<
   { wrapper: string; children: string; backdropClassName: string }
 > = {
   [SIDE_DRAWER_TYPES.PRIMARY]: {
-    wrapper: 'shadow-sideDrawer bg-white border',
+    wrapper: 'shadow-side-drawer bg-white border',
     children: 'bg-white',
     backdropClassName: 'pt-12',
   },
   [SIDE_DRAWER_TYPES.SECONDARY]: {
-    wrapper: 'p-2.5 backdrop-blur-sm',
-    children: 'rounded-xl bg-white w-full h-full sideDrawerInner border-[0.5px] border-GRAY_500 shadow-sideDrawerInner',
+    wrapper: 'p-2.5 backdrop-blur-xs',
+    children:
+      'rounded-xl bg-white w-full h-full sideDrawerInner border-[0.5px] border-GRAY_500 shadow-side-drawer-inner',
     backdropClassName: '',
   },
 };
 
 const POSITION_CLASSNAMES = {
   [POSITION_TYPES.RIGHT]: {
-    mountClassName: 'animate-rightSideDrawer-mount',
+    mountClassName: 'animate-right-side-drawer-mount',
     common: '',
-    unmountClassName: 'animate-rightSideDrawer-unMount',
+    unmountClassName: 'animate-right-side-drawer-un-mount',
   },
   [POSITION_TYPES.BOTTOM]: {
-    mountClassName: 'animate-bottomSideDrawer-mount',
-    unmountClassName: 'animate-bottomSideDrawer-unMount',
-    common: '!w-screen max-h-[90vh]',
+    mountClassName: 'animate-bottom-side-drawer-mount',
+    unmountClassName: 'animate-bottom-side-drawer-un-mount',
+    common: 'w-screen! max-h-[90vh]',
   },
   [POSITION_TYPES.TOP]: { mountClassName: '', unmountClassName: '', common: '' },
   [POSITION_TYPES.LEFT]: { mountClassName: '', unmountClassName: '', common: '' },

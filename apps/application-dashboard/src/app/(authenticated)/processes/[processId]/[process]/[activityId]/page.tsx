@@ -94,7 +94,7 @@ const Activity = () => {
         minSize={isExpanded ? 0 : 30}
         maxSize={isExpanded ? 0 : 70}
         className={cn('transition-all duration-300 ease-in-out', {
-          '!transition-none': isDragging,
+          'transition-none!': isDragging,
         })}
         ref={panelRef}
       >
@@ -133,7 +133,7 @@ const Activity = () => {
         minSize={showSummary ? 30 : isExpanded ? 100 : 30}
         maxSize={showSummary ? 30 : isExpanded ? 100 : 70}
         className={cn('transition-all duration-300 ease-in-out', {
-          '!transition-none': isDragging,
+          'transition-none!': isDragging,
         })}
       >
         {showSummary ? (

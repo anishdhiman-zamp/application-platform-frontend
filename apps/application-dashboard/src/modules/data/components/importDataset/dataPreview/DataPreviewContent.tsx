@@ -50,7 +50,7 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
             id='data-preview'
             type={TAB_TYPES.FILLED_OUTLINED}
             onSelect={handleTabSelect}
-            wrapperClassName='!w-fit rounded-md bg-GRAY_100'
+            wrapperClassName='w-fit! rounded-md bg-GRAY_100'
           />
         </div>
       </div>

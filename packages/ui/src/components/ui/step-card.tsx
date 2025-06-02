@@ -19,7 +19,7 @@ export const StepCard = ({ stepNumber, children, className, onRemove, ...props }
     >
       {onRemove && (
         <div
-          className='absolute -right-2.5 -top-2.5 z-[1] border rounded-full p-[2px] w-5 h-5 bg-white opacity-0 group-hover/step-card:opacity-100 transition-opacity duration-300 cursor-pointer'
+          className='absolute -right-2.5 -top-2.5 z-1 border rounded-full p-[2px] w-5 h-5 bg-white opacity-0 group-hover/step-card:opacity-100 transition-opacity duration-300 cursor-pointer'
           onClick={onRemove}
         >
           <X className='h-3.5 w-3.5 text-gray-900' />

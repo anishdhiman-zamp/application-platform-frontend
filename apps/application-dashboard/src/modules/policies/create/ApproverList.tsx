@@ -68,7 +68,7 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
           ))}
           <input
             ref={inputRef}
-            className='flex-1 min-w-[80px] border-none outline-none bg-transparent f-14-500'
+            className='flex-1 min-w-[80px] border-none outline-hidden bg-transparent f-14-500'
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -76,7 +76,7 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
           />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='z-[1001] max-h-60 overflow-y-auto' align='start'>
+      <DropdownMenuContent className='z-1001 max-h-60 overflow-y-auto' align='start'>
         {filteredOptions.length === 0 ? (
           <div className='px-2 py-2 text-gray-400'>No approvers found</div>
         ) : (

@@ -170,8 +170,8 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   return (
     <MenuWrapper
       id='display-options'
-      className={`!absolute z-10 right-0 mt-1 min-w-[250px] !overflow-visible`}
-      childrenWrapperClassName='!overflow-visible max-h-[422px] w-full'
+      className={`absolute! z-10 right-0 mt-1 min-w-[250px] overflow-visible!`}
+      childrenWrapperClassName='overflow-visible! max-h-[422px] w-full'
       style={{ width: maxWidth }}
     >
       <div className='pt-1 px-1'>

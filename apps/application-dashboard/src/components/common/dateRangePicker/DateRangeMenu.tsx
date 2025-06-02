@@ -343,8 +343,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   customSelectedIndex={dateRangeTabs?.findIndex((tab) => tab.value === currentTab)}
                   list={dateRangeTabs}
                   onSelect={handleTabSelect}
-                  wrapperStyle='border-white !w-auto'
-                  tabItemWrapperStyle='!w-auto'
+                  wrapperStyle='border-white w-auto!'
+                  tabItemWrapperStyle='w-auto!'
                   id='ACCOUNTS_TABS'
                   scrollWrapperClassName='pb-0'
                   type={TAB_TYPES.UNDERLINE}

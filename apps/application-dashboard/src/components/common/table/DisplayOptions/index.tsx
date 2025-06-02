@@ -64,7 +64,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            className='focus-visible:outline-none !ring-0 !ring-offset-0 select-none flex items-center gap-1'
+            className='focus-visible:outline-hidden ring-0! ring-offset-0! select-none flex items-center gap-1'
             size='small'
             variant='outline'
           >
@@ -74,7 +74,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align='end'
-          className='z-[9999] !min-w-[180px]  max-h-[300px] overflow-y-auto'
+          className='z-9999 min-w-[180px]!  max-h-[300px] overflow-y-auto'
           sideOffset={5}
         >
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(

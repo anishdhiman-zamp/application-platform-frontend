@@ -121,7 +121,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         onWidgetChange={onWidgetChange}
         widgetType={widgetType}
         activeWidget={activeWidget}
-        className='!z-1000'
+        className='z-1000!'
       />
       <CommonWrapper
         isLoading={isLoading || isFilterLoading}

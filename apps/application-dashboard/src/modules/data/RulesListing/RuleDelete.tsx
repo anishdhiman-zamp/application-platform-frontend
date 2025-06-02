@@ -36,7 +36,7 @@ const RuleDelete = ({ isOpen, onClose, ruleId, onSuccess }: RuleDeleteProps) => 
       onClose={onClose}
       title='Delete Rule ?'
       iconId='x-close'
-      className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white !p-0 shadow-menuList'
+      className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white p-0! shadow-menu-list'
       titleClassName='f-16-600 text-GRAY_950'
       showIcon
       closeOnClickOutside={false}

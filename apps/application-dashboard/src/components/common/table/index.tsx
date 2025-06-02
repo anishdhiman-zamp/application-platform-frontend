@@ -182,7 +182,7 @@ const Table: FC<TableProps> = ({
       floatingFilter: false,
       headerClass: cn('f-12-600 text-GRAY_1000', headerClass),
       cellClass: cn(
-        'f-11-400 text-GRAY_1000 content-center !px-2 py-1',
+        'f-11-400 text-GRAY_1000 content-center px-2! py-1',
         cellClass,
         onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '',
       ),

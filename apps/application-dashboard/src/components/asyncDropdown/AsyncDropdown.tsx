@@ -90,7 +90,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
       {isOpen && (
         <div
           className={cn(
-            'flex flex-col border border-GRAY_50 rounded-md p-1 absolute right-0 max-w-[170px] min-w-max bg-white z-1000 shadow-tableFilterMenu',
+            'flex flex-col border border-GRAY_50 rounded-md p-1 absolute right-0 max-w-[170px] min-w-max bg-white z-1000 shadow-table-filter-menu',
             wrapperClassName,
           )}
           style={{

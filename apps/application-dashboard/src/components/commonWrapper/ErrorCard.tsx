@@ -49,7 +49,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                   id='wifi-only'
                   size={SIZE_TYPES.SMALL}
                   onClick={toggleIsOfflineClick}
-                  className={isOfflineClicked ? '!px-2.5 !py-1.5' : '!p-1.5'}
+                  className={isOfflineClicked ? 'px-2.5! py-1.5!' : 'p-1.5!'}
                 >
                   {isOfflineClicked ? (
                     <span className='text-base'>{ERROR_BUTTON_TEXT.WIFI_ONLY_EMOJI}</span>

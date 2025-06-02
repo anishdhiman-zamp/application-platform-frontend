@@ -15,18 +15,14 @@ const MoveMoneyButton = () => {
     <DropdownMenu onOpenChange={setIsMoveMoneyActionMenuOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          className='focus-visible:outline-none !ring-0 !ring-offset-0 select-none flex items-center gap-1'
+          className='focus-visible:outline-hidden ring-0! ring-offset-0! select-none flex items-center gap-1'
           size='small'
         >
           Move Money
           <DropdownToggle isShowMenu={isMoveMoneyActionMenuOpen} setIsShowMenu={setIsMoveMoneyActionMenuOpen} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align='end'
-        className='z-[9999] !min-w-[180px]  max-h-[300px] overflow-y-auto'
-        sideOffset={5}
-      >
+      <DropdownMenuContent align='end' className='z-9999 min-w-[180px]!  max-h-[300px] overflow-y-auto' sideOffset={5}>
         {MOVE_MONEY_ACTION_ITEMS.map((item: MapAny) => (
           <DropdownMenuItem
             onClick={() => {

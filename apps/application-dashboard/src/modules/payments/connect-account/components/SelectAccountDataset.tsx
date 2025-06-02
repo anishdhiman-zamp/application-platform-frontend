@@ -20,7 +20,7 @@ const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) =>
       <Input
         autoFocus
         placeholder='Search dataset...'
-        inputClassName='border-none w-full focus:outline-none focus:border-none focus:shadow-none !px-0'
+        inputClassName='border-none w-full focus:outline-hidden focus:border-none focus:shadow-none px-0!'
         value={search}
         trailingIconProps={
           search

@@ -37,10 +37,10 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
   }, [onKeyDown]);
 
   return (
-    <div className='absolute left-0 bg-white max-w-48 w-fit p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'>
+    <div className='absolute left-0 bg-white max-w-48 w-fit p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-table-filter-menu'>
       <span className='flex pt-2 pb-1.5 px-1.5 whitespace-nowrap'>Select a team or create one</span>
       <div
-        className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden outline-none'
+        className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden outline-hidden'
         ref={dropdownRef}
         tabIndex={0}
         onKeyDown={onKeyDown}

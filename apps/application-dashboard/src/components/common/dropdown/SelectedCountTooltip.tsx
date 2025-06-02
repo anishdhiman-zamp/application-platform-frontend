@@ -19,7 +19,7 @@ const SelectedCountTooltip: FC<SelectedCountTooltipPropsType> = ({ value, toolti
             ))}
           </div>
         }
-        tooltipBodystyle={`bg-GRAY_700 text-white f-12-300 !px-3 !py-2  ${tooltipBodyClassName}`}
+        tooltipBodystyle={`bg-GRAY_700 text-white f-12-300 px-3! py-2!  ${tooltipBodyClassName}`}
       >
         {!!value?.length && (
           <div className='bg-BASE_PRIMARY f-10-600 h-4 w-5 flex items-center justify-center'>{value?.length}</div>

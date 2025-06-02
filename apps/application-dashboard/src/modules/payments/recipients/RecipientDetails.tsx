@@ -57,7 +57,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
           <Button
             id='send-money'
             onClick={handleSendMoney}
-            className='!px-3'
+            className='px-3!'
             iconProps={{
               id: 'send-03',
               size: 14,

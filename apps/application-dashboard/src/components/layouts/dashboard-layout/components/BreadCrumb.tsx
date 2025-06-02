@@ -69,8 +69,8 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
           {isMenuOpen && (
             <MenuWrapper
               id='breadcrumb-menu'
-              className='!absolute z-[100] p-1 top-4 mt-2'
-              childrenWrapperClassName='!overflow-y-auto'
+              className='!absolute z-100 p-1 top-4 mt-2'
+              childrenWrapperClassName='overflow-y-auto!'
             >
               {middleBreadCrumbs?.map((item, index) => (
                 <Link

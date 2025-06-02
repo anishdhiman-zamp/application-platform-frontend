@@ -241,7 +241,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         <PositionedMenuWrapper
           id='custom-header-menu'
           className='w-52 p-1'
-          childrenWrapperClassName='!overflow-auto'
+          childrenWrapperClassName='overflow-auto!'
           menuPosition={menuPosition}
           onClose={handleMenuClose}
         >
@@ -282,7 +282,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       {isAddTagOpen && (
         <PositionedMenuWrapper
           id='custom-header-add-tag-menu'
-          childrenWrapperClassName='!overflow-visible !max-h-[380px]'
+          childrenWrapperClassName='overflow-visible! max-h-[380px]!'
           menuPosition={menuPosition}
           onClose={handleAddTagClose}
         >
@@ -299,7 +299,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         <PositionedMenuWrapper
           id='custom-header-filter-menu'
           className='border-none'
-          childrenWrapperClassName='!overflow-visible'
+          childrenWrapperClassName='overflow-visible!'
           menuPosition={menuPosition}
           onClose={handleFilterClose}
         >

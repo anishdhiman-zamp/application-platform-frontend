@@ -134,7 +134,7 @@ const AddTag = ({
             <MenuWrapper
               id='custom-tag-editor-menu'
               className='!fixed mt-1 w-64 z-10'
-              childrenWrapperClassName='!overflow-y-visible !max-h-fit'
+              childrenWrapperClassName='overflow-y-visible! max-h-fit!'
             >
               <div className='text-GRAY_700 f-11-500 p-2'>Select an option or create one</div>
               <div className='space-y-1 my-1 overflow-y-auto max-h-[300px]'>

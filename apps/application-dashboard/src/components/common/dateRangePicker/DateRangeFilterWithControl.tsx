@@ -53,8 +53,8 @@ const DateRangeFilterWithControl: FC<DateRangeFilterWithControlProps> = ({
         id={`DATE_RANGE_BUTTON_${id}`}
         iconCategory={ICON_SPRITE_TYPES.TIME}
         isSelected={isDateRangeOpen}
-        childrenWrapperClassName='!text-xs'
-        className={`!mb-0 ${controlClassName}`}
+        childrenWrapperClassName='text-xs!'
+        className={`mb-0! ${controlClassName}`}
       >
         {getDateRangeTitle(value, showSingleDate)}
       </FilterControlButton>

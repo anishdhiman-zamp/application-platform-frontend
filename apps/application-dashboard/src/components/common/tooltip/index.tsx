@@ -103,16 +103,16 @@ export const Tooltip: FC<TooltipProps> = ({
   };
 
   const wrapperPositionStyle = {
-    [TooltipPositions.RIGHT]: ` ml-2.5 z-[500] left-full`,
-    [TooltipPositions.RIGHT_TOP]: `ml-2.5 z-[500] -top-2.5 left-full`,
-    [TooltipPositions.LEFT]: 'mr-2 z-[500] right-full',
-    [TooltipPositions.LEFT_TOP]: '-top-2.5 mr-2 z-[500] right-full',
-    [TooltipPositions.TOP]: ' mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.BOTTOM]: 'mt-2.5 z-[500] top-full',
-    [TooltipPositions.TOP_RIGHT]: '-right-2.5 mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.TOP_LEFT]: '-left-2.5 mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.BOTTOM_RIGHT]: '-right-2.5 mt-2.5 z-[500] top-full',
-    [TooltipPositions.BOTTOM_LEFT]: '-left-2.5 mt-2.5 z-[500] top-full',
+    [TooltipPositions.RIGHT]: ` ml-2.5 z-500 left-full`,
+    [TooltipPositions.RIGHT_TOP]: `ml-2.5 z-500 -top-2.5 left-full`,
+    [TooltipPositions.LEFT]: 'mr-2 z-500 right-full',
+    [TooltipPositions.LEFT_TOP]: '-top-2.5 mr-2 z-500 right-full',
+    [TooltipPositions.TOP]: ' mb-2.5 z-500 bottom-full',
+    [TooltipPositions.BOTTOM]: 'mt-2.5 z-500 top-full',
+    [TooltipPositions.TOP_RIGHT]: '-right-2.5 mb-2.5 z-500 bottom-full',
+    [TooltipPositions.TOP_LEFT]: '-left-2.5 mb-2.5 z-500 bottom-full',
+    [TooltipPositions.BOTTOM_RIGHT]: '-right-2.5 mt-2.5 z-500 top-full',
+    [TooltipPositions.BOTTOM_LEFT]: '-left-2.5 mt-2.5 z-500 top-full',
   };
 
   const calculatePositionStyle = useCallback((position: TooltipPositions) => {

@@ -9,9 +9,9 @@ interface LoaderProps {
 }
 
 export const SIZE_CLASSNAMES = {
-  [SIZE.XSMALL]: 'w-3 h-3 border-[2px] border-transparent border-t-[2px] border-r-[2px] border-l-[2px]',
+  [SIZE.XSMALL]: 'w-3 h-3 border-2 border-transparent border-t-2 border-r-2 border-l-2',
   [SIZE.SMALL]: 'w-6 h-6 border-[3px] border-transparent border-t-[3px] border-r-[3px] border-l-[3px]',
-  [SIZE.MEDIUM]: 'w-8 h-8 border-[4px] border-transparent border-t-[4px] border-r-[4px] border-l-[4px]',
+  [SIZE.MEDIUM]: 'w-8 h-8 border-4 border-transparent border-t-4 border-r-4 border-l-4',
   [SIZE.LARGE]: 'w-12 h-12 border-[5px] border-transparent border-t-[5px] border-r-[5px] border-l-[5px]',
   [SIZE.XLARGE]: 'w-12 h-12 border-[5px] border-transparent border-t-[5px] border-r-[5px] border-l-[5px]',
 };

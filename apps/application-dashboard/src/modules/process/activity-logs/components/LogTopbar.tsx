@@ -41,7 +41,7 @@ const LogTopbar: FC<LogTopbarProps> = ({ status }) => {
             </div>
           }
         >
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 !mt-[2.5px]'>
+          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
             <SvgSpriteLoader id='slash-circle-01' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
@@ -50,13 +50,13 @@ const LogTopbar: FC<LogTopbarProps> = ({ status }) => {
       <div className='flex items-center p-4 min-w-max'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
         <TooltipV2 tooltipBody='Move to Next Run'>
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 mr-1.5 !mt-[2.5px]'>
+          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mr-1.5 mt-[2.5px]!'>
             <SvgSpriteLoader id='arrow-down' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
 
         <TooltipV2 tooltipBody='Move to Previous Run'>
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 !mt-[2.5px]'>
+          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>

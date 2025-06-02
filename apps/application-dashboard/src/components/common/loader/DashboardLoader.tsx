@@ -21,7 +21,7 @@ const DashboardLoader: FC<DashboardLoaderPropsType> = ({ isFadingOut }) => {
           <SkeletonElement elementCount={3} className='w-4 h-4 rounded-sm bg-GRAY_400' />
           <SkeletonElement elementCount={1} className='w-20 h-4 rounded-sm bg-GRAY_400' />
         </div>
-        <span className='w-60 h-5 bg-GRAY_400 rounded-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent before:animate-[shimmer-skeleton_1.5s_infinite] before:w-full before:h-full'></span>
+        <span className='w-60 h-5 bg-GRAY_400 rounded-sm relative overflow-hidden before:absolute before:inset-0 before:bg-linear-to-r before:from-transparent before:via-white/60 before:to-transparent before:animate-[shimmer-skeleton_1.5s_infinite] before:w-full before:h-full'></span>
 
         <div className='flex gap-4'>
           <SkeletonElement elementCount={1} className='w-8 h-5 rounded-sm bg-GRAY_400' />

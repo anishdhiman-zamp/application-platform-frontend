@@ -219,7 +219,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
   return (
     <div
       className={cn(
-        'px-2.5 py-2 w-[218px] min-w-[300px] max-w-[360px] border-0.5 border-GRAY_400 rounded-md bg-white shadow-tableFilterMenu',
+        'px-2.5 py-2 w-[218px] min-w-[300px] max-w-[360px] border-0.5 border-GRAY_400 rounded-md bg-white shadow-table-filter-menu',
         className,
       )}
     >
@@ -231,7 +231,7 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
       />
 
       <div
-        className='relative mt-2 w-full rounded-md border border-BORDER_GRAY_400 overflow-hidden shadow-tableFilterMenu focus:shadow-inputOutlineShadow focus:border-GRAY_600'
+        className='relative mt-2 w-full rounded-md border border-BORDER_GRAY_400 overflow-hidden shadow-table-filter-menu focus:shadow-input-outline-shadow focus:border-GRAY_600'
         ref={inputWrapperRef}
       >
         <Input
@@ -248,10 +248,10 @@ const MultiSearchFilterMenuItem: FC<MultiSearchFilterMenuItemProps> = ({
           onKeyPress={handleDescriptionInputKeyPress}
           onKeyDown={handleDescriptionInputKeyDown}
           onDeleteTag={onDeleteDescriptionInputTag}
-          overrideInputBgClassName='!bg-white'
+          overrideInputBgClassName='bg-white!'
           value={(descriptionValue ? descriptionValue : descriptionPropertySearch) as string}
           onChange={onDescriptionInputChange}
-          inputClassName='w-full !min-w-[160px] flex-1 outline-none border-none focus:!shadow-none !shadow-none'
+          inputClassName='w-full min-w-[160px]! flex-1 outline-hidden border-none focus:shadow-none! shadow-none!'
           inputSizeClassName='p-0'
           autoFocus
           disabled={isDisabled}

@@ -31,7 +31,7 @@ const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
           <Ellipsis size={14} />
         </div>
       </PopoverTrigger>
-      <PopoverContent className='z-[1001] max-h-60 overflow-y-auto' align='end'>
+      <PopoverContent className='z-1001 max-h-60 overflow-y-auto' align='end'>
         <PopoverMenuItem
           className='hover:bg-gray-100 rounded-md flex gap-1.5 text-primary flex-1 f-12-500 items-center'
           onClick={handleEdit}

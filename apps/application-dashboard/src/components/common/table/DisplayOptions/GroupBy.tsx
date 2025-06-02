@@ -111,7 +111,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
     <MenuWrapper
       id='group-by'
       className='!absolute z-10 right-0 mt-1 min-w-[376px] min-h-[344px] h-fit'
-      childrenWrapperClassName='!overflow-visible !min-h-[344px] h-fit !max-h-fit'
+      childrenWrapperClassName='overflow-visible! min-h-[344px]! h-fit max-h-fit!'
     >
       <div className='px-3 py-1'>
         <div className='flex items-center gap-1.5 py-2'>
@@ -163,7 +163,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
           placeholder='Search Columns...'
           size={SIZE_TYPES.XSMALL}
           noBorders
-          focusClassNames='mt-3 mb-2 !pl-0'
+          focusClassNames='mt-3 mb-2 pl-0!'
           onChange={handleSearch}
           value={searchTerm}
           autoFocus

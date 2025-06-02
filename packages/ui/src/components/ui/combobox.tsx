@@ -55,10 +55,7 @@ export function Combobox({
           }}
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
-          className={cn(
-            'z-[1003] p-0 pointer-events-auto min-w-[var(--radix-popover-trigger-width)] ',
-            contentClassName,
-          )}
+          className={cn('z-1003 p-0 pointer-events-auto min-w-(--radix-popover-trigger-width) ', contentClassName)}
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />

@@ -280,7 +280,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       <div
         className={cn('relative rounded-md border border-GRAY_500 bg-white', {
           'border-GRAY_400 overflow-hidden': !isShowMenu,
-          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
+          'border-GRAY_500 shadow-select-account-dropdown': isShowMenu,
           '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,
         })}
         ref={containerRef}
@@ -319,8 +319,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               <Tabs
                 list={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
                 onSelect={handleTabSelect}
-                wrapperStyle='border-white !w-auto'
-                tabItemWrapperStyle='!w-auto'
+                wrapperStyle='border-white w-auto!'
+                tabItemWrapperStyle='w-auto!'
                 id='ACCOUNTS_TABS'
                 scrollWrapperClassName='pb-0'
                 type={TAB_TYPES.OUTLINE}

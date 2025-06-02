@@ -135,7 +135,7 @@ export const DROPDOWN_SIZE_STYLES = {
     menuOptionClasses: {
       wrapperClass: 'h-10 overflow-clip',
       labelOverrideClassName: 'f-16-400',
-      contentWrapper: '!px-4 !py-3 w-full',
+      contentWrapper: 'px-4! py-3! w-full',
     },
     customClassNames: {
       placeholder: 'f-16-300',

@@ -25,7 +25,7 @@ export const HeaderTextField: React.FC<HeaderTextFieldProps> = ({ field, name, c
               type='text'
               name={name}
               className={cn(
-                'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none [&:not(:placeholder-shown)]:border-transparent min-w-[fit-content] bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset]',
+                'f-22-500 placeholder:text-gray-500 text-primary focus:outline-hidden not-placeholder-shown:border-transparent min-w-fit bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset]',
                 fieldState.error && 'border-destructive focus-visible:ring-destructive',
               )}
               placeholder={field.placeholder || field.label}

@@ -98,11 +98,7 @@ const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
         </div>
       </DropdownMenuTrigger>
       {!!teamList?.length && (
-        <DropdownMenuContent
-          align='end'
-          className='z-[1001] min-w-[200px]  max-h-[300px] overflow-y-auto'
-          sideOffset={5}
-        >
+        <DropdownMenuContent align='end' className='z-1001 min-w-[200px]  max-h-[300px] overflow-y-auto' sideOffset={5}>
           {teamList?.map((user) => (
             <DropdownMenuItem key={user?.user_id} className='flex items-center justify-between py-1 cursor-default'>
               <div className='f-12-450 text-GRAY_1000 px-2.5 py-0.5 border border-GRAY_400 rounded'>

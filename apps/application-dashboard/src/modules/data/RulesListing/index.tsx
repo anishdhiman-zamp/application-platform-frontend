@@ -221,7 +221,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
       id='rules-listing-side-drawer'
       onClose={onClose}
       hideCloseButton
-      childrenWrapperClassName='!px-0'
+      childrenWrapperClassName='px-0!'
     >
       <div className='h-full mt-2'>
         <div className='px-6'>
@@ -247,7 +247,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
               placeholder='Search'
               size={SIZE_TYPES.XSMALL}
               noBorders
-              focusClassNames='mt-6 mb-3.5 !px-0'
+              focusClassNames='mt-6 mb-3.5 px-0!'
               onChange={handleSearch}
               value={searchTerm}
             />
@@ -321,7 +321,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
         onClose={handleApplyChangesPopupClose}
         title='Apply Changes ?'
         iconId='x-close'
-        className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white !p-0 shadow-menuList'
+        className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white p-0! shadow-menu-list'
         titleClassName='f-16-600 text-GRAY_950'
         showIcon
       >

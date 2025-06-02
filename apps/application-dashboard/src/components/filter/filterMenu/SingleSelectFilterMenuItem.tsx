@@ -95,7 +95,7 @@ const SingleSelectFilterMenuItem: FC<SingleSelectFilterMenuItemProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 bg-white pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[218px] min-w-[218px]',
+        'flex flex-col gap-2 bg-white pt-2 pb-1 border border-GRAY_400 rounded-md shadow-table-filter-menu max-h-[330px] w-[218px] min-w-[218px]',
         className,
       )}
     >

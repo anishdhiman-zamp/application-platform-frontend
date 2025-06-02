@@ -44,7 +44,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
   return (
     <div
       className={cn(
-        'flex items-center fixed  z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-pageBottomBar px-8 gap-3 transition-all duration-300',
+        'flex items-center fixed  z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-page-bottom-bar px-8 gap-3 transition-all duration-300',
         !isSidebarOpen ? 'w-full' : 'w-[calc(100%-240px)]',
       )}
     >
@@ -61,7 +61,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
             onClick={() => handleTabSelect(tab)}
             type={BUTTON_TYPES.SECONDARY}
             className={cn(
-              'w-fit !rounded-lg',
+              'w-fit rounded-lg!',
               currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : 'bg-white !border-GRAY_400',
             )}
             size={SIZE_TYPES.MEDIUM}

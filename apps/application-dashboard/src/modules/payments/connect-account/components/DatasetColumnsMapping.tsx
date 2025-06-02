@@ -87,7 +87,7 @@ const DatasetColumnsMapping = ({ onSelectDataset }: DatasetColumnsMappingProps) 
               </div>
             </div>
           ))}
-          <Button id='connect-account-button' size={SIZE_TYPES.MEDIUM} className='w-[56px] !mt-[26px]'>
+          <Button id='connect-account-button' size={SIZE_TYPES.MEDIUM} className='w-[56px] mt-[26px]!'>
             Done
           </Button>
         </div>

@@ -91,10 +91,10 @@ const Dialogue: FC<DialogueProps> = ({
   return (
     <div
       className={cn(
-        'z-[1001] bg-[#00000026] backdrop-blur-[1.5px] transition-all duration-150 ease-in fixed w-screen h-screen top-0 left-0 opacity-100',
+        'z-1001 bg-[#00000026] backdrop-blur-[1.5px] transition-all duration-150 ease-in fixed w-screen h-screen top-0 left-0 opacity-100',
         parentWrapperClassName ?? 'z-1000',
         {
-          '!opacity-0': !isOpenInternal,
+          'opacity-0!': !isOpenInternal,
         },
       )}
       role='presentation'
@@ -103,7 +103,7 @@ const Dialogue: FC<DialogueProps> = ({
       <div className='w-full h-full flex items-center justify-center'>
         <div
           className={cn(
-            'z-[1002] bg-white transition-all duration-300 ease-in block rounded-xl overflow-hidden shadow-sideDrawerInner',
+            'z-1002 bg-white transition-all duration-300 ease-in block rounded-xl overflow-hidden shadow-side-drawer-inner',
             wrapperClassName ?? 'w-[500px]',
             className,
             isOpen ? ' translate-y-0 opacity-1' : 'translate-y-[50px] opacity-0',

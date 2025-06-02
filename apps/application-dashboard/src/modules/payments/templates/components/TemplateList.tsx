@@ -63,16 +63,16 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
               tabsList={TEMPLATE_LIST_TABS}
               currentTab={currentTab}
               onValueChange={handleTabSelect}
-              contentClassName='max-h-[314px] overflow-y-scroll f-12-450 !mt-0'
+              contentClassName='max-h-[314px] overflow-y-scroll f-12-450 mt-0!'
               listClassName='grid w-full grid-cols-2 mx-auto'
-              triggerClassName='!mt-0'
+              triggerClassName='mt-0!'
             />
             <Input
               type='text'
               placeholder='Search...'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              overrideInputBgClassName='!border-none !px-2 focus:outline-none !py-0 !h-6 placeholder:!text-GRAY_500'
+              overrideInputBgClassName='border-none! px-2! focus:outline-hidden py-0! h-6! placeholder:!text-GRAY_500'
               focusClassNames=''
               tabIndex={createTemplateType ? -1 : 0}
             />

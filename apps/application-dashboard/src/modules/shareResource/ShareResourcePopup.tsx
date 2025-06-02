@@ -421,7 +421,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
         onClick={handleTogglePopup}
         className={cn(
-          openPopup && '!border !border-GRAY_400 !bg-GRAY_100',
+          openPopup && 'border! !border-GRAY_400 !bg-GRAY_100',
           'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-BG_GRAY_2 active:bg-GRAY_400 border border-GRAY_400 bg-white',
         )}
       >
@@ -429,8 +429,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       </div>
       <div className='relative'>
         {openPopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
-            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
+          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-1200 bg-faded-white rounded-2xl'>
+            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-table-filter-menu'>
               <div className='flex w-full justify-between items-center p-5'>
                 <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
                 <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
@@ -499,7 +499,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
+            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-table-filter-menu'>
               <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
               <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                 <CommonWrapper
