@@ -2,10 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useLogout } from 'hooks/useLogout';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock('apis/auth', () => ({
@@ -25,6 +26,8 @@ describe('useLogout', () => {
       push: mockPush,
       pathname: '/test-path',
     });
+
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
@@ -56,6 +59,8 @@ describe('useLogout', () => {
       push: mockPush,
       pathname: '/test-path',
     });
+
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
@@ -91,6 +96,8 @@ describe('useLogout', () => {
       push: mockPush,
     });
 
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
+
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
       refetch: mockRefetch,
@@ -120,6 +127,8 @@ describe('useLogout', () => {
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
+
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: undefined,

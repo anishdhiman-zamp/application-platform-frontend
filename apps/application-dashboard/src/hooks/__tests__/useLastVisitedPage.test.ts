@@ -1,12 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { getFromLocalStorage, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock('utils/localstorage', () => ({
@@ -101,6 +102,8 @@ describe('usePersistedPageNavigation', () => {
         pathname,
         push: pushFn,
       });
+
+      (usePathname as jest.Mock).mockReturnValue(pathname);
 
       (getFromLocalStorage as jest.Mock).mockReturnValue(lastVisitedPageId);
 

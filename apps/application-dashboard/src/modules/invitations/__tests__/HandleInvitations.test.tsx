@@ -3,7 +3,7 @@ import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { HandleInvitations } from 'modules/invitations/HandleInvitations';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 // Mock the required modules
 jest.mock('next/font/google', () => ({
@@ -16,6 +16,7 @@ jest.mock('next/font/google', () => ({
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 jest.mock('apis/people', () => ({
@@ -54,6 +55,7 @@ describe('HandleInvitations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    (usePathname as jest.Mock).mockReturnValue('/test-path');
     (useGetMyInvitationsQuery as jest.Mock).mockReturnValue({
       data: null,
       isLoading: true,
