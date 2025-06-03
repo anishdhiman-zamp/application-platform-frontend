@@ -85,9 +85,6 @@ const Sidebar = () => {
                     />
                   </Link>
                 ))}
-                <div onClick={() => router.push(SETTING_SIDEBAR_ITEMS[0]?.path)}>
-                  <SidebarTab name='Settings' iconId='settings-01' className='cursor-pointer' />
-                </div>
               </div>
               {processes && processes?.length > 0 && (
                 <div className='px-2 py-2.5'>
