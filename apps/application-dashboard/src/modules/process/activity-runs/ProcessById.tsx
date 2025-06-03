@@ -10,6 +10,7 @@ import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } fr
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ActivityByStatus from '@/modules/process/activity-runs/ActivityByStatus';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
+import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -89,12 +90,14 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isLoading,
+        'flex flex-col items-center justify-center': isLoading || activityRunsSummaryData?.status_summary?.length === 0,
       })}
       isError={isError}
       refetchFunction={refetchActivityRunsSummary}
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
+      isNoData={activityRunsSummaryData?.status_summary?.length === 0}
+      noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}
       loader={
         <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />

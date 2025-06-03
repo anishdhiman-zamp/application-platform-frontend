@@ -2,7 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Skeleton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -32,7 +32,8 @@ interface PdfArtifactProps {
 }
 
 const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
-  const { processId } = useParams();
+  const searchParams = useSearchParams();
+  const processId = searchParams.get('processId') as string;
 
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState<number | null>(null);

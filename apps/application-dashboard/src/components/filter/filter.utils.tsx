@@ -247,9 +247,9 @@ export const isObjectValue = (value: MultiSelectFilterValue): value is { label: 
 };
 
 export const getValueString = (value: MultiSelectFilterValue): string => {
-  return isObjectValue(value) ? value.value : value;
+  return isObjectValue(value) ? value.value : value.toString();
 };
 
 export const getDisplayString = (value: MultiSelectFilterValue): string => {
-  return isObjectValue(value) ? value.label : value;
+  return isObjectValue(value) ? value.label : value.toString();
 };

@@ -2,6 +2,7 @@ import {
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
+  PROCESS_ACCESS_PRIVILEGES,
   ResourcePrivilege,
   ResourceType,
   ShareResourceConfig,
@@ -57,6 +58,24 @@ export const CHANGE_ACCESS_PRIVILEGES_LIST: ResourcePrivilege[] = [
     value: PAYMENT_ACCESS_PRIVILEGES.VIEWER,
     desc: 'Can view payments only',
   },
+  {
+    kind: ResourceType.PROCESS,
+    label: 'Admin',
+    value: PROCESS_ACCESS_PRIVILEGES.ADMIN,
+    desc: 'Can manage and share process',
+  },
+  {
+    kind: ResourceType.PROCESS,
+    label: 'Viewer',
+    value: PROCESS_ACCESS_PRIVILEGES.VIEWER,
+    desc: 'Can view process only',
+  },
+  {
+    kind: ResourceType.PROCESS,
+    label: 'Editor',
+    value: PROCESS_ACCESS_PRIVILEGES.EDITOR,
+    desc: 'Can edit process',
+  },
 ];
 
 export const resourcePrivilegeRank = {
@@ -81,9 +100,7 @@ export const RESOURCE_PRIVILEGES: Record<ResourceType, ResourcePrivilege[]> = {
   [ResourceType.PAYMENTS]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.PAYMENTS,
   ),
-  [ResourceType.ACTIVITY]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
-    (privilege) => privilege.kind === ResourceType.ACTIVITY,
-  ),
+  [ResourceType.PROCESS]: CHANGE_ACCESS_PRIVILEGES_LIST.filter((privilege) => privilege.kind === ResourceType.PROCESS),
   [ResourceType.ORGANIZATION]: CHANGE_ACCESS_PRIVILEGES_LIST.filter(
     (privilege) => privilege.kind === ResourceType.ORGANIZATION,
   ),
@@ -122,13 +139,13 @@ export const paymentsConfig: ShareResourceConfig = {
   },
 };
 
-export const activityConfig: ShareResourceConfig = {
-  type: ResourceType.ACTIVITY,
-  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.ACTIVITY],
-  displayName: 'activity',
+export const processConfig: ShareResourceConfig = {
+  type: ResourceType.PROCESS,
+  accessPrivilegesList: RESOURCE_PRIVILEGES[ResourceType.PROCESS],
+  displayName: 'process',
   toastMessages: {
-    success: TOAST_MESSAGES.SUCCESS_ACTIVITY_SHARED,
-    failed: TOAST_MESSAGES.FAILED_ACTIVITY_SHARED,
+    success: TOAST_MESSAGES.SUCCESS_PROCESS_SHARED,
+    failed: TOAST_MESSAGES.FAILED_PROCESS_SHARED,
   },
 };
 
@@ -136,7 +153,7 @@ export const resourceTypeRouteMap = {
   [ResourceType.DATASET]: 'datasets',
   [ResourceType.PAGE]: 'pages',
   [ResourceType.PAYMENTS]: 'payments',
-  [ResourceType.ACTIVITY]: 'activities',
+  [ResourceType.PROCESS]: 'processes',
   [ResourceType.ORGANIZATION]: 'organizations',
 };
 

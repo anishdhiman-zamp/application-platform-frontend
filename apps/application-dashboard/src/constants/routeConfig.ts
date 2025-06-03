@@ -18,8 +18,8 @@ export const ROUTES_PATH = {
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
-  PROCESS: '/processes/:processId/:label',
-  PROCESS_ACTIVITY_LOGS: '/processes/:processId/:label/:activityId',
+  PROCESS: '/processes',
+  PROCESS_ACTIVITY_LOGS: '/processes/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   SETTINGS: '/settings',
@@ -53,12 +53,17 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.ADMIN_DATASETS}/${datasetId}`;
 };
 
-export const getProcessRouteById = (processId: string, label: string, status?: string) => {
-  return `${ROUTES_PATH.PROCESS.replace(':processId', processId).replace(':label', label)}${status ? `?status=${status}` : ''}`;
+export const getProcessRouteById = (processId: string, process: string, status?: string) => {
+  return `${ROUTES_PATH.PROCESS}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
 };
 
-export const getProcessActivityLogsRouteById = (processId: string, label: string, activityId: string) => {
-  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':label', label).replace(':activityId', activityId)}`;
+export const getProcessActivityLogsRouteById = (
+  processId: string,
+  process: string,
+  activityId: string,
+  status?: string,
+) => {
+  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':activityId', activityId)}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

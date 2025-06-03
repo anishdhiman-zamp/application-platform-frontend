@@ -82,20 +82,14 @@ const Sidebar = () => {
                     skeletonType={SkeletonTypes.CUSTOM}
                     loader={<SkeletonLoaderSidebarPages />}
                   >
-                    {processes
-                      ?.map((process) => ({
-                        ...process,
-                        fractionalIndex: process?.fractional_index,
-                      }))
-                      .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
-                      .map((process) => (
-                        <ProcessNavTab
-                          key={process?.id}
-                          label={process?.display_name}
-                          processId={process?.id}
-                          isSelected={params?.processId === process?.id}
-                        />
-                      ))}
+                    {processes?.map((process) => (
+                      <ProcessNavTab
+                        key={process?.id}
+                        label={process?.display_name}
+                        processId={process?.id}
+                        isSelected={params?.processId === process?.id}
+                      />
+                    ))}
                   </CommonWrapper>
                 </div>
               )}

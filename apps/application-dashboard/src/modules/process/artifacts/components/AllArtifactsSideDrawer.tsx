@@ -5,7 +5,7 @@ import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery } from '@/apis/processes';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { COLORS } from '@/constants/colors';
@@ -19,7 +19,10 @@ interface AllArtifactsDialogProps {
 }
 
 const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
-  const { processId, activityId } = useParams();
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const processId = searchParams.get('processId') as string;
+  const activityId = params?.activityId;
 
   const {
     data: artifacts,
@@ -65,7 +68,7 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
 
               {isLoadingArtifacts || isErrorArtifacts
                 ? Array.from({ length: 5 }).map((_, index) => (
-                    <SkeletonElement className='w-full h-24 rounded-lg' key={index} />
+                    <SkeletonElement className='w-80 h-24 rounded-lg' key={index} />
                   ))
                 : artifacts?.artifacts?.map((artifact) => (
                     <ArtifactItem

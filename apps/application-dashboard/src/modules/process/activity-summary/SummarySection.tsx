@@ -2,18 +2,23 @@ import { type FC } from 'react';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
 import type { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ArtifactTag from '@/modules/process/common/ArtifactTag';
+import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 
 type SummarySectionProps = {
   handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
 };
 
 const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
-  const { processId, activityId } = useParams();
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const processId = searchParams.get('processId') as string;
+  const activityId = params?.activityId;
+
   const {
     data: summary,
     isLoading: isLoadingSummary,
@@ -54,6 +59,8 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         loader={<ArtifactsSkeleton />}
         isError={isErrorSummary}
         refetchFunction={refetchSummary}
+        isNoData={!summary?.summary?.summary_items?.length}
+        noDataBanner={<NoWidgetData className='h-[400px]' text='No key details found' />}
         errorCardStyle='w-full h-1/2'
         className='px-6 pt-5 pb-6 flex flex-col justify-start items-start w-full gap-y-3'
       >
@@ -67,6 +74,8 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         loader={<ArtifactsSkeleton />}
         isError={isErrorArtifacts}
         refetchFunction={refetchArtifacts}
+        isNoData={!artifacts?.artifacts?.length}
+        noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
         className='px-6 py-5 flex flex-col justify-start items-start w-full gap-y-3'
       >
