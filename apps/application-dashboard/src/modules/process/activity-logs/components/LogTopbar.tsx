@@ -81,13 +81,13 @@ const LogTopbar: FC = () => {
       {/* TODO: Add back when we have the functionality */}
       <div className='flex min-w-max items-center p-4'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
-        <TooltipV2 tooltipBody='Move to Next Run'>
+        <TooltipV2 tooltipBody='Move to Next Run' asChildTrigger>
           <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]! mr-1.5'>
             <SvgSpriteLoader id='arrow-down' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
 
-        <TooltipV2 tooltipBody='Move to Previous Run'>
+        <TooltipV2 tooltipBody='Move to Previous Run' asChildTrigger>
           <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
