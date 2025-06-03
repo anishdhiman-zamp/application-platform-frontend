@@ -10,7 +10,7 @@ import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { useGetPaymentConfigQuery } from '@/apis/payments';
@@ -26,6 +26,8 @@ const Sidebar = () => {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const processId = searchParams?.get('processId');
 
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
@@ -98,20 +100,14 @@ const Sidebar = () => {
                     skeletonType={SkeletonTypes.CUSTOM}
                     loader={<SkeletonLoaderSidebarPages />}
                   >
-                    {processes
-                      ?.map((process) => ({
-                        ...process,
-                        fractionalIndex: process?.fractional_index,
-                      }))
-                      .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
-                      .map((process) => (
-                        <ProcessNavTab
-                          key={process?.id}
-                          label={process?.display_name}
-                          processId={process?.id}
-                          isSelected={params?.processId === process?.id}
-                        />
-                      ))}
+                    {processes?.map((process) => (
+                      <ProcessNavTab
+                        key={process?.id}
+                        label={process?.display_name}
+                        processId={process?.id}
+                        isSelected={processId === process?.id}
+                      />
+                    ))}
                   </CommonWrapper>
                 </div>
               )}

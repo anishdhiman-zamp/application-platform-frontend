@@ -4,7 +4,7 @@ import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -23,6 +23,7 @@ type ProcessByIdProps = {
 const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>(status || '');
   const initialLoadDone = useRef(false);
 
@@ -68,7 +69,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    router.push(`${window?.location?.pathname}?${searchParams?.toString()}&status=${value}`);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+
+    params.set('status', value);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -99,13 +103,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
         </div>
       }
     >
-      <Tabs
-        onValueChange={(value) => {
-          handleTabChange(value);
-        }}
-        value={activeTab}
-        key={activeTab}
-      >
+      <Tabs onValueChange={(value) => handleTabChange(value)} value={activeTab} key={activeTab}>
         <TabsList className='mx-3 my-3 gap-2.5 bg-white'>
           {activityRunsSummaryData?.status_summary?.map((item) => (
             <TabsTrigger
