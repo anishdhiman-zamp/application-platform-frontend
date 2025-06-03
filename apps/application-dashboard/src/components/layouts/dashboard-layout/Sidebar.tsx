@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -12,7 +12,6 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
-import { useGetPaymentConfigQuery } from '@/apis/payments';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
@@ -34,23 +33,12 @@ const Sidebar = () => {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
-  const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
 
   useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }
   }, [pages]);
-
-  const filteredSidebarItems = useMemo(
-    () =>
-      SIDEBAR_ITEMS.filter(
-        (item) => !item?.isHidden && (item?.id !== 'payments' || (item?.id === 'payments' && paymentConfig?.id)),
-      ),
-    [paymentConfig],
-  );
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -75,7 +63,7 @@ const Sidebar = () => {
               className='h-full'
             >
               <div className='px-2 border-b border-GRAY_400 pb-4'>
-                {filteredSidebarItems.map((item) => (
+                {SIDEBAR_ITEMS.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer'>
                     <SidebarTab
                       key={item?.label}
