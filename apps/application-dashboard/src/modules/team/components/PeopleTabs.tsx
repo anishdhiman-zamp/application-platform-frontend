@@ -53,8 +53,6 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
     router.replace(`${ROUTES_PATH.TEAM}?${params.toString()}`);
   };
 
-  console.log('hasPeoplePolicy', hasPeoplePolicy);
-
   const renderTeamListing = () => {
     switch (selectedTab) {
       case TEAM_TABS_TYPES.TEAM_MEMBERS:

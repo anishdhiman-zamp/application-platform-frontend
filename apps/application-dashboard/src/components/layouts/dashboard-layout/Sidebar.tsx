@@ -14,6 +14,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { useGetPaymentConfigQuery } from '@/apis/payments';
+import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
@@ -25,7 +26,9 @@ const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const params = useParams();
   const router = useRouter();
-  const pathname = usePathname();
+  const pathTrim = usePathname();
+  const hash = useHash();
+  const pathname = pathTrim + hash;
 
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
