@@ -10,7 +10,7 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
 import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
@@ -20,44 +20,47 @@ import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
+const ShareButton = () => {
+  const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; activityId: string }>();
+  const pathname = usePathname();
+
+  switch (true) {
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
+      return <SharePagePopup pageId={params?.pageId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
+      return <ShareDatasetPopup datasetId={params?.datasetId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
+      return <SharePaymentsPopup paymentConfigId={params?.paymentConfigId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
+      return <ShareActivityPopup activityId={params?.activityId || ''} />;
+    case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
+      return null;
+    default:
+      return null;
+  }
+};
+
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const [search, setSearch] = useState('');
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+
   const dispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
-
-  const renderShareButton = useMemo(() => {
-    switch (true) {
-      case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
-        return <SharePagePopup pageId={searchParams?.get('pageId') || ''} />;
-      case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
-        return <ShareDatasetPopup datasetId={searchParams?.get('datasetId') || ''} />;
-      case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
-        return <SharePaymentsPopup paymentConfigId={searchParams?.get('paymentConfigId') || ''} />;
-      case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
-        return <ShareActivityPopup activityId={searchParams?.get('activityId') || ''} />;
-      case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
-        return null;
-      default:
-        return null;
-    }
-  }, [pathname, searchParams]);
 
   const renderRightSideActions = useMemo(() => {
     if (pathname?.includes(ROUTES_PATH.PAYMENTS)) {
       return (
         <div className='flex items-center gap-3'>
           <PaymentActions />
-          {renderShareButton}
+          <ShareButton />
         </div>
       );
     }
 
-    return renderShareButton;
-  }, [pathname, renderShareButton]);
+    return <ShareButton />;
+  }, [pathname]);
 
   const handleBackClick = () => {
     dispatch(removeLastBreadcrumb());
