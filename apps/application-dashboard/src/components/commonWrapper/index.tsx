@@ -34,13 +34,13 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
     switch (skeletonType) {
       case SkeletonTypes.DEFAULT:
         return (
-          <div className={cn(`${loaderClassName} flex justify-center items-center`)} style={{ height }}>
+          <div className={cn(`${loaderClassName} flex items-center justify-center`)} style={{ height }}>
             <Loader size={SIZE.LARGE} />
           </div>
         );
       case SkeletonTypes.PROGRESS_BAR:
         return (
-          <div className={cn(`${loaderClassName} flex justify-center items-center`)} style={{ height }}>
+          <div className={cn(`${loaderClassName} flex items-center justify-center`)} style={{ height }}>
             <ProgressBar
               trackColor={COLORS.BLACK}
               indicatorColor={COLORS.WHITE}

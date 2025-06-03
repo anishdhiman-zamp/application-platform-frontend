@@ -415,12 +415,12 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             Share
           </Button>
         </PopoverTrigger>
-        <PopoverContent align='end' className='p-0 shadow-none bg-transparent border-none'>
+        <PopoverContent align='end' className='border-none bg-transparent p-0 shadow-none'>
           <div>
-            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-table-filter-menu'>
-              <div className='flex w-full justify-between items-center p-5'>
+            <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
+              <div className='flex w-full items-center justify-between p-5'>
                 <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
-                <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
+                <div className='cursor-pointer p-1' onClick={handleClosePopup}>
                   <SvgSpriteLoader
                     id='x-close'
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -430,8 +430,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                   />
                 </div>
               </div>
-              <div className='flex flex-col rounded-b-3.5 w-[400px]'>
-                <div className='pt-0 px-4 pb-5 space-y-4'>
+              <div className='rounded-b-3.5 flex w-[400px] flex-col'>
+                <div className='space-y-4 px-4 pb-5 pt-0'>
                   <MultiSelectInput
                     id={`share-${resourceType.toLowerCase()}`}
                     search={search}
@@ -462,8 +462,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     />
                   )}
                 </div>
-                <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
-                  <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
+                <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
+                  <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
                     <SvgSpriteLoader
                       id='link-03'
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -485,9 +485,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-table-filter-menu'>
+            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu mt-2 bg-white py-2 pl-2 pr-4'>
               <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-              <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+              <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                 <CommonWrapper
                   skeletonType={SkeletonTypes.CUSTOM}
                   isLoading={isLoadingAudiencesData}

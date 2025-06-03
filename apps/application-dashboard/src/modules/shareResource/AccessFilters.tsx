@@ -40,10 +40,10 @@ const AccessFilters: FC<AccessFiltersProps> = ({
   return (
     <div className='space-y-2'>
       <div className='text-GRAY_700 f-12-500'>has access to</div>
-      <div className='border border-GRAY_400 rounded-md px-3 py-2.5 f-12-400 flex items-center justify-between'>
+      <div className='border-GRAY_400 f-12-400 flex items-center justify-between rounded-md border px-3 py-2.5'>
         <div className='w-[260px]'>
           {checkIsObjectEmpty(selectedFilters) ? (
-            <span className='border border-GRAY_400 py-0.5 px-1.5 rounded-sm'>{emptyFiltersTitle}</span>
+            <span className='border-GRAY_400 rounded-sm border px-1.5 py-0.5'>{emptyFiltersTitle}</span>
           ) : (
             <FiltersWrapper
               label='Filter'
@@ -57,7 +57,7 @@ const AccessFilters: FC<AccessFiltersProps> = ({
         <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
           <Button
             variant='ghost'
-            className='flex items-center gap-1 text-GRAY_900'
+            className='text-GRAY_900 flex items-center gap-1'
             onClick={disabled ? undefined : onClick}
             size='xxsmall'
           >

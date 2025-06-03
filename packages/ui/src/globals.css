@@ -21,7 +21,7 @@
 }
 
 @utility container-start-90 {
-  @apply flex items-start justify-start w-[90px];
+  @apply flex w-[90px] items-start justify-start;
 }
 
 @utility login-btn-opacity-300-easeInOut {
@@ -939,6 +939,7 @@
   line-height: 10px;
 }
 
-[data-sonner-toast][data-expanded=false][data-front=false][data-styled=false]>* {
-     opacity: 0;
- }
+[data-sonner-toast][data-expanded='false'][data-front='false'][data-styled='false']
+  > * {
+  opacity: 0;
+}

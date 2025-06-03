@@ -91,7 +91,7 @@ const Dialogue: FC<DialogueProps> = ({
   return (
     <div
       className={cn(
-        'z-1001 bg-[#00000026] backdrop-blur-[1.5px] transition-all duration-150 ease-in fixed w-screen h-screen top-0 left-0 opacity-100',
+        'z-1001 fixed left-0 top-0 h-screen w-screen bg-[#00000026] opacity-100 backdrop-blur-[1.5px] transition-all duration-150 ease-in',
         parentWrapperClassName ?? 'z-1000',
         {
           'opacity-0!': !isOpenInternal,
@@ -100,13 +100,13 @@ const Dialogue: FC<DialogueProps> = ({
       role='presentation'
       onClick={onContainerClick}
     >
-      <div className='w-full h-full flex items-center justify-center'>
+      <div className='flex h-full w-full items-center justify-center'>
         <div
           className={cn(
-            'z-1002 bg-white transition-all duration-300 ease-in block rounded-xl overflow-hidden shadow-side-drawer-inner',
+            'z-1002 shadow-side-drawer-inner block overflow-hidden rounded-xl bg-white transition-all duration-300 ease-in',
             wrapperClassName ?? 'w-[500px]',
             className,
-            isOpen ? ' translate-y-0 opacity-1' : 'translate-y-[50px] opacity-0',
+            isOpen ? 'opacity-1 translate-y-0' : 'translate-y-[50px] opacity-0',
             popupWidthClasses,
           )}
           role='presentation'
@@ -126,7 +126,7 @@ const Dialogue: FC<DialogueProps> = ({
             />
           )}
           <div
-            className={cn('px-5 f-14-300 transition-all duration-150 overflow-hidden', childrenClassName)}
+            className={cn('f-14-300 overflow-hidden px-5 transition-all duration-150', childrenClassName)}
             style={width ? { width: width } : {}}
           >
             {children}

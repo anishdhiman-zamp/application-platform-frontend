@@ -53,7 +53,7 @@ export const CheckBox: FC<CheckBoxProps> = ({
     : `${stateStyles[CHECKBOX_STATE_TYPES.ENABLED]} ${stateStyles[CHECKBOX_STATE_TYPES.HOVER]}`;
 
   return (
-    <div className={`h-3.5 w-3.5 flex items-center relative ${className}`} data-testid={`checkbox-wrapper-${id}`}>
+    <div className={`relative flex h-3.5 w-3.5 items-center ${className}`} data-testid={`checkbox-wrapper-${id}`}>
       <input
         type='checkbox'
         value=''
@@ -63,14 +63,14 @@ export const CheckBox: FC<CheckBoxProps> = ({
         onChange={defaultFn}
         disabled={disabled}
         id={id}
-        className='absolute opacity-0 cursor-pointer h-0 w-0 peer'
+        className='peer absolute h-0 w-0 cursor-pointer opacity-0'
         role='checkbox'
       />
       <span
         onClick={disabled ? undefined : handlePress}
         data-checkboxid='check-box'
         className={cn(
-          'absolute top-0 left-0 h-3.5 w-3.5 rounded',
+          'absolute left-0 top-0 h-3.5 w-3.5 rounded',
           isCustomCheckMark ? customCheckMarkClassName : checkmarkStyles,
           displayContainerClassName,
           checkBoxStylesByState,

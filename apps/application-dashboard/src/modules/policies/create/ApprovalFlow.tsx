@@ -39,7 +39,7 @@ const ApprovalFlow: FC<ApprovalFlowProps> = ({ onChange }) => {
   };
 
   return (
-    <div className='bg-BG_GRAY_2 p-4 border-t border-gray-200'>
+    <div className='bg-BG_GRAY_2 border-t border-gray-200 p-4'>
       <div className='f-11-400 text-GRAY_700 flex items-center gap-1 px-1 pb-2.5'>
         <SvgSpriteLoader id='arrow-down' size={12} />
         Approval steps

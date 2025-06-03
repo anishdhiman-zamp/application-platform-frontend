@@ -169,12 +169,12 @@ export const LoginForm = () => {
   }
 
   return (
-    <div className='relative flex items-center justify-center w-screen h-screen bg-BG_GRAY_5'>
-      <video autoPlay muted loop className='absolute z-0 w-full h-full object-cover'>
+    <div className='bg-BG_GRAY_5 relative flex h-screen w-screen items-center justify-center'>
+      <video autoPlay muted loop className='absolute z-0 h-full w-full object-cover'>
         <source src={ZAMP_LOGIN_BG} type='video/mp4' />
         <span className='f-14-400 text-GRAY_1000'>Your browser does not support the video tag.</span>
       </video>
-      <div className='bg-white z-50 w-[580px] rounded-4.5 shadow-table-filter-menu px-16 py-[82px] border border-GRAY_100'>
+      <div className='rounded-4.5 shadow-table-filter-menu border-GRAY_100 z-50 w-[580px] border bg-white px-16 py-[82px]'>
         <Image src={ZAMP_FULL_LOGO} priority alt='ZAMP' width={98} height={24} />
         <form onSubmit={handleSubmit}>
           <Input

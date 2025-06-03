@@ -15,7 +15,7 @@ const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, onCl
   return (
     <div
       key={id}
-      className='flex items-center justify-between py-2 px-2.5 hover:bg-GRAY_100 group cursor-pointer rounded-md'
+      className='hover:bg-GRAY_100 group flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'
       onClick={() => onClick?.(id)}
     >
       <div className='flex items-center gap-1.5'>
@@ -29,7 +29,7 @@ const DisplayOptionItem: FC<DisplayOptionItemProps> = ({ id, label, iconId, onCl
           iconCategory={ICON_SPRITE_TYPES.ARROWS}
           width={12}
           height={12}
-          className='group-hover:opacity-100 opacity-0'
+          className='opacity-0 group-hover:opacity-100'
         />
       </div>
     </div>

@@ -76,7 +76,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
               id='payment-templates'
               onClick={() => setIsPaymentTemplatesSideDrawerOpen(true)}
               tooltipBody='Payment Templates'
-              className='border-none z-1000!'
+              className='z-1000! border-none'
               tooltipClassName='z-1000!'
               tooltipColor={COLORS.BLACK}
               buttonSize={SIZE_TYPES.XSMALL}

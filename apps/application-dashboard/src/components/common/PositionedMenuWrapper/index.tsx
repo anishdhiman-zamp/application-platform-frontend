@@ -43,7 +43,7 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
 
   return createPortal(
     <div
-      className={cn('bg-white abslolute z-1202 shadow-menu-list rounded-md border-0.5 border-GRAY_500', className)}
+      className={cn('abslolute z-1202 shadow-menu-list border-0.5 border-GRAY_500 rounded-md bg-white', className)}
       data-testid={`menu-wrapper-${id}`}
       style={{
         top: menuPosition?.top + 'px',
@@ -60,12 +60,12 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
       </div>
       {!!onReset && (
         <div
-          className={cn('flex py-3 pl-4 border-t border-GRAY_400', resetClassName)}
+          className={cn('border-GRAY_400 flex border-t py-3 pl-4', resetClassName)}
           onClick={handleReset}
           data-testid={`menu-wrapper-reset-${id}`}
         >
           <SvgSpriteLoader id='refresh-ccw-01' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={14} width={14} />
-          <div className={cn('pl-2 f-12-400', resetTextClassName)} data-testid={`menu-wrapper-reset-text-${id}`}>
+          <div className={cn('f-12-400 pl-2', resetTextClassName)} data-testid={`menu-wrapper-reset-text-${id}`}>
             {resetText}
           </div>
         </div>

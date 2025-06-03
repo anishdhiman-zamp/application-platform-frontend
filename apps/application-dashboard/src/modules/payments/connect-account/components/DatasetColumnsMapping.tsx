@@ -34,7 +34,7 @@ const DatasetColumnsMapping = ({ onSelectDataset }: DatasetColumnsMappingProps) 
 
   return (
     <div>
-      <div className='flex items-center gap-1.5 bg-GRAY_100 rounded-lg px-3 py-2.5 w-full mb-6'>
+      <div className='bg-GRAY_100 mb-6 flex w-full items-center gap-1.5 rounded-lg px-3 py-2.5'>
         <Image src={DATASET_TABLE} alt='dataset-table' width={20} height={20} />
         <div className='f-13-500 grow'>Accounts</div>
         <SvgSpriteLoader id='x-close' size={14} className='text-GRAY_900' onClick={() => onSelectDataset('')} />
@@ -45,13 +45,13 @@ const DatasetColumnsMapping = ({ onSelectDataset }: DatasetColumnsMappingProps) 
         </div>
       ) : (
         <div className=''>
-          <div className='f-13-450 text-GRAY_700 text-left flex gap-4'>
+          <div className='f-13-450 text-GRAY_700 flex gap-4 text-left'>
             <div className='grow'>Required Attribute</div>
             <div className='w-65'>Dataset column</div>
           </div>
           {ACCOUNT_DATASET_COLUMNS_MAPPING.map((item) => (
             <div key={item.value} className='my-4.5 flex w-full'>
-              <div className='f-12-500 flex items-center justify-between gap-2 min-w-[178px]'>
+              <div className='f-12-500 flex min-w-[178px] items-center justify-between gap-2'>
                 <div>{item.label}</div>
                 <SvgSpriteLoader id='arrow-right' size={16} className='text-GRAY_900 mx-3' />
               </div>
@@ -87,7 +87,7 @@ const DatasetColumnsMapping = ({ onSelectDataset }: DatasetColumnsMappingProps) 
               </div>
             </div>
           ))}
-          <Button id='connect-account-button' size={SIZE_TYPES.MEDIUM} className='w-[56px] mt-[26px]!'>
+          <Button id='connect-account-button' size={SIZE_TYPES.MEDIUM} className='mt-[26px]! w-[56px]'>
             Done
           </Button>
         </div>

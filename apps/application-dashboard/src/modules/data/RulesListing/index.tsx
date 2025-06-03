@@ -223,9 +223,9 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
       hideCloseButton
       childrenWrapperClassName='px-0!'
     >
-      <div className='h-full mt-2'>
+      <div className='mt-2 h-full'>
         <div className='px-6'>
-          <div className='flex justify-between items-center'>
+          <div className='flex items-center justify-between'>
             <div className='f-16-600'>{columnLabel}</div>
             {isApplyChangesEnabled && (
               <Button
@@ -242,7 +242,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
               </Button>
             )}
           </div>
-          <div className='flex justify-between items-center'>
+          <div className='flex items-center justify-between'>
             <Input
               placeholder='Search'
               size={SIZE_TYPES.XSMALL}
@@ -251,7 +251,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
               onChange={handleSearch}
               value={searchTerm}
             />
-            <div className='flex items-center gap-1 text-GRAY_700 cursor-pointer' onClick={handlePrioritySorting}>
+            <div className='text-GRAY_700 flex cursor-pointer items-center gap-1' onClick={handlePrioritySorting}>
               <SvgSpriteLoader
                 id={prioritySorting === OrderType.DESC ? 'arrow-narrow-down' : 'arrow-narrow-up'}
                 width={14}
@@ -267,7 +267,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           className='h-[calc(100vh-180px)] overflow-auto pl-1.5'
           skeletonType={SkeletonTypes.CUSTOM}
           loader={
-            <div className='flex justify-center items-center h-full'>
+            <div className='flex h-full items-center justify-center'>
               <DynamicLottiePlayer
                 src={ZAMP_LOGO_LOADER}
                 className='lottie-player h-[140px]'
@@ -296,7 +296,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
                 data-grid={layout?.find((layout) => layout.i === rule?.id)}
                 className='flex items-center gap-1'
               >
-                <div className='drag-handle cursor-grab min-w-[14px]'>
+                <div className='drag-handle min-w-[14px] cursor-grab'>
                   <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' className='rotate-90' priority />
                 </div>
                 <RuleCard
@@ -321,14 +321,14 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
         onClose={handleApplyChangesPopupClose}
         title='Apply Changes ?'
         iconId='x-close'
-        className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white p-0! shadow-menu-list'
+        className='border-GRAY_400 rounded-3.5 p-0! shadow-menu-list w-[344px] border-2 bg-white'
         titleClassName='f-16-600 text-GRAY_950'
         showIcon
       >
         <div className='f-13-400 text-GRAY_900 px-5 py-6'>
           You&apos;ve updated the priority of rules. Do you want to apply these changes before leaving?
         </div>
-        <div className='flex justify-end gap-2 px-5 py-4 border-t border-GRAY_400'>
+        <div className='border-GRAY_400 flex justify-end gap-2 border-t px-5 py-4'>
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}

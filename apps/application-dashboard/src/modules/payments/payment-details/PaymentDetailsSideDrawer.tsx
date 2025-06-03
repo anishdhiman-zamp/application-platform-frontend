@@ -44,24 +44,24 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
 
   return (
     <Sheet open={!!paymentDetailsId} onOpenChange={onClose}>
-      <SheetContent size='medium' tabIndex={-1} className='p-0 h-screen overflow-hidden'>
-        <div className='h-full flex flex-col' tabIndex={-1}>
+      <SheetContent size='medium' tabIndex={-1} className='h-screen overflow-hidden p-0'>
+        <div className='flex h-full flex-col' tabIndex={-1}>
           <CommonWrapper
             isLoading={isFetching}
             loader={
-              <div className='px-4.5 py-6 flex items-center gap-3 border-b border-GRAY_400 animate-pulse'>
-                <div className='w-30 h-6 rounded-md bg-GRAY_100 ' />
-                <div className='w-30 h-6 rounded-md bg-GRAY_100' />
+              <div className='px-4.5 border-GRAY_400 flex animate-pulse items-center gap-3 border-b py-6'>
+                <div className='w-30 bg-GRAY_100 h-6 rounded-md' />
+                <div className='w-30 bg-GRAY_100 h-6 rounded-md' />
               </div>
             }
             skeletonType={SkeletonTypes.CUSTOM}
           >
-            <div className='px-4.5 py-6 flex items-center gap-3 border-b border-GRAY_400'>
+            <div className='px-4.5 border-GRAY_400 flex items-center gap-3 border-b py-6'>
               {tabsList?.map((tab) => (
                 <div
                   key={tab.value}
                   className={cn(
-                    'px-1.5 py-1 rounded-md flex gap-1.5 items-center',
+                    'flex items-center gap-1.5 rounded-md px-1.5 py-1',
                     currentTab === tab.value ? 'f-12-500 bg-GRAY_100' : 'f-12-450',
                     'cursor-pointer',
                   )}
@@ -69,7 +69,7 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
                 >
                   <div className='f-12-500'>{tab.label}</div>
                   {tab.value === 'approvals' && paymentApprovalsInfo?.approval_id && (
-                    <div className='w-1.5 h-1.5 rounded-full bg-ORANGE_700' />
+                    <div className='bg-ORANGE_700 h-1.5 w-1.5 rounded-full' />
                   )}
                 </div>
               ))}

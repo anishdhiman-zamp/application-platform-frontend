@@ -16,7 +16,7 @@ const ArtifactTag: FC<ArtifactTagProps> = ({ displayName, type, onClick, display
   return (
     <Button
       variant={'ghost'}
-      className='flex items-center h-6 justify-start gap-x-1.5 px-2 py-1 bg-GRAY_100 rounded cursor-pointer'
+      className='bg-GRAY_100 flex h-6 cursor-pointer items-center justify-start gap-x-1.5 rounded px-2 py-1'
       onClick={onClick}
     >
       <Image

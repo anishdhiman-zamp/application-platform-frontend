@@ -21,12 +21,12 @@ const OrgMembershipPending = () => {
   // TODO: Loading animation
   if (isLoadingMembershipRequests) {
     return (
-      <div className='w-screen h-screen flex flex-col bg-white justify-center items-center'>
+      <div className='flex h-screen w-screen flex-col items-center justify-center bg-white'>
         <Image
           width={60}
           height={60}
           alt='zamp logo'
-          className='w-8 align-middle cursor-pointer'
+          className='w-8 cursor-pointer align-middle'
           src={ZAMP_ICON}
           priority={true}
         />

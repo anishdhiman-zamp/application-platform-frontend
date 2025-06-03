@@ -27,23 +27,23 @@ const ListView: FC<ListViewProps> = ({ policies, audienceMembersData, onPolicyCl
 
   return (
     <>
-      <div className='flex items-center justify-between mb-4.5'>
+      <div className='mb-4.5 flex items-center justify-between'>
         <h1 className='f-16-600'>{heading}</h1>
         <Button variant='outline' size='small' onClick={onNew} className='gap-1'>
           <SvgSpriteLoader id='plus' size={14} />
           New
         </Button>
       </div>
-      <div className='flex items-center justify-between mb-3.5'>
+      <div className='mb-3.5 flex items-center justify-between'>
         <input
           type='text'
           placeholder='Search'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className='f-12-400 text-primary placeholder:text-gray-500 w-60 focus:outline-hidden'
+          className='f-12-400 text-primary focus:outline-hidden w-60 placeholder:text-gray-500'
         />
       </div>
-      <div className='space-y-3.5 overflow-y-auto h-[calc(100vh-125px)] pb-6 [&::-webkit-scrollbar]:hidden'>
+      <div className='h-[calc(100vh-125px)] space-y-3.5 overflow-y-auto pb-6 [&::-webkit-scrollbar]:hidden'>
         <AnimatePresence mode='popLayout'>
           {filteredPolicies.map((policy) => (
             <motion.div

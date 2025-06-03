@@ -14,8 +14,8 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
   const buttonTypeCta = ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.BUTTON);
 
   return (
-    <div className='flex flex-col items-start justify-start gap-y-2 mt-3 w-full'>
-      <div className='w-full flex items-start justify-start gap-x-2 gap-y-2 flex-wrap'>
+    <div className='mt-3 flex w-full flex-col items-start justify-start gap-y-2'>
+      <div className='flex w-full flex-wrap items-start justify-start gap-x-2 gap-y-2'>
         {artifactTypeCta?.map((cta) => (
           <ArtifactTag
             key={cta?.id}
@@ -28,7 +28,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
           />
         ))}
         {buttonTypeCta?.map((cta) => (
-          <Button key={cta?.id} className='gap-x-1.5 h-6 px-2.5 py-1.5 f-12-500 whitespace-nowrap'>
+          <Button key={cta?.id} className='f-12-500 h-6 gap-x-1.5 whitespace-nowrap px-2.5 py-1.5'>
             <SvgSpriteLoader id={'check'} size={12} className='shrink-0' />
             <span className='f-12-450 truncate'>{cta?.display_name}</span>
           </Button>

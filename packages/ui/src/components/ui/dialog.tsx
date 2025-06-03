@@ -35,7 +35,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-1001 bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'z-1001 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 bg-black/20',
       className,
     )}
     {...props}
@@ -77,7 +77,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Description className='sr-only'>{description || 'Dialog content'}</DialogPrimitive.Description>
       {children}
       {showCloseButton && (
-        <DialogClose className='absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-1002'>
+        <DialogClose className='ring-offset-background focus:outline-hidden focus:ring-ring z-1002 absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none'>
           <X className='h-4 w-4' />
           <span className='sr-only'>Close</span>
         </DialogClose>
@@ -89,14 +89,14 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('flex h-14 items-center justify-between border-b border-GRAY_400 px-4 shrink-0', className)}
+    className={cn('border-GRAY_400 flex h-14 shrink-0 items-center justify-between border-b px-4', className)}
     {...props}
   />
 );
 DialogHeader.displayName = 'DialogHeader';
 
 const DialogHeaderTitle = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('text-base font-semibold text-GRAY_1000', className)} {...props} />
+  <div className={cn('text-GRAY_1000 text-base font-semibold', className)} {...props} />
 );
 DialogHeaderTitle.displayName = 'DialogHeaderTitle';
 
@@ -106,12 +106,12 @@ const DialogHeaderActions = ({ className, ...props }: React.HTMLAttributes<HTMLD
 DialogHeaderActions.displayName = 'DialogHeaderActions';
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex-1 rounded-b-lg overflow-y-auto', className)} {...props} />
+  <div className={cn('flex-1 overflow-y-auto rounded-b-lg', className)} {...props} />
 );
 DialogBody.displayName = 'DialogBody';
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('shrink-0 border-t border-GRAY_400 px-6 py-4 mt-auto', className)} {...props} />
+  <div className={cn('border-GRAY_400 mt-auto shrink-0 border-t px-6 py-4', className)} {...props} />
 );
 DialogFooter.displayName = 'DialogFooter';
 

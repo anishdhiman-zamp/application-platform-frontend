@@ -44,7 +44,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
   return (
     <div
       className={cn(
-        'flex items-center fixed  z-1000 bottom-0 right-0 border-t border-l border-border-GRAY_400 h-[57px] bg-white shadow-page-bottom-bar px-8 gap-3 transition-all duration-300',
+        'z-1000 border-border-GRAY_400 shadow-page-bottom-bar fixed bottom-0 right-0 flex h-[57px] items-center gap-3 border-l border-t bg-white px-8 transition-all duration-300',
         !isSidebarOpen ? 'w-full' : 'w-[calc(100%-240px)]',
       )}
     >
@@ -52,7 +52,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
         skeletonType={SkeletonTypes.CUSTOM}
         isLoading={isPageLoading}
         className='flex items-center gap-3'
-        loader={<div className='w-25 rounded-md block animate-pulse bg-GRAY_50 h-8' />}
+        loader={<div className='w-25 bg-GRAY_50 block h-8 animate-pulse rounded-md' />}
       >
         {tabs?.map((tab) => (
           <Button
@@ -61,12 +61,12 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
             onClick={() => handleTabSelect(tab)}
             type={BUTTON_TYPES.SECONDARY}
             className={cn(
-              'w-fit rounded-lg!',
-              currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : 'bg-white !border-GRAY_400',
+              'rounded-lg! w-fit',
+              currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : '!border-GRAY_400 bg-white',
             )}
             size={SIZE_TYPES.MEDIUM}
           >
-            <div className={`transition-all duration-100 f-12-450 whitespace-nowrap`}>{tab?.label}</div>
+            <div className={`f-12-450 whitespace-nowrap transition-all duration-100`}>{tab?.label}</div>
           </Button>
         ))}
       </CommonWrapper>
@@ -78,7 +78,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
         className='z-1'
         position={TooltipPositions.TOP}
       >
-        <div className='flex items-center gap-1 f-12-450 text-GRAY_700 cursor-not-allowed select-none'>
+        <div className='f-12-450 text-GRAY_700 flex cursor-not-allowed select-none items-center gap-1'>
           <SvgSpriteLoader id='plus' width={16} height={16} />
           <div className='whitespace-nowrap'>New sheet</div>
         </div>

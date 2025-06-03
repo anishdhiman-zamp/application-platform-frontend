@@ -200,10 +200,10 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   }, [colId, tableRef, toggleMenu, hideFloatingFilter]);
 
   return (
-    <div ref={menuRef} className='w-full h-full -mx-4 flex-1 relative'>
+    <div ref={menuRef} className='relative -mx-4 h-full w-full flex-1'>
       <div
         className={cn(
-          'w-full h-full flex-1 hover:bg-BACKGROUND_GRAY_1 cursor-pointer flex items-center overflow-hidden justify-between px-2 group pt-5 pb-1 capitalize',
+          'hover:bg-BACKGROUND_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pb-1 pt-5 capitalize',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
           className,
         )}
@@ -217,7 +217,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
             className='shrink-0 object-cover object-center'
           />
         )}
-        <div className='flex items-center gap-1 truncate self-stretch flex-auto'>
+        <div className='flex flex-auto items-center gap-1 self-stretch truncate'>
           <span className='truncate'>{colDef?.headerName ?? colId}</span>
           {!!sortState && (
             <span>
@@ -248,7 +248,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           {filteredMenuOptions.map((option) => (
             <div
               key={option.value}
-              className='flex items-center gap-1.5 px-2.5 py-2 hover:bg-GRAY_100 cursor-pointer rounded-md'
+              className='hover:bg-GRAY_100 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'
               onClick={(e) => {
                 e.stopPropagation();
                 handleMenuOptionClick(option.value);

@@ -49,7 +49,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
   };
 
   return (
-    <div className='flex items-center f-13-400 text-GRAY_700 gap-1'>
+    <div className='f-13-400 text-GRAY_700 flex items-center gap-1'>
       {firstBreadCrumb && (
         <Link
           href={firstBreadCrumb.href ?? ''}
@@ -61,7 +61,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
       )}
       {lastTwoBreadCrumbs?.length > 0 && <div>/</div>}
       {middleBreadCrumbs?.length > 0 && (
-        <div className='flex items-center gap-1 group cursor-pointer relative' ref={menuRef}>
+        <div className='group relative flex cursor-pointer items-center gap-1' ref={menuRef}>
           <div className='group-hover:text-GRAY_1000' onClick={toggleMenu}>
             ...
           </div>
@@ -69,13 +69,13 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
           {isMenuOpen && (
             <MenuWrapper
               id='breadcrumb-menu'
-              className='absolute! z-100 p-1 top-4 mt-2'
+              className='absolute! z-100 top-4 mt-2 p-1'
               childrenWrapperClassName='overflow-y-auto!'
             >
               {middleBreadCrumbs?.map((item, index) => (
                 <Link
                   key={`${item.title}-${index}`}
-                  className='hover:bg-GRAY_200 rounded-md py-2 px-2.5 f-12-500 cursor-pointer text-nowrap'
+                  className='hover:bg-GRAY_200 f-12-500 cursor-pointer text-nowrap rounded-md px-2.5 py-2'
                   href={item.href ?? ''}
                   onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}
                 >

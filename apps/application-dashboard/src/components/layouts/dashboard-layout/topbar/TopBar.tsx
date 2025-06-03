@@ -72,24 +72,24 @@ const Topbar = () => {
   };
 
   return (
-    <div className='h-12 flex items-center justify-between'>
+    <div className='flex h-12 items-center justify-between'>
       <div
         className={cn(
-          'py-4 h-12 flex items-center justify-between text-GRAY_700 transition-all',
+          'text-GRAY_700 flex h-12 items-center justify-between py-4 transition-all',
           isSidebarOpen ? 'w-[240px]' : 'w-[48px]',
         )}
       >
-        <div className={cn('flex-1 transition-all pl-4', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
+        <div className={cn('flex-1 pl-4 transition-all', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
           <Image
             width={16}
             height={16}
             alt='zamp logo'
-            className='w-4 align-middle cursor-pointer'
+            className='w-4 cursor-pointer align-middle'
             src={ZAMP_ICON}
             priority={true}
           />
         </div>
-        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : ' border-GRAY_400')}>
+        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : 'border-GRAY_400')}>
           <SvgSpriteLoader
             className='cursor-pointer pr-5'
             width={16}
@@ -101,7 +101,7 @@ const Topbar = () => {
         </div>
       </div>
       <div
-        className={cn('flex items-center gap-2 w-full h-full transition-all z-1000 bg-BACKGROUND_GRAY_1', {
+        className={cn('z-1000 bg-BACKGROUND_GRAY_1 flex h-full w-full items-center gap-2 transition-all', {
           'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
         })}
       >

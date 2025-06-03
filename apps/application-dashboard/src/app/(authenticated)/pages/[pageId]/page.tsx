@@ -62,7 +62,7 @@ const Page = () => {
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
-      <div className='relative h-full rounded-tl-md w-full'>
+      <div className='relative h-full w-full rounded-tl-md'>
         <Sheets
           key={currentSheetId}
           pageId={pageId as string}

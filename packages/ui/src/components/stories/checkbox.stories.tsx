@@ -27,7 +27,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className='flex items-center space-x-2 p-4 bg-white rounded-lg'>
+      <div className='flex items-center space-x-2 rounded-lg bg-white p-4'>
         <Story />
         <Label htmlFor='terms'>Accept terms and conditions</Label>
       </div>

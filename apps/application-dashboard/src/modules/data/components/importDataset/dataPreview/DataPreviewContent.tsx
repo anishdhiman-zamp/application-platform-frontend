@@ -41,8 +41,8 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
   };
 
   return (
-    <div className='flex flex-col justify-start h-full '>
-      <div className='flex flex-col px-6 pt-6 pb-4'>
+    <div className='flex h-full flex-col justify-start'>
+      <div className='flex flex-col px-6 pb-4 pt-6'>
         <span className='f-16-600'>Preview</span>
         <div className='mt-6'>
           <Tabs
@@ -55,7 +55,7 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
         </div>
       </div>
 
-      <div className='relative w-full h-full overflow-hidden'>
+      <div className='relative h-full w-full overflow-hidden'>
         <div className='h-full overflow-y-auto [&::-webkit-scrollbar]:hidden'>{renderTable()}</div>
       </div>
     </div>

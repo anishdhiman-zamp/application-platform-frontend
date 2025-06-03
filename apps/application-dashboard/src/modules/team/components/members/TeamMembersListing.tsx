@@ -54,10 +54,10 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
 
   return hasData || isLoadingTeamMembersData ? (
     <>
-      <div className='grid grid-cols-4 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
+      <div className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
         {TEAM_MEMBERS_LISTING_COLUMN_DEFS.map((column, index) => (
-          <div key={index} className='py-2 px-2'>
-            <span className='text-left f-11-400 text-GRAY_700'>{column.headerName}</span>
+          <div key={index} className='px-2 py-2'>
+            <span className='f-11-400 text-GRAY_700 text-left'>{column.headerName}</span>
           </div>
         ))}
       </div>
@@ -66,12 +66,12 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<SkeletonLoaderListing columns={4} />}
       >
-        <div className='overflow-y-auto h-[calc(100vh-270px)] [&::-webkit-scrollbar]:hidden'>
+        <div className='h-[calc(100vh-270px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           {data?.map((row, index) => {
             const userMappedTeams = userMappedTeamsMap.get(row?.user?.user_id) ?? [];
 
             return (
-              <div key={index} className='grid grid-cols-4 gap-4 border-b-0.5 border-DIVIDER_GRAY'>
+              <div key={index} className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
                 <MembersName value={row?.user?.email} member />
                 <MembersEmail value={row?.user?.email} />
                 <MembersRole

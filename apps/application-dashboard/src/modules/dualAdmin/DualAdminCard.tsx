@@ -159,10 +159,10 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
   }, [approversList, item]);
 
   return (
-    <tr className='border-b border-GRAY_100'>
+    <tr className='border-GRAY_100 border-b'>
       <td className='px-2 py-3'>
         <div className='flex items-center gap-2'>
-          <div className='p-2 bg-GRAY_100 rounded-md text-GRAY_1000'>
+          <div className='bg-GRAY_100 text-GRAY_1000 rounded-md p-2'>
             <SvgSpriteLoader id={item?.icon_id} size={14} />
           </div>
           <div>
@@ -171,7 +171,7 @@ const DualAdminCard: FC<DualAdminCardProps> = ({ item, setRequestApprovalPolicyC
           </div>
         </div>
       </td>
-      <td className='px-2 py-2.5 '>
+      <td className='px-2 py-2.5'>
         <div className='min-w-24'>
           <ApprovalsDropdown
             selectedApprovers={selectedApprovers}

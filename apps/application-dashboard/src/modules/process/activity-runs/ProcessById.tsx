@@ -94,7 +94,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
@@ -112,7 +112,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
               key={item?.status}
               value={item?.status}
               className={cn(
-                'rounded-sm! px-2! py-1! border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                'rounded-sm! px-2! py-1! hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 border-none',
               )}
             >
               <TabStatusIcon

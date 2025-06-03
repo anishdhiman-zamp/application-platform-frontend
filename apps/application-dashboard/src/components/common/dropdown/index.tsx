@@ -222,7 +222,7 @@ export const Dropdown: FC<DropdownProps> = ({
         {enableReset && <ResetSection resetProps={resetProps} onClickReset={onClickReset} />}
         {enableDelete && (
           <div className='flex flex-col' onClick={onClickDelete}>
-            <span className='flex gap-1.5 items-center f-12-500 text-RED_700 py-2 px-2.5 border-t border-DIVIDER_GRAY'>
+            <span className='f-12-500 text-RED_700 border-DIVIDER_GRAY flex items-center gap-1.5 border-t px-2.5 py-2'>
               <SvgSpriteLoader
                 id='trash-04'
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}

@@ -14,7 +14,7 @@ const ConnectAccountGetStarted: FC<ConnectAccountGetStartedType> = ({ onNextStep
     <div className='w-[312px] pt-[166px]'>
       <Image src={CONNECT_ACCOUNT} alt='connect-account-get-started' width={76} height={76} className='mb-6' />
       <div className='f-16-550'>Payments</div>
-      <div className='f-13-450 text-GRAY_700 mt-2 mb-6'>
+      <div className='f-13-450 text-GRAY_700 mb-6 mt-2'>
         Move money anywhere in the world—seamlessly. Send single or bulk payments in a few clicks, save templates for
         faster transactions, and set up custom access controls and approval policies to stay in full control. Fast,
         secure, and built for teams like yours

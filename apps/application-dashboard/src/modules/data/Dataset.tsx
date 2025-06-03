@@ -639,7 +639,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -650,7 +650,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('flex items-center justify-between pr-8 z-1000', headerClassName)}>
+        <div className={cn('z-1000 flex items-center justify-between pr-8', headerClassName)}>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
@@ -680,7 +680,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
                 <div className='flex items-center gap-2'>
-                  <div className='border-r border-GRAY_400 h-7'></div>
+                  <div className='border-GRAY_400 h-7 border-r'></div>
                   <SingleSelectFilter
                     onFilterChange={handleFilterChange}
                     value={fxCurrency}
@@ -701,7 +701,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
         >
-          <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+          <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
               columns={columns}

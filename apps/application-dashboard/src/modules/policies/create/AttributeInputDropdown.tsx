@@ -48,13 +48,13 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
           <PopoverTrigger id={attribute.id} asChild>
             <Attribute
               className={cn({
-                'border border-red-500 rounded-md': error,
+                'rounded-md border border-red-500': error,
               })}
               label={attribute.label}
               displayValue={`${inputConfig.prefix_text} ${(formatter?.(Number(value)) || value) ?? 0} ${inputConfig.suffix_text}`}
             />
           </PopoverTrigger>
-          <PopoverContent className='p-2.5 space-y-2 pointer-events-auto' sideOffset={6} align='start' side='bottom'>
+          <PopoverContent className='pointer-events-auto space-y-2 p-2.5' sideOffset={6} align='start' side='bottom'>
             <div className='flex items-center gap-2'>
               <p className='f-11-400 text-gray-700'>{inputConfig.label}</p>
               {inputConfig.suffix_text && <p className='f-11-500 text-blue-700'>{inputConfig.prefix_text}</p>}
@@ -70,7 +70,7 @@ const AttributeInputDropdown = ({ attribute, name, error }: AttributeInputDropdo
               min={inputConfig.min}
               max={inputConfig.max}
               tabIndex={0}
-              className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+              className='[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
             />
           </PopoverContent>
         </Popover>

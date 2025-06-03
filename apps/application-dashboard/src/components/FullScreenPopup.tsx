@@ -29,7 +29,7 @@ const FullScreenPopup: FC<FullScreenPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={cn('h-screen w-screen fixed top-0 left-0 overflow-y-auto bg-white z-1000', className)}>
+    <div className={cn('z-1000 fixed left-0 top-0 h-screen w-screen overflow-y-auto bg-white', className)}>
       {!hideHeader && (
         <div className='flex items-center justify-between p-4'>
           {!hideLogo && (
@@ -37,20 +37,20 @@ const FullScreenPopup: FC<FullScreenPopupProps> = ({
               width={16}
               height={16}
               alt='zamp logo'
-              className='w-4 align-middle cursor-pointer'
+              className='w-4 cursor-pointer align-middle'
               src={ZAMP_ICON}
               priority
             />
           )}
 
           {!!onClose && !hideCloseButton && (
-            <div className='p-2 rounded-full cursor-pointer' onClick={onClose}>
+            <div className='cursor-pointer rounded-full p-2' onClick={onClose}>
               <SvgSpriteLoader id='x-close' size={16} />
             </div>
           )}
         </div>
       )}
-      <div className={cn('overflow-y-auto w-full', childrenClassName)}>{children}</div>
+      <div className={cn('w-full overflow-y-auto', childrenClassName)}>{children}</div>
     </div>
   );
 };

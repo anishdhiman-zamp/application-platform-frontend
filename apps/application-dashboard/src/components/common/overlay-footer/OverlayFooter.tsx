@@ -42,7 +42,7 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
   backButtonSize = SIZE_TYPES.SMALL,
 }) =>
   (bottomBar || onBack || onNext) && (
-    <div className={cn('border-t p-4 border-GRAY_400 flex justify-end items-center gap-3 bg-white', footerClassName)}>
+    <div className={cn('border-GRAY_400 flex items-center justify-end gap-3 border-t bg-white p-4', footerClassName)}>
       {bottomBar ? (
         bottomBar
       ) : (

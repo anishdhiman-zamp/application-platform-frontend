@@ -57,23 +57,23 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
   }, [content_type, sender_type]);
 
   return (
-    <div className={cn('w-full flex justify-start items-start gap-x-5 pt-1')} data-log-id={data.id}>
-      <div className='flex items-start justify-start shrink-0 w-14'>
+    <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data.id}>
+      <div className='flex w-14 shrink-0 items-start justify-start'>
         <span className='f-12-450 text-GRAY_700 whitespace-nowrap'>
           {format(new Date(updated_at), DATE_FORMATS.HH_MM_A)}
         </span>
       </div>
-      <div className={cn('flex flex-col items-center justify-start h-full w-2.5 gap-y-2 pt-[2px] shrink-0')}>
+      <div className={cn('flex h-full w-2.5 shrink-0 flex-col items-center justify-start gap-y-2 pt-[2px]')}>
         <LogStatusIndicator
           status={status as LOG_STATUS}
           fillColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.fillColor}
           strokeColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.strokeColor}
         />
-        {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 40}px` }} />}
+        {!isLastLog && <div className='bg-GRAY_400 w-px' style={{ height: `${containerHeight + 40}px` }} />}
       </div>
-      <div className='flex flex-col items-start justify-center w-full min-w-0' ref={containerRef}>
+      <div className='flex w-full min-w-0 flex-col items-start justify-center' ref={containerRef}>
         <p
-          className={cn('f-13-450 text-GRAY_1000 text-left break-words w-full', {
+          className={cn('f-13-450 text-GRAY_1000 w-full break-words text-left', {
             'animate-pulse': status === LOG_STATUS.LOADING,
           })}
         >

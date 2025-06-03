@@ -60,7 +60,7 @@ const PeoplePage = () => {
   }, []);
 
   return (
-    <div className='p-10 w-full h-full'>
+    <div className='h-full w-full p-10'>
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
       <PeopleTabs
         filteredTeamMembers={filteredTeamMembers ?? []}

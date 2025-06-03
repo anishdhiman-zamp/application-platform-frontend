@@ -18,7 +18,7 @@ const PageNavTab = ({ label, pageId, isSelected }: PageNavTabProps) => {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 text-GRAY_900 px-2 py-2 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none',
+        'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer select-none items-center gap-3 rounded-md px-2 py-2',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
       )}
       onClick={() => router.push(getPageRouteById(pageId))}

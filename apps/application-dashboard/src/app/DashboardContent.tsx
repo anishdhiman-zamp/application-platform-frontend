@@ -105,11 +105,11 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
     <Provider store={store}>
       <div className='bg-BACKGROUND_GRAY_1 relative'>
         <Topbar />
-        <div className={`w-full min-w-[768px] flex relative h-[calc(100vh-48px)]`}>
+        <div className={`relative flex h-[calc(100vh-48px)] w-full min-w-[768px]`}>
           <Sidebar />
-          <div ref={containerRef} className='flex flex-col grow relative h-screen'>
+          <div ref={containerRef} className='relative flex h-screen grow flex-col'>
             <div
-              className={cn('w-full relative mx-auto border border-GRAY_400 bg-white h-[calc(100vh-48px)]', {
+              className={cn('border-GRAY_400 relative mx-auto h-[calc(100vh-48px)] w-full border bg-white', {
                 'rounded-tl-xl': isSidebarOpen,
               })}
             >

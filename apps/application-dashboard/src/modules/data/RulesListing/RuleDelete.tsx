@@ -36,7 +36,7 @@ const RuleDelete = ({ isOpen, onClose, ruleId, onSuccess }: RuleDeleteProps) => 
       onClose={onClose}
       title='Delete Rule ?'
       iconId='x-close'
-      className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white p-0! shadow-menu-list'
+      className='border-GRAY_400 rounded-3.5 p-0! shadow-menu-list w-[344px] border-2 bg-white'
       titleClassName='f-16-600 text-GRAY_950'
       showIcon
       closeOnClickOutside={false}
@@ -44,7 +44,7 @@ const RuleDelete = ({ isOpen, onClose, ruleId, onSuccess }: RuleDeleteProps) => 
       <div className='f-13-400 text-GRAY_900 px-5 py-6'>
         Are you sure you want to delete this rule ? This action cannot be undone.
       </div>
-      <div className='flex justify-end gap-2 px-5 py-4 border-t border-GRAY_400'>
+      <div className='border-GRAY_400 flex justify-end gap-2 border-t px-5 py-4'>
         <Button type={BUTTON_TYPES.SECONDARY} size={SIZE_TYPES.MEDIUM} id='rule-delete-cancel' onClick={onClose}>
           Discard
         </Button>

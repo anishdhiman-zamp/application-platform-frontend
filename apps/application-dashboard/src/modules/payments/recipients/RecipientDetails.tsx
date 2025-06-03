@@ -34,11 +34,11 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
   };
 
   return (
-    <div className='pl-4.5 pr-2 py-6.5 flex flex-col gap-8'>
-      <div className='flex items-center gap-3 '>
+    <div className='pl-4.5 py-6.5 flex flex-col gap-8 pr-2'>
+      <div className='flex items-center gap-3'>
         <SvgSpriteLoader id='arrow-narrow-left' size={14} onClick={onBack} />
-        <div className='flex items-center gap-2.5 grow'>
-          <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
+        <div className='flex grow items-center gap-2.5'>
+          <div className='bg-BLUE_200 f-12-500 flex h-6 w-6 items-center justify-center rounded-full'>
             {getFirstLetters(recipientDetails?.name, 1)}
           </div>
           <div className='f-16-600'>{recipientDetails?.name}</div>
@@ -80,8 +80,8 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
               </div>
             ))}
           </div>
-          <div className='flex flex-col gap-3 mt-8'>
-            <div className=' flex justify-between items-center f-13-500'>
+          <div className='mt-8 flex flex-col gap-3'>
+            <div className='f-13-500 flex items-center justify-between'>
               Accounts ({recipientDetails?.accounts?.length})
               {allowActions && (
                 <Button

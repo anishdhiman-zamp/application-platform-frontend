@@ -9,7 +9,7 @@ const HtmlTable: FC<HtmlTablePropsType> = ({ rows, columns, wrapperClassName, co
     <CommonWrapper
       isNoData={!rows?.length || !columns?.length}
       noDataBanner={
-        <div className='h-full w-full flex items-center justify-center'>
+        <div className='flex h-full w-full items-center justify-center'>
           <CustomNoRowsOverlay />
         </div>
       }
@@ -23,7 +23,7 @@ const HtmlTable: FC<HtmlTablePropsType> = ({ rows, columns, wrapperClassName, co
                 <th
                   key={index}
                   className={cn(
-                    'border text-start overflow-hidden whitespace-nowrap py-4 px-3.5 text-GRAY_950 border-GRAY_100 f-12-500',
+                    'text-GRAY_950 border-GRAY_100 f-12-500 overflow-hidden whitespace-nowrap border px-3.5 py-4 text-start',
                     colCellClassName,
                   )}
                 >
@@ -39,7 +39,7 @@ const HtmlTable: FC<HtmlTablePropsType> = ({ rows, columns, wrapperClassName, co
                   <td
                     key={colIndex}
                     className={cn(
-                      'border overflow-hidden whitespace-nowrap text-start px-3 py-2 text-GRAY_950 border-GRAY_100 f-11-400',
+                      'text-GRAY_950 border-GRAY_100 f-11-400 overflow-hidden whitespace-nowrap border px-3 py-2 text-start',
                       rowCellClassName,
                     )}
                   >

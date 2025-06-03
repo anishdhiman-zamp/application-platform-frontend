@@ -111,8 +111,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   return (
     <div
-      className={cn('bg-white h-full border border-GRAY_400 rounded-xl py-4.5 overflow-hidden', {
-        'opacity-85 animate-pulse': isFetching,
+      className={cn('border-GRAY_400 py-4.5 h-full overflow-hidden rounded-xl border bg-white', {
+        'animate-pulse opacity-85': isFetching,
       })}
     >
       <WidgetTitle
@@ -128,22 +128,22 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         isNoData={!transformedData?.length}
         className='h-full'
-        noDataBanner={<NoWidgetData className={cn({ 'opacity-100 animate-pulse': isFetching })} />}
+        noDataBanner={<NoWidgetData className={cn({ 'animate-pulse opacity-100': isFetching })} />}
         isError={isError}
         refetchFunction={refetch}
         loader={
-          <div className='absolute top-0 left-0 h-full w-full flex justify-center items-center z-100 '>
+          <div className='z-100 absolute left-0 top-0 flex h-full w-full items-center justify-center'>
             <DynamicLottiePlayer src={WIDGET_LOADER} className='lottie-player h-[150px]' autoplay loop keepLastFrame />
           </div>
         }
       >
         {chartOptions && (
-          <div className='h-full w-full relative'>
+          <div className='relative h-full w-full'>
             {!widgetDetails?.display_config?.hide_y_axis_title && yAxisTitle && (
-              <div className='absolute -top-10 right-5 z-10 text-GRAY_700 f-12-450'>
+              <div className='text-GRAY_700 f-12-450 absolute -top-10 right-5 z-10'>
                 {snakeCaseToSentenceCase(yAxisTitle)}
                 <div
-                  className='w-px h-4.5 bg-GRAY_200 ml-auto mt-2'
+                  className='h-4.5 bg-GRAY_200 ml-auto mt-2 w-px'
                   style={{ marginRight: `${maxValueLength * 5.5}px` }}
                 ></div>
               </div>

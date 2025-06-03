@@ -16,7 +16,7 @@ const CustomContextMenuItem: FC<CustomContextMenuItemProps> = ({ action, menuIte
 
   return (
     <div
-      className='flex items-center gap-1.5 group hover:bg-GRAY_100 py-2 px-2.5 cursor-pointer mx-1 rounded-md'
+      className='hover:bg-GRAY_100 group mx-1 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'
       onClick={handleClick}
     >
       <SvgSpriteLoader id={menuItemParams.iconId} color={COLORS.GRAY_900} width={12} height={12} />

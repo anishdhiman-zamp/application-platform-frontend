@@ -129,7 +129,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   }, [confirmationPopupControlRef]);
 
   return (
-    <div id={`${persistId}_FILTERS_CONTAINER`} className={`flex items-center flex-wrap gap-2 z-50 ${className}`}>
+    <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
       {filtersList.map((filter, index) => (
         <FilterDropdown
           key={index}
@@ -171,7 +171,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
                   containerRef={confirmationPopupRef}
                   onClick={handleResetFilters}
                   onCancel={() => setShouldShowConfirmationPopup(false)}
-                  className='absolute left-0 z-9999'
+                  className='z-9999 absolute left-0'
                 />
               ) : null}
             </FilterControlButton>

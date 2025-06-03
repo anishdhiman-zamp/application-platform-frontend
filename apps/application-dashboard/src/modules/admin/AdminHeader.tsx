@@ -30,13 +30,13 @@ const AdminHeader: FC<AdminHeaderPropsType> = ({ displayConfigInitialData, displ
   };
 
   return (
-    <div className='flex justify-between items-center px-10'>
+    <div className='flex items-center justify-between px-10'>
       <CommonWrapper isLoading={isDatasetListingLoading}>
         <div className='f-20-600'>
           Edit {datasetListing?.datasets?.find((dataset) => dataset.ID === datasetId)?.Title}
         </div>
       </CommonWrapper>
-      <div className='py-3 px-10 flex justify-end gap-2'>
+      <div className='flex justify-end gap-2 px-10 py-3'>
         {isJsonPreviewSidebarOpen && (
           <JsonPreviewSidebar
             originalJson={displayConfigInitialData}

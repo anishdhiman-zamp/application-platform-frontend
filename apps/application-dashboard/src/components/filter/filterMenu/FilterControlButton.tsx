@@ -56,7 +56,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     >
       <button
         className={cn(
-          'border mb-3 border-DIVIDER_SAIL_2 rounded-lg px-2 py-1.5 h-fit w-fit outline-hidden flex items-center',
+          'border-DIVIDER_SAIL_2 outline-hidden mb-3 flex h-fit w-fit items-center rounded-lg border px-2 py-1.5',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',

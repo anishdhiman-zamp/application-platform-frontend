@@ -61,7 +61,7 @@ const PaymentActions = () => {
             <Button
               variant='ghost'
               size='icon'
-              className='h-8 w-8 text-GRAY_900 focus-visible:ring-0 focus-visible:ring-offset-0 hover:text-GRAY_900 data-[state=open]:bg-GRAY_300'
+              className='text-GRAY_900 hover:text-GRAY_900 data-[state=open]:bg-GRAY_300 h-8 w-8 focus-visible:ring-0 focus-visible:ring-offset-0'
             >
               <ShieldCheck className='h-4 w-4' />
             </Button>

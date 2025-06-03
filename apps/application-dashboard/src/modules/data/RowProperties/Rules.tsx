@@ -38,7 +38,7 @@ const Rules: FC<RulesProps> = ({ ruleConfigs, selectedRuleId }) => {
       isNoData={!ruleConfigs?.length}
       className={cn({ 'h-full': !ruleConfigs?.length })}
       noDataBanner={
-        <div className='flex items-center gap-2.5 h-full justify-center text-GRAY_700 f-12-450'>
+        <div className='text-GRAY_700 f-12-450 flex h-full items-center justify-center gap-2.5'>
           <SvgSpriteLoader id='lightning-01' width={24} height={24} />
           <div>No rules found</div>
         </div>

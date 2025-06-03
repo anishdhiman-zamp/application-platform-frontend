@@ -20,9 +20,9 @@ export default function Home() {
   }, [pages]);
 
   return (
-    <div className='flex justify-center items-center h-full'>
+    <div className='flex h-full items-center justify-center'>
       {isLoading || (pages || [])?.length > 0 ? (
-        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       ) : (

@@ -20,7 +20,7 @@ export const Loader: FC<LoaderProps> = ({ className = '', size = SIZE.MEDIUM }) 
   return (
     <div
       className={cn(
-        `loader border-blue-500 border-b-transparent rounded-full animate-spin`,
+        `loader animate-spin rounded-full border-blue-500 border-b-transparent`,
         SIZE_CLASSNAMES[size],
         className,
       )}

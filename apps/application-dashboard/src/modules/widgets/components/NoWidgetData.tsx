@@ -11,8 +11,8 @@ interface NoWidgetDataProps {
 
 const NoWidgetData: FC<NoWidgetDataProps> = ({ className, text }) => {
   return (
-    <div className={cn('top-0 right-0 w-full h-full flex justify-center items-center z-1000 bg-white', className)}>
-      <div className='flex items-center flex-col gap-3'>
+    <div className={cn('z-1000 right-0 top-0 flex h-full w-full items-center justify-center bg-white', className)}>
+      <div className='flex flex-col items-center gap-3'>
         <SvgSpriteLoader
           id='coins-stacked-03'
           iconCategory={ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE}

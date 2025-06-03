@@ -42,25 +42,25 @@ const PaymentApprovals: FC<PaymentApprovalsProps> = ({ paymentApprovalsInfo, isE
       loader={<ApprovalSkeleton />}
       isNoData={!paymentApprovalsInfo?.policy_evaluation_data?.approval_flow?.steps?.length}
       noDataBanner={
-        <div className='flex items-center gap-2.5 h-[calc(100%-72px)] justify-center text-GRAY_700 f-12-450 mt-10'>
+        <div className='text-GRAY_700 f-12-450 mt-10 flex h-[calc(100%-72px)] items-center justify-center gap-2.5'>
           <SvgSpriteLoader id='lightning-01' width={24} height={24} />
           <div>No approvals found</div>
         </div>
       }
-      className='overflow-auto h-[calc(100%-72px)]'
+      className='h-[calc(100%-72px)] overflow-auto'
     >
-      <div className='w-full h-full overflow-auto bg-BACKGROUND_GRAY_2 py-4 text-GRAY_700'>
+      <div className='bg-BACKGROUND_GRAY_2 text-GRAY_700 h-full w-full overflow-auto py-4'>
         <div className='px-5'>
-          <div className='flex items-center gap-1 f-11-400'>
+          <div className='f-11-400 flex items-center gap-1'>
             <SvgSpriteLoader id='info-circle' size={12} />
             Click on approver names to notify approvers of pending approvals
           </div>
-          <div className='flex items-center gap-1 pb-2.5 pt-4 f-11-400'>
+          <div className='f-11-400 flex items-center gap-1 pb-2.5 pt-4'>
             <SvgSpriteLoader id='arrow-down' size={12} />
             Approval steps
           </div>
         </div>
-        <div className='px-4 flex flex-col gap-3'>
+        <div className='flex flex-col gap-3 px-4'>
           {paymentApprovalsInfo?.policy_evaluation_data?.approval_flow?.steps.map((step: any, index: any) => (
             <ApprovalStatusCard
               key={index}

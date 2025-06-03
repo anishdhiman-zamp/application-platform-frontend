@@ -53,8 +53,8 @@ const PoliciesListSideDrawer: FC<PoliciesListSideDrawerProps> = ({
         onClose();
       }}
     >
-      <SheetContent className='p-0 h-screen overflow-hidden'>
-        <div className='py-6 px-4.5'>
+      <SheetContent className='h-screen overflow-hidden p-0'>
+        <div className='px-4.5 py-6'>
           <AnimatePresence mode='wait'>
             {selectedPolicy ? (
               <motion.div

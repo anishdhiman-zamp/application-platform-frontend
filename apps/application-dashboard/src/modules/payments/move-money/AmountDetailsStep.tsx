@@ -94,7 +94,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
   }, [destinationAccountDetails?.currency_code]);
 
   return (
-    <div className='h-screen pt-20 w-75 m-auto'>
+    <div className='w-75 m-auto h-screen pt-20'>
       <div className='flex flex-col gap-5'>
         <div className='f-22-550'>{isSelfTransfer ? 'Transfer details' : 'How much are you sending?'}</div>
         {isSelfTransfer && (
@@ -109,7 +109,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
             label='Transfer to'
           />
         )}
-        <div className='flex gap-3 items-baseline'>
+        <div className='flex items-baseline gap-3'>
           <Input
             autoFocus={!isSelfTransfer}
             tabIndex={isActiveStep ? 0 : -1}
@@ -123,7 +123,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
             inputFontClassName='px-3! placeholder:text-base bg-white placeholder:!text-GRAY_500 placeholder:text-[13px] w-full'
             inputWrapperClassName='w-full '
           />
-          <div className='border border-GRAY_400 rounded-md f-13-450 p-3 flex items-center justify-center'>
+          <div className='border-GRAY_400 f-13-450 flex items-center justify-center rounded-md border p-3'>
             {sourceAccountDetails?.currency_code}
           </div>
         </div>
@@ -154,7 +154,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
           )}
         </div>
       </div>
-      <div className='flex gap-3 mt-10'>
+      <div className='mt-10 flex gap-3'>
         <Button
           type={BUTTON_TYPES.SECONDARY}
           size={SIZE_TYPES.MEDIUM}

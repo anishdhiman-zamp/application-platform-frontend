@@ -28,7 +28,7 @@ const ApprovalDropdown: FC<ApprovalDropdownProps> = ({ selectedApprovers, onChan
       <DropdownMenuTrigger asChild>
         <div className='relative'>
           {selectedApprovers?.length > 0 ? (
-            <div className='flex items-center gap-1 text-GRAY_1000'>
+            <div className='text-GRAY_1000 flex items-center gap-1'>
               <AudienceMember
                 resourceType={selectedApprovers?.[0]?.resource_type}
                 user={{ ...selectedApprovers?.[0]?.user, email: selectedApprovers?.[0]?.user?.email ?? '' }}

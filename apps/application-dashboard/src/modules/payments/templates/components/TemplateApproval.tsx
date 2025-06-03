@@ -21,14 +21,14 @@ const TemplateApproval: FC<TemplateApprovalProps> = ({ template, onBackClick }) 
   } = useGetTemplateApprovalsInfoQuery(template?.id || '');
 
   return (
-    <div className='pt-6 h-full flex flex-col '>
-      <div className='flex items-center px-4.5 pb-2.5 border-b border-GRAY_400'>
+    <div className='flex h-full flex-col pt-6'>
+      <div className='px-4.5 border-GRAY_400 flex items-center border-b pb-2.5'>
         <SvgSpriteLoader id='arrow-left' size={14} onClick={onBackClick} />
         <TemplateCard template={template} />
       </div>
       {paymentApprovalsInfo?.approval_id && <ApproveActionCard approvalId={paymentApprovalsInfo?.approval_id} />}
 
-      <div className='px-4 py-4 bg-BG_GRAY_2 flex-1 overflow-y-auto'>
+      <div className='bg-BG_GRAY_2 flex-1 overflow-y-auto px-4 py-4'>
         <PaymentApprovals
           paymentApprovalsInfo={paymentApprovalsInfo}
           isLoading={isPaymentApprovalsInfoLoading}

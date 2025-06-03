@@ -85,7 +85,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            inputVariants({ size: currentSize, variant: error ? 'error' : variant }),
+            inputVariants({
+              size: currentSize,
+              variant: error ? 'error' : variant,
+            }),
             getInputPadding(currentSize, iconPosition, !!icon),
             className,
           )}

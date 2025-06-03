@@ -22,7 +22,7 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
 
   return (
     <>
-      <div className='fixed w-screen h-[calc(100vh-136px)]! z-1000 top-[94px] left-0 flex justify-end'>
+      <div className='h-[calc(100vh-136px)]! z-1000 fixed left-0 top-[94px] flex w-screen justify-end'>
         {!datasetBulkLoaders?.length && !fileImportHistoryData?.length ? (
           <div className='absolute right-8 top-0 z-50' ref={importFileHistoryRef}>
             <HistoryEmptyState />
@@ -33,7 +33,7 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
             className='h-full overflow-y-scroll [&::-webkit-scrollbar]:hidden'
             onMouseLeave={() => setIsHoveredLoaders(false)}
           >
-            <div className='flex flex-col h-auto'>
+            <div className='flex h-auto flex-col'>
               <HistoryBulkLoaders
                 isHoveredLoaders={isHoveredLoaders}
                 setIsHoveredLoaders={setIsHoveredLoaders}

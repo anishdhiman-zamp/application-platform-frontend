@@ -83,7 +83,7 @@ const SelectSourceAccount: FC<SelectSourceAccountProps> = ({
             onCreateTemplate={() => setCreateTemplateType(transferType)}
           />
         </div>
-        <div className='flex gap-3 mt-10'>
+        <div className='mt-10 flex gap-3'>
           <Button
             disabled
             type={BUTTON_TYPES.SECONDARY}

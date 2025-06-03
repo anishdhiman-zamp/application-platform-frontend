@@ -15,15 +15,15 @@ const RecipientCard = forwardRef<HTMLDivElement, RecipientCardProps>(
         ref={ref}
         onClick={() => handleRecipientSelect(recipient)}
         className={cn(
-          'cursor-pointer rounded-lg gap-1.5 flex items-center px-2.5 py-2 group hover:bg-GRAY_100 transition duration-100',
+          'hover:bg-GRAY_100 group flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-2 transition duration-100',
           className,
         )}
       >
-        <div className='w-4 h-4 bg-BLUE_200 flex justify-center items-center pl-px f-8-500 rounded-full'>
+        <div className='bg-BLUE_200 f-8-500 flex h-4 w-4 items-center justify-center rounded-full pl-px'>
           {getFirstLetters(recipient?.name as string, 1).toLocaleUpperCase()}
         </div>
         <div className='f-13-500 grow'>{recipient?.name}</div>
-        <SvgSpriteLoader size={14} id='send-03' className='opacity-0 group-hover:opacity-100 transition duration-100' />
+        <SvgSpriteLoader size={14} id='send-03' className='opacity-0 transition duration-100 group-hover:opacity-100' />
       </div>
     );
   },

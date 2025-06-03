@@ -161,7 +161,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
               <Attribute
                 label={attribute.label}
                 className={cn({
-                  'border border-red-500 rounded-md': error,
+                  'rounded-md border border-red-500': error,
                 })}
                 displayValue={attributeDisplayValue(value)}
                 onClick={(e: React.MouseEvent) => {

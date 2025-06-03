@@ -101,19 +101,19 @@ const FormattedJson: FC<FormattedJsonPropsType> = ({ originalJson, formattedJson
 
   return (
     <>
-      <div className='sticky w-full h-fit rounded-md border border-GRAY_300'>
-        <div className='flex w-full justify-end absolute'>
-          <span className='f-10-400 bg-GRAY_300 py-0.5 p-4 rounded-bl-md text-GRAY_700'>JSON</span>
+      <div className='border-GRAY_300 sticky h-fit w-full rounded-md border'>
+        <div className='absolute flex w-full justify-end'>
+          <span className='f-10-400 bg-GRAY_300 text-GRAY_700 rounded-bl-md p-4 py-0.5'>JSON</span>
         </div>
         <div
-          className='flex flex-col w-full max-h-[calc(100vh-180px)] overflow-y-auto rounded-md'
+          className='flex max-h-[calc(100vh-180px)] w-full flex-col overflow-y-auto rounded-md'
           style={{ scrollbarWidth: 'thin' }}
         >
-          <pre className='f-14-400 w-full p-4 whitespace-pre-wrap'>{highlightedJson}</pre>
+          <pre className='f-14-400 w-full whitespace-pre-wrap p-4'>{highlightedJson}</pre>
         </div>
       </div>
       {search && (
-        <span className='flex justify-end f-12-400 mb-2 mt-2 gap-1'>
+        <span className='f-12-400 mb-2 mt-2 flex justify-end gap-1'>
           Found <span className='f-12-600'>{searchCount}</span> search {searchCount > 1 ? 'results' : 'result'}
         </span>
       )}

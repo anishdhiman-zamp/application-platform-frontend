@@ -114,12 +114,12 @@ const InputTag: FC<InputTagProps> = ({
   return (
     <div className={cn(`flex flex-col ${inputTagWrapperClasses}`)}>
       {isMulti ? (
-        <div className={cn(`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto ${inputPillsWrapperClasses}`)}>
+        <div className={cn(`w-inherit flex flex-wrap gap-1 overflow-y-auto bg-white p-1 ${inputPillsWrapperClasses}`)}>
           {tags.map((tag, index) => (
             <div
               key={index}
               onClick={stopPropagationAction}
-              className='whitespace-nowrap w-auto p-2 f-12-400 flex items-center justify-between bg-BLUE_50 gap-2'
+              className='f-12-400 bg-BLUE_50 flex w-auto items-center justify-between gap-2 whitespace-nowrap p-2'
             >
               {tag}
               <SvgSpriteLoader
@@ -187,7 +187,7 @@ const InputTag: FC<InputTagProps> = ({
           onDrop={(e) => e.preventDefault()}
         />
       )}
-      {error && <span className='f-11-400 mt-2 text-RED_700'>{error}</span>}
+      {error && <span className='f-11-400 text-RED_700 mt-2'>{error}</span>}
     </div>
   );
 };

@@ -320,7 +320,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   return (
     <>
       <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div className='flex items-center justify-between pr-8 z-1000'>
+        <div className='z-1000 flex items-center justify-between pr-8'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
@@ -336,7 +336,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}

@@ -121,7 +121,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
   return (
     <div
       className={cn(
-        'h-full fixed w-screen z-1000 top-0 left-0 items-center animate-opacity',
+        'z-1000 animate-opacity fixed left-0 top-0 h-full w-screen items-center',
         isOpen ? '' : 'hidden',
         backdropClassName,
         SIDE_DRAWER_TYPES_CLASSNAMES[type].backdropClassName,
@@ -134,7 +134,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
         className={cn(
           isMount ? mountClassName : unmountClassName,
           common,
-          ' -right-[100vw] w-screen flex flex-col absolute transition-all h-screen',
+          'absolute -right-[100vw] flex h-screen w-screen flex-col transition-all',
           stackedClassNames[stackPosition],
           sidebarWidthClasses,
           className,
@@ -143,7 +143,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
         role='presentation'
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
-        <div className={cn(' bg-white w-full h-full', SIDE_DRAWER_TYPES_CLASSNAMES[type].children)}>
+        <div className={cn('h-full w-full bg-white', SIDE_DRAWER_TYPES_CLASSNAMES[type].children)}>
           <OverlayTitle
             closeButtonDimensions={closeButtonDimensions}
             topBar={topBar}
@@ -157,7 +157,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
             titleClassName={titleClassName}
             subtitleClassName={subtitleClassName}
           />
-          <div className={cn('p-4 h-full', childrenWrapperClassName)}>{children}</div>
+          <div className={cn('h-full p-4', childrenWrapperClassName)}>{children}</div>
           <OverlayFooter
             onBack={onBack}
             onNext={onNext}

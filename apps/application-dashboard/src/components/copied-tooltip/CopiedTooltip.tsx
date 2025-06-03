@@ -19,7 +19,7 @@ const CopiedTooltip: FC<CopiedTooltipProps> = ({
 }) =>
   show && (
     <Button className={cn('absolute flex', wrapperOverrideClassName, className)} id={buttonId}>
-      <div className='flex f-12-300'>
+      <div className='f-12-300 flex'>
         <SvgSpriteLoader id='check' className='mr-1 min-w-[15px]' width={15} height={15} />
         Copied!
       </div>

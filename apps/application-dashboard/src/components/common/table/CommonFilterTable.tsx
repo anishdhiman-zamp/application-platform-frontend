@@ -292,7 +292,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         isLoading={isFilterConfigFetching}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -303,8 +303,8 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8 py-3'>
-          <div className='flex items-center justify-between w-full'>
+        <div className='flex items-center justify-between py-3 pr-8'>
+          <div className='flex w-full items-center justify-between'>
             {!isFilterConfigError && (
               <FiltersWrapper
                 label='Filter'
@@ -318,7 +318,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         </div>
 
         <CommonWrapper isError={isError} refetchFunction={() => router.refresh()}>
-          <div className='z-10 w-full h-full' ref={datasetTableRef}>
+          <div className='z-10 h-full w-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
               columns={columns}

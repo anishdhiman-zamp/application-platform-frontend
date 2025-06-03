@@ -5,7 +5,7 @@ import { Button } from 'components/common/button/Button';
 
 const ChooseRoleMembers = () => {
   return (
-    <div className='relative w-fit flex flex-col'>
+    <div className='relative flex w-fit flex-col'>
       <Button type={BUTTON_TYPES.SECONDARY} id='send-user-invite-btn' size={SIZE_TYPES.SMALL} className='!bg-GRAY_100'>
         Share
       </Button>

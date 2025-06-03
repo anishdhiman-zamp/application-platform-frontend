@@ -334,10 +334,10 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
 
   return (
     <div className='h-full'>
-      <div className='flex  overflow-hidden h-full'>
-        <div className='flex-1 shadow-dateContainer w-full' data-testid={`date-range-menu-custom-${id}`}>
+      <div className='flex h-full overflow-hidden'>
+        <div className='shadow-dateContainer w-full flex-1' data-testid={`date-range-menu-custom-${id}`}>
           {!isSingle && (
-            <div className='border-b border-GRAY_400 mx-3 pt-3 flex w-auto justify-between items-center'>
+            <div className='border-GRAY_400 mx-3 flex w-auto items-center justify-between border-b pt-3'>
               <div className=''>
                 <Tabs
                   customSelectedIndex={dateRangeTabs?.findIndex((tab) => tab.value === currentTab)}
@@ -357,7 +357,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
           )}
           <div
             className={cn(
-              `items-start flex flex-col`,
+              `flex flex-col items-start`,
               isSingle ? 'h-full' : isPeriodicityEnabled ? 'h-[calc(100%-44px)]' : 'h-[calc(100%-38.5px)]',
             )}
           >
@@ -388,13 +388,13 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
               disableFutureDate={disableFutureDate}
             />
             {isPeriodicityEnabled && (
-              <div className='border-t border-GRAY_400 p-3 pb-4'>
+              <div className='border-GRAY_400 border-t p-3 pb-4'>
                 <div className='f-13-500 mb-1.5'>Periodicity</div>
-                <div className='flex items-center gap-1.5 flex-wrap'>
+                <div className='flex flex-wrap items-center gap-1.5'>
                   {PERIODICITY_OPTIONS.map((item) => (
                     <div
                       className={cn(
-                        'f-13-500 border rounded px-2 py-1 f-12-400 cursor-pointer',
+                        'f-13-500 f-12-400 cursor-pointer rounded border px-2 py-1',
                         selectedPeriodicity?.value === item.value ? 'bg-BG_GRAY_2 border-GRAY_500' : 'border-GRAY_400',
                       )}
                       key={item?.value}

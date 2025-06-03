@@ -57,7 +57,7 @@ const AudienceMember = ({
                 <Avatar
                   name={customAvatarWord}
                   backgroundColor={COLORS.GRAY_1000}
-                  className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
+                  className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white'
                 />
               </div>
             )
@@ -81,7 +81,7 @@ const AudienceMember = ({
           </Tag>
         </div>
       </div>
-      <span className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+      <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 whitespace-normal text-wrap break-words'>
         {currentUserHasAdminAccess && (
           <>
             <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />

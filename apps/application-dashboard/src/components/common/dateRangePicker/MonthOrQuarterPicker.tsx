@@ -159,22 +159,22 @@ export const MonthOrQuarterPicker: FC<MonthOrQuarterPickerProps> = ({
     <div className='' ref={containerRef} onMouseLeave={() => setLastHoveredValue(null)}>
       {yearsList.map((year, index) => {
         return (
-          <div className=' flex flex-col items-start' key={index}>
-            <div className='f-12-500 mb-2 text-GRAY_1000'>{year}</div>
-            <div className=' flex flex-wrap gap-2 mb-4'>
+          <div className='flex flex-col items-start' key={index}>
+            <div className='f-12-500 text-GRAY_1000 mb-2'>{year}</div>
+            <div className='mb-4 flex flex-wrap gap-2'>
               {config.map((config, index) => {
                 return (
                   <div
                     key={index}
                     className={` ${
                       isSelected(year, config?.value)
-                        ? 'bg-BLUE_700 text-white border-GRAY_400'
+                        ? 'bg-BLUE_700 border-GRAY_400 text-white'
                         : shouldHighlightCell(year, config)
-                          ? 'bg-BLUE_50 '
+                          ? 'bg-BLUE_50'
                           : isPartiallySelected(year, config?.value)
                             ? 'border-BLUE_700 selected-year'
                             : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
-                    }  cursor-pointer f-12-500 w-13.5 flex items-center justify-center py-[4.5px]  rounded-sm border `}
+                    } f-12-500 w-13.5 flex cursor-pointer items-center justify-center rounded-sm border py-[4.5px]`}
                     onClick={() => onSelectValue({ year, config: config })}
                     onMouseEnter={() => onMouseEnter(year, config)}
                   >

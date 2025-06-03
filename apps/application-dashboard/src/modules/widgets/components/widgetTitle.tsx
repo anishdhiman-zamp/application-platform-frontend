@@ -80,10 +80,10 @@ const WidgetTitle = ({
       <div
         ref={titleRef}
         className={cn(
-          'px-6 flex flex-col items-start w-fit select-none cursor-pointer',
+          'flex w-fit cursor-pointer select-none flex-col items-start px-6',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) && 'mb-10',
-          isPivotTable && isGroupWidgetOptions && 'px-0 gap-y-2 items-start justify-center mb-0',
-          isPivotTable && !isGroupWidgetOptions && 'mb-0 px-0 justify-center cursor-default',
+          isPivotTable && isGroupWidgetOptions && 'mb-0 items-start justify-center gap-y-2 px-0',
+          isPivotTable && !isGroupWidgetOptions && 'mb-0 cursor-default justify-center px-0',
         )}
         onClick={handleToggle}
       >
@@ -103,7 +103,7 @@ const WidgetTitle = ({
         </div>
 
         {isGroupWidgetOptions && (
-          <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions?.length} Variants`}</span>
+          <span className='f-12-450 text-GRAY_700 opacity-0 transition-opacity duration-200 group-hover:opacity-100'>{`${groupWidgetsOptions?.length} Variants`}</span>
         )}
       </div>
       {isGroupWidgetOptionsOpen &&
@@ -113,7 +113,7 @@ const WidgetTitle = ({
               options={groupWidgetsOptions}
               onSelect={handleWidgetChange}
               activeWidget={activeWidget}
-              className='top-14 left-5'
+              className='left-5 top-14'
               dropdownRef={dropdownRef}
             />,
             document?.querySelector('.pivot') as HTMLElement,
@@ -123,7 +123,7 @@ const WidgetTitle = ({
             options={groupWidgetsOptions}
             onSelect={handleWidgetChange}
             activeWidget={activeWidget}
-            className='top-12 left-6'
+            className='left-6 top-12'
             dropdownRef={dropdownRef}
           />
         ))}

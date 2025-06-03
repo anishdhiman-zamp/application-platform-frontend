@@ -41,7 +41,7 @@ const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) =>
         <div
           onClick={() => onSelectDataset(item.value)}
           key={item.value}
-          className='flex items-center gap-2.5 px-2.5 py-3 rounded-lg hover:bg-GRAY_100 cursor-pointer'
+          className='hover:bg-GRAY_100 flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-3'
         >
           <Image src={DATASET_TABLE} alt='dataset-table' width={20} height={20} />
           <div className='f-13-500'>{item.label}</div>

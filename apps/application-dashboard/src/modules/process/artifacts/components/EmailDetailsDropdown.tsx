@@ -13,14 +13,14 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className='rounded flex items-center justify-center px-1 py-1 border-none cursor-pointer hover:bg-GRAY_50'>
+        <div className='hover:bg-GRAY_50 flex cursor-pointer items-center justify-center rounded border-none px-1 py-1'>
           <SvgSpriteLoader id='chevron-down' size={14} color={COLORS.GRAY_700} />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         sideOffset={2}
         align='start'
-        className='z-1001 min-w-[400px] py-2 px-3 flex flex-col gap-y-1'
+        className='z-1001 flex min-w-[400px] flex-col gap-y-1 px-3 py-2'
       >
         {emailArtifact?.from_mail_id && (
           <div className='flex items-start gap-2'>

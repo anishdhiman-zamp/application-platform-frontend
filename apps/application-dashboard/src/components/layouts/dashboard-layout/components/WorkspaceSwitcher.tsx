@@ -31,18 +31,18 @@ const WorkspaceSwitcher = () => {
     <div className='px-2' ref={ref}>
       <div className='relative hidden'>
         <div
-          className=' flex items-center gap-1 px-2 py-2.5 f-13-500 select-none cursor-pointer'
+          className='f-13-500 flex cursor-pointer select-none items-center gap-1 px-2 py-2.5'
           onClick={() => setIsWorkspacePopoverOpen((prev) => !prev)}
         >
           <WorkspaceTab label={selectedWorkspace.label} className='pr-0' color={selectedWorkspace.color} />
           <SvgSpriteLoader
             iconCategory={ICON_SPRITE_TYPES.ARROWS}
             id='chevron-down'
-            className={cn('transition-transform duration-300 -mb-0.5', isWorkspacePopoverOpen ? '-rotate-180' : '')}
+            className={cn('-mb-0.5 transition-transform duration-300', isWorkspacePopoverOpen ? '-rotate-180' : '')}
           />
         </div>
         {isWorkspacePopoverOpen && (
-          <div className='bg-white absolute rounded-md top-[90%] left-0 w-[264px] border border-GRAY_400 z-10 px-2 py-3'>
+          <div className='border-GRAY_400 absolute left-0 top-[90%] z-10 w-[264px] rounded-md border bg-white px-2 py-3'>
             {WORKSPACE_ITEMS.map((workspace) => (
               <WorkspaceTab
                 key={workspace.workspace_id}

@@ -14,7 +14,7 @@ interface ActivityLogsProps {
 
 const ActivityLogs: FC<ActivityLogsProps> = ({ handleShowArtifacts, processId, activityId, className }) => {
   return (
-    <div className={cn('overflow-auto max-w-full h-full flex flex-1 flex-col', className)}>
+    <div className={cn('flex h-full max-w-full flex-1 flex-col overflow-auto', className)}>
       <LogTopbar />
       <LogsSection processId={processId} activityId={activityId} handleShowArtifacts={handleShowArtifacts} />
       <LogInput processId={processId} activityId={activityId} />

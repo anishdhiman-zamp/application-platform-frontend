@@ -26,33 +26,33 @@ const TemplateCard: FC<TemplateCardProps> = ({ onSendClick, template, onTemplate
   return (
     <div
       className={cn(
-        'pivot relative flex items-center gap-3 px-1.5 py-2.5 rounded-md  transition-all duration-200 bg-white',
+        'pivot relative flex items-center gap-3 rounded-md bg-white px-1.5 py-2.5 transition-all duration-200',
         {
-          'cursor-pointer hover:bg-GRAY_50': !!onTemplateClick,
+          'hover:bg-GRAY_50 cursor-pointer': !!onTemplateClick,
         },
       )}
       onClick={onTemplateClick}
     >
-      <div className='w-6 h-6 flex items-center justify-center bg-BLUE_200 rounded-full'>
+      <div className='bg-BLUE_200 flex h-6 w-6 items-center justify-center rounded-full'>
         <SvgSpriteLoader id='file-06' size={14} />
       </div>
       <div className='grow'>
         <div className='f-13-500 mb-1'>{template?.name}</div>
-        <div className='f-12-400 inline-flex divide-x gap-2 divide-GRAY_400 overflow-hidden border border-GRAY_400 rounded-sm'>
+        <div className='f-12-400 divide-GRAY_400 border-GRAY_400 inline-flex gap-2 divide-x overflow-hidden rounded-sm border'>
           {source &&
             destination &&
             [source, destination].map((item, index) => (
               <div
                 key={index}
-                className={cn('flex items-center gap-2 py-1 px-1.5 divide-x  border-GRAY_400', {
+                className={cn('border-GRAY_400 flex items-center gap-2 divide-x px-1.5 py-1', {
                   'border-l': index !== 0,
                 })}
               >
-                <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden max-w-[100px]'>
+                <div className='f-11-400 text-GRAY_700 max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap'>
                   {index === 0 ? 'Source' : 'Recipient'}
                 </div>
-                <div className='f-11-450  whitespace-nowrap flex items-center'>
-                  <div className='text-ellipsis overflow-hidden max-w-[60px] mr-1'>{item?.account_name}</div>
+                <div className='f-11-450 flex items-center whitespace-nowrap'>
+                  <div className='mr-1 max-w-[60px] overflow-hidden text-ellipsis'>{item?.account_name}</div>
                   <div>{`${MASK_DOTS} ${item?.masked_account_number}`}</div>
                 </div>
               </div>

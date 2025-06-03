@@ -71,7 +71,7 @@ const DrilldownMultiDataset = ({ datasetIds }: { datasetIds: string }) => {
 
   return (
     <div className='h-full'>
-      <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400 rounded-tl-xl'>
+      <div className='bg-BG_GRAY_2 border-BORDER_GRAY_400 rounded-tl-xl border-b p-3'>
         {tabs?.length > 1 && (
           <Tabs
             list={tabs}

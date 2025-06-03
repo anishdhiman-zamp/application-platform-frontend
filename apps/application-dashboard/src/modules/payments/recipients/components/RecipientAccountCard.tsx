@@ -13,10 +13,10 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
 
   return (
     <div
-      className='w-full rounded-md border border-BORDER_GRAY_400 overflow-hidden'
+      className='border-BORDER_GRAY_400 w-full overflow-hidden rounded-md border'
       onClick={() => setIsDetailsOpen((prev) => !prev)}
     >
-      <div className='px-2 py-2.5 flex items-center gap-1.5 bg-BACKGROUND_GRAY_2 f-11-400 cursor-pointer select-none'>
+      <div className='bg-BACKGROUND_GRAY_2 f-11-400 flex cursor-pointer select-none items-center gap-1.5 px-2 py-2.5'>
         <SvgSpriteLoader id='bank' size={14} />
         <div className='grow'>Account Name {account?.masked_account_number}</div>
         <DropdownToggle isShowMenu={isDetailsOpen} setIsShowMenu={setIsDetailsOpen} />
@@ -24,7 +24,7 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
 
       <div
         className={cn(
-          'px-2.5 flex flex-col gap-3.5 duration-200 transition-all overflow-hidden',
+          'flex flex-col gap-3.5 overflow-hidden px-2.5 transition-all duration-200',
           isDetailsOpen ? 'max-h-[500px] py-3' : 'max-h-0',
         )}
       >

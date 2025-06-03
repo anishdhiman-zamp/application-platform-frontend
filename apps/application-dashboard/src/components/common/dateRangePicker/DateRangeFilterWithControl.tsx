@@ -60,7 +60,7 @@ const DateRangeFilterWithControl: FC<DateRangeFilterWithControlProps> = ({
       </FilterControlButton>
 
       {isDateRangeOpen ? (
-        <div className='absolute top-10 z-999 right-0'>
+        <div className='z-999 absolute right-0 top-10'>
           <DateRangeFilter
             onChange={onChange}
             value={value}

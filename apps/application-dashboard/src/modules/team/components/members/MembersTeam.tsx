@@ -228,16 +228,16 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
 
   return (
     <div
-      className='relative f-12-400 text-GRAY_1000 h-full flex items-center justify-start text-left py-2 px-2 overflow-visible'
+      className='f-12-400 text-GRAY_1000 relative flex h-full items-center justify-start overflow-visible px-2 py-2 text-left'
       ref={teamsRowRef}
       onClick={handleToggleFullViewTeamTags}
     >
       {isMember ? (
-        <div className={cn('flex flex-nowrap overflow-hidden gap-1.5', openFullViewTeamTags && 'flex-wrap')}>
+        <div className={cn('flex flex-nowrap gap-1.5 overflow-hidden', openFullViewTeamTags && 'flex-wrap')}>
           {selectedItems.map((item, index) => (
             <span
               key={index}
-              className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize'
+              className='f-12-400 text-GRAY_1000 flex w-fit rounded px-1.5 py-0.5 capitalize'
               style={{ backgroundColor: item?.color ?? COLORS.WHITE }}
             >
               {item?.label}

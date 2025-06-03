@@ -29,13 +29,13 @@ const ImportFileWrapper: FC<ImportFileWrapperPropsType> = ({
       closeOnClickOutside={false}
       showIcon
     >
-      <div className='bg-white p-1.5 pt-0 rounded-2.5 rounded-t-none border border-GRAY_400 border-t-0'>
+      <div className='rounded-2.5 border-GRAY_400 rounded-t-none border border-t-0 bg-white p-1.5 pt-0'>
         <ImportFile
           fileName={fileName}
           setFileName={setFileName}
           setRawData={setRawData}
           acceptedFormats={IMPORT_ALLOWED_FILE_FORMATS}
-          className='flex flex-col justify-center items-center bg-BG_GRAY_1 border border-dashed border-GRAY_400 min-h-[220px] rounded-md focus:border-black focus:border-solid cursor-pointer'
+          className='bg-BG_GRAY_1 border-GRAY_400 flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-md border border-dashed focus:border-solid focus:border-black'
           setFileUploadId={setFileUploadId}
           keepLoadingFlow={keepLoadingFlow}
           isFileUploading={isFileUploading}

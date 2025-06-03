@@ -17,11 +17,11 @@ const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange
   return (
     <div
       className={cn(
-        'overflow-x-auto flex flex-col w-full h-full border border-GRAY_400 rounded-xl overflow-hidden group',
+        'border-GRAY_400 group flex h-full w-full flex-col overflow-hidden overflow-x-auto rounded-xl border',
         className,
       )}
     >
-      <div className='bg-white w-full flex justify-between items-start h-[110px] p-6 border-b-0.5'>
+      <div className='border-b-0.5 flex h-[110px] w-full items-start justify-between bg-white p-6'>
         <WidgetTitle
           groupWidgetsOptions={groupWidgetsOptions}
           onWidgetChange={onWidgetChange}
@@ -30,7 +30,7 @@ const NoPivotData: FC<NoPivotDataProps> = ({ groupWidgetsOptions, onWidgetChange
           activeWidget={activeWidget}
         />
       </div>
-      <div className='w-full h-full flex items-center justify-center z-0'>
+      <div className='z-0 flex h-full w-full items-center justify-center'>
         <NoWidgetData />
       </div>
     </div>

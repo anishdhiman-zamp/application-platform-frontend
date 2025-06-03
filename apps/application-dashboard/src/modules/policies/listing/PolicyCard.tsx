@@ -45,7 +45,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
     if (isPendingApproval) {
       return (
         <div className='flex items-center gap-2' onClick={stopPropagationAction}>
-          <span className='w-1 h-1 bg-ORANGE_800 rounded-full' />
+          <span className='bg-ORANGE_800 h-1 w-1 rounded-full' />
           <PolicyApproveCard
             approvalId={policy?.status_details?.approval?.id}
             canApprove={policy?.status_details?.can_approve}
@@ -56,8 +56,8 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
 
     if (policy?.status_details?.status === PolicyResultStatus.APPROVED)
       return (
-        <div className='flex items-center gap-2 f-11-450 text-GREEN_800'>
-          <span className='w-1 h-1 bg-GREEN_800 rounded-full' />
+        <div className='f-11-450 text-GREEN_800 flex items-center gap-2'>
+          <span className='bg-GREEN_800 h-1 w-1 rounded-full' />
           Active
         </div>
       );
@@ -67,11 +67,11 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
     <>
       <ListCard
         header={
-          <div className='flex items-center gap-2 w-full'>
+          <div className='flex w-full items-center gap-2'>
             <TooltipV2 tooltipBody={isPolicyPendingApproval ? cardTitle : ''}>
               <div
-                className={cn('f-11-400 text-gray-700 whitespace-nowrap ', {
-                  'overflow-hidden text-ellipsis max-w-[170px]': isPolicyPendingApproval,
+                className={cn('f-11-400 whitespace-nowrap text-gray-700', {
+                  'max-w-[170px] overflow-hidden text-ellipsis': isPolicyPendingApproval,
                 })}
               >
                 {cardTitle}
@@ -79,7 +79,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
             </TooltipV2>
             {isShowReviewAction && (
               <div
-                className='f-11-450 border-b border-BG_GRAY_2 hover:border-primary select-none'
+                className='f-11-450 border-BG_GRAY_2 hover:border-primary select-none border-b'
                 onClick={handleReviewPolicy}
               >
                 Review

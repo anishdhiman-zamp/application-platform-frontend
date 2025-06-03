@@ -13,9 +13,9 @@ const AgGridTableHeader: FC<MapAny> = (props: any) => {
 
   return (
     <div
-      className={`w-full h-full flex items-center justify-between p-2 ${
+      className={`flex h-full w-full items-center justify-between p-2 ${
         isLastCellInRow ? 'border-r' : ''
-      } w-full border-y border-l border-DIVIDER_SAIL_2 ${headerWrapperClassName}`}
+      } border-DIVIDER_SAIL_2 w-full border-y border-l ${headerWrapperClassName}`}
     >
       {isCustomHeader && !!CustomHeaderComponent && <CustomHeaderComponent {...props} />}
       {!isCustomHeader && <div className={headerClassName}>{column?.headerName ?? ''}</div>}

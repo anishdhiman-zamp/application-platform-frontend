@@ -112,7 +112,7 @@ const AgGridTable: FC<AgGridTableProps> = ({
   };
 
   return (
-    <div className={`w-full h-full ${wrapperClassName}`} style={wrapperStyle}>
+    <div className={`h-full w-full ${wrapperClassName}`} style={wrapperStyle}>
       <SpreadsheetGrid
         columnDefs={columnDefs}
         rowData={data}

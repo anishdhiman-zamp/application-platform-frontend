@@ -86,7 +86,7 @@ const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div
-          className={cn('px-1.5 py-0.5 rounded flex items-center gap-1 border', {
+          className={cn('flex items-center gap-1 rounded border px-1.5 py-0.5', {
             'cursor-pointer': !!teamList?.length,
           })}
           style={{ background: backgroundColor, borderColor }}
@@ -98,10 +98,10 @@ const ApprovalDetailsBadge: FC<ApprovalDetailsBadgeProps> = ({
         </div>
       </DropdownMenuTrigger>
       {!!teamList?.length && (
-        <DropdownMenuContent align='end' className='z-1001 min-w-[200px]  max-h-[300px] overflow-y-auto' sideOffset={5}>
+        <DropdownMenuContent align='end' className='z-1001 max-h-[300px] min-w-[200px] overflow-y-auto' sideOffset={5}>
           {teamList?.map((user) => (
-            <DropdownMenuItem key={user?.user_id} className='flex items-center justify-between py-1 cursor-default'>
-              <div className='f-12-450 text-GRAY_1000 px-2.5 py-0.5 border border-GRAY_400 rounded'>
+            <DropdownMenuItem key={user?.user_id} className='flex cursor-default items-center justify-between py-1'>
+              <div className='f-12-450 text-GRAY_1000 border-GRAY_400 rounded border px-2.5 py-0.5'>
                 {user?.name || user?.email || ''}
               </div>
               {getUserStatusIcon(user?.user_id)}

@@ -115,20 +115,20 @@ export const YearPicker: FC<YearPickerProps> = ({
   };
 
   return (
-    <div className='gap-2 flex flex-wrap' ref={yearListRef} onMouseLeave={() => setLastHoveredValue(null)}>
+    <div className='flex flex-wrap gap-2' ref={yearListRef} onMouseLeave={() => setLastHoveredValue(null)}>
       {yearsList.map((year, index) => {
         return (
           <div
             key={index}
             className={` ${
               isSelected(year)
-                ? 'bg-BLUE_700 text-white border-DIVIDER_SAIL_2'
+                ? 'bg-BLUE_700 border-DIVIDER_SAIL_2 text-white'
                 : shouldHighlightCell(year)
-                  ? 'bg-BLUE_50 '
+                  ? 'bg-BLUE_50'
                   : isPartiallySelected(year)
                     ? 'border-BLUE_700'
                     : 'hover:border-BLUE_700 bg-BG_GRAY_2 border-GRAY_400'
-            }  cursor-pointer mb-2.5 f-12-500 w-[calc(50%-8px)] flex items-center justify-center py-[4.5px]  rounded-sm border `}
+            } f-12-500 mb-2.5 flex w-[calc(50%-8px)] cursor-pointer items-center justify-center rounded-sm border py-[4.5px]`}
             onClick={() => onSelectValue({ year })}
             onMouseEnter={() => onMouseEnter(year)}
           >

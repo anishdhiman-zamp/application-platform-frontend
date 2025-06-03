@@ -42,8 +42,8 @@ const SharePopupPageApprovals = ({ resourceType, resourceId, emptyFiltersTitle }
   if (pendingApprovals?.length === 0 || isLoading) return null;
 
   return (
-    <div className='mt-2 rounded-3.5 py-2 p-1 border-0.5 border-GRAY_500 bg-white shadow-table-filter-menu'>
-      <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+    <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu mt-2 bg-white p-1 py-2'>
+      <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'>
         <CommonWrapper skeletonType={SkeletonTypes.CUSTOM} isLoading={loading} loader={<WhoHasAccessSkeletonLoader />}>
           {!!pendingApprovalList?.length && (
             <div>

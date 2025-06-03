@@ -38,9 +38,9 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccoun
   };
 
   return (
-    <div className='group flex items-center justify-between px-1.5 py-1 hover:bg-GRAY_50 cursor-pointer rounded-md hover:z-50'>
+    <div className='hover:bg-GRAY_50 group flex cursor-pointer items-center justify-between rounded-md px-1.5 py-1 hover:z-50'>
       <div className='flex items-center gap-1.5'>
-        <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
+        <div className='bg-BLUE_200 f-12-500 flex h-6 w-6 items-center justify-center rounded-full'>
           {getFirstLetters(recipient?.name, 1)}
         </div>
         <div>
@@ -71,7 +71,7 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccoun
                 type={BUTTON_TYPES.SECONDARY}
                 id='recipient-card-action'
                 size={SIZE_TYPES.XSMALL}
-                className='border-none bg-transparent! hover:!bg-GRAY_300'
+                className='bg-transparent! hover:!bg-GRAY_300 border-none'
                 iconProps={item?.icon}
                 onClick={(e) => handleActionClick(item?.action, e)}
               />

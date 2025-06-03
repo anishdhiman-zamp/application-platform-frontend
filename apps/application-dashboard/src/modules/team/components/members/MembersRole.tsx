@@ -109,7 +109,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
-    <div className='w-full h-full text-left'>
+    <div className='h-full w-full text-left'>
       {checkPermission ? (
         <div className='relative w-fit'>
           <AsyncDropdown
@@ -131,7 +131,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
           />
         </div>
       ) : (
-        <span className='flex justify-between items-start f-12-400 text-GRAY_1000 pl-2 py-3 pr-2'>{role?.label}</span>
+        <span className='f-12-400 text-GRAY_1000 flex items-start justify-between py-3 pl-2 pr-2'>{role?.label}</span>
       )}
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}

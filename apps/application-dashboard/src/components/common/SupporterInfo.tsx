@@ -41,7 +41,7 @@ export const SupporterInfo: FC<SupporterInfoProps> = ({
   return icon?.id || text ? (
     <div className={`${className} ${typeTextClass}`}>
       {typeIcon?.id && (
-        <div className={typeIcon.className ?? 'mr-2 w-3 h-3'}>
+        <div className={typeIcon.className ?? 'mr-2 h-3 w-3'}>
           <SvgSpriteLoader color={icon?.color} {...typeIcon} id={icon?.id ?? typeIcon?.id ?? ''} />
         </div>
       )}

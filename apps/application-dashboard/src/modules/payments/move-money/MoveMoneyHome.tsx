@@ -56,12 +56,12 @@ const MoneyTransferHome = () => {
   return (
     <div
       style={{ marginTop: `calc(-${currentStep * 100}vh)` }}
-      className='w-full transition-all overflow-hidden duration-700 ease-in-out z-100 '
+      className='z-100 w-full overflow-hidden transition-all duration-700 ease-in-out'
     >
       <SvgSpriteLoader
         id='x-close'
         size={14}
-        className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
+        className='hover:bg-GRAY_100 fixed right-6 top-[72px] rounded-md p-1'
         onClick={() => router.back()}
       />
       <SelectSourceAccount

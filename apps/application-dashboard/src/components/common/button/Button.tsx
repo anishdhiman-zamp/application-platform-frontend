@@ -187,7 +187,7 @@ export const Button: FC<ButtonProps> = ({
         loader ? (
           loader
         ) : (
-          <div className='w-full flex items-center justify-center'>
+          <div className='flex w-full items-center justify-center'>
             <ProgressBar
               trackColor={COLORS.BLACK}
               indicatorColor={COLORS.WHITE}

@@ -49,15 +49,15 @@ const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
         onKeyDown={onKeyPress}
         tabIndex={tabIndex}
         className={cn(
-          'outline-0 flex items-center p-3',
-          onClick ? 'cursor-pointer hover:bg-BACKGROUND_SECONDARY' : '',
+          'flex items-center p-3 outline-0',
+          onClick ? 'hover:bg-BACKGROUND_SECONDARY cursor-pointer' : '',
           className,
           subtitle ? 'gap-3' : 'gap-1.5',
         )}
       >
         {(logo || currencyCode) && (
           <div
-            className='flex justify-center items-center rounded-full'
+            className='flex items-center justify-center rounded-full'
             style={{ minWidth: iconSize, width: iconSize, height: iconSize }}
           >
             {!currencyCode ? (
@@ -77,7 +77,7 @@ const AccountWithLogo = forwardRef<HTMLDivElement, AccountWithLogoCardProps>(
           </div>
         )}
         <div>
-          <div className='flex gap-2 f-12-450'>
+          <div className='f-12-450 flex gap-2'>
             {name} {accountNumber}
           </div>
           {!!subtitle && <div className={cn('text-GRAY_800 f-11-400 mt-1', subtitleClassName)}>{subtitle}</div>}

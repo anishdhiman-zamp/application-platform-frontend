@@ -28,21 +28,21 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
     case ErrorCardTypes.GENERAL_API_FAIL: {
       return (
         <div
-          className={cn('animate-opacity flex items-center h-full', className)}
+          className={cn('animate-opacity flex h-full items-center', className)}
           style={{ minHeight: height && height + 'px' }}
         >
-          <div className='flex flex-col items-center justify-center gap-y-9 h-full w-full'>
-            <div className={cn('w-full flex flex-col items-center justify-center gap-y-3', contentClassName)}>
+          <div className='flex h-full w-full flex-col items-center justify-center gap-y-9'>
+            <div className={cn('flex w-full flex-col items-center justify-center gap-y-3', contentClassName)}>
               <SvgSpriteLoader
                 id='alert-triangle'
                 iconCategory={ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK}
                 color={COLORS.RED_800}
               />
-              <div className='flex flex-col justify-center items-center gap-1'>
+              <div className='flex flex-col items-center justify-center gap-1'>
                 <span className='f-13-600 text-black'>{title}</span>
                 <span className='f-11-400 text-GRAY_900'>{subtitle}</span>
               </div>
-              <div className='flex justify-center items-center gap-1.5'>
+              <div className='flex items-center justify-center gap-1.5'>
                 <Button
                   type={BUTTON_TYPES.SECONDARY}
                   isLoading={isLoading}
@@ -69,7 +69,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                 </Button>
               </div>
             </div>
-            <div className='flex justify-center items-center text-wrap max-w-[182px] text-center'>
+            <div className='flex max-w-[182px] items-center justify-center text-wrap text-center'>
               <span className='text-GRAY_700 f-11-400'>Also, our team has been notified and is working on it!</span>
             </div>
           </div>
@@ -79,11 +79,11 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
     case ErrorCardTypes.KPI_API_FAIL:
       return (
         <div
-          className={cn('animate-opacity flex items-center h-fit', className)}
+          className={cn('animate-opacity flex h-fit items-center', className)}
           style={{ minHeight: height && height + 'px' }}
         >
-          <div className='flex justify-between items-center h-full w-full'>
-            <div className='flex items-center gap-2 px-2 py-1.5 hover:bg-GRAY_100 rounded-[6px]'>
+          <div className='flex h-full w-full items-center justify-between'>
+            <div className='hover:bg-GRAY_100 flex items-center gap-2 rounded-[6px] px-2 py-1.5'>
               <SvgSpriteLoader
                 id='alert-triangle'
                 iconCategory={ICON_SPRITE_TYPES.ALERTS_AND_FEEDBACK}
@@ -93,7 +93,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                 <span className='f-13-400 text-GRAY_900'>Something&rsquo;s wrong</span>
               </span>
             </div>
-            <div className='p-1 hover:bg-GRAY_100 rounded'>
+            <div className='hover:bg-GRAY_100 rounded p-1'>
               <SvgSpriteLoader
                 id='refresh-ccw-01'
                 iconCategory={ICON_SPRITE_TYPES.ARROWS}

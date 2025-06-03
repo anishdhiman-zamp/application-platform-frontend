@@ -43,19 +43,19 @@ const DescriptionOperatorsDropdown: FC<DescriptionOperatorsDropdownProps> = ({
 
   return (
     <div className='flex items-center'>
-      <div className=' text-GRAY_700 f-11-400 mr-1'>{label} </div>
+      <div className='text-GRAY_700 f-11-400 mr-1'>{label} </div>
       <div className=''>
-        <div className='flex items-center cursor-pointer relative' onClick={onToggleDropdown}>
+        <div className='relative flex cursor-pointer items-center' onClick={onToggleDropdown}>
           <div className='text-BLUE_700 f-11-500 mr-1'>{operator?.label ?? CONDITION_OPERATOR_TYPE.ARRAY_CONTAINS}</div>
           <SvgSpriteLoader id='chevron-down' width={12} height={12} color={COLORS.GRAY_700} />
           {isOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 min-w-[120px] bg-white text-GRAY_900 border border-GRAY_400 shadow-table-filter-menu rounded-md'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute left-0 top-full z-10 min-w-[120px] rounded-md border bg-white p-1'
             >
               {operatorOptions.map((option) => (
                 <div
-                  className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
+                  className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2'
                   key={option.value}
                   onClick={() => onSelect(option)}
                 >

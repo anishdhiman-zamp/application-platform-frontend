@@ -21,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <AuthGuard loginRoute='/login'>
             <FeatureFlagsProvider>
               <RouteGuard>
-                <div className={'h-screen light-mode'}>
+                <div className={'light-mode h-screen'}>
                   <NetworkStatus />
                   {children}
                 </div>

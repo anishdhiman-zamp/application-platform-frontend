@@ -112,7 +112,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
           className='h-full'
           refetchFunction={refetchSheetDetails}
           loader={
-            <div className='flex justify-center items-center w-full h-full z-1000 bg-white'>
+            <div className='z-1000 flex h-full w-full items-center justify-center bg-white'>
               <DynamicLottiePlayer
                 src={ZAMP_LOGO_LOADER}
                 className='lottie-player h-[140px]'
@@ -123,7 +123,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
             </div>
           }
         >
-          <div className='flex justify-between items-center z-100 px-5'>
+          <div className='z-100 flex items-center justify-between px-5'>
             <div className='f-24-450 text-GRAY_950'>{sheetDetails?.name}</div>
             <div className='flex items-center gap-2'>
               <FiltersWrapper
@@ -137,7 +137,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
               />
               {isFilterInitialized && !sheetDetails?.sheet_config?.currency?.hide_currency_filter && currency && (
                 <div className='flex items-center gap-2'>
-                  {!!filtersConfig?.length && <div className='border-r border-GRAY_400 h-7'></div>}
+                  {!!filtersConfig?.length && <div className='border-GRAY_400 h-7 border-r'></div>}
                   <SingleSelectFilter
                     filterKey='currency'
                     options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}

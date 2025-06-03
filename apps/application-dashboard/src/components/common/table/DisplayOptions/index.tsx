@@ -64,7 +64,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            className='focus-visible:outline-hidden ring-0! ring-offset-0! select-none flex items-center gap-1'
+            className='focus-visible:outline-hidden ring-0! ring-offset-0! flex select-none items-center gap-1'
             size='small'
             variant='outline'
           >
@@ -72,19 +72,15 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
             Display
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align='end'
-          className='z-9999 min-w-[180px]!  max-h-[300px] overflow-y-auto'
-          sideOffset={5}
-        >
+        <DropdownMenuContent align='end' className='z-9999 min-w-[180px]! max-h-[300px] overflow-y-auto' sideOffset={5}>
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
             (option: MapAny) => (
               <DropdownMenuItem
                 key={option?.id}
                 onClick={() => handleClick(option?.id)}
-                className='cursor-default hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 rounded px-2.5 py-2'
+                className='hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 cursor-default rounded px-2.5 py-2'
               >
-                <div className='flex items-center gap-1.5 w-full cursor-pointer '>
+                <div className='flex w-full cursor-pointer items-center gap-1.5'>
                   <SvgSpriteLoader id={option?.iconId} size={12} />
                   <div>{option?.label}</div>
                 </div>

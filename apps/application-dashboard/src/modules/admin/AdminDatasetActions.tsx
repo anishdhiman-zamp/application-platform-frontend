@@ -29,7 +29,7 @@ const AdminDatasetActions: FC<AdminDatasetActionsProps> = ({ data, onDelete }) =
   };
 
   return (
-    <div className='flex items-center gap-1.5 justify-end'>
+    <div className='flex items-center justify-end gap-1.5'>
       {DATASET_ACTIONS.map((action) => (
         <TooltipButton
           key={action.value}

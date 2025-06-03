@@ -106,7 +106,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
   const formDisabled = loading || !loginFlow;
 
   return (
-    <div className={`w-96 mx-auto mt-[30vh] items-center flex flex-col gap-10 ${className}`}>
+    <div className={`mx-auto mt-[30vh] flex w-96 flex-col items-center gap-10 ${className}`}>
       <Image src={ZAMP_ICON_BLACK} width={48} height={38} alt='Zamp' priority />
 
       {userFacingError &&
@@ -115,7 +115,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
             {error.message}
           </div>
         ))}
-      <form className='flex flex-col gap-3 w-full' onSubmit={handlePasswordSubmit}>
+      <form className='flex w-full flex-col gap-3' onSubmit={handlePasswordSubmit}>
         <Input
           id='login-email'
           label='Email'

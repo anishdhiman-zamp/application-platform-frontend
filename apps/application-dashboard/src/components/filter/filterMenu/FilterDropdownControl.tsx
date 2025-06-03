@@ -38,21 +38,21 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   return (
     <div
       data-testid={`filter-control-${filterConfig?.key}`}
-      className={`cursor-pointer relative ${className}`}
+      className={`relative cursor-pointer ${className}`}
       onClick={onClick}
     >
       <div
         className={cn(
-          'select-none rounded h-[26px] flex items-center gap-1.5 border hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 px-1.5 py-1.5 w-fit bg-white',
+          'hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 flex h-[26px] w-fit select-none items-center gap-1.5 rounded border bg-white px-1.5 py-1.5',
           isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : '',
           controlClassName,
         )}
       >
-        <div className='f-12-400 text-GRAY_900 whitespace-nowrap max-w-[200px] truncate' title={filterConfig?.label}>
+        <div className='f-12-400 text-GRAY_900 max-w-[200px] truncate whitespace-nowrap' title={filterConfig?.label}>
           {formatToNormalText(filterConfig?.label)}
         </div>
         <div
-          className={cn('f-12-500 text-GRAY_1000 whitespace-nowrap max-w-[200px] truncate', titleClassName)}
+          className={cn('f-12-500 text-GRAY_1000 max-w-[200px] truncate whitespace-nowrap', titleClassName)}
           title={filterConfig?.title}
         >
           {filterConfig?.title}

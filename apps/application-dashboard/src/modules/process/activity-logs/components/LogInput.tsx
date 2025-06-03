@@ -81,8 +81,8 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
   }, []);
 
   return (
-    <div className='w-full px-4 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-      <div className='border border-GRAY_400 rounded-xl overflow-hidden shadow-xs bg-white pt-2'>
+    <div className='w-full px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+      <div className='border-GRAY_400 shadow-xs overflow-hidden rounded-xl border bg-white pt-2'>
         <Textarea
           ref={textareaRef}
           value={inputValue}
@@ -90,7 +90,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
           onKeyDown={handleKeyDown}
           placeholder='Work with Pace'
           aria-label='Message input'
-          className='w-full px-4 resize-none overflow-y-auto f-13-450 border-none shadow-none rounded-none'
+          className='f-13-450 w-full resize-none overflow-y-auto rounded-none border-none px-4 shadow-none'
           rows={1}
           disabled={isLoading}
         />
@@ -101,7 +101,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
             onClick={handleSubmit}
             disabled={!inputValue.trim() || isLoading}
             aria-label='Send message'
-            className='bg-GRAY_100 size-6! disabled:opacity-50 disabled:cursor-not-allowed'
+            className='bg-GRAY_100 size-6! disabled:cursor-not-allowed disabled:opacity-50'
           >
             <SvgSpriteLoader id='arrow-up' size={14} color={COLORS.GRAY_700} />
           </Button>

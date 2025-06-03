@@ -91,8 +91,8 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
       className='overflow-auto pb-10'
     >
       <div>
-        <div className='f-12-450 pt-6 pb-5 px-6 border-b border-GRAY_400'>
-          <div className=' mb-1 text-GRAY_700'>
+        <div className='f-12-450 border-GRAY_400 border-b px-6 pb-5 pt-6'>
+          <div className='text-GRAY_700 mb-1'>
             {format(
               paymentDetails?.date ? createDateObjectFromUTCString(paymentDetails?.date) : new Date(),
               `${DATE_FORMATS.dd_MMM_yyyy} 'at' ${DATE_FORMATS.HMMAAA}`,
@@ -103,7 +103,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
           </div>
           <div
             className={cn(
-              'mt-5 border rounded-md overflow-hidden',
+              'mt-5 overflow-hidden rounded-md border',
               cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.borderColor,
             )}
           >
@@ -112,7 +112,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             </div>
             <div
               className={cn(
-                'p-3 flex justify-between gap-2 border-t',
+                'flex justify-between gap-2 border-t p-3',
                 cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.borderColor,
                 cardStyleByStatus[paymentDetails?.status as keyof typeof cardStyleByStatus]?.backgroundColor,
               )}
@@ -133,7 +133,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
         </div>
         <div>
           {paymentDetails?.sections?.map((section) => (
-            <div key={section.title} className='flex flex-col gap-5 border-b border-GRAY_400 py-5 px-6'>
+            <div key={section.title} className='border-GRAY_400 flex flex-col gap-5 border-b px-6 py-5'>
               <div className='f-14-500'>{section.title}</div>
               {section?.values?.map((item) => (
                 <div key={item.label} className='grid grid-cols-2 gap-2'>
@@ -145,10 +145,10 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
           ))}
         </div>
         {!!paymentDetails?.descriptors?.length && (
-          <div className='px-6 py-4 flex flex-col gap-6'>
+          <div className='flex flex-col gap-6 px-6 py-4'>
             {paymentDetails?.descriptors?.map((descriptor) => (
               <div key={descriptor.title}>
-                <div className='f-12-400 text-GRAY_700 w-44 mb-1.5'>{descriptor.title}</div>
+                <div className='f-12-400 text-GRAY_700 mb-1.5 w-44'>{descriptor.title}</div>
                 {descriptor?.description?.map((description) => (
                   <div className='f-12-450' key={description}>
                     {description}
@@ -163,8 +163,8 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
             <div className='f-12-400 mb-3'>Attachments</div>
             <div className='flex flex-col gap-2'>
               {paymentDetails?.attachments?.map((attachment) => (
-                <div key={attachment?.file_name} className='flex justify-between items-center gap-4'>
-                  <div className='flex gap-1.5 items-center f-12-400 min-w-60 bg-GRAY_100 rounded-md px-2 py-1.5'>
+                <div key={attachment?.file_name} className='flex items-center justify-between gap-4'>
+                  <div className='f-12-400 bg-GRAY_100 flex min-w-60 items-center gap-1.5 rounded-md px-2 py-1.5'>
                     <SvgSpriteLoader id='file-05' size={14} />
                     <div className='truncate'>{attachment?.file_name}</div>
                   </div>

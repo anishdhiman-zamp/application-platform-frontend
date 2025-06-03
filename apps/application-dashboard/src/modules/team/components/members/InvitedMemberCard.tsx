@@ -28,7 +28,7 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
   };
 
   return (
-    <div className={cn(`group border-b-0.5 border-DIVIDER_GRAY grid grid-cols-9 w-full relative`)}>
+    <div className={cn(`border-b-0.5 border-DIVIDER_GRAY group relative grid w-full grid-cols-9`)}>
       <div className='col-span-3'>
         <MembersName value={row?.email} />
       </div>
@@ -39,15 +39,15 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
         <MembersRole value={{ user_id: '', privilege: row?.privilege }} />
       </div>
       <div className='absolute right-0 top-2'>
-        <div className='flex justify-end items-center h-full'>
+        <div className='flex h-full items-center justify-end'>
           <Button
             isLoading={isDeletingAudienceInvitation}
             variant='ghost'
             size='small'
-            className='w-6 h-6 group-hover:opacity-100 opacity-0'
+            className='h-6 w-6 opacity-0 group-hover:opacity-100'
             onClick={() => handleDeleteAudienceInvitation(row?.organization_invitation_id ?? '')}
           >
-            <SvgSpriteLoader id='trash-01' className=' text-GRAY_900' size={12} />
+            <SvgSpriteLoader id='trash-01' className='text-GRAY_900' size={12} />
           </Button>
         </div>
       </div>

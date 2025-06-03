@@ -94,7 +94,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
       hideCloseButton
       headerClassName='p-6!'
       topBar={
-        <div className='flex items-center justify-between flex-1'>
+        <div className='flex flex-1 items-center justify-between'>
           <Tabs
             id='row-properties-tabs'
             list={ROW_PROPERTIES_TABS}
@@ -107,7 +107,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
             <Button
               type={BUTTON_TYPES.SECONDARY}
               id='row-properties-source-drill-down-button'
-              className='border-none !text-GRAY_900'
+              className='!text-GRAY_900 border-none'
               iconProps={{
                 id: 'arrow-up-left',
                 iconCategory: ICON_SPRITE_TYPES.ARROWS,

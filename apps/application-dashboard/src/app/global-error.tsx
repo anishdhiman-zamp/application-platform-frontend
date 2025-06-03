@@ -39,7 +39,7 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
     if (this.state.hasError) {
       // Render the current HTML content without hydration
       return (
-        <div suppressHydrationWarning className='flex justify-center items-center h-screen w-full'>
+        <div suppressHydrationWarning className='flex h-screen w-full items-center justify-center'>
           <ErrorCard
             title='Something went wrong'
             className='w-full'

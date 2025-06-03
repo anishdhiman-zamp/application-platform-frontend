@@ -159,7 +159,7 @@ export const Tooltip: FC<TooltipProps> = ({
   return (
     <div
       ref={parentRef}
-      className={`relative group/tooltip cursor-pointer ${className}`}
+      className={`group/tooltip relative cursor-pointer ${className}`}
       data-testid={`tooltip-wrapper-${id}`}
     >
       {children}
@@ -171,7 +171,7 @@ export const Tooltip: FC<TooltipProps> = ({
             wrapperStyle,
             wrapperPositionStyle[position],
             !disabled &&
-              'z-1000 group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto f-12-450 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200',
+              'z-1000 f-12-450 z-999 text-GRAY_200 whitespace-nowrap rounded-md bg-black px-3 py-1.5 group-hover/tooltip:pointer-events-auto group-hover/tooltip:opacity-100',
           )}
           style={style ? style : { ...tooltipPosition }}
           data-testid={`tooltip-${id}`}

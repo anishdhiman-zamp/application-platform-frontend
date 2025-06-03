@@ -27,9 +27,9 @@ const RemoveFromTeamPopup: FC<RemoveFromTeamPopupPropsType> = ({
       onClose={onClose}
       closeOnClickOutside={false}
     >
-      <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white'>
-        <div className='flex flex-col items-center px-5 pb-5 f-14-400 mt-6 text-GRAY_950'>{warningDescription}</div>
-        <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full gap-2.5'>
+      <div className='rounded-b-3.5 flex w-[458px] flex-col bg-white'>
+        <div className='f-14-400 text-GRAY_950 mt-6 flex flex-col items-center px-5 pb-5'>{warningDescription}</div>
+        <div className='border-GRAY_200 flex w-full justify-end gap-2.5 border-t px-5 py-4'>
           <Button id={`${feature}-cancel-btn`} size={SIZE_TYPES.MEDIUM} type={BUTTON_TYPES.SECONDARY} onClick={onClose}>
             Cancel
           </Button>

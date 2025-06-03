@@ -55,13 +55,13 @@ const FileUploader: FC<FileUploaderPropsType> = ({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className='w-3/5 h-full'>
+        <div className='h-full w-3/5'>
           <div className='flex w-full justify-start gap-1.5 py-1'>
             <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_700} />
             <span className='f-12-400 text-GRAY_700'>{fileName}</span>
           </div>
-          <span className='relative flex bg-GRAY_400 h-1 w-full rounded-xl mt-2 overflow-hidden'>
-            <span className='absolute left-0 h-full w-1/2 bg-black animate-slide  rounded-xl'></span>
+          <span className='bg-GRAY_400 relative mt-2 flex h-1 w-full overflow-hidden rounded-xl'>
+            <span className='animate-slide absolute left-0 h-full w-1/2 rounded-xl bg-black'></span>
           </span>
         </div>
       );
@@ -70,20 +70,20 @@ const FileUploader: FC<FileUploaderPropsType> = ({
     if (isSuccess) {
       return (
         <div className='w-3/5'>
-          <div className='flex items-center justify-between w-full gap-4'>
+          <div className='flex w-full items-center justify-between gap-4'>
             <div className='flex w-full justify-start gap-1.5 py-1'>
               <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_1000} />
               <span className='f-12-400 text-GRAY_1000'>{fileName}</span>
             </div>
             <SvgSpriteLoader id='check' width={14} height={14} color={COLORS.GREEN_PRIMARY} />
           </div>
-          <span className='flex bg-GREEN_700 h-1 w-full rounded-xl mt-2'></span>
+          <span className='bg-GREEN_700 mt-2 flex h-1 w-full rounded-xl'></span>
         </div>
       );
     }
 
     return (
-      <div key={indexKey} className='relative flex flex-col justify-center items-center w-full'>
+      <div key={indexKey} className='relative flex w-full flex-col items-center justify-center'>
         {showUploadButton && (
           <Button
             id='UPLOAD_FILE_BUTTON'
@@ -95,7 +95,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
             Browse files
           </Button>
         )}
-        <div className='flex flex-col gap-1 f-12-400 rounded-2.5 text-GRAY_700  mt-1.5'>
+        <div className='f-12-400 rounded-2.5 text-GRAY_700 mt-1.5 flex flex-col gap-1'>
           <span>{footer}</span>
           <span>{helperText}</span>
         </div>
@@ -113,7 +113,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
     <>
       <div
         className={cn(
-          'relative flex flex-col justify-center items-center bg-BG_GRAY_1 border border-dashed border-GRAY_400 min-h-[220px] rounded-md focus:border-black focus:border-solid cursor-pointer',
+          'bg-BG_GRAY_1 border-GRAY_400 relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-md border border-dashed focus:border-solid focus:border-black',
           isLoading ? 'cursor-not-allowed' : 'cursor-pointer',
           className,
           isDragOver && 'bg-GRAY_100 border-GRAY_500',
@@ -126,7 +126,7 @@ const FileUploader: FC<FileUploaderPropsType> = ({
         onDragExit={() => setIsDragOver(false)}
         onDragLeave={() => setIsDragOver(false)}
       >
-        <div onDragOver={() => setIsDragOver(true)} className='flex flex-col items-center text-center w-full'>
+        <div onDragOver={() => setIsDragOver(true)} className='flex w-full flex-col items-center text-center'>
           {renderContent()}
         </div>
         {children}

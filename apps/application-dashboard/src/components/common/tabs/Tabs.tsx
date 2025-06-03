@@ -49,7 +49,7 @@ export const Tabs: FC<TabsPropsType> = ({
   return (
     <>
       {(hasMultipleItems || showSingleAsWell) && (
-        <div className={`overflow-hidden no-scrollbar select-none ${scrollWrapperClassName} ${scrollWrapperStyle}`}>
+        <div className={`no-scrollbar select-none overflow-hidden ${scrollWrapperClassName} ${scrollWrapperStyle}`}>
           <div className={`flex w-full ${wrapperClassName} ${wrapperStyle}`}>
             {list?.map((tabItem, index) => {
               const selected = index === selectedIndex;
@@ -78,7 +78,7 @@ export const Tabs: FC<TabsPropsType> = ({
                     ) : (
                       <div
                         className={cn(
-                          'flex gap-1 w-full justify-center items-center f-12-500',
+                          'f-12-500 flex w-full items-center justify-center gap-1',
                           tabItemClassName,
                           tabItemStyle,
                           selected
@@ -88,7 +88,7 @@ export const Tabs: FC<TabsPropsType> = ({
                       >
                         {tabItem?.label}
                         {!!tabItem?.metadata?.count && (
-                          <div className='f-12-300 border border-BORDER_7 text-GRAY_600 px-1 bg-white h-4 leading-3.5!'>
+                          <div className='f-12-300 border-BORDER_7 text-GRAY_600 leading-3.5! h-4 border bg-white px-1'>
                             {tabItem?.metadata?.count}
                           </div>
                         )}

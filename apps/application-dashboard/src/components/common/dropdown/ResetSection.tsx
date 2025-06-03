@@ -8,7 +8,7 @@ import { cn } from 'utils/common';
 export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }) => {
   return (
     <div
-      className={cn('flex py-3 pl-4 border-t border-DIVIDER_GRAY', resetProps?.resetClassName)}
+      className={cn('border-DIVIDER_GRAY flex border-t py-3 pl-4', resetProps?.resetClassName)}
       onClick={onClickReset}
     >
       <SvgSpriteLoader
@@ -18,7 +18,7 @@ export const ResetSection: FC<ResetSectionProps> = ({ resetProps, onClickReset }
         width={14}
         color={COLORS.TEXT_PRIMARY}
       />
-      <div className={cn('pl-2 f-12-400 text-GRAY_700', resetProps?.resetTextClassName)}>{resetProps?.resetText}</div>
+      <div className={cn('f-12-400 text-GRAY_700 pl-2', resetProps?.resetTextClassName)}>{resetProps?.resetText}</div>
     </div>
   );
 };

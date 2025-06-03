@@ -31,7 +31,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
         tooltipClassName='bg-transparent shadow-table-filter-menu bg-white border border-GRAY_400 rounded-md p-2.5 ml-3'
         tooltipBody={
           <div>
-            <div className='flex flex-col gap-3 min-w-[185px]'>
+            <div className='flex min-w-[185px] flex-col gap-3'>
               <div>
                 <div className='f-11-400 text-GRAY_700 mb-0.5'>Source Account</div>
                 <div className='f-12-500 text-GRAY_950'>{sourceAccountName}</div>
@@ -44,7 +44,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
                 <div className='f-11-400 text-GRAY_700 mb-0.5'>Recipient Account</div>
                 <div className='f-12-500 text-GRAY_950'>{destinationAccountName}</div>
               </div>
-              <div className='f-11-400 text-GRAY_800 pt-1.5 border-t border-GRAY_400'>
+              <div className='f-11-400 text-GRAY_800 border-GRAY_400 border-t pt-1.5'>
                 Created by {template?.created_by}
               </div>
             </div>
@@ -55,7 +55,7 @@ const MoveMoneyTemplateListCard = forwardRef<HTMLDivElement, MoveMoneyTemplateLi
           ref={ref}
           onClick={() => onSelect(template)}
           className={cn(
-            'flex  gap-1.5 text-GRAY_900 px-2.5 py-2 rounded-md hover:bg-GRAY_100 cursor-pointer w-full',
+            'text-GRAY_900 hover:bg-GRAY_100 flex w-full cursor-pointer gap-1.5 rounded-md px-2.5 py-2',
             className,
           )}
         >

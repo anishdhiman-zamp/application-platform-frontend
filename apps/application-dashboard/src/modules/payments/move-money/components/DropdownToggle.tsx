@@ -15,10 +15,10 @@ type DropdownToggleProps = {
 const DropdownToggle: FC<DropdownToggleProps> = ({ isLoading, isShowMenu, setIsShowMenu }) => {
   return (
     <CommonWrapper
-      className='h-full right-3 top-0 z-50 flex items-center'
+      className='right-3 top-0 z-50 flex h-full items-center'
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={<Loader2 className='animate-spin max-w-3' />}
+      loader={<Loader2 className='max-w-3 animate-spin' />}
     >
       <SvgSpriteLoader
         onClick={() => setIsShowMenu(!isShowMenu)}

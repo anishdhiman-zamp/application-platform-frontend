@@ -75,7 +75,7 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
               className='h-full'
             >
-              <div className='px-2 border-b border-GRAY_400 pb-4'>
+              <div className='border-GRAY_400 border-b px-2 pb-4'>
                 {filteredSidebarItems.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer' prefetch>
                     <SidebarTab
@@ -142,12 +142,12 @@ const Sidebar = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, type: 'spring' }}
             >
-              <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
-                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500 select-none'>
+              <div className='bg-BACKGROUND_GRAY_1 absolute -top-12 left-0 z-10 w-60 px-2'>
+                <div className='text-GRAY_700 f-13-500 flex select-none items-center gap-2 py-4'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>
-                <div className='flex flex-col '>
+                <div className='flex flex-col'>
                   {SETTING_SIDEBAR_ITEMS.map((item) => (
                     <button className='inline' key={item.id} onClick={() => router.replace(item?.path)}>
                       <SidebarTab
@@ -165,7 +165,7 @@ const Sidebar = () => {
           )}
         </AnimatePresence>
         <div
-          className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px] flex items-center gap-2.5 text-GRAY_900'
+          className='border-GRAY_400 text-GRAY_900 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
           onClick={logout}
         >
           <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />

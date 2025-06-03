@@ -61,7 +61,7 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
   };
 
   return (
-    <div className='max-w-[410px] m-auto pt-12 h-screen overflow-y-scroll'>
+    <div className='m-auto h-screen max-w-[410px] overflow-y-scroll pt-12'>
       <div className='text-GREEN_1 mb-4'>
         <SvgSpriteLoader size={66} id='check-circle' color='#5AB570' />
       </div>
@@ -69,10 +69,10 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
         You&apos;ve initiated a payment to{' '}
         {recipientDetails?.name ?? `${destinationAccountDetails?.account_holder_name}`}
       </div>
-      <p className='f-14-450 text-gray-700 mt-1'>
+      <p className='f-14-450 mt-1 text-gray-700'>
         The payment has been initiated successfully. It will proceed to the next step for approval, if required.
       </p>
-      <div className='flex flex-col gap-4 mb-4'>
+      <div className='mb-4 flex flex-col gap-4'>
         {!!transactionDetails?.estimated_time && (
           <div className='grid grid-cols-2'>
             <div className='text-GRAY_700 f-12-400'>Estimated time of arrival</div>
@@ -81,12 +81,12 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
         )}
       </div>
       {isTemplateCreated ? (
-        <div className='flex gap-1.5 p-5 f-14-400 border border-GRAY_400 bg-BG_GRAY_2 rounded-md'>
+        <div className='f-14-400 border-GRAY_400 bg-BG_GRAY_2 flex gap-1.5 rounded-md border p-5'>
           <SvgSpriteLoader size={16} id='check-circle' className='text-GREEN_800' />
           <div className='f-14-400 text-GRAY_950'>Your template has been created</div>
         </div>
       ) : (
-        <div className='rounded-md border border-GRAY_400 bg-BG_GRAY_2 p-5 flex flex-col gap-4'>
+        <div className='border-GRAY_400 bg-BG_GRAY_2 flex flex-col gap-4 rounded-md border p-5'>
           <div className='f-16-550'>Save this as payment template</div>
           <Input
             placeholder='Name'
@@ -95,7 +95,7 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
             onChange={(e) => setTemplateName(e.target.value)}
             value={templateName}
           />
-          <div className='flex justify-end f-13-500'>
+          <div className='f-13-500 flex justify-end'>
             <Button
               onClick={handleSubmit}
               type={BUTTON_TYPES.TEXT_NAV}
@@ -110,7 +110,7 @@ const SuccessMoveMoney: FC<SuccessSingleTransferStepProps> = ({ onReset, transfe
           </div>
         </div>
       )}
-      <div className='flex gap-3 mt-10'>
+      <div className='mt-10 flex gap-3'>
         <Button
           type={BUTTON_TYPES.SECONDARY}
           size={SIZE_TYPES.MEDIUM}

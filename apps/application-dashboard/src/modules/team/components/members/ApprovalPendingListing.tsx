@@ -48,11 +48,11 @@ const ApprovalPendingListing: FC<ApprovalPendingListingProps> = ({ search }) => 
 
   return (
     <div>
-      <div className='grid grid-cols-4 gap-4 text-GRAY_700 border-b border-GRAY_100 f-11-450 overflow-auto'>
-        <div className='py-2.5 px-2'>Name</div>
-        <div className='py-2.5 px-2'>Email</div>
-        <div className='py-2.5 px-2'>Change</div>
-        <div className='py-2.5 px-2'>Approval Status</div>
+      <div className='text-GRAY_700 border-GRAY_100 f-11-450 grid grid-cols-4 gap-4 overflow-auto border-b'>
+        <div className='px-2 py-2.5'>Name</div>
+        <div className='px-2 py-2.5'>Email</div>
+        <div className='px-2 py-2.5'>Change</div>
+        <div className='px-2 py-2.5'>Approval Status</div>
       </div>
       <CommonWrapper
         isLoading={loading || isPendingApprovalsLoading}
@@ -61,7 +61,7 @@ const ApprovalPendingListing: FC<ApprovalPendingListingProps> = ({ search }) => 
         noDataBanner={<NoWidgetData className='h-[400px]' text='No pending approvals' />}
         isNoData={pendingApprovalsList?.length === 0}
         isError={isError}
-        className='min-h-[500px] overflow-y-auto h-[calc(100vh-270px)] [&::-webkit-scrollbar]:hidden'
+        className='h-[calc(100vh-270px)] min-h-[500px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
         refetchFunction={refetch}
       >
         {pendingApprovalsList?.map((member) => (

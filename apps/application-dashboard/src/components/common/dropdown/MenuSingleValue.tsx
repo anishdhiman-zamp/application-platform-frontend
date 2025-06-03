@@ -15,7 +15,7 @@ const MenuSingleValue: FC<MenuSingleValuePropsType> = ({
   return (
     <div className='flex items-center'>
       {spriteIcon && (
-        <div className='w-6 mr-4'>
+        <div className='mr-4 w-6'>
           <SvgSpriteLoader id={spriteIcon} />
         </div>
       )}

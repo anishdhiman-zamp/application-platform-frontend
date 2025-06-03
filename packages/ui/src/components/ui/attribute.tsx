@@ -13,12 +13,12 @@ export const Attribute = ({ label, displayValue, dataContextId, ...props }: Attr
       data-context-id={dataContextId}
       {...props}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border border-GRAY_400 px-2 py-1 hover:bg-BG_GRAY_2 active:bg-BG_GRAY_2',
+        'border-GRAY_400 hover:bg-BG_GRAY_2 active:bg-BG_GRAY_2 inline-flex items-center gap-1.5 rounded-md border px-2 py-1',
         props.className,
       )}
     >
       <span className='text-secondary-400 f-12-400 whitespace-nowrap'>{label}</span>
-      <span className='text-black f-12-500 whitespace-nowrap'>{displayValue}</span>
+      <span className='f-12-500 whitespace-nowrap text-black'>{displayValue}</span>
     </button>
   );
 };

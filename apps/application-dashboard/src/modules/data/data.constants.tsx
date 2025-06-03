@@ -24,7 +24,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     headerName: 'Datasets',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <div className='flex items-center gap-2.5 f-13-500'>
+        <div className='f-13-500 flex items-center gap-2.5'>
           <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
           {params.value}
         </div>

@@ -27,7 +27,7 @@ const DatasetHistory = () => {
           tooltipBodystyle='f-10-400'
         >
           <div
-            className={cn('p-1 hover:bg-GRAY_100 rounded cursor-pointer', isFileImportHistoryOpen && 'bg-GRAY_100')}
+            className={cn('hover:bg-GRAY_100 cursor-pointer rounded p-1', isFileImportHistoryOpen && 'bg-GRAY_100')}
             onClick={handleOpenFileImportHistory}
           >
             <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />

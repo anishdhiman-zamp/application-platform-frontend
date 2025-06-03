@@ -44,7 +44,7 @@ const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
   }, [getDatasetListing]);
 
   return (
-    <div className='rounded-tl-xl overflow-hidden'>
+    <div className='overflow-hidden rounded-tl-xl'>
       <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
     </div>
   );

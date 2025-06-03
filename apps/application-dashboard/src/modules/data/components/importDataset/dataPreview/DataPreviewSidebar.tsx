@@ -45,21 +45,21 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
   };
 
   return (
-    <div className='flex flex-col justify-between h-full '>
+    <div className='flex h-full flex-col justify-between'>
       <div className='flex flex-col px-6 pt-6'>
         <span className='f-16-600'>Import Data</span>
-        <div className='flex flex-col gap-2 w-full'>
-          <div className='flex justify-start items-center mt-6 gap-1.5'>
+        <div className='flex w-full flex-col gap-2'>
+          <div className='mt-6 flex items-center justify-start gap-1.5'>
             <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_1000} />
             <div className='flex w-full justify-between'>
               <span className='f-12-400'>{fileName}</span>
               <SvgSpriteLoader id='check' width={14} height={14} color={COLORS.GREEN_PRIMARY} />
             </div>
           </div>
-          <div className='w-full bg-GREEN_700 h-1 rounded-lg'></div>
+          <div className='bg-GREEN_700 h-1 w-full rounded-lg'></div>
         </div>
       </div>
-      <div className='p-6 pb-12 flex justify-between items-center border-t border-GRAY_400'>
+      <div className='border-GRAY_400 flex items-center justify-between border-t p-6 pb-12'>
         <span onClick={onReset} className='f-13-500 text-GRAY_1000 cursor-pointer'>
           Discard
         </span>

@@ -64,7 +64,7 @@ export const HandleInvitations: FC = () => {
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
         <div
-          className='flex justify-center items-center w-full h-full z-1000 bg-white'
+          className='z-1000 flex h-full w-full items-center justify-center bg-white'
           data-testid='handle-invitations-wrapper'
         >
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />

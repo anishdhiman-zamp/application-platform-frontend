@@ -48,8 +48,8 @@ const RecipientsList: FC<RecipientsListProps> = ({
   );
 
   return (
-    <div className='py-6 pl-4.5 pr-2'>
-      <div className='w-full flex items-center justify-between mb-4.5'>
+    <div className='pl-4.5 py-6 pr-2'>
+      <div className='mb-4.5 flex w-full items-center justify-between'>
         <div className='f-16-600 px-1.5'>Recipients</div>
         {allowActions && (
           <Button

@@ -279,8 +279,8 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
       popupWrapperClassName='bg-white rounded-t-3.5 border border-b-0 border-GRAY_400'
       closeOnClickOutside={false}
     >
-      <div className='flex flex-col rounded-b-3.5 w-[458px] bg-white border border-t-0 border-GRAY_400'>
-        <div className='flex flex-col px-4 py-6 gap-2'>
+      <div className='rounded-b-3.5 border-GRAY_400 flex w-[458px] flex-col border border-t-0 bg-white'>
+        <div className='flex flex-col gap-2 px-4 py-6'>
           <div className='flex flex-col'>
             <div className='flex flex-col gap-2'>
               {multiSelectInstances.map((id) => (
@@ -311,7 +311,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
               ))}
             </div>
             {validationErrorText && showValidationError && (
-              <span className='f-11-400 text-RED_700 mt-2 w-full flex text-start'>{validationErrorText}</span>
+              <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
             )}
           </div>
 
@@ -335,7 +335,7 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
           </Button>
         </div>
 
-        <div className='flex justify-end border-t border-GRAY_200 py-4 px-5 w-full'>
+        <div className='border-GRAY_200 flex w-full justify-end border-t px-5 py-4'>
           <Button
             type={BUTTON_TYPES.PRIMARY}
             id='send-user-invite'

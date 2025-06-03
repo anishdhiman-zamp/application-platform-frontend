@@ -50,7 +50,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText} asChildTrigger>
       <button
         className={cn(
-          'border border-GRAY_400 rounded px-2 py-1.5 w-fit outline-hidden flex items-center h-[26px] text-GRAY_1000',
+          'border-GRAY_400 outline-hidden text-GRAY_1000 flex h-[26px] w-fit items-center rounded border px-2 py-1.5',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',
