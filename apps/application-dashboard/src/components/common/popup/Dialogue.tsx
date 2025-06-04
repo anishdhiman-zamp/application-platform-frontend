@@ -106,7 +106,7 @@ const Dialogue: FC<DialogueProps> = ({
             'z-1002 shadow-side-drawer-inner block overflow-hidden rounded-xl bg-white transition-all duration-300 ease-in',
             wrapperClassName ?? 'w-[500px]',
             className,
-            isOpen ? 'opacity-1 translate-y-0' : 'translate-y-[50px] opacity-0',
+            isOpen ? 'translate-y-0 opacity-100' : 'translate-y-[50px] opacity-0',
             popupWidthClasses,
           )}
           role='presentation'

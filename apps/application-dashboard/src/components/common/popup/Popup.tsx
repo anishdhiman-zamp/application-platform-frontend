@@ -27,7 +27,7 @@ const Popup: FC<PopupProps> = ({
     <div
       className={cn(
         `z-1000 fixed left-0 top-0 h-screen w-screen transition-all duration-300 ease-in ${isOverlay ? 'bg-GRAY_70' : ''} ${
-          isOpen ? 'opacity-1' : 'hidden opacity-0'
+          isOpen ? 'opacity-100' : 'hidden opacity-0'
         }`,
       )}
       role='presentation'
@@ -39,7 +39,7 @@ const Popup: FC<PopupProps> = ({
         <div
           className={cn(
             `block rounded-xl px-5 py-5 transition-all duration-300 ease-in ${className} ${
-              isOpen ? 'opacity-1 translate-y-0' : 'translate-y-[50px] opacity-0'
+              isOpen ? 'translate-y-0 opacity-100' : 'translate-y-[50px] opacity-0'
             }`,
           )}
           role='presentation'
