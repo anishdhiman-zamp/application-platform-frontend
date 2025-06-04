@@ -18,6 +18,7 @@ const PaymentActions = () => {
   const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [getPolicies, { data: policiesData, currentData: currentPoliciesData }] = useLazyGetPoliciesQuery();
 
@@ -29,7 +30,13 @@ const PaymentActions = () => {
   };
 
   const handlePolicyListClose = () => {
+    document.body.style.pointerEvents = 'auto';
     setSideDrawerConfigType(undefined);
+  };
+
+  const handlePolicyListOpen = (type: PolicyDialogType) => {
+    setIsDropdownOpen(false);
+    setSideDrawerConfigType(type);
   };
 
   useEffect(() => {
@@ -55,10 +62,18 @@ const PaymentActions = () => {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu
+        open={isDropdownOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            document.body.style.pointerEvents = 'auto';
+          }
+        }}
+      >
         <TooltipV2 tooltipBody='Policies' asChildTrigger>
           <DropdownMenuTrigger asChild>
             <Button
+              onClick={() => setIsDropdownOpen(true)}
               variant='ghost'
               size='icon'
               className='text-GRAY_900 hover:text-GRAY_900 data-[state=open]:bg-GRAY_300 h-8 w-8 focus-visible:ring-0 focus-visible:ring-offset-0'
@@ -75,7 +90,7 @@ const PaymentActions = () => {
                 variant='ghost'
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
-                onClick={() => setSideDrawerConfigType('template')}
+                onClick={() => handlePolicyListOpen('template')}
                 disabled={templatePolicies.length === 0}
               >
                 {templatePolicies.length} {templatePolicies.length > 1 ? 'policies' : 'policy'}
@@ -98,7 +113,7 @@ const PaymentActions = () => {
                 size='xxsmall'
                 className='text-GRAY_600 hover:text-GRAY_900'
                 disabled={paymentPolicies.length === 0}
-                onClick={() => setSideDrawerConfigType('payout')}
+                onClick={() => handlePolicyListOpen('payout')}
               >
                 {paymentPolicies.length} {paymentPolicies.length > 1 ? 'policies' : 'policy'}
               </Button>

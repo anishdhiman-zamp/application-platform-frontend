@@ -532,20 +532,20 @@ const config = {
       },
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+        'slide-in-from-center': {
+          '0%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0' },
+          '100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+        },
+        'slide-out-to-center': {
+          '0%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+          '100%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0' },
         },
         'reverse-spin': {
           from: {
@@ -684,6 +684,8 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'slide-in-from-center': 'slide-in-from-center 0.2s ease-out',
+        'slide-out-to-center': 'slide-out-to-center 0.2s ease-out',
         opacity: 'opacity 0.3s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',
         'reverse-spin': 'reverse-spin 1.5s linear infinite',
