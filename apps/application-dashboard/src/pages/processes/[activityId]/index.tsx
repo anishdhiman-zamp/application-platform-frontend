@@ -12,14 +12,14 @@ import {
 import { toast } from '@/components/common/toast/Toast';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { API_DOMAIN } from '@/constants/api.constants';
-import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import { getProcessActivityLogsRouteById, getProcessRouteById } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION, PDF_DATASET_TAB } from '@/modules/process/process.types';
-import { addBreadcrumb } from '@/store/slices/layout-configs';
+import { resetBreadcrumb } from '@/store/slices/layout-configs';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
 
@@ -31,8 +31,7 @@ const Activity = () => {
 
   const artifactIdFromUrl = searchParams.get('artifactId');
   const artifactTypeFromUrl = searchParams.get('artifactType');
-
-  console.log(processId, process, activityId);
+  const status = searchParams.get('status') as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
   const appDispatch = useAppDispatch();
@@ -123,10 +122,16 @@ const Activity = () => {
 
   useEffect(() => {
     appDispatch(
-      addBreadcrumb({
-        title: 'Activity Logs',
-        href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
-      }),
+      resetBreadcrumb([
+        {
+          title: process as string,
+          href: getProcessRouteById(processId as string, process as string, status as string),
+        },
+        {
+          title: 'Activity Logs',
+          href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
+        },
+      ]),
     );
   }, []);
 
