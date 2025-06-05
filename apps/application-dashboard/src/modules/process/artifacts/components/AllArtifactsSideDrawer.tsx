@@ -20,8 +20,9 @@ interface AllArtifactsDialogProps {
 
 const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
   const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
-  const { activityId } = useParams<{ activityId: string }>() ?? {};
+  const params = useParams();
+  const processId = searchParams?.get('processId') as string;
+  const activityId = params?.activityId;
 
   const {
     data: artifacts,
@@ -67,7 +68,7 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
 
               {isLoadingArtifacts || isErrorArtifacts
                 ? Array.from({ length: 5 }).map((_, index) => (
-                    <SkeletonElement className='h-24 w-full rounded-lg' key={index} />
+                    <SkeletonElement className='h-24 w-80 rounded-lg' key={index} />
                   ))
                 : artifacts?.artifacts?.map((artifact) => (
                     <ArtifactItem

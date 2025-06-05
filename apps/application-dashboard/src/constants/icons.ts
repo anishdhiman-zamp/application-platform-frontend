@@ -113,9 +113,9 @@ export const ACCORDION_CONTENT_BG = IMAGE_PREFIX + '/icons/agents/accordion-cont
 
 //Artifacts
 export const BROWSER = IMAGE_PREFIX + '/icons/agents/artifacts/browser.svg';
-export const COUPA = IMAGE_PREFIX + '/icons/agents/artifacts/coupon.svg';
+export const COUPA = IMAGE_PREFIX + '/icons/agents/artifacts/coupa.svg';
 export const DATASET = IMAGE_PREFIX + '/icons/agents/artifacts/dataset.svg';
-export const DOCUSIGN = IMAGE_PREFIX + '/icons/agents/artifacts/docusign.svg';
+export const DOCUSIGN = IMAGE_PREFIX + '/icons/agents/artifacts/docu-sign.svg';
 export const FILE = IMAGE_PREFIX + '/icons/agents/artifacts/file.svg';
 export const GMAIL = IMAGE_PREFIX + '/icons/agents/artifacts/gmail.svg';
 export const SALESFORCE = IMAGE_PREFIX + '/icons/agents/artifacts/salesforce.svg';

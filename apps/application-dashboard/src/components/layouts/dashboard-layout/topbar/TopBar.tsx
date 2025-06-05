@@ -15,13 +15,13 @@ import { RootState } from 'store';
 import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
-import ShareActivityPopup from '@/modules/process/common/ShareActivityPopup';
+import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
 const ShareButton = () => {
-  const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; activityId: string }>();
+  const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; processId: string }>();
   const pathname = usePathname();
 
   switch (true) {
@@ -32,7 +32,7 @@ const ShareButton = () => {
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
       return <SharePaymentsPopup paymentConfigId={params?.paymentConfigId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
-      return <ShareActivityPopup activityId={params?.activityId || ''} />;
+      return <ShareProcessPopup processId={params?.processId || ''} />;
     case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
       return null;
     default:

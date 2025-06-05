@@ -28,6 +28,7 @@ import {
   TextFilterModule,
   Theme,
   ValidationModule,
+  type ValueFormatterParams,
 } from 'ag-grid-community';
 import {
   AdvancedFilterModule,
@@ -179,13 +180,22 @@ const Table: FC<TableProps> = ({
       filter: 'agTextColumnFilter',
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
+      valueFormatter: (params: ValueFormatterParams) => {
+        if (!params.value) {
+          return 'N/A';
+        }
+
+        return params.value;
+      },
       floatingFilter: false,
       headerClass: cn('f-12-600 text-GRAY_1000', headerClass),
-      cellClass: cn(
-        'f-11-400 text-GRAY_1000 content-center px-2! py-1',
-        cellClass,
-        onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '',
-      ),
+      cellClass: (params: MapAny) => {
+        const baseClasses = 'f-11-400 content-center !px-2 py-1';
+        const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
+        const valueClass = !params.value ? 'text-GRAY_500' : 'text-GRAY_1000';
+
+        return cn(baseClasses, valueClass, interactiveClass, cellClass);
+      },
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       flex: 1,
       cellStyle: (params: MapAny) => {

@@ -1,6 +1,6 @@
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import baseApi from 'services/api';
-import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
+import type { DatasetDataResponseType, DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
   ActivityArtifactsByIdRequestType,
   ActivityArtifactsByIdResponseType,
@@ -9,6 +9,7 @@ import type {
   ActivityLogsResponseType,
   ActivityRunsDataResponseType,
   ActivitySummaryResponseType,
+  DatasetArtifactsRequestType,
   EmitActivityLogsRequestType,
   ProcessActivityRunsRequestType,
   SignedUrlByArtifactIdRequestType,
@@ -81,6 +82,12 @@ const Processes = baseApi.injectEndpoints({
         }),
       }),
     }),
+    getDatasetArtifacts: builder.query<DatasetDataResponseType, DatasetArtifactsRequestType>({
+      query: ({ processId, activityRunId, datasetId, query_config }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_ARTIFACTS_GET, { processId, activityRunId, datasetId }),
+        params: { query_config },
+      }),
+    }),
   }),
 });
 
@@ -97,6 +104,9 @@ export const {
   useGetActivitySummaryQuery,
   useLazyGetActivitySummaryQuery,
   useGetArtifactsByArtifactIdQuery,
+  useLazyGetArtifactsByArtifactIdQuery,
   useGetSignedUrlByArtifactIdQuery,
   useLazyGetSignedUrlByArtifactIdQuery,
+  useGetDatasetArtifactsQuery,
+  useLazyGetDatasetArtifactsQuery,
 } = Processes;

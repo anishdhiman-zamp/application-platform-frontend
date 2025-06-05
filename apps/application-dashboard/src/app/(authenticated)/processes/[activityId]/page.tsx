@@ -9,25 +9,31 @@ import {
   useLazyGetActivityArtifactsQuery,
   useLazyGetActivityLogsQuery,
   useLazyGetActivitySummaryQuery,
+  useLazyGetArtifactsByArtifactIdQuery,
 } from '@/apis/processes';
+import { toast } from '@/components/common/toast/Toast';
 import { API_DOMAIN } from '@/constants/api.constants';
-import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import { getProcessActivityLogsRouteById, getProcessRouteById } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION, PDF_DATASET_TAB } from '@/modules/process/process.types';
-import { addBreadcrumb } from '@/store/slices/layout-configs';
+import { resetBreadcrumb } from '@/store/slices/layout-configs';
+import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
   const searchParams = useSearchParams();
-  const { activityId } = useParams<{ activityId: string }>() ?? {};
-  const processId = searchParams?.get('processId');
-  const process = searchParams?.get('process');
+
+  const processId = searchParams?.get('processId') as string;
+  const process = searchParams?.get('process') as string;
+  const activityId = useParams()?.activityId as string;
+
   const artifactIdFromUrl = searchParams?.get('artifactId');
   const artifactTypeFromUrl = searchParams?.get('artifactType');
+  const status = searchParams?.get('status') as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
   const appDispatch = useAppDispatch();
@@ -44,6 +50,7 @@ const Activity = () => {
   const [getActivityLogs] = useLazyGetActivityLogsQuery();
   const [getArtifacts] = useLazyGetActivityArtifactsQuery();
   const [getActivitySummary] = useLazyGetActivitySummaryQuery();
+  const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
 
@@ -57,7 +64,34 @@ const Activity = () => {
     panelRef.current?.resize(70);
   };
 
+  const handleGetArtifacts = (artifactId: string) => {
+    if (!artifactId) return;
+
+    getArtifact({
+      processId: processId as string,
+      activityRunId: activityId as string,
+      artifact_ids: artifactId,
+    })
+      .unwrap()
+      .then((res) => {
+        const artifactData = res?.artifacts?.[0]?.artifact_data as OtherArtifactsResponseType;
+
+        if (artifactData?.url) {
+          window.open(artifactData?.url, '_blank');
+        }
+      })
+      .catch((err) => {
+        toast.error(err?.data?.message ?? 'Failed to redirect');
+      });
+  };
+
   const handleShowArtifacts = (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => {
+    if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
+      handleGetArtifacts(artifactId);
+
+      return;
+    }
+
     setShowSummary(false);
     panelRef.current?.resize(50);
 
@@ -90,10 +124,16 @@ const Activity = () => {
 
   useEffect(() => {
     appDispatch(
-      addBreadcrumb({
-        title: 'Activity Logs',
-        href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
-      }),
+      resetBreadcrumb([
+        {
+          title: process as string,
+          href: getProcessRouteById(processId as string, process as string, status as string),
+        },
+        {
+          title: 'Activity Logs',
+          href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
+        },
+      ]),
     );
   }, []);
 
@@ -108,6 +148,16 @@ const Activity = () => {
       closeSSE();
     };
   }, []);
+
+  useEffect(() => {
+    if (isLoadingArtifact) {
+      toast.loading('Redirecting...', {
+        id: 'redirecting',
+      });
+    } else {
+      toast.dismiss('redirecting');
+    }
+  }, [isLoadingArtifact]);
 
   return (
     <ResizablePanelGroup direction='horizontal' className='h-full w-full'>

@@ -9,7 +9,6 @@ export enum TEAM_TABS_TYPES {
 
 export const TeamTabsList = [
   { label: 'Team members', value: TEAM_TABS_TYPES.TEAM_MEMBERS },
-  { label: 'Approval pending', value: TEAM_TABS_TYPES.APPROVAL_PENDING },
   { label: 'Invited', value: TEAM_TABS_TYPES.INVITED_MEMBERS },
 ];
 

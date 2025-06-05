@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -13,7 +13,6 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
-import { useGetPaymentConfigQuery } from '@/apis/payments';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -40,23 +39,12 @@ const Sidebar = () => {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
-  const { data: paymentConfig } = useGetPaymentConfigQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
 
   useEffect(() => {
     if (pages) {
       pushToMostRelevantPage();
     }
   }, [pages]);
-
-  const filteredSidebarItems = useMemo(
-    () =>
-      SIDEBAR_ITEMS.filter(
-        (item) => !item?.isHidden && (item?.id !== 'payments' || (item?.id === 'payments' && paymentConfig?.id)),
-      ),
-    [paymentConfig],
-  );
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -81,8 +69,8 @@ const Sidebar = () => {
               className='h-full'
             >
               <div className='border-GRAY_400 border-b px-2 pb-4'>
-                {filteredSidebarItems.map((item) => (
-                  <Link href={item.path} key={item.label} className='cursor-pointer' prefetch>
+                {SIDEBAR_ITEMS.map((item) => (
+                  <Link href={item.path} key={item.label} className='cursor-pointer'>
                     <SidebarTab
                       key={item?.label}
                       name={item?.label}
@@ -91,9 +79,6 @@ const Sidebar = () => {
                     />
                   </Link>
                 ))}
-                <div onClick={() => router.push(SETTING_SIDEBAR_ITEMS[0]?.path)}>
-                  <SidebarTab name='Settings' iconId='settings-01' className='cursor-pointer' />
-                </div>
               </div>
               {processes && processes?.length > 0 && (
                 <div className='px-2 py-2.5'>

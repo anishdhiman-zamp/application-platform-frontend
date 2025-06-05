@@ -33,7 +33,8 @@ interface PdfArtifactProps {
 
 const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
   const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
+  const processId = searchParams?.get('processId') as string;
+
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState(1);

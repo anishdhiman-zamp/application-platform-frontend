@@ -1,21 +1,18 @@
 import type { FC } from 'react';
-import { Button } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import TopbarStatusIcon from 'modules/process/common/TopbarStatusIcon';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useGetActivitySummaryQuery } from '@/apis/processes';
-import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
-import { COLORS } from '@/constants/colors';
 
 const LogTopbar: FC = () => {
-  const { activityId } = useParams<{ activityId: string }>() ?? {};
   const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
+  const activityId = useParams()?.activityId as string;
+  const processId = searchParams?.get('processId') as string;
+
   const {
     data: summaryData,
     isLoading: isLoadingSummary,
@@ -79,7 +76,7 @@ const LogTopbar: FC = () => {
       </CommonWrapper>
 
       {/* TODO: Add back when we have the functionality */}
-      <div className='flex min-w-max items-center p-4'>
+      {/* <div className='flex items-center p-4 min-w-max'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
         <TooltipV2 tooltipBody='Move to Next Run' asChildTrigger>
           <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! mr-1.5 size-6! px-3! py-1!'>
@@ -92,7 +89,7 @@ const LogTopbar: FC = () => {
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
-      </div>
+      </div> */}
     </div>
   );
 };

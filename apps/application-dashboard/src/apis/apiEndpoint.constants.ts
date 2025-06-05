@@ -116,16 +116,18 @@ export const API_ENDPOINTS = {
   POLICIES_GET: '/policy/list',
   POLICY_DELETE: '/policy/{{policyId}}',
 
+  // processes
   PROCESSES_GET: `processes/`,
   ACTIVITY_RUNS_FILTER_CONFIG_GET: `processes/{{processId}}/activity-runs/filter-config`,
   ACTIVITY_RUNS_SUMMARY_GET: `processes/{{processId}}/activity-runs/status-summary`,
   ACTIVITY_RUNS_GET: `processes/{{processId}}/activity-runs`,
   ACTIVITY_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/artifacts`,
   ACTIVITY_RUN_LOGS_GET: `processes/{{processId}}/activity-logs/{{activityRunId}}/logs`,
-  EMIT_ACTIVITY_LOGS_POST: `processes/{{processId}}/activity-logs/{{activityRunId}}`,
+  EMIT_ACTIVITY_LOGS_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/agent-feedback`,
   ACTIVITY_SUMMARY_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/summary`,
   ACTIVITY_ARTIFACTS_BY_ARTIFACT_ID_GET: `processes/{{processId}}/activity-runs/artifacts`,
   ACTIVITY_SIGNED_URL_BY_FILE_ID_GET: `processes/{{processId}}/artifacts/{{artifactId}}/signed-url/{{fileId}}`,
+  DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
 };
 
 export const enum REQUEST_TYPES {
