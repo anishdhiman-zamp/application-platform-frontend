@@ -1,6 +1,7 @@
 import { Label } from '@zamp-platform/ui';
 import { motion } from 'framer-motion';
-import { forwardRef, useImperativeHandle } from 'react';
+import React from 'react';
+import { useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { FormSchema } from '../types';
@@ -16,7 +17,13 @@ export interface FormBuilderRef {
   submit: () => void;
 }
 
-export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schema, onSubmit }, ref) => {
+export const FormBuilder = ({
+  ref,
+  schema,
+  onSubmit,
+}: FormBuilderProps & {
+  ref: React.RefObject<FormBuilderRef | null>;
+}) => {
   // Build defaultValues from schema.fields
   const defaultValues = Object.fromEntries(
     Object.entries(schema.fields).map(([key, field]) => [key, field.default_value]),
@@ -71,4 +78,4 @@ export const FormBuilder = forwardRef<FormBuilderRef, FormBuilderProps>(({ schem
       </form>
     </FormProvider>
   );
-});
+};

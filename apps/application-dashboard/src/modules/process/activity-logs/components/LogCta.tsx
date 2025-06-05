@@ -28,7 +28,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
           />
         ))}
         {buttonTypeCta?.map((cta) => (
-          <Button key={cta?.id} className='f-12-500 h-6 gap-x-1.5 whitespace-nowrap px-2.5 py-1.5'>
+          <Button key={cta?.id} className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'>
             <SvgSpriteLoader id={'check'} size={12} className='shrink-0' />
             <span className='f-12-450 truncate'>{cta?.display_name}</span>
           </Button>

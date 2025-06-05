@@ -69,7 +69,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                 </Button>
               </div>
             </div>
-            <div className='flex max-w-[182px] items-center justify-center text-wrap text-center'>
+            <div className='flex max-w-[182px] items-center justify-center text-center text-wrap'>
               <span className='text-GRAY_700 f-11-400'>Also, our team has been notified and is working on it!</span>
             </div>
           </div>

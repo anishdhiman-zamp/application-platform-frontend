@@ -49,14 +49,14 @@ const PaymentDetailsSideDrawer: FC<PaymentDetailsSideDrawerProps> = ({ onClose, 
           <CommonWrapper
             isLoading={isFetching}
             loader={
-              <div className='px-4.5 border-GRAY_400 flex animate-pulse items-center gap-3 border-b py-6'>
-                <div className='w-30 bg-GRAY_100 h-6 rounded-md' />
-                <div className='w-30 bg-GRAY_100 h-6 rounded-md' />
+              <div className='border-GRAY_400 flex animate-pulse items-center gap-3 border-b px-4.5 py-6'>
+                <div className='bg-GRAY_100 h-6 w-30 rounded-md' />
+                <div className='bg-GRAY_100 h-6 w-30 rounded-md' />
               </div>
             }
             skeletonType={SkeletonTypes.CUSTOM}
           >
-            <div className='px-4.5 border-GRAY_400 flex items-center gap-3 border-b py-6'>
+            <div className='border-GRAY_400 flex items-center gap-3 border-b px-4.5 py-6'>
               {tabsList?.map((tab) => (
                 <div
                   key={tab.value}

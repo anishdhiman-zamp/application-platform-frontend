@@ -73,7 +73,7 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
       </div>
       <div className='flex w-full min-w-0 flex-col items-start justify-center' ref={containerRef}>
         <p
-          className={cn('f-13-450 text-GRAY_1000 w-full break-words text-left', {
+          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', {
             'animate-pulse': status === LOG_STATUS.LOADING,
           })}
         >

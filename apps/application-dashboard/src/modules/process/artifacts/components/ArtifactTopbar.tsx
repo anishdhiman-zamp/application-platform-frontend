@@ -24,7 +24,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
   onOpenAllArtifacts,
 }) => {
   return (
-    <div className='h-15 border-GRAY_100 flex w-full shrink-0 items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+    <div className='border-GRAY_100 flex h-15 w-full shrink-0 items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
       <div className='flex min-w-max items-center justify-center gap-x-2 p-4'>
         <SvgSpriteLoader
           id='menu-03'

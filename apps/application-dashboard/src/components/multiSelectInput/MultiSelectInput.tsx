@@ -342,7 +342,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
           />
         </div>
         {roleOptions && (
-          <div className='cursor-pointer! flex h-fit min-w-max'>
+          <div className='flex h-fit min-w-max cursor-pointer!'>
             <Dropdown
               options={roleOptions}
               id={`${id}-multi-select-input-dropdown`}
@@ -394,7 +394,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 )
               : !!combinedOptions?.length && (
                   <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu absolute left-0 z-10 mt-1 w-full rounded-md border bg-white p-1'>
-                    <span className='flex px-1.5 pb-1.5 pt-2'>Select a team or person</span>
+                    <span className='flex px-1.5 pt-2 pb-1.5'>Select a team or person</span>
                     <div
                       className='flex max-h-[200px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'
                       tabIndex={0}

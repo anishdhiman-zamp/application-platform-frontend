@@ -87,7 +87,7 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-GRAY_400 shadow-table-filter-menu flex max-h-[330px] w-[218px] min-w-[218px] flex-col gap-2 rounded-md border bg-white pb-1 pt-2',
+        'border-GRAY_400 shadow-table-filter-menu flex max-h-[330px] w-[218px] min-w-[218px] flex-col gap-2 rounded-md border bg-white pt-2 pb-1',
         className,
       )}
     >
@@ -131,7 +131,7 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
                 key={item}
                 onClick={() => !isDisabled && onValueChange(item)}
                 className={cn(
-                  'border-2.5 hover:bg-GRAY_100 cursor-pointer select-none rounded px-2.5 py-2',
+                  'border-2.5 hover:bg-GRAY_100 cursor-pointer rounded px-2.5 py-2 select-none',
                   selectedValue === item && 'bg-GRAY_200',
                 )}
               >

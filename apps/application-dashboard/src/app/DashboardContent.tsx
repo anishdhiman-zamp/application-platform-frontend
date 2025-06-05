@@ -54,7 +54,7 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
       if (isValidElement(child))
         return cloneElement(child as ReactElement<CommonPageLayoutProps>, {
           scrollToTop: scrollToTop,
-          rootContainerRef: containerRef,
+          rootContainerRef: containerRef as React.RefObject<HTMLDivElement>,
         });
 
       return child;

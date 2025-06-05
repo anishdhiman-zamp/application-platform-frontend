@@ -1,3 +1,5 @@
+'use client';
+
 import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@zamp-platform/ui/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -40,23 +42,17 @@ export interface ButtonProps
   isLoading?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
-
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        disabled={isLoading || props.disabled}
-        {...props}
-      >
-        {isLoading ? <Loader2 className='animate-spin' /> : children}
-      </Comp>
-    );
-  },
-);
-
-Button.displayName = 'Button';
+function Button({ className, variant, size, asChild = false, isLoading = false, children, ...props }: ButtonProps) {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Comp
+      className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isLoading || props.disabled}
+      {...props}
+    >
+      {isLoading ? <Loader2 className='animate-spin' /> : children}
+    </Comp>
+  );
+}
 
 export { Button, buttonVariants };

@@ -26,7 +26,7 @@ const Popup: FC<PopupProps> = ({
   return (
     <div
       className={cn(
-        `z-1000 fixed left-0 top-0 h-screen w-screen transition-all duration-300 ease-in ${isOverlay ? 'bg-GRAY_70' : ''} ${
+        `fixed top-0 left-0 z-1000 h-screen w-screen transition-all duration-300 ease-in ${isOverlay ? 'bg-GRAY_70' : ''} ${
           isOpen ? 'opacity-100' : 'hidden opacity-0'
         }`,
       )}
@@ -45,7 +45,7 @@ const Popup: FC<PopupProps> = ({
           role='presentation'
           onClick={stopPropagationAction}
         >
-          <div className={cn('flex w-full items-center justify-between px-5 pb-0 pt-5', popupWrapperClassName)}>
+          <div className={cn('flex w-full items-center justify-between px-5 pt-5 pb-0', popupWrapperClassName)}>
             <div className='flex flex-col'>
               {title && <span className={cn('f-16-600 text-GRAY_950', titleClassName)}>{title}</span>}
               {subTitle && <span className={cn('f-12-400 text-GRAY_700 mt-1', subTitleClassName)}>{subTitle}</span>}

@@ -9,8 +9,8 @@ const ChooseRoleMembers = () => {
       <Button type={BUTTON_TYPES.SECONDARY} id='send-user-invite-btn' size={SIZE_TYPES.SMALL} className='!bg-GRAY_100'>
         Share
       </Button>
-      <div className='z-1000 relative'>
-        <div className='absolute bottom-0 right-0 flex h-40 w-[20rem] bg-red-400'>this is the dropdown</div>
+      <div className='relative z-1000'>
+        <div className='absolute right-0 bottom-0 flex h-40 w-[20rem] bg-red-400'>this is the dropdown</div>
       </div>
     </div>
   );

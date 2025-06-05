@@ -15,7 +15,7 @@ type DropdownToggleProps = {
 const DropdownToggle: FC<DropdownToggleProps> = ({ isLoading, isShowMenu, setIsShowMenu }) => {
   return (
     <CommonWrapper
-      className='right-3 top-0 z-50 flex h-full items-center'
+      className='top-0 right-3 z-50 flex h-full items-center'
       isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<Loader2 className='max-w-3 animate-spin' />}

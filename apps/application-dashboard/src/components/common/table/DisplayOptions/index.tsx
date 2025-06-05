@@ -11,7 +11,7 @@ import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
 
 type DisplayOptionsProps = {
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
   datasetId: string;
   isGroupByDisabled?: boolean;
 };
@@ -64,7 +64,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            className='focus-visible:outline-hidden ring-0! ring-offset-0! flex select-none items-center gap-1'
+            className='flex items-center gap-1 ring-0! ring-offset-0! select-none focus-visible:outline-hidden'
             size='small'
             variant='outline'
           >
@@ -72,7 +72,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
             Display
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end' className='z-9999 min-w-[180px]! max-h-[300px] overflow-y-auto' sideOffset={5}>
+        <DropdownMenuContent align='end' className='z-9999 max-h-[300px] min-w-[180px]! overflow-y-auto' sideOffset={5}>
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
             (option: MapAny) => (
               <DropdownMenuItem

@@ -219,7 +219,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
               </div>
             </div>
           </div>
-          <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 whitespace-normal text-wrap break-words'>
+          <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 text-wrap break-words whitespace-normal'>
             {currentUserHasAdminAccess && (
               <>
                 <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
@@ -259,7 +259,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
         ) : (
           <span
             className={cn(
-              'f-12-400 text-GRAY_1000 flex w-28 items-start justify-end py-3 pl-4 pr-2',
+              'f-12-400 text-GRAY_1000 flex w-28 items-start justify-end py-3 pr-2 pl-4',
               !showRoleChangeDropdown && 'text-GRAY_600 pr-4',
             )}
           >

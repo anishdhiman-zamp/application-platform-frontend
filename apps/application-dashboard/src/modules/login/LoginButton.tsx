@@ -39,11 +39,11 @@ const LoginButton: FC<LoginButtonPropsType> = ({ loading, onClick, providerLogo 
     >
       <div
         className={cn(
-          'color-transition before:bg-BG_GRAY_3 before:duration-3000 after:duration-3000 after:bg-BG_GRAY_4 relative z-10 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:translate-x-0 before:transform before:rounded-[6px] before:transition-transform before:ease-in-out after:absolute after:top-0 after:h-full after:w-full after:-translate-x-1/2 after:transform after:rounded-[6px] after:transition-transform after:ease-in-out',
+          'color-transition before:bg-BG_GRAY_3 after:bg-BG_GRAY_4 relative z-10 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:translate-x-0 before:transform before:rounded-[6px] before:transition-transform before:duration-3000 before:ease-in-out after:absolute after:top-0 after:h-full after:w-full after:-translate-x-1/2 after:transform after:rounded-[6px] after:transition-transform after:duration-3000 after:ease-in-out',
           { active: loading },
         )}
       >
-        <div className='absolute right-40 top-[12px] z-40 text-white'>
+        <div className='absolute top-[12px] right-40 z-40 text-white'>
           {showSigningIn ? (
             <div className='f-14-500 animate-opacity flex items-center justify-center gap-1.5 text-white'>
               <span>Signing in with</span>

@@ -20,7 +20,7 @@ const SearchTags: FC<SearchTagsProps> = ({ tags, onDeleteTag }) => {
     <div
       key={index}
       onClick={stopPropagationAction}
-      className={`f-12-400 flex h-[20px] w-auto items-center justify-between gap-2 whitespace-nowrap px-2 py-1 ${
+      className={`f-12-400 flex h-[20px] w-auto items-center justify-between gap-2 px-2 py-1 whitespace-nowrap ${
         tag?.type === DESCRIPTION_TAGS.DESCRIPTION_VALUE ? 'bg-GRAY_100' : 'bg-BG_TAB_SELECTION rounded-[26px]'
       }`}
     >

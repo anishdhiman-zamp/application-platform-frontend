@@ -5,7 +5,7 @@ const LogsSkeleton: FC = () => {
   return (
     <div className='w-full space-y-6'>
       {/* Date Separator Skeleton */}
-      <div className='flex min-w-max items-center justify-center gap-x-4 pb-6 pt-5'>
+      <div className='flex min-w-max items-center justify-center gap-x-4 pt-5 pb-6'>
         <div className='bg-GRAY_100 h-px w-full' />
         <SkeletonElement className='h-4 w-24 rounded' />
         <div className='bg-GRAY_100 h-px w-full' />

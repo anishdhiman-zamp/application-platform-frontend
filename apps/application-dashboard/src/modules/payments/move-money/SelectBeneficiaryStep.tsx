@@ -59,7 +59,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
 
   return (
     <div className='h-screen overflow-y-scroll pt-20'>
-      <div className='max-w-75 m-auto'>
+      <div className='m-auto max-w-75'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
           <SelectBeneDropdown

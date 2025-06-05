@@ -74,7 +74,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
   };
 
   return (
-    <div className='w-5.5 h-5.5 relative z-50 cursor-pointer rounded' onClick={downloadCsv}>
+    <div className='relative z-50 h-5.5 w-5.5 cursor-pointer rounded' onClick={downloadCsv}>
       <Tooltip
         tooltipBody={hasFilters ? 'Export filtered' : 'Export all'}
         tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
@@ -95,7 +95,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
       {isPolling && showExportStatus && (
         <div
           ref={dropdownRef}
-          className='f-13-500 text-GRAY_1000 f-12-450 z-1000 border-0.5 border-GRAY_500 absolute -right-[86px] top-7 flex h-[55px] w-[308px] items-center gap-3 rounded-[10px] bg-white p-5'
+          className='f-13-500 text-GRAY_1000 f-12-450 border-0.5 border-GRAY_500 absolute top-7 -right-[86px] z-1000 flex h-[55px] w-[308px] items-center gap-3 rounded-[10px] bg-white p-5'
         >
           <ProgressBar
             trackColor={COLORS.GRAY_400}

@@ -32,7 +32,7 @@ interface SpreadsheetGridProps {
   hideGridOnZeroData?: boolean;
   onSortChanged?: (event: any) => void;
   resetDataSourceCount?: number;
-  setDataSourceWithFilters?: (gridApi: RefObject<GridApi>) => void;
+  setDataSourceWithFilters?: (gridApi: RefObject<GridApi<any> | null>) => void;
 }
 
 const SpreadsheetGrid: FC<SpreadsheetGridProps> = ({
@@ -62,7 +62,7 @@ const SpreadsheetGrid: FC<SpreadsheetGridProps> = ({
   resetDataSourceCount,
   setDataSourceWithFilters,
 }) => {
-  const gridApi = useRef<GridApi | null>(null);
+  const gridApi = useRef<GridApi<any> | null>(null);
 
   const [lastViewedColumn, setLastViewedColumn] = useState<Column<any> | undefined>(undefined);
   let isEnsureColumnVisibleScroll = false;

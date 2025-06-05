@@ -104,7 +104,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
-      <div className='relative h-[calc(100vh-94px)] overflow-scroll py-6 pl-3 pr-0'>
+      <div className='relative h-[calc(100vh-94px)] overflow-scroll py-6 pr-0 pl-3'>
         <CommonWrapper
           isLoading={isSheetLoading || isPageLoading}
           skeletonType={SkeletonTypes.CUSTOM}

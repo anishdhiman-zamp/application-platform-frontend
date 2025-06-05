@@ -61,7 +61,7 @@ const MoneyTransferHome = () => {
       <SvgSpriteLoader
         id='x-close'
         size={14}
-        className='hover:bg-GRAY_100 fixed right-6 top-[72px] rounded-md p-1'
+        className='hover:bg-GRAY_100 fixed top-[72px] right-6 rounded-md p-1'
         onClick={() => router.back()}
       />
       <SelectSourceAccount

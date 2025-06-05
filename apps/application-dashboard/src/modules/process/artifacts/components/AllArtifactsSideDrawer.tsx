@@ -58,7 +58,7 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div onClick={onClose} className='absolute left-5 top-5 cursor-pointer' aria-label='Close'>
+            <div onClick={onClose} className='absolute top-5 left-5 cursor-pointer' aria-label='Close'>
               <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
             </div>
 
@@ -92,7 +92,7 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
 
   return (
     <div
-      className='p-4.5 border-GRAY_500 hover:bg-BG_GRAY_2 active:bg-GRAY_100 flex w-80 cursor-pointer flex-col items-start justify-start gap-y-2.5 rounded-[10px] border-[0.5px] bg-white'
+      className='border-GRAY_500 hover:bg-BG_GRAY_2 active:bg-GRAY_100 flex w-80 cursor-pointer flex-col items-start justify-start gap-y-2.5 rounded-[10px] border-[0.5px] bg-white p-4.5'
       onClick={onClick}
       aria-label={`${artifact_type} artifact`}
       role='button'

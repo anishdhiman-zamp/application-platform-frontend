@@ -26,7 +26,7 @@ const LogTopbar: FC = () => {
   });
 
   return (
-    <div className='h-15 border-GRAY_100 flex w-full items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+    <div className='border-GRAY_100 flex h-15 w-full items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
       <CommonWrapper
         className='flex min-w-max items-center justify-center gap-x-2 p-4'
         isLoading={isLoadingSummary || isErrorSummary}
@@ -82,13 +82,13 @@ const LogTopbar: FC = () => {
       <div className='flex min-w-max items-center p-4'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
         <TooltipV2 tooltipBody='Move to Next Run' asChildTrigger>
-          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]! mr-1.5'>
+          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! mr-1.5 size-6! px-3! py-1!'>
             <SvgSpriteLoader id='arrow-down' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
 
         <TooltipV2 tooltipBody='Move to Previous Run' asChildTrigger>
-          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
+          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! size-6! px-3! py-1!'>
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>

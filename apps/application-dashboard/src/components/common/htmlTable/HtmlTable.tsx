@@ -23,7 +23,7 @@ const HtmlTable: FC<HtmlTablePropsType> = ({ rows, columns, wrapperClassName, co
                 <th
                   key={index}
                   className={cn(
-                    'text-GRAY_950 border-GRAY_100 f-12-500 overflow-hidden whitespace-nowrap border px-3.5 py-4 text-start',
+                    'text-GRAY_950 border-GRAY_100 f-12-500 overflow-hidden border px-3.5 py-4 text-start whitespace-nowrap',
                     colCellClassName,
                   )}
                 >
@@ -39,7 +39,7 @@ const HtmlTable: FC<HtmlTablePropsType> = ({ rows, columns, wrapperClassName, co
                   <td
                     key={colIndex}
                     className={cn(
-                      'text-GRAY_950 border-GRAY_100 f-11-400 overflow-hidden whitespace-nowrap border px-3 py-2 text-start',
+                      'text-GRAY_950 border-GRAY_100 f-11-400 overflow-hidden border px-3 py-2 text-start whitespace-nowrap',
                       rowCellClassName,
                     )}
                   >

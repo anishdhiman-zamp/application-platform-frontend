@@ -6,23 +6,16 @@ import { Circle } from 'lucide-react';
 
 import { cn } from '@zamp-platform/ui/utils';
 
-const RadioGroup = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => {
-  return <RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} ref={ref} />;
-});
+const RadioGroup = ({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) => {
+  return <RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} />;
+};
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 
-const Radio = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.RadioGroupItem>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.RadioGroupItem>
->(({ className, ...props }, ref) => {
+const Radio = ({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.RadioGroupItem>) => {
   return (
     <RadioGroupPrimitive.RadioGroupItem
-      ref={ref}
       className={cn(
-        'text-gray-1000 ring-offset-background focus:outline-hidden focus-visible:ring-ring aspect-square h-3.5 w-3.5 rounded-full border border-gray-400 focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+        'text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
@@ -32,7 +25,7 @@ const Radio = React.forwardRef<
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.RadioGroupItem>
   );
-});
+};
 Radio.displayName = RadioGroupPrimitive.RadioGroupItem.displayName;
 
 export { Radio, RadioGroup };

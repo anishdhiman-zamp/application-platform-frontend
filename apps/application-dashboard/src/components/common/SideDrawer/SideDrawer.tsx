@@ -121,7 +121,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
   return (
     <div
       className={cn(
-        'z-1000 animate-opacity fixed left-0 top-0 h-full w-screen items-center',
+        'animate-opacity fixed top-0 left-0 z-1000 h-full w-screen items-center',
         isOpen ? '' : 'hidden',
         backdropClassName,
         SIDE_DRAWER_TYPES_CLASSNAMES[type].backdropClassName,

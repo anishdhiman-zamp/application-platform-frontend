@@ -7,12 +7,12 @@ import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@zamp-platform/ui/utils';
 import { useEffect, useState } from 'react';
 
-interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root> {
+interface SheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-const Sheet = React.forwardRef<HTMLDivElement, SheetProps>(({ onOpenChange, open, ...props }, ref) => {
+const Sheet = ({ onOpenChange, open, ...props }: SheetProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
@@ -36,26 +36,22 @@ const Sheet = React.forwardRef<HTMLDivElement, SheetProps>(({ onOpenChange, open
   };
 
   return <SheetPrimitive.Root open={isAnimating} onOpenChange={handleOpenChange} {...props} />;
-});
+};
 Sheet.displayName = SheetPrimitive.Root.displayName;
 
 const SheetTrigger = SheetPrimitive.Trigger;
 const SheetClose = SheetPrimitive.Close;
 const SheetPortal = SheetPrimitive.Portal;
 
-const SheetOverlay = React.forwardRef<
-  React.ElementRef<typeof SheetPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Overlay>) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'z-1001 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300! fixed inset-0 bg-black/20',
+      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-1001 bg-black/20 duration-300!',
       className,
     )}
     {...props}
-    ref={ref}
   />
-));
+);
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
@@ -83,7 +79,7 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends React.ComponentProps<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {
   showCloseButton?: boolean;
   className?: string;
@@ -93,26 +89,30 @@ interface SheetContentProps
   size?: 'large' | 'medium';
 }
 
-const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  (
-    { side = 'right', size = 'medium', className, children, showCloseButton = false, title, description, ...props },
-    ref,
-  ) => (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side, size }), className)} {...props}>
-        <SheetPrimitive.Title className='sr-only'>{title || 'Sheet'}</SheetPrimitive.Title>
-        <SheetPrimitive.Description className='sr-only'>{description || 'Sheet content'}</SheetPrimitive.Description>
-        {children}
-        {showCloseButton && (
-          <SheetPrimitive.Close className='ring-offset-background focus:outline-hidden focus:ring-ring data-[state=open]:bg-secondary absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none'>
-            <X className='h-4 w-4' />
-            <span className='sr-only'>Close</span>
-          </SheetPrimitive.Close>
-        )}
-      </SheetPrimitive.Content>
-    </SheetPortal>
-  ),
+const SheetContent = ({
+  side = 'right',
+  size = 'medium',
+  className,
+  children,
+  showCloseButton = false,
+  title,
+  description,
+  ...props
+}: SheetContentProps) => (
+  <SheetPortal>
+    <SheetOverlay />
+    <SheetPrimitive.Content className={cn(sheetVariants({ side, size }), className)} {...props}>
+      <SheetPrimitive.Title className='sr-only'>{title || 'Sheet'}</SheetPrimitive.Title>
+      <SheetPrimitive.Description className='sr-only'>{description || 'Sheet content'}</SheetPrimitive.Description>
+      {children}
+      {showCloseButton && (
+        <SheetPrimitive.Close className='ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
+          <X className='h-4 w-4' />
+          <span className='sr-only'>Close</span>
+        </SheetPrimitive.Close>
+      )}
+    </SheetPrimitive.Content>
+  </SheetPortal>
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 

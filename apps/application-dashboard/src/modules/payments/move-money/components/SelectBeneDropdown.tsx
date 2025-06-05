@@ -285,7 +285,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
         })}
         ref={containerRef}
       >
-        {disabled && <div className='bg-GRAY_100 absolute right-0 top-0 z-10 h-full w-full opacity-20'></div>}
+        {disabled && <div className='bg-GRAY_100 absolute top-0 right-0 z-10 h-full w-full opacity-20'></div>}
         <div className='flex w-full cursor-pointer items-center gap-1.5 pr-3'>
           <Input
             tabIndex={0}

@@ -11,7 +11,7 @@ interface SenderInfoProps {
 
 interface SenderConfig {
   iconBgColor: string;
-  iconContent: JSX.Element;
+  iconContent: React.JSX.Element;
   displayName: string;
 }
 

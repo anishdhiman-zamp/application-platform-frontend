@@ -171,7 +171,7 @@ export const Tooltip: FC<TooltipProps> = ({
             wrapperStyle,
             wrapperPositionStyle[position],
             !disabled &&
-              'z-1000 f-12-450 z-999 text-GRAY_200 whitespace-nowrap rounded-md bg-black px-3 py-1.5 group-hover/tooltip:pointer-events-auto group-hover/tooltip:opacity-100',
+              'f-12-450 text-GRAY_200 z-999 z-1000 rounded-md bg-black px-3 py-1.5 whitespace-nowrap group-hover/tooltip:pointer-events-auto group-hover/tooltip:opacity-100',
           )}
           style={style ? style : { ...tooltipPosition }}
           data-testid={`tooltip-${id}`}

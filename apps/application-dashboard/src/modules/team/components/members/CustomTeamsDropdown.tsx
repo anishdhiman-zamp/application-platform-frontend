@@ -38,9 +38,9 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
 
   return (
     <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu absolute left-0 z-10 mt-1 w-fit max-w-48 rounded-md border bg-white p-1'>
-      <span className='flex whitespace-nowrap px-1.5 pb-1.5 pt-2'>Select a team or create one</span>
+      <span className='flex px-1.5 pt-2 pb-1.5 whitespace-nowrap'>Select a team or create one</span>
       <div
-        className='outline-hidden flex max-h-[200px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'
+        className='flex max-h-[200px] w-full flex-col overflow-y-auto outline-hidden [&::-webkit-scrollbar]:hidden'
         ref={dropdownRef}
         tabIndex={0}
         onKeyDown={onKeyDown}
@@ -77,7 +77,7 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                     <span> Create team :</span>
                     {search && (
                       <span
-                        className='h-fit w-fit cursor-pointer text-wrap rounded px-1.5 py-0.5 text-black'
+                        className='h-fit w-fit cursor-pointer rounded px-1.5 py-0.5 text-wrap text-black'
                         style={{ backgroundColor: randomColor ?? COLORS.WHITE }}
                       >
                         {option?.label}

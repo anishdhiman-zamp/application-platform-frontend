@@ -22,9 +22,9 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
 
   return (
     <>
-      <div className='h-[calc(100vh-136px)]! z-1000 fixed left-0 top-[94px] flex w-screen justify-end'>
+      <div className='fixed top-[94px] left-0 z-1000 flex h-[calc(100vh-136px)]! w-screen justify-end'>
         {!datasetBulkLoaders?.length && !fileImportHistoryData?.length ? (
-          <div className='absolute right-8 top-0 z-50' ref={importFileHistoryRef}>
+          <div className='absolute top-0 right-8 z-50' ref={importFileHistoryRef}>
             <HistoryEmptyState />
           </div>
         ) : (

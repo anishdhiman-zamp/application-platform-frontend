@@ -231,13 +231,13 @@ const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData 
           <div className='f-12-500 text-primary px-4 py-3 pb-0'>{isEdit ? 'Edit policy' : 'New policy'}</div>
           <FormProvider {...methods}>
             <form onSubmit={(e) => e.preventDefault()}>
-              <div className='px-4 pb-3 pt-6'>
+              <div className='px-4 pt-6 pb-3'>
                 <input
                   type='text'
                   {...methods.register('policyName')}
                   name='policyName'
                   className={cn(
-                    'f-22-500 text-primary focus:outline-hidden border-primary not-placeholder-shown:border-transparent not-placeholder-shown:w-fit w-[120px] border-b border-dotted placeholder:text-gray-500',
+                    'f-22-500 text-primary border-primary w-[120px] border-b border-dotted not-placeholder-shown:w-fit not-placeholder-shown:border-transparent placeholder:text-gray-500 focus:outline-hidden',
                     methods.formState.errors.policyName && 'border-red-500',
                   )}
                   placeholder='Policy Title'

@@ -103,7 +103,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
       <div className='text-GRAY_600 z-80 mb-2 flex w-full items-center gap-1'>
         <div className='f-11-400 text-GRAY_700 whitespace-nowrap'>{label || camelCaseToNormalText(filterKey)}</div>
         <div
-          className='relative mr-2 flex grow cursor-pointer select-none items-center gap-[2px]'
+          className='relative mr-2 flex grow cursor-pointer items-center gap-[2px] select-none'
           onClick={() => !isDisabled && !isConditionOptionsOpen && setIsConditionOptionsOpen((prev) => !prev)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] overflow-hidden text-ellipsis whitespace-nowrap'>
@@ -113,7 +113,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
           {isConditionOptionsOpen && (
             <div
               ref={ref}
-              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute left-0 top-full z-10 w-[256px] rounded-md border bg-white p-1'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 w-[256px] rounded-md border bg-white p-1'
             >
               {SEARCH_FILTER_OPTIONS.map((option) => (
                 <div

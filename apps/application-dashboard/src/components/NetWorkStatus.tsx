@@ -27,7 +27,7 @@ function NetworkStatus() {
 
   return (
     isOffline && (
-      <div className='z-100 fixed left-1/2 top-2 -translate-x-1/2 transform'>
+      <div className='fixed top-2 left-1/2 z-100 -translate-x-1/2 transform'>
         <div className='shadow-GRAY_50 border-GRAY_400 f-14-400 animate-slide-in mt-5 flex w-[400px] items-center justify-between rounded-lg border bg-white p-5 shadow-xl'>
           <div className='flex items-center gap-2'>
             <SvgSpriteLoader

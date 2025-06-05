@@ -252,7 +252,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               {filteredAccounts.map((account, index) => (
                 <div key={`${account?.account_number}_${index}`} onMouseEnter={() => setHoveredIndex(index)}>
                   <AccountWithLogo
-                    className={cn('p-2.5! rounded-md', {
+                    className={cn('rounded-md p-2.5!', {
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
                     name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
@@ -298,10 +298,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div onFocus={!disabled && !isShowMenu ? onFocus : undefined} onKeyDown={handleKeyDown}>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('border-GRAY_500 outline-hidden cursor-pointer rounded-md border bg-white', {
-          'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,
+        className={cn('border-GRAY_500 cursor-pointer rounded-md border bg-white outline-hidden', {
+          'border-GRAY_400 overflow-x-visible overflow-y-hidden': !isShowMenu,
           'border-GRAY_500 shadow-select-account-dropdown': isShowMenu,
-          'cursor-not-allowed! bg-GRAY_100': disabled,
+          'bg-GRAY_100 cursor-not-allowed!': disabled,
         })}
         ref={containerRef}
       >
@@ -325,7 +325,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
         ) : (
           <div onFocus={!disabled && !isInputEnabled ? onFocus : undefined}>
             <AccountWithLogo
-              className={cn('p-2.5! rounded-md', {
+              className={cn('rounded-md p-2.5!', {
                 'bg-BACKGROUND_GRAY_2': disabled,
               })}
               name={accountName}

@@ -43,7 +43,7 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
     <div onClick={stopPropagationAction}>
       <DropdownMenu onOpenChange={setIsShowMenu}>
         <DropdownMenuTrigger asChild>
-          <div className='f-11-450 text-ORANGE_800 flex cursor-pointer select-none items-center justify-end gap-1 whitespace-nowrap'>
+          <div className='f-11-450 text-ORANGE_800 flex cursor-pointer items-center justify-end gap-1 whitespace-nowrap select-none'>
             Awaiting your approval
             <DropdownToggle isShowMenu={isShowMenu} isLoading={isLoading} setIsShowMenu={setIsShowMenu} />
           </div>

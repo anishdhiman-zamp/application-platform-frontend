@@ -174,7 +174,7 @@ export const MonthOrQuarterPicker: FC<MonthOrQuarterPickerProps> = ({
                           : isPartiallySelected(year, config?.value)
                             ? 'border-BLUE_700 selected-year'
                             : 'hover:border-BLUE_700 hover:selected-year bg-BG_GRAY_2'
-                    } f-12-500 w-13.5 flex cursor-pointer items-center justify-center rounded-sm border py-[4.5px]`}
+                    } f-12-500 flex w-13.5 cursor-pointer items-center justify-center rounded-sm border py-[4.5px]`}
                     onClick={() => onSelectValue({ year, config: config })}
                     onMouseEnter={() => onMouseEnter(year, config)}
                   >

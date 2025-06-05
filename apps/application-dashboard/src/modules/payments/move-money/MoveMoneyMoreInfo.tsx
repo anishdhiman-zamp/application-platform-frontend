@@ -77,7 +77,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
 
   return (
     <div className='h-screen overflow-y-scroll'>
-      <div className='max-w-75 m-auto pb-20 pt-20'>
+      <div className='m-auto max-w-75 pt-20 pb-20'>
         <div className='f-22-550 mb-5'>Additional Details</div>
         <div className='mt-5'>
           <div className='text-GRAY_900 f-12-500 mb-2'>External Memo (Optional)</div>
@@ -92,7 +92,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
             onChange={({ target }) => setExternalMemo(target.value)}
           />
         </div>
-        <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments (Optional)</div>
+        <div className='text-GRAY_900 f-12-500 mt-4 mb-2'>Attachments (Optional)</div>
         <FileUploaderWrapper
           className='min-h-[100px] px-6'
           Component={FileUploader}

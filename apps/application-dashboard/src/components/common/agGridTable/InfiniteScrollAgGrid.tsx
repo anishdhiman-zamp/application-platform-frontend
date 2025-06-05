@@ -34,7 +34,7 @@ const InfiniteScrollAgGrid: FC<InfiniteScrollAgGridProps> = ({
     params.api.setGridOption('datasource', dataSource);
   };
 
-  const setDataSourceWithFilters = (gridApi: RefObject<GridApi>) => {
+  const setDataSourceWithFilters = (gridApi: RefObject<GridApi<any> | null>) => {
     const dataSource: IDatasource = {
       getRows: (params) => getRows(params, selectedFilters),
     };

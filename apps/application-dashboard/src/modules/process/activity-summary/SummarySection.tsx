@@ -57,7 +57,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         isError={isErrorSummary}
         refetchFunction={refetchSummary}
         errorCardStyle='w-full h-1/2'
-        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pb-6 pt-5'
+        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pt-5 pb-6'
       >
         <p className='f-13-550'>Key Details</p>
         {summary?.summary?.summary_items?.map((section) => <Summary key={section?.title} data={section} />)}

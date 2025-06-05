@@ -19,7 +19,7 @@ const ProcessNavTab = ({ label, processId, isSelected, disable = false }: Proces
   return (
     <div
       className={cn(
-        'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer select-none items-center gap-3 rounded-md px-2 py-2',
+        'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
         disable ? 'cursor-not-allowed opacity-50' : '',
       )}

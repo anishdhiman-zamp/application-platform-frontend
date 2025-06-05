@@ -110,7 +110,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
               key={item?.status}
               value={item?.status}
               className={cn(
-                'rounded-sm! px-2! py-1! hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 border-none',
+                'hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 rounded-sm! border-none px-2! py-1!',
               )}
             >
               <TabStatusIcon

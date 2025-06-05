@@ -230,7 +230,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
   return (
     <div
       className={cn(
-        'border-0.5 border-GRAY_400 shadow-table-filter-menu w-[218px] min-w-[300px] max-w-[360px] rounded-md bg-white px-2.5 py-2',
+        'border-0.5 border-GRAY_400 shadow-table-filter-menu w-[218px] max-w-[360px] min-w-[300px] rounded-md bg-white px-2.5 py-2',
         className,
       )}
     >

@@ -54,13 +54,13 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
   return (
     <Tabs onValueChange={(value) => setActiveTab(value)} value={activeTab} className='h-full w-full'>
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
-        <TabsList className='mx-4 my-3 flex h-full w-full flex-nowrap items-center justify-start gap-2.5 overflow-x-auto whitespace-nowrap bg-white [scrollbar-width:none]'>
+        <TabsList className='mx-4 my-3 flex h-full w-full flex-nowrap items-center justify-start gap-2.5 overflow-x-auto bg-white whitespace-nowrap [scrollbar-width:none]'>
           {visibleTabs?.map((tab) => (
             <TabsTrigger
               key={tab?.dataset_id}
               value={tab?.dataset_id}
               className={cn(
-                'rounded! px-2! py-1! hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 border-none',
+                'hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 rounded! border-none px-2! py-1!',
               )}
             >
               <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />

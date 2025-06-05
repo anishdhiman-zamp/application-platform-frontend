@@ -94,7 +94,7 @@ const AmountDetailsStep: FC<AmountDetailsStepProps> = ({ isSelfTransfer, handleS
   }, [destinationAccountDetails?.currency_code]);
 
   return (
-    <div className='w-75 m-auto h-screen pt-20'>
+    <div className='m-auto h-screen w-75 pt-20'>
       <div className='flex flex-col gap-5'>
         <div className='f-22-550'>{isSelfTransfer ? 'Transfer details' : 'How much are you sending?'}</div>
         {isSelfTransfer && (

@@ -68,7 +68,7 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
           ))}
           <input
             ref={inputRef}
-            className='outline-hidden f-14-500 min-w-[80px] flex-1 border-none bg-transparent'
+            className='f-14-500 min-w-[80px] flex-1 border-none bg-transparent outline-hidden'
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}

@@ -137,7 +137,7 @@ const RuleCard: FC<RuleCardProps> = ({
           {!isExpanded && (
             <>
               <div className='f-11-400 flex w-[300px] items-center gap-1.5 overflow-hidden'>
-                <span className='text-GRAY_1000 py-1 pl-1.5 pr-2'>If</span>
+                <span className='text-GRAY_1000 py-1 pr-2 pl-1.5'>If</span>
                 <RuleStatement
                   index={0}
                   filterStatement={nonExpandedFilterStatement}
@@ -158,7 +158,7 @@ const RuleCard: FC<RuleCardProps> = ({
           )}
           {isExpanded && (
             <>
-              <span className='text-GRAY_1000 h-fit py-1 pl-1.5 pr-2'>If</span>
+              <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>If</span>
               {filterStatement?.map((value, index) => (
                 <RuleStatement
                   index={index}
@@ -167,8 +167,8 @@ const RuleCard: FC<RuleCardProps> = ({
                   key={`filter-statement-${index}`}
                 />
               ))}
-              <span className='text-GRAY_1000 h-fit py-1 pl-1.5 pr-2'>then apply tag</span>
-              <span className='border-BORDER_GRAY_400 h-fit text-nowrap rounded-md border bg-white py-1 pl-1.5 pr-2'>
+              <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>then apply tag</span>
+              <span className='border-BORDER_GRAY_400 h-fit rounded-md border bg-white py-1 pr-2 pl-1.5 text-nowrap'>
                 {value}
               </span>
             </>

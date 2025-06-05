@@ -51,7 +51,7 @@ const CustomTagEditor = (props: MapAny) => {
         type='text'
         value={searchValue}
         onChange={handleChange}
-        className='outline-hidden -my-1 h-6 w-full'
+        className='-my-1 h-6 w-full outline-hidden'
         autoFocus
       />
       <MenuWrapper

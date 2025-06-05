@@ -111,7 +111,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 
   return (
     <div
-      className={cn('border-GRAY_400 py-4.5 h-full overflow-hidden rounded-xl border bg-white', {
+      className={cn('border-GRAY_400 h-full overflow-hidden rounded-xl border bg-white py-4.5', {
         'animate-pulse opacity-85': isFetching,
       })}
     >
@@ -132,7 +132,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         isError={isError}
         refetchFunction={refetch}
         loader={
-          <div className='z-100 absolute left-0 top-0 flex h-full w-full items-center justify-center'>
+          <div className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'>
             <DynamicLottiePlayer src={WIDGET_LOADER} className='lottie-player h-[150px]' autoplay loop keepLastFrame />
           </div>
         }
@@ -143,7 +143,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
               <div className='text-GRAY_700 f-12-450 absolute -top-10 right-5 z-10'>
                 {snakeCaseToSentenceCase(yAxisTitle)}
                 <div
-                  className='h-4.5 bg-GRAY_200 ml-auto mt-2 w-px'
+                  className='bg-GRAY_200 mt-2 ml-auto h-4.5 w-px'
                   style={{ marginRight: `${maxValueLength * 5.5}px` }}
                 ></div>
               </div>

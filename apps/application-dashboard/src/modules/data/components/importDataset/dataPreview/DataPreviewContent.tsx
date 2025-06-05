@@ -42,7 +42,7 @@ const DataPreviewContent: FC<DataPreviewContentPropsType> = ({ mappedData, rawDa
 
   return (
     <div className='flex h-full flex-col justify-start'>
-      <div className='flex flex-col px-6 pb-4 pt-6'>
+      <div className='flex flex-col px-6 pt-6 pb-4'>
         <span className='f-16-600'>Preview</span>
         <div className='mt-6'>
           <Tabs

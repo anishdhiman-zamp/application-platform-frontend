@@ -40,7 +40,7 @@ interface CommonFilterTableProps {
   handleRowClicked?: (event: RowClickedEvent) => void;
   actionElements?: ReactElement;
   id: string;
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: React.RefObject<AgGridReact | null>;
   cellClass?: string;
   filterConfigUrl: string;
   dataUrl: string;

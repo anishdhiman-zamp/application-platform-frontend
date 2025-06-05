@@ -12,13 +12,13 @@ export const POLLING_ERROR = 'Exceeded max attempts';
  */
 
 const usePolling = () => {
-  const pollingTimer = useRef<ReturnType<typeof setTimeout>>();
-  const pollingFlag = useRef<boolean>();
+  const pollingTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const pollingFlag = useRef<boolean>(true);
 
   pollingFlag.current = true;
 
   const clearTimer = () => {
-    if (pollingTimer) clearTimeout(pollingTimer.current);
+    if (pollingTimer?.current) clearTimeout(pollingTimer.current);
   };
 
   /**

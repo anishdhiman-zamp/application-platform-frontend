@@ -72,7 +72,7 @@ const TemplateApprovalCard: FC<TemplateApprovalCardProps> = ({ canApprove, appro
   return (
     <div ref={moveMoneyActionMenuRef} className='relative'>
       <div
-        className='f-11-450 text-ORANGE_800 hover:bg-GRAY_100 z-10 flex select-none items-center gap-1 rounded-md p-1'
+        className='f-11-450 text-ORANGE_800 hover:bg-GRAY_100 z-10 flex items-center gap-1 rounded-md p-1 select-none'
         onClick={(e) => {
           e.stopPropagation();
           setIsMoveMoneyActionMenuOpen(!isMoveMoneyActionMenuOpen);
@@ -88,7 +88,7 @@ const TemplateApprovalCard: FC<TemplateApprovalCardProps> = ({ canApprove, appro
         </div>
       </div>
       {isMoveMoneyActionMenuOpen && (
-        <div className='border-GRAY_500 animate-opacity absolute right-0 top-full z-50 mt-1 min-w-[165px] select-none rounded-md border bg-white p-1'>
+        <div className='border-GRAY_500 animate-opacity absolute top-full right-0 z-50 mt-1 min-w-[165px] rounded-md border bg-white p-1 select-none'>
           {TEMPLATE_APPROVAL_ACTION_ITEMS.map((item) => (
             <div
               key={item.value}
@@ -98,7 +98,7 @@ const TemplateApprovalCard: FC<TemplateApprovalCardProps> = ({ canApprove, appro
               }}
             >
               <SvgSpriteLoader size={12} id={item?.icon?.id} />
-              <div className='whitespace-nowrap text-sm'>{item?.label}</div>
+              <div className='text-sm whitespace-nowrap'>{item?.label}</div>
             </div>
           ))}
         </div>

@@ -38,7 +38,7 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
       <div className='col-span-3'>
         <MembersRole value={{ user_id: '', privilege: row?.privilege }} />
       </div>
-      <div className='absolute right-0 top-2'>
+      <div className='absolute top-2 right-0'>
         <div className='flex h-full items-center justify-end'>
           <Button
             isLoading={isDeletingAudienceInvitation}

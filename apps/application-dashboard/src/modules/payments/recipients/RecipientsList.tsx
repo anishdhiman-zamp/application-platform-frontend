@@ -48,7 +48,7 @@ const RecipientsList: FC<RecipientsListProps> = ({
   );
 
   return (
-    <div className='pl-4.5 py-6 pr-2'>
+    <div className='py-6 pr-2 pl-4.5'>
       <div className='mb-4.5 flex w-full items-center justify-between'>
         <div className='f-16-600 px-1.5'>Recipients</div>
         {allowActions && (
@@ -90,7 +90,7 @@ const RecipientsList: FC<RecipientsListProps> = ({
             <div
               key={recipient.id}
               onClick={() => onRecipientDetails(recipient)}
-              className='hover:z-1000 cursor-pointer'
+              className='cursor-pointer hover:z-1000'
             >
               <RecipientCard
                 recipient={recipient}

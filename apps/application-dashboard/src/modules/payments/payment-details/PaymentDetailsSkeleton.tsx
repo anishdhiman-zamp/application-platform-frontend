@@ -2,8 +2,8 @@ import React from 'react';
 const PaymentDetailsSkeleton = () => {
   return (
     <div className='animate-pulse overflow-auto pb-10'>
-      <div className='f-12-450 border-GRAY_400 border-b px-6 pb-5 pt-6'>
-        <div className='text-GRAY_700 w-50 bg-GRAY_200 mb-1 h-3.5 rounded-md'></div>
+      <div className='f-12-450 border-GRAY_400 border-b px-6 pt-6 pb-5'>
+        <div className='text-GRAY_700 bg-GRAY_200 mb-1 h-3.5 w-50 rounded-md'></div>
         <div className='f-28-450 bg-GRAY_200 h-9 w-56 rounded-md'></div>
         <div className='border-GRAY_200 mt-5 overflow-hidden rounded-md border'>
           <div className='flex items-center gap-2 p-3'>

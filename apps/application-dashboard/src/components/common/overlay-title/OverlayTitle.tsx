@@ -32,7 +32,7 @@ const OverlayTitle: FC<OverlayTitleProps> = ({
   closeButtonDimensions = { size: 14 },
 }) =>
   (topBar || title || !hideCloseButton) && (
-    <div className={cn('f-16-300 flex min-h-[56px] items-center justify-between py-4 pl-5 pr-4', headerClassName)}>
+    <div className={cn('f-16-300 flex min-h-[56px] items-center justify-between py-4 pr-4 pl-5', headerClassName)}>
       {topBar ? (
         topBar
       ) : (

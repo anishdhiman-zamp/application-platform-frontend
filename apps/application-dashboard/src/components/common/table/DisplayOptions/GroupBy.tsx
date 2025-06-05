@@ -10,7 +10,7 @@ import { MenuWrapper } from 'components/common/MenuWrapper';
 
 type GroupByProps = {
   onClose: defaultFnType;
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
 };
 
 const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
@@ -132,7 +132,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
           className='border-GRAY_500 bg-BG_GRAY_2 min-h-[70px] rounded-md border p-2.5'
         >
           <div className='f-12-400 text-GRAY_700 mb-3'>Drag columns here to group by</div>
-          <div className='flex max-h-[100px] flex-wrap gap-1 overflow-y-auto overflow-x-visible'>
+          <div className='flex max-h-[100px] flex-wrap gap-1 overflow-x-visible overflow-y-auto'>
             {groupedColumns.map((col, index) => (
               <div className='flex items-center gap-1' key={col}>
                 <div
@@ -172,7 +172,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
         <div
           onDragOver={(event) => event.preventDefault()}
           onDrop={handleDropOnAvailable}
-          className='flex max-h-[150px] flex-wrap gap-1.5 overflow-y-auto overflow-x-visible pb-2'
+          className='flex max-h-[150px] flex-wrap gap-1.5 overflow-x-visible overflow-y-auto pb-2'
         >
           {availableColumns?.map((col) => (
             <div

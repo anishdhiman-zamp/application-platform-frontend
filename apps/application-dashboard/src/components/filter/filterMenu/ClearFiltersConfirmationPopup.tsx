@@ -6,7 +6,7 @@ interface ClearFiltersConfirmationPopupProps {
   className?: string;
   onClick: defaultFnType;
   onCancel: defaultFnType;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
 }
 
 const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({
@@ -24,14 +24,14 @@ const ClearFiltersConfirmationPopup: FC<ClearFiltersConfirmationPopupProps> = ({
 
       <div className='flex'>
         <button
-          className='hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_2 outline-hidden min-w-17.5 mr-3 rounded-lg border p-1.5'
+          className='hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_2 mr-3 min-w-17.5 rounded-lg border p-1.5 outline-hidden'
           onClick={onClick}
           data-testid='clear-filters-confirmation-popup-yes'
         >
           Yes
         </button>
         <button
-          className='hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_2 outline-hidden min-w-17.5 rounded-lg border p-1.5'
+          className='hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_2 min-w-17.5 rounded-lg border p-1.5 outline-hidden'
           onClick={onCancel}
         >
           No

@@ -94,7 +94,7 @@ const KpiTag: FC<KpiTagProps> = ({
 
   return (
     <div
-      className={cn('border-GRAY_400 pt-4.5 z-9999 h-full rounded-xl border bg-white px-6 pb-5', {
+      className={cn('border-GRAY_400 z-9999 h-full rounded-xl border bg-white px-6 pt-4.5 pb-5', {
         'animate-pulse opacity-85': isFetching,
       })}
       ref={containerRef}

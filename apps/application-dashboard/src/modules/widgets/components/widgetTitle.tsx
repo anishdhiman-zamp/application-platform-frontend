@@ -80,7 +80,7 @@ const WidgetTitle = ({
       <div
         ref={titleRef}
         className={cn(
-          'flex w-fit cursor-pointer select-none flex-col items-start px-6',
+          'flex w-fit cursor-pointer flex-col items-start px-6 select-none',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) && 'mb-10',
           isPivotTable && isGroupWidgetOptions && 'mb-0 items-start justify-center gap-y-2 px-0',
           isPivotTable && !isGroupWidgetOptions && 'mb-0 cursor-default justify-center px-0',
@@ -113,7 +113,7 @@ const WidgetTitle = ({
               options={groupWidgetsOptions}
               onSelect={handleWidgetChange}
               activeWidget={activeWidget}
-              className='left-5 top-14'
+              className='top-14 left-5'
               dropdownRef={dropdownRef}
             />,
             document?.querySelector('.pivot') as HTMLElement,
@@ -123,7 +123,7 @@ const WidgetTitle = ({
             options={groupWidgetsOptions}
             onSelect={handleWidgetChange}
             activeWidget={activeWidget}
-            className='left-6 top-12'
+            className='top-12 left-6'
             dropdownRef={dropdownRef}
           />
         ))}

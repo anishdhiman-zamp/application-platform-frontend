@@ -71,7 +71,7 @@ const RecipientCard: FC<RecipientCardProps> = ({ recipient, onAddRecipientAccoun
                 type={BUTTON_TYPES.SECONDARY}
                 id='recipient-card-action'
                 size={SIZE_TYPES.XSMALL}
-                className='bg-transparent! hover:!bg-GRAY_300 border-none'
+                className='hover:!bg-GRAY_300 border-none bg-transparent!'
                 iconProps={item?.icon}
                 onClick={(e) => handleActionClick(item?.action, e)}
               />

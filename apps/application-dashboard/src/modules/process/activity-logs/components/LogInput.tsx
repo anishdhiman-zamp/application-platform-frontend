@@ -82,7 +82,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
 
   return (
     <div className='w-full px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-      <div className='border-GRAY_400 shadow-xs overflow-hidden rounded-xl border bg-white pt-2'>
+      <div className='border-GRAY_400 overflow-hidden rounded-xl border bg-white pt-2 shadow-xs'>
         <Textarea
           ref={textareaRef}
           value={inputValue}

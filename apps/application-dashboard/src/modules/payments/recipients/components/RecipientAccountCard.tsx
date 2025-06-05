@@ -16,7 +16,7 @@ const RecipientAccountCard: FC<RecipientAccountCardProps> = ({ account }) => {
       className='border-BORDER_GRAY_400 w-full overflow-hidden rounded-md border'
       onClick={() => setIsDetailsOpen((prev) => !prev)}
     >
-      <div className='bg-BACKGROUND_GRAY_2 f-11-400 flex cursor-pointer select-none items-center gap-1.5 px-2 py-2.5'>
+      <div className='bg-BACKGROUND_GRAY_2 f-11-400 flex cursor-pointer items-center gap-1.5 px-2 py-2.5 select-none'>
         <SvgSpriteLoader id='bank' size={14} />
         <div className='grow'>Account Name {account?.masked_account_number}</div>
         <DropdownToggle isShowMenu={isDetailsOpen} setIsShowMenu={setIsDetailsOpen} />

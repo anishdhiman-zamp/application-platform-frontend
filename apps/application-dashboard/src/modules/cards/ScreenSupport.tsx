@@ -3,12 +3,12 @@ import Image from 'next/image';
 
 const ScreenSupport = () => {
   return (
-    <div className='z-1000 fixed flex h-screen w-screen items-center justify-center bg-white p-6'>
+    <div className='fixed z-1000 flex h-screen w-screen items-center justify-center bg-white p-6'>
       <Image
         width={115}
         height={28}
         alt={'zamp logo'}
-        className='absolute left-8 top-8'
+        className='absolute top-8 left-8'
         src={ZAMP_LOGO}
         draggable='false'
         priority

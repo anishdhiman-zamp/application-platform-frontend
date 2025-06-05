@@ -55,7 +55,7 @@ const PaymentApprovals: FC<PaymentApprovalsProps> = ({ paymentApprovalsInfo, isE
             <SvgSpriteLoader id='info-circle' size={12} />
             Click on approver names to notify approvers of pending approvals
           </div>
-          <div className='f-11-400 flex items-center gap-1 pb-2.5 pt-4'>
+          <div className='f-11-400 flex items-center gap-1 pt-4 pb-2.5'>
             <SvgSpriteLoader id='arrow-down' size={12} />
             Approval steps
           </div>

@@ -169,7 +169,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
   return (
     <>
       <div
-        className='border-GRAY_200 z-1000 absolute -left-[11px] top-[29px] flex h-[38px] w-fit cursor-pointer items-center overflow-hidden rounded-full border bg-[#fafafa] px-[2px] py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+        className='border-GRAY_200 absolute top-[29px] -left-[11px] z-1000 flex h-[38px] w-fit cursor-pointer items-center overflow-hidden rounded-full border bg-[#fafafa] px-[2px] py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100'
         onClick={() => setShowDisplayConfig(!showDisplayConfig)}
       >
         <SvgSpriteLoader id='dots-vertical' width={16} height={16} iconCategory={ICON_SPRITE_TYPES.GENERAL} />
@@ -177,13 +177,13 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
       {showDisplayConfig && (
         <div
           className={cn(
-            'border-GRAY_400 shadow-table-filter-menu absolute -left-2.5 top-[72px] z-10 flex max-h-[330px] min-w-[200px] flex-col rounded-md border bg-white p-1',
+            'border-GRAY_400 shadow-table-filter-menu absolute top-[72px] -left-2.5 z-10 flex max-h-[330px] min-w-[200px] flex-col rounded-md border bg-white p-1',
           )}
           ref={ref}
         >
           {!!displayConfigToggleData && displayConfigToggleData?.length > 0 && (
             <>
-              <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pb-1.5 pt-2'>Display</span>
+              <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pt-2 pb-1.5'>Display</span>
               {displayConfigToggleData?.map((item, index) => {
                 const disabledToggle = disabledToggleFields?.[item?.toggle_field];
 
@@ -218,7 +218,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
             </>
           )}
           <div className='flex flex-col'>
-            <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pb-1.5 pt-2'>Export</span>
+            <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pt-2 pb-1.5'>Export</span>
             <div className='hover:bg-GRAY_100 flex cursor-pointer rounded px-2.5 py-2' onClick={handleExportAgGridData}>
               <span className='f-12-500 text-GRAY_900'>Export Data</span>
             </div>

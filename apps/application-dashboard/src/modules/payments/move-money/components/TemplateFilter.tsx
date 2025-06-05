@@ -34,7 +34,7 @@ const TemplateFilter: FC<TemplateFilterProps> = ({ selectedFilter, setSelectedFi
         />
       </div>
       {isMoveMoneyActionMenuOpen && (
-        <div className='border-GRAY_500 animate-opacity absolute right-0 top-full mt-1 min-w-[165px] select-none rounded-md border bg-white p-1'>
+        <div className='border-GRAY_500 animate-opacity absolute top-full right-0 mt-1 min-w-[165px] rounded-md border bg-white p-1 select-none'>
           {MOVE_MONEY_TEMPLATE_FILTER_ITEMS.map((item) => (
             <div
               key={item.value}
@@ -44,7 +44,7 @@ const TemplateFilter: FC<TemplateFilterProps> = ({ selectedFilter, setSelectedFi
                 selectedFilter?.value === item.value ? 'text-GRAY_1000 bg-GRAY_100' : 'text-GRAY_900',
               )}
             >
-              <div className='whitespace-nowrap text-sm'>{item?.label}</div>
+              <div className='text-sm whitespace-nowrap'>{item?.label}</div>
             </div>
           ))}
         </div>

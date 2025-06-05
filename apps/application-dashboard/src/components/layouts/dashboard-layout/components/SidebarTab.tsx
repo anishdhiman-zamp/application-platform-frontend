@@ -25,7 +25,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconId, iconColor, name, 
     >
       {icon}
       {iconId && <SvgSpriteLoader id={iconId} size={14} className='min-w-4' color={iconColor} />}
-      <div className='f-13-500 select-none truncate whitespace-nowrap'>{name}</div>
+      <div className='f-13-500 truncate whitespace-nowrap select-none'>{name}</div>
     </div>
   );
 };

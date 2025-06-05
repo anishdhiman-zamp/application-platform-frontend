@@ -79,7 +79,7 @@ const PolicyCard: FC<PolicyCardProps> = ({ policy, audienceMembersData }) => {
             </TooltipV2>
             {isShowReviewAction && (
               <div
-                className='f-11-450 border-BG_GRAY_2 hover:border-primary select-none border-b'
+                className='f-11-450 border-BG_GRAY_2 hover:border-primary border-b select-none'
                 onClick={handleReviewPolicy}
               >
                 Review

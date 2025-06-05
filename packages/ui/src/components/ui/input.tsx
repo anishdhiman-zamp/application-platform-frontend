@@ -75,30 +75,40 @@ export interface InputProps
   iconPosition?: IconPosition;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size = 'medium', variant, error, type, icon, iconPosition = 'leading', ...props }, ref) => {
-    const currentSize = size || 'medium';
+const Input = ({
+  ref,
+  className,
+  size = 'medium',
+  variant,
+  error,
+  type,
+  icon,
+  iconPosition = 'leading',
+  ...props
+}: InputProps & {
+  ref?: React.RefCallback<HTMLInputElement>;
+}) => {
+  const currentSize = size || 'medium';
 
-    return (
-      <div className='relative flex items-center'>
-        {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
-        <input
-          type={type}
-          className={cn(
-            inputVariants({
-              size: currentSize,
-              variant: error ? 'error' : variant,
-            }),
-            getInputPadding(currentSize, iconPosition, !!icon),
-            className,
-          )}
-          ref={ref}
-          {...props}
-        />
-      </div>
-    );
-  },
-);
+  return (
+    <div className='relative flex items-center'>
+      {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
+      <input
+        type={type}
+        className={cn(
+          inputVariants({
+            size: currentSize,
+            variant: error ? 'error' : variant,
+          }),
+          getInputPadding(currentSize, iconPosition, !!icon),
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    </div>
+  );
+};
 Input.displayName = 'Input';
 
 export { Input, inputVariants };

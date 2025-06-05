@@ -101,7 +101,7 @@ ModuleRegistry.registerModules([
 ]);
 
 interface TableProps {
-  tableRef?: RefObject<AgGridReact>;
+  tableRef?: RefObject<AgGridReact | null>;
   rows?: MapAny[];
   columns: MapAny[];
   columnConfig?: ColDef;

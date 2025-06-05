@@ -2,20 +2,17 @@ import * as React from 'react';
 
 import { cn } from '@zamp-platform/ui/utils';
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'textarea'>>(
-  ({ className, ...props }, ref) => {
-    return (
-      <textarea
-        className={cn(
-          'border-input shadow-xs placeholder:text-GRAY_700 focus-visible:outline-hidden flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-          className,
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
+const Textarea = ({ className, ...props }: React.ComponentProps<'textarea'>) => {
+  return (
+    <textarea
+      className={cn(
+        'border-input placeholder:text-GRAY_700 flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+        className,
+      )}
+      {...props}
+    />
+  );
+};
 Textarea.displayName = 'Textarea';
 
 export { Textarea };

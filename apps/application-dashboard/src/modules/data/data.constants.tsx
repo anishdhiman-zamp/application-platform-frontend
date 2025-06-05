@@ -52,7 +52,7 @@ export const LISTING_COLUMNS: ColDef[] = [
   },
 ];
 
-export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => JSX.Element> = {
+export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => React.JSX.Element> = {
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
   [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,

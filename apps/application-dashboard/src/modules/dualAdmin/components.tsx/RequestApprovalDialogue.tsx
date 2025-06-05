@@ -71,7 +71,7 @@ const RequestApprovalDialogue: FC<RequestApprovalDialogueProps> = ({ handleOpenC
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent size='small' className='max-w-[334px]' showCloseButton onClick={(e) => e.stopPropagation()}>
         <DialogBody className='z-1002 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          <div className='f-16-600 text-primary px-5 pb-6 pt-5'>
+          <div className='f-16-600 text-primary px-5 pt-5 pb-6'>
             {`You'll need other admins to approve enabling/disabling this policy`}
           </div>
         </DialogBody>

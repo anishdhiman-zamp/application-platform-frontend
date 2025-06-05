@@ -431,7 +431,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
               <div className='rounded-b-3.5 flex w-[400px] flex-col'>
-                <div className='space-y-4 px-4 pb-5 pt-0'>
+                <div className='space-y-4 px-4 pt-0 pb-5'>
                   <MultiSelectInput
                     id={`share-${resourceType.toLowerCase()}`}
                     search={search}
@@ -485,7 +485,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu mt-2 bg-white py-2 pl-2 pr-4'>
+            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu mt-2 bg-white py-2 pr-4 pl-2'>
               <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
               <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                 <CommonWrapper

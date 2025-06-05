@@ -19,7 +19,7 @@ const ImportedDataPreview: FC<ImportedDataPreviewPropsType> = ({
 
   if (startAiTransformation) {
     return (
-      <div className='z-1000 bg-GRAY_70 fixed left-0 top-0 h-screen w-screen'>
+      <div className='bg-GRAY_70 fixed top-0 left-0 z-1000 h-screen w-screen'>
         <div className='rounded-2.5 border-GRAY_400 mt-7 flex h-screen overflow-hidden border border-t bg-white'>
           <div className='border-GRAY_400 sticky h-full w-1/3 border-r'>
             <DataPreviewSidebar

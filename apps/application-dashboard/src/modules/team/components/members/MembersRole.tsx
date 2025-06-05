@@ -131,7 +131,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
           />
         </div>
       ) : (
-        <span className='f-12-400 text-GRAY_1000 flex items-start justify-between py-3 pl-2 pr-2'>{role?.label}</span>
+        <span className='f-12-400 text-GRAY_1000 flex items-start justify-between py-3 pr-2 pl-2'>{role?.label}</span>
       )}
       <RemoveFromTeamPopup
         isOpen={isOpenRemoveFromTeamPopup}

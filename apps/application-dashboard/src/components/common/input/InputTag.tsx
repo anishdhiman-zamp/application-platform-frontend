@@ -119,7 +119,7 @@ const InputTag: FC<InputTagProps> = ({
             <div
               key={index}
               onClick={stopPropagationAction}
-              className='f-12-400 bg-BLUE_50 flex w-auto items-center justify-between gap-2 whitespace-nowrap p-2'
+              className='f-12-400 bg-BLUE_50 flex w-auto items-center justify-between gap-2 p-2 whitespace-nowrap'
             >
               {tag}
               <SvgSpriteLoader

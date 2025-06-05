@@ -29,7 +29,7 @@ const FullScreenPopup: FC<FullScreenPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={cn('z-1000 fixed left-0 top-0 h-screen w-screen overflow-y-auto bg-white', className)}>
+    <div className={cn('fixed top-0 left-0 z-1000 h-screen w-screen overflow-y-auto bg-white', className)}>
       {!hideHeader && (
         <div className='flex items-center justify-between p-4'>
           {!hideLogo && (

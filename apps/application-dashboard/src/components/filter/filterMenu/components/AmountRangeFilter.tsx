@@ -116,7 +116,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           {label || camelCaseToNormalText(filterKey)}
         </div>
         <div
-          className='relative mr-4 flex grow cursor-pointer select-none items-center gap-[2px]'
+          className='relative mr-4 flex grow cursor-pointer items-center gap-[2px] select-none'
           onClick={() => !isDisabled && setIsOpen(!isOpen)}
         >
           <div className='f-11-500 text-BLUE_700 max-w-[110px] overflow-hidden text-ellipsis whitespace-nowrap'>
@@ -126,7 +126,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           {isOpen && (
             <div
               ref={ref}
-              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute left-0 top-full z-10 w-[256px] rounded-md border bg-white p-1'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 w-[256px] rounded-md border bg-white p-1'
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div

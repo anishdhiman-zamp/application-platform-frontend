@@ -22,7 +22,7 @@ const TemplateApproval: FC<TemplateApprovalProps> = ({ template, onBackClick }) 
 
   return (
     <div className='flex h-full flex-col pt-6'>
-      <div className='px-4.5 border-GRAY_400 flex items-center border-b pb-2.5'>
+      <div className='border-GRAY_400 flex items-center border-b px-4.5 pb-2.5'>
         <SvgSpriteLoader id='arrow-left' size={14} onClick={onBackClick} />
         <TemplateCard template={template} />
       </div>

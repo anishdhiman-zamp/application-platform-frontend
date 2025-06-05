@@ -81,7 +81,7 @@ const AudienceMember = ({
           </Tag>
         </div>
       </div>
-      <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 whitespace-normal text-wrap break-words'>
+      <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 text-wrap break-words whitespace-normal'>
         {currentUserHasAdminAccess && (
           <>
             <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />

@@ -91,7 +91,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
       className='overflow-auto pb-10'
     >
       <div>
-        <div className='f-12-450 border-GRAY_400 border-b px-6 pb-5 pt-6'>
+        <div className='f-12-450 border-GRAY_400 border-b px-6 pt-6 pb-5'>
           <div className='text-GRAY_700 mb-1'>
             {format(
               paymentDetails?.date ? createDateObjectFromUTCString(paymentDetails?.date) : new Date(),

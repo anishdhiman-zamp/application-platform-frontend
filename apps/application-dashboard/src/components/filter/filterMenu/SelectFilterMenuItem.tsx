@@ -6,7 +6,7 @@ import Input from 'components/common/input';
 import { FilterConfigType } from 'components/filter/filter.types';
 
 interface SelectFilterMenuItemProps {
-  menuRef: RefObject<HTMLDivElement>;
+  menuRef: RefObject<HTMLDivElement | null>;
   isOpen: boolean;
   getMenuPlacement: () => string;
   filtersConfig: FilterConfigType[];
@@ -46,7 +46,7 @@ const SelectFilterMenuItem = ({
       ref={menuRef}
       style={{ minWidth: menuWidth }}
       className={cn(
-        `z-1000 shadow-table-filter-menu absolute left-0 top-full mt-1 min-w-[300px] rounded-md border bg-white`,
+        `shadow-table-filter-menu absolute top-full left-0 z-1000 mt-1 min-w-[300px] rounded-md border bg-white`,
         isOpen ? 'max-h-[500px] overflow-auto [&::-webkit-scrollbar]:hidden' : 'max-h-0 overflow-hidden border-0',
         getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : '',
       )}

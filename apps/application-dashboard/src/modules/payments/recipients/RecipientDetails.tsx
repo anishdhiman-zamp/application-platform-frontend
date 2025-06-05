@@ -34,7 +34,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
   };
 
   return (
-    <div className='pl-4.5 py-6.5 flex flex-col gap-8 pr-2'>
+    <div className='flex flex-col gap-8 py-6.5 pr-2 pl-4.5'>
       <div className='flex items-center gap-3'>
         <SvgSpriteLoader id='arrow-narrow-left' size={14} onClick={onBack} />
         <div className='flex grow items-center gap-2.5'>

@@ -9,7 +9,7 @@ export declare type EventCallbackType = (id: string, payload: MapAny) => void;
 export interface CommonPageLayoutProps {
   scrollToTop?: defaultFnType;
   scrollToBottom?: defaultFnType;
-  rootContainerRef?: RefObject<HTMLDivElement>;
+  rootContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {

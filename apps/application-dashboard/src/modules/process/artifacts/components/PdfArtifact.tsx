@@ -156,7 +156,7 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
     >
       <div
         ref={containerRef}
-        className={cn('animate-fade-in h-full w-full overflow-scroll px-4 pb-24 pt-4', {
+        className={cn('animate-fade-in h-full w-full overflow-scroll px-4 pt-4 pb-24', {
           'flex flex-col items-center justify-center pb-0': isPdfLoading || (numPages === 1 && !isSignedUrlLoading),
         })}
       >

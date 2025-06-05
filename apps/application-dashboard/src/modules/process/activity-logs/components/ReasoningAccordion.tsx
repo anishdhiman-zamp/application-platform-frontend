@@ -8,7 +8,7 @@ interface ReasoningAccordionProps {
 
 const ReasoningAccordion = ({ thoughtSteps }: ReasoningAccordionProps) => {
   return (
-    <Accordion type='single' collapsible className='mt-2 w-full min-w-[180px] max-w-[485px]'>
+    <Accordion type='single' collapsible className='mt-2 w-full max-w-[485px] min-w-[180px]'>
       <AccordionItem value='item-1' className='border-GRAY_100 w-full rounded-t-md rounded-br-md border'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5'>
           <span className='text-wrap break-words'>{thoughtSteps?.[thoughtSteps?.length - 1]}</span>

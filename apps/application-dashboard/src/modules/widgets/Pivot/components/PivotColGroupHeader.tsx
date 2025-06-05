@@ -26,7 +26,7 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
   return (
     <div
       className={cn(
-        'flex h-full w-full flex-col items-center justify-center overflow-hidden whitespace-normal break-words bg-white p-3',
+        'flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white p-3 break-words whitespace-normal',
         isSingleHeader && 'relative flex items-end justify-end',
       )}
       style={resultantConfigStyles}

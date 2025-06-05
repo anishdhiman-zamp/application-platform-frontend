@@ -56,7 +56,7 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
   return (
     <div className='h-full' tabIndex={-1}>
       <div>
-        <div className='border-GRAY_400 border-b pb-1.5 pl-6 pr-4 pt-6'>
+        <div className='border-GRAY_400 border-b pt-6 pr-4 pb-1.5 pl-6'>
           <div className='f-16-600 mb-4.5'>Templates</div>
           <div className='flex flex-col gap-3'>
             <TabsV2
@@ -88,7 +88,7 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
             </div>
           </div>
         </div>
-        <div className='px-4.5 h-[calc(100vh-220px)] overflow-y-auto py-2'>
+        <div className='h-[calc(100vh-220px)] overflow-y-auto px-4.5 py-2'>
           <CommonWrapper
             isNoData={!templates?.length}
             isLoading={isLoading}

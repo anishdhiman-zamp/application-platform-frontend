@@ -31,7 +31,7 @@ const WorkspaceSwitcher = () => {
     <div className='px-2' ref={ref}>
       <div className='relative hidden'>
         <div
-          className='f-13-500 flex cursor-pointer select-none items-center gap-1 px-2 py-2.5'
+          className='f-13-500 flex cursor-pointer items-center gap-1 px-2 py-2.5 select-none'
           onClick={() => setIsWorkspacePopoverOpen((prev) => !prev)}
         >
           <WorkspaceTab label={selectedWorkspace.label} className='pr-0' color={selectedWorkspace.color} />
@@ -42,7 +42,7 @@ const WorkspaceSwitcher = () => {
           />
         </div>
         {isWorkspacePopoverOpen && (
-          <div className='border-GRAY_400 absolute left-0 top-[90%] z-10 w-[264px] rounded-md border bg-white px-2 py-3'>
+          <div className='border-GRAY_400 absolute top-[90%] left-0 z-10 w-[264px] rounded-md border bg-white px-2 py-3'>
             {WORKSPACE_ITEMS.map((workspace) => (
               <WorkspaceTab
                 key={workspace.workspace_id}

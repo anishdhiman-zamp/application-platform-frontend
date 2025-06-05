@@ -17,7 +17,7 @@ import 'react-grid-layout/css/styles.css';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 type ColumnListingProps = {
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
   onClose: defaultFnType;
   datasetId: string;
 };
@@ -170,7 +170,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   return (
     <MenuWrapper
       id='display-options'
-      className={`absolute! overflow-visible! right-0 z-10 mt-1 min-w-[250px]`}
+      className={`absolute! right-0 z-10 mt-1 min-w-[250px] overflow-visible!`}
       childrenWrapperClassName='overflow-visible! max-h-[422px] w-full'
       style={{ width: maxWidth }}
     >
@@ -202,7 +202,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           onBlur={() => setInputFocused(false)}
         />
       </div>
-      <div className='text-GRAY_900 max-h-[330px] overflow-y-auto overflow-x-visible [&::-webkit-scrollbar]:hidden'>
+      <div className='text-GRAY_900 max-h-[330px] overflow-x-visible overflow-y-auto [&::-webkit-scrollbar]:hidden'>
         <ResponsiveGridLayout
           className='layout'
           layouts={{ lg: layout }}
@@ -234,7 +234,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
                   onPress={(e) => handleColumnClick(e, column)}
                   id={column?.getColId() ?? ''}
                 />
-                <div className='f-12-400 text-GRAY_1000 select-none whitespace-nowrap'>
+                <div className='f-12-400 text-GRAY_1000 whitespace-nowrap select-none'>
                   {column?.getColDef()?.headerName}
                 </div>
               </div>

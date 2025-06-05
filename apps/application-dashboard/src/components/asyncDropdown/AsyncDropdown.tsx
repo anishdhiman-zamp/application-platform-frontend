@@ -90,7 +90,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
       {isOpen && (
         <div
           className={cn(
-            'border-GRAY_50 z-1000 shadow-table-filter-menu absolute right-0 flex min-w-max max-w-[170px] flex-col rounded-md border bg-white p-1',
+            'border-GRAY_50 shadow-table-filter-menu absolute right-0 z-1000 flex max-w-[170px] min-w-max flex-col rounded-md border bg-white p-1',
             wrapperClassName,
           )}
           style={{
@@ -101,7 +101,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
             <div
               key={role.value}
               className={cn(
-                'hover:bg-GRAY_100 flex cursor-pointer flex-col rounded-md py-2 pl-2.5 pr-2',
+                'hover:bg-GRAY_100 flex cursor-pointer flex-col rounded-md py-2 pr-2 pl-2.5',
                 role.value === selectedValue?.value && selectedOptionClassName,
               )}
               onClick={() => onChange(role)}

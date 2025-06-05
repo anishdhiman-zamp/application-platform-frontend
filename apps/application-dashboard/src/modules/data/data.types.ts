@@ -70,7 +70,7 @@ export type FormatColumnsParamsType = {
   currentUserHasEditAccess?: boolean;
   datasetId: string;
   handleSuccessfulUpdate?: ((data: DatasetUpdateResponseType) => void) | undefined;
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
   handleRulesListingSideDrawerOpen?: (ruleColumnDetailsValue: RuleColumnDetailsType) => void;
   sortColumn?: string;
   sortOrder?: string;

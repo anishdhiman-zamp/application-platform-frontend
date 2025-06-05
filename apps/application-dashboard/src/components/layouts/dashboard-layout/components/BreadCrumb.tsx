@@ -69,13 +69,13 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ breadcrumbStack = [] }) => {
           {isMenuOpen && (
             <MenuWrapper
               id='breadcrumb-menu'
-              className='absolute! z-100 top-4 mt-2 p-1'
+              className='absolute! top-4 z-100 mt-2 p-1'
               childrenWrapperClassName='overflow-y-auto!'
             >
               {middleBreadCrumbs?.map((item, index) => (
                 <Link
                   key={`${item.title}-${index}`}
-                  className='hover:bg-GRAY_200 f-12-500 cursor-pointer text-nowrap rounded-md px-2.5 py-2'
+                  className='hover:bg-GRAY_200 f-12-500 cursor-pointer rounded-md px-2.5 py-2 text-nowrap'
                   href={item.href ?? ''}
                   onClick={() => handleBreadcrumbClick(breadcrumbStack.indexOf(item))}
                 >

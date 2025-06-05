@@ -23,7 +23,7 @@ const ProgressBar: FC<ProgressBarProps> = ({
   indicatorColor = `#111619`,
   className = '',
 }) => {
-  const timerId = useRef<ReturnType<typeof setInterval>>();
+  const timerId = useRef<ReturnType<typeof setInterval>>(null);
   const [currentProgress, setCurrentProgress] = useState(0);
 
   const center = size / 2,
@@ -35,7 +35,7 @@ const ProgressBar: FC<ProgressBarProps> = ({
     timerId.current = setInterval(() => {
       setCurrentProgress((prev) => {
         if (prev === progress) {
-          clearInterval(timerId.current);
+          clearInterval(timerId.current as ReturnType<typeof setInterval>);
 
           return prev;
         } else {
@@ -46,7 +46,7 @@ const ProgressBar: FC<ProgressBarProps> = ({
     }, 20);
 
     return () => {
-      clearInterval(timerId.current);
+      clearInterval(timerId.current as ReturnType<typeof setInterval>);
     };
   }, [progress]);
 

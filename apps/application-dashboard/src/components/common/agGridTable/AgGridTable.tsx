@@ -39,7 +39,7 @@ interface AgGridTableProps {
   hideGridOnZeroData?: boolean;
   onReady?: (params: MapAny) => void;
   resetDataSourceCount?: number;
-  setDataSourceWithFilters?: (gridApi: RefObject<GridApi>) => void;
+  setDataSourceWithFilters?: (gridApi: RefObject<GridApi<any> | null>) => void;
 }
 
 const AgGridTable: FC<AgGridTableProps> = ({

@@ -84,7 +84,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
 
   return (
     <div className='h-screen overflow-y-scroll py-20'>
-      <div className='max-w-75 m-auto'>
+      <div className='m-auto max-w-75'>
         <div className='f-22-550 mb-5'>Review</div>
         <div
           className={cn('mb-5', transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && 'border-GRAY_400 border-b pb-5')}

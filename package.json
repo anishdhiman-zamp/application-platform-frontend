@@ -16,7 +16,8 @@
     "format": "prettier --write",
     "prepare": "husky",
     "storybook": "turbo run storybook",
-    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+    "format-tailwind": "node scripts/format-tailwind-classes.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -28,16 +29,11 @@
     ]
   },
   "dependencies": {
-    "@radix-ui/react-switch": "^1.2.4",
-    "eslint-plugin-unused-imports": "^4.1.4",
     "next": "^15",
-    "posthog-js": "^1.235.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
-    "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "prettier": "^3.4.1",

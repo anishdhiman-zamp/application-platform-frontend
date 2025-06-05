@@ -211,8 +211,8 @@ export const getTagParents = (tag: string) => {
 const fieldValueClassName = 'border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit';
 const fieldOperatorClassName = 'text-GRAY_1000 pl-1.5 pr-2 py-1 text-nowrap h-fit';
 
-export const getFilterStatementValues = (filter: RuleFilters | null): JSX.Element[] => {
-  const Statement: JSX.Element[] = [];
+export const getFilterStatementValues = (filter: RuleFilters | null): React.JSX.Element[] => {
+  const Statement: React.JSX.Element[] = [];
 
   if (!filter) return Statement;
   filter?.conditions?.forEach((condition) => {

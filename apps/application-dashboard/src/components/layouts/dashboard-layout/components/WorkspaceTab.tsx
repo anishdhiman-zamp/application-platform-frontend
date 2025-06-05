@@ -20,7 +20,7 @@ const WorkspaceTab = ({ label, isSelected, onClick, className, color }: Workspac
         onClick?.();
       }}
       className={cn(
-        'f-13-500 flex cursor-pointer select-none items-center gap-1 rounded-md px-2 py-2.5',
+        'f-13-500 flex cursor-pointer items-center gap-1 rounded-md px-2 py-2.5 select-none',
         onClick ? 'hover:bg-GRAY_20' : '',
         isSelected ? 'bg-GRAY_100' : '',
         className,

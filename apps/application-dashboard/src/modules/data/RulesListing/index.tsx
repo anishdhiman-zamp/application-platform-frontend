@@ -321,7 +321,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
         onClose={handleApplyChangesPopupClose}
         title='Apply Changes ?'
         iconId='x-close'
-        className='border-GRAY_400 rounded-3.5 p-0! shadow-menu-list w-[344px] border-2 bg-white'
+        className='border-GRAY_400 rounded-3.5 shadow-menu-list w-[344px] border-2 bg-white p-0!'
         titleClassName='f-16-600 text-GRAY_950'
         showIcon
       >

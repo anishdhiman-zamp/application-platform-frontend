@@ -28,7 +28,7 @@ type CustomHeaderProps = {
   handleRulesListingSideDrawerOpen: (ruleColumnDetailsValue: RuleColumnDetailsType) => void;
   handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
   datasetId: string;
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
   filterType: FILTER_TYPES;
   options: string[];
   column: {
@@ -203,7 +203,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     <div ref={menuRef} className='relative -mx-4 h-full w-full flex-1'>
       <div
         className={cn(
-          'hover:bg-BACKGROUND_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pb-1 pt-5 capitalize',
+          'hover:bg-BACKGROUND_GRAY_1 group flex h-full w-full flex-1 cursor-pointer items-center justify-between overflow-hidden px-2 pt-5 pb-1 capitalize',
           { 'bg-BACKGROUND_GRAY_1': isMenuOpen },
           className,
         )}

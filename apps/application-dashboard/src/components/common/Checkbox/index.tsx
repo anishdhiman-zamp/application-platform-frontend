@@ -70,7 +70,7 @@ export const CheckBox: FC<CheckBoxProps> = ({
         onClick={disabled ? undefined : handlePress}
         data-checkboxid='check-box'
         className={cn(
-          'absolute left-0 top-0 h-3.5 w-3.5 rounded',
+          'absolute top-0 left-0 h-3.5 w-3.5 rounded',
           isCustomCheckMark ? customCheckMarkClassName : checkmarkStyles,
           displayContainerClassName,
           checkBoxStylesByState,

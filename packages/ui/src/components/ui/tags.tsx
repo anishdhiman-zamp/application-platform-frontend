@@ -26,13 +26,13 @@ const tagVariants = cva(
 
 export interface TagProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof tagVariants> {}
 
-export const Tag = React.forwardRef<HTMLDivElement, TagProps>(({ className, variant, children, ...props }, ref) => {
+export const Tag = ({ className, variant, children, ...props }: TagProps) => {
   return (
-    <div ref={ref} className={cn(tagVariants({ variant }), className)} {...props}>
+    <div className={cn(tagVariants({ variant }), className)} {...props}>
       {children}
     </div>
   );
-});
+};
 
 Tag.displayName = 'Tag';
 

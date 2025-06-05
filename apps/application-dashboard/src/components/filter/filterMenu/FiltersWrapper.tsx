@@ -171,7 +171,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
                   containerRef={confirmationPopupRef}
                   onClick={handleResetFilters}
                   onCancel={() => setShouldShowConfirmationPopup(false)}
-                  className='z-9999 absolute left-0'
+                  className='absolute left-0 z-9999'
                 />
               ) : null}
             </FilterControlButton>

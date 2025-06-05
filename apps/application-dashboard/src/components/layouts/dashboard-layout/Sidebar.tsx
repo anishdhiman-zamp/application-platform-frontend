@@ -142,7 +142,7 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
             >
               <div className='bg-BACKGROUND_GRAY_1 absolute -top-12 left-0 z-10 w-60 px-2'>
-                <div className='text-GRAY_700 f-13-500 flex select-none items-center gap-2 py-4'>
+                <div className='text-GRAY_700 f-13-500 flex items-center gap-2 py-4 select-none'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>
