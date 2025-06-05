@@ -52,7 +52,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const firstLoadDone = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const process = searchParams?.get('process');
+  const process = searchParams?.get('process') as string;
 
   const {
     dispatch,
@@ -307,14 +307,16 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   }, [processId, status]);
 
   const handleRowClicked = (data: MapAny) => {
+    if (!data?.data?.id) return;
+
     const target = data?.event?.target as HTMLElement;
 
     if (target.closest('.combobox-trigger')) return;
 
     const activityId = data?.data?.id;
-    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId);
+    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId, status);
 
-    router.push(`${path}?status=${status}`);
+    router.push(path);
   };
 
   return (

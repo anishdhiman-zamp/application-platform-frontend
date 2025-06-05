@@ -21,7 +21,7 @@ export const ROUTES_PATH = {
   PROCESS: '/processes',
   PROCESS_ACTIVITY_LOGS: '/processes/:activityId',
   POLICIES: '/settings#dual-admin',
-  TEAM: '/settings#team',
+  TEAM: '/team',
   SETTINGS: '/settings',
 };
 
@@ -53,25 +53,17 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.ADMIN_DATASETS}/${datasetId}`;
 };
 
-export const getProcessRouteById = (processId: string, label: string, status?: string) => {
-  const searchParams = new URLSearchParams();
-
-  searchParams.set('processId', processId);
-  searchParams.set('process', label);
-  if (status) {
-    searchParams.set('status', status);
-  }
-
-  return `${ROUTES_PATH.PROCESS}?${searchParams.toString()}`;
+export const getProcessRouteById = (processId: string, process: string, status?: string) => {
+  return `${ROUTES_PATH.PROCESS}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
 };
 
-export const getProcessActivityLogsRouteById = (processId: string, label: string, activityId: string) => {
-  const searchParams = new URLSearchParams();
-
-  searchParams.set('processId', processId);
-  searchParams.set('process', label);
-
-  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':activityId', activityId)}?${searchParams.toString()}`;
+export const getProcessActivityLogsRouteById = (
+  processId: string,
+  process: string,
+  activityId: string,
+  status?: string,
+) => {
+  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':activityId', activityId)}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
@@ -98,9 +90,9 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     path: ROUTES_PATH.DATA,
   },
   {
-    label: 'Payments',
-    id: 'payments',
-    iconId: 'send-01',
-    path: ROUTES_PATH.PAYMENTS,
+    label: 'People',
+    id: 'people',
+    iconId: 'users-02',
+    path: ROUTES_PATH.TEAM,
   },
 ];

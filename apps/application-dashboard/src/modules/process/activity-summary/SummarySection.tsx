@@ -7,6 +7,7 @@ import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ArtifactTag from '@/modules/process/common/ArtifactTag';
+import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 
 type SummarySectionProps = {
   handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
@@ -14,8 +15,10 @@ type SummarySectionProps = {
 
 const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
   const searchParams = useSearchParams();
-  const { activityId } = useParams<{ activityId: string }>() ?? {};
-  const processId = searchParams?.get('processId');
+  const params = useParams();
+  const processId = searchParams?.get('processId') as string;
+  const activityId = params?.activityId;
+
   const {
     data: summary,
     isLoading: isLoadingSummary,
@@ -56,6 +59,8 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         loader={<ArtifactsSkeleton />}
         isError={isErrorSummary}
         refetchFunction={refetchSummary}
+        isNoData={!summary?.summary?.summary_items?.length}
+        noDataBanner={<NoWidgetData className='h-[400px]' text='No key details found' />}
         errorCardStyle='w-full h-1/2'
         className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pb-6 pt-5'
       >
@@ -69,6 +74,8 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         loader={<ArtifactsSkeleton />}
         isError={isErrorArtifacts}
         refetchFunction={refetchArtifacts}
+        isNoData={!artifacts?.artifacts?.length}
+        noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
         className='flex w-full flex-col items-start justify-start gap-y-3 px-6 py-5'
       >

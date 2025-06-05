@@ -38,7 +38,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
     if (bottomRef.current) {
       setTimeout(() => {
         if (bottomRef.current) {
-          bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+          bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
     }

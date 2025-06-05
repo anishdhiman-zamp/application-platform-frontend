@@ -18,7 +18,8 @@ interface EmailArtifactProps {
 
 const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) => {
   const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
+  const processId = searchParams?.get('processId') as string;
+
   const [loading, setLoading] = useState(true);
 
   const [getSignedUrlByArtifactId] = useLazyGetSignedUrlByArtifactIdQuery();

@@ -9,11 +9,9 @@ import { resetBreadcrumb } from '@/store/slices/layout-configs';
 
 const Process = () => {
   const searchParams = useSearchParams();
-
   const processId = searchParams?.get('processId') as string;
   const process = searchParams?.get('process') as string;
   const status = searchParams?.get('status') as string;
-
   const appDispatch = useAppDispatch();
 
   useEffect(() => {

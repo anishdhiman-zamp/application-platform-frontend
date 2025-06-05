@@ -5,7 +5,7 @@ export enum ResourceType {
   DATASET = 'dataset',
   PAGE = 'page',
   PAYMENTS = 'payments',
-  ACTIVITY = 'activity',
+  PROCESS = 'process',
   ORGANIZATION = 'organization',
 }
 
@@ -129,4 +129,15 @@ export enum PAYMENT_ACCESS_PRIVILEGES {
 export type PaymentAccessPrivilegesType = {
   label: string;
   value: PAYMENT_ACCESS_PRIVILEGES;
+};
+
+export enum PROCESS_ACCESS_PRIVILEGES {
+  ADMIN = 'admin',
+  VIEWER = 'viewer',
+  EDITOR = 'editor',
+}
+
+export type ProcessAccessPrivilegesType = {
+  label: string;
+  value: PROCESS_ACCESS_PRIVILEGES;
 };

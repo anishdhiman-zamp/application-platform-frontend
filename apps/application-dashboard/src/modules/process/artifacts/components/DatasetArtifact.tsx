@@ -93,8 +93,16 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
         </TabsList>
       </div>
 
-      <TabsContent key={activeTab} value={activeTab} className='h-full w-full'>
-        <Dataset id={activeTab} updateBreadcrumb={false} headerClassName='pr-4' filterWrapperClassName='pl-4' />
+      <TabsContent key={activeTab} value={activeTab} className='mt-0 h-full w-full'>
+        <Dataset
+          id={activeTab}
+          updateBreadcrumb={false}
+          headerClassName='px-4 py-3 flex-wrap'
+          filterWrapperClassName='pl-0'
+          showCurrencyFilter={false}
+          showDatasetHistory={false}
+          isDatasetArtifact
+        />
       </TabsContent>
     </Tabs>
   );

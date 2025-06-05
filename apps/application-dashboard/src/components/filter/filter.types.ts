@@ -58,4 +58,4 @@ export type AmountRangeFilterValue = {
   filterTo: string;
 };
 
-export type MultiSelectFilterValue = string | { label: string; value: string };
+export type MultiSelectFilterValue = string | { label: string; value: string } | boolean;

@@ -83,12 +83,21 @@ export type BrowserArtifactsResponseType = {
   browser_url: string;
 };
 
+export type OtherArtifactsResponseType = {
+  display_name: string;
+  url: string;
+};
+
 export type ActivityArtifactsItemType = {
   id: string;
   activity_id: string;
   organization_id: string;
   artifact_type: string;
-  artifact_data: PdfArtifactsResponseType | EmailArtifactsResponseType | BrowserArtifactsResponseType;
+  artifact_data:
+    | PdfArtifactsResponseType
+    | EmailArtifactsResponseType
+    | BrowserArtifactsResponseType
+    | OtherArtifactsResponseType;
   created_at: string;
   updated_at: string;
   is_deleted: boolean;
@@ -126,7 +135,10 @@ export type CtasType = {
 
 export type LogsContentType = {
   sender_type: string;
-  sender_id: string;
+  sender_details: {
+    sender_id: string;
+    sender_name: string;
+  };
   message: string;
   thought_steps: string[];
   ctas: CtasType[];
@@ -136,10 +148,8 @@ export type EmitActivityLogsRequestType = {
   processId: string;
   activityRunId: string;
   payload: {
-    content: LogsContentType;
-    log_group_id: string;
-    content_type: string;
-    status: string;
+    feedback_message: string;
+    sender_id: string;
   };
 };
 
@@ -176,4 +186,11 @@ export type SignedUrlByArtifactIdRequestType = {
 
 export type SignedUrlByArtifactIdResponseType = {
   signed_url: string;
+};
+
+export type DatasetArtifactsRequestType = {
+  processId: string;
+  activityRunId: string;
+  datasetId: string;
+  query_config?: string;
 };

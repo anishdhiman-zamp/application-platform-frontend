@@ -40,8 +40,10 @@ const Artifacts = ({
   onArtifactClick,
 }: ArtifactsProps) => {
   const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
-  const { activityId } = useParams<{ activityId: string }>() ?? {};
+  const params = useParams();
+  const processId = searchParams?.get('processId') as string;
+  const activityId = params?.activityId;
+
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
 
   const {
