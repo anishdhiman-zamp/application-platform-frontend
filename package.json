@@ -16,8 +16,7 @@
     "format": "prettier --write",
     "prepare": "husky",
     "storybook": "turbo run storybook",
-    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-    "format-tailwind": "node scripts/format-tailwind-classes.js"
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
