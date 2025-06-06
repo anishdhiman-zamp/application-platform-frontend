@@ -454,6 +454,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     optionalOpenDropdownOptions={false}
+                    labelCasing='capitalize'
                     selectOnlyFromList
                   />
                   {isCustomiseAccess && (

@@ -49,6 +49,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   setSelectedRole,
   onCustomDeleteFn,
   closeDropdownOnSelect = false,
+  labelCasing,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -291,7 +292,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     <div className='flex flex-col items-center'>
       <div
         className={cn(
-          'flex w-full items-start justify-between gap-1.5 rounded-md border',
+          'flex w-full items-center justify-between gap-1.5 rounded-md border',
           isInputFocused ? 'border-GRAY_600 shadow-input-outline-shadow' : 'border-GRAY_400',
           wrapperClassName,
         )}
@@ -312,7 +313,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
                 }}
               >
-                <span className='f-12-500 text-GRAY_1000 capitalize'>{item?.label}</span>
+                <span className={cn('f-12-450 text-GRAY_1000', labelCasing)}>{item?.label}</span>
                 <SvgSpriteLoader
                   id='x-close'
                   iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -335,7 +336,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             customPaddingClassName='p-0'
             focusClassNames='focus:outline-hidden focus:border-none focus:shadow-none'
             cursorClassname='cursor-text'
-            inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 rounded-none!'}
+            inputFontClassName={multiSelectInputClassName || 'f-13-450 py-0 rounded-none!'}
             style={{
               maxWidth: '100%',
             }}
@@ -362,7 +363,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 fontSize: 'f-12-400',
               }}
               customClassNames={{
-                placeholder: 'f-12-300',
+                placeholder: 'f-12-400',
+                color: 'text-GRAY_900',
               }}
               menuOptionClasses={{
                 contentWrapper: 'py-2',
