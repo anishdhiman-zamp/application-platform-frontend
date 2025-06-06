@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
@@ -120,7 +120,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
   const filteredValues = useMemo(() => {
     const lowerCasedInput = inputValue?.toLowerCase();
 
-    return values.filter((item) => {
+    return values?.filter((item) => {
       const displayStr = getDisplayString(item);
 
       return displayStr && displayStr.toLowerCase().includes(lowerCasedInput);
