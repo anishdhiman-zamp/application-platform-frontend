@@ -55,7 +55,13 @@ const Sidebar = () => {
       <div className='w-60'>
         <AnimatePresence mode='wait'>
           {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
-            <div key='details' className='h-full'>
+            <motion.div
+              key='details'
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, type: 'spring' }}
+              className='h-full'
+            >
               <div className='px-2 border-b border-GRAY_400 pb-4'>
                 {SIDEBAR_ITEMS.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer'>
@@ -76,20 +82,14 @@ const Sidebar = () => {
                     skeletonType={SkeletonTypes.CUSTOM}
                     loader={<SkeletonLoaderSidebarPages />}
                   >
-                    {processes
-                      ?.map((process) => ({
-                        ...process,
-                        fractionalIndex: process?.fractional_index,
-                      }))
-                      .sort((processA, processB) => processA?.fractionalIndex - processB?.fractionalIndex)
-                      .map((process) => (
-                        <ProcessNavTab
-                          key={process?.id}
-                          label={process?.display_name}
-                          processId={process?.id}
-                          isSelected={params?.processId === process?.id}
-                        />
-                      ))}
+                    {processes?.map((process) => (
+                      <ProcessNavTab
+                        key={process?.id}
+                        label={process?.display_name}
+                        processId={process?.id}
+                        isSelected={params?.processId === process?.id}
+                      />
+                    ))}
                   </CommonWrapper>
                 </div>
               )}
@@ -112,7 +112,7 @@ const Sidebar = () => {
                   </CommonWrapper>
                 </div>
               )}
-            </div>
+            </motion.div>
           ) : (
             <motion.div
               key='list'
@@ -121,7 +121,7 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
             >
               <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
-                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500'>
+                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500 select-none'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>

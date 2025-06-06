@@ -128,7 +128,7 @@ export const transformFormDataToApiPayload = (
 ): CreatePolicyConfigPayload => {
   // Transform creator data
   const creator =
-    (data.creator as SelectOption[] | { type: string; id: string }[]).map((option) => {
+    (data?.creator as SelectOption[] | { type: string; id: string }[])?.map((option) => {
       if (typeof option === 'object' && 'type' in option) {
         return option;
       } else if (typeof option.value === 'string' || typeof option.value === 'boolean') {

@@ -13,7 +13,7 @@ import { RootState } from 'store';
 import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
-import ShareActivityPopup from '@/modules/process/common/ShareActivityPopup';
+import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -35,7 +35,7 @@ const Topbar = () => {
       case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
         return <SharePaymentsPopup paymentConfigId={router?.query?.paymentConfigId as string} />;
       case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
-        return <ShareActivityPopup activityId={router?.query?.activityId as string} />;
+        return <ShareProcessPopup processId={router?.query?.processId as string} />;
       case currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET:
         return null;
       default:

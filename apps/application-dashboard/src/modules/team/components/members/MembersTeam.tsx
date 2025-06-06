@@ -20,7 +20,13 @@ import { cn, cyclicIterator } from 'utils/common';
 import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 
-const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, userId, userMappedTeams }) => {
+const MembersTeam: FC<MembersTeamPropsType> = ({
+  organizationId,
+  teamsData,
+  userId,
+  userMappedTeams,
+  hasPeoplePolicy,
+}) => {
   const isMember = checkIfCurrentUserIsMember();
   const teamsRowRef = useRef<HTMLDivElement>(null);
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
@@ -60,7 +66,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
     postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
       .unwrap()
       .then((res) => {
-        toast.success(res?.message || TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
+        toast.success(hasPeoplePolicy ? res?.message : TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
       })
       .catch(() => {
         toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_ERROR);
@@ -147,16 +153,18 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
 
   const handleOptionSelection = (option: { value: string; label: string; color?: string; isNew?: boolean }) => {
     // optimistic update
-    setSelectedItems((prev) => [
-      ...prev,
-      {
-        value: option?.value,
-        label: option?.value,
-        valid: true,
-        color: option?.color ?? randomColor,
-        isNew: option?.isNew,
-      },
-    ]);
+    if (!hasPeoplePolicy) {
+      setSelectedItems((prev) => [
+        ...prev,
+        {
+          value: option?.value,
+          label: option?.value,
+          valid: true,
+          color: option?.color ?? randomColor,
+          isNew: option?.isNew,
+        },
+      ]);
+    }
 
     const payload = {
       name: option?.value,
@@ -256,6 +264,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({ organizationId, teamsData, user
             setIsCustomInputFocused={setIsCustomInputFocused}
             selectOnlyFromList
             onCustomDeleteFn={handleRemoveAudienceFromTeam}
+            closeDropdownOnSelect={hasPeoplePolicy}
           />
         </div>
       )}

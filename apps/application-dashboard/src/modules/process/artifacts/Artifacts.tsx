@@ -7,7 +7,7 @@ import DatasetArtifact from 'modules/process/artifacts/components/DatasetArtifac
 import EmailArtifact from 'modules/process/artifacts/components/EmailArtifact';
 import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -39,7 +39,11 @@ const Artifacts = ({
   artifactId,
   onArtifactClick,
 }: ArtifactsProps) => {
-  const { processId, activityId } = useParams();
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const processId = searchParams.get('processId') as string;
+  const activityId = params?.activityId;
+
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
 
   const {

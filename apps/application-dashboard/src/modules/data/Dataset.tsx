@@ -61,6 +61,7 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
@@ -91,6 +92,9 @@ type DatasetByIdProps = {
   parentSelectedFilters?: MapAny;
   updateBreadcrumb?: boolean;
   filterWrapperClassName?: string;
+  showCurrencyFilter?: boolean;
+  showDatasetHistory?: boolean;
+  isDatasetArtifact?: boolean;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -108,11 +112,18 @@ const DatasetById: FC<DatasetByIdProps> = ({
   parentSelectedFilters,
   updateBreadcrumb = true,
   filterWrapperClassName,
+  showCurrencyFilter = true,
+  showDatasetHistory = true,
+  isDatasetArtifact = false,
 }) => {
-  const filters = decodeURIComponent(useSearchParams().get('filters') ?? '');
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const filters = decodeURIComponent(searchParams.get('filters') ?? '');
+  const processId = searchParams.get('processId') as string;
+  const activityId = params?.activityId;
 
   const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
-  const params = useParams();
+
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
   const { checkUserPrivilege } = useResourceAccess(ResourceType.DATASET, id);
@@ -178,6 +189,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   });
   const { startPolling } = usePolling();
   const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
+  const [getDatasetArtifacts, { data: datasetArtifacts, isError: lazyloadDatasetArtifactsError }] =
+    useLazyGetDatasetArtifactsQuery();
 
   const {
     dispatch,
@@ -224,37 +237,78 @@ const DatasetById: FC<DatasetByIdProps> = ({
             });
           }
         } else {
-          getDatasetData({
-            datasetId: id as string,
-            query_config: queryConfig,
-          })
-            .unwrap()
-            .then((response) => {
-              const totalCount = response?.data?.total_count;
-
-              if (parameters.request.startRow === 0) {
-                setDatasetTitle(response?.title);
-                setTotalRows(totalCount);
-                setIsNoRowsOverlayVisible(totalCount === 0);
-                dispatch({
-                  type: filtersContextActions.SET_TOTAL_ROWS,
-                  payload: { totalRows: totalCount },
-                });
-              }
-              parameters.success({
-                rowData: response?.data?.rows,
-                ...(parameters.request.startRow === 0
-                  ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
-                  : {}),
-              });
+          if (isDatasetArtifact) {
+            getDatasetArtifacts({
+              processId: processId as string,
+              activityRunId: activityId as string,
+              datasetId: id as string,
             })
-            .catch(() => {
-              parameters.fail();
-            });
+              .unwrap()
+              .then((response) => {
+                const totalCount = response?.data?.total_count;
+
+                if (parameters.request.startRow === 0) {
+                  setDatasetTitle(response?.title);
+                  setTotalRows(totalCount);
+                  setIsNoRowsOverlayVisible(totalCount === 0);
+                  dispatch({
+                    type: filtersContextActions.SET_TOTAL_ROWS,
+                    payload: { totalRows: totalCount },
+                  });
+                }
+                parameters.success({
+                  rowData: response?.data?.rows,
+                  ...(parameters.request.startRow === 0
+                    ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
+                    : {}),
+                });
+              })
+              .catch(() => {
+                parameters.fail();
+              });
+          } else {
+            getDatasetData({
+              datasetId: id as string,
+              query_config: queryConfig,
+            })
+              .unwrap()
+              .then((response) => {
+                const totalCount = response?.data?.total_count;
+
+                if (parameters.request.startRow === 0) {
+                  setDatasetTitle(response?.title);
+                  setTotalRows(totalCount);
+                  setIsNoRowsOverlayVisible(totalCount === 0);
+                  dispatch({
+                    type: filtersContextActions.SET_TOTAL_ROWS,
+                    payload: { totalRows: totalCount },
+                  });
+                }
+                parameters.success({
+                  rowData: response?.data?.rows,
+                  ...(parameters.request.startRow === 0
+                    ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
+                    : {}),
+                });
+              })
+              .catch(() => {
+                parameters.fail();
+              });
+          }
         }
       },
     };
-  }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters]);
+  }, [
+    getDatasetData,
+    id,
+    fxCurrency,
+    cachedDatasetData,
+    drilldownFilters,
+    isDatasetArtifact,
+    getDatasetArtifacts,
+    processId,
+    activityId,
+  ]);
 
   const router = useRouter();
   const tableRef = useRef<AgGridReact>(null);
@@ -463,7 +517,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         }
         if (
           isNoRowsOverlayVisible ||
-          datasetData?.data?.total_count === 0 ||
+          (isDatasetArtifact ? datasetArtifacts?.data?.total_count === 0 : datasetData?.data?.total_count === 0) ||
           drilldownFilters?.conditions === null ||
           isReadOnly
         )
@@ -525,10 +579,18 @@ const DatasetById: FC<DatasetByIdProps> = ({
   }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);
 
   const handleRefetchDataset = () => {
-    getDatasetData({
-      datasetId: id as string,
-      query_config: exportsDatasetQuery,
-    });
+    if (isDatasetArtifact) {
+      getDatasetArtifacts({
+        processId: processId as string,
+        activityRunId: activityId as string,
+        datasetId: id as string,
+      });
+    } else {
+      getDatasetData({
+        datasetId: id as string,
+        query_config: exportsDatasetQuery,
+      });
+    }
   };
 
   const handleColumnMoved = (event: ColumnMovedEvent) => {
@@ -601,24 +663,45 @@ const DatasetById: FC<DatasetByIdProps> = ({
       pageSize,
     );
 
-    getDatasetData({
-      datasetId: id as string,
-      query_config: queryConfig,
-    })
-      .unwrap()
-      .then((response) => {
-        setDatasetTitle(response?.title);
-        setTotalRows(response?.data?.total_count);
-        setCachedDatasetData(response);
-        dispatch({
-          type: filtersContextActions.SET_TOTAL_ROWS,
-          payload: { totalRows: response?.data?.total_count },
-        });
+    if (isDatasetArtifact) {
+      getDatasetArtifacts({
+        processId: processId as string,
+        activityRunId: activityId as string,
+        datasetId: id as string,
       })
-      .catch((err) => {
-        captureException(err);
-      });
-  }, [filters, drilldownFilters, id]);
+        .unwrap()
+        .then((response) => {
+          setDatasetTitle(response?.title);
+          setTotalRows(response?.data?.total_count);
+          setCachedDatasetData(response);
+          dispatch({
+            type: filtersContextActions.SET_TOTAL_ROWS,
+            payload: { totalRows: response?.data?.total_count },
+          });
+        })
+        .catch((err) => {
+          captureException(err);
+        });
+    } else {
+      getDatasetData({
+        datasetId: id as string,
+        query_config: queryConfig,
+      })
+        .unwrap()
+        .then((response) => {
+          setDatasetTitle(response?.title);
+          setTotalRows(response?.data?.total_count);
+          setCachedDatasetData(response);
+          dispatch({
+            type: filtersContextActions.SET_TOTAL_ROWS,
+            payload: { totalRows: response?.data?.total_count },
+          });
+        })
+        .catch((err) => {
+          captureException(err);
+        });
+    }
+  }, [filters, drilldownFilters, id, isDatasetArtifact, getDatasetArtifacts, processId, activityId]);
 
   useEffect(() => {
     updateDatasetTitleInParent?.(datasetTitle);
@@ -648,10 +731,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('flex items-center justify-between pr-8 z-1000', headerClassName)}>
-          <div className='flex items-center py-3'>
+        <div className={cn('flex items-center justify-between pr-8 z-1000 gap-y-3', headerClassName)}>
+          <div className={cn('flex items-center py-3', { 'py-0': isDatasetArtifact })}>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
+
           <div className='relative flex items-center gap-2.5'>
             {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}
             {!isReadOnly && (
@@ -673,28 +757,30 @@ const DatasetById: FC<DatasetByIdProps> = ({
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
               />
             )}
-            {!isReadOnly && <DatasetHistory />}
+            {!isReadOnly && showDatasetHistory && <DatasetHistory />}
             {!isReadOnly && (
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-                <div className='flex items-center gap-2'>
-                  <div className='border-r border-GRAY_400 h-7'></div>
-                  <SingleSelectFilter
-                    onFilterChange={handleFilterChange}
-                    value={fxCurrency}
-                    filterKey='fx_currency'
-                    label='Currency'
-                    showColumnLabel={false}
-                    options={PAGE_CURRENCY_OPTIONS}
-                  />
-                </div>
+                {showCurrencyFilter && (
+                  <div className='flex items-center gap-2'>
+                    <div className='border-r border-GRAY_400 h-7'></div>
+                    <SingleSelectFilter
+                      onFilterChange={handleFilterChange}
+                      value={fxCurrency}
+                      filterKey='fx_currency'
+                      label='Currency'
+                      showColumnLabel={false}
+                      options={PAGE_CURRENCY_OPTIONS}
+                    />
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
 
         <CommonWrapper
-          isError={lazyloadDataSetError}
+          isError={isDatasetArtifact ? lazyloadDatasetArtifactsError : lazyloadDataSetError}
           errorCardTitle='Failed to load dataset'
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
@@ -714,7 +800,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
               // columnLevelStats={columnLevelStats}
               containerStyle={containerStyle}
               gridStyle={gridStyle}
-              {...(datasetData?.data?.config?.is_drilldown_enabled ? { onDrilldownClick: handleDrilldownClick } : {})}
+              {...(isDatasetArtifact
+                ? datasetArtifacts?.data?.config?.is_drilldown_enabled
+                  ? { onDrilldownClick: handleDrilldownClick }
+                  : {}
+                : datasetData?.data?.config?.is_drilldown_enabled
+                  ? { onDrilldownClick: handleDrilldownClick }
+                  : {})}
             />
           </div>
         </CommonWrapper>

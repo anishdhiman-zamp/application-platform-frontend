@@ -7,7 +7,7 @@ import {
   PDF_DATASET_TAB,
 } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
-import { BROWSER, DATASET, GMAIL } from '@/constants/icons';
+import { BROWSER, COUPA, DATASET, GMAIL } from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
@@ -82,6 +82,9 @@ export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.BROWSER]: {
     icon_url: BROWSER,
   },
+  [ARTIFACT_TYPE.EXTERNAL_LINK]: {
+    icon_url: COUPA,
+  },
 };
 
 export enum RESIZABLE_PANEL_ID {
@@ -147,7 +150,6 @@ export const MAX_TEXTAREA_HEIGHT = 192;
 export const DATE_SEPARATOR_MAPPING = {
   [DATE_SEPARATOR.TODAY]: 'Today',
   [DATE_SEPARATOR.YESTERDAY]: 'Yesterday',
-  [DATE_SEPARATOR.OTHER]: 'Other',
 };
 
 export const DEFAULT_ARTIFACT_TAB = PDF_DATASET_TAB.DATASET;

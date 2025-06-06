@@ -31,6 +31,7 @@ import {
   DATASET_ACCESS_PRIVILEGES,
   PAGE_ACCESS_PRIVILEGES,
   PAYMENT_ACCESS_PRIVILEGES,
+  PROCESS_ACCESS_PRIVILEGES,
   ResourceType,
   ShareResourcePopupProps,
   ValidationResult,
@@ -95,6 +96,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
         return checkUserPrivilege(PAGE_ACCESS_PRIVILEGES.ADMIN);
       case ResourceType.PAYMENTS:
         return checkUserPrivilege(PAYMENT_ACCESS_PRIVILEGES.ADMIN);
+      case ResourceType.PROCESS:
+        return checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.ADMIN);
       default:
         return false;
     }

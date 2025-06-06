@@ -26,7 +26,7 @@ type LogProps = {
 const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const {
-    content: { message, thought_steps, ctas, sender_type },
+    content: { message, thought_steps, ctas, sender_type, sender_details },
     status,
     content_type,
     updated_at,
@@ -51,10 +51,34 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
 
   const isSenderInfoVisible = useMemo(() => {
     return (
-      (content_type === CONTENT_TYPE.REPLY_SECTION && sender_type === SENDER_TYPE.SYSTEM) ||
-      (content_type === CONTENT_TYPE.REPLY_SECTION && sender_type === SENDER_TYPE.USER)
+      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.SYSTEM) ||
+      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.USER)
     );
   }, [content_type, sender_type]);
+
+  const statusIndicatorColor = useMemo(() => {
+    if (sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.REPLIED_TO_SECTION) {
+      return {
+        status: LOG_STATUS.MESSAGE_FROM_ADAM,
+        fillColor: LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.MESSAGE_FROM_ADAM]?.fillColor,
+        strokeColor: LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.MESSAGE_FROM_ADAM]?.strokeColor,
+      };
+    }
+
+    if (sender_type === SENDER_TYPE.USER && content_type === CONTENT_TYPE.REPLIED_TO_SECTION) {
+      return {
+        status: LOG_STATUS.MESSAGE_FROM_USER,
+        fillColor: LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.MESSAGE_FROM_USER]?.fillColor,
+        strokeColor: LOG_STATUS_ICON_COLOR_MAPPING[LOG_STATUS.MESSAGE_FROM_USER]?.strokeColor,
+      };
+    }
+
+    return {
+      status: status as LOG_STATUS,
+      fillColor: LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.fillColor,
+      strokeColor: LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.strokeColor,
+    };
+  }, [status, content_type, sender_type]);
 
   return (
     <div className={cn('w-full flex justify-start items-start gap-x-5 pt-1')} data-log-id={data.id}>
@@ -65,9 +89,9 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
       </div>
       <div className={cn('flex flex-col items-center justify-start h-full w-2.5 gap-y-2 pt-[2px] shrink-0')}>
         <LogStatusIndicator
-          status={status as LOG_STATUS}
-          fillColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.fillColor}
-          strokeColor={LOG_STATUS_ICON_COLOR_MAPPING[status as LOG_STATUS]?.strokeColor}
+          status={statusIndicatorColor.status}
+          fillColor={statusIndicatorColor.fillColor}
+          strokeColor={statusIndicatorColor.strokeColor}
         />
         {!isLastLog && <div className='w-px bg-GRAY_400' style={{ height: `${containerHeight + 40}px` }} />}
       </div>
@@ -81,7 +105,9 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
         </p>
         {thought_steps && thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} />}
         {ctas && <LogCta ctas={ctas} handleShowArtifacts={handleShowArtifacts} />}
-        {isSenderInfoVisible && <SenderInfo senderType={sender_type as SENDER_TYPE} status={status} />}
+        {isSenderInfoVisible && (
+          <SenderInfo senderType={sender_type as SENDER_TYPE} senderDetails={sender_details} status={status} />
+        )}
       </div>
     </div>
   );

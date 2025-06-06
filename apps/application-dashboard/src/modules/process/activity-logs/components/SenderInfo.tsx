@@ -2,11 +2,14 @@ import type { FC } from 'react';
 import { LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import Image from 'next/image';
 import { ADAM_ICON } from '@/constants/icons';
-import { useAppSelector } from '@/hooks/toolkit';
 import { cn, getFirstLetters } from '@/utils/common';
 interface SenderInfoProps {
   senderType: keyof typeof SENDER_TYPE;
   status: string;
+  senderDetails: {
+    sender_id: string;
+    sender_name: string;
+  };
 }
 
 interface SenderConfig {
@@ -15,19 +18,17 @@ interface SenderConfig {
   displayName: string;
 }
 
-const SenderInfo: FC<SenderInfoProps> = ({ senderType, status }) => {
-  const { user } = useAppSelector((state) => state.user);
-
+const SenderInfo: FC<SenderInfoProps> = ({ senderType, status, senderDetails }) => {
   const SENDER_CONFIG: Record<keyof typeof SENDER_TYPE, SenderConfig> = {
     [SENDER_TYPE.USER]: {
       iconBgColor: 'bg-BLUE_200',
-      iconContent: <span className='f-10-450'>{getFirstLetters(user?.user_email?.split('@')[0] ?? 'U', 1)}</span>,
-      displayName: user?.user_email ?? '',
+      iconContent: <span className='f-10-450'>{getFirstLetters(senderDetails?.sender_name ?? 'U', 1)}</span>,
+      displayName: senderDetails?.sender_name ?? '',
     },
     [SENDER_TYPE.SYSTEM]: {
       iconBgColor: 'bg-VIOLET_100',
       iconContent: <Image src={ADAM_ICON} alt='adam' width={10} height={10} priority />,
-      displayName: 'Adam',
+      displayName: 'Pace',
     },
   };
 
@@ -48,7 +49,6 @@ const SenderInfo: FC<SenderInfoProps> = ({ senderType, status }) => {
       >
         {config.iconContent}
       </div>
-      <span className='f-13-450 text-GRAY_900'>{config.displayName}</span>
       <span className='f-13-450 text-GRAY_900'>{config.displayName}</span>
     </div>
   );

@@ -5,7 +5,7 @@ import EmailDetailsDropdown from 'modules/process/artifacts/components/EmailDeta
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
 import { getEmailDate } from 'modules/process/process.utils';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useLazyGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
@@ -17,7 +17,9 @@ interface EmailArtifactProps {
 }
 
 const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) => {
-  const { processId } = useParams();
+  const searchParams = useSearchParams();
+  const processId = searchParams.get('processId') as string;
+
   const [loading, setLoading] = useState(true);
 
   const [getSignedUrlByArtifactId] = useLazyGetSignedUrlByArtifactIdQuery();

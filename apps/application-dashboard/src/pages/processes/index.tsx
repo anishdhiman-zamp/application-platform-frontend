@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { getProcessRouteById } from '@/constants/routeConfig';
 import { useAppDispatch } from '@/hooks/toolkit';
@@ -7,9 +7,11 @@ import ProcessById from '@/modules/process/activity-runs/ProcessById';
 import { resetBreadcrumb } from '@/store/slices/layout-configs';
 
 const Process = () => {
-  const router = useRouter();
-  const { processId, process } = router.query;
-  const status = router.query.status as string;
+  const searchParams = useSearchParams();
+  const processId = searchParams.get('processId') as string;
+  const process = searchParams.get('process') as string;
+  const status = searchParams.get('status') as string;
+
   const appDispatch = useAppDispatch();
 
   useEffect(() => {

@@ -13,7 +13,7 @@ import { RootState } from 'store';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
-const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData }) => {
+const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData, hasPeoplePolicy }) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -77,12 +77,14 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
                 <MembersRole
                   value={{ user_id: row?.user?.user_id, privilege: row?.privilege, userEmail: row?.user?.email }}
                   member
+                  hasPeoplePolicy={hasPeoplePolicy}
                 />
                 <MembersTeam
                   organizationId={organizationId}
                   teamsData={teamsData ?? []}
                   userId={row?.user?.user_id}
                   userMappedTeams={userMappedTeams}
+                  hasPeoplePolicy={hasPeoplePolicy}
                 />
               </div>
             );

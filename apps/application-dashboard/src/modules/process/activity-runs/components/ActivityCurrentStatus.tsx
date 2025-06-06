@@ -18,6 +18,7 @@ type ActivityCurrentStatusProps = {
 
 const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
   const artifactsData = data?.artifacts_metadata;
+
   const message = value?.message;
 
   return (
@@ -35,7 +36,10 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
       </div>
       <div className='flex items-center gap-2'>
         <p className='f-13-450 text-GRAY_900'>
-          {getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM }, data?.updated_at)}
+          {getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM },
+            data?.activity_updated_at,
+          )}
         </p>
         <ArtifactPill
           count={artifactsData?.length ?? 0}
