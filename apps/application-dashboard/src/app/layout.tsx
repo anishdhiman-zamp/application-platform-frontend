@@ -1,7 +1,9 @@
-import { Providers } from 'app/_providers/providers';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import NetworkStatus from '@/components/NetWorkStatus';
 // Import global styles
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -33,8 +35,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={inter.className}>
-      <body className='light-mode antialiased'>
-        <Providers>{children}</Providers>
+      <body className='light-mode h-screen antialiased'>
+        <SpeedInsights />
+        <NetworkStatus />
+        <Toaster />
+        {children}
       </body>
     </html>
   );
