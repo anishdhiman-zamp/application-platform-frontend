@@ -8,6 +8,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "passThroughEnv": ["SENTRY_ORG", "SENTRY_PROJECT", "SENTRY_AUTH_TOKEN"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "test": {
