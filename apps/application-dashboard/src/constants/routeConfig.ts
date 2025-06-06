@@ -6,7 +6,7 @@ export const ROUTES_PATH = {
   DATA: '/datasets',
   DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
-  PAGES: '/pages/',
+  PAGES: '/pages',
   PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   NO_ACCESS: '/no-access',
@@ -26,7 +26,7 @@ export const ROUTES_PATH = {
 };
 
 export const getPageRouteById = (pageId: string) => {
-  return `${ROUTES_PATH.PAGES}${pageId}`;
+  return `${ROUTES_PATH.PAGES}/${pageId}`;
 };
 
 export const getDatasetRouteById = (datasetId: string) => {

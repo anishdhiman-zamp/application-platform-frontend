@@ -76,7 +76,7 @@ export const AuthGuard: FC<Props> = (props) => {
 
   if (!session) {
     if (pathname !== props.loginRoute) {
-      return <div>Not logged in. Redirecting...</div>;
+      return null;
     } else {
       return props.children;
     }
