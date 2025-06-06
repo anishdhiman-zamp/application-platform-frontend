@@ -46,15 +46,17 @@ const DialogContent = ({
   title,
   description,
   size,
+  dialogueOverlayClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   title?: string;
   description?: string;
   size?: 'large' | 'medium' | 'small';
+  dialogueOverlayClassName?: string;
 }) => (
   <DialogPortal>
-    <DialogOverlay onClick={(e) => e.stopPropagation()} />
+    <DialogOverlay onClick={(e) => e.stopPropagation()} className={dialogueOverlayClassName} />
     <DialogPrimitive.Content
       className={cn(
         dialogVariants({ size }),
