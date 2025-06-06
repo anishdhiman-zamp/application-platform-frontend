@@ -1,5 +1,4 @@
 import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
@@ -46,10 +45,6 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   const hasNonEmptySelectedItems = useMemo(
     () => Object.values(selectedItemsByInstance)?.some((item) => item?.length !== 0),
     [selectedItemsByInstance],
-  );
-  const disableAddBtn = useMemo(
-    () => multiSelectInstances?.length === TEAM_MEMBERS_PRIVILEGES_LIST?.length,
-    [multiSelectInstances],
   );
   const isInvitable = useMemo(() => {
     if (showValidationError || userPrivilege === PERMISSION_ROLES.MEMBER) return false;
@@ -118,9 +113,9 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
 
     postInviteAudiences({ organizationId, body: { invitations } })
       .unwrap()
-      .then((res) => {
+      .then(() => {
         refetchAudiencesByOrganizationId();
-        toast.success(res?.message || TOAST_MESSAGES.SUCCESS_AUDIENCE_INVITED);
+        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_INVITED);
         handleCloseInviteMembersPopup();
       })
       .catch((err) => {
@@ -130,29 +125,32 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
 
   const validateAndGetUserDetails = useCallback(
     (value: string) => {
-      const isValid = validateEmail(value);
+      const invalidRulesList = [
+        {
+          isInvalid: () => !validateEmail(value),
+          message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL,
+        },
+        {
+          isInvalid: () => invitedTeamMembersData?.some((item) => item?.email === value),
+          message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS,
+        },
+        {
+          isInvalid: () => teamMembersData?.some((item) => item?.user?.email === value),
+          message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_IN_ORG,
+        },
+        {
+          isInvalid: () => value === user_email,
+          message: VALIDATION_ERROR_MESSAGES.CANNOT_ADD_SELF,
+        },
+      ];
 
-      if (!isValid) {
-        return { isValid: false, message: VALIDATION_ERROR_MESSAGES.INVALID_EMAIL };
+      for (const rule of invalidRulesList) {
+        if (rule.isInvalid()) {
+          return { isValid: false, message: rule.message };
+        }
       }
 
-      const isAlreadyInvited = invitedTeamMembersData?.some((item) => item?.email === value);
-
-      if (isAlreadyInvited) {
-        return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_HAS_ACCESS };
-      }
-
-      const isOrgMember = teamMembersData?.some((item) => item?.user?.email === value);
-
-      if (isOrgMember) {
-        return { isValid: false, message: VALIDATION_ERROR_MESSAGES.USER_ALREADY_IN_ORG };
-      }
-
-      if (value === user_email) {
-        return { isValid: false, message: VALIDATION_ERROR_MESSAGES.CANNOT_ADD_SELF };
-      }
-
-      return { isValid };
+      return { isValid: true };
     },
     [invitedTeamMembersData, teamMembersData, user_email],
   );
@@ -280,61 +278,39 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
       closeOnClickOutside={false}
     >
       <div className='rounded-b-3.5 border-GRAY_400 flex w-[458px] flex-col border border-t-0 bg-white'>
-        <div className='flex flex-col gap-2 px-4 py-6'>
-          <div className='flex flex-col'>
-            <div className='flex flex-col gap-2'>
-              {multiSelectInstances.map((id) => (
-                <MultiSelectInput
-                  key={id}
-                  id={`invite-members-${id}`}
-                  search={searchValues[id] || ''}
-                  setSearch={(value) => handleSearchChange(id, value)}
-                  isOpen={isOpen}
-                  placeholderText={placeholderText}
-                  roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
-                  inputArrayList={selectedItemsByInstance[id] || []}
-                  setInputArrayList={(items) =>
-                    setSelectedItemsByInstance((prev) => ({
-                      ...prev,
-                      [id]: items as ArrayListOption[],
-                    }))
-                  }
-                  onValidateAndAdd={({ value, label, color }) => handleValidateAndAdd(id, { value, label, color })}
-                  selectedRole={selectedRoleByInstance[id] ?? TEAM_MEMBERS_PRIVILEGES_LIST[0].value}
-                  setSelectedRole={(role) =>
-                    setSelectedRoleByInstance((prev) => ({
-                      ...prev,
-                      [id]: role as TEAM_MEMBERS_PRIVILEGES,
-                    }))
-                  }
-                />
-              ))}
-            </div>
-            {validationErrorText && showValidationError && (
-              <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
-            )}
-          </div>
-
-          <Button
-            type={BUTTON_TYPES.SECONDARY}
-            id='add-duplicate-multiselect-user-invite'
-            size={SIZE_TYPES.SMALL}
-            className='mt-2 w-fit'
-            disabled={disableAddBtn}
-            onClick={() => setMultiSelectInstances((prev) => [...prev, prev?.length])}
-          >
-            <div className='flex gap-0.5'>
-              <SvgSpriteLoader
-                id='plus'
-                width={14}
-                height={14}
-                color={disableAddBtn ? COLORS.GRAY_700 : COLORS.GRAY_1000}
+        <div className='flex flex-col px-4 py-6'>
+          <div className='flex flex-col gap-2'>
+            {multiSelectInstances.map((id) => (
+              <MultiSelectInput
+                key={id}
+                id={`invite-members-${id}`}
+                search={searchValues[id] || ''}
+                setSearch={(value) => handleSearchChange(id, value)}
+                isOpen={isOpen}
+                placeholderText={placeholderText}
+                roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
+                inputArrayList={selectedItemsByInstance[id] || []}
+                setInputArrayList={(items) =>
+                  setSelectedItemsByInstance((prev) => ({
+                    ...prev,
+                    [id]: items as ArrayListOption[],
+                  }))
+                }
+                onValidateAndAdd={({ value, label, color }) => handleValidateAndAdd(id, { value, label, color })}
+                selectedRole={selectedRoleByInstance[id] ?? TEAM_MEMBERS_PRIVILEGES_LIST[0].value}
+                setSelectedRole={(role) =>
+                  setSelectedRoleByInstance((prev) => ({
+                    ...prev,
+                    [id]: role as TEAM_MEMBERS_PRIVILEGES,
+                  }))
+                }
               />
-              Add
-            </div>
-          </Button>
+            ))}
+          </div>
+          {validationErrorText && showValidationError && (
+            <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
+          )}
         </div>
-
         <div className='border-GRAY_200 flex w-full justify-end border-t px-5 py-4'>
           <Button
             type={BUTTON_TYPES.PRIMARY}

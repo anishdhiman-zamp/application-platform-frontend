@@ -35,7 +35,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
             isLoading={isLoadingInvitedTeamMembersData}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderListing />}
-            className='h-[calc(100vh-270px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+            className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
             {data.map((row, index) => (
               <InvitedMemberCard key={index} row={row} organizationId={organizationId} />

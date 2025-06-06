@@ -66,7 +66,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<SkeletonLoaderListing columns={4} />}
       >
-        <div className='h-[calc(100vh-270px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+        <div className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           {data?.map((row, index) => {
             const userMappedTeams = userMappedTeamsMap.get(row?.user?.user_id) ?? [];
 

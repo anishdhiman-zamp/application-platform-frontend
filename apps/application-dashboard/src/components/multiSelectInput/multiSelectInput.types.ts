@@ -57,6 +57,7 @@ export type MultiSelectInputPropsType = {
   onCustomDeleteFn?: (item: MapAny) => void;
   optionalOpenDropdownOptions?: boolean;
   closeDropdownOnSelect?: boolean;
+  labelCasing?: string;
 };
 
 export const KEY_CODES = {
