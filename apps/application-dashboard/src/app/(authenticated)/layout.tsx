@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, Suspense } from 'react';
 import { Provider } from 'react-redux';
 import AgChartInit from 'app/_providers/ag-chart';
 import PostHogProviderWrapper from 'app/_providers/posthog-provider';
@@ -16,18 +16,20 @@ interface AuthenticatedLayoutProps {
 
 const AuthenticatedLayout: FC<AuthenticatedLayoutProps> = ({ children }) => {
   return (
-    <Provider store={store}>
-      <AgChartInit />
-      <PostHogProviderWrapper>
-        <AuthGuard loginRoute='/login'>
-          <FeatureFlagsProvider>
-            <RouteGuard>
-              <DashboardContent>{children}</DashboardContent>
-            </RouteGuard>
-          </FeatureFlagsProvider>
-        </AuthGuard>
-      </PostHogProviderWrapper>
-    </Provider>
+    <Suspense fallback={null}>
+      <Provider store={store}>
+        <AgChartInit />
+        <PostHogProviderWrapper>
+          <AuthGuard loginRoute='/login'>
+            <FeatureFlagsProvider>
+              <RouteGuard>
+                <DashboardContent>{children}</DashboardContent>
+              </RouteGuard>
+            </FeatureFlagsProvider>
+          </AuthGuard>
+        </PostHogProviderWrapper>
+      </Provider>
+    </Suspense>
   );
 };
 
