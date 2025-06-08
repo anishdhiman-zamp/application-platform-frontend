@@ -1,7 +1,10 @@
-import DatasetById from 'modules/data/Dataset';
+'use client';
 
-export default async function DatasetPage({ params }: { params: Promise<{ datasetId: string }> }) {
-  const { datasetId } = await params;
+import DatasetById from 'modules/data/Dataset';
+import { useParams } from 'next/navigation';
+
+export default function DatasetPage() {
+  const { datasetId } = useParams<{ datasetId: string }>() ?? { datasetId: '' };
 
   return <DatasetById id={datasetId} />;
 }
