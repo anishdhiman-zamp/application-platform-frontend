@@ -4,64 +4,58 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { useEffect, useState } from 'react';
 
-interface SheetProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root> {
+interface SheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-const Sheet = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Root>, SheetProps>(
-  ({ onOpenChange, open, ...props }) => {
-    const [isAnimating, setIsAnimating] = useState(false);
+const Sheet = ({ onOpenChange, open, ...props }: SheetProps) => {
+  const [isAnimating, setIsAnimating] = useState(false);
 
-    useEffect(() => {
-      if (open !== undefined) {
-        setIsAnimating(open);
-      }
-    }, [open]);
+  useEffect(() => {
+    if (open !== undefined) {
+      setIsAnimating(open);
+    }
+  }, [open]);
 
-    const handleOpenChange = (newOpen: boolean) => {
-      if (newOpen) {
-        setIsAnimating(true);
-      } else {
-        setIsAnimating(false);
-        // Wait for animation to complete before setting isOpen to false
-        setTimeout(() => {
-          if (onOpenChange) {
-            onOpenChange(false);
-          }
-        }, 300); // Match this with your animation duration
-      }
-    };
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+      // Wait for animation to complete before setting isOpen to false
+      setTimeout(() => {
+        if (onOpenChange) {
+          onOpenChange(false);
+        }
+      }, 300); // Match this with your animation duration
+    }
+  };
 
-    return <SheetPrimitive.Root open={isAnimating} onOpenChange={handleOpenChange} {...props} />;
-  },
-);
+  return <SheetPrimitive.Root open={isAnimating} onOpenChange={handleOpenChange} {...props} />;
+};
 Sheet.displayName = SheetPrimitive.Root.displayName;
 
 const SheetTrigger = SheetPrimitive.Trigger;
 const SheetClose = SheetPrimitive.Close;
 const SheetPortal = SheetPrimitive.Portal;
 
-const SheetOverlay = React.forwardRef<
-  React.ElementRef<typeof SheetPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Overlay>) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'fixed inset-0 z-[1001] bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 !duration-300',
+      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-1001 bg-black/20 duration-300!',
       className,
     )}
     {...props}
-    ref={ref}
   />
-));
+);
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed bg-background shadow-drawer-shadow transition-all !duration-300 ease-in-out flex flex-col rounded-lg m-4 z-[1001] !h-[calc(100vh-2rem)]',
+  'fixed bg-background shadow-drawer-shadow transition-all duration-300! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!',
   {
     variants: {
       side: {
@@ -85,7 +79,7 @@ const sheetVariants = cva(
 );
 
 interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+  extends React.ComponentProps<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {
   showCloseButton?: boolean;
   className?: string;
@@ -95,26 +89,30 @@ interface SheetContentProps
   size?: 'large' | 'medium';
 }
 
-const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  (
-    { side = 'right', size = 'medium', className, children, showCloseButton = false, title, description, ...props },
-    ref,
-  ) => (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side, size }), className)} {...props}>
-        <SheetPrimitive.Title className='sr-only'>{title || 'Sheet'}</SheetPrimitive.Title>
-        <SheetPrimitive.Description className='sr-only'>{description || 'Sheet content'}</SheetPrimitive.Description>
-        {children}
-        {showCloseButton && (
-          <SheetPrimitive.Close className='absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary'>
-            <X className='h-4 w-4' />
-            <span className='sr-only'>Close</span>
-          </SheetPrimitive.Close>
-        )}
-      </SheetPrimitive.Content>
-    </SheetPortal>
-  ),
+const SheetContent = ({
+  side = 'right',
+  size = 'medium',
+  className,
+  children,
+  showCloseButton = false,
+  title,
+  description,
+  ...props
+}: SheetContentProps) => (
+  <SheetPortal>
+    <SheetOverlay />
+    <SheetPrimitive.Content className={cn(sheetVariants({ side, size }), className)} {...props}>
+      <SheetPrimitive.Title className='sr-only'>{title || 'Sheet'}</SheetPrimitive.Title>
+      <SheetPrimitive.Description className='sr-only'>{description || 'Sheet content'}</SheetPrimitive.Description>
+      {children}
+      {showCloseButton && (
+        <SheetPrimitive.Close className='ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
+          <X className='h-4 w-4' />
+          <span className='sr-only'>Close</span>
+        </SheetPrimitive.Close>
+      )}
+    </SheetPrimitive.Content>
+  </SheetPortal>
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
@@ -134,7 +132,7 @@ const SheetHeaderActions = ({ className, ...props }: React.HTMLAttributes<HTMLDi
 SheetHeaderActions.displayName = 'SheetHeaderActions';
 
 const SheetBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex-1 bg-slate-50 p-4 rounded-b-lg overflow-auto', className)} {...props} />
+  <div className={cn('flex-1 overflow-auto rounded-b-lg bg-slate-50 p-4', className)} {...props} />
 );
 SheetBody.displayName = 'SheetBody';
 

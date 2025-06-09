@@ -2,22 +2,29 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { formatUrlFilters, parseDatasets } from 'modules/data/data.utils';
 import DatasetById from 'modules/data/Dataset';
-import { useRouter } from 'next/router';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { addBreadcrumb, removeLastBreadcrumb, resetBreadcrumb } from '@/store/slices/layout-configs';
 import { Tabs } from 'components/common/tabs/Tabs';
 
 const DrilldownMultiDataset = ({ datasetIds }: { datasetIds: string }) => {
-  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Get the query string from searchParams
+  const queryString = searchParams ? searchParams.toString() : '';
+
+  // Reconstruct asPath
+  const currentAsPath = `${pathname}${queryString ? '?' : ''}${queryString}`;
   const dispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   const [selectedTab, setSelectedTab] = useState<string>();
 
   const datasetsArray = useMemo(
-    () => parseDatasets(router.asPath, datasetIds?.split(',')),
-    [router.asPath, datasetIds],
+    () => parseDatasets(currentAsPath || '', datasetIds?.split(',')),
+    [currentAsPath, datasetIds],
   );
 
   const tabs = useMemo(
@@ -64,7 +71,7 @@ const DrilldownMultiDataset = ({ datasetIds }: { datasetIds: string }) => {
 
   return (
     <div className='h-full'>
-      <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400 rounded-tl-xl'>
+      <div className='bg-BG_GRAY_2 border-BORDER_GRAY_400 rounded-tl-xl border-b p-3'>
         {tabs?.length > 1 && (
           <Tabs
             list={tabs}

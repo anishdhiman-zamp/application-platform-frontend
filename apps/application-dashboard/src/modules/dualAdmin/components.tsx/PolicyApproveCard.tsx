@@ -43,23 +43,19 @@ const PolicyApproveCard = ({ canApprove, approvalId }: PolicyApproveCardProps) =
     <div onClick={stopPropagationAction}>
       <DropdownMenu onOpenChange={setIsShowMenu}>
         <DropdownMenuTrigger asChild>
-          <div className='f-11-450 text-ORANGE_800 flex items-center gap-1 justify-end select-none cursor-pointer whitespace-nowrap'>
+          <div className='f-11-450 text-ORANGE_800 flex cursor-pointer items-center justify-end gap-1 whitespace-nowrap select-none'>
             Awaiting your approval
             <DropdownToggle isShowMenu={isShowMenu} isLoading={isLoading} setIsShowMenu={setIsShowMenu} />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align='end'
-          className='z-[1001] min-w-[170px]  max-h-[300px] overflow-y-auto'
-          sideOffset={5}
-        >
+        <DropdownMenuContent align='end' className='z-1001 max-h-[300px] min-w-[170px] overflow-y-auto' sideOffset={5}>
           {DUAL_ADMIN_APPROVAL_POLICY_OPTIONS.map((item: MapAny) => (
             <DropdownMenuItem
               onClick={() => handleApproveAction(item?.value)}
               key={item?.value}
-              className='cursor-default hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 rounded px-2.5 py-2'
+              className='hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 cursor-default rounded px-2.5 py-2'
             >
-              <div className='flex items-center gap-1 w-full cursor-pointer '>
+              <div className='flex w-full cursor-pointer items-center gap-1'>
                 <SvgSpriteLoader id={item?.icon} size={12} />
                 <div>{item?.label}</div>
               </div>

@@ -15,7 +15,7 @@ import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
 
 export interface DatasetTableProps {
-  tableRef?: RefObject<AgGridReact>;
+  tableRef?: RefObject<AgGridReact | null>;
   columns: MapAny[];
   serverSideDatasource?: IServerSideDatasource;
   columnConfig?: ColDef;

@@ -87,19 +87,19 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 bg-white pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[218px] min-w-[218px]',
+        'border-GRAY_400 shadow-table-filter-menu flex max-h-[330px] w-[218px] min-w-[218px] flex-col gap-2 rounded-md border bg-white pt-2 pb-1',
         className,
       )}
     >
-      <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 px-2.5'>
+      <div className='text-GRAY_600 z-80 flex w-full items-center gap-1 px-2.5'>
         {showColumnLabel && (
-          <div className='grow f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
+          <div className='f-11-400 text-GRAY_700 grow overflow-hidden text-ellipsis whitespace-nowrap'>
             {formatToNormalText(filterKey)}
           </div>
         )}
 
         {allowClear && (
-          <div className='flex justify-end text-GRAY_700 cursor-pointer'>
+          <div className='text-GRAY_700 flex cursor-pointer justify-end'>
             <SvgSpriteLoader
               id='refresh-ccw-01'
               iconCategory={ICON_SPRITE_TYPES.ARROWS}
@@ -122,7 +122,7 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
           />
         </div>
       )}
-      <div className='flex flex-col h-full overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
+      <div className='flex h-full flex-col overflow-y-auto px-1 [&::-webkit-scrollbar]:hidden'>
         {!!values?.length &&
           values
             .filter((item) => item?.toLowerCase()?.includes(inputValue?.toLowerCase()))
@@ -131,7 +131,7 @@ const SingleSelectFilter: FC<SingleSelectFilterProps> = ({
                 key={item}
                 onClick={() => !isDisabled && onValueChange(item)}
                 className={cn(
-                  'py-2 px-2.5 border-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100',
+                  'border-2.5 hover:bg-GRAY_100 cursor-pointer rounded px-2.5 py-2 select-none',
                   selectedValue === item && 'bg-GRAY_200',
                 )}
               >

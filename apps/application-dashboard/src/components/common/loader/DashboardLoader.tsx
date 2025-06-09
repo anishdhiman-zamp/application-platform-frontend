@@ -12,23 +12,23 @@ const DashboardLoader: FC<DashboardLoaderPropsType> = ({ isFadingOut }) => {
   return (
     <div
       className={cn(
-        'fixed inset-0 flex flex-col justify-between items-center transition duration-500 ease-out z-1000 bg-BACKGROUND_GRAY_1',
-        isFadingOut ? 'opacity-100 pointer-events-none  translate-x-40' : 'opacity-100 translate-x-0',
+        'bg-BACKGROUND_GRAY_1 fixed inset-0 z-1000 flex flex-col items-center justify-between transition duration-500 ease-out',
+        isFadingOut ? 'pointer-events-none translate-x-40 opacity-100' : 'translate-x-0 opacity-100',
       )}
     >
-      <div className='h-12 py-4 px-8 flex items-center justify-between w-full border-2 border-GRAY_400 bg-white'>
+      <div className='border-GRAY_400 flex h-12 w-full items-center justify-between border-2 bg-white px-8 py-4'>
         <div className='flex gap-4'>
-          <SkeletonElement elementCount={3} className='w-4 h-4 rounded-sm bg-GRAY_400' />
-          <SkeletonElement elementCount={1} className='w-20 h-4 rounded-sm bg-GRAY_400' />
+          <SkeletonElement elementCount={3} className='bg-GRAY_400 h-4 w-4 rounded-sm' />
+          <SkeletonElement elementCount={1} className='bg-GRAY_400 h-4 w-20 rounded-sm' />
         </div>
-        <span className='w-60 h-5 bg-GRAY_400 rounded-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent before:animate-[shimmer-skeleton_1.5s_infinite] before:w-full before:h-full'></span>
+        <span className='bg-GRAY_400 relative h-5 w-60 overflow-hidden rounded-sm before:absolute before:inset-0 before:h-full before:w-full before:animate-[shimmer-skeleton_1.5s_infinite] before:bg-linear-to-r before:from-transparent before:via-white/60 before:to-transparent'></span>
 
         <div className='flex gap-4'>
-          <SkeletonElement elementCount={1} className='w-8 h-5 rounded-sm bg-GRAY_400' />
-          <SkeletonElement elementCount={1} className='w-12 h-5 rounded-sm bg-GRAY_400' />
+          <SkeletonElement elementCount={1} className='bg-GRAY_400 h-5 w-8 rounded-sm' />
+          <SkeletonElement elementCount={1} className='bg-GRAY_400 h-5 w-12 rounded-sm' />
         </div>
       </div>
-      <div className={cn('transition-transform duration-500 delay-150', isFadingOut ? 'scale-150' : 'scale-100')}>
+      <div className={cn('transition-transform delay-150 duration-500', isFadingOut ? 'scale-150' : 'scale-100')}>
         <DynamicLottiePlayer
           src={DASHBOARD_LOADER}
           className='lottie-player'

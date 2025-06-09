@@ -3,7 +3,7 @@ import { ICellRendererParams } from 'ag-grid-community';
 import { getAdminDatasetRouteById } from 'constants/routeConfig';
 import { DATASET_ACTIONS } from 'modules/admin/admin.constants';
 import { AdminDatasetActionTypes, AdminDeleteDatasetDetailsType } from 'modules/admin/admin.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import TooltipButton from 'components/common/button/TooltipButton';
 import { TooltipPositions } from 'components/common/tooltip';
 
@@ -29,7 +29,7 @@ const AdminDatasetActions: FC<AdminDatasetActionsProps> = ({ data, onDelete }) =
   };
 
   return (
-    <div className='flex items-center gap-1.5 justify-end'>
+    <div className='flex items-center justify-end gap-1.5'>
       {DATASET_ACTIONS.map((action) => (
         <TooltipButton
           key={action.value}

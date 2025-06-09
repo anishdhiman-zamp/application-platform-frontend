@@ -1,9 +1,7 @@
 import typography from '@tailwindcss/typography';
-import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
-  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
@@ -248,15 +246,15 @@ const config = {
       },
       boxShadow: {
         overlay: '1px 2px 10px rgba(197, 220, 255, 0.54)',
-        inputOutlineShadow: '0px 0px 0px 3px var(--GRAY_400)',
-        inputErrorOutlineShadow: '0px 0px 0px 3px var(--RED_100)',
-        tableFilterMenu: '1px 2px 10px 0px #A6A6A61A',
-        pageBottomBar: '0px -4px 0px 0px #00000005',
-        sideDrawer: '-3px 0px 0px 0px #00000005',
-        sideDrawerInner: '10px 0px 50px 0px #0000000d',
-        menuList: '1px 2px 20px 0px #0000001A',
-        selectAccountDropdown: '1px 2px 10px 0px #a6a6a61a',
-        menuShadow: 'var(--menu-shadow)',
+        'input-outline-shadow': '0px 0px 0px 3px var(--GRAY_400)',
+        'input-error-outline-shadow': '0px 0px 0px 3px var(--RED_100)',
+        'table-filter-menu': '1px 2px 10px 0px #A6A6A61A',
+        'page-bottom-bar': '0px -4px 0px 0px #00000005',
+        'side-drawer': '-3px 0px 0px 0px #00000005',
+        'side-drawer-inner': '10px 0px 50px 0px #0000000d',
+        'menu-list': '1px 2px 20px 0px #0000001A',
+        'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
+        'menu-shadow': 'var(--menu-shadow)',
       },
       fontSize: {
         '8': [
@@ -534,20 +532,20 @@ const config = {
       },
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+        'slide-in-from-center': {
+          '0%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0' },
+          '100%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+        },
+        'slide-out-to-center': {
+          '0%': { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' },
+          '100%': { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0' },
         },
         'reverse-spin': {
           from: {
@@ -686,27 +684,26 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'slide-in-from-center': 'slide-in-from-center 0.2s ease-out',
+        'slide-out-to-center': 'slide-out-to-center 0.2s ease-out',
         opacity: 'opacity 0.3s ease-in-out',
         'file-upload': 'file-upload 0.5s linear ',
         'reverse-spin': 'reverse-spin 1.5s linear infinite',
-        'rightSideDrawer-mount': 'rightSideDrawerTransition 0.4s normal forwards ease-out',
-        'bottomSideDrawer-mount': 'bottomSideDrawerTransition 0.4s normal forwards ease-out',
-        'rightSideDrawer-unMount': 'rightSideDrawerUnMountTransition 0.4s normal forwards ease-out',
-        'bottomSideDrawer-unMount': 'bottomSideDrawerUnMountTransition 0.4s normal forwards ease-out',
+        'right-side-drawer-mount': 'rightSideDrawerTransition 0.4s normal forwards ease-out',
+        'bottom-side-drawer-mount': 'bottomSideDrawerTransition 0.4s normal forwards ease-out',
+        'right-side-drawer-un-mount': 'rightSideDrawerUnMountTransition 0.4s normal forwards ease-out',
+        'bottom-side-drawer-un-mount': 'bottomSideDrawerUnMountTransition 0.4s normal forwards ease-out',
         'shimmer-round': 'shimmer-round 1.5s infinite linear',
         width: 'position 1.5s linear infinite',
         slide: 'slide 1.5s linear infinite',
-        slideInOut: 'slideInOut 5s cubic-bezier(0.85, 0, 0.15, 1) forwards',
+        'slide-in-out': 'slideInOut 5s cubic-bezier(0.85, 0, 0.15, 1) forwards',
         'slide-in': 'slideIn 0.5s ease-in-out',
         'fade-in': 'fade-in 0.5s ease-in-out',
         'fade-out': 'fade-out 0.5s ease-in-out 0.3s',
       },
     },
   },
-  variants: {
-    textColor: ['group-hover'],
-  },
   plugins: [tailwindcssAnimate, typography],
-} satisfies Config;
+};
 
 export default config;

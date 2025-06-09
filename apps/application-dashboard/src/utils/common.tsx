@@ -1,18 +1,18 @@
 import { MouseEventHandler } from 'react';
-import { type ClassValue, clsx } from 'clsx';
+import { cn as cnUI } from '@zamp-platform/ui/utils';
+import { type ClassValue } from 'clsx';
 import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
 import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
-import { twMerge } from 'tailwind-merge';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 
 declare type MapAny = Record<string, any>;
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export const cn = (...inputs: ClassValue[]) => {
+  return cnUI(...inputs);
+};
 
 export const checkIsObjectEmpty = (obj?: MapAny, ignoreKeys?: string[]) => {
   if (!obj) return true;

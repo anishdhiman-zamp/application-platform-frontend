@@ -55,7 +55,7 @@ const ReviewPolicyUpdatePopover: FC<ReviewPolicyUpdatePopoverProps> = ({
         }}
       >
         <DialogHeader className='f-14-550'>{policy?.name}</DialogHeader>
-        <DialogBody className='!bg-GRAY_100 grid grid-cols-2 divide-x divide-GRAY_300'>
+        <DialogBody className='!bg-GRAY_100 divide-GRAY_300 grid grid-cols-2 divide-x'>
           <UpdatePolicyCard
             label='Current'
             policyConfig={policy?.policy_configurations}

@@ -10,7 +10,7 @@ import {
   TAG_SOURCE_TYPES,
 } from 'modules/data/RowProperties/rowProperties.types';
 import Rules from 'modules/data/RowProperties/Rules';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -92,9 +92,9 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
       id='row-properties-side-drawer'
       onClose={onClose}
       hideCloseButton
-      headerClassName='!p-6'
+      headerClassName='p-6!'
       topBar={
-        <div className='flex items-center justify-between flex-1'>
+        <div className='flex flex-1 items-center justify-between'>
           <Tabs
             id='row-properties-tabs'
             list={ROW_PROPERTIES_TABS}
@@ -107,7 +107,7 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
             <Button
               type={BUTTON_TYPES.SECONDARY}
               id='row-properties-source-drill-down-button'
-              className='border-none !text-GRAY_900'
+              className='!text-GRAY_900 border-none'
               iconProps={{
                 id: 'arrow-up-left',
                 iconCategory: ICON_SPRITE_TYPES.ARROWS,

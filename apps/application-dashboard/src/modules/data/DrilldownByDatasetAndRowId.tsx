@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useGetDatasetDrilldownQuery } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
@@ -87,13 +89,13 @@ const DrilldownByDatasetAndRowId = () => {
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
     >
       <div className='h-full'>
-        <div className='p-3 bg-BG_GRAY_2 border-b border-BORDER_GRAY_400 rounded-tl-xl'>
+        <div className='bg-BG_GRAY_2 border-BORDER_GRAY_400 rounded-tl-xl border-b p-3'>
           {tabs?.length > 1 && (
             <Tabs
               list={tabs}

@@ -418,7 +418,7 @@ const TreeTableComponent = ({
   }, []);
 
   return (
-    <div className='h-fit w-full relative pivot tree-table group' ref={gridContainerRef}>
+    <div className='pivot tree-table group relative h-fit w-full' ref={gridContainerRef}>
       <PivotConfigDropdown
         handleExportAgGridData={handleExportAgGridData}
         displayConfigToggleData={displayConfigToggleConditions}

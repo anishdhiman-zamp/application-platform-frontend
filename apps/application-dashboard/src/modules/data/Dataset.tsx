@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import {
@@ -48,8 +50,7 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { addBreadcrumb, updateUrlForLastBreadcrumb } from 'store/slices/layout-configs';
 import {
@@ -118,11 +119,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
-  const filters = decodeURIComponent(searchParams.get('filters') ?? '');
-  const processId = searchParams.get('processId') as string;
+  const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
+  const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
 
-  const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
+  const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
 
   const appDispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
@@ -439,7 +440,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(updateUrlForLastBreadcrumb(router.asPath));
+    appDispatch(updateUrlForLastBreadcrumb(window.location.href));
     if (params?.pageId) {
       router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {
@@ -720,7 +721,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -731,7 +732,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('flex items-center justify-between pr-8 z-1000 gap-y-3', headerClassName)}>
+        <div className={cn('z-1000 flex items-center justify-between gap-y-3 pr-8', headerClassName)}>
           <div className={cn('flex items-center py-3', { 'py-0': isDatasetArtifact })}>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
@@ -763,7 +764,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
                 {showCurrencyFilter && (
                   <div className='flex items-center gap-2'>
-                    <div className='border-r border-GRAY_400 h-7'></div>
+                    <div className='border-GRAY_400 h-7 border-r'></div>
                     <SingleSelectFilter
                       onFilterChange={handleFilterChange}
                       value={fxCurrency}
@@ -785,7 +786,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
         >
-          <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+          <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
               columns={columns}

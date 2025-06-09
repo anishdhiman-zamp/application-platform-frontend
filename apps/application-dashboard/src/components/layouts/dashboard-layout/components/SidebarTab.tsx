@@ -17,7 +17,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconId, iconColor, name, 
   return (
     <div
       className={cn(
-        'rounded-md overflow-hidden h-8 w-full px-2.5 f-14-300 flex gap-2.5 items-center',
+        'f-14-300 flex h-8 w-full items-center gap-2.5 overflow-hidden rounded-md px-2.5',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : 'text-GRAY_900 hover:bg-GRAY_20',
         className,
       )}
@@ -25,7 +25,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconId, iconColor, name, 
     >
       {icon}
       {iconId && <SvgSpriteLoader id={iconId} size={14} className='min-w-4' color={iconColor} />}
-      <div className='whitespace-nowrap select-none f-13-500 truncate'>{name}</div>
+      <div className='f-13-500 truncate whitespace-nowrap select-none'>{name}</div>
     </div>
   );
 };

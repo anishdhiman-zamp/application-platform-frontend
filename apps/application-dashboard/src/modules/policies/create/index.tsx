@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { validateField } from '@zamp-platform/form-builder';
 import { Button, Dialog, DialogBody, DialogClose, DialogContent, DialogFooter, SelectOption } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { defaultConditions, getAttributes, transformFormDataToApiPayload } from 'modules/policies/commons';
 import { DEFAULT_APPROVAL_STEP } from 'modules/policies/constants';
 import ApprovalFlow from 'modules/policies/create/ApprovalFlow';
@@ -24,7 +24,8 @@ import AttributeMenuDropdown from '@/modules/policies/create/AttributeMenuDropdo
 import { CreatePolicyPayloadType } from '@/types/api/paymentApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData }: CreatePolicyDialogProps) => {
-  const { policyId } = useParams();
+  const params = useParams();
+  const policyId = params?.policyId as string;
   const searchParams = useSearchParams();
   const type = argType || (searchParams?.get('type') as PolicyDialogType) || 'template';
   const policyData = useMemo(
@@ -226,24 +227,24 @@ const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent showCloseButton onClick={(e) => e.stopPropagation()}>
-        <DialogBody className='overflow-y-auto [&::-webkit-scrollbar]:hidden z-[1002]'>
-          <div className='f-12-500 text-primary py-3 px-4 pb-0'>{isEdit ? 'Edit policy' : 'New policy'}</div>
+        <DialogBody className='z-1002 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+          <div className='f-12-500 text-primary px-4 py-3 pb-0'>{isEdit ? 'Edit policy' : 'New policy'}</div>
           <FormProvider {...methods}>
             <form onSubmit={(e) => e.preventDefault()}>
-              <div className='px-4 pb-3 pt-6'>
+              <div className='px-4 pt-6 pb-3'>
                 <input
                   type='text'
                   {...methods.register('policyName')}
                   name='policyName'
                   className={cn(
-                    'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none border-b border-primary border-dotted [&:not(:placeholder-shown)]:border-transparent w-[120px] [&:not(:placeholder-shown)]:w-fit',
+                    'f-22-500 text-primary border-primary w-[120px] border-b border-dotted not-placeholder-shown:w-fit not-placeholder-shown:border-transparent placeholder:text-gray-500 focus:outline-hidden',
                     methods.formState.errors.policyName && 'border-red-500',
                   )}
                   placeholder='Policy Title'
                   onFocus={(e) => e.stopPropagation()}
                 />
               </div>
-              <div className='flex gap-2 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden'>
+              <div className='flex gap-2 overflow-x-auto px-4 py-3 [&::-webkit-scrollbar]:hidden'>
                 {getAttributes(type).map((attributeId) => {
                   const attribute = updatedAttributeMap[attributeId];
                   const error = methods.formState.errors[attributeId]?.message;
@@ -268,7 +269,7 @@ const CreatePolicyDialog = ({ type: argType, isOpen, onOpenChange, policiesData 
               </div>
 
               <div
-                className={`transition-all duration-300 ease-in-out overflow-hidden ${(() => {
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${(() => {
                   const actionValue = (methods.watch('action') as SelectOption[])?.[0]?.value;
 
                   return actionValue !== PolicyAttributeAction.BLOCK

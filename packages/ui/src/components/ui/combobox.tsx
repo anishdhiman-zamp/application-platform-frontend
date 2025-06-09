@@ -1,4 +1,4 @@
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import * as React from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
 import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from './popover';
@@ -59,10 +59,7 @@ export function Combobox({
           }}
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
-          className={cn(
-            ' z-[1003] p-0 pointer-events-auto min-w-[var(--radix-popover-trigger-width)] ',
-            contentClassName,
-          )}
+          className={cn('z-1003 min-w-(--radix-popover-trigger-width) pointer-events-auto p-0', contentClassName)}
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
@@ -70,7 +67,7 @@ export function Combobox({
               {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
               <CommandGroup
                 className={cn(
-                  'max-h-60 overflow-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent',
+                  'max-h-60 overflow-auto [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-0.5',
                   groupClassName,
                 )}
               >

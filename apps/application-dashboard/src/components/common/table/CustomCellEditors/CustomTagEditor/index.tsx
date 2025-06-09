@@ -51,16 +51,16 @@ const CustomTagEditor = (props: MapAny) => {
         type='text'
         value={searchValue}
         onChange={handleChange}
-        className='h-6 -my-1 w-full outline-none'
+        className='-my-1 h-6 w-full outline-hidden'
         autoFocus
       />
       <MenuWrapper
         id='custom-tag-editor-menu'
-        className='!fixed mt-1 w-64 top-7'
-        childrenWrapperClassName='!overflow-y-visible !max-h-fit'
+        className='!fixed top-7 mt-1 w-64'
+        childrenWrapperClassName='overflow-y-visible! max-h-fit!'
       >
         <div className='text-GRAY_700 f-11-500 p-2'>Select an option or create one</div>
-        <div className='space-y-1 my-1 overflow-y-auto max-h-[300px]'>
+        <div className='my-1 max-h-[300px] space-y-1 overflow-y-auto'>
           {searchResults.map((tag: string) => (
             <div key={tag} onClick={() => handleTagClick(tag)}>
               <TagWithHierarchy tag={tag} labelColor={tagColorMap?.[tag]} isSelected={tag === initialValue} />
@@ -68,7 +68,7 @@ const CustomTagEditor = (props: MapAny) => {
           ))}
         </div>
         <CreateTag value={searchValue} handleCreateTag={handleCreateTag} existingList={values} />
-        <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2 rounded-b-md'>
+        <div className='bg-BG_GRAY_2 flex items-center gap-2 rounded-b-md p-2'>
           <span>💡</span>
           <span className='text-GRAY_900 f-11-400'>Use “ / “ to create hierarchy</span>
         </div>

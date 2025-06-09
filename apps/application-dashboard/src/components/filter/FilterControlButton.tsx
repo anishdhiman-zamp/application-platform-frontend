@@ -13,7 +13,7 @@ interface FilterControlButtonProps extends PropsWithChildren {
   icon?: string;
   iconCategory?: ICON_SPRITE_TYPES;
   iconColor?: string;
-  buttonRef?: RefObject<HTMLButtonElement>;
+  buttonRef?: RefObject<HTMLButtonElement | null>;
   isSelected?: boolean;
   childrenWrapperClassName?: string;
   className?: string;
@@ -50,7 +50,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText} asChildTrigger>
       <button
         className={cn(
-          'border border-GRAY_400 rounded px-2 py-1.5 w-fit outline-none flex items-center h-[26px] text-GRAY_1000',
+          'border-GRAY_400 text-GRAY_1000 flex h-[26px] w-fit items-center rounded border px-2 py-1.5 outline-hidden',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',

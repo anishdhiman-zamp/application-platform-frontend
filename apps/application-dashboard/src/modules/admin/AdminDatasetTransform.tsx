@@ -105,7 +105,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
         isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='flex justify-center items-center h-full overflow-y-auto w-full z-1000 bg-white'>
+          <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -116,8 +116,8 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
           </div>
         }
       >
-        <div className='space-y-4 h-full overflow-y-auto'>
-          <div className='flex justify-between items-center'>
+        <div className='h-full space-y-4 overflow-y-auto'>
+          <div className='flex items-center justify-between'>
             <div className='f-20-600 mb-4'>Transform</div>
             <Button
               onClick={handleSubmit}
@@ -130,7 +130,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
               Trigger Transformation
             </Button>
           </div>
-          <div className='flex gap-4 flex-1'>
+          <div className='flex flex-1 gap-4'>
             <div className='w-1/2 space-y-2'>
               <Dropdown
                 options={dropdownOptions}
@@ -193,7 +193,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
             </div>
           </div>
           {!targetDataset && (
-            <div className='grid grid-cols-3 gap-4 items-end'>
+            <div className='grid grid-cols-3 items-end gap-4'>
               <Input
                 label='Name*'
                 value={title}

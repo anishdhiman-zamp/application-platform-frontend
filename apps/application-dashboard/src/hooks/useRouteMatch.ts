@@ -21,8 +21,8 @@ interface RouteMatchResult {
  * @returns RouteMatchResult | null - The match result if the route matches, null otherwise
  */
 export const useRouteMatch = (options?: RouteMatchOptions): RouteMatchResult | null => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() ?? '';
+  const searchParams = useSearchParams() ?? '';
 
   return useMemo(() => {
     if (!options?.path) {

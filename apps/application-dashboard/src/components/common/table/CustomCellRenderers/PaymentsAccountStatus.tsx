@@ -6,7 +6,7 @@ const PaymentsAccountStatusCell = (props: ICellRendererParams) => {
   const { value, colDef } = props;
 
   return (
-    <Tag variant='gray' className='text-blue-700 f-11-500 py-[3.5px]'>
+    <Tag variant='gray' className='f-11-500 py-[3.5px] text-blue-700'>
       {
         colDef?.headerComponentParams?.options?.find(
           (option: { label: string; value: string }) => option.value === value,

@@ -109,28 +109,28 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
 
   return (
     <div
-      className={`px-2.5 py-2 w-[250px] min-w-[250px] border-0.5 border-GRAY_500 rounded-md bg-white shadow-tableFilterMenu ${className}`}
+      className={`border-0.5 border-GRAY_500 shadow-table-filter-menu w-[250px] min-w-[250px] rounded-md bg-white px-2.5 py-2 ${className}`}
     >
-      <div className='flex text-GRAY_600 items-center gap-1 w-full z-80 mb-2'>
-        <div className='f-11-400 text-GRAY_700 whitespace-nowrap text-ellipsis overflow-hidden'>
+      <div className='text-GRAY_600 z-80 mb-2 flex w-full items-center gap-1'>
+        <div className='f-11-400 text-GRAY_700 overflow-hidden text-ellipsis whitespace-nowrap'>
           {label || camelCaseToNormalText(filterKey)}
         </div>
         <div
-          className='flex items-center gap-[2px] cursor-pointer relative select-none grow mr-4'
+          className='relative mr-4 flex grow cursor-pointer items-center gap-[2px] select-none'
           onClick={() => !isDisabled && setIsOpen(!isOpen)}
         >
-          <div className='f-11-500 text-BLUE_700 max-w-[110px] whitespace-nowrap text-ellipsis overflow-hidden'>
+          <div className='f-11-500 text-BLUE_700 max-w-[110px] overflow-hidden text-ellipsis whitespace-nowrap'>
             {selectedOperator?.label || 'is equal to'}
           </div>
           <SvgSpriteLoader id='chevron-down' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={12} width={12} />
           {isOpen && (
             <div
               ref={ref}
-              className='p-1 z-10 absolute top-full left-0 w-[256px] bg-white text-GRAY_900 border border-GRAY_400 shadow-tableFilterMenu rounded-md'
+              className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 w-[256px] rounded-md border bg-white p-1'
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div
-                  className='hover:bg-GRAY_100 f-12-500 py-2 px-2.5 rounded-md'
+                  className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2'
                   key={option.value}
                   onClick={() => onOperatorChange(option)}
                 >
@@ -140,7 +140,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
             </div>
           )}
         </div>
-        <div className='flex justify-end text-GRAY_700 cursor-pointer'>
+        <div className='text-GRAY_700 flex cursor-pointer justify-end'>
           <SvgSpriteLoader
             id='refresh-ccw-01'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}
@@ -154,7 +154,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
         <Tooltip
           tooltipBody={`condition set to “is blank”`}
           tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
-          className='z-1 !cursor-not-allowed'
+          className='z-1 cursor-not-allowed!'
           disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
         >
           <Input

@@ -22,7 +22,7 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
     <div
       className={cn(
         !!datasetBulkLoaders?.length && 'mt-1.5',
-        'w-96 mr-4 mb-4 rounded-2.5 shadow-tableFilterMenu h-full max-h-fit bg-white',
+        'rounded-2.5 shadow-table-filter-menu mr-4 mb-4 h-full max-h-fit w-96 bg-white',
       )}
       style={{
         scrollbarWidth: 'none',
@@ -30,10 +30,10 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
       }}
     >
       {!!fileImportHistoryData && !!fileImportHistoryData?.length && (
-        <div className='flex flex-col justify-start items-start p-3.5 border-[0.5px] border-GRAY_500 rounded-2.5 w-full overflow-y-scroll'>
-          <div className='flex flex-col justify-start items-start w-full'>
+        <div className='border-GRAY_500 rounded-2.5 flex w-full flex-col items-start justify-start overflow-y-scroll border-[0.5px] p-3.5'>
+          <div className='flex w-full flex-col items-start justify-start'>
             <span className='f-14-600'>Import History</span>
-            <div className='flex flex-col w-full justify-start items-start gap-2 mt-2'>
+            <div className='mt-2 flex w-full flex-col items-start justify-start gap-2'>
               <CommonWrapper
                 skeletonType={SkeletonTypes.CUSTOM}
                 loader={<SkeletonLoaderFileHistory />}
@@ -43,10 +43,10 @@ const HistoryList: FC<HistoryListPropsType> = ({ isHoveredLoaders, fileImportHis
                   fileImportHistoryData.map((historyItem) => (
                     <div
                       key={historyItem?.id}
-                      className='flex flex-col flex-wrap justify-start items-start w-full border-b border-GRAY_400 py-3.5'
+                      className='border-GRAY_400 flex w-full flex-col flex-wrap items-start justify-start border-b py-3.5'
                     >
-                      <div className='flex justify-between items-center w-full'>
-                        <div className='flex justify-start py-1.5 px-2 bg-GRAY_100 rounded-md w-fit'>
+                      <div className='flex w-full items-center justify-between'>
+                        <div className='bg-GRAY_100 flex w-fit justify-start rounded-md px-2 py-1.5'>
                           <SvgSpriteLoader id='file-06' width={14} height={14} color={COLORS.GRAY_1000} />
                           <span className='f-12-400 text-GRAY_1000 ml-1.5'>
                             {maskString(historyItem?.file_name, 8, 8, 16)}

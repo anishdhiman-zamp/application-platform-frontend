@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { X } from 'lucide-react';
 
 interface StepCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -12,21 +12,21 @@ export const StepCard = ({ stepNumber, children, className, onRemove, ...props }
   return (
     <div
       className={cn(
-        'flex items-start rounded-lg border-[0.5px] border-gray-500 bg-white relative group/step-card',
+        'group/step-card relative flex items-start rounded-lg border-[0.5px] border-gray-500 bg-white',
         className,
       )}
       {...props}
     >
       {onRemove && (
         <div
-          className='absolute -right-2.5 -top-2.5 z-[1] border rounded-full p-[2px] w-5 h-5 bg-white opacity-0 group-hover/step-card:opacity-100 transition-opacity duration-300 cursor-pointer'
+          className='z-1 absolute -right-2.5 -top-2.5 h-5 w-5 cursor-pointer rounded-full border bg-white p-[2px] opacity-0 transition-opacity duration-300 group-hover/step-card:opacity-100'
           onClick={onRemove}
         >
           <X className='h-3.5 w-3.5 text-gray-900' />
         </div>
       )}
-      <div className='bg-gray-100 w-6 h-full absolute left-0 top-0 rounded-l-lg'>
-        <div className='flex items-center justify-center h-6 w-6 bg-primary text-white rounded-tl-lg f-12-500'>
+      <div className='absolute left-0 top-0 h-full w-6 rounded-l-lg bg-gray-100'>
+        <div className='bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white'>
           {stepNumber}
         </div>
       </div>

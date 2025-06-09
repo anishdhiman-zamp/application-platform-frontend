@@ -20,22 +20,22 @@ const OverlayTitle: FC<OverlayTitleProps> = ({
 }) =>
   (topBar || title || !hideCloseButton) && (
     <div
-      className={cn('min-h-[56px] px-4 border-b f-16-300 flex justify-between items-center py-2.5', headerClassName)}
+      className={cn('f-16-300 flex min-h-[56px] items-center justify-between border-b px-4 py-2.5', headerClassName)}
     >
       {topBar ? (
         topBar
       ) : (
         <div className='grow'>
-          <div className='f-14-500 gap-1 flex items-center '>
+          <div className='f-14-500 flex items-center gap-1'>
             <div className={titleClassName}>{title}</div>
-            {step && <div className='text-GRAY_1000 uppercase f-12-300'>step {step}</div>}
+            {step && <div className='text-GRAY_1000 f-12-300 uppercase'>step {step}</div>}
           </div>
           {!!subtitle && <div className={cn('f-11-300 text-GRAY_600 mt-1', subtitleClassName)}>{subtitle}</div>}
         </div>
       )}
 
       {!!onClose && !hideCloseButton && (
-        <div className={cn('p-2 rounded-full cursor-pointer', closeButtonClassName)} onClick={onClose}>
+        <div className={cn('cursor-pointer rounded-full p-2', closeButtonClassName)} onClick={onClose}>
           <SvgSpriteLoader id='x-close' iconCategory={ICON_SPRITE_TYPES.GENERAL} {...closeButtonDimensions} />
         </div>
       )}

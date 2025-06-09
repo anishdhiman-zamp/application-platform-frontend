@@ -89,7 +89,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
       <div
         ref={menuRef}
         className={cn(
-          `absolute top-full mt-1.5 w-fit shadow-dropdown transition-all duration-500 z-50 min-w-[218px]`,
+          `shadow-dropdown absolute top-full z-50 mt-1.5 w-fit min-w-[218px] transition-all duration-500`,
           controlClassName,
           isRightAligned ? 'right-0' : getMenuPlacement ? 'right-0' : 'left-0',
           isOpen ? '' : 'max-h-0 overflow-hidden border-0',
@@ -100,7 +100,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
           filterKey={filter?.key}
           filterType={filter?.type as FILTER_TYPES}
           label={filter?.label}
-          className='min-w-[200px] w-full'
+          className='w-full min-w-[200px]'
           isOpen={isOpen}
           updateContextOnChange
           onClose={() => setIsOpen(false)}

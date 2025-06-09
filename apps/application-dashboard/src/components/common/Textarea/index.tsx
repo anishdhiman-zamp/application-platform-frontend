@@ -22,7 +22,7 @@ export type TextareaPropsType = {
   errBorderClassName?: string;
   errClassName?: string;
   textAreaStyle?: string;
-  textAreaRef?: RefObject<HTMLTextAreaElement>;
+  textAreaRef?: RefObject<HTMLTextAreaElement | null>;
   tabIndex?: number;
 };
 
@@ -51,7 +51,7 @@ const Textarea: FC<TextareaPropsType> = ({
         id={id}
         name={name}
         className={cn(
-          `placeholder:text-BORDER_6 placeholder:tracking-[0.03em] w-full outline-none border border-GRAY_400 rounded-md`,
+          `placeholder:text-BORDER_6 border-GRAY_400 w-full rounded-md border outline-hidden placeholder:tracking-[0.03em]`,
           className,
           textAreaStyle,
           error ? errBorderClassName || 'border-ERROR_RED' : 'border-BORDER_7 border-b-BORDER_6',

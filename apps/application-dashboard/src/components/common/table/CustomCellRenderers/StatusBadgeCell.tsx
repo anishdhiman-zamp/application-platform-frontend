@@ -19,7 +19,7 @@ const StatusBadgeCell = ({ value }: StatusBadgeCellProps) => {
   return (
     <div
       className={cn(
-        'inline-flex rounded-md f-11-500 px-1.5 py-1 capitalize',
+        'f-11-500 inline-flex rounded-md px-1.5 py-1 capitalize',
         badgeStyles[value as keyof typeof badgeStyles],
       )}
     >

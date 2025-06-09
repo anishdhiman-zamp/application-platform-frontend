@@ -1,3 +1,5 @@
+'use client';
+
 import { memo, useEffect } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
@@ -8,10 +10,10 @@ import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
@@ -23,7 +25,11 @@ const Sidebar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const params = useParams();
   const router = useRouter();
-  const pathname = router?.pathname;
+  const pathTrim = usePathname();
+  const hash = useHash();
+  const pathname = pathTrim + hash;
+  const searchParams = useSearchParams();
+  const processId = searchParams?.get('processId');
 
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
@@ -44,17 +50,17 @@ const Sidebar = () => {
 
   useEffect(() => {
     SETTING_SIDEBAR_ITEMS.forEach((item) => {
-      if (router.asPath.includes(item.path)) {
+      if (pathname?.includes(item.path)) {
         router.prefetch(item.path);
       }
     });
-  }, []);
+  }, [pathname, router]);
 
   return (
     <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
       <div className='w-60'>
         <AnimatePresence mode='wait'>
-          {!router.pathname.includes(ROUTES_PATH.SETTINGS) ? (
+          {!pathname?.includes(ROUTES_PATH.SETTINGS) ? (
             <motion.div
               key='details'
               initial={{ opacity: 0, x: -20 }}
@@ -62,14 +68,14 @@ const Sidebar = () => {
               transition={{ duration: 0.3, type: 'spring' }}
               className='h-full'
             >
-              <div className='px-2 border-b border-GRAY_400 pb-4'>
+              <div className='border-GRAY_400 border-b px-2 pb-4'>
                 {SIDEBAR_ITEMS.map((item) => (
                   <Link href={item.path} key={item.label} className='cursor-pointer'>
                     <SidebarTab
                       key={item?.label}
                       name={item?.label}
                       iconId={item?.iconId}
-                      isSelected={!params?.pageId && !params?.processId && pathname.includes(item?.path)}
+                      isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
                     />
                   </Link>
                 ))}
@@ -87,7 +93,7 @@ const Sidebar = () => {
                         key={process?.id}
                         label={process?.display_name}
                         processId={process?.id}
-                        isSelected={params?.processId === process?.id}
+                        isSelected={processId === process?.id}
                       />
                     ))}
                   </CommonWrapper>
@@ -120,19 +126,19 @@ const Sidebar = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, type: 'spring' }}
             >
-              <div className='w-60 absolute px-2 -top-12 left-0 z-10 bg-BACKGROUND_GRAY_1'>
-                <div className='text-GRAY_700 py-4 flex items-center gap-2 f-13-500 select-none'>
+              <div className='bg-BACKGROUND_GRAY_1 absolute -top-12 left-0 z-10 w-60 px-2'>
+                <div className='text-GRAY_700 f-13-500 flex items-center gap-2 py-4 select-none'>
                   <SvgSpriteLoader id='arrow-left' size={16} onClick={() => router.back()} />
                   Settings
                 </div>
-                <div className='flex flex-col '>
+                <div className='flex flex-col'>
                   {SETTING_SIDEBAR_ITEMS.map((item) => (
                     <button className='inline' key={item.id} onClick={() => router.replace(item?.path)}>
                       <SidebarTab
                         key={item?.id}
                         name={item?.label}
                         iconId={item?.iconId}
-                        isSelected={router.asPath.includes(item?.path)}
+                        isSelected={pathname?.includes(item?.path)}
                         className='text-GRAY_1000'
                       />
                     </button>
@@ -143,7 +149,7 @@ const Sidebar = () => {
           )}
         </AnimatePresence>
         <div
-          className='border-t border-GRAY_400 px-4 py-3 absolute bottom-0 w-full cursor-pointer h-[57px] flex items-center gap-2.5 text-GRAY_900'
+          className='border-GRAY_400 text-GRAY_900 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
           onClick={logout}
         >
           <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />

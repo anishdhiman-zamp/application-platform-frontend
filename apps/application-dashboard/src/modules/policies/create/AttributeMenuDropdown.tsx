@@ -161,7 +161,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
               <Attribute
                 label={attribute.label}
                 className={cn({
-                  'border border-red-500 rounded-md': error,
+                  'rounded-md border border-red-500': error,
                 })}
                 displayValue={attributeDisplayValue(value)}
                 onClick={(e: React.MouseEvent) => {
@@ -171,7 +171,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='z-[1001] max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+            className='z-1001 max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
             sideOffset={6}
             align='start'
             side='bottom'

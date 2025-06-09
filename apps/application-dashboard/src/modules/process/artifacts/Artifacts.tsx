@@ -41,7 +41,7 @@ const Artifacts = ({
 }: ArtifactsProps) => {
   const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams.get('processId') as string;
+  const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
 
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
@@ -68,11 +68,11 @@ const Artifacts = ({
   }, [artifacts]);
 
   return (
-    <div className='h-full w-full relative animate-fade-in'>
+    <div className='animate-fade-in relative h-full w-full'>
       <Tabs
         value={activeTab}
         onValueChange={(value) => setActiveTab(value as PDF_DATASET_TAB)}
-        className='h-full max-w-full flex flex-col'
+        className='flex h-full max-w-full flex-col'
       >
         <ArtifactTopbar
           onClose={onClose}
@@ -85,9 +85,9 @@ const Artifacts = ({
         <CommonWrapper
           isLoading={isLoading}
           loader={
-            <div className='w-full h-full flex flex-col items-center justify-center gap-y-1 bg-BG_GRAY_2'>
+            <div className='bg-BG_GRAY_2 flex h-full w-full flex-col items-center justify-center gap-y-1'>
               <SvgSpriteLoader id='stand' size={14} color={COLORS.GRAY_600} />
-              <span className='f-13-450 animate-pulse text-GRAY_600'>Loading artifact...</span>
+              <span className='f-13-450 text-GRAY_600 animate-pulse'>Loading artifact...</span>
             </div>
           }
           skeletonType={SkeletonTypes.CUSTOM}
@@ -97,7 +97,7 @@ const Artifacts = ({
         >
           {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifacts && (
             <>
-              <TabsContent value={PDF_DATASET_TAB.DATASET} className='h-full w-full flex-1 mt-0'>
+              <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
                 <DatasetArtifact
                   datasetArtifact={
                     artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
@@ -105,7 +105,7 @@ const Artifacts = ({
                   }
                 />
               </TabsContent>
-              <TabsContent value={PDF_DATASET_TAB.PDF} className='h-full w-full flex-1 mt-0'>
+              <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
                 <PdfArtifact
                   pdfArtifact={
                     artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]

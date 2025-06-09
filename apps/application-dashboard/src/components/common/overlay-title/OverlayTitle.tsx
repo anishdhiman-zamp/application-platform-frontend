@@ -32,14 +32,14 @@ const OverlayTitle: FC<OverlayTitleProps> = ({
   closeButtonDimensions = { size: 14 },
 }) =>
   (topBar || title || !hideCloseButton) && (
-    <div className={cn('min-h-[56px] pl-5 pr-4 f-16-300 flex justify-between items-center py-4', headerClassName)}>
+    <div className={cn('f-16-300 flex min-h-[56px] items-center justify-between py-4 pr-4 pl-5', headerClassName)}>
       {topBar ? (
         topBar
       ) : (
         <div className='grow'>
-          <div className='f-14-550 gap-1 flex items-center '>
+          <div className='f-14-550 flex items-center gap-1'>
             <div className={cn(titleClassName)}>{title}</div>
-            {step && <div className='text-ZAMP_PRIMARY uppercase f-12-300'>step {step}</div>}
+            {step && <div className='text-ZAMP_PRIMARY f-12-300 uppercase'>step {step}</div>}
           </div>
           {!!subtitle && <div className={cn('f-11-300 text-GRAY_600 mt-1', subtitleClassName)}>{subtitle}</div>}
         </div>
@@ -47,7 +47,7 @@ const OverlayTitle: FC<OverlayTitleProps> = ({
 
       {!!onClose && !hideCloseButton && (
         <div
-          className={cn('hover:bg-BACKGROUND_SECONDARY p-2 rounded-full cursor-pointer', closeButtonClassName)}
+          className={cn('hover:bg-BACKGROUND_SECONDARY cursor-pointer rounded-full p-2', closeButtonClassName)}
           onClick={onClose}
         >
           <SvgSpriteLoader id='x-close' iconCategory={ICON_SPRITE_TYPES.GENERAL} {...closeButtonDimensions} />

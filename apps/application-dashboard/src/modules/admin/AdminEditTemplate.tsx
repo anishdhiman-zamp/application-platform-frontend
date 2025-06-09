@@ -73,7 +73,7 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
         isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='flex justify-center items-center h-full overflow-y-auto w-full z-1000 bg-white'>
+          <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -84,7 +84,7 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
           </div>
         }
       >
-        <div className='flex justify-between m-4 items-center'>
+        <div className='m-4 flex items-center justify-between'>
           <div className='f-20-600'>{data?.templates?.[0]?.name}</div>
           <Button
             size={SIZE_TYPES.MEDIUM}

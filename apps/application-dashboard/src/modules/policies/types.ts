@@ -114,8 +114,8 @@ export type ApprovalFlow = {
 export type ApproverListOption = {
   id: string;
   label: string;
-  richLabel: JSX.Element;
-  display_value: JSX.Element;
+  richLabel: React.JSX.Element;
+  display_value: React.JSX.Element;
   value: { type: ResourceAudienceType; id: string };
 };
 

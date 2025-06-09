@@ -26,7 +26,7 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
   return (
     <div
       className={cn(
-        'w-full h-full p-3 flex flex-col items-center justify-center bg-white break-words whitespace-normal overflow-hidden',
+        'flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white p-3 break-words whitespace-normal',
         isSingleHeader && 'relative flex items-end justify-end',
       )}
       style={resultantConfigStyles}
@@ -40,10 +40,10 @@ const PivotColGroupHeader: FC<PivotAutoGroupHeaderProps> = (params) => {
           className='shrink-0 object-cover object-center'
         />
       )}
-      <div className='relative flex gap-2 justify-center items-center z-10 text-center'>
+      <div className='relative z-10 flex items-center justify-center gap-2 text-center'>
         <span className={cn(isSingleHeader ? 'f-13-550' : 'f-13-450')}> {mainText}</span>
         {suffix && (
-          <span className='p-1.5 py-1 rounded border border-GRAY_400 bg-white f-12-450 text-GRAY_900'>{suffix}</span>
+          <span className='border-GRAY_400 f-12-450 text-GRAY_900 rounded border bg-white p-1.5 py-1'>{suffix}</span>
         )}
       </div>
     </div>

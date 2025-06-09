@@ -8,7 +8,7 @@ import RecipientCardSkeleton from 'modules/payments/recipients/components/Recipi
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import TemplateCard from 'modules/payments/templates/components/TemplateCard';
 import { TEMPLATE_LIST_TABS } from 'modules/payments/templates/templates.constant';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useGetTemplateListQuery } from '@/apis/payments';
 import Input from '@/components/common/input';
 import TabsV2 from '@/components/common/tabs/TabsV2';
@@ -56,29 +56,29 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
   return (
     <div className='h-full' tabIndex={-1}>
       <div>
-        <div className='border-b border-GRAY_400 pt-6 pl-6 pr-4 pb-1.5'>
+        <div className='border-GRAY_400 border-b pt-6 pr-4 pb-1.5 pl-6'>
           <div className='f-16-600 mb-4.5'>Templates</div>
           <div className='flex flex-col gap-3'>
             <TabsV2
               tabsList={TEMPLATE_LIST_TABS}
               currentTab={currentTab}
               onValueChange={handleTabSelect}
-              contentClassName='max-h-[314px] overflow-y-scroll f-12-450 !mt-0'
+              contentClassName='max-h-[314px] overflow-y-scroll f-12-450 mt-0!'
               listClassName='grid w-full grid-cols-2 mx-auto'
-              triggerClassName='!mt-0'
+              triggerClassName='mt-0!'
             />
             <Input
               type='text'
               placeholder='Search...'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              overrideInputBgClassName='!border-none !px-2 focus:outline-none !py-0 !h-6 placeholder:!text-GRAY_500'
+              overrideInputBgClassName='border-none! px-2! focus:outline-hidden py-0! h-6! placeholder:!text-GRAY_500'
               focusClassNames=''
               tabIndex={createTemplateType ? -1 : 0}
             />
             <div className='flex justify-between'>
               <div
-                className='flex items-center cursor-pointer f-12-500 gap-2 px py-1.5'
+                className='f-12-500 px flex cursor-pointer items-center gap-2 py-1.5'
                 onClick={() => setCreateTemplateType(currentTab as MOVE_MONEY_TYPE)}
               >
                 <SvgSpriteLoader id='plus' size={14} />
@@ -88,7 +88,7 @@ const TemplateList: FC<TemplateListProps> = ({ onTemplateClick }) => {
             </div>
           </div>
         </div>
-        <div className='px-4.5 py-2 h-[calc(100vh-220px)] overflow-y-auto'>
+        <div className='h-[calc(100vh-220px)] overflow-y-auto px-4.5 py-2'>
           <CommonWrapper
             isNoData={!templates?.length}
             isLoading={isLoading}

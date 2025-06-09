@@ -1,6 +1,6 @@
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 import { defaultFnType } from '@/types/commonTypes';
@@ -28,18 +28,18 @@ const ShareResourceAccessDetails = ({
         <Button
           variant='ghost'
           size='xxsmall'
-          className='f-12-450 text-GRAY_1000 px-1 py-0.5 flex items-center gap-1.5 group'
+          className='f-12-450 text-GRAY_1000 group flex items-center gap-1.5 px-1 py-0.5'
           onClick={handleToggleCustomiseAccess}
           disabled={!showRoleChangeDropdown}
         >
-          <span className='w-2 h-2 rounded-[2px]' style={{ backgroundColor: fgacColor ?? COLORS.BLUE_150 }} />
+          <span className='h-2 w-2 rounded-[2px]' style={{ backgroundColor: fgacColor ?? COLORS.BLUE_150 }} />
           <span>Custom</span>
           {showRoleChangeDropdown && (
             <SvgSpriteLoader
               id='arrow-narrow-right'
               size={12}
               color={COLORS.GRAY_1000}
-              className='group-hover:opacity-100 opacity-0'
+              className='opacity-0 group-hover:opacity-100'
             />
           )}
         </Button>
@@ -47,7 +47,7 @@ const ShareResourceAccessDetails = ({
         <TooltipV2 tooltipBody={tooltipText} asChildTrigger>
           <div
             className={cn(
-              'cursor-pointer flex items-center gap-1.5 px-1 group rounded-sm w-fit f-12-450 text-GRAY_1000',
+              'f-12-450 text-GRAY_1000 group flex w-fit cursor-pointer items-center gap-1.5 rounded-sm px-1',
               !showRoleChangeDropdown ? 'text-GRAY_600' : 'hover:bg-accent hover:text-accent-foreground',
             )}
             onClick={handleToggleCustomiseAccess}
@@ -59,7 +59,7 @@ const ShareResourceAccessDetails = ({
                 id='arrow-narrow-right'
                 size={12}
                 color={COLORS.GRAY_1000}
-                className='group-hover:opacity-100 opacity-0'
+                className='opacity-0 group-hover:opacity-100'
               />
             )}
           </div>

@@ -31,16 +31,16 @@ const PolicyActionsDropdown = ({ policy }: { policy: PolicyDetailsType }) => {
           <Ellipsis size={14} />
         </div>
       </PopoverTrigger>
-      <PopoverContent className='z-[1001] max-h-60 overflow-y-auto' align='end'>
+      <PopoverContent className='z-1001 max-h-60 overflow-y-auto' align='end'>
         <PopoverMenuItem
-          className='hover:bg-gray-100 rounded-md flex gap-1.5 text-primary flex-1 f-12-500 items-center'
+          className='text-primary f-12-500 flex flex-1 items-center gap-1.5 rounded-md hover:bg-gray-100'
           onClick={handleEdit}
         >
           <SvgSpriteLoader id='edit-03' size={12} />
           <span>Edit</span>
         </PopoverMenuItem>
         <PopoverMenuItem
-          className='hover:bg-gray-100 rounded-md flex gap-1.5 text-red-800 flex-1 f-12-500 items-center'
+          className='f-12-500 flex flex-1 items-center gap-1.5 rounded-md text-red-800 hover:bg-gray-100'
           onClick={handleDelete}
         >
           <SvgSpriteLoader id='trash-03' size={12} />

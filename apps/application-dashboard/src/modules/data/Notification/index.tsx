@@ -19,8 +19,8 @@ const Notification: FC<NotificationProps> = ({ isPolling, message = 'Tagging in 
   return (
     <>
       {isPolling ? (
-        <div className='relative  cursor-pointer w-5.5 h-5.5 rounded' onClick={toggleNotificationPanel}>
-          <div className='hover:bg-GRAY_100 h-full w-full rounded flex items-center justify-center'>
+        <div className='relative h-5.5 w-5.5 cursor-pointer rounded' onClick={toggleNotificationPanel}>
+          <div className='hover:bg-GRAY_100 flex h-full w-full items-center justify-center rounded'>
             <ProgressBar
               trackColor={COLORS.GRAY_400}
               indicatorColor={'#22A356'}
@@ -34,7 +34,7 @@ const Notification: FC<NotificationProps> = ({ isPolling, message = 'Tagging in 
           {showNotificationPanel && (
             <div
               ref={dropdownRef}
-              className='p-5 absolute top-7 -right-[86px] h-[55px] f-13-500 bg-white rounded-[10px] text-GRAY_1000 f-12-450 z-1000 flex items-center w-[308px] border-0.5 border-GRAY_500 gap-3'
+              className='f-13-500 text-GRAY_1000 f-12-450 border-0.5 border-GRAY_500 absolute top-7 -right-[86px] z-1000 flex h-[55px] w-[308px] items-center gap-3 rounded-[10px] bg-white p-5'
             >
               <ProgressBar
                 trackColor={COLORS.GRAY_400}

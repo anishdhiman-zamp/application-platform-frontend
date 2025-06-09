@@ -21,7 +21,7 @@ const TagChip: FC<TagChipProps> = ({ item, existingList, showIcon = false, exter
 
   return (
     <span
-      className={cn(isExisting ? '' : 'f-11-400 py-1 px-1.5 rounded-md text-GRAY_1000 flex items-center w-fit')}
+      className={cn(isExisting ? '' : 'f-11-400 text-GRAY_1000 flex w-fit items-center rounded-md px-1.5 py-1')}
       style={isExisting ? {} : { backgroundColor: externalColor ?? backgroundColor }}
     >
       {showIcon && <SvgSpriteLoader id='lightning-01' className='mr-1' height={12} width={12} />}

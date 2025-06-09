@@ -57,6 +57,7 @@ module.exports = {
   ignorePatterns: ['*.webp', '*.png', 'fonts.css', 'eslint.js', '**/next.config.js', 'dist'],
   rules: {
     'no-unused-vars': 'off',
+    'react/no-unescaped-entities': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',
       {

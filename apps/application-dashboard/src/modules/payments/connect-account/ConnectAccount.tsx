@@ -21,7 +21,7 @@ const ConnectAccount = () => {
     }
   };
 
-  return <div className='flex justify-center items-center'>{renderStep()}</div>;
+  return <div className='flex items-center justify-center'>{renderStep()}</div>;
 };
 
 export default ConnectAccount;

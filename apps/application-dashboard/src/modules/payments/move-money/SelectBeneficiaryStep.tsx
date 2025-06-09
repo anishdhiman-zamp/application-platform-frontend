@@ -59,7 +59,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
 
   return (
     <div className='h-screen overflow-y-scroll pt-20'>
-      <div className='max-w-75 m-auto'>
+      <div className='m-auto max-w-75'>
         <div className='f-22-550 mb-5'>Who are you paying?</div>
         <div className='flex flex-col gap-5'>
           <SelectBeneDropdown
@@ -97,7 +97,7 @@ const SelectBeneficiaryStep: FC<SelectBeneficiaryStepProps> = ({ handleStepChang
             </div>
           )}
         </div>
-        <div className='flex gap-3 mt-10'>
+        <div className='mt-10 flex gap-3'>
           <Button
             onClick={() => handleStepChange(currentStep - 1)}
             type={BUTTON_TYPES.SECONDARY}

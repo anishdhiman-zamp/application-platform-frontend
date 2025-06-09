@@ -96,7 +96,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
         tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
         className='z-1'
       >
-        <div className='hover:bg-GRAY_100 p-1 rounded-md' onClick={handleCopy}>
+        <div className='hover:bg-GRAY_100 rounded-md p-1' onClick={handleCopy}>
           {value}
         </div>
       </Tooltip>
@@ -105,10 +105,10 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
 
   return (
     <>
-      <div className='f-12-400 text-GRAY_700 h-6 flex items-center'>
+      <div className='f-12-400 text-GRAY_700 flex h-6 items-center'>
         <p>{column?.headerName ?? column?.field}</p>
       </div>
-      <div className='f-11-400 text-GRAY_1000 min-h-6 h-fit flex items-center break-all'>{getValue(column, value)}</div>
+      <div className='f-11-400 text-GRAY_1000 flex h-fit min-h-6 items-center break-all'>{getValue(column, value)}</div>
     </>
   );
 };

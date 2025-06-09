@@ -29,8 +29,8 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                 <div
                   key={index}
                   className={cn(
-                    !isHoveredLoaders && 'absolute ease-out delay-100',
-                    'flex gap-3 justify-between items-center w-96 px-5 py-3 bg-white border-[0.5px] border-GRAY_500 rounded-2.5 shadow-tableFilterMenu transition-transform duration-300 ease-out delay-100',
+                    !isHoveredLoaders && 'absolute delay-100 ease-out',
+                    'border-GRAY_500 rounded-2.5 shadow-table-filter-menu flex w-96 items-center justify-between gap-3 border-[0.5px] bg-white px-5 py-3 transition-transform delay-100 duration-300 ease-out',
                   )}
                   style={{
                     transform: isHoveredLoaders
@@ -39,14 +39,14 @@ const HistoryBulkLoaders: FC<HistoryBulkLoadersPropsType> = ({
                     zIndex: isHoveredLoaders ? '' : datasetBulkLoaders?.length - index,
                   }}
                 >
-                  <div className='flex gap-3 items-start'>
+                  <div className='flex items-start gap-3'>
                     <StatusIndicator status={loader?.status} />
                     <div className='flex flex-col'>
                       <span className='f-13-500 text-GRAY_1000'>{loader?.title}</span>
                       <span className='f-11-400 text-GRAY_700 mt-1'>{loader?.description}</span>
                     </div>
                   </div>
-                  <div className='flex flex-col justify-center items-center'>
+                  <div className='flex flex-col items-center justify-center'>
                     {!(loader?.status === LOADER_STATUS?.LOADING) && (
                       <SvgSpriteLoader
                         id='x-close'

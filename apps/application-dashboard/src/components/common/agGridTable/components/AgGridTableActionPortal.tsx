@@ -49,7 +49,7 @@ const AgGridTableActionPortal: FC<AgGridTableActionPortalProps> = ({
     createPortal(
       <div
         style={{ ...positionStyles }}
-        className={`z-[998] fixed top-0 ${actionWrapperClassName}`}
+        className={`fixed top-0 z-998 ${actionWrapperClassName}`}
         ref={ref}
         onClick={(e) => {
           e?.stopPropagation();

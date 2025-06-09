@@ -69,7 +69,7 @@ export const ADMIN_DATASET_LISTING_COLUMNS: ColDef[] = [
 
 export const TRANSFORM_DATASET_LABEL_PROPS = {
   input: {
-    labelClassName: '!mb-1',
+    labelClassName: 'mb-1!',
     className: 'w-full space-y-2',
   },
   dropdown: {

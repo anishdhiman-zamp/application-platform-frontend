@@ -4,10 +4,10 @@ const ArtifactsSkeleton = () => {
   return (
     <>
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className='flex flex-col gap-y-2 w-full'>
-          <SkeletonElement className='h-4 rounded bg-GRAY_400 w-1/2' />
-          <SkeletonElement className='h-4 rounded bg-GRAY_400 w-3/4' />
-          <SkeletonElement className='h-4 rounded bg-GRAY_400 w-2/3' />
+        <div key={index} className='flex w-full flex-col gap-y-2'>
+          <SkeletonElement className='bg-GRAY_400 h-4 w-1/2 rounded' />
+          <SkeletonElement className='bg-GRAY_400 h-4 w-3/4 rounded' />
+          <SkeletonElement className='bg-GRAY_400 h-4 w-2/3 rounded' />
         </div>
       ))}
     </>

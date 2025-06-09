@@ -52,7 +52,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const firstLoadDone = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const process = searchParams.get('process') as string;
+  const process = searchParams?.get('process') as string;
 
   const {
     dispatch,
@@ -322,7 +322,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   return (
     <>
       <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div className='flex items-center justify-between pr-8 z-1000'>
+        <div className='z-1000 flex items-center justify-between pr-8'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
@@ -338,7 +338,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}
@@ -347,7 +347,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             totalRows={totalRows}
             customTheme={myThemeWithProcess}
             headerClass='f-12-450 text-GRAY_700'
-            cellClass='!text-[13px] !font-[450] !px-4'
+            cellClass='text-[13px]! font-[450]! px-4!'
             suppressCellFocus
             enableCellSelection={false}
             onGridReady={handleGridReady}

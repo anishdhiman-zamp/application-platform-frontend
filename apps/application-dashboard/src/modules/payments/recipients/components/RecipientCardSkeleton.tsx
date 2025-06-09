@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 type RecipientCardSkeletonProps = {
   length?: number;
@@ -10,19 +10,19 @@ const RecipientCardSkeleton: FC<RecipientCardSkeletonProps> = ({ length = 8, cla
   return (
     <>
       {Array.from({ length }, (_, index) => index).map((index) => (
-        <div key={index} className={cn('flex py-1 px-1.5 justify-between mb-2 animate-pulse', className)}>
+        <div key={index} className={cn('mb-2 flex animate-pulse justify-between px-1.5 py-1', className)}>
           <div className='flex items-center gap-1.5'>
-            <div className='w-6 h-6 flex items-center justify-center rounded-full bg-GRAY_200'></div>
+            <div className='bg-GRAY_200 flex h-6 w-6 items-center justify-center rounded-full'></div>
             <div className='flex flex-col gap-1'>
-              <div className='w-24 h-3 bg-GRAY_200 rounded-md'></div>
-              <div className='w-24 h-2 bg-GRAY_200 rounded-md'></div>
+              <div className='bg-GRAY_200 h-3 w-24 rounded-md'></div>
+              <div className='bg-GRAY_200 h-2 w-24 rounded-md'></div>
             </div>
           </div>
           <div className='flex items-center gap-6'>
-            <div className='w-24 h-3 bg-GRAY_200 rounded-md'></div>
-            <div className='w-4 h-4 rounded bg-GRAY_200'></div>
-            <div className='w-4 h-4 rounded bg-GRAY_200'></div>
-            <div className='w-4 h-4 rounded bg-GRAY_200'></div>
+            <div className='bg-GRAY_200 h-3 w-24 rounded-md'></div>
+            <div className='bg-GRAY_200 h-4 w-4 rounded'></div>
+            <div className='bg-GRAY_200 h-4 w-4 rounded'></div>
+            <div className='bg-GRAY_200 h-4 w-4 rounded'></div>
           </div>
         </div>
       ))}

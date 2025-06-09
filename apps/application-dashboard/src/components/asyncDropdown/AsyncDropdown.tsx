@@ -68,7 +68,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
     >
       <div
         className={cn(
-          'flex justify-between items-center py-3 pl-4 gap-0 cursor-pointer h-10 f-12-400',
+          'f-12-400 flex h-10 cursor-pointer items-center justify-between gap-0 py-3 pl-4',
           parentWrapperClassName,
         )}
         onClick={handleToggleDropdown}
@@ -90,7 +90,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
       {isOpen && (
         <div
           className={cn(
-            'flex flex-col border border-GRAY_50 rounded-md p-1 absolute right-0 max-w-[170px] min-w-max bg-white z-1000 shadow-tableFilterMenu',
+            'border-GRAY_50 shadow-table-filter-menu absolute right-0 z-1000 flex max-w-[170px] min-w-max flex-col rounded-md border bg-white p-1',
             wrapperClassName,
           )}
           style={{
@@ -101,12 +101,12 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
             <div
               key={role.value}
               className={cn(
-                'flex flex-col py-2 pl-2.5 pr-2 hover:bg-GRAY_100 cursor-pointer rounded-md',
+                'hover:bg-GRAY_100 flex cursor-pointer flex-col rounded-md py-2 pr-2 pl-2.5',
                 role.value === selectedValue?.value && selectedOptionClassName,
               )}
               onClick={() => onChange(role)}
             >
-              <span className='flex justify-between items-start f-12-500 text-GRAY_1000'>
+              <span className='f-12-500 text-GRAY_1000 flex items-start justify-between'>
                 {role?.label}
                 {showSelectedIcon && role?.value === selectedValue?.value && (
                   <SvgSpriteLoader
@@ -123,7 +123,7 @@ const AsyncDropdown: FC<AsyncDropdownPropsType> = ({
           ))}
           {showDelete && (
             <span
-              className='flex gap-1.5 items-center f-12-500 text-RED_700 py-2 px-2.5 border-t border-DIVIDER_GRAY cursor-pointer'
+              className='f-12-500 text-RED_700 border-DIVIDER_GRAY flex cursor-pointer items-center gap-1.5 border-t px-2.5 py-2'
               onClick={onDelete}
             >
               <SvgSpriteLoader

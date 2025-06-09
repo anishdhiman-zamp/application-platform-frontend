@@ -17,7 +17,7 @@ import 'react-grid-layout/css/styles.css';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 type ColumnListingProps = {
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
   onClose: defaultFnType;
   datasetId: string;
 };
@@ -170,11 +170,11 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   return (
     <MenuWrapper
       id='display-options'
-      className={`!absolute z-10 right-0 mt-1 min-w-[250px] !overflow-visible`}
-      childrenWrapperClassName='!overflow-visible max-h-[422px] w-full'
+      className={`absolute! right-0 z-10 mt-1 min-w-[250px] overflow-visible!`}
+      childrenWrapperClassName='overflow-visible! max-h-[422px] w-full'
       style={{ width: maxWidth }}
     >
-      <div className='pt-1 px-1'>
+      <div className='px-1 pt-1'>
         <div className='flex items-center gap-1.5 p-2'>
           <SvgSpriteLoader
             id='arrow-narrow-left'
@@ -184,7 +184,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
             className='cursor-pointer'
             onClick={onClose}
           />
-          <div className='f-12-500 text-GRAY_1000 flex justify-between w-full'>
+          <div className='f-12-500 text-GRAY_1000 flex w-full justify-between'>
             <div>Columns</div>
             <div className='cursor-pointer' onClick={handleSelectAll}>
               Select All
@@ -202,7 +202,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           onBlur={() => setInputFocused(false)}
         />
       </div>
-      <div className='text-GRAY_900 max-h-[330px] [&::-webkit-scrollbar]:hidden overflow-x-visible overflow-y-auto'>
+      <div className='text-GRAY_900 max-h-[330px] overflow-x-visible overflow-y-auto [&::-webkit-scrollbar]:hidden'>
         <ResponsiveGridLayout
           className='layout'
           layouts={{ lg: layout }}
@@ -217,16 +217,16 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           {columns?.map((column, index) => (
             <div
               key={column?.getColId()}
-              className='flex items-center gap-2.5 p-2 bg-white hover:!bg-GRAY_100 rounded-md w-full'
+              className='hover:!bg-GRAY_100 flex w-full items-center gap-2.5 rounded-md bg-white p-2'
             >
-              <div className='drag-handle cursor-grab min-w-[14px]'>
+              <div className='drag-handle min-w-[14px] cursor-grab'>
                 <Image src={DRAG_ICON} width={14} height={14} alt='drag icon' />
               </div>
               <div
                 ref={(el) => {
                   columnRefs.current[index] = el;
                 }}
-                className='flex items-center gap-2.5 cursor-pointer'
+                className='flex cursor-pointer items-center gap-2.5'
                 onClick={(e) => handleColumnClick(e, column)}
               >
                 <CheckBox

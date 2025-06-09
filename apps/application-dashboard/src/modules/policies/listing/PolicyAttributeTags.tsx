@@ -14,7 +14,7 @@ const hasOptions = (attr: any): attr is { options: Array<{ value: string; label:
 };
 
 const PolicyAttributeTags: FC<PolicyAttributeTagsProps> = ({ creatorLength, conditions, action }) => (
-  <div className='flex gap-1.5 flex-wrap'>
+  <div className='flex flex-wrap gap-1.5'>
     <Tag variant='gray'>
       {creatorLength ?? 'Any'} {creatorLength && creatorLength > 1 ? 'Creators' : 'Creator'}
     </Tag>

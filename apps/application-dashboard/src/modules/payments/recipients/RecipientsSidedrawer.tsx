@@ -60,7 +60,7 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, type: 'spring' }}
-          className='h-full '
+          className='h-full'
         >
           <RecipientDetails
             allowActions={allowActions}
@@ -90,8 +90,8 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className='p-0 h-screen overflow-hidden'>
-        <div className='overflow-y-scroll h-full'>
+      <SheetContent className='h-screen overflow-hidden p-0'>
+        <div className='h-full overflow-y-scroll'>
           <AnimatePresence mode='wait'>{renderStep()}</AnimatePresence>
         </div>
         <AddRecipient open={isAddRecipient} onOpenChange={setIsAddRecipient} />

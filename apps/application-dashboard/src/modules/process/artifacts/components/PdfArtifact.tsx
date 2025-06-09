@@ -33,7 +33,7 @@ interface PdfArtifactProps {
 
 const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
   const searchParams = useSearchParams();
-  const processId = searchParams.get('processId') as string;
+  const processId = searchParams?.get('processId') as string;
 
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -149,32 +149,32 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='flex justify-center items-center h-full w-full'>
+        <div className='flex h-full w-full items-center justify-center'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
-      className='h-full w-full bg-BG_GRAY_1'
+      className='bg-BG_GRAY_1 h-full w-full'
     >
       <div
         ref={containerRef}
-        className={cn('h-full w-full overflow-scroll pb-24 px-4 pt-4 animate-fade-in', {
+        className={cn('animate-fade-in h-full w-full overflow-scroll px-4 pt-4 pb-24', {
           'flex flex-col items-center justify-center pb-0': isPdfLoading || (numPages === 1 && !isSignedUrlLoading),
         })}
       >
         <Document
           file={signedUrl?.signed_url}
           loading={
-            <div className='flex justify-center w-full h-full animate-fade-in'>
-              <Skeleton className='w-[413px] h-[582px]' />
+            <div className='animate-fade-in flex h-full w-full justify-center'>
+              <Skeleton className='h-[582px] w-[413px]' />
             </div>
           }
           error={
-            <div className='flex justify-center h-full w-full animate-fade-in'>
+            <div className='animate-fade-in flex h-full w-full justify-center'>
               <span className='f-13-450 text-GRAY_600'>Error loading artifact</span>
             </div>
           }
           noData={
-            <div className='flex justify-center h-full w-full animate-fade-in'>
+            <div className='animate-fade-in flex h-full w-full justify-center'>
               <span className='f-13-450 text-GRAY_600'>No data</span>
             </div>
           }
@@ -189,7 +189,7 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
                 ref={(el) => {
                   pageRefs.current[index] = el;
                 }}
-                className='flex justify-center w-full h-full'
+                className='flex h-full w-full justify-center'
               >
                 <Page width={413} height={582} pageNumber={index + 1} scale={scale} className='my-2.5 shadow-xl' />
               </div>
@@ -213,9 +213,9 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
 
 const PdfToolbar = ({ pageNumber, numPages, previousPage, nextPage, zoomOut, zoomIn }: ToolbarProps) => {
   return (
-    <div className='absolute bottom-1.5 left-1/2 transform -translate-x-1/2 bg-black rounded-md px-2.5 py-1.5 flex items-center gap-x-1.5 z-10 animate-fade-in'>
+    <div className='animate-fade-in absolute bottom-1.5 left-1/2 z-10 flex -translate-x-1/2 transform items-center gap-x-1.5 rounded-md bg-black px-2.5 py-1.5'>
       <SvgSpriteLoader id='chevron-up' color={COLORS.WHITE} size={12} onClick={previousPage} />
-      <div className='text-white f-11-500 flex items-center gap-x-1.5'>
+      <div className='f-11-500 flex items-center gap-x-1.5 text-white'>
         Page <span className='bg-GRAY_950 rounded px-1 py-[2px]'>{pageNumber}</span> / {numPages || '--'}
       </div>
       <SvgSpriteLoader id='chevron-down' color={COLORS.WHITE} size={12} onClick={nextPage} />

@@ -61,14 +61,14 @@ const DualAdminHome = () => {
         </div>
       </div>
       <div>
-        <table className='w-full text-left f-11-450 text-GRAY_700'>
+        <table className='f-11-450 text-GRAY_700 w-full text-left'>
           <thead>
-            <tr className='border-b border-GRAY_400'>
-              <th className='px-2 py-2.5 f-11-450'>Resource</th>
-              <th className='px-2 py-2.5 f-11-450'>Approvers</th>
-              <th className='px-2 py-2.5 f-11-450'></th>
-              <th className='px-2 py-2.5 f-11-450'>Status</th>
-              <th className='px-2 py-2.5 f-11-450'> </th>
+            <tr className='border-GRAY_400 border-b'>
+              <th className='f-11-450 px-2 py-2.5'>Resource</th>
+              <th className='f-11-450 px-2 py-2.5'>Approvers</th>
+              <th className='f-11-450 px-2 py-2.5'></th>
+              <th className='f-11-450 px-2 py-2.5'>Status</th>
+              <th className='f-11-450 px-2 py-2.5'> </th>
             </tr>
           </thead>
           <tbody>

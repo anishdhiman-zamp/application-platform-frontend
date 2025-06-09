@@ -25,7 +25,7 @@ const TemplateFilter: FC<TemplateFilterProps> = ({ selectedFilter, setSelectedFi
     <div ref={moveMoneyActionMenuRef} className='relative z-50 flex items-center'>
       <div
         onClick={() => setIsMoveMoneyActionMenuOpen(!isMoveMoneyActionMenuOpen)}
-        className='f-12-400 flex items-center gap-1.5 cursor-pointer'
+        className='f-12-400 flex cursor-pointer items-center gap-1.5'
       >
         {selectedFilter?.label}
         <DropdownToggle
@@ -34,13 +34,13 @@ const TemplateFilter: FC<TemplateFilterProps> = ({ selectedFilter, setSelectedFi
         />
       </div>
       {isMoveMoneyActionMenuOpen && (
-        <div className='absolute top-full right-0 p-1 rounded-md border border-GRAY_500 bg-white mt-1 animate-opacity select-none min-w-[165px]'>
+        <div className='border-GRAY_500 animate-opacity absolute top-full right-0 mt-1 min-w-[165px] rounded-md border bg-white p-1 select-none'>
           {MOVE_MONEY_TEMPLATE_FILTER_ITEMS.map((item) => (
             <div
               key={item.value}
               onClick={() => handleFilterClick(item)}
               className={cn(
-                'px-2.5 py-2 hover:bg-GRAY_100 rounded-md cursor-pointer f-12-500',
+                'hover:bg-GRAY_100 f-12-500 cursor-pointer rounded-md px-2.5 py-2',
                 selectedFilter?.value === item.value ? 'text-GRAY_1000 bg-GRAY_100' : 'text-GRAY_900',
               )}
             >

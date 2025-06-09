@@ -6,7 +6,7 @@ import Input from 'components/common/input';
 import { FilterConfigType } from 'components/filter/filter.types';
 
 interface SelectFilterMenuItemProps {
-  menuRef: RefObject<HTMLDivElement>;
+  menuRef: RefObject<HTMLDivElement | null>;
   isOpen: boolean;
   getMenuPlacement: () => string;
   filtersConfig: FilterConfigType[];
@@ -46,7 +46,7 @@ const SelectFilterMenuItem = ({
       ref={menuRef}
       style={{ minWidth: menuWidth }}
       className={cn(
-        `absolute top-full min-w-[300px] left-0 mt-1  z-1000 shadow-tableFilterMenu border bg-white rounded-md`,
+        `shadow-table-filter-menu absolute top-full left-0 z-1000 mt-1 min-w-[300px] rounded-md border bg-white`,
         isOpen ? 'max-h-[500px] overflow-auto [&::-webkit-scrollbar]:hidden' : 'max-h-0 overflow-hidden border-0',
         getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : '',
       )}
@@ -55,8 +55,8 @@ const SelectFilterMenuItem = ({
         autoFocus
         inputRef={searchRef}
         placeholder='Search...'
-        className='sticky top-0 bg-white z-10'
-        inputClassName=' border-none w-full focus:outline-none focus:border-none focus:shadow-none'
+        className='sticky top-0 z-10 bg-white'
+        inputClassName=' border-none w-full focus:outline-hidden focus:border-none focus:shadow-none'
         value={search}
         trailingIconProps={
           search
@@ -80,8 +80,8 @@ const SelectFilterMenuItem = ({
               key={index}
               data-testid={`filter-menu-item-${filter?.key}`}
               className={cn(
-                ` flex p-2 items-center rounded w-full`,
-                checkIfFilterIsSelected(filter?.key) ? ' cursor-default opacity-30' : 'cursor-pointer hover:bg-GRAY_70',
+                `flex w-full items-center rounded p-2`,
+                checkIfFilterIsSelected(filter?.key) ? 'cursor-default opacity-30' : 'hover:bg-GRAY_70 cursor-pointer',
               )}
               onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddFilter(filter?.key)}
             >
@@ -89,7 +89,7 @@ const SelectFilterMenuItem = ({
             </div>
           ))
         ) : (
-          <div className='flex justify-center items-center p-2 f-12-450 text-GRAY_700'>No results found</div>
+          <div className='f-12-450 text-GRAY_700 flex items-center justify-center p-2'>No results found</div>
         )}
       </div>
     </div>

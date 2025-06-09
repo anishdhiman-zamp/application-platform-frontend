@@ -14,7 +14,7 @@ const CustomChipRenderer = ({ value, className = '' }: CustomChipsRendererProps)
   }, [value]);
 
   return (
-    <div className={cn(`flex gap-2 w-full`, className)}>
+    <div className={cn(`flex w-full gap-2`, className)}>
       {chips?.map((chip: string, index: number) => (
         <div key={chip + index}>
           <TagChip item={chip} externalColor={COLORS.GRAY_50} />

@@ -1,11 +1,13 @@
+'use client';
+
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -38,25 +40,30 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
+  ref?: React.RefObject<HTMLButtonElement | null>;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
-
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        disabled={isLoading || props.disabled}
-        {...props}
-      >
-        {isLoading ? <Loader2 className='animate-spin' /> : children}
-      </Comp>
-    );
-  },
-);
-
-Button.displayName = 'Button';
+function Button({
+  ref,
+  className,
+  variant,
+  size,
+  asChild = false,
+  isLoading = false,
+  children,
+  ...props
+}: ButtonProps) {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Comp
+      ref={ref}
+      className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isLoading || props.disabled}
+      {...props}
+    >
+      {isLoading ? <Loader2 className='animate-spin' /> : children}
+    </Comp>
+  );
+}
 
 export { Button, buttonVariants };

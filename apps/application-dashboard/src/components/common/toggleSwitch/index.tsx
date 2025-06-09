@@ -12,7 +12,7 @@ const ToggleSwitch: FC<ToggleSwitchProps> = ({
   onChange,
   label = '',
   disabled = false,
-  toggleClassName = 'relative outline-none h-3 w-5 rounded-full transition-all duration-200',
+  toggleClassName = 'relative outline-hidden h-3 w-5 rounded-full transition-all duration-200',
   sliderClassName = 'absolute top-[2px] rounded-full w-2 h-2 transition-all duration-200',
   sliderStyle = '',
   toggleStyle = '',

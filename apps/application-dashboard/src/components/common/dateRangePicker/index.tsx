@@ -173,12 +173,12 @@ const DateRangePicker: FC<DateFilterProps> = ({
     <MenuWrapper
       id={`${id}_DATE_RANGE_FILTER`}
       childrenWrapperClassName={cn(
-        '!overflow-visible !w-[284px]',
+        'overflow-visible! w-[284px]!',
         isSingle
-          ? '!h-[390px] !max-h-125'
+          ? 'h-[390px]! max-h-125!'
           : isPeriodicityEnabled
-            ? '!h-[590px] !max-h-[590px]'
-            : '!h-[480px] !max-h-125',
+            ? 'h-[590px]! max-h-[590px]!'
+            : 'h-[480px]! max-h-125!',
       )}
     >
       <DateRangeMenu

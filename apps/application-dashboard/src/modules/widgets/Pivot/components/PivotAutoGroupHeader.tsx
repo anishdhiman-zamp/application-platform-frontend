@@ -10,7 +10,7 @@ const PivotAutoGroupHeader: FC<PivotAutoGroupHeaderPropsType> = ({ title, isSing
   return (
     <div
       className={cn(
-        'bg-white w-full h-full f-18-450 p-6 flex items-start border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400',
+        'f-18-450 border-b-0.5 border-b-GRAY_400 border-r-0.5 border-r-GRAY_400 flex h-full w-full items-start bg-white p-6',
         isSingleValue && 'items-center',
       )}
     >

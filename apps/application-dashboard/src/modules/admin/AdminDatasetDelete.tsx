@@ -22,7 +22,7 @@ const AdminDatasetDelete = ({ isOpen, onClose, datasetDetails }: AdminDatasetDel
       onClose={onClose}
       title='Delete Dataset ?'
       iconId='x-close'
-      className='w-[344px] border-2 border-GRAY_400 rounded-3.5 bg-white !p-0 shadow-menuList'
+      className='border-GRAY_400 rounded-3.5 shadow-menu-list w-[344px] border-2 bg-white p-0!'
       titleClassName='f-16-600 text-GRAY_950'
       showIcon
       closeOnClickOutside={false}
@@ -31,7 +31,7 @@ const AdminDatasetDelete = ({ isOpen, onClose, datasetDetails }: AdminDatasetDel
         Are you sure you want to delete <span className='f-13-700'>{datasetDetails?.datasetName}</span>? This action
         cannot be undone.
       </div>
-      <div className='flex justify-end gap-2 px-5 py-4 border-t border-GRAY_400'>
+      <div className='border-GRAY_400 flex justify-end gap-2 border-t px-5 py-4'>
         <Button
           type={BUTTON_TYPES.SECONDARY}
           size={SIZE_TYPES.MEDIUM}

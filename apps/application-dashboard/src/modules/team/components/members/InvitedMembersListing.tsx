@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { useAppSelector } from 'hooks/toolkit';
 import EmptyStateListing from 'modules/team/components/EmptyStateListing';
@@ -22,12 +22,12 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
 
   return hasData || isLoadingInvitedTeamMembersData ? (
     <>
-      <div className={` gap-4 border-b-0.5 border-DIVIDER_GRAY`}>
+      <div className={`border-b-0.5 border-DIVIDER_GRAY gap-4`}>
         <div className='w-full'>
-          <div className='border-b border-GRAY_100 grid grid-cols-9'>
+          <div className='border-GRAY_100 grid grid-cols-9 border-b'>
             {INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS.map((column, index) => (
-              <div key={index} className={cn('py-2 px-2 text-left', column.className)}>
-                <span className='text-left f-11-400 text-GRAY_700'>{column.headerName}</span>
+              <div key={index} className={cn('px-2 py-2 text-left', column.className)}>
+                <span className='f-11-400 text-GRAY_700 text-left'>{column.headerName}</span>
               </div>
             ))}
           </div>
@@ -35,7 +35,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
             isLoading={isLoadingInvitedTeamMembersData}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderListing />}
-            className='overflow-y-auto h-[calc(100vh-270px)] [&::-webkit-scrollbar]:hidden'
+            className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
             {data.map((row, index) => (
               <InvitedMemberCard key={index} row={row} organizationId={organizationId} />

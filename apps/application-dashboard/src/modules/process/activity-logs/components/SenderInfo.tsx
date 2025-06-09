@@ -14,7 +14,7 @@ interface SenderInfoProps {
 
 interface SenderConfig {
   iconBgColor: string;
-  iconContent: JSX.Element;
+  iconContent: React.JSX.Element;
   displayName: string;
 }
 
@@ -38,12 +38,12 @@ const SenderInfo: FC<SenderInfoProps> = ({ senderType, status, senderDetails }) 
 
   return (
     <div
-      className={cn('flex items-center justify-start gap-x-1.5 mt-3', {
+      className={cn('mt-3 flex items-center justify-start gap-x-1.5', {
         'bg-RED_200': status === LOG_STATUS.FAILED,
       })}
     >
       <div
-        className={cn('size-4 rounded flex justify-center items-center', config.iconBgColor, {
+        className={cn('flex size-4 items-center justify-center rounded', config.iconBgColor, {
           'bg-RED_950': status === LOG_STATUS.FAILED,
         })}
       >

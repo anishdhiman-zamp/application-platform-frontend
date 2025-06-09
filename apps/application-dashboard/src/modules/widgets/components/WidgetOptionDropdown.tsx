@@ -6,7 +6,7 @@ interface DropdownProps {
   onSelect: (widgetId: string) => void;
   activeWidget: string;
   className?: string;
-  dropdownRef: RefObject<HTMLDivElement>;
+  dropdownRef: RefObject<HTMLDivElement | null>;
 }
 
 export const WidgetOptionDropdown = ({ options, onSelect, activeWidget, className, dropdownRef }: DropdownProps) => {
@@ -14,16 +14,16 @@ export const WidgetOptionDropdown = ({ options, onSelect, activeWidget, classNam
     <div
       ref={dropdownRef}
       className={cn(
-        'absolute z-40 bg-white flex flex-col gap-2 pt-2 pb-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] w-[200px]',
+        'border-GRAY_400 shadow-table-filter-menu absolute z-40 flex max-h-[330px] w-[200px] flex-col gap-2 rounded-md border bg-white pt-2 pb-1',
         className,
       )}
     >
-      <div className='flex flex-col h-full overflow-y-auto custom-scroll-bar-common px-1 select-none'>
+      <div className='custom-scroll-bar-common flex h-full flex-col overflow-y-auto px-1 select-none'>
         {options.map((option) => (
           <div
             key={option.value}
             onClick={() => onSelect(option.value as string)}
-            className={cn('py-2 px-2.5 cursor-pointer select-none rounded hover:bg-GRAY_100', {
+            className={cn('hover:bg-GRAY_100 cursor-pointer rounded px-2.5 py-2 select-none', {
               'bg-GRAY_100': activeWidget === option.value,
             })}
           >

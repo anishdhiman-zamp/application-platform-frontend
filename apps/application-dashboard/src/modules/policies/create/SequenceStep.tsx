@@ -35,10 +35,10 @@ const SequenceStep: FC<SequenceStepProps> = ({ sequence, onRemove, index, onUpda
       {index > 0 && (
         <div className='my-4 flex items-center gap-1.5'>
           <span className='f-11-600'>OR</span>
-          <div className='h-0 border-t border-GRAY_400 w-full border-dashed' />
+          <div className='border-GRAY_400 h-0 w-full border-t border-dashed' />
         </div>
       )}
-      <div className='flex gap-2.5 items-center'>
+      <div className='flex items-center gap-2.5'>
         <PolicyQuorumDropdown value={sequence.mode} onChange={handleApprovalStepModifierChange} />
         <ApproverList selectedApprovers={sequence.approver_details} onChange={handleApproverChange} />
         {index > 0 && (

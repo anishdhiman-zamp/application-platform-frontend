@@ -31,7 +31,7 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
   return (
     <>
       <div className='f-20-600 text-GRAY_1000'>People</div>
-      <div className='flex justify-between items-center w-full mt-5'>
+      <div className='mt-5 flex w-full items-center justify-between'>
         <Input
           placeholder='Search team members'
           className='w-80'

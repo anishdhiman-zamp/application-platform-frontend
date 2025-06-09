@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
@@ -8,7 +10,7 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
 import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
 import { SIZE_TYPES } from 'types/common/components';
@@ -18,43 +20,47 @@ import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
+const ShareButton = () => {
+  const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; processId: string }>();
+  const pathname = usePathname();
+
+  switch (true) {
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
+      return <SharePagePopup pageId={params?.pageId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
+      return <ShareDatasetPopup datasetId={params?.datasetId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
+      return <SharePaymentsPopup paymentConfigId={params?.paymentConfigId || ''} />;
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
+      return <ShareProcessPopup processId={params?.processId || ''} />;
+    case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
+      return null;
+    default:
+      return null;
+  }
+};
+
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const [search, setSearch] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
+
   const dispatch = useAppDispatch();
   const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
-  const currentRoute = router.pathname;
-
-  const renderShareButton = useMemo(() => {
-    switch (true) {
-      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAGES):
-        return <SharePagePopup pageId={router?.query?.pageId as string} />;
-      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
-        return <ShareDatasetPopup datasetId={router?.query?.datasetId as string} />;
-      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
-        return <SharePaymentsPopup paymentConfigId={router?.query?.paymentConfigId as string} />;
-      case currentRoute.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
-        return <ShareProcessPopup processId={router?.query?.processId as string} />;
-      case currentRoute === SHARE_BTN_ALLOWED_ROUTES.DATASET:
-        return null;
-      default:
-        return null;
-    }
-  }, [currentRoute, router?.query?.pageId, router?.query?.datasetId, router?.query?.paymentConfigId]);
 
   const renderRightSideActions = useMemo(() => {
-    if (currentRoute.includes(ROUTES_PATH.PAYMENTS)) {
+    if (pathname?.includes(ROUTES_PATH.PAYMENTS)) {
       return (
         <div className='flex items-center gap-3'>
           <PaymentActions />
-          {renderShareButton}
+          <ShareButton />
         </div>
       );
     }
 
-    return renderShareButton;
-  }, [currentRoute, renderShareButton]);
+    return <ShareButton />;
+  }, [pathname]);
 
   const handleBackClick = () => {
     dispatch(removeLastBreadcrumb());
@@ -66,24 +72,24 @@ const Topbar = () => {
   };
 
   return (
-    <div className='h-12 flex items-center justify-between'>
+    <div className='flex h-12 items-center justify-between'>
       <div
         className={cn(
-          'py-4 h-12 flex items-center justify-between text-GRAY_700 transition-all',
+          'text-GRAY_700 flex h-12 items-center justify-between py-4 transition-all',
           isSidebarOpen ? 'w-[240px]' : 'w-[48px]',
         )}
       >
-        <div className={cn('flex-1 transition-all pl-4', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
+        <div className={cn('flex-1 pl-4 transition-all', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
           <Image
             width={16}
             height={16}
             alt='zamp logo'
-            className='w-4 align-middle cursor-pointer'
+            className='w-4 cursor-pointer align-middle'
             src={ZAMP_ICON}
             priority={true}
           />
         </div>
-        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : ' border-GRAY_400')}>
+        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : 'border-GRAY_400')}>
           <SvgSpriteLoader
             className='cursor-pointer pr-5'
             width={16}
@@ -95,7 +101,7 @@ const Topbar = () => {
         </div>
       </div>
       <div
-        className={cn('flex items-center gap-2 w-full h-full transition-all z-1000 bg-BACKGROUND_GRAY_1', {
+        className={cn('bg-BACKGROUND_GRAY_1 z-1000 flex h-full w-full items-center gap-2 transition-all', {
           'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
         })}
       >

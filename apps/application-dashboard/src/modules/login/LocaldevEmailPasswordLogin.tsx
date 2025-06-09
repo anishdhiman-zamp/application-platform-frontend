@@ -5,7 +5,7 @@ import { LOGIN_METHODS } from 'constants/auth.constants';
 import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
@@ -28,7 +28,8 @@ const commonFetchConfig = {
 const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow }) => {
   const cachedUserEmail = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_USER) ?? '{}');
   const router = useRouter();
-  const errorId = router.query.error?.toString() ?? '';
+  const searchParams = useSearchParams();
+  const errorId = searchParams?.get('error')?.toString() ?? '';
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +106,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
   const formDisabled = loading || !loginFlow;
 
   return (
-    <div className={`w-96 mx-auto mt-[30vh] items-center flex flex-col gap-10 ${className}`}>
+    <div className={`mx-auto mt-[30vh] flex w-96 flex-col items-center gap-10 ${className}`}>
       <Image src={ZAMP_ICON_BLACK} width={48} height={38} alt='Zamp' priority />
 
       {userFacingError &&
@@ -114,7 +115,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
             {error.message}
           </div>
         ))}
-      <form className='flex flex-col gap-3 w-full' onSubmit={handlePasswordSubmit}>
+      <form className='flex w-full flex-col gap-3' onSubmit={handlePasswordSubmit}>
         <Input
           id='login-email'
           label='Email'

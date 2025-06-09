@@ -4,7 +4,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
-import { useRouter } from 'next/router';
+import { useParams, usePathname } from 'next/navigation';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -37,10 +37,13 @@ const WidgetTitle = ({
   const [isGroupWidgetOptionsOpen, setIsGroupWidgetOptionsOpen] = useState(false);
   const isGroupWidgetOptions = groupWidgetsOptions?.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
-  const router = useRouter();
-  const { id } = router.query;
 
-  const currentSheetId = useMemo(() => getSheetIdFromPath(router.asPath, id as string), [router.asPath, id]) ?? sheetId;
+  // App Router hooks
+  const params = useParams();
+  const pathname = usePathname() || '';
+  const id = params?.id as string | undefined;
+
+  const currentSheetId = useMemo(() => getSheetIdFromPath(pathname ?? '', id ?? ''), [pathname, id]) ?? sheetId;
 
   useOnClickOutside(dropdownRef, (event) => {
     if (titleRef?.current && titleRef.current.contains(event?.target as Node)) return;
@@ -77,10 +80,10 @@ const WidgetTitle = ({
       <div
         ref={titleRef}
         className={cn(
-          'px-6 flex flex-col items-start w-fit select-none cursor-pointer',
+          'flex w-fit cursor-pointer flex-col items-start px-6 select-none',
           ![WIDGET_TYPES.DONUT_CHART, WIDGET_TYPES.PIE_CHART].includes(widgetType) && 'mb-10',
-          isPivotTable && isGroupWidgetOptions && 'px-0 gap-y-2 items-start justify-center mb-0',
-          isPivotTable && !isGroupWidgetOptions && 'mb-0 px-0 justify-center cursor-default',
+          isPivotTable && isGroupWidgetOptions && 'mb-0 items-start justify-center gap-y-2 px-0',
+          isPivotTable && !isGroupWidgetOptions && 'mb-0 cursor-default justify-center px-0',
         )}
         onClick={handleToggle}
       >
@@ -100,7 +103,7 @@ const WidgetTitle = ({
         </div>
 
         {isGroupWidgetOptions && (
-          <span className='f-12-450 text-GRAY_700 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>{`${groupWidgetsOptions?.length} Variants`}</span>
+          <span className='f-12-450 text-GRAY_700 opacity-0 transition-opacity duration-200 group-hover:opacity-100'>{`${groupWidgetsOptions?.length} Variants`}</span>
         )}
       </div>
       {isGroupWidgetOptionsOpen &&

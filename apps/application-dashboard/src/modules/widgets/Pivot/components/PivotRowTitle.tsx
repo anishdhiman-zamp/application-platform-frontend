@@ -75,10 +75,10 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({
   return (
     <div
       className={cn(
-        'h-full w-full flex items-center gap-2 border-b-0.5 border-r-0.5 border-GRAY_400 z-10',
+        'border-b-0.5 border-r-0.5 border-GRAY_400 z-10 flex h-full w-full items-center gap-2',
         allowExpanding && 'cursor-pointer',
         isLowestLevel && 'bg-BACKGROUND_GRAY_1',
-        isRootLevel && 'justify-end pr-3 gap-1 bg-BACKGROUND_GRAY_1 border-b-0',
+        isRootLevel && 'bg-BACKGROUND_GRAY_1 justify-end gap-1 border-b-0 pr-3',
       )}
       style={{
         paddingLeft,
@@ -129,7 +129,7 @@ const PivotRowTitle: FC<PivotRowTitleProps> = ({
       )}
 
       <span
-        className='f-13-550 text-GRAY_950 overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px]'
+        className='f-13-550 text-GRAY_950 max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap'
         title={formattedValue}
       >
         {isRootLevel ? ROOT_LEVEL_TITLE : formattedValue}

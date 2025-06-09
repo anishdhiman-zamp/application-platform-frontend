@@ -17,7 +17,7 @@ const SkeletonElement: FC<SkeletonElementProps> = ({ elementCount = 1, className
   return elements?.map((_, index) => {
     return (
       <span
-        className={`block animate-pulse bg-BASE_PRIMARY ${className} ${shape ? (SHAPE_STYLE[shape] ?? '') : ''}`}
+        className={`bg-BASE_PRIMARY block animate-pulse ${className} ${shape ? (SHAPE_STYLE[shape] ?? '') : ''}`}
         key={index}
       >
         &zwnj;

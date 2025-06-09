@@ -26,7 +26,7 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
   (bottomBar || onBack || onNext) && (
     <div
       className={cn(
-        'border-t p-4 flex justify-end items-center gap-3 bg-white absolute bottom-12 w-full',
+        'absolute bottom-12 flex w-full items-center justify-end gap-3 border-t bg-white p-4',
         footerClassName,
       )}
     >

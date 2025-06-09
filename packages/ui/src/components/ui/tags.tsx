@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 
 const tagVariants = cva(
   'inline-flex justify-center items-center rounded-sm py-[2.5px] px-[6px] f-12-450 border select-none border-transparent text-primary',
@@ -26,13 +26,13 @@ const tagVariants = cva(
 
 export interface TagProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof tagVariants> {}
 
-export const Tag = React.forwardRef<HTMLDivElement, TagProps>(({ className, variant, children, ...props }, ref) => {
+export const Tag = ({ className, variant, children, ...props }: TagProps) => {
   return (
-    <div ref={ref} className={cn(tagVariants({ variant }), className)} {...props}>
+    <div className={cn(tagVariants({ variant }), className)} {...props}>
       {children}
     </div>
   );
-});
+};
 
 Tag.displayName = 'Tag';
 
