@@ -191,7 +191,14 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
                 }}
                 className='flex h-full w-full justify-center'
               >
-                <Page width={413} height={582} pageNumber={index + 1} scale={scale} className='my-2.5 shadow-xl' />
+                <Page
+                  loading={null}
+                  width={413}
+                  height={582}
+                  pageNumber={index + 1}
+                  scale={scale}
+                  className='my-2.5 shadow-xl'
+                />
               </div>
             ))}
         </Document>

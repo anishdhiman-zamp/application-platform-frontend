@@ -146,7 +146,7 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
         ref={buttonRef}
         className={cn(
           'border-GRAY_400 hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 flex h-5 cursor-pointer items-center gap-1.5 rounded border px-1.5 py-1 transition-colors',
-          isDisabled && 'opacity-50',
+          isDisabled && 'border-GRAY_400 !opacity-100',
         )}
         disabled={isDisabled}
         variant='outline'
@@ -155,11 +155,11 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
           id='stand'
           iconCategory={ICON_SPRITE_TYPES.EDUCATION}
           size={12}
-          color={COLORS.GRAY_900}
+          color={isDisabled ? COLORS.GRAY_500 : COLORS.GRAY_900}
           className='scale-75'
         />
 
-        <span className='f-11-400 text-GRAY_1000'>{count ?? 0}</span>
+        <span className={cn('f-11-400', isDisabled ? 'text-GRAY_500' : 'text-GRAY_1000')}>{count ?? 0}</span>
       </Button>
     </Combobox>
   );

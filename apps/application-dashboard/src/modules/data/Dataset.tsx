@@ -113,7 +113,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   parentSelectedFilters,
   updateBreadcrumb = true,
   filterWrapperClassName,
-  showCurrencyFilter = true,
   showDatasetHistory = true,
   isDatasetArtifact = false,
 }) => {
@@ -243,6 +242,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
               processId: processId as string,
               activityRunId: activityId as string,
               datasetId: id as string,
+              query_config: queryConfig,
             })
               .unwrap()
               .then((response) => {
@@ -585,6 +585,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         processId: processId as string,
         activityRunId: activityId as string,
         datasetId: id as string,
+        query_config: exportsDatasetQuery,
       });
     } else {
       getDatasetData({
@@ -669,6 +670,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         processId: processId as string,
         activityRunId: activityId as string,
         datasetId: id as string,
+        query_config: queryConfig,
       })
         .unwrap()
         .then((response) => {
@@ -762,7 +764,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
             {!isReadOnly && (
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-                {showCurrencyFilter && (
+                {filterConfigData?.config?.is_fx_enabled && (
                   <div className='flex items-center gap-2'>
                     <div className='border-GRAY_400 h-7 border-r'></div>
                     <SingleSelectFilter

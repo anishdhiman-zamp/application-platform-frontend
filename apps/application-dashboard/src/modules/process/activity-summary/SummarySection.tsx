@@ -60,7 +60,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         isError={isErrorSummary}
         refetchFunction={refetchSummary}
         isNoData={!summary?.summary?.summary_items?.length}
-        noDataBanner={<NoWidgetData className='h-[400px]' text='No key details found' />}
+        noDataBanner={<NoWidgetData text='No key details found' className='h-[400px]' />}
         errorCardStyle='w-full h-1/2'
         className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pt-5 pb-6'
       >

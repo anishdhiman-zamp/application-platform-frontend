@@ -188,9 +188,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
 
   return (
     <>
-      <div className='f-12-400 flex items-center justify-between bg-white pl-2'>
+      <div className='f-12-400 flex items-center justify-between bg-white'>
         <div className='flex items-center justify-start'>
-          <div className='flex w-[140px] items-start justify-start gap-x-1'>
+          <div className='flex w-[168px] items-start justify-start gap-x-1 px-2'>
             <div className='flex items-center gap-1'>
               {checkIfResourceTypeTeam ? (
                 <div>
@@ -254,7 +254,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             isHoveredDropdown={isHoveredDropdown}
             setIsHoveredDropdown={setIsHoveredDropdown}
             isOverflowStyle
-            parentWrapperClassName='w-28 justify-end'
+            parentWrapperClassName='w-[70px] justify-end'
           />
         ) : (
           <span

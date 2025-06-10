@@ -78,7 +78,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
       </div>
 
       {/* Body */}
-      {emailArtifact?.body_html && (
+      {emailArtifact?.body_html ? (
         <div className='relative w-full flex-1 overflow-auto p-4'>
           {loading && (
             <div className='bg-opacity-80 absolute inset-0 z-10 flex items-center justify-center bg-white'>
@@ -93,13 +93,11 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
             loading='eager'
           />
         </div>
-      )}
-
-      {emailArtifact?.body_plain_text && (
+      ) : emailArtifact?.body_plain_text ? (
         <div className='relative w-full flex-1 overflow-auto p-4'>
           <span className='f-13-400 text-GRAY_900'>{emailArtifact?.body_plain_text}</span>
         </div>
-      )}
+      ) : null}
 
       {/* Attachments bar */}
       <div className='border-GRAY_500 flex w-full items-center justify-start gap-2 overflow-hidden border-t-[0.5px]'>

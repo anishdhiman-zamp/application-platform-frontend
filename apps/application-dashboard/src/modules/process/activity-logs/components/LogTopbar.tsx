@@ -28,34 +28,38 @@ const LogTopbar: FC = () => {
         className='flex min-w-max items-center justify-center gap-x-2 p-4'
         isLoading={isLoadingSummary || isErrorSummary}
         loader={
-          <div className='flex items-center gap-x-1'>
+          <div className='flex items-center gap-x-2'>
+            <SkeletonElement className='h-6 w-20 rounded-full' />
             <SkeletonElement className='h-6 w-20 rounded-full' />
           </div>
         }
         skeletonType={SkeletonTypes.CUSTOM}
       >
         {summaryData?.summary?.header &&
-          Object.entries(summaryData?.summary?.header).map(([key, value]) => (
+          Object.entries(summaryData?.summary?.header)?.map(([key, value]) => (
             <div key={key} className='flex items-center gap-x-1'>
               <span className='f-13-550 text-GRAY_700 capitalize'>{key}</span>
-              <span className='f-13-550 text-GRAY_1000'>{value}</span>
+              <span className='f-13-550 text-GRAY_1000'>{value || '---'}</span>
             </div>
           ))}
 
-        <div className='border-GRAY_400 bg-BG_GRAY_2 flex items-center gap-x-1.5 rounded-full border px-2 py-1'>
-          <TopbarStatusIcon
-            status={summaryData?.summary?.status as ACTIVITY_RUN_STATUS}
-            fillColor={
-              STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor
-            }
-            strokeColor={
-              STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor
-            }
-          />
-          <span className='f-12-450 text-GRAY_1000'>
-            {STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.label}
-          </span>
-        </div>
+        {summaryData?.summary?.status && (
+          <div className='border-GRAY_400 bg-BG_GRAY_2 flex items-center gap-x-1.5 rounded-full border px-2 py-1'>
+            <TopbarStatusIcon
+              status={summaryData?.summary?.status as ACTIVITY_RUN_STATUS}
+              fillColor={
+                STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor
+              }
+              strokeColor={
+                STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon
+                  ?.strokeColor
+              }
+            />
+            <span className='f-12-450 text-GRAY_1000'>
+              {STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.label}
+            </span>
+          </div>
+        )}
 
         {/* TODO: Add back when we have the functionality */}
         {/* <TooltipV2

@@ -99,7 +99,6 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
           updateBreadcrumb={false}
           headerClassName='px-4 py-3 flex-wrap'
           filterWrapperClassName='pl-0'
-          showCurrencyFilter={false}
           showDatasetHistory={false}
           isDatasetArtifact
         />

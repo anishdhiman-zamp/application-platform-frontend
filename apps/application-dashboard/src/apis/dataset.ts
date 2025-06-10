@@ -40,7 +40,10 @@ import { formRequestUrlWithParams } from 'utils/common';
 const Dataset = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDatasetFilterConfig: builder.query<
-      { config: { is_file_import_enabled: boolean }; data: DatasetFilterConfigResponseType[] },
+      {
+        config: { is_file_import_enabled: boolean; is_fx_enabled: boolean };
+        data: DatasetFilterConfigResponseType[];
+      },
       { datasetId: string }
     >({
       query: ({ datasetId }) => ({

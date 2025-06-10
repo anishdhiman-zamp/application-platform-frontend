@@ -11,12 +11,12 @@ const ReasoningAccordion = ({ thoughtSteps }: ReasoningAccordionProps) => {
     <Accordion type='single' collapsible className='mt-2 w-full max-w-[485px] min-w-[180px]'>
       <AccordionItem value='item-1' className='border-GRAY_100 w-full rounded-t-md rounded-br-md border'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5'>
-          <span className='text-wrap break-words'>{thoughtSteps?.[thoughtSteps?.length - 1]}</span>
+          <span className='text-wrap break-words'>See reasoning</span>
         </AccordionTrigger>
         <AccordionContent className='border-GRAY_100 f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4'>
           {thoughtSteps?.map((title: string, index: number) => (
             <div key={index} className='flex w-full items-start justify-start gap-x-4'>
-              <div className='flex items-start justify-center pt-1'>
+              <div className='flex items-start justify-center'>
                 <Image src={ACCORDION_LIST} alt='accordion-list' width={13} height={9} priority className='shrink-0' />
               </div>
               <p className='f-12-450 text-GRAY_900 w-full text-wrap break-words'>{title}</p>

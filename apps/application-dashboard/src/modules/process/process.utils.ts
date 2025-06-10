@@ -1,18 +1,18 @@
-import { format, formatDistanceToNow, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { DATE_FORMATS } from '@/constants/date.constants';
 
 /**
- * Formats date string to include day, time and relative time
+ * Formats date string to include day and time
  * @param {string} date - Input date string
- * @returns {string} Formatted date with relative time (e.g. "Mon Jan 1 2:30 PM (2 hours ago)")
+ * @returns {string} Formatted date (e.g. "Feb 4, 2025, 12:30PM")
  */
 export const getEmailDate = (date: string) => {
   // Parse the input date string
-  const parsedDate = parse(date, 'yyyy-MM-dd EEEE hh:mm:ss a', new Date());
+  const parsedDate = new Date(date);
 
   if (isNaN(parsedDate.getTime())) {
     return date;
   }
 
-  return `${format(parsedDate, DATE_FORMATS.EEE_MMM_d_h_mm_a)} (${formatDistanceToNow(parsedDate)} ago)`;
+  return format(parsedDate, DATE_FORMATS.MMM_d_yyyy_h_mm_a);
 };

@@ -109,13 +109,12 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
         <div className='flex justify-end p-2'>
           <Button
             size='icon'
-            variant='ghost'
             onClick={handleSubmit}
             disabled={!inputValue.trim() || isLoading || isLoadingAudienceMembers || !enableSendMessage}
             aria-label='Send message'
-            className='bg-GRAY_100 size-6! disabled:cursor-not-allowed disabled:opacity-50'
+            className='!size-6'
           >
-            <SvgSpriteLoader id='arrow-up' size={14} color={COLORS.GRAY_700} />
+            <SvgSpriteLoader id='arrow-up' size={14} color={COLORS.WHITE} />
           </Button>
         </div>
       </div>

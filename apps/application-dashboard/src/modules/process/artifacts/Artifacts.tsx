@@ -63,8 +63,20 @@ const Artifacts = ({
     },
   );
 
-  const title = useMemo(() => {
-    return artifacts?.artifacts?.[0]?.artifact_data?.display_name;
+  const { id, artifactData, title } = useMemo(() => {
+    if (!artifacts) {
+      return {
+        id: '',
+        artifactData: null,
+        title: '',
+      };
+    }
+
+    return {
+      id: artifacts.artifacts[0]?.id ?? '',
+      artifactData: artifacts.artifacts[0]?.artifact_data ?? null,
+      title: artifacts.artifacts[0]?.artifact_data?.display_name ?? '',
+    };
   }, [artifacts]);
 
   return (
@@ -95,40 +107,18 @@ const Artifacts = ({
           refetchFunction={refetch}
           className='h-full w-full'
         >
-          {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifacts && (
+          {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifactData && id && (
             <>
               <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-                <DatasetArtifact
-                  datasetArtifact={
-                    artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
-                      ?.artifact_data as PdfArtifactsResponseType
-                  }
-                />
+                <DatasetArtifact datasetArtifact={artifactData as PdfArtifactsResponseType} key={id} />
               </TabsContent>
               <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
-                <PdfArtifact
-                  pdfArtifact={
-                    artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
-                      ?.artifact_data as PdfArtifactsResponseType
-                  }
-                  artifactId={
-                    artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.PDF_DATASET)?.[0]
-                      ?.id
-                  }
-                />
+                <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />
               </TabsContent>
             </>
           )}
-          {artifactType === ARTIFACT_TYPE.EMAIL && artifacts && (
-            <EmailArtifact
-              emailArtifact={
-                artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.EMAIL)?.[0]
-                  ?.artifact_data as EmailArtifactsResponseType
-              }
-              artifactId={
-                artifacts?.artifacts.filter((artifact) => artifact.artifact_type === ARTIFACT_TYPE.EMAIL)?.[0]?.id
-              }
-            />
+          {artifactType === ARTIFACT_TYPE.EMAIL && artifactData && id && (
+            <EmailArtifact emailArtifact={artifactData as EmailArtifactsResponseType} artifactId={id} key={id} />
           )}
         </CommonWrapper>
 
