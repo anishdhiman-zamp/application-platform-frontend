@@ -10,7 +10,6 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { useGetFilterConfigQuery, useLazyGetDataQuery } from 'apis/filterTable';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import {
   formatColumns,
   formatDrilldownFilters,
@@ -19,8 +18,6 @@ import {
 } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { RootState } from 'store';
-import { addBreadcrumb } from 'store/slices/layout-configs';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
@@ -87,8 +84,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   const datasetTableRef = useRef<HTMLDivElement>(null);
 
   const filters = useSearchParams()?.get('filters') ?? '';
-  const appDispatch = useAppDispatch();
-  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   const {
     dispatch,
@@ -97,7 +92,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
 
@@ -119,7 +113,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
         if (cachedData) {
           if (parameters.request.startRow === 0) {
-            setDatasetTitle(cachedData.title);
             setTotalRows(cachedData.data?.total_count);
             setIsNoRowsOverlayVisible(cachedData.data?.total_count === 0);
             dispatch({
@@ -143,7 +136,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
             GlobalCacheStore.set(cacheKey, response);
 
             if (parameters.request.startRow === 0) {
-              setDatasetTitle(response?.title);
               setTotalRows(response?.data?.total_count);
               setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
               dispatch({
@@ -276,12 +268,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
       tableRef.current?.api?.hideOverlay();
     }
   }, [isNoRowsOverlayVisible]);
-
-  useEffect(() => {
-    if (datasetTitle && breadcrumbStack?.length === 0) {
-      appDispatch(addBreadcrumb([datasetTitle]));
-    }
-  }, [datasetTitle, breadcrumbStack]);
 
   return (
     <>

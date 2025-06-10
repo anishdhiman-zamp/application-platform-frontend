@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
 import {
@@ -17,14 +17,9 @@ import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { defaultFn } from 'types/commonTypes';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch } from '@/hooks/toolkit';
-import { resetBreadcrumb } from '@/store/slices/layout-configs';
-import { capitalizeFirstLetter } from '@/utils/common';
 
 const MoneyTransferHome = () => {
   const router = useRouter();
-  const appDispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const type = searchParams?.get('type');
   const templateId = searchParams?.get('templateId');
@@ -43,15 +38,6 @@ const MoneyTransferHome = () => {
       payload: { currentStep: step },
     });
   };
-
-  useEffect(() => {
-    appDispatch(
-      resetBreadcrumb([
-        { title: 'Payments', href: ROUTES_PATH.PAYMENTS },
-        { title: `${capitalizeFirstLetter(transferType)} transfer` },
-      ]),
-    );
-  }, []);
 
   return (
     <div

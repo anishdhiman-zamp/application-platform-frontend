@@ -19,9 +19,8 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { getDatasetDrilldownRoute, getDatasetRouteById, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
-import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
@@ -51,8 +50,6 @@ import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { RootState } from 'store';
-import { addBreadcrumb, updateUrlForLastBreadcrumb } from 'store/slices/layout-configs';
 import {
   DatasetActionStatusResponseType,
   DatasetDataResponseType,
@@ -101,7 +98,6 @@ type DatasetByIdProps = {
 const DatasetById: FC<DatasetByIdProps> = ({
   id,
   drilldownFilters,
-  isDrilldown = false,
   pageSize,
   isReadOnly = false,
   containerStyle,
@@ -111,7 +107,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
-  updateBreadcrumb = true,
   filterWrapperClassName,
   showDatasetHistory = true,
   isDatasetArtifact = false,
@@ -124,8 +119,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
 
-  const appDispatch = useAppDispatch();
-  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
   const { checkUserPrivilege } = useResourceAccess(ResourceType.DATASET, id);
 
   const currentUserHasEditAccess = useMemo(() => {
@@ -440,7 +433,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(updateUrlForLastBreadcrumb(window.location.href));
     if (params?.pageId) {
       router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {
@@ -566,18 +558,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const handleFilterChange = (value: string[]) => {
     setFxCurrency(value);
   };
-
-  useEffect(() => {
-    if (
-      !isReadOnly &&
-      !isDrilldown &&
-      datasetTitle &&
-      !breadcrumbStack?.some((item) => item.title === datasetTitle) &&
-      updateBreadcrumb
-    ) {
-      appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
-    }
-  }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);
 
   const handleRefetchDataset = () => {
     if (isDatasetArtifact) {

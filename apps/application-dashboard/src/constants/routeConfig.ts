@@ -33,8 +33,14 @@ export const getDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.DATA}/${datasetId}`;
 };
 
-export const getPageDatasetRoute = (pageId: string, datasetId: string) => {
-  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}`;
+export const getPageDatasetRoute = (pageId: string, datasetId: string, query?: Record<string, string>) => {
+  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}${
+    query
+      ? `?${Object.entries(query)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&')}`
+      : ''
+  }`;
 };
 
 export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {

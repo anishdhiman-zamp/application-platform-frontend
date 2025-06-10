@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES, ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -10,13 +10,11 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
 import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
-import { removeLastBreadcrumb, toggleSidebar } from 'store/slices/layout-configs';
-import { SIZE_TYPES } from 'types/common/components';
+import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
-import Input from 'components/common/input';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
@@ -43,12 +41,9 @@ const ShareButton = () => {
 
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
-  const [search, setSearch] = useState('');
-  const router = useRouter();
   const pathname = usePathname();
 
   const dispatch = useAppDispatch();
-  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
 
   const renderRightSideActions = useMemo(() => {
     if (pathname?.includes(ROUTES_PATH.PAYMENTS)) {
@@ -62,11 +57,6 @@ const Topbar = () => {
 
     return <ShareButton />;
   }, [pathname]);
-
-  const handleBackClick = () => {
-    dispatch(removeLastBreadcrumb());
-    router.back();
-  };
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());
@@ -101,32 +91,8 @@ const Topbar = () => {
           />
         </div>
       </div>
-      <div
-        className={cn('bg-BACKGROUND_GRAY_1 z-1000 flex h-full w-full items-center gap-2 transition-all', {
-          'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
-        })}
-      >
-        {breadcrumbStack?.length > 1 && (
-          <SvgSpriteLoader
-            id='arrow-left'
-            iconCategory={ICON_SPRITE_TYPES.ARROWS}
-            height={16}
-            width={16}
-            onClick={handleBackClick}
-            className='cursor-pointer'
-          />
-        )}
-        <BreadCrumb breadcrumbStack={breadcrumbStack} />
-      </div>
-      <Input
-        placeholder='Search'
-        value={search}
-        size={SIZE_TYPES.SMALL}
-        className='hidden'
-        onChange={(e) => {
-          setSearch(e.target.value);
-        }}
-      />
+
+      <BreadCrumb isSidebarOpen={isSidebarOpen} />
       <div className='pr-8'>{renderRightSideActions}</div>
     </div>
   );

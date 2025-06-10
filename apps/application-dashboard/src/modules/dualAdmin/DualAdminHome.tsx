@@ -10,10 +10,8 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
-import { resetBreadcrumb } from '@/store/slices/layout-configs';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { ResourceType } from '@/types/api/policies.types';
 
@@ -24,7 +22,6 @@ export interface AudienceMembersDataType extends AudiencesByResourceResponse {
 
 const DualAdminHome = () => {
   const { user } = useAppSelector((state) => state.user);
-  const appDispatch = useAppDispatch();
   const { data: dualAdminPolicy, isLoading, isError, refetch } = useGetDualAdminPolicyQuery();
   const [requestApprovalPolicyConfig, setRequestApprovalPolicyConfig] = useState<RequestApprovalPolicyConfig | null>(
     null,
@@ -47,10 +44,6 @@ const DualAdminHome = () => {
       setApproversList(systemAdmin ?? []);
     }
   }, [audiences, loading]);
-
-  useEffect(() => {
-    appDispatch(resetBreadcrumb([{ title: 'Policies', href: ROUTES_PATH.POLICIES }]));
-  }, []);
 
   return (
     <div className='p-10'>
