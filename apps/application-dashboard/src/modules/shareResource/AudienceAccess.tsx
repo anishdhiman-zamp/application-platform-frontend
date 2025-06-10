@@ -259,8 +259,8 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
         ) : (
           <span
             className={cn(
-              'f-12-400 text-GRAY_1000 flex w-28 items-start justify-end py-3 pr-2 pl-4',
-              !showRoleChangeDropdown && 'text-GRAY_600 pr-4',
+              'f-12-400 text-GRAY_1000 flex w-[70px] items-center py-3 pl-4',
+              !showRoleChangeDropdown && 'text-GRAY_600',
             )}
           >
             {role?.label}
