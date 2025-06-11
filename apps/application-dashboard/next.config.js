@@ -17,6 +17,9 @@ const nextConfig = {
   },
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder'],
   productionBrowserSourceMaps: true,
+  images: {
+    remotePatterns: [new URL('https://l0lws8ltlx4vwaic.public.blob.vercel-storage.com/**')],
+  },
 };
 
 module.exports = withSentryConfig(nextConfig, {
