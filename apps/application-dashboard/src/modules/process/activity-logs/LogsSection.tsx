@@ -5,11 +5,12 @@ import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { useGetActivityLogsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface LogsSectionProps {
   processId: string;
   activityId: string;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
 }
 
 const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, activityId }) => {

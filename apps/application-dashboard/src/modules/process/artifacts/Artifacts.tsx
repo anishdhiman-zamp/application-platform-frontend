@@ -13,6 +13,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType, PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
   ssr: false,
@@ -26,7 +27,8 @@ interface ArtifactsProps {
   setActiveTab: (tab: PDF_DATASET_TAB) => void;
   artifactType: ARTIFACT_TYPE;
   artifactId: string;
-  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  filters: MapAny;
+  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
 }
 
 const Artifacts = ({
@@ -38,6 +40,7 @@ const Artifacts = ({
   artifactType,
   artifactId,
   onArtifactClick,
+  filters,
 }: ArtifactsProps) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -110,7 +113,11 @@ const Artifacts = ({
           {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifactData && id && (
             <>
               <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-                <DatasetArtifact datasetArtifact={artifactData as PdfArtifactsResponseType} key={id} />
+                <DatasetArtifact
+                  datasetArtifact={artifactData as PdfArtifactsResponseType}
+                  filters={filters}
+                  key={id}
+                />
               </TabsContent>
               <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
                 <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />

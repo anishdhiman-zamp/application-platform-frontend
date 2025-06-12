@@ -14,12 +14,13 @@ import {
 } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 type LogProps = {
   isLastLog?: boolean;
   data: ActivityLogsItemType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
   isExpanded?: boolean;
 };
 
@@ -105,9 +106,7 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
         </p>
         {thought_steps && thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} />}
         {ctas && <LogCta ctas={ctas} handleShowArtifacts={handleShowArtifacts} />}
-        {isSenderInfoVisible && (
-          <SenderInfo senderType={sender_type as SENDER_TYPE} senderDetails={sender_details} status={status} />
-        )}
+        {isSenderInfoVisible && <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />}
       </div>
     </div>
   );

@@ -74,7 +74,7 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
                     <ArtifactItem
                       key={artifact?.id}
                       artifact={artifact}
-                      onClick={() => handleArtifactClick(artifact?.artifact_type as ARTIFACT_TYPE, artifact?.id)}
+                      onClick={() => handleArtifactClick(artifact?.artifact_type, artifact?.id)}
                     />
                   ))}
             </div>

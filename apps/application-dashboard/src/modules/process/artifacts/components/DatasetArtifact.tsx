@@ -14,15 +14,23 @@ import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 import Dataset from '@/modules/data/Dataset';
 import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: PdfArtifactsResponseType;
+  filters: MapAny;
 }
 
 const MAX_VISIBLE_TABS = 3;
 
-const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
-  const datasets = datasetArtifact?.datasets ?? [];
+const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact, filters }) => {
+  const filterDatasets = Object.keys(filters?.dataset_to_filter_map ?? {});
+  const datasets = (datasetArtifact?.datasets ?? []).filter((dataset) => {
+    if (filterDatasets?.length === 0) return true;
+
+    return filterDatasets?.includes(dataset?.dataset_id);
+  });
+
   const [activeTab, setActiveTab] = useState<string>('');
 
   const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
@@ -100,6 +108,7 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
           headerClassName='px-4 py-3 flex-wrap'
           filterWrapperClassName='pl-0'
           showDatasetHistory={false}
+          drilldownFilters={filters?.dataset_to_filter_map?.[activeTab]?.filters ?? {}}
           isDatasetArtifact
         />
       </TabsContent>

@@ -4,9 +4,10 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { type ARTIFACT_TYPE, type CTA_ACTION, CTA_COMPONENT_TYPE } from 'modules/process/process.types';
 import type { CtasType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 type LogCtaProps = {
   ctas: CtasType[];
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
 };
 
 const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
@@ -22,7 +23,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
             displayName={cta?.display_name}
             type={cta?.artifact_type}
             onClick={() =>
-              handleShowArtifacts(cta?.artifact_type as ARTIFACT_TYPE, cta?.id ?? '', cta?.cta_action as CTA_ACTION)
+              handleShowArtifacts(cta?.artifact_type, cta?.id ?? '', cta?.cta_action, cta?.filter_metadata)
             }
             displayClassName='max-w-40'
           />

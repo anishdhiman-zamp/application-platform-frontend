@@ -5,10 +5,11 @@ import Log from 'modules/process/activity-logs/components/Log';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface LogsListProps {
   logs: ActivityLogsResponseType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
 }
 
 const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {

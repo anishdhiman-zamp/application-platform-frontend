@@ -1,4 +1,5 @@
 import type { MapAny } from 'types/commonTypes';
+import type { ARTIFACT_TYPE, CTA_ACTION, CTA_COMPONENT_TYPE, SENDER_TYPE } from '@/modules/process/process.types';
 export type StatusSummaryItem = {
   status_summary: {
     status: string;
@@ -92,7 +93,7 @@ export type ActivityArtifactsItemType = {
   id: string;
   activity_id: string;
   organization_id: string;
-  artifact_type: string;
+  artifact_type: ARTIFACT_TYPE;
   artifact_data:
     | PdfArtifactsResponseType
     | EmailArtifactsResponseType
@@ -128,13 +129,15 @@ export type ActivityLogsItemType = {
 export type CtasType = {
   id: string;
   display_name: string;
-  artifact_type: string;
-  cta_component_type: string;
-  cta_action: string;
+  artifact_type: ARTIFACT_TYPE;
+  cta_component_type: CTA_COMPONENT_TYPE;
+  cta_action: CTA_ACTION;
+  icon_identifier: string;
+  filter_metadata: MapAny;
 };
 
 export type LogsContentType = {
-  sender_type: string;
+  sender_type: SENDER_TYPE;
   sender_details: {
     sender_id: string;
     sender_name: string;

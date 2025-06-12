@@ -116,6 +116,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
   const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
+  const [gridReady, setGridReady] = useState<boolean>(false);
 
   const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
 
@@ -543,9 +544,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
   }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
 
   useEffect(() => {
-    tableRef.current?.api?.setFilterModel(selectedFilters);
-    updateFiltersInParent?.(selectedFilters);
-  }, [selectedFilters, fxCurrency]);
+    if (gridReady && selectedFilters) {
+      tableRef.current?.api?.setFilterModel(selectedFilters);
+      updateFiltersInParent?.(selectedFilters);
+    }
+  }, [selectedFilters, fxCurrency, gridReady]);
 
   useEffect(() => {
     if (isNoRowsOverlayVisible) {
@@ -692,6 +695,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   useOnClickOutside(datasetTableRef, removeCellFocus);
 
+  const handleGridReady = () => {
+    setGridReady(true);
+  };
+
   return (
     <>
       <CommonWrapper
@@ -779,6 +786,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
               onFillEnd={onFillEnd}
               onRowPropertiesClick={handleRowPropertiesClick}
               onColumnMoved={handleColumnMoved}
+              onGridReady={handleGridReady}
               // Removed because it is causing load on star tree
               // columnLevelStats={columnLevelStats}
               containerStyle={containerStyle}
