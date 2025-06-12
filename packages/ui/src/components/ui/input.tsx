@@ -84,14 +84,16 @@ const Input = ({
   type,
   icon,
   iconPosition = 'leading',
+  wrapperClassName,
   ...props
 }: InputProps & {
   ref?: React.RefCallback<HTMLInputElement>;
+  wrapperClassName?: string;
 }) => {
   const currentSize = size || 'medium';
 
   return (
-    <div className='relative flex items-center'>
+    <div className={cn('relative flex items-center', wrapperClassName)}>
       {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
       <input
         type={type}

@@ -1,22 +1,22 @@
 import { useMemo, useState } from 'react';
 import { Tabs, TabsContent } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
+import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import DatasetArtifact from 'modules/process/artifacts/components/DatasetArtifact';
-import EmailArtifact from 'modules/process/artifacts/components/EmailArtifact';
+import EmailArtifactWrapper from 'modules/process/artifacts/components/EmailArtifactWrapper';
 import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType, PdfArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
 const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
   ssr: false,
+  loading: () => <ArtifactLoader />,
 });
 
 interface ArtifactsProps {
@@ -99,12 +99,7 @@ const Artifacts = ({
         />
         <CommonWrapper
           isLoading={isLoading}
-          loader={
-            <div className='bg-BG_GRAY_2 flex h-full w-full flex-col items-center justify-center gap-y-1'>
-              <SvgSpriteLoader id='stand' size={14} color={COLORS.GRAY_600} />
-              <span className='f-13-450 text-GRAY_600 animate-pulse'>Loading artifact...</span>
-            </div>
-          }
+          loader={<ArtifactLoader />}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isError}
           refetchFunction={refetch}
@@ -125,7 +120,7 @@ const Artifacts = ({
             </>
           )}
           {artifactType === ARTIFACT_TYPE.EMAIL && artifactData && id && (
-            <EmailArtifact emailArtifact={artifactData as EmailArtifactsResponseType} artifactId={id} key={id} />
+            <EmailArtifactWrapper artifactData={artifactData as EmailArtifactsResponseType} id={id} key={id} />
           )}
         </CommonWrapper>
 

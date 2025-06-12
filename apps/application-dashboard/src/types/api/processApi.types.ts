@@ -1,5 +1,11 @@
 import type { MapAny } from 'types/commonTypes';
-import type { ARTIFACT_TYPE, CTA_ACTION, CTA_COMPONENT_TYPE, SENDER_TYPE } from '@/modules/process/process.types';
+import type {
+  ARTIFACT_TYPE,
+  CTA_ACTION,
+  CTA_COMPONENT_TYPE,
+  EMAIL_STATUS,
+  SENDER_TYPE,
+} from '@/modules/process/process.types';
 export type StatusSummaryItem = {
   status_summary: {
     status: string;
@@ -62,7 +68,7 @@ export type PdfArtifactsResponseType = {
 
 export type EmailArtifactsResponseType = {
   display_name: string;
-  status: string;
+  status: EMAIL_STATUS;
   heading: string;
   date: string;
   from_mail_id: string;
