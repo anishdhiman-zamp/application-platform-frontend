@@ -97,6 +97,7 @@ export interface DropdownCustomClassNames {
   placeholder?: string;
   menu?: string;
   noOptionsMessage?: string;
+  color?: string;
 }
 
 export interface DropdownCustomStyles {
@@ -183,9 +184,7 @@ export type MenuSingleValuePropsType = {
   value?: string | number;
   showValueInControl?: boolean;
   size: keyof typeof DROPDOWN_SIZE_STYLES;
-  customClassNames?: {
-    placeholder?: string;
-  };
+  customClassNames?: DropdownCustomClassNames;
 };
 
 export type SelectedCountTooltipPropsType = {

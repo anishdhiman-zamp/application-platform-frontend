@@ -42,7 +42,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
     className={cn('flex flex-row items-start justify-between', containerClass)}
     data-testid={`menu-option-container-${innerProps.id}`}
   >
-    <div className='absolute -translate-x-1 p-1 right-0'>
+    <div className='absolute right-0 -translate-x-1 p-1'>
       <SvgSpriteLoader
         id='check'
         iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -74,7 +74,7 @@ export const MenuOption: FC<MenuOptionProps> = ({
         />
       )}
       <div
-        className={cn(`${contentWrapper} ${isMulti ? '' : 'py-1'} flex flex-col justify-start items-start`)}
+        className={cn(`${contentWrapper} ${isMulti ? '' : 'py-1'} flex flex-col items-start justify-start`)}
         data-testid={`menu-option-content-${innerProps.id}`}
       >
         {data?.spriteIcon && (

@@ -1,6 +1,8 @@
+'use client';
+
 import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '../assets';
@@ -112,7 +114,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
 
     return (
       <div className={cn('relative w-full', className)}>
-        {label && <label className='block mb-1 text-sm font-medium'>{label}</label>}
+        {label && <label className='mb-1 block text-sm font-medium'>{label}</label>}
         <Combobox
           optionsLoading={loading}
           options={comboboxOptions}
@@ -133,7 +135,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
         >
           <div
             className={cn(
-              'f-13-400 h-10 flex w-full items-center placeholder:text-gray-700 rounded-md border border-input focus:border-gray-600 bg-white px-3 outline-none focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
+              'f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
               value ? 'text-primary' : 'text-gray-700',
             )}
           >
@@ -142,7 +144,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             </span>
             <ChevronDown
               className={cn(
-                'h-4 w-4 opacity-50 transition-transform duration-200 text-gray-900',
+                'h-4 w-4 text-gray-900 opacity-50 transition-transform duration-200',
                 isOpen && 'rotate-180',
               )}
             />

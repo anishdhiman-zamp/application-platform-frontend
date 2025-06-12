@@ -63,7 +63,7 @@ const TeamMemberApprovalCard = ({
         return (
           <div className='flex items-center gap-1.5 whitespace-nowrap'>
             Removed from
-            <div className='px-1.5 py-1 rounded' style={{ backgroundColor: teamDetails.color }}>
+            <div className='rounded px-1.5 py-1' style={{ backgroundColor: teamDetails.color }}>
               {teamDetails.name}
             </div>
           </div>
@@ -72,7 +72,7 @@ const TeamMemberApprovalCard = ({
         return (
           <div className='flex items-center gap-1.5 whitespace-nowrap'>
             Added to
-            <div className='px-1.5 py-1 rounded' style={{ backgroundColor: teamDetails.color }}>
+            <div className='rounded px-1.5 py-1' style={{ backgroundColor: teamDetails.color }}>
               {teamDetails.name}
             </div>
           </div>
@@ -107,7 +107,7 @@ const TeamMemberApprovalCard = ({
     return null;
 
   return (
-    <div className='grid grid-cols-4 gap-4 f-12-450 border-b border-GRAY_100'>
+    <div className='f-12-450 border-GRAY_100 grid grid-cols-4 gap-4 border-b'>
       <div className='flex items-center'>
         <MembersName value={name} />
       </div>
@@ -120,7 +120,7 @@ const TeamMemberApprovalCard = ({
               variant='outline'
               size='xsmall'
               onClick={() => handleAction(TEMPLATE_APPROVAL_ACTION_TYPES.APPROVE)}
-              className='gap-1 min-w-[88px]'
+              className='min-w-[88px] gap-1'
               isLoading={isLoading && !isRejected}
             >
               <SvgSpriteLoader id='check' size={14} />
@@ -130,7 +130,7 @@ const TeamMemberApprovalCard = ({
               variant='outline'
               size='xsmall'
               onClick={() => handleAction(TEMPLATE_APPROVAL_ACTION_TYPES.REJECT)}
-              className='gap-1 min-w-[88px]'
+              className='min-w-[88px] gap-1'
               isLoading={isLoading && isRejected}
             >
               <SvgSpriteLoader id='x-close' size={14} />

@@ -6,7 +6,7 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/MoveMoneyTemplateListCard';
 import { MASK_DOTS, MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { AccountDetailsType, MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import TabsV2 from '@/components/common/tabs/TabsV2';
@@ -50,12 +50,12 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   showCurrencyLogo = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const accountRefs = useRef<(HTMLDivElement | null)[]>([]);
   const templateRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const { contact_id } = router.query;
+  const searchParams = useSearchParams();
+  const contact_id = searchParams?.get('contact_id');
 
   const [searchValue, setSearchValue] = useState('');
   const [isShowMenu, setIsShowMenu] = useState(false);
@@ -233,8 +233,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     return (
       <>
         {label && <div className={cn('text-GRAY_900 f-12-500', showTemplate ? 'mb-2' : 'mb-0')}>{label}</div>}
-        <div className='rounded-md border border-GRAY_500 bg-white p-2'>
-          <SkeletonElement className='w-full h-6' />
+        <div className='border-GRAY_500 rounded-md border bg-white p-2'>
+          <SkeletonElement className='h-6 w-full' />
         </div>
       </>
     );
@@ -244,7 +244,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     switch (currentTab) {
       case MOVE_MONEY_PAYMENT_TYPE.ACCOUNTS: {
         return (
-          <div className='p-1 flex-1 overflow-y-auto'>
+          <div className='flex-1 overflow-y-auto p-1'>
             <CommonWrapper
               isNoData={filteredAccounts?.length === 0}
               noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No accounts found</div>}
@@ -252,7 +252,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               {filteredAccounts.map((account, index) => (
                 <div key={`${account?.account_number}_${index}`} onMouseEnter={() => setHoveredIndex(index)}>
                   <AccountWithLogo
-                    className={cn('rounded-md !p-2.5', {
+                    className={cn('rounded-md p-2.5!', {
                       'bg-GRAY_100': hoveredIndex === index,
                     })}
                     name={`${snakeCaseToSentenceCase(account?.account_name)}  ${MASK_DOTS}  ${account?.masked_account_number}`}
@@ -268,7 +268,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       }
       case MOVE_MONEY_PAYMENT_TYPE.TEMPLATES: {
         return (
-          <div className='flex flex-col gap-0.5 p-1 flex-1 max-w-[298px]'>
+          <div className='flex max-w-[298px] flex-1 flex-col gap-0.5 p-1'>
             <CommonWrapper
               isNoData={templates?.length === 0}
               noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
@@ -298,10 +298,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div onFocus={!disabled && !isShowMenu ? onFocus : undefined} onKeyDown={handleKeyDown}>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('rounded-md border border-GRAY_500 bg-white cursor-pointer outline-none', {
-          'border-GRAY_400 overflow-y-hidden overflow-x-visible': !isShowMenu,
-          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
-          '!cursor-not-allowed bg-GRAY_100': disabled,
+        className={cn('border-GRAY_500 cursor-pointer rounded-md border bg-white outline-hidden', {
+          'border-GRAY_400 overflow-x-visible overflow-y-hidden': !isShowMenu,
+          'border-GRAY_500 shadow-select-account-dropdown': isShowMenu,
+          'bg-GRAY_100 cursor-not-allowed!': disabled,
         })}
         ref={containerRef}
       >
@@ -318,14 +318,14 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
               disabled={!!contact_id || disabled}
               onChange={handleSearch}
               className='f-13-450 grow'
-              focusClassNames='!px-0'
+              focusClassNames='px-0!'
               placeholder='Search account name, number'
             />
           </div>
         ) : (
           <div onFocus={!disabled && !isInputEnabled ? onFocus : undefined}>
             <AccountWithLogo
-              className={cn('rounded-md !p-2.5', {
+              className={cn('rounded-md p-2.5!', {
                 'bg-BACKGROUND_GRAY_2': disabled,
               })}
               name={accountName}
@@ -341,8 +341,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             height: dropdownHeight,
           }}
           tabIndex={-1}
-          className={cn('transition-all duration-200 flex flex-col', {
-            'opacity-0 pointer-events-none': !isShowMenu,
+          className={cn('flex flex-col transition-all duration-200', {
+            'pointer-events-none opacity-0': !isShowMenu,
           })}
         >
           {
@@ -362,9 +362,9 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
             </div>
           }
           {showTemplate && (
-            <div className='border-t border-GRAY_400 px-1'>
+            <div className='border-GRAY_400 border-t px-1'>
               <div
-                className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center cursor-pointer rounded-md'
+                className='f-12-500 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'
                 onClick={onCreateTemplate}
               >
                 <SvgSpriteLoader size={12} id='plus' />

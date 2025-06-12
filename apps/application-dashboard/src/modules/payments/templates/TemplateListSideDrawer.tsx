@@ -16,8 +16,8 @@ const TemplateListSideDrawer: FC<TemplateListSideDrawerProps> = ({ onClose, isOp
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent size='large' tabIndex={-1} className='p-0 h-screen overflow-hidden'>
-        <div className='h-full test'>
+      <SheetContent size='large' tabIndex={-1} className='h-screen overflow-hidden p-0'>
+        <div className='test h-full'>
           <AnimatePresence mode='wait'>
             {templateApprove ? (
               <motion.div

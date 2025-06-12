@@ -22,23 +22,21 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
   const message = value?.message;
 
   return (
-    <div className='flex items-center justify-between w-full'>
+    <div className='flex w-full items-center justify-between'>
       <div className='flex items-center gap-2'>
         <TabStatusIcon
           status={data.status as ACTIVITY_RUN_STATUS}
           fillColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor}
           strokeColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
         />
-        <span className='w-2 h-[1px] rounded-full bg-GRAY_400' />
-        <p className='f-13-500 text-GRAY_950 truncate max-w-[400px]' title={snakeCaseToSentenceCase(message)}>
-          {snakeCaseToSentenceCase(message)}
-        </p>
+        <span className='bg-GRAY_400 h-px w-2 rounded-full' />
+        <p className='f-13-500 text-GRAY_950 max-w-[400px] truncate'>{snakeCaseToSentenceCase(message)}</p>
       </div>
       <div className='flex items-center gap-2'>
         <p className='f-13-450 text-GRAY_900'>
           {getFormattedDate(
             { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM },
-            data?.activity_updated_at,
+            data?.activity_updated_at ?? data?.updated_at,
           )}
         </p>
         <ArtifactPill

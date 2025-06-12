@@ -16,10 +16,10 @@ export const DateRangePickerNavigator = (
   const yearsList = getYearList();
 
   return (
-    <div className=' flex justify-between'>
-      <div className=' flex w-fit border border-DIVIDER_SAIL_2'>
+    <div className='flex justify-between'>
+      <div className='border-DIVIDER_SAIL_2 flex w-fit border'>
         <select
-          className='f-12-400 appearance-none px-2 py-1 bg-BG_GRAY_2 focus:outline-none border border-r-DIVIDER_SAIL_2 border-y-0 border-l-0 outline-none cursor-pointer'
+          className='f-12-400 bg-BG_GRAY_2 border-r-DIVIDER_SAIL_2 cursor-pointer appearance-none border border-y-0 border-l-0 px-2 py-1 outline-hidden focus:outline-hidden'
           value={currentMonth}
           onChange={(e) => changeShownDate(e.target.value, 'setMonth')}
         >
@@ -31,7 +31,7 @@ export const DateRangePickerNavigator = (
         </select>
 
         <select
-          className='f-12-400 appearance-none bg-BG_GRAY_2 focus:outline-none px-2 py-1 border-none  outline-none cursor-pointer'
+          className='f-12-400 bg-BG_GRAY_2 cursor-pointer appearance-none border-none px-2 py-1 outline-hidden focus:outline-hidden'
           value={currFocusedDate?.getFullYear()}
           onChange={(e) => changeShownDate(e.target.value, 'setYear')}
         >
@@ -43,11 +43,11 @@ export const DateRangePickerNavigator = (
         </select>
       </div>
 
-      <div className='flex '>
-        <button className=' text-DIVIDER_SAIL_4  mr-3' onClick={() => changeShownDate(-1, 'monthOffset')}>
+      <div className='flex'>
+        <button className='text-DIVIDER_SAIL_4 mr-3' onClick={() => changeShownDate(-1, 'monthOffset')}>
           <SvgSpriteLoader id='chevron-left' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={16} height={16} />
         </button>
-        <button className=' text-DIVIDER_SAIL_4' onClick={() => changeShownDate(1, 'monthOffset')}>
+        <button className='text-DIVIDER_SAIL_4' onClick={() => changeShownDate(1, 'monthOffset')}>
           <SvgSpriteLoader id='chevron-right' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={16} height={16} />
         </button>
       </div>

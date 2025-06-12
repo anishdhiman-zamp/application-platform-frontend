@@ -117,7 +117,7 @@ const AddTag = ({
   return (
     <div className='w-[300px]'>
       <div className='py-3'>
-        <div className='flex items-center justify-between mb-3.5 px-3'>
+        <div className='mb-3.5 flex items-center justify-between px-3'>
           <div className='f-12-500 text-GRAY_1000'>Add Tag</div>
           <SvgSpriteLoader
             id='x-close'
@@ -133,11 +133,11 @@ const AddTag = ({
           {isOpen && (
             <MenuWrapper
               id='custom-tag-editor-menu'
-              className='!fixed mt-1 w-64 z-10'
-              childrenWrapperClassName='!overflow-y-visible !max-h-fit'
+              className='!fixed z-10 mt-1 w-64'
+              childrenWrapperClassName='overflow-y-visible! max-h-fit!'
             >
               <div className='text-GRAY_700 f-11-500 p-2'>Select an option or create one</div>
-              <div className='space-y-1 my-1 overflow-y-auto max-h-[300px]'>
+              <div className='my-1 max-h-[300px] space-y-1 overflow-y-auto'>
                 {searchResults.map((tag: string) => (
                   <div key={tag} onClick={() => handleTagClick(tag)}>
                     <TagWithHierarchy tag={tag} />
@@ -145,7 +145,7 @@ const AddTag = ({
                 ))}
               </div>
               <CreateTag value={searchValue} handleCreateTag={handleCreateTag} existingList={tagList} />
-              <div className='flex items-center p-2 bg-BG_GRAY_2 gap-2 rounded-b-md'>
+              <div className='bg-BG_GRAY_2 flex items-center gap-2 rounded-b-md p-2'>
                 <span>💡</span>
                 <span className='text-GRAY_900 f-11-400'>Use “ / “ to create hierarchy</span>
               </div>
@@ -154,7 +154,7 @@ const AddTag = ({
           {filterStatement?.length > 0 && (
             <>
               <div
-                className='rounded-md bg-BG_GRAY_2 px-3 py-2.5 f-11-400 text-GRAY_1000 border border-BORDER_GRAY_400 my-2.5 h-[140px] overflow-y-auto flex flex-wrap gap-y-2 items-center'
+                className='bg-BG_GRAY_2 f-11-400 text-GRAY_1000 border-BORDER_GRAY_400 my-2.5 flex h-[140px] flex-wrap items-center gap-y-2 overflow-y-auto rounded-md border px-3 py-2.5'
                 style={{ scrollbarWidth: 'none' }}
               >
                 <span className={fieldOperatorClassName}>If</span>
@@ -167,7 +167,7 @@ const AddTag = ({
                   />
                 ))}
               </div>
-              <div className='flex items-center gap-1.5 mb-1.5'>
+              <div className='mb-1.5 flex items-center gap-1.5'>
                 <ToggleSwitch id='add-tag-make-rule' onChange={setIsActive} checked={isActive} />
                 <div className='f-11-400 text-GRAY_1000'>Make this a rule</div>
               </div>
@@ -179,7 +179,7 @@ const AddTag = ({
           )}
         </div>
       </div>
-      <div className='flex flex-row-reverse items-center justify-between px-4 py-3 border-t border-BORDER_GRAY_400'>
+      <div className='border-BORDER_GRAY_400 flex flex-row-reverse items-center justify-between border-t px-4 py-3'>
         <Button
           size={SIZE_TYPES.XSMALL}
           id='add-tag-transactions'

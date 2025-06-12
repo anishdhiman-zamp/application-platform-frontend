@@ -114,7 +114,7 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
           description='Comma separated list of columns to dedup on'
           value={dedupColumns}
           onChange={(e) => setDedupColumns(e.target.value)}
-          labelClassName='!mb-1'
+          labelClassName='mb-1!'
           className='w-full space-y-2'
         />
         <Input
@@ -122,7 +122,7 @@ const CreateDataset: FC<CreateDatasetProps> = ({ onClose, isOpen, onSuccessfulCr
           description='Comma separated list of columns to partition on'
           value={partitionColumns}
           onChange={(e) => setPartitionColumns(e.target.value)}
-          labelClassName='!mb-1'
+          labelClassName='mb-1!'
           className='w-full space-y-2'
         />
         <Input

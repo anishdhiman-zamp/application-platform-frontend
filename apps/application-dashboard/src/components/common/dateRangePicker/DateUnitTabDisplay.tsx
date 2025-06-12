@@ -51,7 +51,7 @@ export const DateUnitTabDisplay: FC<DateUnitTabDisplayProps> = ({
 
   return (
     <div
-      className='h-[calc(100%-65px)] pt-3 px-3 border-t border-GRAY_400 w-full overflow-y-auto date-unit-container'
+      className='border-GRAY_400 date-unit-container h-[calc(100%-65px)] w-full overflow-y-auto border-t px-3 pt-3'
       ref={containerRef}
     >
       {currentTab === DATE_RANGE_TYPES.MONTH ? (

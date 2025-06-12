@@ -20,7 +20,7 @@ const SkeletonElement: FC<SkeletonElementProps> = ({ elementCount = 1, className
 
   return elements?.map((_, index) => {
     return (
-      <span className={cn('block animate-pulse bg-GRAY_50', className, shape ? SHAPE_STYLE[shape] : '')} key={index}>
+      <span className={cn('bg-GRAY_50 block animate-pulse', className, shape ? SHAPE_STYLE[shape] : '')} key={index}>
         &zwnj;
       </span>
     );

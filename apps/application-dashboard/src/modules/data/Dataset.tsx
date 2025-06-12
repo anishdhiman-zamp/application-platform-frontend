@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import {
@@ -17,9 +19,8 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { getDatasetDrilldownRoute, getDatasetRouteById, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
+import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
-import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
@@ -48,10 +49,7 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
-import { RootState } from 'store';
-import { addBreadcrumb, updateUrlForLastBreadcrumb } from 'store/slices/layout-configs';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   DatasetActionStatusResponseType,
   DatasetDataResponseType,
@@ -100,7 +98,6 @@ type DatasetByIdProps = {
 const DatasetById: FC<DatasetByIdProps> = ({
   id,
   drilldownFilters,
-  isDrilldown = false,
   pageSize,
   isReadOnly = false,
   containerStyle,
@@ -110,22 +107,19 @@ const DatasetById: FC<DatasetByIdProps> = ({
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
-  updateBreadcrumb = true,
   filterWrapperClassName,
-  showCurrencyFilter = true,
   showDatasetHistory = true,
   isDatasetArtifact = false,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
-  const filters = decodeURIComponent(searchParams.get('filters') ?? '');
-  const processId = searchParams.get('processId') as string;
+  const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
+  const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
+  const [gridReady, setGridReady] = useState<boolean>(false);
 
-  const currency = useSearchParams().get('currency') ?? LOCAL_CURRENCY;
+  const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
 
-  const appDispatch = useAppDispatch();
-  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
   const { checkUserPrivilege } = useResourceAccess(ResourceType.DATASET, id);
 
   const currentUserHasEditAccess = useMemo(() => {
@@ -242,6 +236,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
               processId: processId as string,
               activityRunId: activityId as string,
               datasetId: id as string,
+              query_config: queryConfig,
             })
               .unwrap()
               .then((response) => {
@@ -439,7 +434,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   const handleDrilldownClick = (data: MapAny) => {
-    appDispatch(updateUrlForLastBreadcrumb(router.asPath));
     if (params?.pageId) {
       router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
     } else {
@@ -550,9 +544,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
   }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
 
   useEffect(() => {
-    tableRef.current?.api?.setFilterModel(selectedFilters);
-    updateFiltersInParent?.(selectedFilters);
-  }, [selectedFilters, fxCurrency]);
+    if (gridReady && selectedFilters) {
+      tableRef.current?.api?.setFilterModel(selectedFilters);
+      updateFiltersInParent?.(selectedFilters);
+    }
+  }, [selectedFilters, fxCurrency, gridReady]);
 
   useEffect(() => {
     if (isNoRowsOverlayVisible) {
@@ -566,24 +562,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
     setFxCurrency(value);
   };
 
-  useEffect(() => {
-    if (
-      !isReadOnly &&
-      !isDrilldown &&
-      datasetTitle &&
-      !breadcrumbStack?.some((item) => item.title === datasetTitle) &&
-      updateBreadcrumb
-    ) {
-      appDispatch(addBreadcrumb({ title: datasetTitle, href: getDatasetRouteById(id as string) }));
-    }
-  }, [datasetTitle, breadcrumbStack, isDrilldown, isReadOnly]);
-
   const handleRefetchDataset = () => {
     if (isDatasetArtifact) {
       getDatasetArtifacts({
         processId: processId as string,
         activityRunId: activityId as string,
         datasetId: id as string,
+        query_config: exportsDatasetQuery,
       });
     } else {
       getDatasetData({
@@ -668,6 +653,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         processId: processId as string,
         activityRunId: activityId as string,
         datasetId: id as string,
+        query_config: queryConfig,
       })
         .unwrap()
         .then((response) => {
@@ -709,6 +695,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   useOnClickOutside(datasetTableRef, removeCellFocus);
 
+  const handleGridReady = () => {
+    setGridReady(true);
+  };
+
   return (
     <>
       <CommonWrapper
@@ -720,7 +710,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -731,7 +721,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('flex items-center justify-between pr-8 z-1000 gap-y-3', headerClassName)}>
+        <div className={cn('z-1000 flex items-center justify-between gap-y-3 pr-8', headerClassName)}>
           <div className={cn('flex items-center py-3', { 'py-0': isDatasetArtifact })}>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
           </div>
@@ -761,9 +751,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
             {!isReadOnly && (
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
-                {showCurrencyFilter && (
+                {filterConfigData?.config?.is_fx_enabled && (
                   <div className='flex items-center gap-2'>
-                    <div className='border-r border-GRAY_400 h-7'></div>
+                    <div className='border-GRAY_400 h-7 border-r'></div>
                     <SingleSelectFilter
                       onFilterChange={handleFilterChange}
                       value={fxCurrency}
@@ -785,7 +775,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
         >
-          <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+          <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
               columns={columns}
@@ -796,6 +786,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
               onFillEnd={onFillEnd}
               onRowPropertiesClick={handleRowPropertiesClick}
               onColumnMoved={handleColumnMoved}
+              onGridReady={handleGridReady}
               // Removed because it is causing load on star tree
               // columnLevelStats={columnLevelStats}
               containerStyle={containerStyle}

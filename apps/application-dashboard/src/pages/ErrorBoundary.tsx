@@ -25,7 +25,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
     if (this.state.hasError)
       // You can render any custom fallback UI
       return (
-        <div className='flex justify-center items-center h-screen w-full'>
+        <div className='flex h-screen w-full items-center justify-center'>
           <ErrorCard
             title='Something went wrong'
             className='w-full'

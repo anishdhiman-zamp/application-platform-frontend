@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { type Edge, type Node, ReactFlow, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
 import { useGetAllDatasetsQuery, useGetDatasetDagQuery } from 'apis/admin';
@@ -13,7 +15,7 @@ import AdminDatasetTransform from 'modules/admin/AdminDatasetTransform';
 import AdminEditTemplate from 'modules/admin/AdminEditTemplate';
 import CreateDataset from 'modules/admin/CreateDataset';
 import Notification from 'modules/data/Notification';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -175,7 +177,7 @@ const AdminDatasetDag: FC = () => {
         isLoading={isFetching}
         isError={isError}
         loader={
-          <div className='flex justify-center items-center h-full'>
+          <div className='flex h-full items-center justify-center'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -189,7 +191,7 @@ const AdminDatasetDag: FC = () => {
         refetchFunction={refetch}
         className='h-full w-full'
       >
-        <div className='flex justify-between items-center p-4'>
+        <div className='flex items-center justify-between p-4'>
           <Button id='layout-button' onClick={onLayout} size={SIZE_TYPES.SMALL}>
             Auto Arrange
           </Button>

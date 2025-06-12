@@ -1,4 +1,5 @@
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
+import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
   useDeleteAudienceFromResourceMutation,
@@ -7,7 +8,6 @@ import {
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
-import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
@@ -16,11 +16,9 @@ import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { cn, getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
+import { getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
@@ -39,7 +37,6 @@ import {
 import { AddAudiencesToResourcePayload } from '@/types/api/collaboration.types';
 import { FilterModelType } from '@/types/components/table.type';
 import { PERMISSION_ROLES } from '@/utils/accessPermission/accessPermission.types';
-import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -51,7 +48,6 @@ import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeleto
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const { resourceType, resourceConfig, isCustomiseAccess = false, title } = props;
   const resourceId = props.resourceId || '';
-  const popupRef = useRef<HTMLDivElement>(null);
   const [selectedRole, setSelectedRole] = useState<string>(resourceConfig.accessPrivilegesList[0]?.value ?? '');
   const [search, setSearch] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<ArrayListOption[]>([]);
@@ -157,10 +153,6 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     }
   }, [resourceType]);
 
-  const handleOpenPopup = () => {
-    setOpenPopup(true);
-  };
-
   const handleClosePopup = () => {
     if (showCustomiseAccess) return;
     setOpenPopup(false);
@@ -169,16 +161,16 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
     setSearch('');
   };
 
-  const handleTogglePopup = useCallback(() => {
-    if (openPopup) {
-      handleClosePopup();
+  const handleTogglePopup = (open: boolean) => {
+    if (open) {
+      setOpenPopup(true);
+      if (audiencesData) {
+        refetchAudiencesData();
+      }
     } else {
-      refetchAudiencesData();
-      handleOpenPopup();
+      handleClosePopup();
     }
-  }, [openPopup]);
-
-  useOnClickOutside(popupRef, handleClosePopup);
+  };
 
   const handleShareResource = () => {
     const shareData: AddAudiencesToResourcePayload = {
@@ -419,24 +411,19 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   };
 
   return (
-    <div ref={popupRef} className='flex w-fit'>
-      <div
-        id={`share-${resourceType.toLowerCase()}-to-audience-btn`}
-        onClick={handleTogglePopup}
-        className={cn(
-          openPopup && '!border !border-GRAY_400 !bg-GRAY_100',
-          'f-13-500 text-black py-1.5 px-2.5 rounded-md cursor-pointer hover:bg-BG_GRAY_2 active:bg-GRAY_400 border border-GRAY_400 bg-white',
-        )}
-      >
-        Share
-      </div>
-      <div className='relative'>
-        {openPopup && (
-          <div className='absolute flex flex-col w-[400px] right-0 top-9 z-[1200] bg-faded-white rounded-2xl'>
-            <div className='border-0.5 border-GRAY_500 rounded-3.5 bg-white shadow-tableFilterMenu'>
-              <div className='flex w-full justify-between items-center p-5'>
+    <div className='flex w-fit'>
+      <Popover open={openPopup} onOpenChange={handleTogglePopup}>
+        <PopoverTrigger asChild>
+          <Button size='small' variant='secondary' id={`share-${resourceType.toLowerCase()}-to-audience-btn`}>
+            Share
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
+          <div>
+            <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
+              <div className='flex w-full items-center justify-between p-5'>
                 <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
-                <div className='p-1 cursor-pointer' onClick={handleClosePopup}>
+                <div className='cursor-pointer p-1' onClick={handleClosePopup}>
                   <SvgSpriteLoader
                     id='x-close'
                     iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -446,8 +433,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                   />
                 </div>
               </div>
-              <div className='flex flex-col rounded-b-3.5 w-[400px]'>
-                <div className='pt-0 px-4 pb-5 space-y-4'>
+              <div className='rounded-b-3.5 flex w-full flex-col'>
+                <div className='space-y-4 px-4 pt-0 pb-5'>
                   <MultiSelectInput
                     id={`share-${resourceType.toLowerCase()}`}
                     search={search}
@@ -467,6 +454,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     optionalOpenDropdownOptions={false}
+                    labelCasing='capitalize'
                     selectOnlyFromList
                   />
                   {isCustomiseAccess && (
@@ -478,8 +466,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     />
                   )}
                 </div>
-                <div className='flex items-center justify-between w-full py-4 px-5 border-t-0.5 border-GRAY_500'>
-                  <span className='flex justify-center items-center f-11-500 gap-1.5 cursor-not-allowed'>
+                <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
+                  <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
                     <SvgSpriteLoader
                       id='link-03'
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -490,9 +478,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     <CopyToClipboardBrowserUrl />
                   </span>
                   <Button
-                    type={BUTTON_TYPES.PRIMARY}
                     id='send-user-invite-btn'
-                    size={SIZE_TYPES.SMALL}
+                    size='small'
                     disabled={!isResourceSharable}
                     onClick={handleShareResource}
                     isLoading={postInviteAudiencesIsLoading}
@@ -502,9 +489,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className='mt-2 rounded-3.5 py-2 pl-2 pr-4 border-0.5 border-GRAY_500 bg-white shadow-tableFilterMenu'>
-              <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-              <div className='flex flex-col w-full mt-2 max-h-[222px] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
+              <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
+              <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'>
                 <CommonWrapper
                   skeletonType={SkeletonTypes.CUSTOM}
                   isLoading={isLoadingAudiencesData}
@@ -549,8 +536,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
               resourceId={resourceId}
             />
           </div>
-        )}
-      </div>
+        </PopoverContent>
+      </Popover>
       {showCustomiseAccess && (
         <CustomiseAccess
           isOpen={showCustomiseAccess}

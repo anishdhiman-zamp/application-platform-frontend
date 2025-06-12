@@ -1,3 +1,4 @@
+'use client';
 import { FC, useRef, useState } from 'react';
 import { RowClickedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -52,7 +53,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
         id={id}
         handleRowClicked={handleRowClicked}
         tableRef={tableRef}
-        cellClass='!py-0'
+        cellClass='py-0!'
         filterConfigUrl={API_ENDPOINTS.PAYMENT_LIST_FILTER_CONFIG_GET}
         dataUrl={API_ENDPOINTS.PAYMENT_LIST_GET}
         actionElements={
@@ -62,7 +63,7 @@ const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
               onClick={() => setIsRecipientsSideDrawerOpen(true)}
               tooltipBody='Recipients'
               className='border-none'
-              tooltipClassName='!z-1000'
+              tooltipClassName='z-1000!'
               tooltipColor={COLORS.BLACK}
               buttonSize={SIZE_TYPES.XSMALL}
               tooltipPosition={TooltipPositions.TOP}
@@ -75,8 +76,8 @@ const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
               id='payment-templates'
               onClick={() => setIsPaymentTemplatesSideDrawerOpen(true)}
               tooltipBody='Payment Templates'
-              className='border-none !z-1000'
-              tooltipClassName='!z-1000'
+              className='z-1000! border-none'
+              tooltipClassName='z-1000!'
               tooltipColor={COLORS.BLACK}
               buttonSize={SIZE_TYPES.XSMALL}
               tooltipPosition={TooltipPositions.TOP}

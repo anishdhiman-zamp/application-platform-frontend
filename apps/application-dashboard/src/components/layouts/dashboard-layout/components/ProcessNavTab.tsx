@@ -1,6 +1,8 @@
+'use client';
+
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { getProcessRouteById } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import { ICON_SPRITE_TYPES } from '@/constants/icons';
 
@@ -17,9 +19,9 @@ const ProcessNavTab = ({ label, processId, isSelected, disable = false }: Proces
   return (
     <div
       className={cn(
-        'flex items-center gap-3 text-GRAY_900 px-2 py-2 f-13-500 hover:bg-GRAY_20 rounded-md cursor-pointer select-none',
+        'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
-        disable ? 'opacity-50 cursor-not-allowed' : '',
+        disable ? 'cursor-not-allowed opacity-50' : '',
       )}
       onClick={() => {
         if (!disable) {
@@ -32,7 +34,7 @@ const ProcessNavTab = ({ label, processId, isSelected, disable = false }: Proces
         id='activity'
         height={16}
         width={16}
-        className='w-[14px] align-middle cursor-pointer'
+        className='w-[14px] cursor-pointer align-middle'
       />
       <div>{label}</div>
     </div>

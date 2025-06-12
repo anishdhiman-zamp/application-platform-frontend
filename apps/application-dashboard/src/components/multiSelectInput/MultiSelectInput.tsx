@@ -49,6 +49,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   setSelectedRole,
   onCustomDeleteFn,
   closeDropdownOnSelect = false,
+  labelCasing,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -291,13 +292,13 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     <div className='flex flex-col items-center'>
       <div
         className={cn(
-          'flex justify-between items-start w-full rounded-md gap-1.5 border',
-          isInputFocused ? 'border-GRAY_600 shadow-inputOutlineShadow' : 'border-GRAY_400',
+          'flex w-full items-center justify-between gap-1.5 rounded-md border',
+          isInputFocused ? 'border-GRAY_600 shadow-input-outline-shadow' : 'border-GRAY_400',
           wrapperClassName,
         )}
       >
         <div
-          className={cn('flex flex-wrap gap-1.5 py-3 pl-3 w-full', inputWrapperClassName)}
+          className={cn('flex w-full flex-wrap gap-1.5 py-3 pl-3', inputWrapperClassName)}
           ref={containerRef}
           onClick={handleSetInputFocus}
         >
@@ -306,13 +307,13 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             inputArrayList?.map((item, index) => (
               <div
                 key={index}
-                className='flex items-center gap-1 px-1.5 pr-1 py-0.5 rounded w-fit h-fit cursor-default'
+                className='flex h-fit w-fit cursor-default items-center gap-1 rounded px-1.5 py-0.5 pr-1'
                 style={{
                   backgroundColor: item?.valid ? (item?.color ? item?.color : COLORS.GRAY_50) : COLORS.RED_100,
                   border: `1px solid ${item?.valid ? (item?.color !== COLORS.WHITE ? 'transparent' : COLORS.GRAY_400) : COLORS.RED_200}`,
                 }}
               >
-                <span className='f-12-500 text-GRAY_1000 capitalize'>{item?.label}</span>
+                <span className={cn('f-12-450 text-GRAY_1000', labelCasing)}>{item?.label}</span>
                 <SvgSpriteLoader
                   id='x-close'
                   iconCategory={ICON_SPRITE_TYPES.GENERAL}
@@ -331,18 +332,18 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleClickKeyDown}
-            className='flex-1 min-w-[20px] h-fit mt-[2px]'
+            className='mt-[2px] h-fit min-w-[20px] flex-1'
             customPaddingClassName='p-0'
-            focusClassNames='focus:outline-none focus:border-none focus:shadow-none'
+            focusClassNames='focus:outline-hidden focus:border-none focus:shadow-none'
             cursorClassname='cursor-text'
-            inputFontClassName={multiSelectInputClassName || 'f-13-400 py-0 !rounded-none'}
+            inputFontClassName={multiSelectInputClassName || 'f-13-450 py-0 rounded-none!'}
             style={{
               maxWidth: '100%',
             }}
           />
         </div>
         {roleOptions && (
-          <div className='flex min-w-max h-fit !cursor-pointer'>
+          <div className='flex h-fit min-w-max cursor-pointer!'>
             <Dropdown
               options={roleOptions}
               id={`${id}-multi-select-input-dropdown`}
@@ -362,7 +363,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                 fontSize: 'f-12-400',
               }}
               customClassNames={{
-                placeholder: 'f-12-300',
+                placeholder: 'f-12-400',
+                color: 'text-GRAY_900',
               }}
               menuOptionClasses={{
                 contentWrapper: 'py-2',
@@ -373,7 +375,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         )}
       </div>
       {openDropdownOptions && (
-        <div className='w-full relative'>
+        <div className='relative w-full'>
           <div ref={dropdownOptionsRef} onClick={(e) => e.stopPropagation()}>
             {customOptionsListDropdown
               ? createElement(
@@ -393,10 +395,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   } as Record<string, unknown>,
                 )
               : !!combinedOptions?.length && (
-                  <div className='absolute left-0 bg-white w-full p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'>
-                    <span className='flex pt-2 pb-1.5 px-1.5'>Select a team or person</span>
+                  <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu absolute left-0 z-10 mt-1 w-full rounded-md border bg-white p-1'>
+                    <span className='flex px-1.5 pt-2 pb-1.5'>Select a team or person</span>
                     <div
-                      className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden'
+                      className='flex max-h-[200px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'
                       tabIndex={0}
                     >
                       <CommonWrapper
@@ -412,7 +414,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                                 optionRefs.current[index] = el;
                               }
                             }}
-                            className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                            className={cn('hover:bg-GRAY_50 w-full cursor-pointer rounded-md px-1.5 py-1', {
                               'bg-GRAY_50':
                                 (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
                             })}
@@ -422,7 +424,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                           >
                             <span
                               className={cn(
-                                'f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded capitalize border',
+                                'f-12-400 text-GRAY_1000 flex w-fit rounded border px-1.5 py-0.5 capitalize',
                               )}
                               style={{
                                 backgroundColor: option?.color || COLORS.WHITE,
@@ -441,7 +443,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         </div>
       )}
       {validationErrorText && showValidationError && (
-        <span className='f-11-400 text-RED_700 mt-2 w-full flex text-start'>{validationErrorText}</span>
+        <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
       )}
     </div>
   );

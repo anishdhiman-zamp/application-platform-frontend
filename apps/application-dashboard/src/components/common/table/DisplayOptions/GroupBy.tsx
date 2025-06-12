@@ -10,7 +10,7 @@ import { MenuWrapper } from 'components/common/MenuWrapper';
 
 type GroupByProps = {
   onClose: defaultFnType;
-  tableRef: RefObject<AgGridReact>;
+  tableRef: RefObject<AgGridReact | null>;
 };
 
 const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
@@ -110,8 +110,8 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
   return (
     <MenuWrapper
       id='group-by'
-      className='!absolute z-10 right-0 mt-1 min-w-[376px] min-h-[344px] h-fit'
-      childrenWrapperClassName='!overflow-visible !min-h-[344px] h-fit !max-h-fit'
+      className='!absolute right-0 z-10 mt-1 h-fit min-h-[344px] min-w-[376px]'
+      childrenWrapperClassName='overflow-visible! min-h-[344px]! h-fit max-h-fit!'
     >
       <div className='px-3 py-1'>
         <div className='flex items-center gap-1.5 py-2'>
@@ -129,15 +129,15 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
         <div
           onDragOver={(event) => event.preventDefault()}
           onDrop={handleDropOnGroup}
-          className='border border-GRAY_500 rounded-md p-2.5 bg-BG_GRAY_2 min-h-[70px]'
+          className='border-GRAY_500 bg-BG_GRAY_2 min-h-[70px] rounded-md border p-2.5'
         >
           <div className='f-12-400 text-GRAY_700 mb-3'>Drag columns here to group by</div>
-          <div className='flex gap-1 flex-wrap overflow-y-auto max-h-[100px] overflow-x-visible'>
+          <div className='flex max-h-[100px] flex-wrap gap-1 overflow-x-visible overflow-y-auto'>
             {groupedColumns.map((col, index) => (
-              <div className='flex gap-1 items-center' key={col}>
+              <div className='flex items-center gap-1' key={col}>
                 <div
                   key={col}
-                  className='border border-GRAY_400 rounded-md px-2 py-1 text-GRAY_1000 bg-white f-12-500 flex items-center gap-1.5'
+                  className='border-GRAY_400 text-GRAY_1000 f-12-500 flex items-center gap-1.5 rounded-md border bg-white px-2 py-1'
                   draggable
                   onDragStart={handleDragStart(col)}
                 >
@@ -163,7 +163,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
           placeholder='Search Columns...'
           size={SIZE_TYPES.XSMALL}
           noBorders
-          focusClassNames='mt-3 mb-2 !pl-0'
+          focusClassNames='mt-3 mb-2 pl-0!'
           onChange={handleSearch}
           value={searchTerm}
           autoFocus
@@ -172,21 +172,21 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
         <div
           onDragOver={(event) => event.preventDefault()}
           onDrop={handleDropOnAvailable}
-          className='flex flex-wrap gap-1.5 overflow-y-auto max-h-[150px] overflow-x-visible pb-2'
+          className='flex max-h-[150px] flex-wrap gap-1.5 overflow-x-visible overflow-y-auto pb-2'
         >
           {availableColumns?.map((col) => (
             <div
               key={col}
               draggable
               onDragStart={handleDragStart(col)}
-              className='border border-GRAY_400 rounded-md px-2 py-1 w-fit cursor-move text-GRAY_900 f-12-400 hover:bg-BG_GRAY_2'
+              className='border-GRAY_400 text-GRAY_900 f-12-400 hover:bg-BG_GRAY_2 w-fit cursor-move rounded-md border px-2 py-1'
             >
               {col}
             </div>
           ))}
         </div>
       </div>
-      <div className='w-full flex flex-row-reverse f-12-500 text-GRAY_1000 py-2.5 px-3 border-t border-GRAY_400 absolute bottom-0 bg-white rounded-b-md'>
+      <div className='f-12-500 text-GRAY_1000 border-GRAY_400 absolute bottom-0 flex w-full flex-row-reverse rounded-b-md border-t bg-white px-3 py-2.5'>
         <div className='cursor-pointer' onClick={handleReset}>
           Reset
         </div>

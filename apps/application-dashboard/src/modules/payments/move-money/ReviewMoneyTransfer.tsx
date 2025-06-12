@@ -5,7 +5,7 @@ import AccountWithLogo from 'modules/payments/move-money/components/AccountWithL
 import { useMoveMoneyContextStore } from 'modules/payments/move-money/moveMoney.context';
 import { MASK_DOTS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
@@ -84,10 +84,10 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
 
   return (
     <div className='h-screen overflow-y-scroll py-20'>
-      <div className='max-w-75 m-auto'>
+      <div className='m-auto max-w-75'>
         <div className='f-22-550 mb-5'>Review</div>
         <div
-          className={cn(' mb-5', transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && 'border-b border-GRAY_400 pb-5')}
+          className={cn('mb-5', transferType === MOVE_MONEY_TYPE.SINGLE_TRANSFER && 'border-GRAY_400 border-b pb-5')}
         >
           <div className='mb-4'>
             {recipientDetails?.name && <div className='f-14-450 mb-1'>Payment to {recipientDetails?.name}</div>}
@@ -117,9 +117,9 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
           )}
         </div>
         <div>
-          <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer from {sourceAccountDetails?.account_holder_name}</div>
+          <div className='f-12-400 text-GRAY_700 mb-1.5'>Transfer from {sourceAccountDetails?.account_holder_name}</div>
           <AccountWithLogo
-            className='border border-GRAY_400 mb-5 rounded-md'
+            className='border-GRAY_400 mb-5 rounded-md border'
             logo={sourceAccountDetails?.banking_partner ?? DEFAULT_BANK}
             name={sourceAccountName}
             subtitle={sourceAccountDetails?.bank_name}
@@ -127,9 +127,9 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
         </div>
         {transferType === MOVE_MONEY_TYPE.SELF_TRANSFER && (
           <div>
-            <div className='f-12-400 mb-1.5 text-GRAY_700'>Transfer to</div>
+            <div className='f-12-400 text-GRAY_700 mb-1.5'>Transfer to</div>
             <AccountWithLogo
-              className='border border-GRAY_400 mb-5 rounded-md'
+              className='border-GRAY_400 mb-5 rounded-md border'
               logo={destinationAccountDetails?.banking_partner ?? DEFAULT_BANK}
               name={destinationAccountName}
               subtitle={destinationAccountDetails?.bank_name}
@@ -139,22 +139,22 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
         <div className='flex flex-col gap-6'>
           {moreDetails?.externalMemo && (
             <div>
-              <div className='f-12-400 mb-1.5 text-GRAY_700'>Memo for recipient</div>
+              <div className='f-12-400 text-GRAY_700 mb-1.5'>Memo for recipient</div>
               <div className='f-12-450'>{moreDetails?.externalMemo}</div>
             </div>
           )}
           {moreDetails?.note && (
             <div>
-              <div className='f-12-400 mb-1.5 text-GRAY_700'>Notes</div>
+              <div className='f-12-400 text-GRAY_700 mb-1.5'>Notes</div>
               <div className='f-12-450'>{moreDetails?.note}</div>
             </div>
           )}
           {!!moreDetails?.attachments.length && (
             <div>
-              <div className='f-12-400 mb-3 text-GRAY_700'>Attachments</div>
+              <div className='f-12-400 text-GRAY_700 mb-3'>Attachments</div>
               {moreDetails?.attachments?.map((attachment, index) => (
-                <div key={index} className='flex justify-between mb-2'>
-                  <div className='flex items-center gap-2 bg-GRAY_100 rounded-md py-1.5 px-2'>
+                <div key={index} className='mb-2 flex justify-between'>
+                  <div className='bg-GRAY_100 flex items-center gap-2 rounded-md px-2 py-1.5'>
                     <SvgSpriteLoader size={14} id='file-02' />
                     <div className='f-12-400'>{attachment?.fileName}</div>
                   </div>
@@ -180,7 +180,7 @@ const ReviewMoneyTransfer: FC<ReviewMoneyTransferProps> = ({ handleStepChange, t
             </div>
           )}
         </div>
-        <div className='flex gap-3 mt-10'>
+        <div className='mt-10 flex gap-3'>
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}

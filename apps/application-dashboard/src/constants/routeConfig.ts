@@ -6,7 +6,7 @@ export const ROUTES_PATH = {
   DATA: '/datasets',
   DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
-  PAGES: '/pages/',
+  PAGES: '/pages',
   PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   NO_ACCESS: '/no-access',
@@ -16,6 +16,7 @@ export const ROUTES_PATH = {
   MONEY_TRANSFER: '/payments/money-transfer',
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
+  ADMIN_ASSETS: '/admin/assets',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes',
@@ -26,15 +27,21 @@ export const ROUTES_PATH = {
 };
 
 export const getPageRouteById = (pageId: string) => {
-  return `${ROUTES_PATH.PAGES}${pageId}`;
+  return `${ROUTES_PATH.PAGES}/${pageId}`;
 };
 
 export const getDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.DATA}/${datasetId}`;
 };
 
-export const getPageDatasetRoute = (pageId: string, datasetId: string) => {
-  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}`;
+export const getPageDatasetRoute = (pageId: string, datasetId: string, query?: Record<string, string>) => {
+  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}${
+    query
+      ? `?${Object.entries(query)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&')}`
+      : ''
+  }`;
 };
 
 export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {

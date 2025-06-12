@@ -16,7 +16,7 @@ type SummarySectionProps = {
 const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
   const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams.get('processId') as string;
+  const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
 
   const {
@@ -52,7 +52,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
   );
 
   return (
-    <div className='flex flex-col items-start justify-start h-full w-full overflow-y-auto animate-fade-in'>
+    <div className='animate-fade-in flex h-full w-full flex-col items-start justify-start overflow-y-auto'>
       <CommonWrapper
         isLoading={isLoadingSummary}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -60,14 +60,14 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         isError={isErrorSummary}
         refetchFunction={refetchSummary}
         isNoData={!summary?.summary?.summary_items?.length}
-        noDataBanner={<NoWidgetData className='h-[400px]' text='No key details found' />}
+        noDataBanner={<NoWidgetData text='No key details found' className='h-[400px]' />}
         errorCardStyle='w-full h-1/2'
-        className='px-6 pt-5 pb-6 flex flex-col justify-start items-start w-full gap-y-3'
+        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pt-5 pb-6'
       >
         <p className='f-13-550'>Key Details</p>
         {summary?.summary?.summary_items?.map((section) => <Summary key={section?.title} data={section} />)}
       </CommonWrapper>
-      <div className='h-px w-full bg-GRAY_400' />
+      <div className='bg-GRAY_400 h-px w-full' />
       <CommonWrapper
         isLoading={isLoadingArtifacts}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -77,7 +77,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         isNoData={!artifacts?.artifacts?.length}
         noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
-        className='px-6 py-5 flex flex-col justify-start items-start w-full gap-y-3'
+        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 py-5'
       >
         <p className='f-13-550'>Artifacts</p>
         {artifacts?.artifacts?.map((artifact) => (
@@ -85,7 +85,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
             key={artifact?.id}
             displayName={artifact?.artifact_data?.display_name}
             type={artifact?.artifact_type}
-            onClick={() => handleShowArtifacts(artifact?.artifact_type as ARTIFACT_TYPE, artifact?.id ?? '')}
+            onClick={() => handleShowArtifacts(artifact?.artifact_type, artifact?.id ?? '')}
             displayClassName='max-w-80'
           />
         ))}

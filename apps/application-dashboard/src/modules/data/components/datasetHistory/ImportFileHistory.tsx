@@ -6,15 +6,15 @@ import HistoryBulkLoaders from 'modules/data/components/datasetHistory/HistoryBu
 import HistoryEmptyState from 'modules/data/components/datasetHistory/HistoryEmptyState';
 import HistoryList from 'modules/data/components/datasetHistory/HistoryList';
 import { ImportFileHistoryPropsType } from 'modules/data/components/importDataset/importData.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 
 const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
   const importFileHistoryRef = useRef<HTMLDivElement>(null);
   const [isHoveredLoaders, setIsHoveredLoaders] = useState(false);
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
-  const router = useRouter();
-  const datasetId = router?.query?.datasetId as string;
+  const searchParams = useSearchParams();
+  const datasetId = searchParams?.get('datasetId') as string;
   const { data } = useGetFileImportHistoryQuery({ datasetId });
   const fileImportHistoryData = data?.file_uploads || [];
 
@@ -22,9 +22,9 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
 
   return (
     <>
-      <div className='fixed w-screen !h-[calc(100vh-136px)] z-1000 top-[94px] left-0 flex justify-end'>
+      <div className='fixed top-[94px] left-0 z-1000 flex h-[calc(100vh-136px)]! w-screen justify-end'>
         {!datasetBulkLoaders?.length && !fileImportHistoryData?.length ? (
-          <div className='absolute right-8 top-0 z-50' ref={importFileHistoryRef}>
+          <div className='absolute top-0 right-8 z-50' ref={importFileHistoryRef}>
             <HistoryEmptyState />
           </div>
         ) : (
@@ -33,7 +33,7 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
             className='h-full overflow-y-scroll [&::-webkit-scrollbar]:hidden'
             onMouseLeave={() => setIsHoveredLoaders(false)}
           >
-            <div className='flex flex-col h-auto'>
+            <div className='flex h-auto flex-col'>
               <HistoryBulkLoaders
                 isHoveredLoaders={isHoveredLoaders}
                 setIsHoveredLoaders={setIsHoveredLoaders}

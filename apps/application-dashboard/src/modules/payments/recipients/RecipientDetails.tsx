@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import RecipientAccountCard from 'modules/payments/recipients/components/RecipientAccountCard';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -28,21 +28,17 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
   const router = useRouter();
 
   const handleSendMoney = () => {
-    router.push({
-      pathname: ROUTES_PATH.MONEY_TRANSFER,
-      query: {
-        type: MOVE_MONEY_TYPE.SINGLE_TRANSFER,
-        recipientId: recipientDetails?.id,
-      },
-    });
+    router.push(
+      `${ROUTES_PATH.MONEY_TRANSFER}?type=${MOVE_MONEY_TYPE.SINGLE_TRANSFER}&recipientId=${recipientDetails?.id}`,
+    );
   };
 
   return (
-    <div className='pl-4.5 pr-2 py-6.5 flex flex-col gap-8'>
-      <div className='flex items-center gap-3 '>
+    <div className='flex flex-col gap-8 py-6.5 pr-2 pl-4.5'>
+      <div className='flex items-center gap-3'>
         <SvgSpriteLoader id='arrow-narrow-left' size={14} onClick={onBack} />
-        <div className='flex items-center gap-2.5 grow'>
-          <div className='w-6 h-6 flex items-center justify-center rounded-full bg-BLUE_200 f-12-500'>
+        <div className='flex grow items-center gap-2.5'>
+          <div className='bg-BLUE_200 f-12-500 flex h-6 w-6 items-center justify-center rounded-full'>
             {getFirstLetters(recipientDetails?.name, 1)}
           </div>
           <div className='f-16-600'>{recipientDetails?.name}</div>
@@ -61,7 +57,7 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
           <Button
             id='send-money'
             onClick={handleSendMoney}
-            className='!px-3'
+            className='px-3!'
             iconProps={{
               id: 'send-03',
               size: 14,
@@ -84,8 +80,8 @@ const RecipientDetails: FC<RecipientDetailsProps> = ({
               </div>
             ))}
           </div>
-          <div className='flex flex-col gap-3 mt-8'>
-            <div className=' flex justify-between items-center f-13-500'>
+          <div className='mt-8 flex flex-col gap-3'>
+            <div className='f-13-500 flex items-center justify-between'>
               Accounts ({recipientDetails?.accounts?.length})
               {allowActions && (
                 <Button

@@ -69,9 +69,9 @@ const AddRecipient = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton>
         <DialogHeader>New Recipient</DialogHeader>
-        <DialogBody className='p-6 flex justify-center'>
+        <DialogBody className='flex justify-center p-6'>
           {isFormConfigLoading || !formConfig ? (
-            <div className='flex justify-center items-center h-full'>
+            <div className='flex h-full items-center justify-center'>
               <Loader className='border-gray-800 border-b-transparent' />
             </div>
           ) : (

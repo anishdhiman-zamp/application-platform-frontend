@@ -62,13 +62,13 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className='flex flex-wrap gap-2.5 border p-1.5 rounded-md w-full min-h-[40px] items-center cursor-text'>
+        <div className='flex min-h-[40px] w-full cursor-text flex-wrap items-center gap-2.5 rounded-md border p-1.5'>
           {selectedApprovers.map((approver, idx) => (
             <Fragment key={idx}>{currentOptions.find((o) => o.value.id === approver.id)?.richLabel}</Fragment>
           ))}
           <input
             ref={inputRef}
-            className='flex-1 min-w-[80px] border-none outline-none bg-transparent f-14-500'
+            className='f-14-500 min-w-[80px] flex-1 border-none bg-transparent outline-hidden'
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -76,7 +76,7 @@ const ApproverList: FC<ApproverListProps> = ({ selectedApprovers, onChange }) =>
           />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='z-[1001] max-h-60 overflow-y-auto' align='start'>
+      <DropdownMenuContent className='z-1001 max-h-60 overflow-y-auto' align='start'>
         {filteredOptions.length === 0 ? (
           <div className='px-2 py-2 text-gray-400'>No approvers found</div>
         ) : (

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from '../../lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { SizeType } from '@zamp-platform/ui/types';
 
 const inputVariants = cva(
-  'p-3 flex w-full rounded-md border border-gray-400 placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'p-3 flex w-full rounded-md border border-gray-400 placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       size: {
@@ -75,27 +75,40 @@ export interface InputProps
   iconPosition?: IconPosition;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size = 'medium', variant, error, type, icon, iconPosition = 'leading', ...props }, ref) => {
-    const currentSize = size || 'medium';
+const Input = ({
+  ref,
+  className,
+  size = 'medium',
+  variant,
+  error,
+  type,
+  icon,
+  iconPosition = 'leading',
+  ...props
+}: InputProps & {
+  ref?: React.RefCallback<HTMLInputElement>;
+}) => {
+  const currentSize = size || 'medium';
 
-    return (
-      <div className='relative flex items-center'>
-        {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
-        <input
-          type={type}
-          className={cn(
-            inputVariants({ size: currentSize, variant: error ? 'error' : variant }),
-            getInputPadding(currentSize, iconPosition, !!icon),
-            className,
-          )}
-          ref={ref}
-          {...props}
-        />
-      </div>
-    );
-  },
-);
+  return (
+    <div className='relative flex items-center'>
+      {icon && <div className={`absolute ${getIconClasses(currentSize, iconPosition)}`}>{icon}</div>}
+      <input
+        type={type}
+        className={cn(
+          inputVariants({
+            size: currentSize,
+            variant: error ? 'error' : variant,
+          }),
+          getInputPadding(currentSize, iconPosition, !!icon),
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    </div>
+  );
+};
 Input.displayName = 'Input';
 
 export { Input, inputVariants };

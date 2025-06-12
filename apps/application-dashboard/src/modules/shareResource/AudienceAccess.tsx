@@ -188,9 +188,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
 
   return (
     <>
-      <div className='f-12-400 pl-2 bg-white flex justify-between items-center'>
+      <div className='f-12-400 flex items-center justify-between bg-white'>
         <div className='flex items-center justify-start'>
-          <div className='flex items-start justify-start gap-x-1 w-[140px]'>
+          <div className='flex w-[168px] items-start justify-start gap-x-1 px-2'>
             <div className='flex items-center gap-1'>
               {checkIfResourceTypeTeam ? (
                 <div>
@@ -201,14 +201,14 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
                   <Avatar
                     name={customAvatarWord}
                     backgroundColor={COLORS.GRAY_1000}
-                    className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
+                    className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white'
                   />
                 </div>
               )}
               <div
                 className={cn(
-                  'flex justify-center items-center gap-1 whitespace-nowrap',
-                  checkIfResourceTypeTeam && 'px-1.5 py-0.5 rounded',
+                  'flex items-center justify-center gap-1 whitespace-nowrap',
+                  checkIfResourceTypeTeam && 'rounded px-1.5 py-0.5',
                 )}
                 style={{
                   backgroundColor: checkIfResourceTypeTeam ? teamInfo?.color : 'transparent',
@@ -219,7 +219,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
               </div>
             </div>
           </div>
-          <span className='hidden text-wrap flex-wrap break-words whitespace-normal items-center justify-start gap-1 w-[100px]'>
+          <span className='hidden w-[100px] flex-wrap items-center justify-start gap-1 text-wrap break-words whitespace-normal'>
             {currentUserHasAdminAccess && (
               <>
                 <Image src={JOINED_DATASET_ICON} alt='joined-dataset-icon' width={16} height={16} />
@@ -254,13 +254,13 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             isHoveredDropdown={isHoveredDropdown}
             setIsHoveredDropdown={setIsHoveredDropdown}
             isOverflowStyle
-            parentWrapperClassName='w-28 justify-end'
+            parentWrapperClassName='w-[70px] justify-end'
           />
         ) : (
           <span
             className={cn(
-              'flex justify-end items-start f-12-400 text-GRAY_1000 pl-4 py-3 pr-2 w-28',
-              !showRoleChangeDropdown && 'pr-4 text-GRAY_600',
+              'f-12-400 text-GRAY_1000 flex w-[70px] items-center py-3 pl-4',
+              !showRoleChangeDropdown && 'text-GRAY_600',
             )}
           >
             {role?.label}

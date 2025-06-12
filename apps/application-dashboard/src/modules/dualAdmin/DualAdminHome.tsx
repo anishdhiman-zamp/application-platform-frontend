@@ -10,10 +10,8 @@ import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useAppSelector } from '@/hooks/toolkit';
 import useAudienceMembers from '@/hooks/useAudienceMembers';
-import { resetBreadcrumb } from '@/store/slices/layout-configs';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { ResourceType } from '@/types/api/policies.types';
 
@@ -24,7 +22,6 @@ export interface AudienceMembersDataType extends AudiencesByResourceResponse {
 
 const DualAdminHome = () => {
   const { user } = useAppSelector((state) => state.user);
-  const appDispatch = useAppDispatch();
   const { data: dualAdminPolicy, isLoading, isError, refetch } = useGetDualAdminPolicyQuery();
   const [requestApprovalPolicyConfig, setRequestApprovalPolicyConfig] = useState<RequestApprovalPolicyConfig | null>(
     null,
@@ -48,10 +45,6 @@ const DualAdminHome = () => {
     }
   }, [audiences, loading]);
 
-  useEffect(() => {
-    appDispatch(resetBreadcrumb([{ title: 'Policies', href: ROUTES_PATH.POLICIES }]));
-  }, []);
-
   return (
     <div className='p-10'>
       <div className='mb-5'>
@@ -61,14 +54,14 @@ const DualAdminHome = () => {
         </div>
       </div>
       <div>
-        <table className='w-full text-left f-11-450 text-GRAY_700'>
+        <table className='f-11-450 text-GRAY_700 w-full text-left'>
           <thead>
-            <tr className='border-b border-GRAY_400'>
-              <th className='px-2 py-2.5 f-11-450'>Resource</th>
-              <th className='px-2 py-2.5 f-11-450'>Approvers</th>
-              <th className='px-2 py-2.5 f-11-450'></th>
-              <th className='px-2 py-2.5 f-11-450'>Status</th>
-              <th className='px-2 py-2.5 f-11-450'> </th>
+            <tr className='border-GRAY_400 border-b'>
+              <th className='f-11-450 px-2 py-2.5'>Resource</th>
+              <th className='f-11-450 px-2 py-2.5'>Approvers</th>
+              <th className='f-11-450 px-2 py-2.5'></th>
+              <th className='f-11-450 px-2 py-2.5'>Status</th>
+              <th className='f-11-450 px-2 py-2.5'> </th>
             </tr>
           </thead>
           <tbody>

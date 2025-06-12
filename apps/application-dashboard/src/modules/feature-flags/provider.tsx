@@ -1,3 +1,5 @@
+'use client';
+
 import { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { ENVIRONMENT } from 'constants/common.constants';

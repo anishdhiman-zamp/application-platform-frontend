@@ -5,11 +5,12 @@ import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { useGetActivityLogsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface LogsSectionProps {
   processId: string;
   activityId: string;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
 }
 
 const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, activityId }) => {
@@ -46,11 +47,11 @@ const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, act
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<LogsSkeleton />}
       errorCardStyle='flex-1'
-      className='overflow-auto w-full flex-1 px-8 h-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+      className='h-full w-full flex-1 overflow-auto px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
     >
       <div
         ref={containerRef}
-        className='h-full flex-1 overflow-auto pb-40 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+        className='h-full flex-1 overflow-auto pb-40 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
       >
         {logs?.activity_logs?.length && <LogsList logs={logs} handleShowArtifacts={handleShowArtifacts} />}
       </div>

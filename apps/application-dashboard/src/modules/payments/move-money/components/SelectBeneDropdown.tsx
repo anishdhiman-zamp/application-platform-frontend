@@ -6,7 +6,7 @@ import MoveMoneyTemplateListCard from 'modules/payments/move-money/components/Mo
 import RecipientCard from 'modules/payments/move-money/components/RecipientCard';
 import { MOVE_MONEY_PAYMENT_TYPE_OPTIONS } from 'modules/payments/payments.constant';
 import { MOVE_MONEY_PAYMENT_TYPE } from 'modules/payments/payments.types';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -42,11 +42,10 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
   disabled = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const recipientRefs = useRef<(HTMLDivElement | null)[]>([]);
   const templateRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const { contact_id } = router.query;
+  const searchParams = useSearchParams();
+  const contact_id = searchParams?.get('contact_id');
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState(templateDetails?.name || '');
   const [selectedRecipient, setSelectedRecipient] = useState<MenuItem | null>(null);
@@ -203,7 +202,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     switch (currentTab.value) {
       case MOVE_MONEY_PAYMENT_TYPE.RECIPIENT: {
         return (
-          <div className='p-1 flex-1'>
+          <div className='flex-1 p-1'>
             <div className='max-h-[320px] overflow-y-auto'>
               <CommonWrapper
                 isNoData={counterParties?.length === 0}
@@ -229,7 +228,7 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
       }
       case MOVE_MONEY_PAYMENT_TYPE.TEMPLATES: {
         return (
-          <div className='flex flex-col gap-0.5 p-1 flex-1'>
+          <div className='flex flex-1 flex-col gap-0.5 p-1'>
             <CommonWrapper
               isNoData={templates?.length === 0}
               noDataBanner={<div className='tw-text-GRAY_900 f-12-500 px-2.5 py-2'>No templates found</div>}
@@ -268,8 +267,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     return (
       <div>
         {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
-        <div className='rounded-md border border-GRAY_500 bg-white p-2'>
-          <SkeletonElement className='w-full h-6' />
+        <div className='border-GRAY_500 rounded-md border bg-white p-2'>
+          <SkeletonElement className='h-6 w-full' />
         </div>
       </div>
     );
@@ -279,15 +278,15 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
     <div>
       {label && <div className='text-GRAY_900 f-12-500 mb-2'>{label}</div>}
       <div
-        className={cn('relative rounded-md border border-GRAY_500 bg-white', {
+        className={cn('border-GRAY_500 relative rounded-md border bg-white', {
           'border-GRAY_400 overflow-hidden': !isShowMenu,
-          'border-GRAY_500 shadow-selectAccountDropdown': isShowMenu,
-          '!bg-BACKGROUND_GRAY_2 cursor-not-allowed pointer-events-none': disabled,
+          'border-GRAY_500 shadow-select-account-dropdown': isShowMenu,
+          '!bg-BACKGROUND_GRAY_2 pointer-events-none cursor-not-allowed': disabled,
         })}
         ref={containerRef}
       >
-        {disabled && <div className='absolute top-0 right-0 w-full h-full bg-GRAY_100 z-10 opacity-20'></div>}
-        <div className='flex items-center gap-1.5 pr-3 w-full cursor-pointer'>
+        {disabled && <div className='bg-GRAY_100 absolute top-0 right-0 z-10 h-full w-full opacity-20'></div>}
+        <div className='flex w-full cursor-pointer items-center gap-1.5 pr-3'>
           <Input
             tabIndex={0}
             id='ADD_ACCOUNT_SEARCH_BANK'
@@ -313,15 +312,15 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           style={{
             height: dropdownHeight,
           }}
-          className='transition-all duration-200 flex flex-col'
+          className='flex flex-col transition-all duration-200'
         >
           {showTemplate && (
             <div className='px-3 pt-3'>
               <Tabs
                 list={MOVE_MONEY_PAYMENT_TYPE_OPTIONS}
                 onSelect={handleTabSelect}
-                wrapperStyle='border-white !w-auto'
-                tabItemWrapperStyle='!w-auto'
+                wrapperStyle='border-white w-auto!'
+                tabItemWrapperStyle='w-auto!'
                 id='ACCOUNTS_TABS'
                 scrollWrapperClassName='pb-0'
                 type={TAB_TYPES.OUTLINE}
@@ -330,8 +329,8 @@ const SelectBeneDropdown: FC<SelectBeneDropdownProps> = ({
           )}
           {getDropdownBody()}
           {showTemplate && (
-            <div className='border-t border-GRAY_400 p-1 '>
-              <div className='flex px-2.5 gap-1.5 f-12-500 py-2 items-center hover:bg-GRAY_100 cursor-pointer rounded-md'>
+            <div className='border-GRAY_400 border-t p-1'>
+              <div className='f-12-500 hover:bg-GRAY_100 flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-2'>
                 <SvgSpriteLoader size={12} id='plus' />
                 New recipient
               </div>

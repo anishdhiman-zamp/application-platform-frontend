@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';
@@ -103,16 +105,16 @@ export const Tooltip: FC<TooltipProps> = ({
   };
 
   const wrapperPositionStyle = {
-    [TooltipPositions.RIGHT]: ` ml-2.5 z-[500] left-full`,
-    [TooltipPositions.RIGHT_TOP]: `ml-2.5 z-[500] -top-2.5 left-full`,
-    [TooltipPositions.LEFT]: 'mr-2 z-[500] right-full',
-    [TooltipPositions.LEFT_TOP]: '-top-2.5 mr-2 z-[500] right-full',
-    [TooltipPositions.TOP]: ' mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.BOTTOM]: 'mt-2.5 z-[500] top-full',
-    [TooltipPositions.TOP_RIGHT]: '-right-2.5 mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.TOP_LEFT]: '-left-2.5 mb-2.5 z-[500] bottom-full',
-    [TooltipPositions.BOTTOM_RIGHT]: '-right-2.5 mt-2.5 z-[500] top-full',
-    [TooltipPositions.BOTTOM_LEFT]: '-left-2.5 mt-2.5 z-[500] top-full',
+    [TooltipPositions.RIGHT]: ` ml-2.5 z-500 left-full`,
+    [TooltipPositions.RIGHT_TOP]: `ml-2.5 z-500 -top-2.5 left-full`,
+    [TooltipPositions.LEFT]: 'mr-2 z-500 right-full',
+    [TooltipPositions.LEFT_TOP]: '-top-2.5 mr-2 z-500 right-full',
+    [TooltipPositions.TOP]: ' mb-2.5 z-500 bottom-full',
+    [TooltipPositions.BOTTOM]: 'mt-2.5 z-500 top-full',
+    [TooltipPositions.TOP_RIGHT]: '-right-2.5 mb-2.5 z-500 bottom-full',
+    [TooltipPositions.TOP_LEFT]: '-left-2.5 mb-2.5 z-500 bottom-full',
+    [TooltipPositions.BOTTOM_RIGHT]: '-right-2.5 mt-2.5 z-500 top-full',
+    [TooltipPositions.BOTTOM_LEFT]: '-left-2.5 mt-2.5 z-500 top-full',
   };
 
   const calculatePositionStyle = useCallback((position: TooltipPositions) => {
@@ -159,7 +161,7 @@ export const Tooltip: FC<TooltipProps> = ({
   return (
     <div
       ref={parentRef}
-      className={`relative group/tooltip cursor-pointer ${className}`}
+      className={`group/tooltip relative cursor-pointer ${className}`}
       data-testid={`tooltip-wrapper-${id}`}
     >
       {children}
@@ -171,7 +173,7 @@ export const Tooltip: FC<TooltipProps> = ({
             wrapperStyle,
             wrapperPositionStyle[position],
             !disabled &&
-              'z-1000 group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto f-12-450 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200',
+              'f-12-450 text-GRAY_200 z-999 z-1000 rounded-md bg-black px-3 py-1.5 whitespace-nowrap group-hover/tooltip:pointer-events-auto group-hover/tooltip:opacity-100',
           )}
           style={style ? style : { ...tooltipPosition }}
           data-testid={`tooltip-${id}`}

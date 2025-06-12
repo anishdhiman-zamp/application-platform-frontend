@@ -10,8 +10,8 @@ import SkeletonElement from '@/components/skeletons/SkeletonElement';
 
 const LogTopbar: FC = () => {
   const searchParams = useSearchParams();
-  const activityId = useParams().activityId as string;
-  const processId = searchParams.get('processId') as string;
+  const activityId = useParams()?.activityId as string;
+  const processId = searchParams?.get('processId') as string;
 
   const {
     data: summaryData,
@@ -23,39 +23,43 @@ const LogTopbar: FC = () => {
   });
 
   return (
-    <div className='flex justify-between items-center w-full h-15 border-b border-GRAY_100 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+    <div className='border-GRAY_100 flex h-15 w-full items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
       <CommonWrapper
-        className='flex justify-center items-center gap-x-2 p-4 min-w-max'
+        className='flex min-w-max items-center justify-center gap-x-2 p-4'
         isLoading={isLoadingSummary || isErrorSummary}
         loader={
-          <div className='flex items-center gap-x-1'>
-            <SkeletonElement className='w-20 h-6 rounded-full' />
+          <div className='flex items-center gap-x-2'>
+            <SkeletonElement className='h-6 w-20 rounded-full' />
+            <SkeletonElement className='h-6 w-20 rounded-full' />
           </div>
         }
         skeletonType={SkeletonTypes.CUSTOM}
       >
         {summaryData?.summary?.header &&
-          Object.entries(summaryData?.summary?.header).map(([key, value]) => (
+          Object.entries(summaryData?.summary?.header)?.map(([key, value]) => (
             <div key={key} className='flex items-center gap-x-1'>
               <span className='f-13-550 text-GRAY_700 capitalize'>{key}</span>
-              <span className='f-13-550 text-GRAY_1000'>{value}</span>
+              <span className='f-13-550 text-GRAY_1000'>{value || '---'}</span>
             </div>
           ))}
 
-        <div className='flex px-2 py-1 rounded-full items-center gap-x-1.5 border border-GRAY_400 bg-BG_GRAY_2'>
-          <TopbarStatusIcon
-            status={summaryData?.summary?.status as ACTIVITY_RUN_STATUS}
-            fillColor={
-              STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor
-            }
-            strokeColor={
-              STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor
-            }
-          />
-          <span className='f-12-450 text-GRAY_1000'>
-            {STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.label}
-          </span>
-        </div>
+        {summaryData?.summary?.status && (
+          <div className='border-GRAY_400 bg-BG_GRAY_2 flex items-center gap-x-1.5 rounded-full border px-2 py-1'>
+            <TopbarStatusIcon
+              status={summaryData?.summary?.status as ACTIVITY_RUN_STATUS}
+              fillColor={
+                STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor
+              }
+              strokeColor={
+                STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon
+                  ?.strokeColor
+              }
+            />
+            <span className='f-12-450 text-GRAY_1000'>
+              {STATUS_ICON_COLOR_MAPPING[summaryData?.summary?.status as ACTIVITY_RUN_STATUS]?.label}
+            </span>
+          </div>
+        )}
 
         {/* TODO: Add back when we have the functionality */}
         {/* <TooltipV2
@@ -69,7 +73,7 @@ const LogTopbar: FC = () => {
             </div>
           }
         >
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 !mt-[2.5px]'>
+          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
             <SvgSpriteLoader id='slash-circle-01' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2> */}
@@ -78,14 +82,14 @@ const LogTopbar: FC = () => {
       {/* TODO: Add back when we have the functionality */}
       {/* <div className='flex items-center p-4 min-w-max'>
         <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
-        <TooltipV2 tooltipBody='Move to Next Run'>
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 mr-1.5 !mt-[2.5px]'>
+        <TooltipV2 tooltipBody='Move to Next Run' asChildTrigger>
+          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! mr-1.5 size-6! px-3! py-1!'>
             <SvgSpriteLoader id='arrow-down' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>
 
-        <TooltipV2 tooltipBody='Move to Previous Run'>
-          <Button variant={'outline'} size={'icon'} className='!size-6 !px-3 !py-1 !mt-[2.5px]'>
+        <TooltipV2 tooltipBody='Move to Previous Run' asChildTrigger>
+          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! size-6! px-3! py-1!'>
             <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
           </Button>
         </TooltipV2>

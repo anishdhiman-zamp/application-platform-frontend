@@ -23,7 +23,7 @@ const RenderRecipientDetails = ({ recipientDetails }: { recipientDetails: Recipi
   ];
 
   return (
-    <div className='flex flex-col gap-2.5 mb-4'>
+    <div className='mb-4 flex flex-col gap-2.5'>
       {details.map((detail) => (
         <div key={detail.label} className='grid grid-cols-[1fr_1fr] items-center'>
           <p className='f-12-400 text-gray-700'>{detail.label}</p>
@@ -105,10 +105,10 @@ const AddRecipientAccount = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton>
         <DialogHeader>New Recipient Account</DialogHeader>
-        <DialogBody className='p-6 flex justify-center'>
+        <DialogBody className='flex justify-center p-6'>
           <div className='w-[50%] max-w-[400px]'>
             {isFormConfigLoading || !formConfig ? (
-              <div className='flex justify-center items-center h-full'>
+              <div className='flex h-full items-center justify-center'>
                 <Loader className='border-gray-800 border-b-transparent' />
               </div>
             ) : (

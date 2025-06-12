@@ -99,8 +99,8 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent showCloseButton className='min-h-[600px]'>
           <DialogHeader>{TITLE_MAP[paymentType as keyof typeof TITLE_MAP] ?? ''}</DialogHeader>
-          <DialogBody className='p-6 flex justify-center '>
-            <div className='flex flex-col gap-5 w-[300px] mx-auto'>
+          <DialogBody className='flex justify-center p-6'>
+            <div className='mx-auto flex w-[300px] flex-col gap-5'>
               <div className='flex items-end gap-2'>
                 <Input
                   id='ADD_ACCOUNT_SEARCH_BANK'
@@ -111,7 +111,7 @@ const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose
                   focusClassNames=''
                   placeholder='New Template'
                   inputWrapperClassName='border-b border-dashed border-GRAY_1000'
-                  inputFontClassName='f-22-550 !px-0 !pb-0 font-medium'
+                  inputFontClassName='f-22-550 px-0! pb-0! font-medium'
                 />
                 <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
               </div>

@@ -21,7 +21,8 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
     resourceId: '',
   });
   const [deletePolicy, { isLoading }] = useDeletePolicyMutation();
-  const { policyId } = useParams();
+  const params = useParams();
+  const policyId = params?.policyId as string;
   const policy = policiesData?.find((policy) => policy.id === policyId);
 
   const handleDeletePolicy = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,7 +49,7 @@ const PolicyDeleteConfirmPopup: FC<PolicyDeleteConfirmPopupProps> = ({ isOpen, o
         }}
       >
         <DialogHeader className='f-16-600'>Are you sure you want to delete this policy?</DialogHeader>
-        <DialogBody className='p-6 flex justify-center'>
+        <DialogBody className='flex justify-center p-6'>
           {policy && <PolicyCard policy={policy} audienceMembersData={audienceMembersData ?? []} />}
         </DialogBody>
         <DialogFooter className='flex justify-end gap-2'>

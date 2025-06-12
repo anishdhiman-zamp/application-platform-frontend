@@ -19,9 +19,9 @@ const ImportedDataPreview: FC<ImportedDataPreviewPropsType> = ({
 
   if (startAiTransformation) {
     return (
-      <div className='fixed w-screen h-screen z-1000 top-0 left-0 bg-GRAY_70'>
-        <div className='h-screen bg-white mt-7 rounded-2.5 border border-t border-GRAY_400 flex overflow-hidden'>
-          <div className='sticky w-1/3 h-full border-r border-GRAY_400'>
+      <div className='bg-GRAY_70 fixed top-0 left-0 z-1000 h-screen w-screen'>
+        <div className='rounded-2.5 border-GRAY_400 mt-7 flex h-screen overflow-hidden border border-t bg-white'>
+          <div className='border-GRAY_400 sticky h-full w-1/3 border-r'>
             <DataPreviewSidebar
               fileName={fileName}
               fileUploadId={fileUploadId}
@@ -30,7 +30,7 @@ const ImportedDataPreview: FC<ImportedDataPreviewPropsType> = ({
               onRefetch={onRefetch}
             />
           </div>
-          <div className='w-2/3 h-full'>
+          <div className='h-full w-2/3'>
             <DataPreviewContent mappedData={mappedData} rawData={rawData} />
           </div>
         </div>

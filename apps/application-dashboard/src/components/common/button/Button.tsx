@@ -14,7 +14,7 @@ const BUTTON_STATE_STYLES = {
     [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-GRAY_950 hover:text-white',
     [BUTTON_STATE_TYPES.PRESSED]: 'active:bg-GRAY_950 active:text-white',
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-GRAY_100 disabled:text-GRAY_700',
-    [BUTTON_STATE_TYPES.LOADING]: 'bg-GRAY_700 !cursor-not-allowed',
+    [BUTTON_STATE_TYPES.LOADING]: 'bg-GRAY_700 cursor-not-allowed!',
   },
   [BUTTON_TYPES.SECONDARY]: {
     [BUTTON_STATE_TYPES.COMMON]: 'border',
@@ -22,7 +22,7 @@ const BUTTON_STATE_STYLES = {
     [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-BG_GRAY_2',
     [BUTTON_STATE_TYPES.PRESSED]: 'active:bg-GRAY_400',
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-BG_GRAY_2 disabled:text-GRAY_700',
-    [BUTTON_STATE_TYPES.LOADING]: '!cursor-not-allowed',
+    [BUTTON_STATE_TYPES.LOADING]: 'cursor-not-allowed!',
   },
   [BUTTON_TYPES.TEXT_NAV]: {
     [BUTTON_STATE_TYPES.COMMON]: 'bg-transparent',
@@ -38,15 +38,15 @@ const BUTTON_STATE_STYLES = {
     [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-RED_600 hover:text-white',
     [BUTTON_STATE_TYPES.PRESSED]: 'active:bg-RED_600 active:text-white',
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-RED_100 disabled:text-white',
-    [BUTTON_STATE_TYPES.LOADING]: 'bg-RED_500 !cursor-not-allowed',
+    [BUTTON_STATE_TYPES.LOADING]: 'bg-RED_500 cursor-not-allowed!',
   },
   [BUTTON_TYPES.SHARE]: {
     [BUTTON_STATE_TYPES.COMMON]: '',
-    [BUTTON_STATE_TYPES.DEFAULT]: 'outline-0 !bg-transparent !text-GRAY_1000 !border-BORDER_GRAY_400',
+    [BUTTON_STATE_TYPES.DEFAULT]: 'outline-0 bg-transparent! !text-GRAY_1000 !border-BORDER_GRAY_400',
     [BUTTON_STATE_TYPES.HOVER]: 'hover:bg-BG_GRAY_2',
     [BUTTON_STATE_TYPES.PRESSED]: '!bg-GRAY_400',
     [BUTTON_STATE_TYPES.DISABLED]: 'disabled:cursor-not-allowed disabled:bg-BG_GRAY_2 disabled:text-GRAY_700',
-    [BUTTON_STATE_TYPES.LOADING]: '!cursor-not-allowed',
+    [BUTTON_STATE_TYPES.LOADING]: 'cursor-not-allowed!',
   },
 };
 
@@ -102,7 +102,7 @@ const BUTTON_SIZE_STYLES = {
 };
 
 const BUTTON_ALIGN_STYLES = {
-  wrapperDefaultAlignment: 'flex items-center !justify-center',
+  wrapperDefaultAlignment: 'flex items-center justify-center!',
   wrapperAlignmentWithoutLeadingIcon: 'flex items-center justify-between',
 };
 
@@ -187,7 +187,7 @@ export const Button: FC<ButtonProps> = ({
         loader ? (
           loader
         ) : (
-          <div className='w-full flex items-center justify-center'>
+          <div className='flex w-full items-center justify-center'>
             <ProgressBar
               trackColor={COLORS.BLACK}
               indicatorColor={COLORS.WHITE}

@@ -24,7 +24,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     headerName: 'Datasets',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <div className='flex items-center gap-2.5 f-13-500'>
+        <div className='f-13-500 flex items-center gap-2.5'>
           <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
           {params.value}
         </div>
@@ -52,7 +52,7 @@ export const LISTING_COLUMNS: ColDef[] = [
   },
 ];
 
-export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => JSX.Element> = {
+export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRendererParams) => React.JSX.Element> = {
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
   [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,

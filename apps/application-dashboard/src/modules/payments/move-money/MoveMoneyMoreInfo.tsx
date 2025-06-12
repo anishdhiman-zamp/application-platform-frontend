@@ -77,7 +77,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
 
   return (
     <div className='h-screen overflow-y-scroll'>
-      <div className='pt-20 max-w-75 m-auto pb-20'>
+      <div className='m-auto max-w-75 pt-20 pb-20'>
         <div className='f-22-550 mb-5'>Additional Details</div>
         <div className='mt-5'>
           <div className='text-GRAY_900 f-12-500 mb-2'>External Memo (Optional)</div>
@@ -88,11 +88,11 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
             textAreaRef={textareaRef}
             value={externalMemo}
             tabIndex={isActiveStep ? 0 : -1}
-            className=' f-12-300'
+            className='f-12-300'
             onChange={({ target }) => setExternalMemo(target.value)}
           />
         </div>
-        <div className='text-GRAY_900 f-12-500 mb-2 mt-4'>Attachments (Optional)</div>
+        <div className='text-GRAY_900 f-12-500 mt-4 mb-2'>Attachments (Optional)</div>
         <FileUploaderWrapper
           className='min-h-[100px] px-6'
           Component={FileUploader}
@@ -105,15 +105,15 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
           uploadPath={API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST}
         />
         {uploadedFiles?.length > 0 && (
-          <div className='flex flex-col gap-2 my-2.5'>
+          <div className='my-2.5 flex flex-col gap-2'>
             {uploadedFiles.map((file, idx) => (
               <div
                 key={file?.fileName + idx}
                 style={{ zIndex: 100 - idx }}
-                className='border border-GRAY_400 rounded-md relative animate-file-upload overflow-hidden flex justify-between gap-1.5 items-center p-2'
+                className='border-GRAY_400 animate-file-upload relative flex items-center justify-between gap-1.5 overflow-hidden rounded-md border p-2'
               >
                 <SvgSpriteLoader id='file-05' onClick={() => handleRemoveFile(idx)} size={14} />
-                <div className='whitespace-nowrap w-full overflow-hidden text-ellipsis f-14-400'>{file?.fileName}</div>
+                <div className='f-14-400 w-full overflow-hidden text-ellipsis whitespace-nowrap'>{file?.fileName}</div>
                 <SvgSpriteLoader
                   id='x-close'
                   className='cursor-pointer'
@@ -138,7 +138,7 @@ const MoneyTransferMoreDetailsStep: FC<MoneyTransferMoreDetailsStepProps> = ({ h
           />
           <div className='text-GRAY_700 f-11-450 mt-1'>Only visible to members of your organization</div>
         </div>
-        <div className='flex gap-3 mt-10'>
+        <div className='mt-10 flex gap-3'>
           <Button
             type={BUTTON_TYPES.SECONDARY}
             size={SIZE_TYPES.MEDIUM}

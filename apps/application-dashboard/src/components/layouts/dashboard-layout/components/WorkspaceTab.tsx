@@ -20,14 +20,14 @@ const WorkspaceTab = ({ label, isSelected, onClick, className, color }: Workspac
         onClick?.();
       }}
       className={cn(
-        'flex items-center gap-1 px-2 py-2.5 f-13-500 select-none cursor-pointer rounded-md',
+        'f-13-500 flex cursor-pointer items-center gap-1 rounded-md px-2 py-2.5 select-none',
         onClick ? 'hover:bg-GRAY_20' : '',
         isSelected ? 'bg-GRAY_100' : '',
         className,
       )}
     >
       <div
-        className={cn('w-3.5 h-3.5 flex items-center justify-center rounded-sm f-9-600 text-white mr-1.5')}
+        className={cn('f-9-600 mr-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-sm text-white')}
         style={{ backgroundColor: color }}
       >
         {label.charAt(0).toUpperCase()}
@@ -39,7 +39,7 @@ const WorkspaceTab = ({ label, isSelected, onClick, className, color }: Workspac
           iconCategory={ICON_SPRITE_TYPES.GENERAL}
           width={14}
           height={14}
-          className='min-w-4 float-right'
+          className='float-right min-w-4'
         />
       )}
     </div>

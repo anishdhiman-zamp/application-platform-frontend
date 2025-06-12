@@ -12,11 +12,11 @@ const MembersName: FC<MembersNamePropsType> = ({ value = '', member = false }) =
 
   return (
     !!value && (
-      <div className='flex items-start justify-start gap-1 w-full h-full text-left py-3 px-2'>
+      <div className='flex h-full w-full items-start justify-start gap-1 px-2 py-3 text-left'>
         <Avatar
           name={value}
           backgroundColor={COLORS.GRAY_1000}
-          className='w-4 h-4 rounded-full text-white f-8-400 flex items-center justify-center'
+          className='f-8-400 flex h-4 w-4 items-center justify-center rounded-full text-white'
         />
         <div className='flex items-center justify-center gap-1'>
           <span className='f-12-400 text-GRAY_1000'>{convertEmailUsernameToName(getUserNameFromEmail(value))}</span>

@@ -48,8 +48,8 @@ const RecipientsList: FC<RecipientsListProps> = ({
   );
 
   return (
-    <div className='py-6 pl-4.5 pr-2'>
-      <div className='w-full flex items-center justify-between mb-4.5'>
+    <div className='py-6 pr-2 pl-4.5'>
+      <div className='mb-4.5 flex w-full items-center justify-between'>
         <div className='f-16-600 px-1.5'>Recipients</div>
         {allowActions && (
           <Button
@@ -74,7 +74,7 @@ const RecipientsList: FC<RecipientsListProps> = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className='mb-3.5 px-1.5'
-        inputClassName='!border-none !px-0 focus:outline-none placeholder:text-xs !py-0 !h-6 placeholder:!text-GRAY_500'
+        inputClassName='border-none! px-0! focus:outline-hidden placeholder:text-xs py-0! h-6! placeholder:!text-GRAY_500'
         focusClassNames=''
       />
       <CommonWrapper
@@ -90,7 +90,7 @@ const RecipientsList: FC<RecipientsListProps> = ({
             <div
               key={recipient.id}
               onClick={() => onRecipientDetails(recipient)}
-              className='hover:z-1000 cursor-pointer'
+              className='cursor-pointer hover:z-1000'
             >
               <RecipientCard
                 recipient={recipient}

@@ -37,7 +37,7 @@ const ApproveActionCard: FC<ApproveActionCardProps> = ({ approvalId }) => {
   };
 
   return (
-    <div className='px-4.5 py-4 flex items-center gap-3 border-b border-GRAY_400'>
+    <div className='border-GRAY_400 flex items-center gap-3 border-b px-4.5 py-4'>
       <div className='f-12-500 text-ORANGE_800 flex-1'>Your approval is pending for this payment</div>
       <Button
         id='reject-payment'

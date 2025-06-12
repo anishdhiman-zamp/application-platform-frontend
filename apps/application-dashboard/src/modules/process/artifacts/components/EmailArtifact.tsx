@@ -18,7 +18,7 @@ interface EmailArtifactProps {
 
 const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) => {
   const searchParams = useSearchParams();
-  const processId = searchParams.get('processId') as string;
+  const processId = searchParams?.get('processId') as string;
 
   const [loading, setLoading] = useState(true);
 
@@ -41,18 +41,18 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
   };
 
   return (
-    <div className='flex flex-col justify-start items-start h-[calc(100%-40px)] m-5 rounded-xl border-[0.5px] border-GRAY_500'>
+    <div className='border-GRAY_500 m-5 flex h-[calc(100%-40px)] flex-col items-start justify-start rounded-xl border-[0.5px]'>
       {/* Header */}
-      <div className='flex justify-between items-start w-full py-3 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-        <div className='flex justify-start items-start min-w-fit gap-3'>
-          <div className='flex justify-center items-center w-6 h-6 rounded-full bg-BLUE_200 shrink-0'>
+      <div className='flex w-full items-start justify-between overflow-x-auto px-4 py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+        <div className='flex min-w-fit items-start justify-start gap-3'>
+          <div className='bg-BLUE_200 flex h-6 w-6 shrink-0 items-center justify-center rounded-full'>
             {/* Avatar */}
             <span className='text-GRAY_1000 f-12-500 whitespace-nowrap capitalize'>
               {getFirstLetters(emailArtifact?.from_name ?? emailArtifact?.from_mail_id?.split('@')[0] ?? 'U', 1)}
             </span>
           </div>
-          <div className='flex flex-col justify-between items-start gap-1 min-w-fit'>
-            <div className='flex justify-start items-center gap-3'>
+          <div className='flex min-w-fit flex-col items-start justify-between gap-1'>
+            <div className='flex items-center justify-start gap-3'>
               {emailArtifact?.from_name && (
                 <span className='f-13-600 text-GRAY_1000 whitespace-nowrap'>{emailArtifact?.from_name}</span>
               )}
@@ -60,7 +60,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
                 <span className='f-13-400 text-GRAY_900 whitespace-nowrap'>{emailArtifact?.from_mail_id}</span>
               )}
             </div>
-            <div className='flex justify-start items-center gap-1'>
+            <div className='flex items-center justify-start gap-1'>
               {!!emailArtifact?.to_mail_ids?.length && (
                 <p className='f-13-400 text-GRAY_900 whitespace-nowrap'>
                   to {emailArtifact?.to_mail_ids.map((email) => email.split('@')[0]).join(', ')}
@@ -71,45 +71,43 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
           </div>
         </div>
         {emailArtifact?.date && (
-          <div className='flex justify-end items-end min-w-fit ml-4 shrink-0'>
+          <div className='ml-4 flex min-w-fit shrink-0 items-end justify-end'>
             <span className='f-13-400 text-GRAY_700'>{getEmailDate(emailArtifact?.date)}</span>
           </div>
         )}
       </div>
 
       {/* Body */}
-      {emailArtifact?.body_html && (
-        <div className='p-4 overflow-auto flex-1 w-full relative'>
+      {emailArtifact?.body_html ? (
+        <div className='relative w-full flex-1 overflow-auto p-4'>
           {loading && (
-            <div className='absolute inset-0 flex justify-center items-center bg-white bg-opacity-80 z-10'>
+            <div className='bg-opacity-80 absolute inset-0 z-10 flex items-center justify-center bg-white'>
               <span className='f-13-400 text-GRAY_700'>Loading...</span>
             </div>
           )}
           <iframe
             srcDoc={emailArtifact?.body_html}
             title='Email content'
-            className='w-full h-full border-none'
+            className='h-full w-full border-none'
             onLoad={() => setLoading(false)}
             loading='eager'
           />
         </div>
-      )}
-
-      {emailArtifact?.body_plain_text && (
-        <div className='p-4 overflow-auto flex-1 w-full relative'>
+      ) : emailArtifact?.body_plain_text ? (
+        <div className='relative w-full flex-1 overflow-auto p-4'>
           <span className='f-13-400 text-GRAY_900'>{emailArtifact?.body_plain_text}</span>
         </div>
-      )}
+      ) : null}
 
       {/* Attachments bar */}
-      <div className='flex justify-start items-center gap-2 w-full overflow-hidden border-t-[0.5px] border-GRAY_500'>
-        <div className='flex justify-start items-center gap-2 py-4 pl-4 shrink-0'>
+      <div className='border-GRAY_500 flex w-full items-center justify-start gap-2 overflow-hidden border-t-[0.5px]'>
+        <div className='flex shrink-0 items-center justify-start gap-2 py-4 pl-4'>
           <SvgSpriteLoader id='attachment-01' size={16} color={COLORS.GRAY_900} />
           <span className='f-13-400 text-GRAY_900'>{emailArtifact?.attachments?.length ?? 0} Attachments:</span>
         </div>
 
         {!!emailArtifact?.attachments?.length && (
-          <div className='w-0 overflow-x-auto flex flex-1 justify-start items-center gap-2 py-4 pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+          <div className='flex w-0 flex-1 items-center justify-start gap-2 overflow-x-auto py-4 pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
             {emailArtifact?.attachments.map((attachment) => (
               <ArtifactTag
                 key={attachment?.file_id}

@@ -83,7 +83,7 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
       }
       case RESOURCE_ACTION_TYPE.ADD_RESOURCE_AUDIENCE_POLICY: {
         return (
-          <div className='flex items-center gap-1.5 text-GRAY_1000'>
+          <div className='text-GRAY_1000 flex items-center gap-1.5'>
             {getPreviousPrivilege(audience?.privilege || '')} +
             <ShareResourceAccessDetails
               fgacFilters={audience?.fgac_filters ?? {}}
@@ -111,7 +111,7 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
   }, [audience?.resource_action]);
 
   return (
-    <div className='p-2 flex items-center'>
+    <div className='flex items-center p-2'>
       <div className='min-w-[150px]'>
         <AudienceMember
           resourceType={audience?.audience_type}
@@ -134,7 +134,7 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
         {audience?.can_approve ? (
           <div className='flex items-center gap-4 px-1'>
             {isLoading && !isRejected ? (
-              <Loader2 className='animate-spin max-w-[14px] max-h-[14px]' />
+              <Loader2 className='max-h-[14px] max-w-[14px] animate-spin' />
             ) : (
               <SvgSpriteLoader
                 id='check'
@@ -143,7 +143,7 @@ const ShareResourceApprovalCard: FC<ShareResourceApprovalCardProps> = ({
               />
             )}
             {isLoading && isRejected ? (
-              <Loader2 className='animate-spin max-w-[14px] max-h-[14px]' />
+              <Loader2 className='max-h-[14px] max-w-[14px] animate-spin' />
             ) : (
               <SvgSpriteLoader
                 id='x-close'

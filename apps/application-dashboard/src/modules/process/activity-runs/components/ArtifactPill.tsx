@@ -31,8 +31,8 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
   const [open, setOpen] = useState(false);
 
   const searchParams = useSearchParams();
-  const processId = searchParams.get('processId') as string;
-  const process = searchParams.get('process') as string;
+  const processId = searchParams?.get('processId') as string;
+  const process = searchParams?.get('process') as string;
 
   const router = useRouter();
   const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
@@ -145,8 +145,8 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
       <Button
         ref={buttonRef}
         className={cn(
-          'flex items-center h-5 py-1 px-1.5 gap-1.5 border border-GRAY_400 rounded transition-colors hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 cursor-pointer',
-          isDisabled && 'opacity-50',
+          'border-GRAY_400 hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 flex h-5 cursor-pointer items-center gap-1.5 rounded border px-1.5 py-1 transition-colors',
+          isDisabled && 'border-GRAY_400 !opacity-100',
         )}
         disabled={isDisabled}
         variant='outline'
@@ -155,11 +155,11 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
           id='stand'
           iconCategory={ICON_SPRITE_TYPES.EDUCATION}
           size={12}
-          color={COLORS.GRAY_900}
+          color={isDisabled ? COLORS.GRAY_500 : COLORS.GRAY_900}
           className='scale-75'
         />
 
-        <span className='f-11-400 text-GRAY_1000'>{count ?? 0}</span>
+        <span className={cn('f-11-400', isDisabled ? 'text-GRAY_500' : 'text-GRAY_1000')}>{count ?? 0}</span>
       </Button>
     </Combobox>
   );
@@ -167,8 +167,8 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
 
 const OverlayContent = () => {
   return (
-    <div className='flex flex-col h-24 bg-GRAY_50 py-4 px-3.5 gap-2 items-start justify-center w-full border-t border-GRAY_400'>
-      <div className='flex justify-start items-center gap-2 w-full'>
+    <div className='bg-GRAY_50 border-GRAY_400 flex h-24 w-full flex-col items-start justify-center gap-2 border-t px-3.5 py-4'>
+      <div className='flex w-full items-center justify-start gap-2'>
         <SvgSpriteLoader id='stand' size={16} color={COLORS.GRAY_900} />
       </div>
       <p className='f-11-450 text-GRAY_900 text-wrap break-words'>

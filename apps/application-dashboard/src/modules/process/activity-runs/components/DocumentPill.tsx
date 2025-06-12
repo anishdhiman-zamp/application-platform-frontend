@@ -6,9 +6,9 @@ const DocumentPill = ({ value }: { value: string }) => {
   if (!value) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
 
   return (
-    <div className='rounded bg-GRAY_100 px-1.5 py-1 gap-1.5 w-fit flex items-center'>
+    <div className='bg-GRAY_100 flex w-fit items-center gap-1.5 rounded px-1.5 py-1'>
       <SvgSpriteLoader id='file-02' iconCategory={ICON_SPRITE_TYPES.FILES} size={12} color={COLORS.GRAY_1000} />
-      <p className='f-11-450 text-GRAY_1000 truncate max-w-[136px]' title={value}>
+      <p className='f-11-450 text-GRAY_1000 max-w-[136px] truncate' title={value}>
         {value}
       </p>
     </div>

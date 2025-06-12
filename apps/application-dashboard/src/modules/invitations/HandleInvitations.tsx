@@ -1,10 +1,12 @@
+'use client';
+
 import { FC, useEffect, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -62,7 +64,7 @@ export const HandleInvitations: FC = () => {
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
         <div
-          className='flex justify-center items-center w-full h-full z-1000 bg-white'
+          className='z-1000 flex h-full w-full items-center justify-center bg-white'
           data-testid='handle-invitations-wrapper'
         >
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />

@@ -4,7 +4,7 @@ import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -23,6 +23,8 @@ type ProcessByIdProps = {
 
 const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>(status || '');
   const initialLoadDone = useRef(false);
 
@@ -68,10 +70,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    const pathname = router.pathname;
-    const queryParams = router.query;
+    const params = new URLSearchParams(searchParams?.toString() || '');
 
-    router.push({ pathname, query: { ...queryParams, status: value } });
+    params.set('status', value);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -99,25 +101,19 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       isNoData={activityRunsSummaryData?.status_summary?.length === 0}
       noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}
       loader={
-        <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
     >
-      <Tabs
-        onValueChange={(value) => {
-          handleTabChange(value);
-        }}
-        value={activeTab}
-        key={activeTab}
-      >
+      <Tabs onValueChange={(value) => handleTabChange(value)} value={activeTab} key={activeTab}>
         <TabsList className='mx-3 my-3 gap-2.5 bg-white'>
           {activityRunsSummaryData?.status_summary?.map((item) => (
             <TabsTrigger
               key={item?.status}
               value={item?.status}
               className={cn(
-                '!rounded !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                'hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 rounded-sm! border-none px-2! py-1!',
               )}
             >
               <TabStatusIcon

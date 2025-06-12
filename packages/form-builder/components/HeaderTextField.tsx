@@ -1,5 +1,5 @@
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -25,7 +25,7 @@ export const HeaderTextField: React.FC<HeaderTextFieldProps> = ({ field, name, c
               type='text'
               name={name}
               className={cn(
-                'f-22-500 placeholder:text-gray-500 text-primary focus:outline-none [&:not(:placeholder-shown)]:border-transparent min-w-[fit-content] bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset]',
+                'f-22-500 text-primary min-w-fit bg-white not-placeholder-shown:border-transparent placeholder:text-gray-500 focus:outline-hidden [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset]',
                 fieldState.error && 'border-destructive focus-visible:ring-destructive',
               )}
               placeholder={field.placeholder || field.label}
@@ -46,7 +46,7 @@ export const HeaderTextField: React.FC<HeaderTextFieldProps> = ({ field, name, c
           </div>
           {fieldState.error?.message ? (
             <span
-              className='transition-all duration-200 f-11-400 ease-in-out'
+              className='f-11-400 transition-all duration-200 ease-in-out'
               style={{ marginBottom: '12px', color: 'var(--RED_700)' }}
             >
               {fieldState.error.message}

@@ -5,7 +5,7 @@ export enum TOAST_MESSAGES {
   SUCCESS_PROCESS_SHARED = 'Process shared successfully',
   SUCCESS_AUDIENCE_ROLE_CHANGED = 'Role changed successfully',
   SUCCESS_AUDIENCE_DELETED = 'Audience deleted successfully',
-  SUCCESS_AUDIENCE_INVITED = 'Done',
+  SUCCESS_AUDIENCE_INVITED = 'Invitation mail sent',
   SUCCESS_AUDIENCE_CUSTOMISE_ACCESS = 'Custom access filters updated successfully',
 
   FAILED_DATASET_SHARED = 'Failed to shared dataset',

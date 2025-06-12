@@ -3,9 +3,9 @@ import SkeletonElement from 'components/skeletons/SkeletonElement';
 
 const WhoHasAccessSkeletonLoader = () => {
   return (
-    <div className='flex justify-between w-full pl-2 pr-1 mt-2'>
-      <SkeletonElement className='h-4 w-32 rounded-md bg-GRAY_50' />
-      <SkeletonElement className='h-4 w-16 rounded-md bg-GRAY_50' />
+    <div className='mt-2 flex w-full justify-between pr-1 pl-2'>
+      <SkeletonElement className='bg-GRAY_50 h-4 w-32 rounded-md' />
+      <SkeletonElement className='bg-GRAY_50 h-4 w-16 rounded-md' />
     </div>
   );
 };

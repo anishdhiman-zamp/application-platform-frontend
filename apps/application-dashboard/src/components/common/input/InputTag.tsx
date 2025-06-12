@@ -20,13 +20,13 @@ const InputTag: FC<InputTagProps> = ({
   autocomplete = 'off',
   inputTagBorderClassName = '',
   inputTagWrapperClassName = 'w-full',
-  inputClassName = ' w-full box-border rounded-md text-GRAY_1000 placeholder:text-GRAY_500 placeholder:font-normal outline-none',
-  focusClassNames = 'border border-BORDER_GRAY_400 focus:shadow-inputOutlineShadow focus:border-GRAY_600',
+  inputClassName = ' w-full box-border rounded-md text-GRAY_1000 placeholder:text-GRAY_500 placeholder:font-normal outline-hidden',
+  focusClassNames = 'border border-BORDER_GRAY_400 focus:shadow-input-outline-shadow focus:border-GRAY_600',
   cursorClassname = 'cursor-text',
   inputRoundedClassName = 'rounded-md',
   inputSizeClassName = 'p-6',
   customPaddingClassName,
-  errorClass = '!border-RED_700 focus:shadow-inputErrorOutlineShadow',
+  errorClass = '!border-RED_700 focus:shadow-input-error-outline-shadow',
   onChange = defaultFn,
   onKeyPress = defaultFn,
   onKeyDown = defaultFn,
@@ -114,12 +114,12 @@ const InputTag: FC<InputTagProps> = ({
   return (
     <div className={cn(`flex flex-col ${inputTagWrapperClasses}`)}>
       {isMulti ? (
-        <div className={cn(`flex p-1 bg-white gap-1 flex-wrap w-inherit overflow-y-auto ${inputPillsWrapperClasses}`)}>
+        <div className={cn(`w-inherit flex flex-wrap gap-1 overflow-y-auto bg-white p-1 ${inputPillsWrapperClasses}`)}>
           {tags.map((tag, index) => (
             <div
               key={index}
               onClick={stopPropagationAction}
-              className='whitespace-nowrap w-auto p-2 f-12-400 flex items-center justify-between bg-BLUE_50 gap-2'
+              className='f-12-400 bg-BLUE_50 flex w-auto items-center justify-between gap-2 p-2 whitespace-nowrap'
             >
               {tag}
               <SvgSpriteLoader
@@ -187,7 +187,7 @@ const InputTag: FC<InputTagProps> = ({
           onDrop={(e) => e.preventDefault()}
         />
       )}
-      {error && <span className='f-11-400 mt-2 text-RED_700'>{error}</span>}
+      {error && <span className='f-11-400 text-RED_700 mt-2'>{error}</span>}
     </div>
   );
 };

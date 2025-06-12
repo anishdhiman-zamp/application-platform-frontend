@@ -33,7 +33,7 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
 
   return (
     <div
-      className={cn('bg-white relative z-1 shadow-menuList rounded-md border-0.5 border-GRAY_500', className)}
+      className={cn('shadow-menu-list border-0.5 border-GRAY_500 relative z-1 rounded-md bg-white', className)}
       data-testid={`menu-wrapper-${id}`}
       style={style}
     >
@@ -45,12 +45,12 @@ export const MenuWrapper: FC<MenuWrapperProps> = ({
       </div>
       {!!onReset && (
         <div
-          className={`flex py-3 pl-4 border-t border-GRAY_400 ${resetClassName}`}
+          className={`border-GRAY_400 flex border-t py-3 pl-4 ${resetClassName}`}
           onClick={handleReset}
           data-testid={`menu-wrapper-reset-${id}`}
         >
           <SvgSpriteLoader id='refresh-ccw-01' iconCategory={ICON_SPRITE_TYPES.ARROWS} height={14} width={14} />
-          <div className={`pl-2 f-12-400 ${resetTextClassName}`} data-testid={`menu-wrapper-reset-text-${id}`}>
+          <div className={`f-12-400 pl-2 ${resetTextClassName}`} data-testid={`menu-wrapper-reset-text-${id}`}>
             {resetText}
           </div>
         </div>

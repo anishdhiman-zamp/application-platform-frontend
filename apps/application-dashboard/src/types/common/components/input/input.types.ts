@@ -34,7 +34,7 @@ export interface InputTagProps {
   inputClassName?: string;
   inputSizeClassName?: string;
   errorClass?: string;
-  inputRef?: RefObject<HTMLInputElement>;
+  inputRef?: RefObject<HTMLInputElement | null>;
   onChange?: (evt: ChangeEvent<HTMLInputElement>) => void;
   onKeyPress?: (evt: KeyboardEvent<HTMLInputElement>) => void;
   onKeyDown?: (evt: KeyboardEvent<HTMLInputElement>) => void;

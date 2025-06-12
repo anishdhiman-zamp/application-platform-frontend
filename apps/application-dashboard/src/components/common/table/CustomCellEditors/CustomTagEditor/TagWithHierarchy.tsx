@@ -9,7 +9,7 @@ const TagWithHierarchy: FC<TagWithHierarchyProps> = ({ tag, labelColor, isReadOn
   return (
     <div
       className={cn('space-y-1', {
-        'hover:bg-GRAY_100 p-1 mx-1 rounded-md cursor-pointer': !isReadOnly || isSelected,
+        'hover:bg-GRAY_100 mx-1 cursor-pointer rounded-md p-1': !isReadOnly || isSelected,
         'bg-GRAY_100': isSelected,
       })}
     >

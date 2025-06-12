@@ -17,7 +17,7 @@ const PivotColHeader: FC<PivotColHeaderProps> = (params) => {
   const contextFieldName = snakeCaseToSentenceCase(column.colDef?.context?.name || '');
 
   return (
-    <div className='relative w-full h-full flex items-end justify-end p-3 border-r-0.5 border-b-0.5 border-GRAY_400 break-words whitespace-normal bg-white overflow-hidden'>
+    <div className='border-r-0.5 border-b-0.5 border-GRAY_400 relative flex h-full w-full items-end justify-end overflow-hidden bg-white p-3 break-words whitespace-normal'>
       <Image
         src={PIVOT_HEADER_BG}
         alt='Pivot Header Background'
@@ -25,7 +25,7 @@ const PivotColHeader: FC<PivotColHeaderProps> = (params) => {
         priority
         className='shrink-0 object-cover object-center'
       />
-      <span className='relative z-10 f-13-550'>{contextFieldName || displayName}</span>
+      <span className='f-13-550 relative z-10'>{contextFieldName || displayName}</span>
     </div>
   );
 };

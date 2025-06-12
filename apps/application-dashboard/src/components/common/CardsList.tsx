@@ -10,7 +10,7 @@ type CardsListProps = {
 const CardsList: FC<CardsListProps> = ({
   cards,
   CardComponent,
-  gridClassName = 'grid-cols-[repeat(auto-fill,_minmax(100px,_1fr))] gap-4',
+  gridClassName = 'grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4',
 }) => {
   return (
     <div className={cn('grid', gridClassName)}>

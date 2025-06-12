@@ -9,7 +9,7 @@ export declare type EventCallbackType = (id: string, payload: MapAny) => void;
 export interface CommonPageLayoutProps {
   scrollToTop?: defaultFnType;
   scrollToBottom?: defaultFnType;
-  rootContainerRef?: RefObject<HTMLDivElement>;
+  rootContainerRef?: RefObject<HTMLDivElement | null>;
 }
 
 export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
@@ -51,4 +51,10 @@ export enum SIDE_OPTIONS {
   BOTTOM = 'bottom',
   LEFT = 'left',
   RIGHT = 'right',
+}
+
+export enum MODULE_TYPE {
+  PAGES = 'pages',
+  DATASETS = 'datasets',
+  PROCESSES = 'processes',
 }

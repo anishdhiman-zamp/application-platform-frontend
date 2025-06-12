@@ -169,7 +169,7 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
   return (
     <>
       <div
-        className='h-[38px] px-[2px] py-1.5 flex items-center rounded-full border border-GRAY_200 absolute w-fit top-[29px] -left-[11px] cursor-pointer z-1000 overflow-hidden bg-[#fafafa] opacity-0 group-hover:opacity-100 transition-opacity duration-200'
+        className='border-GRAY_200 absolute top-[29px] -left-[11px] z-1000 flex h-[38px] w-fit cursor-pointer items-center overflow-hidden rounded-full border bg-[#fafafa] px-[2px] py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100'
         onClick={() => setShowDisplayConfig(!showDisplayConfig)}
       >
         <SvgSpriteLoader id='dots-vertical' width={16} height={16} iconCategory={ICON_SPRITE_TYPES.GENERAL} />
@@ -177,13 +177,13 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
       {showDisplayConfig && (
         <div
           className={cn(
-            'absolute z-10 top-[72px] -left-2.5 bg-white flex flex-col  p-1 border border-GRAY_400 rounded-md shadow-tableFilterMenu max-h-[330px] min-w-[200px] ',
+            'border-GRAY_400 shadow-table-filter-menu absolute top-[72px] -left-2.5 z-10 flex max-h-[330px] min-w-[200px] flex-col rounded-md border bg-white p-1',
           )}
           ref={ref}
         >
           {!!displayConfigToggleData && displayConfigToggleData?.length > 0 && (
             <>
-              <span className='f-11-500 gap-2.5 pt-2 pb-1.5 px-2.5 text-GRAY_600'>Display</span>
+              <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pt-2 pb-1.5'>Display</span>
               {displayConfigToggleData?.map((item, index) => {
                 const disabledToggle = disabledToggleFields?.[item?.toggle_field];
 
@@ -191,8 +191,8 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
                   <div
                     key={index}
                     className={cn(
-                      'flex items-center justify-between gap-2.5 py-2 px-2.5 rounded cursor-pointer hover:bg-GRAY_100',
-                      disabledToggle && 'opacity-50 cursor-not-allowed',
+                      'hover:bg-GRAY_100 flex cursor-pointer items-center justify-between gap-2.5 rounded px-2.5 py-2',
+                      disabledToggle && 'cursor-not-allowed opacity-50',
                     )}
                     onClick={() => {
                       if (!disabledToggle) {
@@ -218,8 +218,8 @@ const PivotConfigDropdown: FC<PivotConfigDropdownProps> = ({
             </>
           )}
           <div className='flex flex-col'>
-            <span className='f-11-500 gap-2.5 pt-2 pb-1.5 px-2.5 text-GRAY_600'>Export</span>
-            <div className='flex py-2 px-2.5 rounded cursor-pointer hover:bg-GRAY_100' onClick={handleExportAgGridData}>
+            <span className='f-11-500 text-GRAY_600 gap-2.5 px-2.5 pt-2 pb-1.5'>Export</span>
+            <div className='hover:bg-GRAY_100 flex cursor-pointer rounded px-2.5 py-2' onClick={handleExportAgGridData}>
               <span className='f-12-500 text-GRAY_900'>Export Data</span>
             </div>
           </div>

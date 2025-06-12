@@ -1,10 +1,12 @@
-import { FC, ReactNode, useEffect } from 'react';
+'use client';
+
+import React, { FC, ReactNode, useEffect } from 'react';
 import { useWhoAmIQuery } from 'apis/auth';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
@@ -19,6 +21,8 @@ type Props = {
 
 export const AuthGuard: FC<Props> = (props) => {
   const router = useRouter();
+  const pathname = usePathname() || '';
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
   const { data: session, isLoading, isError, isSuccess } = useWhoAmIQuery();
@@ -41,42 +45,44 @@ export const AuthGuard: FC<Props> = (props) => {
         router.push(preLogoutPath);
       }
     }
-  }, [session, isSuccess, dispatch]);
+  }, [session, isSuccess, dispatch, router]);
 
-  if (isError && router.pathname !== props.loginRoute) {
-    let query = {};
+  useEffect(() => {
+    if (isError && pathname !== props.loginRoute) {
+      const redirectTo = searchParams?.get('redirect_to');
+      const query = redirectTo ? `?redirect_to=${redirectTo}` : '';
 
-    if (router.query.redirect_to) {
-      query = { redirect_to: router.query.redirect_to };
+      router.push(`${props.loginRoute}${query}`);
     }
-    router.push(props.loginRoute, {
-      query,
-    });
+  }, [isError, pathname, props.loginRoute, router, searchParams]);
 
-    return null;
-  }
+  useEffect(() => {
+    if (isSuccess && session?.user_id && pathname === props.loginRoute) {
+      const redirectTo = searchParams?.get('redirect_to');
 
-  if (isSuccess && session?.user_id && router.pathname === props.loginRoute) {
-    router.push((router.query.redirect_to as string) ?? '/');
+      router.push(redirectTo || '/');
+    }
+  }, [isSuccess, session?.user_id, pathname, props.loginRoute, router, searchParams]);
 
-    return;
-  }
+  useEffect(() => {
+    if (isLoading || (session?.user_id && workspace === null)) {
+      dispatch(setDashboardLoader(true));
+    }
+  }, [isLoading, session?.user_id, workspace, dispatch]);
 
   if (isLoading || (session?.user_id && workspace === null)) {
-    dispatch(setDashboardLoader(true));
-
     return null;
   }
 
   if (!session) {
-    if (router.pathname !== props.loginRoute) {
-      return <div>Not logged in. Redirecting...</div>;
+    if (pathname !== props.loginRoute) {
+      return null;
     } else {
       return props.children;
     }
   }
 
-  if (session?.orgs?.length === 0 && !router.pathname.includes(ROUTES_PATH.INVITATIONS)) {
+  if (session?.orgs?.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS)) {
     return <OrgMembershipPending />;
   }
 

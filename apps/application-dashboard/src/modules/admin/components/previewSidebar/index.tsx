@@ -25,7 +25,7 @@ const JsonPreviewSidebar: FC<JsonPreviewSidebarPropsType> = ({ formattedJson, or
           placeholder='search keyword ...'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className=' mb-4'
+          className='mb-4'
         />
         <FormattedJson originalJson={originalJson} formattedJson={formattedJson} search={search} />
       </>

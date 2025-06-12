@@ -10,7 +10,6 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { useGetFilterConfigQuery, useLazyGetDataQuery } from 'apis/filterTable';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import {
   formatColumns,
   formatDrilldownFilters,
@@ -19,8 +18,6 @@ import {
 } from 'modules/data/data.utils';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { RootState } from 'store';
-import { addBreadcrumb } from 'store/slices/layout-configs';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
@@ -40,7 +37,7 @@ interface CommonFilterTableProps {
   handleRowClicked?: (event: RowClickedEvent) => void;
   actionElements?: ReactElement;
   id: string;
-  tableRef: React.RefObject<AgGridReact>;
+  tableRef: React.RefObject<AgGridReact | null>;
   cellClass?: string;
   filterConfigUrl: string;
   dataUrl: string;
@@ -86,9 +83,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
   const router = useRouter();
   const datasetTableRef = useRef<HTMLDivElement>(null);
 
-  const filters = useSearchParams().get('filters');
-  const appDispatch = useAppDispatch();
-  const breadcrumbStack = useAppSelector((state: RootState) => state.layoutConfig.breadcrumbStack);
+  const filters = useSearchParams()?.get('filters') ?? '';
 
   const {
     dispatch,
@@ -97,7 +92,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
 
@@ -119,7 +113,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
 
         if (cachedData) {
           if (parameters.request.startRow === 0) {
-            setDatasetTitle(cachedData.title);
             setTotalRows(cachedData.data?.total_count);
             setIsNoRowsOverlayVisible(cachedData.data?.total_count === 0);
             dispatch({
@@ -143,7 +136,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
             GlobalCacheStore.set(cacheKey, response);
 
             if (parameters.request.startRow === 0) {
-              setDatasetTitle(response?.title);
               setTotalRows(response?.data?.total_count);
               setIsNoRowsOverlayVisible(response?.data?.total_count === 0);
               dispatch({
@@ -277,12 +269,6 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
     }
   }, [isNoRowsOverlayVisible]);
 
-  useEffect(() => {
-    if (datasetTitle && breadcrumbStack?.length === 0) {
-      appDispatch(addBreadcrumb([datasetTitle]));
-    }
-  }, [datasetTitle, breadcrumbStack]);
-
   return (
     <>
       <CommonWrapper
@@ -292,7 +278,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         isLoading={isFilterConfigFetching}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='flex justify-center items-center h-[calc(100vh-200px)] w-full z-50 bg-white'>
+          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
             <DynamicLottiePlayer
               src={ZAMP_LOGO_LOADER}
               className='lottie-player h-[140px]'
@@ -303,8 +289,8 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
           </div>
         }
       >
-        <div className='flex items-center justify-between pr-8 py-3'>
-          <div className='flex items-center justify-between w-full'>
+        <div className='flex items-center justify-between py-3 pr-8'>
+          <div className='flex w-full items-center justify-between'>
             {!isFilterConfigError && (
               <FiltersWrapper
                 label='Filter'
@@ -318,7 +304,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         </div>
 
         <CommonWrapper isError={isError} refetchFunction={() => router.refresh()}>
-          <div className='z-10 w-full h-full' ref={datasetTableRef}>
+          <div className='z-10 h-full w-full' ref={datasetTableRef}>
             <DatasetTable
               tableRef={tableRef}
               columns={columns}

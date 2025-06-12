@@ -4,7 +4,7 @@ import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
@@ -32,13 +32,13 @@ const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
   };
 
   return (
-    <div className='w-screen h-screen flex flex-col bg-white justify-center items-center'>
+    <div className='flex h-screen w-screen flex-col items-center justify-center bg-white'>
       <div>
         <Image
           width={60}
           height={60}
           alt='zamp logo'
-          className='w-8 align-middle cursor-pointer'
+          className='w-8 cursor-pointer align-middle'
           src={ZAMP_ICON}
           priority={true}
         />
@@ -49,7 +49,7 @@ const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
         <span className='f-13-400 text-GRAY_600 mt-4'>You&apos;re logged in as</span>
         <span className='f-13-600 text-GRAY_950 mt-1'>{user_email}</span>
       </div>
-      <div className='flex gap-2.5 mt-6'>
+      <div className='mt-6 flex gap-2.5'>
         <Button type={BUTTON_TYPES.SECONDARY} id='back-to-home' size={SIZE_TYPES.SMALL} onClick={handleHomeBtn}>
           Back to Home
         </Button>

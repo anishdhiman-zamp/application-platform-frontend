@@ -39,12 +39,9 @@ export const DateRangePickerWrapper: FC<DateRangePickerWrapperProps> = ({
 
     return (
       <div
-        className={`w-full h-full flex justify-center items-center rounded-full  ${
-          isStart ? 'bg-BLUE_700 !text-white' : ''
-        } ${isEnd ? 'bg-BLUE_700 !text-white' : ''}
-            ${isSearchValue ? 'border-BLUE_700 border is-searched' : ''}
-            ${!isStart && !isEnd && !isSearchValue && isToday ? 'border border-DIVIDER_SAIL_2' : ''}
-            ${isNotInCurrentMonth || (disableFutureDate && isFutureDate) ? ' text-GRAY_500' : 'text-black'}`}
+        className={`flex h-full w-full items-center justify-center rounded-full ${
+          isStart ? 'bg-BLUE_700 text-white!' : ''
+        } ${isEnd ? 'bg-BLUE_700 text-white!' : ''} ${isSearchValue ? 'border-BLUE_700 is-searched border' : ''} ${!isStart && !isEnd && !isSearchValue && isToday ? 'border-DIVIDER_SAIL_2 border' : ''} ${isNotInCurrentMonth || (disableFutureDate && isFutureDate) ? 'text-GRAY_500' : 'text-black'}`}
       >
         {day.getDate()}
       </div>
@@ -74,7 +71,7 @@ export const DateRangePickerWrapper: FC<DateRangePickerWrapperProps> = ({
         showMonthArrow={false}
         direction='horizontal'
         dayContentRenderer={renderDayContent}
-        className='!w-[258px]'
+        className='w-[258px]!'
         navigatorRenderer={DateRangePickerNavigator}
         fixedHeight={true}
         maxDate={disableFutureDate ? new Date() : undefined}

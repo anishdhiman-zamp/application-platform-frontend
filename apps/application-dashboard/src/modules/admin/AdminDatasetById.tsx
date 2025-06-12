@@ -46,7 +46,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
       isError={isError}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='flex justify-center items-center h-full overflow-y-auto w-full z-1000 bg-white'>
+        <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
@@ -58,17 +58,17 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
       />
 
       <div className='flex flex-row overflow-y-auto'>
-        <div className='flex flex-col w-full f-14-400'>
-          <div className='grid grid-cols-7 border-GRAY_400 px-10'>
+        <div className='f-14-400 flex w-full flex-col'>
+          <div className='border-GRAY_400 grid grid-cols-7 px-10'>
             {DisplayConfigHeadersList.map((header, index: number) => (
-              <div key={index} className='border border-GRAY_400 px-2 py-5'>
+              <div key={index} className='border-GRAY_400 border px-2 py-5'>
                 {header?.value}
               </div>
             ))}
           </div>
-          <div className='flex flex-col p-10 pt-0 h-[calc(100vh-130px)] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+          <div className='flex h-[calc(100vh-130px)] flex-col overflow-y-auto p-10 pt-0 [&::-webkit-scrollbar]:hidden'>
             {displayConfigUpdatedData?.map((config, index) => (
-              <div key={index} className='grid grid-cols-7 border-b border-GRAY_400'>
+              <div key={index} className='border-GRAY_400 grid grid-cols-7 border-b'>
                 <EditableConfigField value={config?.column || ''} isEditing={false} firstColumn />
                 <EditableConfigField
                   value={config?.alias || ''}
@@ -77,7 +77,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
                   onChange={(e) => handleChange(index, DISPLAY_CONFIG_HEADERS.ALIAS, e.target.value)}
                 />
 
-                <div className='flex gap-2 border-r border-GRAY_400 p-2'>
+                <div className='border-GRAY_400 flex gap-2 border-r p-2'>
                   <ToggleSwitch
                     id='toggle-is_hidden'
                     toggleClassName='relative w-10 h-5 rounded-full border-none'
@@ -88,7 +88,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
                   {config?.is_hidden ? 'True' : 'False'}
                 </div>
 
-                <div className='flex gap-2 border-r border-GRAY_400 p-2'>
+                <div className='border-GRAY_400 flex gap-2 border-r p-2'>
                   <ToggleSwitch
                     id='toggle-is_editable'
                     toggleClassName='relative w-10 h-5 rounded-full border-none'
@@ -99,7 +99,7 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
                   {config?.is_editable ? 'True' : 'False'}
                 </div>
 
-                <span className=' border-r border-GRAY_400 p-2 overflow-hidden'>{config?.type || '-'}</span>
+                <span className='border-GRAY_400 overflow-hidden border-r p-2'>{config?.type || '-'}</span>
 
                 <EditableConfigField
                   value={config?.config?.amount_column || ''}

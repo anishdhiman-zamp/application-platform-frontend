@@ -28,18 +28,15 @@
     ]
   },
   "dependencies": {
-    "@radix-ui/react-switch": "^1.2.4",
-    "eslint-plugin-unused-imports": "^4.1.4",
     "next": "^15",
-    "posthog-js": "^1.235.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
     "prettier": "^3.4.1",
+    "prettier-plugin-tailwindcss": "^0.6.12",
     "ts-node": "^10.9.2",
     "turbo": "^2.4.4",
     "typescript": "^5"

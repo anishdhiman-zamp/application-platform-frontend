@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+'use client';
+
+import { useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AmountDetailsStep from 'modules/payments/move-money/AmountDetailsStep';
 import {
@@ -13,17 +15,15 @@ import SelectSourceAccount from 'modules/payments/move-money/SelectSourceAccount
 import SuccessMoveMoney from 'modules/payments/move-money/SuccessMoveMoney';
 import { MOVE_MONEY_TYPE } from 'modules/payments/payments.types';
 import CreateTemplatePopover from 'modules/payments/templates/components/CreateTemplatePopover';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { defaultFn } from 'types/commonTypes';
-import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useAppDispatch } from '@/hooks/toolkit';
-import { resetBreadcrumb } from '@/store/slices/layout-configs';
-import { capitalizeFirstLetter } from '@/utils/common';
 
 const MoneyTransferHome = () => {
   const router = useRouter();
-  const appDispatch = useAppDispatch();
-  const { type, templateId, recipientId } = router.query;
+  const searchParams = useSearchParams();
+  const type = searchParams?.get('type');
+  const templateId = searchParams?.get('templateId');
+  const recipientId = searchParams?.get('recipientId');
   const isSelfTransfer = type === MOVE_MONEY_TYPE.SELF_TRANSFER;
   const transferType = isSelfTransfer ? MOVE_MONEY_TYPE.SELF_TRANSFER : MOVE_MONEY_TYPE.SINGLE_TRANSFER;
   const [createTemplateType, setCreateTemplateType] = useState<MOVE_MONEY_TYPE | null>(null);
@@ -39,24 +39,15 @@ const MoneyTransferHome = () => {
     });
   };
 
-  useEffect(() => {
-    appDispatch(
-      resetBreadcrumb([
-        { title: 'Payments', href: ROUTES_PATH.PAYMENTS },
-        { title: `${capitalizeFirstLetter(transferType)} transfer` },
-      ]),
-    );
-  }, []);
-
   return (
     <div
       style={{ marginTop: `calc(-${currentStep * 100}vh)` }}
-      className='w-full transition-all overflow-hidden duration-700 ease-in-out z-100 '
+      className='z-100 w-full overflow-hidden transition-all duration-700 ease-in-out'
     >
       <SvgSpriteLoader
         id='x-close'
         size={14}
-        className='fixed top-[72px] right-6 hover:bg-GRAY_100 p-1 rounded-md'
+        className='hover:bg-GRAY_100 fixed top-[72px] right-6 rounded-md p-1'
         onClick={() => router.back()}
       />
       <SelectSourceAccount

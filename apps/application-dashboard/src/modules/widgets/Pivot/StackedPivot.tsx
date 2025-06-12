@@ -633,7 +633,7 @@ const StackedPivot = ({
   }, []);
 
   return (
-    <div className={cn('h-fit w-full relative pivot group', className)} ref={gridContainerRef}>
+    <div className={cn('pivot group relative h-fit w-full', className)} ref={gridContainerRef}>
       <PivotConfigDropdown
         handleExportAgGridData={handleExportAgGridData}
         displayConfigToggleData={displayConfigToggleConditions}

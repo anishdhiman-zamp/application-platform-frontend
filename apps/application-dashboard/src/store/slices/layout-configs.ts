@@ -8,14 +8,12 @@ export type BreadcrumbItem = {
 export type LayoutConfigState = {
   modalStack: string[];
   fullPageLayoutStack: string[];
-  breadcrumbStack: BreadcrumbItem[];
   isSidebarOpen: boolean;
 };
 
 const initialState: LayoutConfigState = {
   modalStack: [],
   fullPageLayoutStack: [],
-  breadcrumbStack: [],
   isSidebarOpen: false,
 };
 
@@ -43,54 +41,15 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
-    addBreadcrumb: (state, action) => {
-      const hasCommonValue = state.breadcrumbStack.some((value) => value.title === action.payload.title);
-
-      if (!hasCommonValue) {
-        state.breadcrumbStack = [...state.breadcrumbStack, action.payload];
-      }
-
-      return state;
-    },
-    removeBreadcrumb: (state, action) => {
-      state.breadcrumbStack = state.breadcrumbStack.filter((breadcrumb) => breadcrumb !== action.payload);
-
-      return state;
-    },
-    resetBreadcrumb: (state, action) => {
-      state.breadcrumbStack = action.payload ?? [];
-
-      return state;
-    },
-    removeLastBreadcrumb: (state) => {
-      state.breadcrumbStack = state.breadcrumbStack.slice(0, -1);
-
-      return state;
-    },
     toggleSidebar: (state) => {
       state.isSidebarOpen = !state.isSidebarOpen;
-
-      return state;
-    },
-    updateUrlForLastBreadcrumb: (state, action) => {
-      state.breadcrumbStack[state.breadcrumbStack?.length - 1].href = action.payload;
 
       return state;
     },
   },
 });
 
-export const {
-  addModal,
-  removeModal,
-  addFullPageLayout,
-  removeFullPageLayout,
-  addBreadcrumb,
-  removeBreadcrumb,
-  resetBreadcrumb,
-  removeLastBreadcrumb,
-  toggleSidebar,
-  updateUrlForLastBreadcrumb,
-} = layoutConfigsSlice.actions;
+export const { addModal, removeModal, addFullPageLayout, removeFullPageLayout, toggleSidebar } =
+  layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

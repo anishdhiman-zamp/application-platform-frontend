@@ -1,4 +1,4 @@
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import * as React from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
 import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from './popover';
@@ -59,10 +59,7 @@ export function Combobox({
           }}
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
-          className={cn(
-            ' z-[1003] p-0 pointer-events-auto min-w-[var(--radix-popover-trigger-width)] ',
-            contentClassName,
-          )}
+          className={cn('pointer-events-auto z-1003 min-w-(--radix-popover-trigger-width) p-0', contentClassName)}
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />

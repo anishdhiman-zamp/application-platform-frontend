@@ -45,7 +45,7 @@ const ApprovalStep: FC<ApprovalStepProps> = ({ stepNumber, step, onChange, onRem
           onUpdateApproverSequence={handleUpdateApproverSequence}
         />
       ))}
-      <div className='f-11-500 flex items-center gap-1.5 cursor-pointer mt-4 w-fit' onClick={handleAddApproverSequence}>
+      <div className='f-11-500 mt-4 flex w-fit cursor-pointer items-center gap-1.5' onClick={handleAddApproverSequence}>
         <SvgSpriteLoader id='plus' size={14} />
         Approver sequence
       </div>

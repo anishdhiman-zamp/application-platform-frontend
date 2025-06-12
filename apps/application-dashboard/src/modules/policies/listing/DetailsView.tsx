@@ -17,9 +17,9 @@ interface DetailsViewProps {
 const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack }) => {
   return (
     <>
-      <div className='flex items-center justify-between mb-4.5'>
-        <div className='flex items-center gap-2 w-full'>
-          <Button variant='ghost' size='small' onClick={onBack} className='p-0 min-w-0'>
+      <div className='mb-4.5 flex items-center justify-between'>
+        <div className='flex w-full items-center gap-2'>
+          <Button variant='ghost' size='small' onClick={onBack} className='min-w-0 p-0'>
             <SvgSpriteLoader id='arrow-left' size={18} />
           </Button>
           <h1 className='f-16-600'>{policy.name}</h1>
@@ -28,7 +28,7 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
           </div>
         </div>
       </div>
-      <div className='overflow-y-auto h-[calc(100vh-92px)] pb-6 [&::-webkit-scrollbar]:hidden'>
+      <div className='h-[calc(100vh-92px)] overflow-y-auto pb-6 [&::-webkit-scrollbar]:hidden'>
         <div className='space-y-4'>
           <PolicyAttributeTags
             creatorLength={policy?.policy_configurations?.creator?.length}
@@ -43,12 +43,12 @@ const DetailsView: FC<DetailsViewProps> = ({ policy, audienceMembersData, onBack
                   {step.conditions.map((cond, cidx) => (
                     <div key={cidx} className='mb-2'>
                       {cidx > 0 && (
-                        <div className='flex items-center gap-1.5 mb-2'>
+                        <div className='mb-2 flex items-center gap-1.5'>
                           <span className='f-11-600'>OR</span>
-                          <div className='h-0 border-t border-GRAY_400 w-full border-dashed' />
+                          <div className='border-GRAY_400 h-0 w-full border-t border-dashed' />
                         </div>
                       )}
-                      <div className='flex items-center gap-2 mb-2'>
+                      <div className='mb-2 flex items-center gap-2'>
                         <span className='f-12-500 text-gray-700'>
                           {POLICY_APPROVAL_STEP_MODIFIERS.find((modifier) => modifier?.value === cond.mode)?.label}
                         </span>

@@ -7,7 +7,7 @@ import Input from 'components/common/input';
 const EditConfig = ({ isEditing, onClick }: { isEditing: boolean; onClick: () => void }) => {
   return (
     <div onClick={onClick}>
-      <span className='flex bg-GRAY_100 rounded-md p-2 cursor-pointer h-fit w-fit hover:bg-GRAY_200'>
+      <span className='bg-GRAY_100 hover:bg-GRAY_200 flex h-fit w-fit cursor-pointer rounded-md p-2'>
         <SvgSpriteLoader id={isEditing ? 'check' : 'pencil-02'} height={14} width={14} color={COLORS.TEXT_PRIMARY} />
       </span>
     </div>
@@ -41,7 +41,7 @@ const EditableConfigField = ({
 
   return (
     <div
-      className={cn(firstColumn && 'border-l', 'flex items-center gap-2 border-r border-GRAY_400 p-2 overflow-hidden')}
+      className={cn(firstColumn && 'border-l', 'border-GRAY_400 flex items-center gap-2 overflow-hidden border-r p-2')}
     >
       {onEditToggle && onChange && <EditConfig isEditing={isEditing} onClick={handleEditToggle} />}
       {isEditing ? (

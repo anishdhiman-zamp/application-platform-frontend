@@ -47,7 +47,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
   };
 
   return (
-    <div className='bg-white w-full h-full flex justify-between items-start p-6 border-b-0.5 border-r-0.5 border-GRAY_400'>
+    <div className='border-b-0.5 border-r-0.5 border-GRAY_400 flex h-full w-full items-start justify-between bg-white p-6'>
       <WidgetTitle
         title={title}
         groupWidgetsOptions={groupWidgetsOptions}
@@ -66,7 +66,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
         tooltipColor={COLORS.BLACK}
         buttonSize={SIZE_TYPES.XSMALL}
         tooltipPosition={TooltipPositions.BOTTOM_RIGHT}
-        className='!text-xs !p-1.5 !bg-BG_GRAY_2 !rounded'
+        className='!bg-BG_GRAY_2 rounded! p-1.5! text-xs!'
       >
         <Image alt='' src={isExpanded ? GROUP_COLLAPSE_ICON : GROUP_EXPAND_ICON} width={14} height={14} />
       </TooltipButton>

@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 type RuleStatementProps = {
   index: number;
-  filterStatement: JSX.Element;
+  filterStatement: React.JSX.Element;
   numberOfFilters: number;
 };
 
@@ -10,7 +10,7 @@ const RuleStatement: FC<RuleStatementProps> = ({ index, filterStatement, numberO
   return (
     <>
       {filterStatement}
-      {index !== numberOfFilters - 1 && <span className='text-GRAY_1000 pl-1.5 pr-2 py-1 h-fit'>and</span>}
+      {index !== numberOfFilters - 1 && <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>and</span>}
     </>
   );
 };

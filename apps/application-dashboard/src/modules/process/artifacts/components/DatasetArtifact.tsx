@@ -10,19 +10,27 @@ import {
   TabsTrigger,
 } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/lib/utils';
+import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 import Dataset from '@/modules/data/Dataset';
 import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: PdfArtifactsResponseType;
+  filters: MapAny;
 }
 
 const MAX_VISIBLE_TABS = 3;
 
-const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
-  const datasets = datasetArtifact?.datasets ?? [];
+const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact, filters }) => {
+  const filterDatasets = Object.keys(filters?.dataset_to_filter_map ?? {});
+  const datasets = (datasetArtifact?.datasets ?? []).filter((dataset) => {
+    if (filterDatasets?.length === 0) return true;
+
+    return filterDatasets?.includes(dataset?.dataset_id);
+  });
+
   const [activeTab, setActiveTab] = useState<string>('');
 
   const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
@@ -52,15 +60,15 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
   };
 
   return (
-    <Tabs onValueChange={(value) => setActiveTab(value)} value={activeTab} className='w-full h-full'>
+    <Tabs onValueChange={(value) => setActiveTab(value)} value={activeTab} className='h-full w-full'>
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
-        <TabsList className='mx-4 my-3 gap-2.5 h-full bg-white overflow-x-auto flex-nowrap w-full flex items-center justify-start whitespace-nowrap [scrollbar-width:none]'>
+        <TabsList className='mx-4 my-3 flex h-full w-full flex-nowrap items-center justify-start gap-2.5 overflow-x-auto bg-white whitespace-nowrap [scrollbar-width:none]'>
           {visibleTabs?.map((tab) => (
             <TabsTrigger
               key={tab?.dataset_id}
               value={tab?.dataset_id}
               className={cn(
-                '!rounded !px-2 !py-1 border-none gap-1.5 hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100',
+                'hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 gap-1.5 rounded! border-none px-2! py-1!',
               )}
             >
               <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
@@ -72,15 +80,15 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
           {hiddenTabs?.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className='rounded flex items-center justify-center px-1.5 py-1 border-none cursor-pointer hover:bg-GRAY_50 data-[state=open]:bg-GRAY_200 overflow-hidden'>
+                <div className='hover:bg-GRAY_50 data-[state=open]:bg-GRAY_200 flex cursor-pointer items-center justify-center overflow-hidden rounded border-none px-1.5 py-1'>
                   <span className='f-12-500 text-GRAY_900'>+{hiddenTabs?.length} more</span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent sideOffset={4} className='p-1 gap-y-[3px]'>
+              <DropdownMenuContent sideOffset={4} className='gap-y-[3px] p-1'>
                 {hiddenTabs?.map((tab) => (
                   <DropdownMenuItem
                     key={tab?.dataset_id}
-                    className='flex justify-start items-center px-2.5 py-1.5 gap-x-1.5 cursor-pointer hover:bg-GRAY_100'
+                    className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-start gap-x-1.5 px-2.5 py-1.5'
                     onClick={() => handleTabSelect(tab?.dataset_id)}
                   >
                     <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={14} />
@@ -93,14 +101,14 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
         </TabsList>
       </div>
 
-      <TabsContent key={activeTab} value={activeTab} className='h-full w-full mt-0'>
+      <TabsContent key={activeTab} value={activeTab} className='mt-0 h-full w-full'>
         <Dataset
           id={activeTab}
           updateBreadcrumb={false}
           headerClassName='px-4 py-3 flex-wrap'
           filterWrapperClassName='pl-0'
-          showCurrencyFilter={false}
           showDatasetHistory={false}
+          drilldownFilters={filters?.dataset_to_filter_map?.[activeTab]?.filters ?? {}}
           isDatasetArtifact
         />
       </TabsContent>

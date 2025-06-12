@@ -4,8 +4,11 @@
   "private": true,
   "main": "index.ts",
   "types": "index.ts",
+  "dependencies": {
+    "@vercel/blob": "^1.1.1",
+    "react": "^19"
+  },
   "files": [
     "./index.ts"
-  ],
-  "devDependencies": {}
+  ]
 }

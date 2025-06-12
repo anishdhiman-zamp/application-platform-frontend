@@ -21,7 +21,7 @@ interface AllArtifactsDialogProps {
 const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
   const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams.get('processId') as string;
+  const processId = searchParams?.get('processId') as string;
   const activityId = params?.activityId;
 
   const {
@@ -46,14 +46,14 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
       {isOpen && (
         <motion.div
           key='backdrop'
-          className='absolute w-full h-full z-50 flex items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'
+          className='absolute z-50 flex h-full w-full items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
             key='content'
-            className='relative w-full h-full overflow-y-auto rounded-xl'
+            className='relative h-full w-full overflow-y-auto rounded-xl'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -63,18 +63,18 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
               <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
             </div>
 
-            <div className='h-full flex flex-col justify-start items-start gap-y-2 p-5 absolute left-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
+            <div className='absolute left-10 flex h-full flex-col items-start justify-start gap-y-2 overflow-y-auto p-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
               <h2 className='text-GRAY_1000 f-14-500'>All Artifacts</h2>
 
               {isLoadingArtifacts || isErrorArtifacts
                 ? Array.from({ length: 5 }).map((_, index) => (
-                    <SkeletonElement className='w-80 h-24 rounded-lg' key={index} />
+                    <SkeletonElement className='h-24 w-80 rounded-lg' key={index} />
                   ))
                 : artifacts?.artifacts?.map((artifact) => (
                     <ArtifactItem
                       key={artifact?.id}
                       artifact={artifact}
-                      onClick={() => handleArtifactClick(artifact?.artifact_type as ARTIFACT_TYPE, artifact?.id)}
+                      onClick={() => handleArtifactClick(artifact?.artifact_type, artifact?.id)}
                     />
                   ))}
             </div>
@@ -93,7 +93,7 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
 
   return (
     <div
-      className='flex flex-col items-start justify-start gap-y-2.5 p-4.5 bg-white rounded-[10px] w-80 border-[0.5px] border-GRAY_500 hover:bg-BG_GRAY_2 cursor-pointer active:bg-GRAY_100'
+      className='border-GRAY_500 hover:bg-BG_GRAY_2 active:bg-GRAY_100 flex w-80 cursor-pointer flex-col items-start justify-start gap-y-2.5 rounded-[10px] border-[0.5px] bg-white p-4.5'
       onClick={onClick}
       aria-label={`${artifact_type} artifact`}
       role='button'

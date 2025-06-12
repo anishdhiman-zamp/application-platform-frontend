@@ -3,15 +3,15 @@ import SkeletonElement from 'components/skeletons/SkeletonElement';
 
 const SkeletonLoaderFileHistory = () => {
   return (
-    <div className='flex flex-col flex-wrap justify-start items-start w-full '>
+    <div className='flex w-full flex-col flex-wrap items-start justify-start'>
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className='grid grid-cols-1 gap-4 w-full items-center border-b border-GRAY_400 py-3.5'>
-          <div className='flex flex-col justify-start rounded-md w-full'>
-            <div className='flex justify-between items-center w-full'>
-              <SkeletonElement key={index} className='h-7 w-30 rounded-md bg-GRAY_500' />
-              <SkeletonElement key={index} className='h-4 w-4 rounded-sm bg-GRAY_500' />
+        <div key={index} className='border-GRAY_400 grid w-full grid-cols-1 items-center gap-4 border-b py-3.5'>
+          <div className='flex w-full flex-col justify-start rounded-md'>
+            <div className='flex w-full items-center justify-between'>
+              <SkeletonElement key={index} className='bg-GRAY_500 h-7 w-30 rounded-md' />
+              <SkeletonElement key={index} className='bg-GRAY_500 h-4 w-4 rounded-sm' />
             </div>
-            <SkeletonElement key={index} className='h-3 w-50 rounded-md bg-GRAY_500 mt-1' />
+            <SkeletonElement key={index} className='bg-GRAY_500 mt-1 h-3 w-50 rounded-md' />
           </div>
         </div>
       ))}

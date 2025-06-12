@@ -22,10 +22,10 @@ const CustomiseAccessHeader: FC<CustomiseAccessHeaderProps> = ({
 }) => {
   return (
     <>
-      <div className='p-4 border border-GRAY_400 rounded-lg flex justify-between m-2 bg-white'>
+      <div className='border-GRAY_400 m-2 flex justify-between rounded-lg border bg-white p-4'>
         <Label
           title={
-            <div className='flex gap-1.5 items-center'>
+            <div className='flex items-center gap-1.5'>
               <Image src={HAND_ICON} alt='hand' width={14} height={15} className='min-w-[14px]' />
               <span className='f-16-600 text-gray-950'>Customise access</span>
             </div>

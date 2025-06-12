@@ -82,12 +82,12 @@ const RuleCard: FC<RuleCardProps> = ({
   return (
     <div
       className={cn(
-        'rounded-md border transition-all duration-500 bg-white',
+        'rounded-md border bg-white transition-all duration-500',
         isExpanded ? 'border-GRAY_600 h-[300px]' : 'border-GRAY_400 h-[148px]',
         className,
       )}
     >
-      <div className='flex items-center justify-between bg-BG_GRAY_2 py-2 px-2.5 rounded-t-md'>
+      <div className='bg-BG_GRAY_2 flex items-center justify-between rounded-t-md px-2.5 py-2'>
         {!!createdOn && (
           <span className='f-12-400 text-GRAY_700'>
             Created on {format(new Date(createdOn), DATE_FORMATS.ddMMMyyyy)}
@@ -104,14 +104,14 @@ const RuleCard: FC<RuleCardProps> = ({
           {isMenuOpen && (
             <MenuWrapper
               id='rule-actions'
-              className='!absolute z-10 p-1 right-0 mt-1 w-[180px]'
-              childrenWrapperClassName='text-GRAY_900 !overflow-y-auto'
+              className='!absolute right-0 z-10 mt-1 w-[180px] p-1'
+              childrenWrapperClassName='text-GRAY_900 overflow-y-auto!'
             >
               {RULE_ACTIONS.map((option) => (
                 <div
                   key={option.value}
                   className={cn(
-                    'cursor-pointer py-2 px-2.5 text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_100 rounded-md f-12-500',
+                    'text-GRAY_900 hover:text-GRAY_1000 hover:bg-GRAY_100 f-12-500 cursor-pointer rounded-md px-2.5 py-2',
                     option.fontColor,
                   )}
                   onClick={() => handleClickAction(option.value)}
@@ -123,11 +123,11 @@ const RuleCard: FC<RuleCardProps> = ({
           )}
         </div>
       </div>
-      <div className='px-2.5 py-3 space-y-3'>
+      <div className='space-y-3 px-2.5 py-3'>
         {!!value && <TagWithHierarchy tag={value} labelColor={labelColor} isReadOnly />}
         <div
-          className={cn('flex f-11-400 gap-1.5', {
-            'h-[150px] overflow-auto flex-wrap items-start content-start': isExpanded,
+          className={cn('f-11-400 flex gap-1.5', {
+            'h-[150px] flex-wrap content-start items-start overflow-auto': isExpanded,
             'items-center': !isExpanded,
           })}
           style={{ scrollbarWidth: 'none' }}
@@ -136,8 +136,8 @@ const RuleCard: FC<RuleCardProps> = ({
 
           {!isExpanded && (
             <>
-              <div className='flex items-center gap-1.5 f-11-400 w-[300px] overflow-hidden'>
-                <span className='text-GRAY_1000 pl-1.5 pr-2 py-1'>If</span>
+              <div className='f-11-400 flex w-[300px] items-center gap-1.5 overflow-hidden'>
+                <span className='text-GRAY_1000 py-1 pr-2 pl-1.5'>If</span>
                 <RuleStatement
                   index={0}
                   filterStatement={nonExpandedFilterStatement}
@@ -158,7 +158,7 @@ const RuleCard: FC<RuleCardProps> = ({
           )}
           {isExpanded && (
             <>
-              <span className='text-GRAY_1000 pl-1.5 pr-2 py-1 h-fit'>If</span>
+              <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>If</span>
               {filterStatement?.map((value, index) => (
                 <RuleStatement
                   index={index}
@@ -167,8 +167,8 @@ const RuleCard: FC<RuleCardProps> = ({
                   key={`filter-statement-${index}`}
                 />
               ))}
-              <span className='text-GRAY_1000 pl-1.5 pr-2 py-1 h-fit'>then apply tag</span>
-              <span className='border-BORDER_GRAY_400 border bg-white rounded-md pl-1.5 pr-2 py-1 text-nowrap h-fit'>
+              <span className='text-GRAY_1000 h-fit py-1 pr-2 pl-1.5'>then apply tag</span>
+              <span className='border-BORDER_GRAY_400 h-fit rounded-md border bg-white py-1 pr-2 pl-1.5 text-nowrap'>
                 {value}
               </span>
             </>

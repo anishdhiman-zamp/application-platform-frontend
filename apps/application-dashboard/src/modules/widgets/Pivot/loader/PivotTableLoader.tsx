@@ -1,15 +1,15 @@
 const PivotTableLoader = () => {
   return (
-    <div className='overflow-x-auto w-full h-full border border-GRAY_400 rounded-xl animate-pulse overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-      <table className='w-full text-left border-collapse'>
+    <div className='border-GRAY_400 h-full w-full animate-pulse overflow-hidden overflow-x-auto rounded-xl border [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+      <table className='w-full border-collapse text-left'>
         <thead className='h-[84px]'>
-          <tr className='border-b border-GRAY_400'>
+          <tr className='border-GRAY_400 border-b'>
             {Array.from({ length: 6 }).map((_, i) => (
               <th
                 key={i}
-                className='py-6 px-4 border-r-0.5 border-GRAY_400 last:border-r-0 first:min-w-[380px] first:w-[380px] w-[170px]'
+                className='border-r-0.5 border-GRAY_400 w-[170px] px-4 py-6 first:w-[380px] first:min-w-[380px] last:border-r-0'
               >
-                <div className='w-24 h-4 bg-GRAY_50 rounded'></div>
+                <div className='bg-GRAY_50 h-4 w-24 rounded'></div>
               </th>
             ))}
           </tr>
@@ -18,8 +18,8 @@ const PivotTableLoader = () => {
           {Array.from({ length: 12 }).map((_, rowIndex) => (
             <tr key={rowIndex} className='border-b-0.5 border-GRAY_400 last:border-b-0'>
               {Array.from({ length: 6 }).map((_, colIndex) => (
-                <td key={colIndex} className='py-3 px-4 border-r-0.5 border-GRAY_400 last:border-r-0 h-[42px]'>
-                  <div className='h-4 bg-GRAY_50 rounded w-full'></div>
+                <td key={colIndex} className='border-r-0.5 border-GRAY_400 h-[42px] px-4 py-3 last:border-r-0'>
+                  <div className='bg-GRAY_50 h-4 w-full rounded'></div>
                 </td>
               ))}
             </tr>

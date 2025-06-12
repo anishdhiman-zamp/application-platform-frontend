@@ -37,10 +37,10 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
   }, [onKeyDown]);
 
   return (
-    <div className='absolute left-0 bg-white max-w-48 w-fit p-1 f-10-500 text-GRAY_700 rounded-md border border-GRAY_400 mt-1 z-10 shadow-tableFilterMenu'>
-      <span className='flex pt-2 pb-1.5 px-1.5 whitespace-nowrap'>Select a team or create one</span>
+    <div className='f-10-500 text-GRAY_700 border-GRAY_400 shadow-table-filter-menu absolute left-0 z-10 mt-1 w-fit max-w-48 rounded-md border bg-white p-1'>
+      <span className='flex px-1.5 pt-2 pb-1.5 whitespace-nowrap'>Select a team or create one</span>
       <div
-        className='flex flex-col w-full max-h-[200px] overflow-y-auto [&::-webkit-scrollbar]:hidden outline-none'
+        className='flex max-h-[200px] w-full flex-col overflow-y-auto outline-hidden [&::-webkit-scrollbar]:hidden'
         ref={dropdownRef}
         tabIndex={0}
         onKeyDown={onKeyDown}
@@ -69,15 +69,15 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
             >
               {(option as ArrayListOption & { isNew?: boolean })?.isNew && !!search?.length ? (
                 <div
-                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                  className={cn('hover:bg-GRAY_50 w-full cursor-pointer rounded-md px-1.5 py-1', {
                     'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
                   })}
                 >
-                  <div className='f-12-400 flex flex-wrap items-center text-GRAY_1000 gap-1 rounded-md cursor-pointer min-h-5 px-1.5'>
+                  <div className='f-12-400 text-GRAY_1000 flex min-h-5 cursor-pointer flex-wrap items-center gap-1 rounded-md px-1.5'>
                     <span> Create team :</span>
                     {search && (
                       <span
-                        className='px-1.5 py-0.5 rounded cursor-pointer text-black w-fit h-fit text-wrap'
+                        className='h-fit w-fit cursor-pointer rounded px-1.5 py-0.5 text-wrap text-black'
                         style={{ backgroundColor: randomColor ?? COLORS.WHITE }}
                       >
                         {option?.label}
@@ -87,12 +87,12 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                 </div>
               ) : search?.length === 0 && !(option as ArrayListOption & { isNew?: boolean })?.isNew ? (
                 <div
-                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                  className={cn('hover:bg-GRAY_50 w-full cursor-pointer rounded-md px-1.5 py-1', {
                     'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
                   })}
                 >
                   <span
-                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
+                    className='f-12-400 text-GRAY_1000 flex w-fit rounded px-1.5 py-0.5'
                     style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
                   >
                     {transformLabel ? transformLabel(option?.label) : option?.label}
@@ -100,12 +100,12 @@ const CustomTeamsDropdown: FC<CustomTeamsDropdownPropsType> = ({
                 </div>
               ) : search?.length !== 0 && !(option as ArrayListOption & { isNew?: boolean })?.isNew ? (
                 <div
-                  className={cn('w-full px-1.5 py-1 hover:bg-GRAY_50 rounded-md cursor-pointer', {
+                  className={cn('hover:bg-GRAY_50 w-full cursor-pointer rounded-md px-1.5 py-1', {
                     'bg-GRAY_50': (hoveredOptionIndex === null && index === 0) || hoveredOptionIndex === index,
                   })}
                 >
                   <span
-                    className='f-12-400 text-GRAY_1000 flex px-1.5 py-0.5 w-fit rounded'
+                    className='f-12-400 text-GRAY_1000 flex w-fit rounded px-1.5 py-0.5'
                     style={{ backgroundColor: option?.color ?? COLORS.WHITE }}
                   >
                     {transformLabel ? transformLabel(option?.label) : option?.label}

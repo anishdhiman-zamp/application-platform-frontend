@@ -20,7 +20,7 @@ export const getColumnDefs = (columnList: WorkspaceDisplayColumns[]) => {
       } else if (props.value !== undefined) {
         return props.value;
       } else {
-        return <SkeletonElement className='w-52 h-5' />;
+        return <SkeletonElement className='h-5 w-52' />;
       }
     },
   }));

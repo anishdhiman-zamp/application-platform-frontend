@@ -9,6 +9,7 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
+import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
@@ -18,6 +19,7 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import { ACTIVITY_RUN_STATUS } from '@/modules/process/process.types';
 import type { ActivityRunsDataResponseType } from '@/types/api/processApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -52,7 +54,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const firstLoadDone = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const process = searchParams.get('process') as string;
+  const process = searchParams?.get('process') as string;
 
   const {
     dispatch,
@@ -319,10 +321,18 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     router.push(path);
   };
 
+  if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters)) {
+    return (
+      <div className='h-full w-full'>
+        <ActivityRunsEmptyState status={status as ACTIVITY_RUN_STATUS} />
+      </div>
+    );
+  }
+
   return (
     <>
       <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div className='flex items-center justify-between pr-8 z-1000'>
+        <div className='z-1000 flex items-center justify-between pr-8'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
@@ -338,7 +348,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='z-10 w-full h-full sensitive' ref={datasetTableRef}>
+        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}
@@ -347,7 +357,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             totalRows={totalRows}
             customTheme={myThemeWithProcess}
             headerClass='f-12-450 text-GRAY_700'
-            cellClass='!text-[13px] !font-[450] !px-4'
+            cellClass='text-[13px]! font-[450]! px-4!'
             suppressCellFocus
             enableCellSelection={false}
             onGridReady={handleGridReady}

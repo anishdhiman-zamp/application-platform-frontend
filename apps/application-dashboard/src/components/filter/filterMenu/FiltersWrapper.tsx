@@ -129,7 +129,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   }, [confirmationPopupControlRef]);
 
   return (
-    <div id={`${persistId}_FILTERS_CONTAINER`} className={`flex items-center flex-wrap gap-2 z-50 ${className}`}>
+    <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
       {filtersList.map((filter, index) => (
         <FilterDropdown
           key={index}
