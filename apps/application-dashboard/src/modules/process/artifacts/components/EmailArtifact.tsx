@@ -111,7 +111,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
             {emailArtifact?.attachments.map((attachment) => (
               <ArtifactTag
                 key={attachment?.file_id}
-                type={ARTIFACT_TYPE.PDF_DATASET}
+                artifactType={ARTIFACT_TYPE.PDF_DATASET}
                 displayName={attachment?.file_display_name}
                 onClick={() => handleAttachmentDownload(attachment?.file_id)}
                 displayClassName='max-w-40'

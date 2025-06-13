@@ -59,6 +59,7 @@ export type DatasetType = {
 export type PdfArtifactsResponseType = {
   display_name: string;
   status: string;
+  icon_identifier: string;
   datasets: DatasetType[];
   pdf_file: {
     file_display_name: string;
@@ -69,6 +70,7 @@ export type PdfArtifactsResponseType = {
 export type EmailArtifactsResponseType = {
   display_name: string;
   status: EMAIL_STATUS;
+  icon_identifier: string;
   heading: string;
   date: string;
   from_mail_id: string;
@@ -87,11 +89,13 @@ export type EmailArtifactsResponseType = {
 export type BrowserArtifactsResponseType = {
   display_name: string;
   status: string;
+  icon_identifier: string;
   browser_url: string;
 };
 
 export type OtherArtifactsResponseType = {
   display_name: string;
+  icon_identifier: string;
   url: string;
 };
 
@@ -138,7 +142,10 @@ export type CtasType = {
   artifact_type: ARTIFACT_TYPE;
   cta_component_type: CTA_COMPONENT_TYPE;
   cta_action: CTA_ACTION;
-  icon_identifier: string;
+  cta_config: {
+    icon_identifier: string;
+    variant: string;
+  };
   filter_metadata: MapAny;
 };
 
