@@ -20,6 +20,23 @@ const nextConfig = {
   images: {
     remotePatterns: [new URL('https://l0lws8ltlx4vwaic.public.blob.vercel-storage.com/**')],
   },
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = withSentryConfig(nextConfig, {

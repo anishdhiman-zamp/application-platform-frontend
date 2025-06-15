@@ -20,6 +20,7 @@ import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import { useServiceWorker } from '@/hooks/useServiceWorker';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
 import {
   fadeOutOffsetTimeDifference,
@@ -29,6 +30,7 @@ import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 
 const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
+  useServiceWorker();
   const pathname = usePathname() || '/';
   const dispatch = useDispatch();
   const containerRef = useRef<HTMLDivElement>(null);
