@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Skeleton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
@@ -232,4 +232,4 @@ const PdfToolbar = ({ pageNumber, numPages, previousPage, nextPage, zoomOut, zoo
   );
 };
 
-export default PdfArtifact;
+export default memo(PdfArtifact);

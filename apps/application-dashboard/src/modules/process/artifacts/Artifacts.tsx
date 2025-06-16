@@ -51,7 +51,7 @@ const Artifacts = ({
 
   const {
     data: artifacts,
-    isLoading,
+    isFetching,
     isError,
     refetch,
   } = useGetArtifactsByArtifactIdQuery(
@@ -98,7 +98,7 @@ const Artifacts = ({
           onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
         />
         <CommonWrapper
-          isLoading={isLoading}
+          isLoading={isFetching}
           loader={<ArtifactLoader />}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isError}

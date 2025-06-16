@@ -47,7 +47,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
               className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
             >
               <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to Dataset'}>
-                <SvgSpriteLoader id='coins-stacked-04' size={14} color={COLORS.GRAY_1000} />
+                <SvgSpriteLoader id='coins-stacked-04' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
               </TooltipV2>
             </TabsTrigger>
             <TabsTrigger
@@ -55,7 +55,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
               className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
             >
               <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to PDF'}>
-                <SvgSpriteLoader id='file-02' size={14} color={COLORS.GRAY_1000} className='shrink-0' />
+                <SvgSpriteLoader id='file-02' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
               </TooltipV2>
             </TabsTrigger>
           </TabsList>

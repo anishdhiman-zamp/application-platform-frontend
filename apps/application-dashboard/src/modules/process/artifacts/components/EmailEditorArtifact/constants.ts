@@ -20,14 +20,14 @@ export const FONT_SIZES = [
 export const SENDER_HEADINGS = [
   {
     label: 'To',
-    value: 'to',
+    value: 'to_mail_ids',
   },
   {
     label: 'Cc',
-    value: 'cc',
+    value: 'cc_mail_ids',
   },
   {
     label: 'Bcc',
-    value: 'bcc',
+    value: 'bcc_mail_ids',
   },
 ];

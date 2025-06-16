@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import EmailArtifact from 'modules/process/artifacts/components/EmailArtifact';
 import { EMAIL_STATUS } from 'modules/process/process.types';
@@ -22,4 +23,4 @@ const EmailArtifactWrapper = ({ artifactData, id }: { artifactData: EmailArtifac
   }
 };
 
-export default EmailArtifactWrapper;
+export default memo(EmailArtifactWrapper);
