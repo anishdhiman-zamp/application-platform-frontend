@@ -20,8 +20,8 @@ import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import ServiceWorkerProvider from '@/app/_providers/ServiceWorkerProvider';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
-import ServiceWorkerProvider from 'components/common/ServiceWorkerProvider';
 import {
   fadeOutOffsetTimeDifference,
   minLoaderDuration,
