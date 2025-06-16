@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react';
+import { type FC, memo, useEffect, useMemo, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,20 +24,23 @@ interface DatasetArtifactProps {
 const MAX_VISIBLE_TABS = 3;
 
 const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact, filters }) => {
-  const filterDatasets = Object.keys(filters?.dataset_to_filter_map ?? {});
-  const datasets = (datasetArtifact?.datasets ?? []).filter((dataset) => {
-    if (filterDatasets?.length === 0) return true;
+  const filterDatasets = useMemo(() => Object.keys(filters?.dataset_to_filter_map ?? {}), [filters]);
 
-    return filterDatasets?.includes(dataset?.dataset_id);
-  });
+  const datasets = useMemo(() => {
+    return (datasetArtifact?.datasets ?? []).filter((dataset) => {
+      if (filterDatasets?.length === 0) return true;
+
+      return filterDatasets?.includes(dataset?.dataset_id);
+    });
+  }, [datasetArtifact?.datasets, filterDatasets]);
 
   const [activeTab, setActiveTab] = useState<string>('');
 
   const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
 
   useEffect(() => {
-    if (datasets.length > 0) {
-      setActiveTab(datasets[0].dataset_id);
+    if (datasets?.length > 0) {
+      setActiveTab(datasets[0]?.dataset_id);
     }
   }, [datasets]);
 
@@ -116,4 +119,4 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact, filters })
   );
 };
 
-export default DatasetArtifact;
+export default memo(DatasetArtifact);

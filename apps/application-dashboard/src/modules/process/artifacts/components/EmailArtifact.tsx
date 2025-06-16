@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { useLazyGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import { COLORS } from '@/constants/colors';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
-import { getFirstLetters } from '@/utils/common';
+import { formatPlural, getFirstLetters } from '@/utils/common';
 
 interface EmailArtifactProps {
   emailArtifact: EmailArtifactsResponseType;
@@ -100,26 +100,28 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
       ) : null}
 
       {/* Attachments bar */}
-      <div className='border-GRAY_500 flex w-full items-center justify-start gap-2 overflow-hidden border-t-[0.5px]'>
-        <div className='flex shrink-0 items-center justify-start gap-2 py-4 pl-4'>
-          <SvgSpriteLoader id='attachment-01' size={16} color={COLORS.GRAY_900} />
-          <span className='f-13-400 text-GRAY_900'>{emailArtifact?.attachments?.length ?? 0} Attachments:</span>
-        </div>
+      {!!emailArtifact?.attachments?.length && (
+        <div className='border-GRAY_500 flex w-full items-center justify-start gap-2 overflow-hidden border-t-[0.5px]'>
+          <div className='flex shrink-0 items-center justify-start gap-2 py-4 pl-4'>
+            <SvgSpriteLoader id='attachment-01' size={16} color={COLORS.GRAY_900} />
+            <span className='f-13-400 text-GRAY_900'>
+              {formatPlural(emailArtifact?.attachments?.length ?? 0, 'Attachment')}
+            </span>
+          </div>
 
-        {!!emailArtifact?.attachments?.length && (
           <div className='flex w-0 flex-1 items-center justify-start gap-2 overflow-x-auto py-4 pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
             {emailArtifact?.attachments.map((attachment) => (
               <ArtifactTag
                 key={attachment?.file_id}
-                type={ARTIFACT_TYPE.PDF_DATASET}
+                artifactType={ARTIFACT_TYPE.PDF_DATASET}
                 displayName={attachment?.file_display_name}
                 onClick={() => handleAttachmentDownload(attachment?.file_id)}
                 displayClassName='max-w-40'
               />
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

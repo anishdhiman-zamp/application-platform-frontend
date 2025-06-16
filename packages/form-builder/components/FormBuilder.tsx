@@ -10,6 +10,7 @@ import { FormSection } from './FormSection';
 
 interface FormBuilderProps {
   schema: FormSchema;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
 }
 

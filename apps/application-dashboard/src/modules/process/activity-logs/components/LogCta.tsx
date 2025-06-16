@@ -21,7 +21,8 @@ const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
           <ArtifactTag
             key={cta?.id}
             displayName={cta?.display_name}
-            type={cta?.artifact_type}
+            artifactType={cta?.artifact_type}
+            iconIdentifier={cta?.cta_config?.icon_identifier}
             onClick={() =>
               handleShowArtifacts(cta?.artifact_type, cta?.id ?? '', cta?.cta_action, cta?.filter_metadata)
             }

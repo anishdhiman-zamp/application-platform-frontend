@@ -22,3 +22,4 @@ export * from './ui/textarea';
 export * from './ui/tooltip';
 export * from './ui/switch';
 export * from './ui/toast';
+export * from './ui/email-input-to-chips';

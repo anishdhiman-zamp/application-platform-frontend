@@ -3,6 +3,7 @@ import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
+import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
@@ -16,7 +17,8 @@ import { cn } from '@/utils/common';
 type Artifact = {
   id: string;
   display_name: string;
-  artifact_type: keyof typeof ARTIFACT_ICON_MAPPING;
+  icon_identifier: string;
+  artifact_type: ARTIFACT_TYPE;
   status: string;
 };
 
@@ -116,7 +118,7 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
         icon: (
           <Image
             src={
-              ARTIFACT_ICON_MAPPING[artifact?.artifact_type]?.icon_url ??
+              getArtifactPrefixIconSrc(artifact?.artifact_type, artifact?.icon_identifier) ??
               ARTIFACT_ICON_MAPPING[ARTIFACT_TYPE.PDF_DATASET]?.icon_url
             }
             alt={artifact?.display_name}
