@@ -20,8 +20,8 @@ import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { useServiceWorker } from '@/hooks/useServiceWorker';
 import DashboardLoader from 'components/common/loader/DashboardLoader';
+import ServiceWorkerProvider from 'components/common/ServiceWorkerProvider';
 import {
   fadeOutOffsetTimeDifference,
   minLoaderDuration,
@@ -30,7 +30,6 @@ import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 
 const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
-  useServiceWorker();
   const pathname = usePathname() || '/';
   const dispatch = useDispatch();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,23 +104,24 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <Provider store={store}>
-      <div className='bg-BACKGROUND_GRAY_1 relative'>
-        <Topbar />
-        <div className={`relative flex h-[calc(100vh-48px)] w-full min-w-[768px]`}>
-          <Sidebar />
-          <div ref={containerRef} className='relative flex h-screen grow flex-col'>
-            <div
-              className={cn('border-GRAY_400 relative mx-auto h-[calc(100vh-48px)] w-full border bg-white', {
-                'rounded-tl-xl': isSidebarOpen,
-              })}
-            >
-              {renderChildrenWithProps(children)}
+      <ServiceWorkerProvider>
+        <div className='bg-BACKGROUND_GRAY_1 relative'>
+          <Topbar />
+          <div className={`relative flex h-[calc(100vh-48px)] w-full min-w-[768px]`}>
+            <Sidebar />
+            <div ref={containerRef} className='relative flex h-screen grow flex-col'>
+              <div
+                className={cn('border-GRAY_400 relative mx-auto h-[calc(100vh-48px)] w-full border bg-white', {
+                  'rounded-tl-xl': isSidebarOpen,
+                })}
+              >
+                {renderChildrenWithProps(children)}
+              </div>
             </div>
           </div>
+          {isShowDashboardLoader && showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
         </div>
-
-        {isShowDashboardLoader && showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
-      </div>
+      </ServiceWorkerProvider>
     </Provider>
   );
 };

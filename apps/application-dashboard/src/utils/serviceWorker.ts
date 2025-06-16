@@ -1,14 +1,11 @@
+import { captureException } from '@sentry/browser';
+
 export const register = (): Promise<ServiceWorkerRegistration | undefined> => {
   return new Promise((resolve, reject) => {
-    // if (process.env.NODE_ENV !== 'production') {
-    //   console.log('Service worker not registered — development mode');
-    //   return resolve(undefined);
-    // }
-
     if (!('serviceWorker' in navigator)) {
       const error = new Error('Service workers are not supported in this browser');
 
-      console.error(error);
+      captureException(error);
 
       return reject(error);
     }
@@ -35,8 +32,7 @@ export const register = (): Promise<ServiceWorkerRegistration | undefined> => {
 
               if (installingWorker.state === 'installed') {
                 if (navigator.serviceWorker.controller) {
-                  console.log('New content is available; waiting to activate...');
-                  installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                  console.log('New content is available and will be used when all tabs are closed');
                 } else {
                   console.log('Content is cached for offline use.');
                 }
@@ -45,15 +41,10 @@ export const register = (): Promise<ServiceWorkerRegistration | undefined> => {
           }
         };
 
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('Controller changed, reloading...');
-          window.location.reload();
-        });
-
         resolve(registration);
       })
       .catch((error) => {
-        console.error('Error during service worker registration:', error);
+        captureException('Error during service worker registration:', error);
         reject(error);
       });
   });
@@ -62,7 +53,7 @@ export const register = (): Promise<ServiceWorkerRegistration | undefined> => {
 export const unregister = (): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     if (!('serviceWorker' in navigator)) {
-      console.log('Service workers are not supported in this browser');
+      captureException('Service workers are not supported in this browser');
 
       return resolve(false);
     }
@@ -76,7 +67,7 @@ export const unregister = (): Promise<boolean> => {
         resolve(result);
       })
       .catch((error) => {
-        console.error('Error unregistering service worker:', error);
+        captureException('Error unregistering service worker:', error);
         reject(error);
       });
   });

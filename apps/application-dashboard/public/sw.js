@@ -1,4 +1,7 @@
-const CACHE_NAME = 'zamp-sw-cache-v1';
+import { captureException } from '@sentry/browser';
+
+const CACHE_VERSION = '1'; // increment manually, whenever updating old static assets
+const CACHE_NAME = `zamp-sw-cache-v${CACHE_VERSION}`;
 const MAX_CACHE_ENTRIES = 100;
 
 const CACHE_PATTERNS = [
@@ -6,6 +9,10 @@ const CACHE_PATTERNS = [
   /^\/_next\/image\//, // Optimized images
   /^\/images\//, // Custom images
   /^\/fonts\//, // Fonts
+  /^\/icons\//, // Icons directory
+  /^\/mp4\//, // Video files
+  /^\/[^/]+\.(ico|svg|png|jpg|jpeg|webp)$/i, // Root level icons and images
+  /^\/pdf\.worker\.min\.mjs$/, // PDF worker
 ];
 
 console.log('[Service Worker] Initializing...');
@@ -32,7 +39,7 @@ function shouldCacheUrl(url) {
 
     return CACHE_PATTERNS.some((pattern) => pattern.test(pathname));
   } catch (e) {
-    console.error('[Service Worker] Error parsing URL:', url, e);
+    captureException('[Service Worker] Error parsing URL:', url, e);
 
     return false;
   }
@@ -82,7 +89,7 @@ async function fetchAndCache(request) {
 
     return response;
   } catch (error) {
-    console.error('[Service Worker] Fetch failed:', error);
+    captureException('[Service Worker] Fetch failed:', error);
     throw error;
   }
 }
@@ -97,14 +104,6 @@ self.addEventListener('install', () => {
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activate event');
   event.waitUntil(Promise.all([cleanupOldCaches(), self.clients.claim()]));
-});
-
-// Handle messages from the page
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[Service Worker] Skip waiting...');
-    self.skipWaiting();
-  }
 });
 
 // Fetch event handler
