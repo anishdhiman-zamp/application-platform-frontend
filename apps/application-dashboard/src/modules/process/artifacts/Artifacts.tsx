@@ -11,7 +11,12 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import type { EmailArtifactsResponseType, PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type {
+  DatasetArtifactsResponseType,
+  EmailArtifactsResponseType,
+  PdfArtifactsResponseType,
+  PdfDatasetArtifactsResponseType,
+} from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
 const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
@@ -56,7 +61,7 @@ const Artifacts = ({
     refetch,
   } = useGetArtifactsByArtifactIdQuery(
     {
-      processId: processId as string,
+      processId,
       activityRunId: activityId as string,
       artifact_ids: artifactId,
     },
@@ -75,12 +80,50 @@ const Artifacts = ({
       };
     }
 
+    const artifact = artifacts.artifacts[0];
+
     return {
-      id: artifacts.artifacts[0]?.id ?? '',
-      artifactData: artifacts.artifacts[0]?.artifact_data ?? null,
-      title: artifacts.artifacts[0]?.artifact_data?.display_name ?? '',
+      id: artifact?.id ?? '',
+      artifactData: artifact?.artifact_data ?? null,
+      title: artifact?.artifact_data?.display_name ?? '',
     };
   }, [artifacts]);
+
+  const artifactComponent = useMemo(() => {
+    if (!artifactData || !id) return null;
+
+    switch (artifactType) {
+      case ARTIFACT_TYPE.PDF_DATASET:
+        return (
+          <>
+            <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
+              <DatasetArtifact
+                datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
+                filters={filters}
+                key={id}
+              />
+            </TabsContent>
+            <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
+              <PdfArtifact pdfArtifact={artifactData as PdfDatasetArtifactsResponseType} artifactId={id} key={id} />
+            </TabsContent>
+          </>
+        );
+
+      case ARTIFACT_TYPE.EMAIL:
+        return <EmailArtifactWrapper artifactData={artifactData as EmailArtifactsResponseType} id={id} key={id} />;
+
+      case ARTIFACT_TYPE.DATASET:
+        return (
+          <DatasetArtifact datasetArtifact={artifactData as DatasetArtifactsResponseType} filters={filters} key={id} />
+        );
+
+      case ARTIFACT_TYPE.PDF:
+        return <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />;
+
+      default:
+        return null;
+    }
+  }, [artifactType, artifactData, id, filters]);
 
   return (
     <div className='animate-fade-in relative h-full w-full'>
@@ -105,23 +148,7 @@ const Artifacts = ({
           refetchFunction={refetch}
           className='h-full w-full'
         >
-          {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifactData && id && (
-            <>
-              <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-                <DatasetArtifact
-                  datasetArtifact={artifactData as PdfArtifactsResponseType}
-                  filters={filters}
-                  key={id}
-                />
-              </TabsContent>
-              <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
-                <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />
-              </TabsContent>
-            </>
-          )}
-          {artifactType === ARTIFACT_TYPE.EMAIL && artifactData && id && (
-            <EmailArtifactWrapper artifactData={artifactData as EmailArtifactsResponseType} id={id} key={id} />
-          )}
+          {artifactComponent}
         </CommonWrapper>
 
         <AllArtifactsSideDrawer

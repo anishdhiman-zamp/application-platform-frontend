@@ -18,6 +18,8 @@ export enum ARTIFACT_TYPE {
   EMAIL = 'EMAIL',
   BROWSER = 'BROWSER',
   EXTERNAL_LINK = 'EXTERNAL_LINK',
+  PDF = 'PDF',
+  DATASET = 'DATASET',
 }
 
 export enum LOG_STATUS {

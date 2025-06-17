@@ -56,11 +56,28 @@ export type DatasetType = {
   dataset_name: string;
 };
 
-export type PdfArtifactsResponseType = {
+export type PdfDatasetArtifactsResponseType = {
   display_name: string;
   status: string;
   icon_identifier: string;
   datasets: DatasetType[];
+  pdf_file: {
+    file_display_name: string;
+    file_id: string;
+  };
+};
+
+export type DatasetArtifactsResponseType = {
+  display_name: string;
+  status: string;
+  icon_identifier: string;
+  datasets: DatasetType[];
+};
+
+export type PdfArtifactsResponseType = {
+  display_name: string;
+  status: string;
+  icon_identifier: string;
   pdf_file: {
     file_display_name: string;
     file_id: string;
@@ -105,7 +122,9 @@ export type ActivityArtifactsItemType = {
   organization_id: string;
   artifact_type: ARTIFACT_TYPE;
   artifact_data:
+    | PdfDatasetArtifactsResponseType
     | PdfArtifactsResponseType
+    | DatasetArtifactsResponseType
     | EmailArtifactsResponseType
     | BrowserArtifactsResponseType
     | OtherArtifactsResponseType;
@@ -142,6 +161,9 @@ export type CtasType = {
   artifact_type: ARTIFACT_TYPE;
   cta_component_type: CTA_COMPONENT_TYPE;
   cta_action: CTA_ACTION;
+  cta_action_id: string;
+  hitl_request_id: string;
+  cta_value: string;
   cta_config: {
     icon_identifier: string;
     variant: string;
@@ -209,4 +231,18 @@ export type DatasetArtifactsRequestType = {
   activityRunId: string;
   datasetId: string;
   query_config?: string;
+};
+
+export type EmitHITLActionRequestType = {
+  processId: string;
+  activityRunId: string;
+  payload: {
+    hitl_request_id: string;
+    log_group_id: string;
+    submitted_by: string;
+    responses: {
+      action_id: string;
+      values: string[];
+    }[];
+  };
 };

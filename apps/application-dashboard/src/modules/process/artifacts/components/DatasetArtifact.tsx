@@ -13,11 +13,11 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 import Dataset from '@/modules/data/Dataset';
-import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
-  datasetArtifact: PdfArtifactsResponseType;
+  datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
   filters: MapAny;
 }
 
