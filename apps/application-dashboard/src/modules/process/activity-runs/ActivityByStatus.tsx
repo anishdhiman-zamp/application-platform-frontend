@@ -308,6 +308,12 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     }
   }, [processId, status]);
 
+  useEffect(() => {
+    if (processId && process) {
+      router.prefetch(getProcessActivityLogsRouteById(processId, process, 'some-activity-id', status));
+    }
+  }, [processId, process, status]);
+
   const handleRowClicked = (data: MapAny) => {
     if (!data?.data?.id) return;
 
@@ -359,6 +365,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             headerClass='f-12-450 text-GRAY_700'
             cellClass='text-[13px]! font-[450]! px-4!'
             suppressCellFocus
+            gridStyle={{ height: 'calc(100vh - 150px)' }}
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}

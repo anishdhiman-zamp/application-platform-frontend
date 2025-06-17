@@ -33,8 +33,8 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
       privilege === PROCESS_ACCESS_PRIVILEGES.ADMIN || privilege === PROCESS_ACCESS_PRIVILEGES.EDITOR;
 
     return (
-      hasEditorPrivileges(userPrivilege as PROCESS_ACCESS_PRIVILEGES) ??
-      (organisationPrivilege && hasEditorPrivileges(organisationPrivilege.privilege as PROCESS_ACCESS_PRIVILEGES))
+      hasEditorPrivileges(userPrivilege as PROCESS_ACCESS_PRIVILEGES) ||
+      (organisationPrivilege && hasEditorPrivileges(organisationPrivilege?.privilege as PROCESS_ACCESS_PRIVILEGES))
     );
   }, [audiencesData, user]);
 

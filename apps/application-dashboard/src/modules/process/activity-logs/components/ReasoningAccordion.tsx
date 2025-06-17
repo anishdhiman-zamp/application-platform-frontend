@@ -55,7 +55,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId }: ReasoningAccordionProp
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5'>
           <span className='text-wrap break-words'>See reasoning</span>
         </AccordionTrigger>
-        <AccordionContent className='border-GRAY_100 f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4'>
+        <AccordionContent className='border-GRAY_100 f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4 [&::-webkit-scrollbar]:hidden'>
           {thoughtSteps?.map((title, index) => (
             <div key={index} className='flex w-full items-start justify-start gap-x-4'>
               <div className='flex items-start justify-center'>
