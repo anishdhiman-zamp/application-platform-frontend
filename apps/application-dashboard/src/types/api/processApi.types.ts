@@ -108,6 +108,10 @@ export type BrowserArtifactsResponseType = {
   status: string;
   icon_identifier: string;
   browser_url: string;
+  browser_session_recording: {
+    file_id: string;
+    file_display_name: string;
+  };
 };
 
 export type OtherArtifactsResponseType = {

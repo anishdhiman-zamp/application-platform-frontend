@@ -3,8 +3,8 @@ import { Tabs, TabsContent } from '@zamp-platform/ui';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
-import DatasetArtifact from 'modules/process/artifacts/components/DatasetArtifact';
-import EmailArtifactWrapper from 'modules/process/artifacts/components/EmailArtifactWrapper';
+import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifact';
+import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -12,6 +12,7 @@ import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import type {
+  BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
   EmailArtifactsResponseType,
   PdfArtifactsResponseType,
@@ -19,10 +20,18 @@ import type {
 } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
-const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
+const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
   ssr: false,
   loading: () => <ArtifactLoader />,
 });
+
+const BrowserArtifact = dynamic(
+  () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
+  {
+    ssr: false,
+    loading: () => <ArtifactLoader />,
+  },
+);
 
 interface ArtifactsProps {
   onClose: () => void;
@@ -110,7 +119,9 @@ const Artifacts = ({
         );
 
       case ARTIFACT_TYPE.EMAIL:
-        return <EmailArtifactWrapper artifactData={artifactData as EmailArtifactsResponseType} id={id} key={id} />;
+        return (
+          <EmailArtifactWrapper emailArtifact={artifactData as EmailArtifactsResponseType} artifactId={id} key={id} />
+        );
 
       case ARTIFACT_TYPE.DATASET:
         return (
@@ -119,6 +130,11 @@ const Artifacts = ({
 
       case ARTIFACT_TYPE.PDF:
         return <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />;
+
+      case ARTIFACT_TYPE.BROWSER:
+        return (
+          <BrowserArtifact browserArtifact={artifactData as BrowserArtifactsResponseType} artifactId={id} key={id} />
+        );
 
       default:
         return null;

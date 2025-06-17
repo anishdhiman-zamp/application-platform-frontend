@@ -36,3 +36,15 @@ export const getArtifactPrefixIconSrc = (artifactType: ARTIFACT_TYPE, iconIdenti
     ARTIFACT_ICON_MAPPING[ARTIFACT_TYPE.PDF_DATASET]?.icon_url
   );
 };
+
+/**
+ * Formats time in seconds to minutes:seconds format
+ * @param {number} time - Input time in seconds
+ * @returns {string} Formatted time (e.g. "1:30")
+ */
+export const formatTime = (time: number) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};

@@ -7,12 +7,15 @@ import { StarterKit } from '@tiptap/starter-kit';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
-import { TextStyleWithBackground } from 'modules/process/artifacts/components/EmailEditorArtifact/extensions/background-color';
-import { FontSize } from 'modules/process/artifacts/components/EmailEditorArtifact/extensions/font-size';
-import FontSizeSelector from 'modules/process/artifacts/components/EmailEditorArtifact/FontSizeSelector';
-import TextAlignmentSelector from 'modules/process/artifacts/components/EmailEditorArtifact/TextAlignmentSelector';
-import TextAndBackgroundColor from 'modules/process/artifacts/components/EmailEditorArtifact/TextAndBackgroundColorSelector';
-import { BodyAndFooterProps, ToolbarConfig } from 'modules/process/artifacts/components/EmailEditorArtifact/types';
+import { TextStyleWithBackground } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/extensions/background-color';
+import { FontSize } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/extensions/font-size';
+import FontSizeSelector from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/FontSizeSelector';
+import TextAlignmentSelector from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/TextAlignmentSelector';
+import TextAndBackgroundColor from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/TextAndBackgroundColorSelector';
+import {
+  BodyAndFooterProps,
+  ToolbarConfig,
+} from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 
 const BodyAndFooter: FC<BodyAndFooterProps> = ({
   initialContent = '<p></p>',
