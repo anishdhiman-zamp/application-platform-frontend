@@ -1,5 +1,3 @@
-import { captureException } from '@sentry/browser';
-
 const CACHE_VERSION = '1'; // increment manually, whenever updating old static assets
 const CACHE_NAME = `zamp-sw-cache-v${CACHE_VERSION}`;
 const MAX_CACHE_ENTRIES = 100;
@@ -15,8 +13,6 @@ const CACHE_PATTERNS = [
   /^\/pdf\.worker\.min\.mjs$/, // PDF worker
 ];
 
-console.log('[Service Worker] Initializing...');
-
 // Clean up old caches
 async function cleanupOldCaches() {
   const cacheNames = await caches.keys();
@@ -25,8 +21,6 @@ async function cleanupOldCaches() {
     cacheNames
       .filter((cacheName) => cacheName !== CACHE_NAME)
       .map((cacheName) => {
-        console.log('[Service Worker] Removing old cache:', cacheName);
-
         return caches.delete(cacheName);
       }),
   );
@@ -38,9 +32,7 @@ function shouldCacheUrl(url) {
     const pathname = new URL(url).pathname;
 
     return CACHE_PATTERNS.some((pattern) => pattern.test(pathname));
-  } catch (e) {
-    captureException('[Service Worker] Error parsing URL:', url, e);
-
+  } catch {
     return false;
   }
 }
@@ -50,59 +42,49 @@ async function enforceCacheLimit(cache) {
 
   if (keys.length > MAX_CACHE_ENTRIES) {
     await cache.delete(keys[0]); // Remove oldest entry
-    console.log('[Service Worker] Enforcing cache limit: deleted oldest entry');
   }
 }
 
 // Helper function to fetch and cache a request
 async function fetchAndCache(request) {
-  try {
-    const response = await fetch(request);
+  const response = await fetch(request);
 
-    // Do not cache non-OK or opaque responses
-    if (
-      !response ||
-      response.status !== 200 ||
-      request.method !== 'GET' ||
-      response.type === 'opaque' || // Don't cache opaque responses
-      !shouldCacheUrl(request.url)
-    ) {
-      return response;
-    }
-
-    // Respect 'Cache-Control: no-store' headers
-    const cacheControl = response.headers.get('Cache-Control');
-
-    if (cacheControl && cacheControl.includes('no-store')) {
-      console.log('[Service Worker] Skipping cache due to no-store header:', request.url);
-
-      return response;
-    }
-
-    // Cache the response
-    const cache = await caches.open(CACHE_NAME);
-
-    await cache.put(request, response.clone());
-
-    // limit the number of entries in cache
-    await enforceCacheLimit(cache);
-
+  // Do not cache non-OK or opaque responses
+  if (
+    !response ||
+    response.status !== 200 ||
+    request.method !== 'GET' ||
+    response.type === 'opaque' || // Don't cache opaque responses
+    !shouldCacheUrl(request.url)
+  ) {
     return response;
-  } catch (error) {
-    captureException('[Service Worker] Fetch failed:', error);
-    throw error;
   }
+
+  // Respect 'Cache-Control: no-store' headers
+  const cacheControl = response.headers.get('Cache-Control');
+
+  if (cacheControl && cacheControl.includes('no-store')) {
+    return response;
+  }
+
+  // Cache the response
+  const cache = await caches.open(CACHE_NAME);
+
+  await cache.put(request, response.clone());
+
+  // limit the number of entries in cache
+  await enforceCacheLimit(cache);
+
+  return response;
 }
 
 // Install event - activate new service worker immediately
 self.addEventListener('install', () => {
-  console.log('[Service Worker] Install event');
   self.skipWaiting();
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate event');
   event.waitUntil(Promise.all([cleanupOldCaches(), self.clients.claim()]));
 });
 
@@ -123,25 +105,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Always network for API requests
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(JSON.stringify({ error: 'You are offline' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }),
-    );
-
-    return;
-  }
+  // Pass through API requests
+  if (url.pathname.startsWith('/api/')) return;
 
   // Cache-first strategy for static resources
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
-        fetchAndCache(request).catch(console.error); // update cache in background
+        fetchAndCache(request); // update cache in background
 
         return cachedResponse;
       }
