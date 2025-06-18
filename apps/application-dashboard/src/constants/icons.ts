@@ -127,6 +127,11 @@ export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/n
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.png';
 export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.png';
 
+// Video Artifact
+export const PAUSED_OVERLAY = IMAGE_PREFIX + '/icons/agents/video-artifact/paused-overlay.svg';
+export const PLAYING = IMAGE_PREFIX + '/icons/agents/video-artifact/playing.svg';
+export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
+
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 

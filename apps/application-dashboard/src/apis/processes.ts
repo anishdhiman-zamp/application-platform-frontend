@@ -11,6 +11,7 @@ import type {
   ActivitySummaryResponseType,
   DatasetArtifactsRequestType,
   EmitActivityLogsRequestType,
+  EmitHITLActionRequestType,
   ProcessActivityRunsRequestType,
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
@@ -88,6 +89,13 @@ const Processes = baseApi.injectEndpoints({
         params: { query_config },
       }),
     }),
+    emitHITLAction: builder.mutation<void, EmitHITLActionRequestType>({
+      query: ({ processId, activityRunId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.EMIT_HITL_ACTION_POST, { processId, activityRunId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -109,4 +117,5 @@ export const {
   useLazyGetSignedUrlByArtifactIdQuery,
   useGetDatasetArtifactsQuery,
   useLazyGetDatasetArtifactsQuery,
+  useEmitHITLActionMutation,
 } = Processes;

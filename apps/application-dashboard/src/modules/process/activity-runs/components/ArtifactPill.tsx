@@ -137,7 +137,8 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
       emptyText='No artifacts found'
       inputClassName='placeholder:text-GRAY_500 placeholder:f-12-400'
       contentClassName='w-[300px] h-[334px] rounded-md border-[0.5px] border-GRAY_500 shadow-md flex flex-col justify-between'
-      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-md'
+      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-md overflow-hidden'
+      labelClassName='truncate'
       overLayContent={<OverlayContent />}
       isPortalNeeded
       triggerClassName='combobox-trigger'

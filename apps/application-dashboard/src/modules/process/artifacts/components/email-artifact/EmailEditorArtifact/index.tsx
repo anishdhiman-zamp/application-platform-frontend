@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
-import BodyAndFooter from 'modules/process/artifacts/components/EmailEditorArtifact/BodyAndFooter';
-import Header from 'modules/process/artifacts/components/EmailEditorArtifact/Header';
+import BodyAndFooter from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/BodyAndFooter';
+import Header from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Header';
 import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 interface EmailEditorArtifactProps {

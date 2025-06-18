@@ -128,6 +128,7 @@ export const API_ENDPOINTS = {
   ACTIVITY_ARTIFACTS_BY_ARTIFACT_ID_GET: `processes/{{processId}}/activity-runs/artifacts`,
   ACTIVITY_SIGNED_URL_BY_FILE_ID_GET: `processes/{{processId}}/artifacts/{{artifactId}}/signed-url/{{fileId}}`,
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
+  EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
 };
 
 export const enum REQUEST_TYPES {

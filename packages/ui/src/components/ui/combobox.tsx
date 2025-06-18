@@ -25,6 +25,7 @@ type ComboboxProps = {
   optionsLoading?: boolean;
   isPortalNeeded?: boolean;
   listClassName?: string;
+  labelClassName?: string;
 };
 
 export function Combobox({
@@ -44,6 +45,7 @@ export function Combobox({
   isPortalNeeded = false,
   listClassName,
   groupClassName,
+  labelClassName,
 }: ComboboxProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -87,7 +89,7 @@ export function Combobox({
                       className={cn('flex items-center', itemClassName)}
                     >
                       {option?.icon && option?.icon}
-                      {option?.label}
+                      <span className={labelClassName}>{option?.label}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>

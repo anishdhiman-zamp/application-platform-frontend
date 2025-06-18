@@ -22,15 +22,18 @@ type LogProps = {
   data: ActivityLogsItemType;
   handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
   isExpanded?: boolean;
+  processId: string;
+  activityId: string;
 };
 
-const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => {
+const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, processId, activityId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     content: { message, thought_steps, ctas, sender_type, sender_details },
     status,
     content_type,
     updated_at,
+    log_group_id,
   } = data;
   const [containerHeight, setContainerHeight] = useState(0);
 
@@ -104,8 +107,18 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
         >
           {message}
         </p>
-        {thought_steps && thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} />}
-        {ctas && <LogCta ctas={ctas} handleShowArtifacts={handleShowArtifacts} />}
+        {thought_steps && thought_steps?.length > 0 && (
+          <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />
+        )}
+        {ctas && (
+          <LogCta
+            ctas={ctas}
+            logGroupId={log_group_id}
+            processId={processId}
+            activityId={activityId}
+            handleShowArtifacts={handleShowArtifacts}
+          />
+        )}
         {isSenderInfoVisible && <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />}
       </div>
     </div>

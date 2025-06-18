@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { FONT_SIZES } from 'modules/process/artifacts/components/EmailEditorArtifact/constants';
+import { FONT_SIZES } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/constants';
 import { COLORS } from '@/constants/colors';
 
 const FontSizeSelector: FC<{ editor: Editor | null }> = ({ editor }) => {

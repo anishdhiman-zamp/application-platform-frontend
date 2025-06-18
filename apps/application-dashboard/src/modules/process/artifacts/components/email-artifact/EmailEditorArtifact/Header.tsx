@@ -1,7 +1,7 @@
 import { type FC } from 'react';
 import { EmailInputToChips, Input } from '@zamp-platform/ui';
-import { SENDER_HEADINGS } from 'modules/process/artifacts/components/EmailEditorArtifact/constants';
-import { HeaderProps } from 'modules/process/artifacts/components/EmailEditorArtifact/types';
+import { SENDER_HEADINGS } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/constants';
+import { HeaderProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 
 const Header: FC<HeaderProps> = ({ onChange, value }) => {
   return (

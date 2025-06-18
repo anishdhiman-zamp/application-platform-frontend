@@ -8,7 +8,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
 import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
-import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -27,7 +27,7 @@ interface ToolbarProps {
 }
 
 interface PdfArtifactProps {
-  pdfArtifact: PdfArtifactsResponseType;
+  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   artifactId: string;
 }
 
