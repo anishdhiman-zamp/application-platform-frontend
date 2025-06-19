@@ -29,7 +29,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
       currentDate = showDateSeparator ? logDate : currentDate;
 
       return {
-        key: log.id,
+        key: log?.log_group_id,
         showDateSeparator,
         isLastLogOfDate,
         log,

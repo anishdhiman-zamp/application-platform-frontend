@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import SectionTitle from 'modules/process/activity-summary/components/SectionTitle';
 import type { ActivitySummaryItem } from '@/types/api/processApi.types';
 
@@ -10,7 +11,7 @@ const Summary = ({ data }: SummaryProps) => {
     <div className='flex w-full flex-col items-start justify-start'>
       <SectionTitle title={data?.title} />
       <div className='flex w-full flex-col items-start justify-start'>
-        {Object.entries(data?.values).map(([key, value]) => (
+        {data?.values?.map(({ key, value }) => (
           <div key={key} className='grid w-full grid-cols-[1fr_1fr] items-center gap-x-3'>
             <p className='f-12-450 text-GRAY_900 max-w-full truncate capitalize' title={key}>
               {key}
@@ -25,4 +26,4 @@ const Summary = ({ data }: SummaryProps) => {
   );
 };
 
-export default Summary;
+export default memo(Summary);

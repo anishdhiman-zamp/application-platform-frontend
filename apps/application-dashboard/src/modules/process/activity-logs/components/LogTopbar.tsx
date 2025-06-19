@@ -35,13 +35,12 @@ const LogTopbar: FC = () => {
         }
         skeletonType={SkeletonTypes.CUSTOM}
       >
-        {summaryData?.summary?.header &&
-          Object.entries(summaryData?.summary?.header)?.map(([key, value]) => (
-            <div key={key} className='flex items-center gap-x-1'>
-              <span className='f-13-550 text-GRAY_700 capitalize'>{key}</span>
-              <span className='f-13-550 text-GRAY_1000'>{value || '---'}</span>
-            </div>
-          ))}
+        {summaryData?.summary?.header && (
+          <div className='flex items-center gap-x-1'>
+            <span className='f-13-550 text-GRAY_700 capitalize'>{summaryData?.summary?.header?.key}</span>
+            <span className='f-13-550 text-GRAY_1000'>{summaryData?.summary?.header?.value || '---'}</span>
+          </div>
+        )}
 
         {summaryData?.summary?.status && (
           <div className='border-GRAY_400 bg-BG_GRAY_2 flex items-center gap-x-1.5 rounded-full border px-2 py-1'>
@@ -60,40 +59,7 @@ const LogTopbar: FC = () => {
             </span>
           </div>
         )}
-
-        {/* TODO: Add back when we have the functionality */}
-        {/* <TooltipV2
-          tooltipBody={
-            <div className='flex flex-col justify-start items-start gap-y-1 bg-black py-2 px-3 rounded-md'>
-              <span className='f-10-450 text-white'>Mark as void</span>
-              <p className='f-10-400 text-GRAY_600 text-wrap max-w-[260px]'>
-                This run will be voided and no further agent actions will occur. Human updates will still be tracked and
-                visible in the activity log
-              </p>
-            </div>
-          }
-        >
-          <Button variant={'outline'} size={'icon'} className='size-6! px-3! py-1! mt-[2.5px]!'>
-            <SvgSpriteLoader id='slash-circle-01' height={14} width={14} color={COLORS.GRAY_1000} />
-          </Button>
-        </TooltipV2> */}
       </CommonWrapper>
-
-      {/* TODO: Add back when we have the functionality */}
-      {/* <div className='flex items-center p-4 min-w-max'>
-        <span className='f-13-450 text-GRAY_900 mr-3'>8/24</span>
-        <TooltipV2 tooltipBody='Move to Next Run' asChildTrigger>
-          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! mr-1.5 size-6! px-3! py-1!'>
-            <SvgSpriteLoader id='arrow-down' height={14} width={14} color={COLORS.GRAY_1000} />
-          </Button>
-        </TooltipV2>
-
-        <TooltipV2 tooltipBody='Move to Previous Run' asChildTrigger>
-          <Button variant={'outline'} size={'icon'} className='mt-[2.5px]! size-6! px-3! py-1!'>
-            <SvgSpriteLoader id='arrow-up' height={14} width={14} color={COLORS.GRAY_1000} />
-          </Button>
-        </TooltipV2>
-      </div> */}
     </div>
   );
 };

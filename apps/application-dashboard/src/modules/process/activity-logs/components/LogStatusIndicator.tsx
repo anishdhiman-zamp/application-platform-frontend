@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { LOG_STATUS } from 'modules/process/process.types';
 
 type LogStatusIndicatorProps = {
@@ -49,4 +50,4 @@ const LogStatusIndicator = ({ fillColor, strokeColor, status }: LogStatusIndicat
   }
 };
 
-export default LogStatusIndicator;
+export default memo(LogStatusIndicator);

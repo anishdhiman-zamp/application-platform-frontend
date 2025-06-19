@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { memo } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { ARTIFACT_TYPE, type CTA_ACTION } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
@@ -51,4 +52,4 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
   );
 };
 
-export default ArtifactTag;
+export default memo(ArtifactTag);

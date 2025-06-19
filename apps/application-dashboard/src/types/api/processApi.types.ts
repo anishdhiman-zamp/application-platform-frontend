@@ -200,14 +200,20 @@ export type ActivitySummaryResponseType = {
 };
 
 export type ActivitySummaryItemType = {
-  header: Record<string, string>;
+  header: {
+    key: string;
+    value: string;
+  };
   status: string;
   summary_items: ActivitySummaryItem[];
 };
 
 export type ActivitySummaryItem = {
   title: string;
-  values: Record<string, string>;
+  values: {
+    key: string;
+    value: string;
+  }[];
 };
 
 export type ActivityArtifactsByIdRequestType = {

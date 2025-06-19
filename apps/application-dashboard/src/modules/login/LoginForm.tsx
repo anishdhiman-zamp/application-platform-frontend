@@ -36,7 +36,6 @@ export const LoginForm = () => {
     try {
       const redirectUrl = respJson.redirect_browser_to;
 
-      console.log('redirectUrl', redirectUrl);
       const emailDomain = getDomainFromEmail(email);
 
       const urlObj = new URL(redirectUrl);
