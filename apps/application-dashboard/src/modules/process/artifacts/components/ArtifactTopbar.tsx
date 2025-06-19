@@ -24,8 +24,8 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
   onOpenAllArtifacts,
 }) => {
   return (
-    <div className='border-GRAY_100 flex h-15 w-full shrink-0 items-center justify-between overflow-x-auto border-b [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-      <div className='flex min-w-max items-center justify-center gap-x-2 p-4'>
+    <div className='border-GRAY_100 flex h-15 w-full shrink-0 items-center justify-between overflow-hidden border-b'>
+      <div className='flex w-full items-center justify-center gap-x-2 p-4'>
         <SvgSpriteLoader
           id='menu-03'
           size={14}
@@ -34,7 +34,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
           onClick={onOpenAllArtifacts}
         />
 
-        <span className='f-14-500 text-GRAY_1000 animate-opacity transition-all duration-300'>
+        <span className='f-14-500 text-GRAY_1000 animate-opacity w-0 flex-1 truncate transition-all duration-300'>
           {title ?? 'Artifact'}
         </span>
       </div>
@@ -47,7 +47,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
               className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
             >
               <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to Dataset'}>
-                <SvgSpriteLoader id='coins-stacked-04' size={14} color={COLORS.GRAY_1000} />
+                <SvgSpriteLoader id='coins-stacked-04' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
               </TooltipV2>
             </TabsTrigger>
             <TabsTrigger
@@ -55,7 +55,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
               className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
             >
               <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to PDF'}>
-                <SvgSpriteLoader id='file-02' size={14} color={COLORS.GRAY_1000} className='shrink-0' />
+                <SvgSpriteLoader id='file-02' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
               </TooltipV2>
             </TabsTrigger>
           </TabsList>

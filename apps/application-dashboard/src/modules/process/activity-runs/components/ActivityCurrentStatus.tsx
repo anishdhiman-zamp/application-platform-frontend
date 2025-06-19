@@ -36,7 +36,7 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
         <p className='f-13-450 text-GRAY_900'>
           {getFormattedDate(
             { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM },
-            data?.activity_updated_at,
+            data?.activity_updated_at ?? data?.updated_at,
           )}
         </p>
         <ArtifactPill

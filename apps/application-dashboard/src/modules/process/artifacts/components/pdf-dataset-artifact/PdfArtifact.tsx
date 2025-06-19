@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Skeleton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
@@ -8,7 +8,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
 import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
-import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -27,7 +27,7 @@ interface ToolbarProps {
 }
 
 interface PdfArtifactProps {
-  pdfArtifact: PdfArtifactsResponseType;
+  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   artifactId: string;
 }
 
@@ -191,7 +191,14 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
                 }}
                 className='flex h-full w-full justify-center'
               >
-                <Page width={413} height={582} pageNumber={index + 1} scale={scale} className='my-2.5 shadow-xl' />
+                <Page
+                  loading={null}
+                  width={413}
+                  height={582}
+                  pageNumber={index + 1}
+                  scale={scale}
+                  className='my-2.5 shadow-xl'
+                />
               </div>
             ))}
         </Document>
@@ -225,4 +232,4 @@ const PdfToolbar = ({ pageNumber, numPages, previousPage, nextPage, zoomOut, zoo
   );
 };
 
-export default PdfArtifact;
+export default memo(PdfArtifact);

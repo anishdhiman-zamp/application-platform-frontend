@@ -1,4 +1,4 @@
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useMemo } from 'react';
 import { format } from 'date-fns';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
@@ -14,40 +14,26 @@ import {
 } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 type LogProps = {
   isLastLog?: boolean;
   data: ActivityLogsItemType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
   isExpanded?: boolean;
+  processId: string;
+  activityId: string;
 };
 
-const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, processId, activityId }) => {
   const {
     content: { message, thought_steps, ctas, sender_type, sender_details },
     status,
     content_type,
     updated_at,
+    log_group_id,
   } = data;
-  const [containerHeight, setContainerHeight] = useState(0);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerHeight(entry.contentRect.height);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
 
   const isSenderInfoVisible = useMemo(() => {
     return (
@@ -80,22 +66,30 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
     };
   }, [status, content_type, sender_type]);
 
+  const formattedTime = useMemo(() => {
+    return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
+  }, [updated_at]);
+
   return (
-    <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data.id}>
+    <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
       <div className='flex w-14 shrink-0 items-start justify-start'>
-        <span className='f-12-450 text-GRAY_700 whitespace-nowrap'>
-          {format(new Date(updated_at), DATE_FORMATS.HH_MM_A)}
-        </span>
+        <span className='f-12-450 text-GRAY_700 whitespace-nowrap'>{formattedTime}</span>
       </div>
-      <div className={cn('flex h-full w-2.5 shrink-0 flex-col items-center justify-start gap-y-2 pt-[2px]')}>
-        <LogStatusIndicator
-          status={statusIndicatorColor.status}
-          fillColor={statusIndicatorColor.fillColor}
-          strokeColor={statusIndicatorColor.strokeColor}
-        />
-        {!isLastLog && <div className='bg-GRAY_400 w-px' style={{ height: `${containerHeight + 40}px` }} />}
-      </div>
-      <div className='flex w-full min-w-0 flex-col items-start justify-center' ref={containerRef}>
+      <div
+        className={cn(
+          'border-GRAY_100 relative flex w-full min-w-0 flex-col items-start justify-start border-l pb-10 pl-5',
+          {
+            'border-white pb-0': isLastLog,
+          },
+        )}
+      >
+        <div className={cn('absolute top-0 -left-2.5 flex w-5 items-start justify-center bg-white pt-[2px] pb-2')}>
+          <LogStatusIndicator
+            status={statusIndicatorColor.status}
+            fillColor={statusIndicatorColor.fillColor}
+            strokeColor={statusIndicatorColor.strokeColor}
+          />
+        </div>
         <p
           className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', {
             'animate-pulse': status === LOG_STATUS.LOADING,
@@ -103,14 +97,20 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts }) => 
         >
           {message}
         </p>
-        {thought_steps && thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} />}
-        {ctas && <LogCta ctas={ctas} handleShowArtifacts={handleShowArtifacts} />}
-        {isSenderInfoVisible && (
-          <SenderInfo senderType={sender_type as SENDER_TYPE} senderDetails={sender_details} status={status} />
+        {thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />}
+        {ctas && (
+          <LogCta
+            ctas={ctas}
+            logGroupId={log_group_id}
+            processId={processId}
+            activityId={activityId}
+            handleShowArtifacts={handleShowArtifacts}
+          />
         )}
+        {isSenderInfoVisible && <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />}
       </div>
     </div>
   );
 };
 
-export default Log;
+export default memo(Log);

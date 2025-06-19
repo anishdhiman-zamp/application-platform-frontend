@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { COLORS } from 'constants/colors';
 import { cn } from 'utils/common';

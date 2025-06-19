@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import { API_DOMAIN } from 'constants/api.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
@@ -35,6 +35,7 @@ export const LoginForm = () => {
 
     try {
       const redirectUrl = respJson.redirect_browser_to;
+
       const emailDomain = getDomainFromEmail(email);
 
       const urlObj = new URL(redirectUrl);

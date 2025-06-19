@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
-import Image from 'next/image';
+import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 import { toast } from '@/components/common/toast/Toast';
 import { COLORS } from '@/constants/colors';
-import { ICON_SPRITE_TYPES } from '@/constants/icons';
+import { DATASET, ICON_SPRITE_TYPES, LINK } from '@/constants/icons';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
@@ -16,7 +16,8 @@ import { cn } from '@/utils/common';
 type Artifact = {
   id: string;
   display_name: string;
-  artifact_type: keyof typeof ARTIFACT_ICON_MAPPING;
+  icon_identifier: string;
+  artifact_type: ARTIFACT_TYPE;
   status: string;
 };
 
@@ -114,11 +115,9 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
         value: artifact?.id,
         label: artifact?.display_name,
         icon: (
-          <Image
-            src={
-              ARTIFACT_ICON_MAPPING[artifact?.artifact_type]?.icon_url ??
-              ARTIFACT_ICON_MAPPING[ARTIFACT_TYPE.PDF_DATASET]?.icon_url
-            }
+          <ImageWithFallback
+            fallback={artifact?.artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK ? LINK : DATASET}
+            src={getArtifactPrefixIconSrc(artifact?.artifact_type, artifact?.icon_identifier)}
             alt={artifact?.display_name}
             width={12}
             height={12}
@@ -135,7 +134,8 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
       emptyText='No artifacts found'
       inputClassName='placeholder:text-GRAY_500 placeholder:f-12-400'
       contentClassName='w-[300px] h-[334px] rounded-md border-[0.5px] border-GRAY_500 shadow-md flex flex-col justify-between'
-      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-md'
+      itemClassName='f-13-450 text-GRAY_950 hover:bg-GRAY_900 rounded-md overflow-hidden'
+      labelClassName='truncate'
       overLayContent={<OverlayContent />}
       isPortalNeeded
       triggerClassName='combobox-trigger'
@@ -146,7 +146,7 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
         ref={buttonRef}
         className={cn(
           'border-GRAY_400 hover:bg-GRAY_50 data-[state=open]:bg-GRAY_50 flex h-5 cursor-pointer items-center gap-1.5 rounded border px-1.5 py-1 transition-colors',
-          isDisabled && 'opacity-50',
+          isDisabled && 'border-GRAY_400 !opacity-100',
         )}
         disabled={isDisabled}
         variant='outline'
@@ -155,11 +155,11 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
           id='stand'
           iconCategory={ICON_SPRITE_TYPES.EDUCATION}
           size={12}
-          color={COLORS.GRAY_900}
+          color={isDisabled ? COLORS.GRAY_500 : COLORS.GRAY_900}
           className='scale-75'
         />
 
-        <span className='f-11-400 text-GRAY_1000'>{count ?? 0}</span>
+        <span className={cn('f-11-400', isDisabled ? 'text-GRAY_500' : 'text-GRAY_1000')}>{count ?? 0}</span>
       </Button>
     </Combobox>
   );

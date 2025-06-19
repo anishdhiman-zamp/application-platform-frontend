@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react';
+import { type FC, memo, useEffect, useMemo, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,23 +13,34 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 import Dataset from '@/modules/data/Dataset';
-import type { PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
-  datasetArtifact: PdfArtifactsResponseType;
+  datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
+  filters: MapAny;
 }
 
 const MAX_VISIBLE_TABS = 3;
 
-const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
-  const datasets = datasetArtifact?.datasets ?? [];
+const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact, filters }) => {
+  const filterDatasets = useMemo(() => Object.keys(filters?.dataset_to_filter_map ?? {}), [filters]);
+
+  const datasets = useMemo(() => {
+    return (datasetArtifact?.datasets ?? []).filter((dataset) => {
+      if (filterDatasets?.length === 0) return true;
+
+      return filterDatasets?.includes(dataset?.dataset_id);
+    });
+  }, [datasetArtifact?.datasets, filterDatasets]);
+
   const [activeTab, setActiveTab] = useState<string>('');
 
   const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
 
   useEffect(() => {
-    if (datasets.length > 0) {
-      setActiveTab(datasets[0].dataset_id);
+    if (datasets?.length > 0) {
+      setActiveTab(datasets[0]?.dataset_id);
     }
   }, [datasets]);
 
@@ -99,8 +110,8 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
           updateBreadcrumb={false}
           headerClassName='px-4 py-3 flex-wrap'
           filterWrapperClassName='pl-0'
-          showCurrencyFilter={false}
           showDatasetHistory={false}
+          drilldownFilters={filters?.dataset_to_filter_map?.[activeTab]?.filters ?? {}}
           isDatasetArtifact
         />
       </TabsContent>
@@ -108,4 +119,4 @@ const DatasetArtifact: FC<DatasetArtifactProps> = ({ datasetArtifact }) => {
   );
 };
 
-export default DatasetArtifact;
+export default memo(DatasetArtifact);

@@ -9,6 +9,7 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
+import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
@@ -18,6 +19,7 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import { ACTIVITY_RUN_STATUS } from '@/modules/process/process.types';
 import type { ActivityRunsDataResponseType } from '@/types/api/processApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -306,6 +308,12 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     }
   }, [processId, status]);
 
+  useEffect(() => {
+    if (processId && process) {
+      router.prefetch(getProcessActivityLogsRouteById(processId, process, 'some-activity-id', status));
+    }
+  }, [processId, process, status]);
+
   const handleRowClicked = (data: MapAny) => {
     if (!data?.data?.id) return;
 
@@ -318,6 +326,14 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
     router.push(path);
   };
+
+  if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters)) {
+    return (
+      <div className='h-full w-full'>
+        <ActivityRunsEmptyState status={status as ACTIVITY_RUN_STATUS} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -349,6 +365,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             headerClass='f-12-450 text-GRAY_700'
             cellClass='text-[13px]! font-[450]! px-4!'
             suppressCellFocus
+            gridStyle={{ height: 'calc(100vh - 150px)' }}
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}

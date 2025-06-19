@@ -1,8 +1,8 @@
 import typography from '@tailwindcss/typography';
-import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
   content: [
+    './src/app/**/*.{js,ts,jsx,tsx}',
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
     './src/layout/**/*.{js,ts,jsx,tsx}',
@@ -703,7 +703,7 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate, typography],
+  plugins: [typography],
 };
 
 export default config;

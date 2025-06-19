@@ -13,30 +13,25 @@ import {
 } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { API_DOMAIN } from '@/constants/api.constants';
-import { getProcessActivityLogsRouteById, getProcessRouteById } from '@/constants/routeConfig';
-import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION, PDF_DATASET_TAB } from '@/modules/process/process.types';
-import { resetBreadcrumb } from '@/store/slices/layout-configs';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
   const searchParams = useSearchParams();
 
   const processId = searchParams?.get('processId') as string;
-  const process = searchParams?.get('process') as string;
   const activityId = useParams()?.activityId as string;
 
   const artifactIdFromUrl = searchParams?.get('artifactId');
   const artifactTypeFromUrl = searchParams?.get('artifactType');
-  const status = searchParams?.get('status') as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
-  const appDispatch = useAppDispatch();
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -46,6 +41,7 @@ const Activity = () => {
     (artifactTypeFromUrl as ARTIFACT_TYPE) ?? ARTIFACT_TYPE.PDF_DATASET,
   );
   const [artifactId, setArtifactId] = useState<string>(artifactIdFromUrl as string);
+  const [filters, setFilters] = useState<MapAny>({});
 
   const [getActivityLogs] = useLazyGetActivityLogsQuery();
   const [getArtifacts] = useLazyGetActivityArtifactsQuery();
@@ -85,7 +81,12 @@ const Activity = () => {
       });
   };
 
-  const handleShowArtifacts = (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => {
+  const handleShowArtifacts = (
+    artifactType: ARTIFACT_TYPE,
+    artifactId: string,
+    action?: CTA_ACTION,
+    filters?: MapAny,
+  ) => {
     if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
       handleGetArtifacts(artifactId);
 
@@ -97,6 +98,8 @@ const Activity = () => {
 
     setArtifactId(artifactId);
     setArtifactType(artifactType);
+    setFilters(filters ?? {});
+
     if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
       setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
     }
@@ -121,21 +124,6 @@ const Activity = () => {
       captureException(error);
     },
   });
-
-  useEffect(() => {
-    appDispatch(
-      resetBreadcrumb([
-        {
-          title: process as string,
-          href: getProcessRouteById(processId as string, process as string, status as string),
-        },
-        {
-          title: 'Activity Logs',
-          href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
-        },
-      ]),
-    );
-  }, []);
 
   useEffect(() => {
     if (!isExpanded) {
@@ -221,6 +209,7 @@ const Activity = () => {
             setActiveTab={setActiveTab}
             artifactType={artifactType}
             artifactId={artifactId}
+            filters={filters}
             onArtifactClick={handleShowArtifacts}
           />
         )}

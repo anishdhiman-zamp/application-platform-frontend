@@ -7,7 +7,15 @@ import {
   PDF_DATASET_TAB,
 } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
-import { BROWSER, COUPA, DATASET, GMAIL } from '@/constants/icons';
+import {
+  BROWSER,
+  DATASET,
+  DONE_EMPTY_STATE,
+  FILE,
+  GMAIL,
+  IN_PROGRESS_EMPTY_STATE,
+  NEEDS_ATTENTION_EMPTY_STATE,
+} from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
@@ -82,8 +90,11 @@ export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.BROWSER]: {
     icon_url: BROWSER,
   },
-  [ARTIFACT_TYPE.EXTERNAL_LINK]: {
-    icon_url: COUPA,
+  [ARTIFACT_TYPE.PDF]: {
+    icon_url: FILE,
+  },
+  [ARTIFACT_TYPE.DATASET]: {
+    icon_url: DATASET,
   },
 };
 
@@ -157,4 +168,37 @@ export const DEFAULT_ARTIFACT_TAB = PDF_DATASET_TAB.DATASET;
 export const ARTIFACT_TAB_MAPPING = {
   [CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST]: PDF_DATASET_TAB.PDF,
   [CTA_ACTION.VIEW_DATASET_PDF_DATASET_FIRST]: PDF_DATASET_TAB.DATASET,
+};
+
+export const EMPTY_STATE_BY_STATUS = {
+  [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
+    title: 'No blockers right now',
+    description: 'Sit back and let things flow, we’ll nudge you when it’s time to step in.',
+    iconUrl: NEEDS_ATTENTION_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.IN_PROGRESS]: {
+    title: 'All clear for now',
+    description: 'Looks like a quiet moment. Maybe grab a coffee?',
+    iconUrl: IN_PROGRESS_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.DONE]: {
+    title: 'Nothing to see here yet',
+    description: 'Everything that’s wrapped up nicely will land here. Sit tight!',
+    iconUrl: DONE_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.VOID]: {
+    title: 'Nothing to see here yet',
+    description: 'Any process that is void will land here.',
+    iconUrl: DONE_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.PAUSED]: {
+    title: 'Nothing to see here yet',
+    description: 'Any process that is paused will land here.',
+    iconUrl: DONE_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.FAILED]: {
+    title: 'Nothing to see here yet',
+    description: 'Any process that is failed will land here.',
+    iconUrl: DONE_EMPTY_STATE,
+  },
 };

@@ -52,3 +52,9 @@ export enum SIDE_OPTIONS {
   LEFT = 'left',
   RIGHT = 'right',
 }
+
+export enum MODULE_TYPE {
+  PAGES = 'pages',
+  DATASETS = 'datasets',
+  PROCESSES = 'processes',
+}

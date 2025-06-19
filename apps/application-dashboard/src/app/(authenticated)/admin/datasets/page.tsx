@@ -1,11 +1,7 @@
-import { Suspense } from 'react';
-import AdminDatasetListing from 'modules/admin/AdminDatasetListing';
-import { Loader } from '@/components/common/loader/Loader';
+'use client';
 
-const AdminDataset = () => (
-  <Suspense fallback={<Loader />}>
-    <AdminDatasetListing />
-  </Suspense>
-);
+import AdminDatasetListing from 'modules/admin/AdminDatasetListing';
+
+const AdminDataset = () => <AdminDatasetListing />;
 
 export default AdminDataset;

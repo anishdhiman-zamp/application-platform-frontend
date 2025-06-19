@@ -1,18 +1,57 @@
-import { format, formatDistanceToNow, parse } from 'date-fns';
+import { format } from 'date-fns';
+import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
+import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
+import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 
 /**
- * Formats date string to include day, time and relative time
+ * Formats date string to include day and time
  * @param {string} date - Input date string
- * @returns {string} Formatted date with relative time (e.g. "Mon Jan 1 2:30 PM (2 hours ago)")
+ * @returns {string} Formatted date (e.g. "Feb 4, 2025, 12:30PM")
  */
 export const getEmailDate = (date: string) => {
   // Parse the input date string
-  const parsedDate = parse(date, 'yyyy-MM-dd EEEE hh:mm:ss a', new Date());
+  const parsedDate = new Date(date);
 
   if (isNaN(parsedDate.getTime())) {
     return date;
   }
 
-  return `${format(parsedDate, DATE_FORMATS.EEE_MMM_d_h_mm_a)} (${formatDistanceToNow(parsedDate)} ago)`;
+  return format(parsedDate, DATE_FORMATS.MMM_d_yyyy_h_mm_a);
+};
+
+/**
+ * Retrieves the icon source URL for a given artifact type and icon identifier.
+ * @param {ARTIFACT_TYPE} artifactType - The type of the artifact.
+ * @param {string} iconIdentifier - The identifier for the icon.
+ * @returns {string | undefined} The URL of the icon or undefined if not found.
+ */
+export const getArtifactPrefixIconSrc = (
+  artifactType: ARTIFACT_TYPE,
+  iconIdentifier?: string,
+  ctaAction?: CTA_ACTION,
+) => {
+  if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
+    return iconIdentifier ? `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}` : LINK;
+  }
+
+  if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
+    const type = ctaAction === CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST ? ARTIFACT_TYPE.PDF : ARTIFACT_TYPE.DATASET;
+
+    return ARTIFACT_ICON_MAPPING[type]?.icon_url;
+  }
+
+  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url;
+};
+
+/**
+ * Formats time in seconds to minutes:seconds format
+ * @param {number} time - Input time in seconds
+ * @returns {string} Formatted time (e.g. "1:30")
+ */
+export const formatTime = (time: number) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };

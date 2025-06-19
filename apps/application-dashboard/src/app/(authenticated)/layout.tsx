@@ -1,14 +1,10 @@
 'use client';
 
 import { FC, ReactNode } from 'react';
-import { Provider } from 'react-redux';
 import AgChartInit from 'app/_providers/ag-chart';
 import PostHogProviderWrapper from 'app/_providers/posthog-provider';
+import Providers from 'app/_providers/providers';
 import DashboardContent from 'app/DashboardContent';
-import { AuthGuard } from '@/components/hoc/AuthGuard';
-import { RouteGuard } from '@/components/hoc/RouteGuard';
-import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
-import { store } from '@/store';
 
 interface AuthenticatedLayoutProps {
   children: ReactNode;
@@ -16,18 +12,12 @@ interface AuthenticatedLayoutProps {
 
 const AuthenticatedLayout: FC<AuthenticatedLayoutProps> = ({ children }) => {
   return (
-    <Provider store={store}>
+    <Providers>
       <AgChartInit />
       <PostHogProviderWrapper>
-        <AuthGuard loginRoute='/login'>
-          <FeatureFlagsProvider>
-            <RouteGuard>
-              <DashboardContent>{children}</DashboardContent>
-            </RouteGuard>
-          </FeatureFlagsProvider>
-        </AuthGuard>
+        <DashboardContent>{children}</DashboardContent>
       </PostHogProviderWrapper>
-    </Provider>
+    </Providers>
   );
 };
 

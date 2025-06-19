@@ -1,20 +1,16 @@
 'use client';
 import { useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
-import { getPageRouteById } from 'constants/routeConfig';
-import { useAppDispatch } from 'hooks/toolkit';
 import { useHash } from 'hooks/useHash';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
 import { useParams } from 'next/navigation';
-import { resetBreadcrumb } from 'store/slices/layout-configs';
 import CommonWrapper from 'components/commonWrapper';
 import 'ag-charts-enterprise';
 
 const Page = () => {
-  const dispatch = useAppDispatch();
   const params = useParams();
   const pathname = useHash();
 
@@ -54,10 +50,7 @@ const Page = () => {
   );
 
   useEffect(() => {
-    const currentPageTitle = pages?.find((page) => page.page_id === pageId)?.name ?? 'Loading...';
-
     persistLastVisitedPage(pageId as string);
-    dispatch(resetBreadcrumb([{ title: currentPageTitle, href: getPageRouteById(pageId as string) }]));
   }, [pageId, pages]);
 
   return (

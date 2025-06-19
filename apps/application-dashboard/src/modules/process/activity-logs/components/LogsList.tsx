@@ -5,13 +5,16 @@ import Log from 'modules/process/activity-logs/components/Log';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 interface LogsListProps {
   logs: ActivityLogsResponseType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  processId: string;
+  activityId: string;
 }
 
-const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
+const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, activityId }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const logsWithSeparators = useMemo(() => {
     let currentDate = '';
@@ -26,7 +29,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
       currentDate = showDateSeparator ? logDate : currentDate;
 
       return {
-        key: log.id,
+        key: log?.log_group_id,
         showDateSeparator,
         isLastLogOfDate,
         log,
@@ -53,7 +56,13 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts }) => {
           <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
             {showDateSeparator && <DateSeparator date={log?.updated_at} />}
             {isOverallLastLog && <div ref={bottomRef} />}
-            <Log data={log} isLastLog={isLastLogOfDate} handleShowArtifacts={handleShowArtifacts} />
+            <Log
+              data={log}
+              isLastLog={isLastLogOfDate}
+              handleShowArtifacts={handleShowArtifacts}
+              processId={processId}
+              activityId={activityId}
+            />
           </div>
         );
       })}

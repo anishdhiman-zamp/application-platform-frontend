@@ -192,7 +192,7 @@ const Table: FC<TableProps> = ({
       cellClass: (params: MapAny) => {
         const baseClasses = 'f-11-400 content-center !px-2 py-1';
         const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
-        const valueClass = !params.value ? 'text-GRAY_500' : 'text-GRAY_1000';
+        const valueClass = !params?.value ? '!text-GRAY_500' : '!text-GRAY_1000';
 
         return cn(baseClasses, valueClass, interactiveClass, cellClass);
       },

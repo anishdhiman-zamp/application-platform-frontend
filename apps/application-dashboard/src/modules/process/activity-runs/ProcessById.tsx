@@ -35,7 +35,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const {
     data: activityRunsSummaryData,
     isError,
-    isLoading,
+    isFetching,
     refetch: refetchActivityRunsSummary,
   } = useGetActivityRunsSummaryQuery(
     {
@@ -49,7 +49,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
         undefined,
       ),
     },
-    { skip: !processId },
+    {
+      skip: !processId,
+      refetchOnMountOrArgChange: false,
+    },
   );
 
   const {
@@ -92,11 +95,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isLoading || activityRunsSummaryData?.status_summary?.length === 0,
+        'flex flex-col items-center justify-center':
+          isFetching || activityRunsSummaryData?.status_summary?.length === 0,
       })}
       isError={isError}
       refetchFunction={refetchActivityRunsSummary}
-      isLoading={isLoading}
+      isLoading={isFetching}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={activityRunsSummaryData?.status_summary?.length === 0}
       noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}

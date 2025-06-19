@@ -188,9 +188,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
 
   return (
     <>
-      <div className='f-12-400 flex items-center justify-between bg-white pl-2'>
+      <div className='f-12-400 flex items-center justify-between bg-white'>
         <div className='flex items-center justify-start'>
-          <div className='flex w-[140px] items-start justify-start gap-x-1'>
+          <div className='flex w-[168px] items-start justify-start gap-x-1 px-2'>
             <div className='flex items-center gap-1'>
               {checkIfResourceTypeTeam ? (
                 <div>
@@ -254,13 +254,13 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
             isHoveredDropdown={isHoveredDropdown}
             setIsHoveredDropdown={setIsHoveredDropdown}
             isOverflowStyle
-            parentWrapperClassName='w-28 justify-end'
+            parentWrapperClassName='w-[70px] justify-end'
           />
         ) : (
           <span
             className={cn(
-              'f-12-400 text-GRAY_1000 flex w-28 items-start justify-end py-3 pr-2 pl-4',
-              !showRoleChangeDropdown && 'text-GRAY_600 pr-4',
+              'f-12-400 text-GRAY_1000 flex w-[70px] items-center py-3 pl-4',
+              !showRoleChangeDropdown && 'text-GRAY_600',
             )}
           >
             {role?.label}

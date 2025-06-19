@@ -25,6 +25,7 @@ type ComboboxProps = {
   optionsLoading?: boolean;
   isPortalNeeded?: boolean;
   listClassName?: string;
+  labelClassName?: string;
 };
 
 export function Combobox({
@@ -44,6 +45,7 @@ export function Combobox({
   isPortalNeeded = false,
   listClassName,
   groupClassName,
+  labelClassName,
 }: ComboboxProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -59,7 +61,7 @@ export function Combobox({
           }}
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
-          className={cn('z-1003 min-w-(--radix-popover-trigger-width) pointer-events-auto p-0', contentClassName)}
+          className={cn('pointer-events-auto z-1003 min-w-(--radix-popover-trigger-width) p-0', contentClassName)}
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
@@ -67,7 +69,7 @@ export function Combobox({
               {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
               <CommandGroup
                 className={cn(
-                  'max-h-60 overflow-auto [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-0.5',
+                  'max-h-60 overflow-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent',
                   groupClassName,
                 )}
               >
@@ -87,7 +89,7 @@ export function Combobox({
                       className={cn('flex items-center', itemClassName)}
                     >
                       {option?.icon && option?.icon}
-                      {option?.label}
+                      <span className={labelClassName}>{option?.label}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>

@@ -16,6 +16,7 @@ export const ROUTES_PATH = {
   MONEY_TRANSFER: '/payments/money-transfer',
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
+  ADMIN_ASSETS: '/admin/assets',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes',
@@ -33,8 +34,14 @@ export const getDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.DATA}/${datasetId}`;
 };
 
-export const getPageDatasetRoute = (pageId: string, datasetId: string) => {
-  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}`;
+export const getPageDatasetRoute = (pageId: string, datasetId: string, query?: Record<string, string>) => {
+  return `${ROUTES_PATH.PAGE_DATASET.replace(':pageId', pageId).replace(':datasetId', datasetId)}${
+    query
+      ? `?${Object.entries(query)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&')}`
+      : ''
+  }`;
 };
 
 export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {

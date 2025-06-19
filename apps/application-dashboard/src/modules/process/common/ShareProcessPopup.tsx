@@ -18,7 +18,6 @@ const ShareProcessPopup: FC<ShareProcessProps> = ({ processId }) => {
       resourceType={ResourceType.PROCESS}
       resourceConfig={processConfig}
       resourceAdminPrivilege={PERMISSION_ROLES.ADMIN}
-      isCustomiseAccess
     />
   );
 };

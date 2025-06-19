@@ -418,7 +418,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             Share
           </Button>
         </PopoverTrigger>
-        <PopoverContent align='end' className='border-none bg-transparent p-0 shadow-none'>
+        <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
           <div>
             <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
               <div className='flex w-full items-center justify-between p-5'>
@@ -433,7 +433,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                   />
                 </div>
               </div>
-              <div className='rounded-b-3.5 flex w-[400px] flex-col'>
+              <div className='rounded-b-3.5 flex w-full flex-col'>
                 <div className='space-y-4 px-4 pt-0 pb-5'>
                   <MultiSelectInput
                     id={`share-${resourceType.toLowerCase()}`}
@@ -454,6 +454,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     onSelectOption={handleOptionSelection}
                     transformLabel={getUserNameFromEmail}
                     optionalOpenDropdownOptions={false}
+                    labelCasing='capitalize'
                     selectOnlyFromList
                   />
                   {isCustomiseAccess && (
@@ -488,9 +489,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                 </div>
               </div>
             </div>
-            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-table-filter-menu mt-2 bg-white py-2 pr-4 pl-2'>
-              <span className='f-12-500 text-GRAY_700 p-2'>Who has access</span>
-              <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
+              <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
+              <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'>
                 <CommonWrapper
                   skeletonType={SkeletonTypes.CUSTOM}
                   isLoading={isLoadingAudiencesData}

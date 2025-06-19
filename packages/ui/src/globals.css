@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-
+@import 'tw-animate-css';
 @config '../tailwind.config.ts';
 
 /*
@@ -942,4 +942,16 @@
 [data-sonner-toast][data-expanded='false'][data-front='false'][data-styled='false']
   > * {
   opacity: 0;
+}
+
+.ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ProseMirror {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 32px;
 }

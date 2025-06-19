@@ -76,7 +76,7 @@ describe('useLogout', () => {
       try {
         await result.current.logout();
       } catch (error) {
-        // Expected error, we can ignore it
+        console.log(error);
       }
     });
 
