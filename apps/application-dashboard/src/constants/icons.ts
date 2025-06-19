@@ -122,6 +122,8 @@ export const SALESFORCE = IMAGE_PREFIX + '/icons/agents/artifacts/salesforce.svg
 export const SLACK = IMAGE_PREFIX + '/icons/agents/artifacts/slack.svg';
 export const VIDEO = IMAGE_PREFIX + '/icons/agents/artifacts/video.svg';
 export const SPRINKLR = IMAGE_PREFIX + '/icons/agents/artifacts/sprinklr.svg';
+export const REDIRECT = IMAGE_PREFIX + '/icons/agents/artifacts/redirect.svg';
+export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 
 export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.png';
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.png';

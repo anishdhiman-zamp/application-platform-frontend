@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
-import { ARTIFACT_TYPE } from 'modules/process/process.types';
+import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
-import { VERCEL_BLOB_ICON_URL } from '@/constants/icons';
+import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 
 /**
  * Formats date string to include day and time
@@ -26,15 +26,22 @@ export const getEmailDate = (date: string) => {
  * @param {string} iconIdentifier - The identifier for the icon.
  * @returns {string | undefined} The URL of the icon or undefined if not found.
  */
-export const getArtifactPrefixIconSrc = (artifactType: ARTIFACT_TYPE, iconIdentifier?: string) => {
-  if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK && iconIdentifier) {
-    return `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}`;
+export const getArtifactPrefixIconSrc = (
+  artifactType: ARTIFACT_TYPE,
+  iconIdentifier?: string,
+  ctaAction?: CTA_ACTION,
+) => {
+  if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
+    return iconIdentifier ? `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}` : LINK;
   }
 
-  return (
-    (artifactType && ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url) ||
-    ARTIFACT_ICON_MAPPING[ARTIFACT_TYPE.PDF_DATASET]?.icon_url
-  );
+  if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
+    const type = ctaAction === CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST ? ARTIFACT_TYPE.PDF : ARTIFACT_TYPE.DATASET;
+
+    return ARTIFACT_ICON_MAPPING[type]?.icon_url;
+  }
+
+  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url;
 };
 
 /**

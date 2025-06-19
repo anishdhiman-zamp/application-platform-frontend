@@ -60,6 +60,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             displayName={cta?.display_name}
             artifactType={cta?.artifact_type}
             iconIdentifier={cta?.cta_config?.icon_identifier}
+            ctaAction={cta?.cta_action}
             onClick={() =>
               handleShowArtifacts(cta?.artifact_type, cta?.id ?? '', cta?.cta_action, cta?.filter_metadata)
             }
