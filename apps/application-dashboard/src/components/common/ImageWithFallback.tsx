@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import Image, { ImageProps } from 'next/image';
 
 interface ImageWithFallbackProps extends ImageProps {
@@ -15,4 +15,4 @@ const ImageWithFallback = ({ fallback, alt, src, ...props }: ImageWithFallbackPr
   return <Image alt={alt} onError={() => setError(true)} src={error ? fallback : src} {...props} />;
 };
 
-export default ImageWithFallback;
+export default memo(ImageWithFallback);

@@ -1,4 +1,4 @@
-import React, { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
+import { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { SIZE } from 'constants/common.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
@@ -50,7 +50,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
     <TooltipV2 side={tooltipPosition} tooltipBody={tooltipText} asChildTrigger>
       <button
         className={cn(
-          'border-GRAY_400 text-GRAY_1000 flex h-[26px] w-fit items-center rounded border px-2 py-1.5 outline-hidden',
+          'border-GRAY_400 text-GRAY_1000 flex h-[26px] w-fit cursor-pointer items-center rounded border px-2 py-1.5 outline-hidden',
           className,
           isSelected ? 'bg-DIVIDER_SAIL_1' : '',
           disabled ? 'opacity-50' : 'hover:border-DIVIDER_SAIL_4',

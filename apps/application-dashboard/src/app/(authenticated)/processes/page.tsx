@@ -9,7 +9,7 @@ const Process = () => {
   const processId = searchParams?.get('processId') as string;
   const status = searchParams?.get('status') as string;
 
-  return <ProcessById processId={processId as string} status={status} />;
+  return <ProcessById key={processId} processId={processId as string} status={status} />;
 };
 
 export default Process;

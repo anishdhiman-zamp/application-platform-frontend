@@ -28,6 +28,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const [activeTab, setActiveTab] = useState<string>(status || '');
   const initialLoadDone = useRef(false);
 
+  useEffect(() => {
+    initialLoadDone.current = false;
+  }, [processId]);
+
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
@@ -35,7 +39,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const {
     data: activityRunsSummaryData,
     isError,
-    isFetching,
+    isLoading,
     refetch: refetchActivityRunsSummary,
   } = useGetActivityRunsSummaryQuery(
     {
@@ -51,7 +55,6 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
     },
     {
       skip: !processId,
-      refetchOnMountOrArgChange: false,
     },
   );
 
@@ -95,12 +98,11 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center':
-          isFetching || activityRunsSummaryData?.status_summary?.length === 0,
+        'flex flex-col items-center justify-center': isLoading || activityRunsSummaryData?.status_summary?.length === 0,
       })}
       isError={isError}
       refetchFunction={refetchActivityRunsSummary}
-      isLoading={isFetching}
+      isLoading={isLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={activityRunsSummaryData?.status_summary?.length === 0}
       noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}
@@ -135,17 +137,19 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
           ))}
         </TabsList>
 
-        <TabsContent value={activeTab}>
-          <ActivityByStatus
-            processId={processId}
-            status={activeTab}
-            filterConfigData={filterConfigData}
-            isFilterConfigLoading={isFilterConfigLoading}
-            isFilterConfigError={isFilterConfigError}
-            isFilterConfigUninitialized={isFilterConfigUninitialized}
-            refetchFilterConfig={refetchFilterConfig}
-          />
-        </TabsContent>
+        {activeTab && (
+          <TabsContent value={activeTab}>
+            <ActivityByStatus
+              processId={processId}
+              status={activeTab}
+              filterConfigData={filterConfigData}
+              isFilterConfigLoading={isFilterConfigLoading}
+              isFilterConfigError={isFilterConfigError}
+              isFilterConfigUninitialized={isFilterConfigUninitialized}
+              refetchFilterConfig={refetchFilterConfig}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </CommonWrapper>
   );
