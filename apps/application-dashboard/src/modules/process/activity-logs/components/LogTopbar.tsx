@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { type FC, memo } from 'react';
 import TopbarStatusIcon from 'modules/process/common/TopbarStatusIcon';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
@@ -64,4 +64,4 @@ const LogTopbar: FC = () => {
   );
 };
 
-export default LogTopbar;
+export default memo(LogTopbar);

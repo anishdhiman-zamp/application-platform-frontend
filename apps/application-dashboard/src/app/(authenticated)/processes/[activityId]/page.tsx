@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
@@ -60,50 +60,51 @@ const Activity = () => {
     panelRef.current?.resize(70);
   };
 
-  const handleGetArtifacts = (artifactId: string) => {
-    if (!artifactId) return;
+  const handleGetArtifacts = useCallback(
+    (artifactId: string) => {
+      if (!artifactId) return;
 
-    getArtifact({
-      processId: processId as string,
-      activityRunId: activityId as string,
-      artifact_ids: artifactId,
-    })
-      .unwrap()
-      .then((res) => {
-        const artifactData = res?.artifacts?.[0]?.artifact_data as OtherArtifactsResponseType;
-
-        if (artifactData?.url) {
-          window.open(artifactData?.url, '_blank');
-        }
+      getArtifact({
+        processId: processId as string,
+        activityRunId: activityId as string,
+        artifact_ids: artifactId,
       })
-      .catch((err) => {
-        toast.error(err?.data?.message ?? 'Failed to redirect');
-      });
-  };
+        .unwrap()
+        .then((res) => {
+          const artifactData = res?.artifacts?.[0]?.artifact_data as OtherArtifactsResponseType;
 
-  const handleShowArtifacts = (
-    artifactType: ARTIFACT_TYPE,
-    artifactId: string,
-    action?: CTA_ACTION,
-    filters?: MapAny,
-  ) => {
-    if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
-      handleGetArtifacts(artifactId);
+          if (artifactData?.url) {
+            window.open(artifactData?.url, '_blank');
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.data?.message ?? 'Failed to redirect');
+        });
+    },
+    [getArtifact, processId, activityId],
+  );
 
-      return;
-    }
+  const handleShowArtifacts = useCallback(
+    (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => {
+      if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
+        handleGetArtifacts(artifactId);
 
-    setShowSummary(false);
-    panelRef.current?.resize(50);
+        return;
+      }
 
-    setArtifactId(artifactId);
-    setArtifactType(artifactType);
-    setFilters(filters ?? {});
+      setShowSummary(false);
+      panelRef.current?.resize(50);
 
-    if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
-      setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
-    }
-  };
+      setArtifactId(artifactId);
+      setArtifactType(artifactType);
+      setFilters(filters ?? {});
+
+      if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
+        setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
+      }
+    },
+    [panelRef, handleGetArtifacts],
+  );
 
   const handleUpdate = (event: MessageEvent) => {
     const data = event?.data;
