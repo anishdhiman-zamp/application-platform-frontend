@@ -5,7 +5,7 @@ import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery } from '@/apis/processes';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { COLORS } from '@/constants/colors';
@@ -19,9 +19,8 @@ interface AllArtifactsDialogProps {
 }
 
 const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
-  const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
 
   const {

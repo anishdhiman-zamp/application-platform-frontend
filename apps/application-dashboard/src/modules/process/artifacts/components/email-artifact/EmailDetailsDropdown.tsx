@@ -35,11 +35,9 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
           <div className='flex items-start gap-2'>
             <p className='f-13-500 text-GRAY_600 w-[60px]'>to:</p>
             <div className='flex flex-wrap gap-1'>
-              {emailArtifact?.to_mail_ids?.map((email) => (
-                <span key={email} className='f-13-400 text-GRAY_1000'>
-                  {email}
-                </span>
-              ))}
+              <span className='f-13-400 text-GRAY_1000'>
+                {emailArtifact?.to_mail_ids?.map((email) => email).join(', ')}
+              </span>
             </div>
           </div>
         )}
@@ -59,11 +57,9 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
           <div className='flex items-start gap-2'>
             <p className='f-13-500 text-GRAY_600 w-[60px]'>bcc:</p>
             <div className='flex flex-wrap gap-1'>
-              {emailArtifact?.bcc_mail_ids?.map((email) => (
-                <span key={email} className='f-13-400 text-GRAY_1000'>
-                  {email}
-                </span>
-              ))}
+              <span className='f-13-400 text-GRAY_1000'>
+                {emailArtifact?.bcc_mail_ids?.map((email) => email).join(', ')}
+              </span>
             </div>
           </div>
         )}
@@ -71,11 +67,9 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
           <div className='flex items-start gap-2'>
             <p className='f-13-500 text-GRAY_600 w-[60px]'>cc:</p>
             <div className='flex flex-wrap gap-1'>
-              {emailArtifact?.cc_mail_ids?.map((email) => (
-                <span key={email} className='f-13-400 text-GRAY_1000'>
-                  {email}
-                </span>
-              ))}
+              <span className='f-13-400 text-GRAY_1000'>
+                {emailArtifact?.cc_mail_ids?.map((email) => email).join(', ')}
+              </span>
             </div>
           </div>
         )}

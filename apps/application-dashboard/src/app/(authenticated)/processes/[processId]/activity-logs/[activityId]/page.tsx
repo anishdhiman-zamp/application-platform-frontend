@@ -23,10 +23,11 @@ import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
+  const params = useParams();
   const searchParams = useSearchParams();
 
-  const processId = searchParams?.get('processId') as string;
-  const activityId = useParams()?.activityId as string;
+  const processId = params?.processId as string;
+  const activityId = params?.activityId as string;
 
   const artifactIdFromUrl = searchParams?.get('artifactId');
   const artifactTypeFromUrl = searchParams?.get('artifactType');

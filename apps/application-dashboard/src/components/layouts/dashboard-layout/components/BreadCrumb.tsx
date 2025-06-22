@@ -2,7 +2,7 @@
 
 import { FC, useMemo, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useGetPagesQuery } from 'apis/pages';
+import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import {
   getDatasetRouteById,
   getPageDatasetRoute,
@@ -38,6 +38,9 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
   const { data: datasets } = useGetAllDatasetsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
+  const { data: processes } = useGetProcessesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
 
@@ -71,19 +74,18 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
       case MODULE_TYPE.PROCESSES:
         {
           const activityId = params?.activityId;
-          const processId = searchParams?.get('processId') as string;
-          const process = searchParams?.get('process') as string;
+          const processId = params?.processId as string;
           const status = searchParams?.get('status') as string;
-          const currentProcessTitle = process as string;
+          const currentProcessTitle = processes?.find((process) => process?.id === processId)?.display_name ?? '';
 
           breadcrumbStack.push({
             title: currentProcessTitle,
-            href: getProcessRouteById(processId as string, process as string, status as string),
+            href: getProcessRouteById(processId as string, status as string),
           });
           if (activityId) {
             breadcrumbStack.push({
               title: 'Activity Logs',
-              href: getProcessActivityLogsRouteById(processId as string, process as string, activityId as string),
+              href: getProcessActivityLogsRouteById(processId as string, activityId as string, status as string),
             });
           }
         }

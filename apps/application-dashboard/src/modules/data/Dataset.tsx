@@ -114,7 +114,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const searchParams = useSearchParams();
   const params = useParams();
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
   const [gridReady, setGridReady] = useState<boolean>(false);
 

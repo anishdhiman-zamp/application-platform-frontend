@@ -251,7 +251,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
   useEffect(() => {
     if (processId && process) {
-      router.prefetch(getProcessActivityLogsRouteById(processId, process, 'some-activity-id', status));
+      router.prefetch(getProcessActivityLogsRouteById(processId, 'some-activity-id', status));
     }
   }, [processId, process, status]);
 
@@ -263,7 +263,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     if (target.closest('.combobox-trigger')) return;
 
     const activityId = data?.data?.id;
-    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId, status);
+    const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
 
     router.push(path);
   };
