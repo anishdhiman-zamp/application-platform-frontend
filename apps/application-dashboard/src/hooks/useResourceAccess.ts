@@ -8,6 +8,13 @@ import { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 
+type UseResourceAccessProps = {
+  resourceType: ResourceType;
+  resourceId?: string;
+  skipAudienceData?: boolean;
+  skipTeamsData?: boolean;
+};
+
 const checkPrivilege = (
   allAudiences: AudiencesByResourceResponse[],
   organizationId: string,
@@ -41,7 +48,12 @@ const checkPrivilege = (
   return false;
 };
 
-export const useResourceAccess = (resourceType: ResourceType, resourceId: string) => {
+export const useResourceAccess = ({
+  resourceType,
+  resourceId = '',
+  skipAudienceData,
+  skipTeamsData,
+}: UseResourceAccessProps) => {
   const { user } = useAppSelector((state: RootState) => state.user);
 
   const organizationId = user?.orgs?.[0]?.organization_id ?? '';
@@ -56,12 +68,12 @@ export const useResourceAccess = (resourceType: ResourceType, resourceId: string
     refetch: refetchAudiencesData,
   } = useGetAudiencesByResourceIdQuery(
     { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
-    { skip: shouldSkipAudiencesQuery, refetchOnMountOrArgChange: false },
+    { skip: shouldSkipAudiencesQuery || skipAudienceData, refetchOnMountOrArgChange: false },
   );
 
   const { data: allTeamsData } = useGetTeamsByOrganizationIdQuery(
     { organizationId },
-    { skip: !organizationId, refetchOnMountOrArgChange: false },
+    { skip: !organizationId || skipTeamsData, refetchOnMountOrArgChange: false },
   );
 
   const userTeams =
