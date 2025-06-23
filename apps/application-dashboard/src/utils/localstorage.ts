@@ -1,3 +1,5 @@
+'use client';
+
 export enum LOCAL_STORAGE_KEYS {
   XZAMP_GOD_MODE = 'XZAMP_GOD_MODE',
   XZAMP_USER = 'TMS_XZAMP_USER',
