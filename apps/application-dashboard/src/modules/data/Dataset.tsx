@@ -46,7 +46,6 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
-import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -63,6 +62,7 @@ import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
@@ -114,13 +114,16 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const searchParams = useSearchParams();
   const params = useParams();
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
   const [gridReady, setGridReady] = useState<boolean>(false);
 
   const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
 
-  const { checkUserPrivilege } = useResourceAccess(ResourceType.DATASET, id);
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.DATASET,
+    resourceId: id,
+  });
 
   const currentUserHasEditAccess = useMemo(() => {
     return (

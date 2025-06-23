@@ -3,7 +3,7 @@ import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import { toast } from '@/components/common/toast/Toast';
@@ -31,9 +31,8 @@ type ArtifactPillProps = {
 const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProps) => {
   const [open, setOpen] = useState(false);
 
-  const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId') as string;
-  const process = searchParams?.get('process') as string;
+  const params = useParams();
+  const processId = params?.processId as string;
 
   const router = useRouter();
   const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
@@ -73,7 +72,7 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
       return;
     }
 
-    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId, status);
+    const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
 
     router.push(`${path}&artifactId=${artifact?.id}&artifactType=${artifact?.artifact_type}`);
   };

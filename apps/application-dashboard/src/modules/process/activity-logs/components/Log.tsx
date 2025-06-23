@@ -91,7 +91,7 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, proce
           />
         </div>
         <p
-          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', {
+          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words capitalize', {
             'animate-pulse': status === LOG_STATUS.LOADING,
           })}
         >

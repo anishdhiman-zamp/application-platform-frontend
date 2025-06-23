@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -14,8 +14,8 @@ interface BrowserArtifactProps {
 }
 
 const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, artifactId }) => {
-  const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId') as string;
+  const params = useParams();
+  const processId = params?.processId as string;
 
   const {
     data: signedUrl,

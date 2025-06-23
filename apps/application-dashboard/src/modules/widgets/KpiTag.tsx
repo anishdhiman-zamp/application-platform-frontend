@@ -68,7 +68,7 @@ const KpiTag: FC<KpiTagProps> = ({
 
     return currency
       ? `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}`
-      : getCommaSeparatedNumber(Number(data?.[key]), 2);
+      : getCommaSeparatedNumber(Number(data?.[key]), 0);
   }, [widgetData]);
 
   useEffect(() => {
