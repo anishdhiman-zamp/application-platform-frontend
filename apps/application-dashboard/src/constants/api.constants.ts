@@ -48,7 +48,7 @@ export const getUserRegion = () => {
 export const getApiDomainByRegion = async (email = '') => {
   const region = getUserRegion();
 
-  if (!region) {
+  if (ENVIRONMENT === 'production' && !region) {
     const apiDomains = await Promise.allSettled(
       REGION_LIST.map(async (region) => {
         return fetch(`${getApiDomain(ENVIRONMENT, region)}/auth/verify/email`, {
