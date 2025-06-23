@@ -1,5 +1,3 @@
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-
 export const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION;
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
@@ -33,56 +31,14 @@ export enum APITags {
 }
 export const API_TAGS = Object.values(APITags);
 
-const REGION_LIST = ['-sg', ''];
-
-export const getUserRegion = () => {
-  const userRegion = getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION);
-
-  if (userRegion) {
-    return userRegion;
-  }
-
-  return '';
-};
-
-export const getApiDomainByRegion = async (email = '') => {
-  const region = getUserRegion();
-
-  if (!region) {
-    const apiDomains = await Promise.allSettled(
-      REGION_LIST.map(async (region) => {
-        return fetch(`${getApiDomain(ENVIRONMENT, region)}/auth/verify/email`, {
-          method: 'POST',
-          body: JSON.stringify({
-            email: email ? email : getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL),
-          }),
-        }).then((res) => ({
-          region,
-          status: res.status,
-        }));
-      }),
-    );
-    const region = apiDomains.find((apiDomain) => apiDomain.status === 'fulfilled')?.value?.region;
-
-    if (region) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region);
-      reinitializeApiDomain();
-    }
-
-    return getApiDomain(ENVIRONMENT, region);
-  }
-
-  return getApiDomain(ENVIRONMENT, region);
-};
-
-const getApiDomain = (environment = '', region = '') => {
+const getApiDomain = (environment = '') => {
   switch (environment) {
     case 'production':
-      return `https://api${region}.zamp.ai`;
+      return 'https://api.zamp.ai';
     case 'staging':
-      return `https://api-stg${region}.zamp.ai`;
+      return 'https://api-stg.zamp.ai';
     case 'development':
-      return `https://api-dev${region}.zamp.ai`;
+      return 'https://api-dev.zamp.ai';
     default:
       return 'http://localhost:8080';
   }
@@ -103,8 +59,4 @@ export const ERROR_TOKENS = {
 
 export const SESSION_EXPIRY_TOKENS = [ERROR_TOKENS.INVALID_TOKEN, ERROR_TOKENS.MISSING_TOKEN];
 
-export let API_DOMAIN = getApiDomain(ENVIRONMENT, getUserRegion());
-
-export const reinitializeApiDomain = () => {
-  API_DOMAIN = getApiDomain(ENVIRONMENT, getUserRegion());
-};
+export const API_DOMAIN = getApiDomain(ENVIRONMENT);
