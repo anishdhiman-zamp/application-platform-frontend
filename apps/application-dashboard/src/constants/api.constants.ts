@@ -62,14 +62,19 @@ export const getApiDomainByRegion = async (email = '') => {
         }));
       }),
     );
-    const region = apiDomains.find((apiDomain) => apiDomain.status === 'fulfilled')?.value?.region;
 
-    if (region) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region);
+    const successfulRegion = apiDomains
+      .filter(
+        (result): result is PromiseFulfilledResult<{ region: string; status: number }> => result.status === 'fulfilled',
+      )
+      .find((result) => result.value.status === 200)?.value.region;
+
+    if (successfulRegion) {
+      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, successfulRegion ?? '');
       reinitializeApiDomain();
     }
 
-    return getApiDomain(ENVIRONMENT, region);
+    return getApiDomain(ENVIRONMENT, successfulRegion ?? '');
   }
 
   return getApiDomain(ENVIRONMENT, region);

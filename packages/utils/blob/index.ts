@@ -17,7 +17,7 @@ export async function uploadBlob({ file, path, allowOverwrite = false }: UploadB
 
     return blob;
   } catch (error) {
-    console.error('Error uploading blob:', error);
+    console.error('Error uploading blob', error);
     throw error;
   }
 }
