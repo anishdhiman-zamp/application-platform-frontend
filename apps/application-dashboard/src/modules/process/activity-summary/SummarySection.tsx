@@ -2,7 +2,7 @@ import { type FC } from 'react';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
 import type { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -14,9 +14,8 @@ type SummarySectionProps = {
 };
 
 const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
-  const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
 
   const {
@@ -87,7 +86,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
             artifactType={artifact?.artifact_type}
             iconIdentifier={artifact?.artifact_data?.icon_identifier}
             onClick={() => handleShowArtifacts(artifact?.artifact_type, artifact?.id ?? '')}
-            displayClassName='max-w-80'
+            displayClassName='max-w-[200px]'
           />
         ))}
       </CommonWrapper>

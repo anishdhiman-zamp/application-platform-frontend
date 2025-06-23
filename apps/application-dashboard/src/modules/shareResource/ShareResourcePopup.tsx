@@ -11,9 +11,8 @@ import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
-import SharePopupPageApprovals from 'modules/shareResource/components/SharePopupPageApprovals';
-import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
+import { motion } from 'motion/react';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
@@ -23,6 +22,7 @@ import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomiseAccess from '@/modules/shareResource/CustomiseAccess';
 import {
   CombinedOptionListDataType,
@@ -45,6 +45,18 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 import WhoHasAccessSkeletonLoader from 'components/skeletons/WhoHasAccessSkeletonLoader';
 
+const WhoHasAccessLoaderVariants = {
+  hidden: {
+    opacity: 0,
+    overflow: 'hidden',
+  },
+  visible: {
+    opacity: 1,
+    height: 'auto',
+    overflow: 'auto',
+  },
+};
+
 const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const { resourceType, resourceConfig, isCustomiseAccess = false, title } = props;
   const resourceId = props.resourceId || '';
@@ -55,18 +67,22 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
-
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
   const { audiencesData, checkUserPrivilege, allTeamsData, isLoadingAudiencesData, refetchAudiencesData } =
-    useResourceAccess(resourceType, props.resourceId || '');
+    useResourceAccess({ resourceType, resourceId, skipAudienceData: !openPopup, skipTeamsData: !openPopup });
 
   const {
     state: { selectedFilters },
     dispatch,
   } = useFiltersContextStore();
+
   // get teams and users data in the organization
-  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+  const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
+    { organizationId },
+    { skip: !organizationId || !openPopup },
+  );
+
   // post invite audiences
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] = usePostShareResourceToAudiencesMutation();
 
@@ -162,11 +178,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   };
 
   const handleTogglePopup = (open: boolean) => {
-    if (open) {
+    if (open && organizationId) {
       setOpenPopup(true);
-      if (audiencesData) {
-        refetchAudiencesData();
-      }
+      refetchAudiencesData();
     } else {
       handleClosePopup();
     }
@@ -184,10 +198,10 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
 
     postInviteAudiences({ resourceRoute: resourceTypeRouteMap[resourceType], resourceId, body: shareData })
       .unwrap()
-      .then((res) => {
+      .then(() => {
         setSelectedItems([]);
         refetchAudiencesData();
-        toast.success(res?.message || resourceConfig.toastMessages.success);
+        toast.success(resourceConfig.toastMessages.success);
       })
       .catch((err) => {
         toast.error(err?.data?.error || resourceConfig.toastMessages.failed);
@@ -214,9 +228,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then((res) => {
+      .then(() => {
         refetchAudiencesData();
-        toast.success(res?.message);
+        toast.success(TOAST_MESSAGES.SUCCESS_AUDIENCE_ROLE_CHANGED);
 
         return true;
       })
@@ -243,9 +257,9 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
       },
     })
       .unwrap()
-      .then((res) => {
+      .then(() => {
         refetchAudiencesData();
-        toast.success(res?.message || `Removed ${userName} successfully`);
+        toast.success(`Removed ${userName} successfully`);
       })
       .catch((err) => {
         toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
@@ -491,7 +505,16 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             </div>
             <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
               <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
-              <div className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'>
+              <motion.div
+                initial={WhoHasAccessLoaderVariants.hidden}
+                animate={openPopup ? WhoHasAccessLoaderVariants.visible : WhoHasAccessLoaderVariants.hidden}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.4, 0, 0.2, 1],
+                  opacity: { duration: 0.15 },
+                }}
+                className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'
+              >
                 <CommonWrapper
                   skeletonType={SkeletonTypes.CUSTOM}
                   isLoading={isLoadingAudiencesData}
@@ -528,13 +551,8 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
                     />
                   ))}
                 </CommonWrapper>
-              </div>
+              </motion.div>
             </div>
-            <SharePopupPageApprovals
-              emptyFiltersTitle={emptyFiltersTitle}
-              resourceType={resourceType}
-              resourceId={resourceId}
-            />
           </div>
         </PopoverContent>
       </Popover>

@@ -1,15 +1,9 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { captureException } from '@sentry/nextjs';
-import {
-  ColDef,
-  type ColumnMovedEvent,
-  IServerSideDatasource,
-  IServerSideGetRowsParams,
-  IServerSideGetRowsRequest,
-} from 'ag-grid-community';
+import { ColDef, type ColumnMovedEvent, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
+import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
@@ -19,8 +13,6 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
-import { ACTIVITY_RUN_STATUS } from '@/modules/process/process.types';
-import type { ActivityRunsDataResponseType } from '@/types/api/processApi.types';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -51,7 +43,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 }) => {
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
-  const firstLoadDone = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const process = searchParams?.get('process') as string;
@@ -65,21 +56,17 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const [totalRows, setTotalRows] = useState<number>(0);
 
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const [cachedDatasetData, setCachedDatasetData] = useState<ActivityRunsDataResponseType>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
+  const [hasServerSideDataLoaded, setHasServerSideDataLoaded] = useState<boolean>(false);
+  const [isGridReady, setIsGridReady] = useState<boolean>(false);
 
   const [getActivityRuns, { data: activityRunsData, isError: lazyloadActivityRunsError }] =
     useLazyGetActivityRunsQuery();
-
-  const [isGridReady, setIsGridReady] = useState(false);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
         const filterModel = parameters?.request?.filterModel;
-        const isDefaultFilters = checkIsObjectEmpty(filterModel ?? {})
-          ? false
-          : Object.values(filterModel ?? {}).every((filter) => filter?.isDefault);
 
         const activityStatusFilter = {
           filterType: FILTER_TYPES.MULTI_SELECT,
@@ -99,48 +86,36 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
         removeCellFocus();
         setExportsDatasetQuery(queryConfig);
-        if (!firstLoadDone.current || isDefaultFilters) {
-          // Use Cached Data for First Load or when no valid filters
-          firstLoadDone.current = true; // Mark first load as done
-          if (!checkIsObjectEmpty(cachedDatasetData)) {
-            const totalCount = cachedDatasetData?.total_count ?? 0;
 
-            setIsNoRowsOverlayVisible(totalCount === 0);
+        getActivityRuns({
+          processId: processId as string,
+          query_config: queryConfig,
+        })
+          .unwrap()
+          .then((response) => {
+            const totalCount = response?.total_count;
+
+            if (parameters.request.startRow === 0) {
+              setTotalRows(totalCount);
+              setIsNoRowsOverlayVisible(totalCount === 0);
+              dispatch({
+                type: filtersContextActions.SET_TOTAL_ROWS,
+                payload: { totalRows: totalCount },
+              });
+            }
+
             parameters.success({
-              rowData: cachedDatasetData?.rows ?? [],
+              rowData: response?.rows,
               ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
             });
-          }
-        } else {
-          getActivityRuns({
-            processId: processId as string,
-            query_config: queryConfig,
+            setHasServerSideDataLoaded(true);
           })
-            .unwrap()
-            .then((response) => {
-              const totalCount = response?.total_count;
-
-              if (parameters.request.startRow === 0) {
-                setTotalRows(totalCount);
-                setIsNoRowsOverlayVisible(totalCount === 0);
-                dispatch({
-                  type: filtersContextActions.SET_TOTAL_ROWS,
-                  payload: { totalRows: totalCount },
-                });
-              }
-
-              parameters.success({
-                rowData: response?.rows,
-                ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
-              });
-            })
-            .catch(() => {
-              parameters.fail();
-            });
-        }
+          .catch(() => {
+            parameters.fail();
+          });
       },
     };
-  }, [processId, cachedDatasetData, status]);
+  }, [processId, status]);
 
   const handleColumnMoved = (event: ColumnMovedEvent) => {
     const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(processId as string);
@@ -262,6 +237,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   useEffect(() => {
     if (isGridReady && selectedFilters) {
       tableRef.current?.api?.setFilterModel(selectedFilters);
+      setHasServerSideDataLoaded(false);
     }
   }, [selectedFilters, isGridReady]);
 
@@ -274,43 +250,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   }, [isNoRowsOverlayVisible, isGridReady]);
 
   useEffect(() => {
-    if (status) {
-      firstLoadDone.current = false;
-
-      const activityStatusFilter = {
-        filterType: FILTER_TYPES.MULTI_SELECT,
-        type: CONDITION_OPERATOR_TYPE.CONTAINS,
-        values: [status],
-      };
-
-      const queryConfig = getEncodedRequest({
-        filterModel: {
-          ...(status ? { status: activityStatusFilter } : {}),
-        },
-      } as IServerSideGetRowsRequest);
-
-      getActivityRuns({
-        processId: processId as string,
-        query_config: queryConfig,
-      })
-        .unwrap()
-        .then((response) => {
-          setTotalRows(response?.total_count);
-          setCachedDatasetData(response);
-          dispatch({
-            type: filtersContextActions.SET_TOTAL_ROWS,
-            payload: { totalRows: response?.total_count },
-          });
-        })
-        .catch((err) => {
-          captureException(err);
-        });
-    }
-  }, [processId, status]);
-
-  useEffect(() => {
     if (processId && process) {
-      router.prefetch(getProcessActivityLogsRouteById(processId, process, 'some-activity-id', status));
+      router.prefetch(getProcessActivityLogsRouteById(processId, 'some-activity-id', status));
     }
   }, [processId, process, status]);
 
@@ -322,12 +263,12 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     if (target.closest('.combobox-trigger')) return;
 
     const activityId = data?.data?.id;
-    const path = getProcessActivityLogsRouteById(processId as string, process as string, activityId, status);
+    const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
 
     router.push(path);
   };
 
-  if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters)) {
+  if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters) && hasServerSideDataLoaded) {
     return (
       <div className='h-full w-full'>
         <ActivityRunsEmptyState status={status as ACTIVITY_RUN_STATUS} />

@@ -1,15 +1,30 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import ProcessById from '@/modules/process/activity-runs/ProcessById';
+import { useEffect } from 'react';
+import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
+import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
-const Process = () => {
-  const searchParams = useSearchParams();
+export default function Page() {
+  const { data: processes } = useGetProcessesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
-  const processId = searchParams?.get('processId') as string;
-  const status = searchParams?.get('status') as string;
+  const { data: pages } = useGetPagesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
-  return <ProcessById processId={processId as string} status={status} />;
-};
+  const { pushToMostRelevantProcess, pushToMostRelevantPage } = usePersistedPageNavigation({
+    processesList: processes ?? [],
+    pagesList: pages ?? [],
+  });
 
-export default Process;
+  useEffect(() => {
+    if (processes && processes?.length > 0) {
+      pushToMostRelevantProcess();
+    } else if (pages && pages?.length > 0) {
+      pushToMostRelevantPage();
+    }
+  }, [processes, pages]);
+
+  return null;
+}

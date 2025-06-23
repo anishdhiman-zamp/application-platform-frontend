@@ -10,7 +10,7 @@ import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
 import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
@@ -20,7 +20,6 @@ import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/to
 
 const ShareButton = () => {
   const params = useParams<{ pageId: string; datasetId: string; paymentConfigId: string; processId: string }>();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
 
   switch (true) {
@@ -31,7 +30,7 @@ const ShareButton = () => {
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
       return <SharePaymentsPopup paymentConfigId={params?.paymentConfigId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
-      return <ShareProcessPopup processId={searchParams?.get('processId') || ''} />;
+      return <ShareProcessPopup processId={params?.processId || ''} />;
     case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
       return null;
     default:

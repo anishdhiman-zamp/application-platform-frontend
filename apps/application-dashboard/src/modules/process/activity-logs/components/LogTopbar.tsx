@@ -1,17 +1,17 @@
-import type { FC } from 'react';
+import { type FC, memo } from 'react';
 import TopbarStatusIcon from 'modules/process/common/TopbarStatusIcon';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetActivitySummaryQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 
 const LogTopbar: FC = () => {
-  const searchParams = useSearchParams();
-  const activityId = useParams()?.activityId as string;
-  const processId = searchParams?.get('processId') as string;
+  const params = useParams();
+  const activityId = params?.activityId as string;
+  const processId = params?.processId as string;
 
   const {
     data: summaryData,
@@ -64,4 +64,4 @@ const LogTopbar: FC = () => {
   );
 };
 
-export default LogTopbar;
+export default memo(LogTopbar);

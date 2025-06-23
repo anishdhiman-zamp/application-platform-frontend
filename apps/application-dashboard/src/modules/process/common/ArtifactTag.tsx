@@ -13,6 +13,7 @@ interface ArtifactTagProps {
   displayName: string;
   onClick: defaultFnType;
   displayClassName?: string;
+  buttonClassName?: string;
   artifactType: ARTIFACT_TYPE;
   iconIdentifier?: string;
   ctaAction?: CTA_ACTION;
@@ -22,6 +23,7 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
   displayName,
   onClick,
   displayClassName,
+  buttonClassName,
   artifactType,
   iconIdentifier,
   ctaAction,
@@ -31,7 +33,10 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
   return (
     <Button
       variant={'ghost'}
-      className='bg-GRAY_100 flex h-6 cursor-pointer items-center justify-start gap-x-1.5 rounded px-2 py-1'
+      className={cn(
+        'bg-GRAY_100 flex h-6 cursor-pointer items-center justify-start gap-x-1.5 rounded px-2 py-1',
+        buttonClassName,
+      )}
       onClick={onClick}
     >
       <ImageWithFallback

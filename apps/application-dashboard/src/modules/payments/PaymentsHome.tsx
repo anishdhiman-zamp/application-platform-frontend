@@ -8,10 +8,10 @@ import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/Ta
 import { LOADER_STATUS } from 'modules/data/data.types';
 import MoveMoneyButton from 'modules/payments/move-money/components/MoveMoneyButton';
 import RecipientsSideDrawer from 'modules/payments/recipients/RecipientsSidedrawer';
-import { useResourceAccess } from 'modules/shareResource/hooks/useResourceAccess';
 import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import { SIZE_TYPES } from 'types/common/components';
 import CommonFilterTable from '@/components/common/table/CommonFilterTable';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import PaymentDetailsSideDrawer from '@/modules/payments/payment-details/PaymentDetailsSideDrawer';
 import TemplateListSideDrawer from '@/modules/payments/templates/TemplateListSideDrawer';
 import TooltipButton from 'components/common/button/TooltipButton';
@@ -26,7 +26,10 @@ type PaymentsListProps = {
 const PaymentsList: FC<PaymentsListProps> = ({ id }) => {
   const tableRef = useRef<AgGridReact>(null);
 
-  const { checkUserPrivilege } = useResourceAccess(ResourceType.PAYMENTS, '');
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.PAYMENTS,
+    resourceId: id,
+  });
   const [isRecipientsSideDrawerOpen, setIsRecipientsSideDrawerOpen] = useState<boolean>(false);
   const [isPaymentTemplatesSideDrawerOpen, setIsPaymentTemplatesSideDrawerOpen] = useState<boolean>(false);
   const [paymentDetailsId, setPaymentDetailsId] = useState<string>('');

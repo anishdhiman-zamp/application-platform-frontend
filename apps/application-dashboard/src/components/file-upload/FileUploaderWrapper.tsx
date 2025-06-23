@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
 import {
   FILE_IMPORT_STATUS_MSG,
@@ -8,7 +9,6 @@ import {
   FileMimeType,
 } from 'modules/data/components/importDataset/importData.constants';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
-import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
 import { SignedUrlResponseType } from '@/types/api/fileUpload.types';
@@ -41,8 +41,6 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   const [fileUploaderKey, setFileUploaderKey] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [currentUploadFileName, setCurrentUploadFileName] = useState<string | null>(null);
-
-  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const filesToUpload: File | null = event?.target?.files?.[0] ?? null;
@@ -132,10 +130,15 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           disableNext?.(true);
           getSignedUrl(signedUrlPayload)
             .unwrap()
-            .then((data: SignedUrlResponseType) => {
-              uploadFileToSignedUrl(data, filesToUpload, fileExtension).then(() => {
-                postFormsSignedUploadAck({ fileImportId: data?.file_upload_id ?? '' });
-              });
+            .then(async (data: SignedUrlResponseType) => {
+              try {
+                await uploadFileToSignedUrl(data, filesToUpload, fileExtension);
+              } catch (error) {
+                captureException(error);
+                setIsLoading(false);
+                setRawData?.(null);
+                setError(FILE_IMPORT_STATUS_MSG.FILE_UPLOAD_COMMON_ERROR);
+              }
             })
             .catch(() => {
               setIsLoading(false);
