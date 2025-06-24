@@ -3,7 +3,7 @@ import { Tabs, TabsContent } from '@zamp-platform/ui';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
-import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifact';
+import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
@@ -119,7 +119,12 @@ const Artifacts = ({
 
       case ARTIFACT_TYPE.EMAIL:
         return (
-          <EmailArtifactWrapper emailArtifact={artifactData as EmailArtifactsResponseType} artifactId={id} key={id} />
+          <EmailArtifactWrapper
+            artifactData={artifactData as EmailArtifactsResponseType}
+            artifactId={id}
+            processId={processId}
+            key={id}
+          />
         );
 
       case ARTIFACT_TYPE.DATASET:

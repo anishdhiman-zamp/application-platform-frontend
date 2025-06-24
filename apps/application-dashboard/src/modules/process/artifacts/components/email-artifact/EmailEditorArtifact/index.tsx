@@ -2,19 +2,14 @@
 import { useState } from 'react';
 import BodyAndFooter from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/BodyAndFooter';
 import Header from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Header';
-import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+import { EmailEditorArtifactProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 
-interface EmailEditorArtifactProps {
-  emailArtifact: EmailArtifactsResponseType;
-  artifactId: string;
-}
-
-const EmailEditorArtifact = ({ emailArtifact }: EmailEditorArtifactProps) => {
+const EmailEditorArtifact = ({ emailArtifact, artifactId, processId }: EmailEditorArtifactProps) => {
   const [header, setHeader] = useState({
     heading: emailArtifact.heading,
-    to_mail_ids: emailArtifact.to_mail_ids,
-    cc_mail_ids: emailArtifact.cc_mail_ids,
-    bcc_mail_ids: emailArtifact.bcc_mail_ids,
+    to_mail_ids: emailArtifact.to_mail_ids ?? [],
+    cc_mail_ids: emailArtifact.cc_mail_ids ?? [],
+    bcc_mail_ids: emailArtifact.bcc_mail_ids ?? [],
   });
 
   const handleSend = (htmlString: string) => {
@@ -30,15 +25,16 @@ const EmailEditorArtifact = ({ emailArtifact }: EmailEditorArtifactProps) => {
   };
 
   return (
-    <div className='bg-bg-gray-2 p-5'>
-      <div className='border-GRAY_500 rounded-xl border bg-white'>
+    <div className='bg-bg-gray-2 h-[calc(100vh-110px)] overflow-y-auto p-5'>
+      <div className='border-GRAY_500 rounded-xl border-[0.5px] bg-white'>
         <Header onChange={handleChangeHeading} value={header} />
         <BodyAndFooter
           initialContent={emailArtifact.body_html || `<p>${emailArtifact.body_plain_text}</p>`}
           onSend={handleSend}
           onDelete={handleDelete}
-          className='relative h-[calc(100vh-376px)] pt-0'
-          bodyClassName='h-[calc(100vh-376px)]'
+          attachments={emailArtifact?.attachments}
+          processId={processId}
+          artifactId={artifactId}
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { EmailArtifactsResponseType, EmailAttachmentType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
 export type ToolbarConfig = {
@@ -5,6 +6,7 @@ export type ToolbarConfig = {
   onClick?: defaultFnType;
   showDivider?: boolean;
   component?: React.ReactNode;
+  tooltipBody?: string;
 };
 
 export type HeaderProps = {
@@ -24,4 +26,13 @@ export type BodyAndFooterProps = {
   className?: string;
   bodyClassName?: string;
   footerClassName?: string;
+  attachments: EmailAttachmentType[];
+  processId: string;
+  artifactId: string;
+};
+
+export type EmailEditorArtifactProps = {
+  emailArtifact: EmailArtifactsResponseType;
+  artifactId: string;
+  processId: string;
 };

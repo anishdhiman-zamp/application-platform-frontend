@@ -15,7 +15,7 @@ import {
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
-import { cn } from '@/utils/common';
+import { capitalizeFirstLetter, cn } from '@/utils/common';
 
 type LogProps = {
   isLastLog?: boolean;
@@ -91,11 +91,11 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, proce
           />
         </div>
         <p
-          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words capitalize', {
+          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', {
             'animate-pulse': status === LOG_STATUS.LOADING,
           })}
         >
-          {message}
+          {capitalizeFirstLetter(message)}
         </p>
         {thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />}
         {ctas && (
