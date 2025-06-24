@@ -55,8 +55,7 @@ jobs:
       - name: Output Branch name
         run: |
           echo ":seedling: Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
-          echo ":rocket: Environment: ${{ needs.prepare-env.outputs.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
-          echo ":gear: Values File: ${{ needs.prepare-env.outputs.VALUES_FILE }}" >> $GITHUB_STEP_SUMMARY
+          echo ":rocket: Environment: development" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
     needs:
@@ -135,6 +134,12 @@ jobs:
           echo "Build completed successfully!"
           echo "Build artifacts:"
           ls -la apps/application-dashboard/.next/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+          driver: remote
 
       - id: build
         name: Build and Push Image
