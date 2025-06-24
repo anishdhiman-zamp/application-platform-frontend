@@ -16,7 +16,6 @@ jobs:
     timeout-minutes: 2
     outputs:
       SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
-      SSH_PRIVATE_KEY: ${{ steps.vars.outputs.SSH_PRIVATE_KEY }}
       HELM_CHART_NAME: ${{ steps.vars.outputs.HELM_CHART_NAME }}
       AWS_ACCOUNT_ID: ${{ steps.vars.outputs.AWS_ACCOUNT_ID }}
       VALUES_FILE: ${{ steps.vars.outputs.VALUES_FILE }}
@@ -39,7 +38,6 @@ jobs:
           # Values based on Terraform module configuration
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
           echo "SLACK_WEBHOOK_URL=DEV_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
-          echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
           echo "ECR_REPO=zamp-dev-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
           echo "NAMESPACE=app-dashboard" >> $GITHUB_OUTPUT
@@ -71,7 +69,6 @@ jobs:
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
       ECR_REPO: ${{ needs.prepare-env.outputs.ECR_REPO }}
       APP_NAME: ${{ needs.prepare-env.outputs.APP_NAME }}
-      SSH_PRIVATE_KEY: ${{ needs.prepare-env.outputs.SSH_PRIVATE_KEY }}
       ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
@@ -82,6 +79,12 @@ jobs:
     steps:
       - name: "Checkout repository on : ${{ github.REF }}"
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
@@ -101,10 +104,6 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
 
       - id: build
         name: Build and Push Image
