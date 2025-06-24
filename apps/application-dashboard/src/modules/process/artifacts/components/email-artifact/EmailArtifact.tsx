@@ -40,6 +40,28 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
       });
   };
 
+  const handleIframeLoad = (e: React.SyntheticEvent<HTMLIFrameElement>) => {
+    setLoading(false);
+    const iframe = e.currentTarget;
+    const doc = iframe.contentDocument;
+
+    if (!doc) return;
+
+    const style = doc.createElement('style');
+
+    style.innerHTML = `
+    body {
+      font-family: 'Inter', sans-serif !important;
+      font-size: 14px;
+      color: #333;
+    }
+    * {
+      font-family: inherit !important;
+    }
+  `;
+    doc.head.appendChild(style);
+  };
+
   return (
     <div className='bg-BG_GRAY_2 h-full w-full p-5'>
       <div className='border-GRAY_500 flex h-full flex-col items-start justify-start rounded-xl border-[0.5px] bg-white'>
@@ -94,7 +116,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
               srcDoc={emailArtifact?.body_html}
               title='Email content'
               className='h-full w-full overflow-auto border-none'
-              onLoad={() => setLoading(false)}
+              onLoad={handleIframeLoad}
               loading='eager'
             />
           </div>
