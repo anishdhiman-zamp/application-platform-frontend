@@ -4,12 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
-    paths-ignore:
-      - "helm/prd-values.yaml"
-      - "helm/stg-values.yaml"
-      - "helm/dev-values.yaml"
-      - ".github/workflows/*"
+      - development
+
 env:
   APP_NAME: application-platform-frontend
 
