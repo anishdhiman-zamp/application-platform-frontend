@@ -30,27 +30,29 @@ jobs:
       APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+      CLOUDFRONT_DOMAIN: ${{ steps.vars.outputs.CLOUDFRONT_DOMAIN }}
 
     steps:
       - id: vars
         run: |
           TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
-          # FIXME: Replace with your actual values
+          # Values based on Terraform module configuration
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
           echo "SLACK_WEBHOOK_URL=DEV_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
-          echo "ECR_REPO=zamp-dev-us-application-platform-ecr" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-dev-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
-          echo "NAMESPACE=application-platform" >> $GITHUB_OUTPUT
+          echo "NAMESPACE=app-dashboard" >> $GITHUB_OUTPUT
           echo "EKS_CLUSTER=zamp-dev-us-cluster" >> $GITHUB_OUTPUT
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
-          echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
-          echo "VALUES_FILE=awsdev-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-dev-us-assets" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
-          echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
+          echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-dev-us-app-dashboard" >> $GITHUB_OUTPUT
+          echo "BUILD_ENV=dev" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
           echo "ENVIRONMENT=Development" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DOMAIN=d2zmqfd18ltqnx.cloudfront.net" >> $GITHUB_OUTPUT
 
       - name: Output Branch name
         run: |
@@ -84,7 +86,7 @@ jobs:
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
@@ -108,17 +110,14 @@ jobs:
         name: Build and Push Image
         env:
           ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://${{ needs.prepare-env.outputs.CLOUDFRONT_DOMAIN }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
-          # The destiny package seems to be a private one, ensure SSH key is set up correctly.
-          npm install destiny@github:Zampfi/destiny#main
           npm install
           npm run build
 
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
           IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
           
-          # FIXME: Make sure you have a Dockerfile in the root of your repository
           docker build -t $ECR_REPO_URI:$IMAGE_TAG --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} --build-arg TIMESTAMP="${TIMESTAMP}" .
           docker push $ECR_REPO_URI:$IMAGE_TAG
           
@@ -162,7 +161,7 @@ jobs:
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
@@ -183,7 +182,7 @@ jobs:
       - name: Deploy
         run: |
           # This assumes your Helm chart is in S3.
-          aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
+          aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz .
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
