@@ -1,0 +1,85 @@
+global:
+  service:
+    name: application-platform-frontend-stg
+
+projectName: zamp  # required
+default:
+  annotations:
+    all:
+      app.kv.io/env: stg
+  labels:
+    all:
+      service-name: application-platform-frontend-svc
+  resources:
+    request:
+      cpu: 100m
+      memory: 200Mi
+    limit:
+      cpu: 150m
+      memory: 250Mi
+  replicaCount: 1
+  image:
+    repository: 
+    tag: 
+    imagePullPolicy: Always
+  signoz:
+    enabled: false
+  configMaps:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: false
+  externalSecrets:
+    injection:
+      enabled: false
+    volumeMount:
+      enabled: true
+      secrets:
+      - data:  
+          - fileName: ".env"
+            mountPath: "/home/node/app/.env"
+            secretKey: zamp-stg-us-application-platform-frontend-env
+        refreshInterval: 1h
+        secretStoreName: aws-secrets-manager
+        secretName: env
+deployment:
+  - name: "svc"
+    service:
+      type: ClusterIP
+      ports:
+      - port: 3000
+        name: api
+    serviceAccount:
+        create: false
+    terminationGracePeriodSeconds: 140
+    containers:
+      - name: "svc"
+        port: 3000
+        healthcheck: 
+          enabled: true
+          livenessProbe: 
+            path : "/"
+            initialDelaySeconds : 40
+            periodSeconds: 30
+          readinessProbe: 
+            path : "/"
+            initialDelaySeconds : 30
+            periodSeconds : 30
+        command:
+        - npm
+        args:
+        - run
+        - start
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 120
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80 
