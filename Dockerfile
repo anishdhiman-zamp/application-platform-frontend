@@ -44,7 +44,7 @@ COPY --from=builder /app/apps/application-dashboard/package.json ./apps/applicat
 COPY --from=builder /app/node_modules ./node_modules
 
 # Set environment variables
-ENV NODE_ENV=production
+ENV NEXT_PUBLIC_ENVIRONMENT=production
 ENV PORT=2000
 
 # Expose port
