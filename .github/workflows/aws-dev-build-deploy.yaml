@@ -46,7 +46,7 @@ jobs:
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
           echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-dev-us-assets" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
+          echo "ASSETS_S3_BUCKET=zamp-dev-us-app-dashboard" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
           echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
