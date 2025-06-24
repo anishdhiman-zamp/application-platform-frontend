@@ -1,3 +1,5 @@
+import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+
 export enum ACTIVITY_RUN_STATUS {
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
   VOID = 'VOID',
@@ -72,3 +74,9 @@ export enum EMAIL_STATUS {
   DRAFT = 'DRAFT',
   RECEIVED = 'RECEIVED',
 }
+
+export type EmailArtifactWrapperProps = {
+  artifactData: EmailArtifactsResponseType;
+  artifactId: string;
+  processId: string;
+};

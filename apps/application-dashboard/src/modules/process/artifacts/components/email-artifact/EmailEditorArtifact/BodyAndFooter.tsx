@@ -7,6 +7,7 @@ import { StarterKit } from '@tiptap/starter-kit';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
+import Attachments from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Attachments';
 import { TextStyleWithBackground } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/extensions/background-color';
 import { FontSize } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/extensions/font-size';
 import FontSizeSelector from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/FontSizeSelector';
@@ -16,6 +17,7 @@ import {
   BodyAndFooterProps,
   ToolbarConfig,
 } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+import TooltipV2 from '@/components/common/TooltipV2';
 
 const BodyAndFooter: FC<BodyAndFooterProps> = ({
   initialContent = '<p></p>',
@@ -24,6 +26,9 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
   className,
   bodyClassName,
   footerClassName,
+  attachments,
+  processId,
+  artifactId,
 }) => {
   const editor = useEditor({
     extensions: [
@@ -44,11 +49,13 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       {
         icon: 'flip-backward',
         onClick: () => editor?.chain().focus().undo().run(),
+        tooltipBody: 'Undo',
       },
       {
         icon: 'flip-forward',
         onClick: () => editor?.chain().focus().redo().run(),
         showDivider: true,
+        tooltipBody: 'Redo',
       },
       {
         showDivider: true,
@@ -57,14 +64,17 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       {
         icon: 'bold-02',
         onClick: () => editor?.chain().focus().toggleBold().run(),
+        tooltipBody: 'Bold',
       },
       {
         icon: 'italic-01',
         onClick: () => editor?.chain().focus().toggleItalic().run(),
+        tooltipBody: 'Italic',
       },
       {
         icon: 'underline-01',
         onClick: () => editor?.chain().focus().toggleUnderline().run(),
+        tooltipBody: 'Underline',
       },
       {
         component: <TextAndBackgroundColor editor={editor} />,
@@ -77,15 +87,18 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         icon: 'list',
         onClick: () => editor?.chain().focus().toggleBulletList().run(),
         showDivider: true,
+        tooltipBody: 'Bullet List',
       },
       {
         icon: 'strikethrough-01',
         onClick: () => editor?.chain().focus().toggleStrike().run(),
         showDivider: true,
+        tooltipBody: 'Strikethrough',
       },
       {
         icon: 'type-strikethrough-01',
         onClick: () => editor?.commands.unsetAllMarks(),
+        tooltipBody: 'Remove Formatting',
       },
     ],
     [editor],
@@ -93,16 +106,27 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
 
   return (
     <>
-      <div className={cn('px-4 py-3', className)}>
-        <EditorContent editor={editor} className={cn('prose w-full max-w-none', bodyClassName)} />
+      <div className={cn('relative h-[calc(100vh-376px)] overflow-hidden px-4 pt-0 pb-3', className)}>
+        <div className='flex h-full flex-col justify-between overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+          <div className='mb-4'>
+            <EditorContent editor={editor} className={cn('prose w-full max-w-none', bodyClassName)} />
+          </div>
+          {attachments?.length > 0 && (
+            <div className='min-h-12'>
+              <Attachments attachments={attachments} processId={processId} artifactId={artifactId} />
+            </div>
+          )}
+        </div>
         {editor && (
           <div className='shadow-side-drawer-inner absolute bottom-4 z-1 flex h-8 w-fit items-center gap-2 rounded-md border bg-white px-2 py-1'>
             {toolbarConfigs.map((config) => (
               <Fragment key={config.icon}>
                 {config.component ?? (
-                  <Button onClick={config?.onClick} variant='ghost' size='xsmall' className='h-6 px-1'>
-                    <SvgSpriteLoader id={config?.icon || ''} />
-                  </Button>
+                  <TooltipV2 tooltipBody={config?.tooltipBody} asChildTrigger>
+                    <Button onClick={config?.onClick} variant='ghost' size='xsmall' className='h-6 px-1'>
+                      <SvgSpriteLoader id={config?.icon || ''} />
+                    </Button>
+                  </TooltipV2>
                 )}
                 {config.showDivider && <div className='h-4 w-px border' />}
               </Fragment>

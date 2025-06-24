@@ -129,9 +129,13 @@ const Activity = () => {
 
   useEffect(() => {
     if (!isExpanded) {
-      panelRef.current?.resize(50);
+      if (showSummary) {
+        panelRef.current?.resize(70);
+      } else {
+        panelRef.current?.resize(50);
+      }
     }
-  }, [isExpanded]);
+  }, [isExpanded, showSummary]);
 
   useEffect(() => {
     return () => {
@@ -175,17 +179,18 @@ const Activity = () => {
 
       <ResizableHandle
         withHandle
-        disabled={showSummary || isExpanded}
+        disabled={isExpanded}
         onDragging={handleDragging}
-        className={cn('cursor-col-resize', {
-          'cursor-default': showSummary || isExpanded,
-          'bg-black': isDragging && !showSummary && !isExpanded,
+        className={cn('group cursor-col-resize', {
+          'cursor-default': isExpanded,
+          'bg-black': isDragging && !isExpanded,
           'opacity-0': isExpanded && !isDragging,
           'opacity-100': !isExpanded && !isDragging,
           'transition-opacity duration-300 ease-in-out': !isDragging,
         })}
         handleClassName={cn('bg-white', {
           'bg-black border-black': isDragging,
+          'opacity-0 group-hover:opacity-100': showSummary && !isDragging,
         })}
         onDoubleClick={() => toggleExpand()}
       />
@@ -194,14 +199,14 @@ const Activity = () => {
         id={showSummary ? RESIZABLE_PANEL_ID.SUMMARY : RESIZABLE_PANEL_ID.ARTIFACTS}
         order={2}
         defaultSize={showSummary ? 30 : isExpanded ? 100 : 50}
-        minSize={showSummary ? 30 : isExpanded ? 100 : 30}
-        maxSize={showSummary ? 30 : isExpanded ? 100 : 70}
+        minSize={isExpanded ? 100 : 30}
+        maxSize={isExpanded ? 100 : 70}
         className={cn('transition-all duration-300 ease-in-out', {
           'transition-none!': isDragging,
         })}
       >
         {showSummary ? (
-          <Summary handleShowArtifacts={handleShowArtifacts} />
+          <Summary handleShowArtifacts={handleShowArtifacts} isExpanded={isExpanded} onExpand={toggleExpand} />
         ) : (
           <Artifacts
             onClose={closeArtifacts}

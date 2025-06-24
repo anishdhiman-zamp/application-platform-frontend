@@ -84,6 +84,11 @@ export type PdfArtifactsResponseType = {
   };
 };
 
+export type EmailAttachmentType = {
+  file_id: string;
+  file_display_name: string;
+};
+
 export type EmailArtifactsResponseType = {
   display_name: string;
   status: EMAIL_STATUS;
@@ -97,10 +102,7 @@ export type EmailArtifactsResponseType = {
   cc_mail_ids: string[];
   bcc_mail_ids: string[];
   to_mail_ids: string[];
-  attachments: {
-    file_id: string;
-    file_display_name: string;
-  }[];
+  attachments: EmailAttachmentType[];
 };
 
 export type BrowserArtifactsResponseType = {
