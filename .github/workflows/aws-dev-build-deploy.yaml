@@ -41,20 +41,22 @@ jobs:
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
           echo "ECR_REPO=zamp-dev-us-application-platform-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
-          echo "NAMESPACE=application-platform" >> $GITHUB_OUTPUT
+          echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
           echo "EKS_CLUSTER=zamp-dev-us-cluster" >> $GITHUB_OUTPUT
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
-          echo "VALUES_FILE=awsdev-values.yaml" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
           echo "ASSETS_S3_BUCKET=zamp-dev-us-assets" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
           echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
-          echo "ENVIRONMENT=Development" >> $GITHUB_OUTPUT
+          echo "ENVIRONMENT=development" >> $GITHUB_OUTPUT
 
       - name: Output Branch name
         run: |
-          echo ":seedling: Branch:${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+          echo ":seedling: Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+          echo ":rocket: Environment: ${{ needs.prepare-env.outputs.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo ":gear: Values File: ${{ needs.prepare-env.outputs.VALUES_FILE }}" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
     needs:
@@ -96,13 +98,37 @@ jobs:
           path: |
             ~/.npm
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
+            ${{ github.workspace }}/apps/application-dashboard/.next/cache
+            ${{ github.workspace }}/node_modules
+            ${{ github.workspace }}/apps/application-dashboard/node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-deps-
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
+
+      - name: Install dependencies
+        run: |
+          # Install all dependencies (will use cache if available)
+          npm ci
+
+      - name: Build application
+        env:
+          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          TIMESTAMP: "${TIMESTAMP}"
+        run: |
+          echo "Building application with environment variables:"
+          echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
+          echo "TIMESTAMP: $TIMESTAMP"
+          
+          # Build the application
+          npm run build
+          
+          echo "Build completed successfully!"
+          echo "Build artifacts:"
+          ls -la apps/application-dashboard/.next/
 
       - id: build
         name: Build and Push Image
@@ -110,16 +136,20 @@ jobs:
           ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
-          # The destiny package seems to be a private one, ensure SSH key is set up correctly.
-          npm install destiny@github:Zampfi/destiny#main
-          npm install
-          npm run build
-
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
           IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
           
-          # FIXME: Make sure you have a Dockerfile in the root of your repository
-          docker build -t $ECR_REPO_URI:$IMAGE_TAG --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} --build-arg TIMESTAMP="${TIMESTAMP}" .
+          # Build Docker image using the Dockerfile
+          # Application is already built, so Docker will just package it
+          docker build -t $ECR_REPO_URI:$IMAGE_TAG \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
+            --build-arg TIMESTAMP="${TIMESTAMP}" \
+            --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
+            --build-arg PORT=3000 \
+            --build-arg SKIP_INSTALL=true \
+            --build-arg SKIP_BUILD=true \
+            .
+          
           docker push $ECR_REPO_URI:$IMAGE_TAG
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
@@ -129,8 +159,12 @@ jobs:
       - id: upload-assets
         name: Upload Static Files to S3
         run: |
-          aws s3 sync .next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
-          aws s3 sync public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          # Upload Next.js static files directly from the built application
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          
+          echo "Static assets uploaded to S3 successfully!"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
 
   deploy-to-eks:
     name: Deploy to EKS
