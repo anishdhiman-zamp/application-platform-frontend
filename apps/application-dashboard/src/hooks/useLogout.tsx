@@ -11,7 +11,7 @@ export const useLogout = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: logoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
-  const [logOut] = useLazyLogoutQuery();
+  const [logOut, { isLoading: isLoggingOut }] = useLazyLogoutQuery();
   const [whoAmI] = useLazyWhoAmIQuery();
 
   const handleLogout = useCallback(async () => {
@@ -34,5 +34,6 @@ export const useLogout = () => {
 
   return {
     logout: handleLogout,
+    isLoggingOut,
   };
 };

@@ -15,6 +15,7 @@ import { cn } from 'utils/common';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 import ProcessNavTab from 'components/layouts/dashboard-layout/components/ProcessNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
@@ -108,12 +109,13 @@ const Sidebar = () => {
           )}
         </div>
         <div
-          className='border-GRAY_400 text-GRAY_900 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+          className='border-GRAY_400 text-GRAY_900 absolute bottom-[100px] hidden h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
           onClick={logout}
         >
           <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
           <div className='f-13-500'>Logout</div>
         </div>
+        <OrgSwitcher />
       </div>
     </div>
   );
