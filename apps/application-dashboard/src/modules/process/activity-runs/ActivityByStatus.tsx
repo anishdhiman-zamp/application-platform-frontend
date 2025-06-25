@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetActivityRunsQuery } from '@/apis/processes';
@@ -44,8 +44,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const tableRef = useRef<AgGridReact>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const process = searchParams?.get('process') as string;
 
   const {
     dispatch,
@@ -101,6 +99,12 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
               dispatch({
                 type: filtersContextActions.SET_TOTAL_ROWS,
                 payload: { totalRows: totalCount },
+              });
+            }
+
+            if (response?.rows?.length) {
+              response?.rows?.forEach((row) => {
+                router.prefetch(getProcessActivityLogsRouteById(processId, row?.id, status));
               });
             }
 
@@ -248,12 +252,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
       tableRef.current?.api?.hideOverlay();
     }
   }, [isNoRowsOverlayVisible, isGridReady]);
-
-  useEffect(() => {
-    if (processId && process) {
-      router.prefetch(getProcessActivityLogsRouteById(processId, 'some-activity-id', status));
-    }
-  }, [processId, process, status]);
 
   const handleRowClicked = (data: MapAny) => {
     if (!data?.data?.id) return;
