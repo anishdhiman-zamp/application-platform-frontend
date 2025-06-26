@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { captureException } from '@sentry/browser';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -121,9 +120,6 @@ const Activity = () => {
     url: `${API_DOMAIN}/processes/events/${activityId}`,
     eventListeners: {
       update: handleUpdate,
-    },
-    onError: (error) => {
-      captureException(error);
     },
   });
 
