@@ -6,6 +6,7 @@ import type {
   EMAIL_STATUS,
   SENDER_TYPE,
 } from '@/modules/process/process.types';
+
 export type StatusSummaryItem = {
   status_summary: {
     status: string;
@@ -173,8 +174,26 @@ export type CtasType = {
   cta_config: {
     icon_identifier: string;
     variant: string;
+    dataset_to_missing_fields_map: Record<
+      string,
+      {
+        cells: MissingFieldItemType[];
+        filters: MapAny;
+      }
+    >;
+    dataset_artifacts: {
+      cells: MissingFieldItemType[];
+      dataset_id: string;
+    }[];
   };
   filter_metadata: MapAny;
+};
+
+export type MissingFieldItemType = {
+  column: string;
+  id: string;
+  is_required?: boolean;
+  confidence?: string;
 };
 
 export type LogsContentType = {
@@ -255,6 +274,7 @@ export type EmitHITLActionRequestType = {
     responses: {
       action_id: string;
       values: string[];
+      cta_component_type?: CTA_COMPONENT_TYPE;
     }[];
   };
 };

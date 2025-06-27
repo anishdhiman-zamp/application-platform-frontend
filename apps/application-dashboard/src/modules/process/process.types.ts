@@ -1,4 +1,5 @@
 import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+import type { MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
@@ -54,6 +55,8 @@ export enum DATE_SEPARATOR {
 export enum CTA_COMPONENT_TYPE {
   ARTIFACT = 'ARTIFACT',
   BUTTON = 'BUTTON',
+  OVERRIDE_MISSING_FIELDS_BUTTON = 'OVERRIDE_MISSING_FIELDS_BUTTON',
+  REQUIRED_MISSING_FIELDS_BUTTON = 'REQUIRED_MISSING_FIELDS_BUTTON',
 }
 
 export enum PDF_DATASET_TAB {
@@ -79,4 +82,19 @@ export type EmailArtifactWrapperProps = {
   artifactData: EmailArtifactsResponseType;
   artifactId: string;
   processId: string;
+};
+
+export interface HandleShowArtifactsProps extends EmitHITLActionPayload {
+  artifactType: ARTIFACT_TYPE;
+  artifactId: string;
+  action?: CTA_ACTION;
+  filters?: MapAny;
+  ctaConfig?: MapAny;
+}
+
+export type EmitHITLActionPayload = {
+  logGroupId?: string;
+  hitlRequestId?: string;
+  ctaActionId?: string;
+  ctaValue?: string;
 };

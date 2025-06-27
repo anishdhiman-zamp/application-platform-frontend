@@ -310,6 +310,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             onColumnMoved={handleColumnMoved}
             onRowClicked={handleRowClicked}
             menuTitle='Activity properties'
+            showStatusBar={false}
+            shouldShowNA
           />
         </div>
       </CommonWrapper>

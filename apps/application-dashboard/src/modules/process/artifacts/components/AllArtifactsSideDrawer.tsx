@@ -2,7 +2,7 @@
 
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
-import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
+import { ARTIFACT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -15,7 +15,7 @@ import { defaultFnType } from '@/types/commonTypes';
 interface AllArtifactsDialogProps {
   onClose: defaultFnType;
   isOpen: boolean;
-  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  onArtifactClick: (props: HandleShowArtifactsProps) => void;
 }
 
 const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
@@ -35,8 +35,8 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
     },
   );
 
-  const handleArtifactClick = (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => {
-    onArtifactClick(artifactType, artifactId, action);
+  const handleArtifactClick = (props: HandleShowArtifactsProps) => {
+    onArtifactClick(props);
     onClose();
   };
 
@@ -73,7 +73,12 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
                     <ArtifactItem
                       key={artifact?.id}
                       artifact={artifact}
-                      onClick={() => handleArtifactClick(artifact?.artifact_type, artifact?.id)}
+                      onClick={() =>
+                        handleArtifactClick({
+                          artifactType: artifact?.artifact_type,
+                          artifactId: artifact?.id ?? '',
+                        })
+                      }
                     />
                   ))}
             </div>
