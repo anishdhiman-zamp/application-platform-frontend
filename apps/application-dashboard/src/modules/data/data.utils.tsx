@@ -1,4 +1,12 @@
-import { ColDef, IServerSideGetRowsRequest, type SortDirection, ValueFormatterParams } from 'ag-grid-community';
+import { captureException } from '@sentry/browser';
+import {
+  ColDef,
+  type ColumnMovedEvent,
+  IServerSideGetRowsRequest,
+  type SortDirection,
+  ValueFormatterParams,
+} from 'ag-grid-community';
+import { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
   differenceInDays,
@@ -26,6 +34,9 @@ import {
   snakeCaseToSentenceCase,
 } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import { toast } from '@/components/common/toast/Toast';
+import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
+import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
 import { ArrayFilters } from 'components/common/table/table.constants';
@@ -88,6 +99,12 @@ export const getColumnMinWidth = (
   }
 };
 
+const CheckIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
+  const rowId = params.data?.id;
+
+  return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
+};
+
 export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   filterConfig,
   currentUserHasEditAccess,
@@ -99,6 +116,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   sortOrder,
   isProcess,
   isMenuDisabled,
+  missingFields,
 }) => {
   const columns: ColDef[] = [];
 
@@ -116,7 +134,13 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       field: column?.column,
       hide: column?.metadata?.is_hidden,
       cellRendererParams: column?.metadata,
-      editable: column?.metadata?.is_editable && currentUserHasEditAccess,
+      editable: (params: MapAny) => {
+        return !!(
+          column?.metadata?.is_editable &&
+          currentUserHasEditAccess &&
+          CheckIsCellEditable(params, missingFields || [])
+        );
+      },
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,
@@ -689,4 +713,81 @@ export const parseDatasets = (url: string, datasetIds: string[]): DatasetTabType
     title: datasets[id]?.title || '',
     filters: datasets[id]?.filters || {},
   }));
+};
+
+/**
+ * Removes cell focus from the table
+ */
+export const removeCellFocus = (tableRef: React.RefObject<AgGridReact | null>) => {
+  tableRef.current?.api?.clearCellSelection();
+  tableRef.current?.api?.clearFocusedCell();
+};
+
+/**
+ * Handles drilldown navigation for dataset rows
+ */
+export const handleDrilldownClick = (data: MapAny, datasetId: string, pageId?: string, router?: any) => {
+  if (!router) return;
+
+  if (pageId) {
+    router.push(getPageDatasetDrilldownRoute(pageId, datasetId, data?._zamp_id as string));
+  } else {
+    router.push(getDatasetDrilldownRoute(datasetId, data?._zamp_id as string));
+  }
+};
+
+/**
+ * Handles API errors with proper error logging and user feedback
+ */
+export const handleApiError = (error: any, errorMessage = 'Failed to update') => {
+  captureException(error);
+  toast.error(errorMessage);
+};
+
+/**
+ * Handles column moved event and updates local storage
+ */
+export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) => {
+  const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(datasetId);
+  const latestColumns = event?.api?.getColumns() ?? [];
+  const { column, toIndex = 0 } = event;
+
+  if (!column) return;
+
+  const columnOrderingVisibility: { colId: string; isVisible: boolean }[] = columnOrderingFromLocalStorage?.length
+    ? columnOrderingFromLocalStorage
+    : latestColumns.map((column) => ({
+        colId: column.getColId(),
+        isVisible: column.isVisible(),
+      }));
+
+  const movedColumn = columnOrderingVisibility.find((item) => item.colId === column?.getColId()) ?? {};
+  const fromIndex = columnOrderingVisibility.findIndex((item) => item.colId === column?.getColId());
+
+  if (fromIndex === toIndex) return;
+
+  let finalList: { colId?: string; isVisible?: boolean }[] = [];
+
+  if (fromIndex < toIndex) {
+    const zeroToOldIndex = columnOrderingVisibility.slice(0, fromIndex) ?? [];
+    const oldIndexToNewIndex = columnOrderingVisibility.slice(fromIndex + 1, toIndex + 1) ?? [];
+    const newIndexToEnd = columnOrderingVisibility.slice(toIndex + 1) ?? [];
+
+    finalList = [...zeroToOldIndex, ...oldIndexToNewIndex, movedColumn, ...newIndexToEnd];
+  } else {
+    const endToOldIndex = columnOrderingVisibility.slice(fromIndex + 1) ?? [];
+    const oldIndexToNewIndex = columnOrderingVisibility.slice(toIndex, fromIndex) ?? [];
+    const newIndexToStart = columnOrderingVisibility.slice(0, toIndex) ?? [];
+
+    finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
+  }
+
+  const currentColumnOrderingVisibility = JSON.parse(
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
+  );
+
+  setToLocalStorage(
+    LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
+    JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: finalList }),
+  );
 };

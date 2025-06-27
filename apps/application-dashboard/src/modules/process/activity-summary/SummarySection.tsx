@@ -2,7 +2,7 @@ import { type FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
-import type { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
+import type { HandleShowArtifactsProps } from 'modules/process/process.types';
 import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis/processes';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -14,7 +14,7 @@ import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 import { defaultFnType } from '@/types/commonTypes';
 
 type SummarySectionProps = {
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
   isExpanded: boolean;
   onExpand: defaultFnType;
 };
@@ -103,7 +103,12 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
             displayName={artifact?.artifact_data?.display_name}
             artifactType={artifact?.artifact_type}
             iconIdentifier={artifact?.artifact_data?.icon_identifier}
-            onClick={() => handleShowArtifacts(artifact?.artifact_type, artifact?.id ?? '')}
+            onClick={() =>
+              handleShowArtifacts({
+                artifactType: artifact?.artifact_type,
+                artifactId: artifact?.id ?? '',
+              })
+            }
             displayClassName='max-w-[200px]'
           />
         ))}
