@@ -5,7 +5,6 @@ import { captureException } from '@sentry/browser';
 import {
   CellEditRequestEvent,
   ColDef,
-  ColumnMovedEvent,
   FillEndEvent,
   IServerSideDatasource,
   IServerSideGetRowsParams,
@@ -19,7 +18,6 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from 'constants/routeConfig';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
@@ -37,8 +35,11 @@ import {
   formatColumns,
   formatDrilldownFilters,
   formatUrlFilters,
-  getColumnOrderingVisibilityForCurrentDataset,
   getFilters,
+  handleApiError,
+  handleColumnMoved,
+  handleDrilldownClick,
+  removeCellFocus,
   syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
 import Notification from 'modules/data/Notification';
@@ -57,10 +58,7 @@ import {
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
-import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
-import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -83,16 +81,10 @@ type DatasetByIdProps = {
   isReadOnly?: boolean;
   containerStyle?: MapAny;
   gridStyle?: MapAny;
-  headerClassName?: string;
   updateDatasetTitleInParent?: (title: string) => void;
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
-  updateBreadcrumb?: boolean;
-  filterWrapperClassName?: string;
-  showCurrencyFilter?: boolean;
-  showDatasetHistory?: boolean;
-  isDatasetArtifact?: boolean;
 };
 
 const DatasetById: FC<DatasetByIdProps> = ({
@@ -102,34 +94,26 @@ const DatasetById: FC<DatasetByIdProps> = ({
   isReadOnly = false,
   containerStyle,
   gridStyle,
-  headerClassName,
   updateDatasetTitleInParent,
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
-  filterWrapperClassName,
-  showDatasetHistory = true,
-  isDatasetArtifact = false,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
   const filters = decodeURIComponent(searchParams?.get('filters') ?? '');
   const processId = params?.processId as string;
   const activityId = params?.activityId;
-  const [gridReady, setGridReady] = useState<boolean>(false);
-
   const currency = searchParams?.get('currency') ?? LOCAL_CURRENCY;
+  const router = useRouter();
+  const tableRef = useRef<AgGridReact>(null);
+  const datasetTableRef = useRef<HTMLDivElement>(null);
+  const firstLoadDone = useRef(false);
 
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
   });
-
-  const currentUserHasEditAccess = useMemo(() => {
-    return (
-      checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.DATA_EDITOR)
-    );
-  }, [checkUserPrivilege]);
 
   const {
     data: filterConfigData,
@@ -146,9 +130,26 @@ const DatasetById: FC<DatasetByIdProps> = ({
       refetchOnMountOrArgChange: true,
     },
   );
-  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
-  const [updateDatasetData] = useUpdateDatasetDataMutation();
+
   const [getActionStatus] = useLazyGetActionStatusQuery();
+  const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
+
+  const {
+    dispatch,
+    state: { selectedFilters, filtersConfig },
+  } = useFiltersContextStore();
+
+  const { startPolling } = usePolling();
+
+  const currentUserHasEditAccess = useMemo(() => {
+    return (
+      checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN) || checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.DATA_EDITOR)
+    );
+  }, [checkUserPrivilege]);
+
+  const showFileImports = filterConfigData?.config?.is_file_import_enabled;
+
+  const [gridReady, setGridReady] = useState<boolean>(false);
   const [columns, setColumns] = useState<ColDef[]>([]);
   const [isPolling, setIsPolling] = useState<boolean>(false);
   const [totalRows, setTotalRows] = useState<number>(0);
@@ -165,14 +166,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
-  // Removed because it is causing load on star tree
-  // const [columnLevelStats, setColumnLevelStats] = useState<MapAny>();
   const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
   const [deleteRuleId, setDeleteRuleId] = useState<string>();
   const [pollingMessage, setPollingMessage] = useState<string>('');
-
-  const firstLoadDone = useRef(false); // Track if first load is done
-
   const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
     open: boolean;
     status: string;
@@ -184,15 +180,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
     title: '',
     description: '',
   });
-  const { startPolling } = usePolling();
-  const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
-  const [getDatasetArtifacts, { data: datasetArtifacts, isError: lazyloadDatasetArtifactsError }] =
-    useLazyGetDatasetArtifactsQuery();
 
-  const {
-    dispatch,
-    state: { selectedFilters, filtersConfig },
-  } = useFiltersContextStore();
+  const [updateDatasetData] = useUpdateDatasetDataMutation();
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
@@ -213,7 +202,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           ? false
           : Object.values(filterModel ?? {}).every((filter) => filter?.isDefault);
 
-        removeCellFocus();
+        removeCellFocus(tableRef);
         setExportsDatasetQuery(queryConfig);
         if (!firstLoadDone.current || isDefaultFilters) {
           // Use Cached Data for First Load
@@ -234,88 +223,37 @@ const DatasetById: FC<DatasetByIdProps> = ({
             });
           }
         } else {
-          if (isDatasetArtifact) {
-            getDatasetArtifacts({
-              processId: processId as string,
-              activityRunId: activityId as string,
-              datasetId: id as string,
-              query_config: queryConfig,
-            })
-              .unwrap()
-              .then((response) => {
-                const totalCount = response?.data?.total_count;
+          getDatasetData({
+            datasetId: id as string,
+            query_config: queryConfig,
+          })
+            .unwrap()
+            .then((response) => {
+              const totalCount = response?.data?.total_count;
 
-                if (parameters.request.startRow === 0) {
-                  setDatasetTitle(response?.title);
-                  setTotalRows(totalCount);
-                  setIsNoRowsOverlayVisible(totalCount === 0);
-                  dispatch({
-                    type: filtersContextActions.SET_TOTAL_ROWS,
-                    payload: { totalRows: totalCount },
-                  });
-                }
-                parameters.success({
-                  rowData: response?.data?.rows,
-                  ...(parameters.request.startRow === 0
-                    ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
-                    : {}),
+              if (parameters.request.startRow === 0) {
+                setDatasetTitle(response?.title);
+                setTotalRows(totalCount);
+                setIsNoRowsOverlayVisible(totalCount === 0);
+                dispatch({
+                  type: filtersContextActions.SET_TOTAL_ROWS,
+                  payload: { totalRows: totalCount },
                 });
-              })
-              .catch(() => {
-                parameters.fail();
+              }
+              parameters.success({
+                rowData: response?.data?.rows,
+                ...(parameters.request.startRow === 0
+                  ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
+                  : {}),
               });
-          } else {
-            getDatasetData({
-              datasetId: id as string,
-              query_config: queryConfig,
             })
-              .unwrap()
-              .then((response) => {
-                const totalCount = response?.data?.total_count;
-
-                if (parameters.request.startRow === 0) {
-                  setDatasetTitle(response?.title);
-                  setTotalRows(totalCount);
-                  setIsNoRowsOverlayVisible(totalCount === 0);
-                  dispatch({
-                    type: filtersContextActions.SET_TOTAL_ROWS,
-                    payload: { totalRows: totalCount },
-                  });
-                }
-                parameters.success({
-                  rowData: response?.data?.rows,
-                  ...(parameters.request.startRow === 0
-                    ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
-                    : {}),
-                });
-              })
-              .catch(() => {
-                parameters.fail();
-              });
-          }
+            .catch(() => {
+              parameters.fail();
+            });
         }
       },
     };
-  }, [
-    getDatasetData,
-    id,
-    fxCurrency,
-    cachedDatasetData,
-    drilldownFilters,
-    isDatasetArtifact,
-    getDatasetArtifacts,
-    processId,
-    activityId,
-  ]);
-
-  const router = useRouter();
-  const tableRef = useRef<AgGridReact>(null);
-  const datasetTableRef = useRef<HTMLDivElement>(null);
-
-  const removeCellFocus = () => {
-    tableRef.current?.api?.clearCellSelection();
-    tableRef.current?.api?.clearFocusedCell();
-  };
+  }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId]);
 
   const handleSuccessfulUpdate = (
     data: DatasetUpdateResponseType,
@@ -386,10 +324,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     })
       .unwrap()
       .then((response) => handleSuccessfulUpdate(response, false))
-      .catch((err) => {
-        captureException(err);
-        toast.error(TOAST_MESSAGES.FAILED_DATASET_UPDATE);
-      });
+      .catch((err) => handleApiError(err));
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
@@ -436,21 +371,25 @@ const DatasetById: FC<DatasetByIdProps> = ({
     });
   };
 
-  const handleDrilldownClick = (data: MapAny) => {
-    if (params?.pageId) {
-      router.push(getPageDatasetDrilldownRoute(params?.pageId as string, id as string, data?._zamp_id as string));
-    } else {
-      router.push(getDatasetDrilldownRoute(id as string, data?._zamp_id as string));
-    }
-  };
-
-  const handleRowPropertiesClick = (data: MapAny) => {
-    setRowPropertiesData(data);
-  };
-
   const handleRulesListingSideDrawerOpen = (ruleColumnDetailsValue: RuleColumnDetailsType) => {
     setIsRulesListingSideDrawerOpen(true);
     setRuleColumnDetails(ruleColumnDetailsValue);
+  };
+
+  const handleFilterChange = (value: string[]) => {
+    setFxCurrency(value);
+  };
+
+  const handleRefetchDataset = () => {
+    getDatasetData({
+      datasetId: id as string,
+      query_config: exportsDatasetQuery,
+    });
+  };
+
+  const handleDeleteRuleSuccess = (data: DatasetUpdateResponseType) => {
+    setIsRulesListingSideDrawerOpen(false);
+    handleSuccessfulUpdate(data, true, DATASET_ACTION_TYPE.RULE_DELETION);
   };
 
   useEffect(() => {
@@ -514,34 +453,11 @@ const DatasetById: FC<DatasetByIdProps> = ({
         }
         if (
           isNoRowsOverlayVisible ||
-          (isDatasetArtifact ? datasetArtifacts?.data?.total_count === 0 : datasetData?.data?.total_count === 0) ||
+          datasetData?.data?.total_count === 0 ||
           drilldownFilters?.conditions === null ||
           isReadOnly
         )
           return;
-        // Removed because it is causing load on star tree
-        // const amountRangeColumns = columns
-        //   ?.filter((column) => column?.headerComponentParams?.filterType === FILTER_TYPES.AMOUNT_RANGE)
-        //   ?.map((column) => column?.field)
-        //   ?.filter((column) => column !== undefined);
-
-        // if (amountRangeColumns?.length > 0) {
-        //   getDatasetData({
-        //     datasetId: id as string,
-        //     query_config: getEncodedRequestWithAggregations(amountRangeColumns),
-        //   })
-        //     .unwrap()
-        //     .then((response) => {
-        //       if (!isNoRowsOverlayVisible) {
-        //         setColumnLevelStats(formatColumnLevelStats(response?.data?.rows?.[0]));
-        //       }
-        //     })
-        //     .catch(() => {
-        //       if (!isNoRowsOverlayVisible) {
-        //         setColumnLevelStats(undefined);
-        //       }
-        //     });
-        // }
       }
     }
   }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
@@ -561,81 +477,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
     }
   }, [isNoRowsOverlayVisible]);
 
-  const handleFilterChange = (value: string[]) => {
-    setFxCurrency(value);
-  };
-
-  const handleRefetchDataset = () => {
-    if (isDatasetArtifact) {
-      getDatasetArtifacts({
-        processId: processId as string,
-        activityRunId: activityId as string,
-        datasetId: id as string,
-        query_config: exportsDatasetQuery,
-      });
-    } else {
-      getDatasetData({
-        datasetId: id as string,
-        query_config: exportsDatasetQuery,
-      });
-    }
-  };
-
-  const handleColumnMoved = (event: ColumnMovedEvent) => {
-    const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(id);
-    const latestColumns = event?.api?.getColumns() ?? [];
-    const { column, toIndex = 0 } = event;
-
-    if (!column) return;
-    const columnOrderingVisibility: { colId: string; isVisible: boolean }[] = columnOrderingFromLocalStorage?.length
-      ? columnOrderingFromLocalStorage
-      : latestColumns.map((column) => ({
-          colId: column.getColId(),
-          isVisible: column.isVisible(),
-        }));
-
-    const movedColumn = columnOrderingVisibility.find((item) => item.colId === column?.getColId()) ?? {};
-    const fromIndex = columnOrderingVisibility.findIndex((item) => item.colId === column?.getColId());
-
-    if (fromIndex === toIndex) return;
-    let finalList: { colId?: string; isVisible?: boolean }[] = [];
-
-    if (fromIndex < toIndex) {
-      const zeroToOldIndex = columnOrderingVisibility.slice(0, fromIndex) ?? [];
-      const oldIndexToNewIndex = columnOrderingVisibility.slice(fromIndex + 1, toIndex + 1) ?? [];
-      const newIndexToEnd = columnOrderingVisibility.slice(toIndex + 1) ?? [];
-
-      finalList = [...zeroToOldIndex, ...oldIndexToNewIndex, movedColumn, ...newIndexToEnd];
-    } else {
-      const endToOldIndex = columnOrderingVisibility.slice(fromIndex + 1) ?? [];
-      const oldIndexToNewIndex = columnOrderingVisibility.slice(toIndex, fromIndex) ?? [];
-      const newIndexToStart = columnOrderingVisibility.slice(0, toIndex) ?? [];
-
-      finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
-    }
-    const currentColumnOrderingVisibility = JSON.parse(
-      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-    );
-
-    setToLocalStorage(
-      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-      JSON.stringify({ ...currentColumnOrderingVisibility, [id]: finalList }),
-    );
-  };
-
-  const handleCloseRulesListingSideDrawer = () => {
-    setIsRulesListingSideDrawerOpen(false);
-  };
-
-  const handleCloseDeleteRule = () => {
-    setDeleteRuleId('');
-  };
-
-  const handleDeleteRuleSuccess = (data: DatasetUpdateResponseType) => {
-    handleCloseRulesListingSideDrawer();
-    handleSuccessfulUpdate(data, true, DATASET_ACTION_TYPE.RULE_DELETION);
-  };
-
   useEffect(() => {
     firstLoadDone.current = false;
     if (drilldownFilters?.conditions === null) return;
@@ -651,56 +492,30 @@ const DatasetById: FC<DatasetByIdProps> = ({
       pageSize,
     );
 
-    if (isDatasetArtifact) {
-      getDatasetArtifacts({
-        processId: processId as string,
-        activityRunId: activityId as string,
-        datasetId: id as string,
-        query_config: queryConfig,
-      })
-        .unwrap()
-        .then((response) => {
-          setDatasetTitle(response?.title);
-          setTotalRows(response?.data?.total_count);
-          setCachedDatasetData(response);
-          dispatch({
-            type: filtersContextActions.SET_TOTAL_ROWS,
-            payload: { totalRows: response?.data?.total_count },
-          });
-        })
-        .catch((err) => {
-          captureException(err);
+    getDatasetData({
+      datasetId: id as string,
+      query_config: queryConfig,
+    })
+      .unwrap()
+      .then((response) => {
+        setDatasetTitle(response?.title);
+        setTotalRows(response?.data?.total_count);
+        setCachedDatasetData(response);
+        dispatch({
+          type: filtersContextActions.SET_TOTAL_ROWS,
+          payload: { totalRows: response?.data?.total_count },
         });
-    } else {
-      getDatasetData({
-        datasetId: id as string,
-        query_config: queryConfig,
       })
-        .unwrap()
-        .then((response) => {
-          setDatasetTitle(response?.title);
-          setTotalRows(response?.data?.total_count);
-          setCachedDatasetData(response);
-          dispatch({
-            type: filtersContextActions.SET_TOTAL_ROWS,
-            payload: { totalRows: response?.data?.total_count },
-          });
-        })
-        .catch((err) => {
-          captureException(err);
-        });
-    }
-  }, [filters, drilldownFilters, id, isDatasetArtifact, getDatasetArtifacts, processId, activityId]);
+      .catch((err) => {
+        captureException(err);
+      });
+  }, [filters, drilldownFilters, id, processId, activityId]);
 
   useEffect(() => {
     updateDatasetTitleInParent?.(datasetTitle);
   }, [datasetTitle, updateDatasetTitleInParent]);
 
-  useOnClickOutside(datasetTableRef, removeCellFocus);
-
-  const handleGridReady = () => {
-    setGridReady(true);
-  };
+  useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
 
   return (
     <>
@@ -724,9 +539,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('z-1000 flex items-center justify-between gap-y-3 pr-8', headerClassName)}>
-          <div className={cn('flex items-center py-3', { 'py-0': isDatasetArtifact })}>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className={filterWrapperClassName} />
+        <div className={cn('flex items-center justify-between gap-y-3 pr-8')}>
+          <div className='flex items-center py-3'>
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} />
           </div>
 
           <div className='relative flex items-center gap-2.5'>
@@ -750,7 +565,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
                 setShowAiTransformationStatus={setShowAiTransformationStatus}
               />
             )}
-            {!isReadOnly && showDatasetHistory && <DatasetHistory />}
+            {!isReadOnly && <DatasetHistory />}
             {!isReadOnly && (
               <>
                 <DisplayOptions tableRef={tableRef} datasetId={id as string} />
@@ -773,7 +588,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         </div>
 
         <CommonWrapper
-          isError={isDatasetArtifact ? lazyloadDatasetArtifactsError : lazyloadDataSetError}
+          isError={lazyloadDataSetError}
           errorCardTitle='Failed to load dataset'
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
@@ -787,20 +602,17 @@ const DatasetById: FC<DatasetByIdProps> = ({
               totalRows={totalRows}
               onCellEditRequest={onCellEditRequest}
               onFillEnd={onFillEnd}
-              onRowPropertiesClick={handleRowPropertiesClick}
-              onColumnMoved={handleColumnMoved}
-              onGridReady={handleGridReady}
-              // Removed because it is causing load on star tree
-              // columnLevelStats={columnLevelStats}
+              onRowPropertiesClick={(data) => setRowPropertiesData(data)}
+              onColumnMoved={(event) => handleColumnMoved(event, id as string)}
+              onGridReady={() => setGridReady(true)}
               containerStyle={containerStyle}
               gridStyle={gridStyle}
-              {...(isDatasetArtifact
-                ? datasetArtifacts?.data?.config?.is_drilldown_enabled
-                  ? { onDrilldownClick: handleDrilldownClick }
-                  : {}
-                : datasetData?.data?.config?.is_drilldown_enabled
-                  ? { onDrilldownClick: handleDrilldownClick }
-                  : {})}
+              {...(datasetData?.data?.config?.is_drilldown_enabled
+                ? {
+                    onDrilldownClick: (data) =>
+                      handleDrilldownClick(data, id as string, params?.pageId as string, router),
+                  }
+                : {})}
             />
           </div>
         </CommonWrapper>
@@ -810,7 +622,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           column={ruleColumnDetails?.colId}
           columnLabel={ruleColumnDetails?.columnLabel}
           tagColorMap={ruleColumnDetails?.tagColorMap}
-          onClose={handleCloseRulesListingSideDrawer}
+          onClose={() => setIsRulesListingSideDrawerOpen(false)}
           datasetId={id as string}
           handleSuccessfulUpdate={handleSuccessfulUpdate}
           onDeleteRuleId={setDeleteRuleId}
@@ -828,7 +640,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       {deleteRuleId && (
         <RuleDelete
           isOpen={!!deleteRuleId}
-          onClose={handleCloseDeleteRule}
+          onClose={() => setDeleteRuleId('')}
           ruleId={deleteRuleId ?? ''}
           onSuccess={handleDeleteRuleSuccess}
         />

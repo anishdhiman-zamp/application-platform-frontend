@@ -60,7 +60,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
   };
 
   return (
-    <div className='relative' ref={menuRef}>
+    <div className='relative z-100' ref={menuRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button

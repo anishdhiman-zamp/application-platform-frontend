@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ColumnHeaderClickedEvent } from 'ag-grid-community';
 import { CustomStatusPanelProps } from 'ag-grid-react';
 import { MapAny } from 'types/commonTypes';

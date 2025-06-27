@@ -1,16 +1,15 @@
 import { type FC, useEffect, useRef } from 'react';
 import LogsList from 'modules/process/activity-logs/components/LogsList';
 import LogsSkeleton from 'modules/process/activity-logs/loader/LogsSkeleton';
-import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
+import type { HandleShowArtifactsProps } from 'modules/process/process.types';
 import { useGetActivityLogsQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import type { MapAny } from '@/types/commonTypes';
 
 interface LogsSectionProps {
   processId: string;
   activityId: string;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
 }
 
 const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, activityId }) => {
