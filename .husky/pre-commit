@@ -1,1 +1,49 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged (ESLint + Prettier on staged files)
+echo "🔧 Running lint-staged..."
 npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ lint-staged check failed"
+  exit 1
+fi
+
+# Check for any types
+echo "🚫 Checking for 'any' types..."
+if grep -r ":\s*any" src/ --include="*.ts" --include="*.tsx" | grep -v "//.*any"; then
+  echo "❌ Found 'any' types. Please use proper type definitions."
+  grep -r ":\s*any" src/ --include="*.ts" --include="*.tsx" | grep -v "//.*any"
+  exit 1
+fi
+
+# Check for inline styles
+echo "🎨 Checking for inline styles..."
+if grep -r "style=\{" src/ --include="*.tsx" | grep -v "//.*style="; then
+  echo "⚠️  Found inline styles - consider using Tailwind classes"
+  grep -r "style=\{" src/ --include="*.tsx" | grep -v "//.*style="
+  echo "💡 Consider using Tailwind classes instead of inline styles"
+fi
+
+# Check for missing dependency arrays in useEffect
+echo "🔄 Checking useEffect dependency arrays..."
+if grep -r "useEffect.*=>" src/ --include="*.tsx" | grep -v "\[\]" | grep -v "//.*useEffect"; then
+  echo "⚠️  Found useEffect without dependency array"
+  grep -r "useEffect.*=>" src/ --include="*.tsx" | grep -v "\[\]" | grep -v "//.*useEffect"
+  echo "💡 Add dependency array to useEffect hooks"
+fi
+
+# Check for potential sensitive data
+echo "🔒 Checking for potential sensitive data..."
+if grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | \
+   grep -v "//.*password\|//.*secret\|//.*key\|//.*token" | \
+   grep -v "password.*=.*process\|secret.*=.*process\|key.*=.*process\|token.*=.*process"; then
+  echo "⚠️  Found potential sensitive data - please review"
+  grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | \
+  grep -v "//.*password\|//.*secret\|//.*key\|//.*token" | \
+  grep -v "password.*=.*process\|secret.*=.*process\|key.*=.*process\|token.*=.*process"
+fi
+
+echo "✅ Pre-commit checks passed!"
