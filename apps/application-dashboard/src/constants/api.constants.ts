@@ -8,6 +8,7 @@ export const AZURE_AUTHORITY = process.env.NEXT_PUBLIC_AZURE_AUTHORITY ?? '';
 export const AZURE_REDIRECT = process.env.NEXT_PUBLIC_AZURE_REDIRECT || '/';
 export const AZURE_SCOPE = process.env.NEXT_PUBLIC_AZURE_SCOPE ?? '';
 export const VELT_KEY = process.env.NEXT_PUBLIC_VELT_KEY ?? '';
+export const MULTI_REGION_ENABLED = process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED === 'true';
 export const CSRF_TOKEN_KEY = 'X-ZAMP-CSRF';
 export const PLATFORM_HEADER_KEY = 'X-Platform';
 export const CANARY_HEADER_KEY = 'X-Canary';
@@ -33,7 +34,7 @@ export enum APITags {
 }
 export const API_TAGS = Object.values(APITags);
 
-const REGION_LIST = ['-sg', ''];
+const REGION_LIST = ['', '-sg', '-me'];
 
 export const getUserRegion = () => {
   const userRegion = getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION);
@@ -48,7 +49,7 @@ export const getUserRegion = () => {
 export const getApiDomainByRegion = async (email = '') => {
   const region = getUserRegion();
 
-  if (ENVIRONMENT === 'production' && !region) {
+  if (ENVIRONMENT === 'production' && !region && MULTI_REGION_ENABLED) {
     const apiDomains = await Promise.allSettled(
       REGION_LIST.map(async (region) => {
         return fetch(`${getApiDomain(ENVIRONMENT, region)}/auth/verify/email`, {
@@ -69,10 +70,8 @@ export const getApiDomainByRegion = async (email = '') => {
       )
       .find((result) => result.value.status === 200)?.value.region;
 
-    if (successfulRegion) {
-      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, successfulRegion ?? '');
-      reinitializeApiDomain();
-    }
+    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, successfulRegion ?? '');
+    reinitializeApiDomain();
 
     return getApiDomain(ENVIRONMENT, successfulRegion ?? '');
   }
