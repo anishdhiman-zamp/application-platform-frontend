@@ -2,6 +2,7 @@ import { MarkerType } from '@xyflow/react';
 import { ColDef } from 'ag-grid-community';
 import { COLORS } from 'constants/colors';
 import { AdminDatasetActionTypes, DatasetType, DISPLAY_CONFIG_HEADERS, ProviderType } from 'modules/admin/admin.types';
+import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 
 export const DisplayConfigHeadersList = [
   {
@@ -79,3 +80,10 @@ export const TRANSFORM_DATASET_LABEL_PROPS = {
 };
 
 export const S3_INGESTION_EDGE_LABEL = 'S3 ingestion';
+
+export const DISPLAY_TYPE_OPTIONS: { label: CUSTOM_COLUMNS_TYPE; value: CUSTOM_COLUMNS_TYPE }[] = Object.values(
+  CUSTOM_COLUMNS_TYPE,
+).map((type) => ({
+  label: type,
+  value: type,
+}));

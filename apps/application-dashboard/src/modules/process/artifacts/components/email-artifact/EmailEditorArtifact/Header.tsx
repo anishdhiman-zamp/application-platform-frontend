@@ -7,7 +7,7 @@ const Header: FC<HeaderProps> = ({ onChange, value }) => {
   return (
     <>
       <div className='px-4'>
-        <table className='f-13-500 border-separate border-spacing-y-3 [&_td]:odd:py-1 [&_td]:odd:text-gray-700'>
+        <table className='f-13-500 border-separate border-spacing-y-3 [&_td]:odd:content-start [&_td]:odd:py-1 [&_td]:odd:pr-1 [&_td]:odd:text-gray-700'>
           <tbody>
             {SENDER_HEADINGS.map((heading) => (
               <tr key={heading.value}>
@@ -23,7 +23,7 @@ const Header: FC<HeaderProps> = ({ onChange, value }) => {
           </tbody>
         </table>
       </div>
-      <div className='border-GRAY_500 flex items-center gap-3 border-y px-4 py-3'>
+      <div className='border-GRAY_500 flex items-center gap-3 border-y-[0.5px] px-4 py-3'>
         <span className='f-13-500 text-gray-700'>Subject</span>
         <Input
           value={value.heading}

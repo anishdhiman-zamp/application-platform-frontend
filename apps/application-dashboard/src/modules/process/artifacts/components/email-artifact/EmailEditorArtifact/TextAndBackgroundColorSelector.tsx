@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { type Editor } from '@tiptap/react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 
 const TextAndBackgroundColor: FC<{ editor: Editor | null }> = ({ editor }) => {
@@ -24,11 +25,13 @@ const TextAndBackgroundColor: FC<{ editor: Editor | null }> = ({ editor }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1 underline'>
-          A <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
-        </Button>
-      </DropdownMenuTrigger>
+      <TooltipV2 tooltipBody='Text and Background Color' asChildTrigger>
+        <DropdownMenuTrigger asChild>
+          <Button variant='ghost' size='xsmall' className='flex h-6 items-center gap-1 px-1 underline'>
+            A <SvgSpriteLoader id='chevron-down' color={COLORS.GRAY_700} size={8} />
+          </Button>
+        </DropdownMenuTrigger>
+      </TooltipV2>
 
       <DropdownMenuContent>
         <div className='flex items-center gap-2'>

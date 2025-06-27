@@ -1,4 +1,5 @@
 import { DatasetType, ProviderType } from 'modules/admin/admin.types';
+import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 
 export type GetDatasetDisplayConfigRequestType = {
   datasetId: string;
@@ -9,7 +10,7 @@ export type displayConfigType = {
   alias?: string;
   is_hidden: string;
   is_editable: string;
-  type: string;
+  type: CUSTOM_COLUMNS_TYPE;
   config: {
     amount_column: string;
     currency_column: string;

@@ -53,7 +53,7 @@ const LogsSection: FC<LogsSectionProps> = ({ handleShowArtifacts, processId, act
         ref={containerRef}
         className='h-full flex-1 overflow-auto pb-40 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
       >
-        {logs?.activity_logs?.length && (
+        {!!logs?.activity_logs?.length && (
           <LogsList
             logs={logs}
             processId={processId}

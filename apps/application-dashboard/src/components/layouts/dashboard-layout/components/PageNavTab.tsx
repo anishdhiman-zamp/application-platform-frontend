@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { getPageRouteById } from 'constants/routeConfig';
-import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import { COLORS } from '@/constants/colors';
 
@@ -12,16 +10,13 @@ interface PageNavTabProps {
   isSelected?: boolean;
 }
 
-const PageNavTab = ({ label, pageId, isSelected }: PageNavTabProps) => {
-  const router = useRouter();
-
+const PageNavTab = ({ label, isSelected }: PageNavTabProps) => {
   return (
     <div
       className={cn(
         'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
       )}
-      onClick={() => router.push(getPageRouteById(pageId))}
     >
       <svg width='14' height='14' viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
         <path

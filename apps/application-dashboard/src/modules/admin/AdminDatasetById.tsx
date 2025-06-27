@@ -1,7 +1,9 @@
 import React, { FC, useEffect, useState } from 'react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetDatasetDisplayConfigQuery } from 'apis/admin';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { DisplayConfigHeadersList } from 'modules/admin/admin.constants';
+import { DISPLAY_TYPE_OPTIONS, DisplayConfigHeadersList } from 'modules/admin/admin.constants';
 import { AdminDatasetByIdPropsType, DISPLAY_CONFIG_HEADERS } from 'modules/admin/admin.types';
 import AdminHeader from 'modules/admin/AdminHeader';
 import EditableConfigField from 'modules/admin/components/previewSidebar/EditConfig';
@@ -99,7 +101,22 @@ const AdminDatasetById: FC<AdminDatasetByIdPropsType> = ({ id }) => {
                   {config?.is_editable ? 'True' : 'False'}
                 </div>
 
-                <span className='border-GRAY_400 overflow-hidden border-r p-2'>{config?.type || '-'}</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className='border-GRAY_400 flex cursor-pointer items-center justify-between overflow-hidden border-r p-2'>
+                    <span>{config?.type || '-'}</span>
+                    <SvgSpriteLoader id='chevron-down' />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {DISPLAY_TYPE_OPTIONS.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleChange(index, DISPLAY_CONFIG_HEADERS.TYPE, option.value)}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <EditableConfigField
                   value={config?.config?.amount_column || ''}

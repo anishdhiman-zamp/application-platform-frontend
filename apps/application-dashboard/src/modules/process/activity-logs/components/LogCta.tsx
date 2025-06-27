@@ -53,7 +53,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
 
   return (
     <div className='mt-3 flex w-full flex-col items-start justify-start gap-y-2'>
-      <div className='flex w-full flex-wrap items-start justify-start gap-x-2 gap-y-2'>
+      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
         {artifactTypeCta?.map((cta) => (
           <ArtifactTag
             key={cta?.id}
@@ -67,6 +67,8 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             displayClassName='max-w-40'
           />
         ))}
+      </div>
+      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
         {buttonTypeCta?.map((cta) => (
           <Button
             variant={(cta?.cta_config?.variant as ButtonProps['variant']) ?? 'secondary'}
