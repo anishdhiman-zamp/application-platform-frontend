@@ -224,18 +224,20 @@
   box-shadow: none !important;
 }
 
-.missing-focus {
-  border: 1.5px solid #e10909 !important;
+.ag-cell-focus {
+  border: 1.5px solid #2546f5;
   border-radius: 4px;
 }
 
-.missing-completed {
-  background-color: #fef9da !important;
-  border: none !important;
+.ag-status-bar {
+  min-height: 30px;
+  border-top: 1px solid #c9c9c9;
+  background-color: #fafafa;
+  padding: 0 16px;
 }
 
-.ag-cell-focus {
-  border: 1.5px solid #2546f5;
+.missing-focus {
+  border: 1.5px solid #e10909 !important;
   border-radius: 4px;
 }
 
@@ -248,9 +250,16 @@
   background-color: #e10909 !important;
 }
 
-.ag-status-bar {
-  min-height: 30px;
-  border-top: 1px solid #c9c9c9;
-  background-color: #fafafa;
-  padding: 0 16px;
+.missing-completed {
+  background-color: #fef9da !important;
+  border: none !important;
+}
+
+.missing-completed:has(.ag-input-field-input) {
+  border: 1.5px solid #2546f5 !important;
+}
+
+.missing-completed .ag-fill-handle {
+  border: 1.5px solid #fef9da !important;
+  background-color: #fef9da !important;
 }

@@ -25,6 +25,7 @@ import {
 } from '@/modules/process/artifacts/context/completedFields.context';
 import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
+import { formatPlural } from '@/utils/common';
 
 interface DatasetArtifactProps {
   datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
@@ -49,8 +50,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   } = useCompletedFields();
   const userId = useAppSelector((state) => state?.user?.user?.user_id);
 
-  const MAX_VISIBLE_TABS = 3;
-
   const filterDatasets = useMemo(() => Object.keys(filters?.dataset_to_filter_map ?? missingFields ?? {}), [filters]);
   const datasets = useMemo(() => {
     return (datasetArtifact?.datasets ?? []).filter((dataset) => {
@@ -60,7 +59,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     });
   }, [datasetArtifact?.datasets, filterDatasets]);
 
-  const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, MAX_VISIBLE_TABS));
+  const [visibleTabs, setVisibleTabs] = useState(datasets?.slice(0, 3));
   const [activeTab, setActiveTab] = useState<string>('');
 
   const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
@@ -89,7 +88,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     const alreadyVisible = visibleTabs.some((tab) => tab?.dataset_id === dataset_id);
 
     if (!alreadyVisible) {
-      const newVisibleTabs = [...visibleTabs.slice(0, MAX_VISIBLE_TABS - 1), selectedTab];
+      const newVisibleTabs = [...visibleTabs.slice(0, 2), selectedTab];
 
       setVisibleTabs(newVisibleTabs);
     }
@@ -143,10 +142,12 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
         {missingFieldsCount > 0 && (
           <div className='bg-GRAY_100 flex items-center justify-between px-4 py-1.5'>
             <span className='f-11-500 text-RED_800'>
-              {missingFieldsCount} Missing Fields in {datasets?.length} datasets
+              {formatPlural(missingFieldsCount, 'missing field')} in {formatPlural(datasets?.length, 'dataset')}
             </span>
             <div className='flex items-center gap-2.5'>
-              <span className='f-11-500 text-GRAY_1000'>{completedFieldsCount} New Entries</span>
+              <span className='f-11-500 text-GRAY_1000'>
+                {formatPlural(completedFieldsCount, 'new entry', 'new entries')}
+              </span>
               <Button
                 disabled={missingFieldsCount !== completedFieldsCount}
                 size='xsmall'

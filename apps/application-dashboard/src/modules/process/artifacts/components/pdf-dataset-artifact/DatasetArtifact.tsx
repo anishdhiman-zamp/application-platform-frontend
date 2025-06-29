@@ -56,7 +56,7 @@ import {
 } from 'types/api/dataset.types';
 import { type defaultFnType, MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
-import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
+import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
@@ -772,7 +772,9 @@ const MissingFieldControl: FC<MissingFieldControlProps> = ({
   return (
     <div className='animate-opacity border-GRAY_500 absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 transform items-center justify-center rounded-md border-[0.5px] bg-white'>
       <div className='flex items-center gap-x-2.5 p-2.5'>
-        <span className='f-11-500 text-RED_800 whitespace-nowrap'>{totalMissingFields} Missing Fields</span>
+        <span className='f-11-500 text-RED_800 whitespace-nowrap'>
+          {formatPlural(totalMissingFields, 'missing field')}
+        </span>
         <div className='flex items-center gap-x-1.5'>
           <SvgSpriteLoader
             id='chevron-up'
