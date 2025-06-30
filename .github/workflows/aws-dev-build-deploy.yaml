@@ -152,6 +152,37 @@ jobs:
           echo "Build artifacts:"
           ls -la apps/application-dashboard/.next/
 
+      - name: Debug file structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Root directory contents:"
+          ls -la
+          echo "node_modules exists: $(test -d node_modules && echo 'YES' || echo 'NO')"
+          echo "node_modules size: $(du -sh node_modules 2>/dev/null || echo 'NOT FOUND')"
+          echo "apps/application-dashboard/.next exists: $(test -d apps/application-dashboard/.next && echo 'YES' || echo 'NO')"
+          echo "apps/application-dashboard/.next/standalone exists: $(test -d apps/application-dashboard/.next/standalone && echo 'YES' || echo 'NO')"
+          
+          echo "=== Detailed node_modules check ==="
+          if [ -d "node_modules" ]; then
+            echo "node_modules directory exists"
+            echo "node_modules permissions: $(ls -ld node_modules)"
+            echo "node_modules contents (first 10 items):"
+            ls -la node_modules | head -10
+            echo "node_modules/.bin exists: $(test -d node_modules/.bin && echo 'YES' || echo 'NO')"
+            echo "next command exists: $(test -f node_modules/.bin/next && echo 'YES' || echo 'NO')"
+          else
+            echo "node_modules directory does NOT exist"
+            echo "Checking if it's a symlink: $(ls -la | grep node_modules || echo 'No node_modules found')"
+          fi
+          
+          echo "=== Checking .dockerignore ==="
+          if [ -f ".dockerignore" ]; then
+            echo ".dockerignore exists"
+            echo ".dockerignore contents:"
+            cat .dockerignore
+          else
+            echo ".dockerignore does not exist"
+          fi
 
       - id: build
         name: Build and Push Image
