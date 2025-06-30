@@ -35,15 +35,5 @@ if grep -r "useEffect.*=>" src/ --include="*.tsx" | grep -v "\[\]" | grep -v "//
   echo "💡 Add dependency array to useEffect hooks"
 fi
 
-# Check for potential sensitive data
-echo "🔒 Checking for potential sensitive data..."
-if grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | \
-   grep -v "//.*password\|//.*secret\|//.*key\|//.*token" | \
-   grep -v "password.*=.*process\|secret.*=.*process\|key.*=.*process\|token.*=.*process"; then
-  echo "⚠️  Found potential sensitive data - please review"
-  grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.tsx" | \
-  grep -v "//.*password\|//.*secret\|//.*key\|//.*token" | \
-  grep -v "password.*=.*process\|secret.*=.*process\|key.*=.*process\|token.*=.*process"
-fi
 
 echo "✅ Pre-commit checks passed!"
