@@ -202,6 +202,10 @@ const Table: FC<TableProps> = ({
     [completedFields],
   );
 
+  const hasMissingFields = useMemo(() => {
+    return missingFields && missingFields?.length > 0;
+  }, [missingFields]);
+
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -337,10 +341,6 @@ const Table: FC<TableProps> = ({
     [onDrilldownClick, onRowPropertiesClick, menuTitle],
   );
 
-  const shouldShowRowId = useMemo(() => {
-    return rows.some((row) => row?.id);
-  }, [rows]);
-
   const getRowId = useCallback((params: GetRowIdParams) => {
     return params.data?.id;
   }, []);
@@ -375,7 +375,7 @@ const Table: FC<TableProps> = ({
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}
-          {...(shouldShowRowId ? { getRowId } : {})}
+          {...(hasMissingFields ? { getRowId } : {})}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',
