@@ -95,8 +95,29 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
+      - name: Construct AWS registry url
+        id: registry
+        run: |
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_ENV
+          echo "::set-output name=ECR_REGISTRY::$ECR_REGISTRY"
+
+      - name: "Install AWS CLI"
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+  
       - name: "Login to Amazon ECR"
-        uses: aws-actions/amazon-ecr-login@v2
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+          driver: remote
+  
 
       - uses: actions/cache@v4
         with:
@@ -135,11 +156,6 @@ jobs:
           echo "Build artifacts:"
           ls -la apps/application-dashboard/.next/
 
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v3
-        with:
-          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
-          driver: remote
 
       - id: build
         name: Build and Push Image
@@ -152,16 +168,15 @@ jobs:
           
           # Build Docker image using the Dockerfile
           # Application is already built, so Docker will just package it
-          docker build -t $ECR_REPO_URI:$IMAGE_TAG \
+          docker buildx build -t -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
             --build-arg PORT=3000 \
             --build-arg SKIP_INSTALL=true \
             --build-arg SKIP_BUILD=true \
-            .
+            --push .
           
-          docker push $ECR_REPO_URI:$IMAGE_TAG
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
