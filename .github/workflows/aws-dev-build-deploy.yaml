@@ -121,15 +121,11 @@ jobs:
 
       - uses: actions/cache@v4
         with:
-          path: |
-            ~/.npm
-            ${{ github.workspace }}/.next/cache
-            ${{ github.workspace }}/apps/application-dashboard/.next/cache
-            ${{ github.workspace }}/node_modules
-            ${{ github.workspace }}/apps/application-dashboard/node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-turbo-
+
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -168,7 +164,9 @@ jobs:
           
           # Build Docker image using the Dockerfile
           # Application is already built, so Docker will just package it
-          docker buildx build -t -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+          docker buildx build \
+            --platform linux/amd64 \
+            -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
