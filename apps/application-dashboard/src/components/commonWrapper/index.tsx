@@ -1,5 +1,4 @@
 import { FC, Fragment } from 'react';
-import { captureException } from '@sentry/browser';
 import { COLORS } from 'constants/colors';
 import { SIZE } from 'constants/common.constants';
 import { cn } from 'utils/common';
@@ -70,8 +69,6 @@ const CommonWrapper: FC<CommonWrapperPropsTypes> = ({
     );
 
   if (isError) {
-    captureException(new Error('Error in fetching data'));
-
     return renderError ? (
       renderError
     ) : (

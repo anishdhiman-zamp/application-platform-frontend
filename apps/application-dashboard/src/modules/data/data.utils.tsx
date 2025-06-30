@@ -99,7 +99,7 @@ export const getColumnMinWidth = (
   }
 };
 
-const CheckIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
+const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
   const rowId = params.data?.id;
 
   return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
@@ -138,7 +138,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         return !!(
           column?.metadata?.is_editable &&
           currentUserHasEditAccess &&
-          CheckIsCellEditable(params, missingFields || [])
+          checkIsCellEditable(params, missingFields || [])
         );
       },
       suppressFillHandle: !column?.metadata?.is_editable,

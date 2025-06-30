@@ -16,7 +16,7 @@ const Summary = ({ data }: SummaryProps) => {
             <p className='f-12-450 text-GRAY_900 w-[150px] truncate capitalize' title={key}>
               {key}
             </p>
-            <p className='f-12-450 text-GRAY_1000 flex-1 truncate px-2 py-1.5' title={value}>
+            <p className='f-12-450 text-GRAY_1000 max-w-[400px] flex-1 truncate px-2 py-1.5' title={value}>
               {value?.toString()?.trim() || '-'}
             </p>
           </div>

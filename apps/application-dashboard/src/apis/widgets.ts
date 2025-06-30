@@ -17,7 +17,30 @@ const Widgets = baseApi.injectEndpoints({
         params: payload,
       }),
     }),
+    getTransformedWidgetData: builder.query<any, WidgetDataRequestType>({
+      queryFn: async ({ widgetId, payload }) => {
+        try {
+          const params = new URLSearchParams(payload);
+          const response = await fetch(`/api/widgets/${widgetId}/transformed-data?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          return { data };
+        } catch (error) {
+          return { error: { status: 'FETCH_ERROR', error: error instanceof Error ? error.message : 'Unknown error' } };
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetWidgetInstanceQuery, useGetWidgetDataQuery } = Widgets;
+export const { useGetWidgetInstanceQuery, useGetWidgetDataQuery, useGetTransformedWidgetDataQuery } = Widgets;

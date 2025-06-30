@@ -52,6 +52,7 @@ import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
+import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
 import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
@@ -201,9 +202,9 @@ const Table: FC<TableProps> = ({
     [completedFields],
   );
 
-  const isValueEmpty = (value: string | null | undefined) => {
-    return value === '' || value === null || value === undefined;
-  };
+  const hasMissingFields = useMemo(() => {
+    return missingFields && missingFields?.length > 0;
+  }, [missingFields]);
 
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
@@ -214,7 +215,7 @@ const Table: FC<TableProps> = ({
       suppressHeaderContextMenu: true,
       valueFormatter: (params: ValueFormatterParams) => {
         if (checkIsMissingField(params ?? []) && isValueEmpty(params.value)) {
-          return 'Attention Required';
+          return 'Required*';
         }
 
         if (shouldShowNA && isValueEmpty(params.value)) {
@@ -228,7 +229,7 @@ const Table: FC<TableProps> = ({
       cellClass: (params: MapAny) => {
         const baseClasses = 'f-11-400 content-center !px-2 py-1';
         const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
-        const valueClass = !params?.value ? '!text-GRAY_500' : '!text-GRAY_1000';
+        const valueClass = isValueEmpty(params?.value) ? '!text-GRAY_500' : '!text-GRAY_1000';
 
         return cn(baseClasses, valueClass, interactiveClass, cellClass);
       },
@@ -341,14 +342,13 @@ const Table: FC<TableProps> = ({
   );
 
   const getRowId = useCallback((params: GetRowIdParams) => {
-    return params.data.id;
+    return params.data?.id;
   }, []);
 
   return (
     <div style={containerStyle}>
       <div className='dataset' style={gridStyle}>
         <AgGridReact
-          getRowId={getRowId}
           ref={tableRef}
           columnDefs={columns}
           defaultColDef={defaultColDef}
@@ -375,6 +375,7 @@ const Table: FC<TableProps> = ({
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}
+          {...(hasMissingFields ? { getRowId } : {})}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',
