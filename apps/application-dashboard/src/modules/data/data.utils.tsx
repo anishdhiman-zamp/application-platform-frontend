@@ -148,7 +148,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         values: column?.options,
       },
       suppressMovable: column?.metadata?.config?.movable,
-      headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias ?? column?.column),
+      headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias || column?.column),
       minWidth: getColumnMinWidth(
         columnNameLength,
         isActivityCurrentStatusColumn,

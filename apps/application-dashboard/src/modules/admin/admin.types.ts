@@ -1,4 +1,4 @@
-import { displayConfigType } from 'types/api/admin.types';
+import { DisplayConfigType } from 'types/api/admin.types';
 import { defaultFnType } from 'types/commonTypes';
 
 export enum DISPLAY_CONFIG_HEADERS {
@@ -7,19 +7,18 @@ export enum DISPLAY_CONFIG_HEADERS {
   IS_HIDDEN = 'is_hidden',
   IS_EDITABLE = 'is_editable',
   TYPE = 'type',
-  AMOUNT_COLUMN = 'amount_column',
-  CURRENCY_COLUMN = 'currency_column',
+  CONFIG = 'config',
 }
 
 export type FormattedJsonPropsType = {
-  originalJson: displayConfigType[];
-  formattedJson: displayConfigType[];
+  originalJson: DisplayConfigType[];
+  formattedJson: DisplayConfigType[];
   search: string;
 };
 
 export type AdminHeaderPropsType = {
-  displayConfigInitialData: displayConfigType[];
-  displayConfigFinalData: displayConfigType[];
+  displayConfigInitialData: DisplayConfigType[];
+  displayConfigFinalData: DisplayConfigType[];
   datasetId: string;
 };
 
@@ -28,8 +27,8 @@ export type AdminDatasetByIdPropsType = {
 };
 
 export type JsonPreviewSidebarPropsType = {
-  formattedJson: displayConfigType[];
-  originalJson: displayConfigType[];
+  formattedJson: DisplayConfigType[];
+  originalJson: DisplayConfigType[];
   onClose: defaultFnType;
   isOpen: boolean;
 };
@@ -37,6 +36,7 @@ export type JsonPreviewSidebarPropsType = {
 export enum AdminDatasetActionTypes {
   DELETE = 'delete',
   EDIT = 'edit',
+  EDIT_DATASET = 'edit_dataset',
 }
 
 export type AdminDeleteDatasetDetailsType = {
@@ -62,6 +62,9 @@ export type EditDatasetType = {
   cluster_columns?: string[];
   order_by_column?: string;
   datasetId: string;
+  required_columns?: string[];
+  is_eligible_for_file_imports?: boolean;
+  dataset_type?: DatasetType;
 };
 
 export enum NodeType {

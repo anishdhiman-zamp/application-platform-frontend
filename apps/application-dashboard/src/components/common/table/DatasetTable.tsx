@@ -8,6 +8,7 @@ import {
   FillEndEvent,
   IServerSideDatasource,
   RowClickedEvent,
+  RowDragEndEvent,
   Theme,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -40,6 +41,8 @@ export interface DatasetTableProps {
   enableCellSelection?: boolean;
   onGridReady?: () => void;
   menuTitle?: string;
+  enableRowDrag?: boolean;
+  onRowDragEnd?: (event: RowDragEndEvent) => void;
   showStatusBar?: boolean;
   missingFields?: MissingFieldItemType[];
   completedFields?: { rowId: string; columnId: string }[];
@@ -71,6 +74,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
   enableCellSelection = true,
   onGridReady,
   menuTitle,
+  enableRowDrag,
+  onRowDragEnd,
   showStatusBar = true,
   missingFields,
   completedFields,
@@ -104,6 +109,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
         cellClass={cellClass}
         onGridReady={onGridReady}
         menuTitle={menuTitle}
+        enableRowDrag={enableRowDrag}
+        onRowDragEnd={onRowDragEnd}
         missingFields={missingFields}
         completedFields={completedFields}
         shouldShowNA={shouldShowNA}

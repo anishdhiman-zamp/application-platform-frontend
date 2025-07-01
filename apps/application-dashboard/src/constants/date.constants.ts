@@ -15,7 +15,6 @@ export const DATE_FORMATS = {
   YYYYMMDD_HHMMSS: 'yyyy-MM-dd HH:mm:ss',
   HHMM: 'HH:mm',
   MMddyyyy: 'MM/dd/yyyy',
-  dd_MMM_yyyy: 'dd MMM yyyy',
   d_MMM_yyyy: 'd MMM yyyy',
   MMM_yyyy: 'MMM yyyy',
   YYYY: 'yyyy',
