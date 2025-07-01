@@ -210,6 +210,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         datasetId: processId,
         tableRef,
         isProcess: true,
+        wrapLink: true,
       });
 
       if (columns?.length > 0) {
@@ -253,19 +254,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     }
   }, [isNoRowsOverlayVisible, isGridReady]);
 
-  const handleRowClicked = (data: MapAny) => {
-    if (!data?.data?.id) return;
-
-    const target = data?.event?.target as HTMLElement;
-
-    if (target.closest('.combobox-trigger')) return;
-
-    const activityId = data?.data?.id;
-    const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
-
-    router.push(path);
-  };
-
   if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters) && hasServerSideDataLoaded) {
     return (
       <div className='h-full w-full'>
@@ -308,7 +296,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             enableCellSelection={false}
             onGridReady={handleGridReady}
             onColumnMoved={handleColumnMoved}
-            onRowClicked={handleRowClicked}
             menuTitle='Activity properties'
             showStatusBar={false}
             shouldShowNA

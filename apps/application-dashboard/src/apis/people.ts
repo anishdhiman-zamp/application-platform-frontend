@@ -1,6 +1,5 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import { APITags } from 'constants/api.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   AcceptInvitationRequestType,
   AcceptInvitationResponseType,
@@ -34,6 +33,8 @@ import {
   ProcessApprovalResponse,
 } from 'types/api/policies.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
 
 const People = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -41,7 +42,6 @@ const People = baseApi.injectEndpoints({
       query: ({ organizationId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),
-      transformResponse: (data) => data,
       providesTags: [APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     getInvitedAudiencesByOrganisationId: builder.query<
@@ -51,7 +51,6 @@ const People = baseApi.injectEndpoints({
       query: ({ organizationId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET, { organizationId }),
       }),
-      transformResponse: (data) => data,
       providesTags: [APITags.GET_PEOPLE_INVITATIONS],
     }),
 

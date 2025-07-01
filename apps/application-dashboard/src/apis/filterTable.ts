@@ -1,9 +1,9 @@
-import baseApi from 'services/api';
 import {
   DatasetDataRequestType,
   DatasetDataResponseType,
   DatasetFilterConfigResponseType,
 } from 'types/api/dataset.types';
+import { baseApi } from '@/services/baseApi';
 
 const FilterTable = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,8 +15,8 @@ const FilterTable = baseApi.injectEndpoints({
     }),
     getData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
       query: ({ url, query_config }) => ({
-        url,
-        params: { query_config },
+        url: url!,
+        params: { query_config: query_config! },
       }),
     }),
   }),

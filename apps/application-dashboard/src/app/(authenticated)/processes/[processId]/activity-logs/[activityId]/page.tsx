@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { API_DOMAIN } from '@zamp-platform/api';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -11,7 +12,6 @@ import {
   useLazyGetArtifactsByArtifactIdQuery,
 } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
-import { API_DOMAIN } from '@/constants/api.constants';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';

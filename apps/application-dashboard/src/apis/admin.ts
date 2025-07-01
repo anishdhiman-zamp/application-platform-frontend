@@ -1,5 +1,5 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   AdminDatasetListingResponseType,
   CreateDatasetRequestType,
@@ -19,6 +19,7 @@ import {
   UpsertTemplateResponseType,
 } from 'types/api/admin.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { baseApi } from '@/services/baseApi';
 
 const Admin = baseApi.injectEndpoints({
   endpoints: (builder) => ({

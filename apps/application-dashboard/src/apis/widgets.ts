@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
 import { WidgetDataRequestType, WidgetDataResponseType, WidgetInstanceResponseType } from 'types/api/widgets.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { baseApi } from '@/services/baseApi';
 
 const Widgets = baseApi.injectEndpoints({
   endpoints: (builder) => ({

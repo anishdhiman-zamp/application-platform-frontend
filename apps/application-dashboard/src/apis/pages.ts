@@ -1,5 +1,5 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   AudiencesByPageIdRequest,
   AudiencesByPageIdResponse,
@@ -13,6 +13,7 @@ import {
   SheetResponseType,
 } from 'types/api/pagesApi.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { baseApi } from '@/services/baseApi';
 import type { ProcessesResponseType } from '@/types/api/processApi.types';
 
 const Pages = baseApi.injectEndpoints({

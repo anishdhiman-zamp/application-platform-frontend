@@ -21,7 +21,7 @@ const EditableConfigField = ({
   onChange,
   firstColumn,
 }: {
-  value: string;
+  value: string | number;
   isEditing: boolean;
   onEditToggle?: () => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;

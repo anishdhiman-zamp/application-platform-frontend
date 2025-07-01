@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/browser';
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   FILE_IMPORT_STATUS_MSG,
   FILE_SIZE,

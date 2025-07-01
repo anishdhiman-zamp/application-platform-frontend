@@ -16,13 +16,17 @@ import {
   FillEndEvent,
   GetContextMenuItemsParams,
   type GetRowIdParams,
+  GridReadyEvent,
   IServerSideDatasource,
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
   RowApiModule,
   RowClickedEvent,
+  RowDragEndEvent,
+  RowDragModule,
   ScrollApiModule,
+  SelectEditorModule,
   SizeColumnsToContentStrategy,
   SizeColumnsToFitGridStrategy,
   SizeColumnsToFitProvidedWidthStrategy,
@@ -105,7 +109,9 @@ ModuleRegistry.registerModules([
   RowApiModule,
   ColumnAutoSizeModule,
   EventApiModule,
-  ValidationModule,
+  RowDragModule,
+  SelectEditorModule,
+  ValidationModule /* Development Only */,
 ]);
 
 interface TableProps {
@@ -137,8 +143,10 @@ interface TableProps {
   columnLevelStats?: MapAny;
   cellClass?: string;
   headerClass?: string;
-  onGridReady?: () => void;
+  onGridReady?: (params: GridReadyEvent) => void;
   menuTitle?: string;
+  enableRowDrag?: boolean;
+  onRowDragEnd?: (event: RowDragEndEvent) => void;
   missingFields?: MissingFieldItemType[];
   completedFields?: { rowId: string; columnId: string }[];
   shouldShowNA?: boolean;
@@ -182,6 +190,8 @@ const Table: FC<TableProps> = ({
   headerClass,
   onGridReady,
   menuTitle,
+  enableRowDrag = false,
+  onRowDragEnd,
   missingFields,
   completedFields,
   shouldShowNA = false,
@@ -375,6 +385,9 @@ const Table: FC<TableProps> = ({
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}
+          rowDragManaged={enableRowDrag}
+          rowDragEntireRow={enableRowDrag}
+          onRowDragEnd={onRowDragEnd}
           {...(hasMissingFields ? { getRowId } : {})}
           {...(serverSideDatasource
             ? {
