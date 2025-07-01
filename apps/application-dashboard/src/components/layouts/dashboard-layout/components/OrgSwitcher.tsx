@@ -1,53 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
+import { useAppSelector } from 'hooks/toolkit';
 import { Loader2 } from 'lucide-react';
-import { useGetOrganizationsQuery } from '@/apis/auth';
+import { RootState } from 'store';
+import useGetAllOrganizations from '@/hooks/useGetAllOrganizations';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { MapAny } from '@/types/commonTypes';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 
-const OrgData = [
-  {
-    name: 'Zamp',
-    className: 'bg-ORANGE_200',
-    value: '-dev',
-  },
-  {
-    name: 'Doordash',
-    className: 'bg-GREEN_300',
-    value: '-sg',
-  },
-  {
-    name: 'Uber',
-    className: 'bg-RED_200',
-    value: '-me',
-  },
-];
+const OrgData = ['bg-ORANGE_200', 'bg-GREEN_300', 'bg-RED_200'];
 
 const OrgSwitcher = () => {
+  const { user } = useAppSelector((state: RootState) => state.user);
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<MapAny>(OrgData[0]);
+  const [selectedOrg, setSelectedOrg] = useState<MapAny>();
   const { logout, isLoggingOut } = useLogout();
 
-  const { data: organizations } = useGetOrganizationsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
-
-  console.log('organizations', organizations);
+  const organizations = useGetAllOrganizations();
 
   const handleOrgChange = (org: MapAny) => {
     setSelectedOrg(org);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, org.value);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, org.region);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
     setTimeout(() => {
       window.location.reload();
     }, 500);
   };
+
+  const selectedOrgColor =
+    OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ?? OrgData[0];
+
+  useEffect(() => {
+    setSelectedOrg(organizations?.find((org) => org.organization_id === user?.orgs?.[0]?.organization_id));
+  }, [organizations, user]);
 
   return (
     <div>
@@ -56,7 +47,7 @@ const OrgSwitcher = () => {
           <div className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'>
             <div className='flex w-full items-center justify-between gap-2 select-none'>
               <div
-                className={`${selectedOrg?.className} f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white`}
+                className={`${selectedOrgColor} f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white`}
               >
                 {selectedOrg?.name[0]}
               </div>
@@ -71,9 +62,13 @@ const OrgSwitcher = () => {
           sideOffset={5}
         >
           <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
-            {OrgData.map((item: MapAny, idx) => (
+            {organizations?.map((item: MapAny, idx) => (
               <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
-                <OrgCard isSelected={idx === 0} name={item?.name} className={item?.className} />
+                <OrgCard
+                  isSelected={item?.organization_id === selectedOrg?.organization_id}
+                  name={item?.name}
+                  className={OrgData[idx]}
+                />
               </DropdownMenuItem>
             ))}
           </div>
