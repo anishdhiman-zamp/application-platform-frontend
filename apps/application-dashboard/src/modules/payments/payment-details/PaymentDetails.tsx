@@ -95,7 +95,7 @@ const PaymentDetails: FC<PaymentDetailsProps> = ({ paymentDetailsId }) => {
           <div className='text-GRAY_700 mb-1'>
             {format(
               paymentDetails?.date ? createDateObjectFromUTCString(paymentDetails?.date) : new Date(),
-              `${DATE_FORMATS.dd_MMM_yyyy} 'at' ${DATE_FORMATS.HMMAAA}`,
+              `${DATE_FORMATS.ddMMMyyyy} 'at' ${DATE_FORMATS.HMMAAA}`,
             )}
           </div>
           <div className='f-28-450'>

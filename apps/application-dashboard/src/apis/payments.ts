@@ -1,6 +1,7 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
 import {
   DatasetDataRequestType,
   DatasetDataResponseType,
@@ -128,7 +129,7 @@ const Payments = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
-      transformResponse: (data) => data?.data,
+      transformResponse: (data: unknown) => data as unknown as CreatePolicyResponseType,
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPolicies: builder.query<GetPoliciesResponseType, GetPoliciesParamsType>({
@@ -143,7 +144,7 @@ const Payments = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.POLICY_DELETE, { policyId }),
         method: REQUEST_TYPES.DELETE,
       }),
-      transformResponse: (data) => data?.data,
+      transformResponse: (data: unknown) => data as unknown as CreatePolicyResponseType,
       invalidatesTags: [APITags.GET_POLICY_LIST],
     }),
     getPaymentApprovalsInfo: builder.query<PaymentApprovalsInfoResponseType, string>({

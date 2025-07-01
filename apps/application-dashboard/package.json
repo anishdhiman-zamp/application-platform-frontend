@@ -35,6 +35,7 @@
     "@zamp-platform/svg-loader": "*",
     "@zamp-platform/ui": "*",
     "@zamp-platform/utils": "*",
+    "@zamp-platform/api": "*",
     "ag-charts-community": "^11.0.0",
     "ag-charts-enterprise": "^11.0.0",
     "ag-charts-react": "^11.0.0",

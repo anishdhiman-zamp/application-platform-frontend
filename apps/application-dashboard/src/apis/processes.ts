@@ -1,5 +1,6 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { baseApi } from '@/services/baseApi';
 import type { DatasetDataResponseType, DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
   ActivityArtifactsByIdRequestType,

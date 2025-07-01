@@ -1,4 +1,5 @@
 import { createContext, Dispatch, FC, ReactElement, useContext, useEffect, useReducer } from 'react';
+import { captureException } from '@sentry/browser';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -102,7 +103,7 @@ export const CompletedFieldsProvider: FC<{ children: ReactElement }> = ({ childr
             payload: { completedFields: parsedData },
           });
         } catch (error) {
-          console.error('Error parsing completed fields from localStorage:', error);
+          captureException(error);
         }
       }
     };

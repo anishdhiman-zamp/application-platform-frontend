@@ -1,9 +1,11 @@
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { captureException } from '@sentry/browser';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
-import { ABORT_ERROR, API_DOMAIN, API_TAGS } from 'constants/api.constants';
-import { ROUTES_PATH } from 'constants/routeConfig';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from 'utils/localstorage';
+
+import { API_DOMAIN } from './api.utils';
+import { ABORT_ERROR, LOGIN_PATH } from './constants';
 
 const mutex = new Mutex();
 
@@ -21,22 +23,26 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithAuth: any = async (args: any, api: any, extraOptions: any) => {
+const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
   await mutex.waitForUnlock();
 
   const result = await baseQuery(args, api, extraOptions);
   const path = window.location.pathname;
 
-  const isLoginRoute = path === ROUTES_PATH.LOGIN;
+  const isLoginRoute = path === LOGIN_PATH;
 
   const error = result?.error;
 
   if (error) {
     const status = error?.status;
-    const data: any = error?.data;
+    const data = (error as { data?: { error?: { code?: string } } }).data;
 
     if (status === 401 && !isLoginRoute) {
-      let loginUrl = ROUTES_PATH.LOGIN;
+      let loginUrl = LOGIN_PATH;
 
       if (window.location.pathname && window.location.pathname !== '/') {
         loginUrl += '?redirect_to=' + window.location.pathname;
@@ -63,12 +69,13 @@ const baseQueryWithAuth: any = async (args: any, api: any, extraOptions: any) =>
   return result;
 };
 
-const baseApi = createApi({
-  reducerPath: 'api',
-  tagTypes: Object.values(API_TAGS),
-  baseQuery: baseQueryWithAuth,
-  endpoints: () => ({}),
-  refetchOnMountOrArgChange: true,
-});
+const baseApiProvider = (tagTypes: Record<string, string>) =>
+  createApi({
+    reducerPath: 'api',
+    tagTypes: Object.values(tagTypes),
+    baseQuery: baseQueryWithAuth,
+    endpoints: () => ({}),
+    refetchOnMountOrArgChange: true,
+  });
 
-export default baseApi;
+export default baseApiProvider;
