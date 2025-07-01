@@ -1,6 +1,13 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
-import { ErrorDetails, LoginFlow, loginPayloadType, LogoutFlow, Session } from 'types/api/auth.types';
+import {
+  ErrorDetails,
+  LoginFlow,
+  loginPayloadType,
+  LogoutFlow,
+  type Organization,
+  Session,
+} from 'types/api/auth.types';
 import { baseApi } from '@/services/baseApi';
 
 const Teams = baseApi.injectEndpoints({
@@ -23,6 +30,9 @@ const Teams = baseApi.injectEndpoints({
     whoAmI: builder.query<Session, void>({
       query: () => ({ url: API_ENDPOINTS.USER_WHOAMI_GET }),
     }),
+    getOrganizations: builder.query<Organization[], void>({
+      query: () => ({ url: API_ENDPOINTS.ORGANIZATIONS_GET }),
+    }),
   }),
 });
 
@@ -34,4 +44,5 @@ export const {
   useGetErrorDetailsQuery,
   useWhoAmIQuery,
   useLazyWhoAmIQuery,
+  useGetOrganizationsQuery,
 } = Teams;

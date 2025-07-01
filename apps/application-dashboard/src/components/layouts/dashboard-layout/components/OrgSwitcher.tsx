@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
+import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Loader2 } from 'lucide-react';
+import { useGetOrganizationsQuery } from '@/apis/auth';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { MapAny } from '@/types/commonTypes';
@@ -14,14 +16,17 @@ const OrgData = [
   {
     name: 'Zamp',
     className: 'bg-ORANGE_200',
+    value: '-dev',
   },
   {
     name: 'Doordash',
     className: 'bg-GREEN_300',
+    value: '-sg',
   },
   {
     name: 'Uber',
     className: 'bg-RED_200',
+    value: '-me',
   },
 ];
 
@@ -29,6 +34,20 @@ const OrgSwitcher = () => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<MapAny>(OrgData[0]);
   const { logout, isLoggingOut } = useLogout();
+
+  const { data: organizations } = useGetOrganizationsQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
+
+  console.log('organizations', organizations);
+
+  const handleOrgChange = (org: MapAny) => {
+    setSelectedOrg(org);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, org.value);
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
 
   return (
     <div>
@@ -53,7 +72,7 @@ const OrgSwitcher = () => {
         >
           <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
             {OrgData.map((item: MapAny, idx) => (
-              <DropdownMenuItem className='p-0' onClick={() => setSelectedOrg(item)} key={idx}>
+              <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
                 <OrgCard isSelected={idx === 0} name={item?.name} className={item?.className} />
               </DropdownMenuItem>
             ))}
