@@ -1,6 +1,7 @@
+import { REQUEST_TYPES } from '@zamp-platform/api';
 import { FormSchema } from '@zamp-platform/form-builder';
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { baseApi } from '@/services/baseApi';
 
 export type GetFormConfigRequestType = {
   form_id: string;

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { FC, ReactNode, useEffect } from 'react';
+import { getApiDomainByRegion, reinitializeApiDomain } from '@zamp-platform/api';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
-import { getApiDomainByRegion, reinitializeApiDomain } from '@/constants/api.constants';
 
 interface RegionProviderProps {
   children: ReactNode;
@@ -31,7 +31,7 @@ export const RegionProvider: FC<RegionProviderProps> = ({ children }) => {
         }
       } catch (error) {
         console.error('Failed to initialize region:', error);
-        // Even if region initialization fails, we should still proceed
+        // Even if region initialization fails, we should still p`roceed
         // The app will use the default region
       }
     };

@@ -1,5 +1,5 @@
+import { API_DOMAIN } from '@zamp-platform/api';
 import { getTransformedDataServerSafe } from 'app/api/widgets/[widgetId]/transformed-data/transformations';
-import { API_DOMAIN } from 'constants/api.constants';
 import { NextRequest, NextResponse } from 'next/server';
 import { DEFAULT_TRANSFORMED_DATA } from '@/modules/widgets/widgets.constant';
 
