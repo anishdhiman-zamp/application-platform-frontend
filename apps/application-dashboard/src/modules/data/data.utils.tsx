@@ -34,6 +34,8 @@ import {
   snakeCaseToSentenceCase,
 } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/ActivityLinkWrapper';
+import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
 import { toast } from '@/components/common/toast/Toast';
 import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
@@ -117,6 +119,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   isProcess,
   isMenuDisabled,
   missingFields,
+  wrapLink,
 }) => {
   const columns: ColDef[] = [];
 
@@ -159,8 +162,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,
     };
 
-    formattedColumn.cellRenderer =
-      CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
+    formattedColumn.cellRenderer = wrapLink
+      ? withLinkCellWrapper(
+          ActivityLinkWrapper,
+          CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column],
+        )
+      : CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     formattedColumn.headerComponentParams = {

@@ -1,0 +1,29 @@
+import React from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+
+const selectors = ['.combobox-trigger', '#combobox-content'];
+
+const ActivityLinkWrapper = ({ children, data }: { children: React.ReactNode; data: any; selectors: string[] }) => {
+  const params = useParams();
+
+  return (
+    <Link
+      href={getProcessActivityLogsRouteById(params?.processId as string, data?.id as string, data?.status as string)}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+        const target = e.target as HTMLElement;
+
+        if (selectors.some((selector) => target.closest(selector))) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+      className='block w-full'
+    >
+      {children}
+    </Link>
+  );
+};
+
+export default ActivityLinkWrapper;
