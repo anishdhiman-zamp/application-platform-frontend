@@ -5,7 +5,7 @@ export const withLinkCellWrapper = (
   CellRendererComponent?: React.ComponentType<any>,
 ) => {
   const WrappedRenderer = (props: any) => {
-    const content = CellRendererComponent ? <CellRendererComponent {...props} /> : <>{props.value}</>;
+    const content = CellRendererComponent ? <CellRendererComponent {...props} /> : <>{props.valueFormatted}</>;
 
     return <WrapperComponent {...props}>{content}</WrapperComponent>;
   };
