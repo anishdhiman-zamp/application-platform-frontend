@@ -19,7 +19,7 @@ const ActivityLinkWrapper = ({ children, data }: { children: React.ReactNode; da
           e.stopPropagation();
         }
       }}
-      className='block w-full'
+      className='block w-full truncate'
     >
       {children}
     </Link>
