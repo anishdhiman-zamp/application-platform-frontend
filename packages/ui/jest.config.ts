@@ -6,7 +6,7 @@ const config: Config = {
   moduleDirectories: ['node_modules', 'packages/ui/src'],
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '^@zamp-platform/ui/(.*)$': '<rootDir>/../../packages/ui/src/$1',
+    '^@zamp-platform/ui/(.*)$': '<rootDir>/src/$1',
   },
 };
 
