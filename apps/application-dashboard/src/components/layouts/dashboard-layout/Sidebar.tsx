@@ -1,13 +1,10 @@
 'use client';
 
 import { memo, useEffect } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { getPageRouteById, getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
-import { useLogout } from 'hooks/useLogout';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
@@ -28,7 +25,6 @@ const Sidebar = () => {
   const hash = useHash();
   const pathname = pathTrim + hash;
 
-  const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
@@ -107,13 +103,6 @@ const Sidebar = () => {
               </CommonWrapper>
             </div>
           )}
-        </div>
-        <div
-          className='border-GRAY_400 text-GRAY_900 absolute bottom-[100px] hidden h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
-          onClick={logout}
-        >
-          <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='log-out-02' height={14} width={14} />
-          <div className='f-13-500'>Logout</div>
         </div>
         <OrgSwitcher />
       </div>
