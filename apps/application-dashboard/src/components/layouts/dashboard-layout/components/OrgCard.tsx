@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { cn } from '@zamp-platform/ui/utils';
 import { sentenceCase } from '@/utils/common';
 
 type OrgCardProps = {
@@ -11,7 +12,13 @@ type OrgCardProps = {
 const OrgCard: FC<OrgCardProps> = ({ isSelected, name, className }) => {
   return (
     <div className='hover:bg-GRAY_100 text-GRAY_1000 flex w-full items-center gap-2 rounded-md p-1'>
-      <div className={`${className} f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border border-white`}>
+      <div
+        className={cn(
+          'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border border-white',
+          isSelected ? 'border-GRAY_900' : 'border-GRAY_400',
+          className,
+        )}
+      >
         {sentenceCase(name[0])}
       </div>
       <div className='f-12-450 flex-1'>{name}</div>

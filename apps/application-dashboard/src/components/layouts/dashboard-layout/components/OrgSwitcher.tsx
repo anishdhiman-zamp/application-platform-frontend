@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
@@ -12,17 +12,20 @@ import { RootState } from 'store';
 import useGetAllOrganizations from '@/hooks/useGetAllOrganizations';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
+import type { Organization } from '@/types/api/auth.types';
 import { MapAny } from '@/types/commonTypes';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 
 const OrgData = ['BG_ORANGE_200', 'BG_GREEN_300', 'BG_RED_200', 'BG_BLUE_300', 'BG_BLUE_200'];
 
 const OrgSwitcher = () => {
+  const router = useRouter();
   const { user } = useAppSelector((state: RootState) => state.user);
+  const { logout, isLoggingOut } = useLogout();
+
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<MapAny>();
-  const { logout, isLoggingOut } = useLogout();
-  const router = useRouter();
+
   const organizations = useGetAllOrganizations();
 
   const handleOrgChange = (org: MapAny) => {
@@ -39,9 +42,12 @@ const OrgSwitcher = () => {
     }, 100);
   };
 
-  const selectedOrgColor =
-    OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ??
-    'bg-GRAY_200';
+  const selectedOrgColor = useMemo(
+    () =>
+      OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ??
+      'bg-GRAY_200',
+    [organizations, selectedOrg],
+  );
 
   useEffect(() => {
     setSelectedOrg(organizations?.find((org) => org.organization_id === user?.orgs?.[0]?.organization_id));
@@ -54,7 +60,10 @@ const OrgSwitcher = () => {
           <div className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'>
             <div className='flex w-full items-center justify-between gap-2 select-none'>
               <div
-                className={`${selectedOrgColor} f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white`}
+                className={cn(
+                  selectedOrgColor,
+                  'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
+                )}
               >
                 {selectedOrg?.name[0]}
               </div>
@@ -69,7 +78,7 @@ const OrgSwitcher = () => {
           sideOffset={5}
         >
           <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
-            {organizations?.map((item: MapAny, idx) => (
+            {organizations?.map((item: Organization, idx) => (
               <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
                 <OrgCard
                   isSelected={item?.organization_id === selectedOrg?.organization_id}
