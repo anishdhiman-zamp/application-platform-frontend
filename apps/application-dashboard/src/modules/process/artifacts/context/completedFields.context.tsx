@@ -7,9 +7,10 @@ import {
   setToLocalStorage,
 } from '@/utils/localstorage';
 
-interface CompletedField {
+export interface CompletedField {
   rowId: string;
   columnId: string;
+  isRequired: boolean;
 }
 
 interface CompletedFieldsState {
@@ -17,7 +18,6 @@ interface CompletedFieldsState {
 }
 
 export enum CompletedFieldsActions {
-  SET_COMPLETED_FIELDS = 'SET_COMPLETED_FIELDS',
   ADD_COMPLETED_FIELD = 'ADD_COMPLETED_FIELD',
   LOAD_FROM_STORAGE = 'LOAD_FROM_STORAGE',
   RESET_COMPLETED_FIELDS = 'RESET_COMPLETED_FIELDS',
@@ -38,11 +38,6 @@ const initialState: CompletedFieldsState = {
 
 const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFieldsAction): CompletedFieldsState => {
   switch (action.type) {
-    case CompletedFieldsActions.SET_COMPLETED_FIELDS:
-      return {
-        ...state,
-        completedFields: action.payload?.completedFields || {},
-      };
     case CompletedFieldsActions.ADD_COMPLETED_FIELD: {
       if (!action.payload?.datasetId || !action.payload?.field) return state;
 
@@ -51,7 +46,9 @@ const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFi
       const existingFields = state.completedFields[datasetId] || [];
 
       // Check if field already exists
-      const fieldExists = existingFields.some((f) => f.rowId === field.rowId && f.columnId === field.columnId);
+      const fieldExists = existingFields.some(
+        (f) => f.rowId === field.rowId && f.columnId === field.columnId && f.isRequired === field.isRequired,
+      );
 
       if (fieldExists) return state;
 

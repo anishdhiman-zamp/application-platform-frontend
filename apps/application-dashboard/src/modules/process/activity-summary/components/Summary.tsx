@@ -8,15 +8,15 @@ interface SummaryProps {
 
 const Summary = ({ data }: SummaryProps) => {
   return (
-    <div className='flex w-full flex-col items-start justify-start'>
+    <div className='flex w-full flex-col items-start justify-start gap-y-3'>
       <SectionTitle title={data?.title} />
-      <div className='flex w-full flex-col items-start justify-start'>
+      <div className='flex w-full flex-col items-start justify-start gap-y-3'>
         {data?.values?.map(({ key, value }) => (
-          <div key={key} className='flex w-full items-center justify-start gap-x-3'>
-            <p className='f-12-450 text-GRAY_900 w-[150px] truncate capitalize' title={key}>
+          <div key={key} className='flex w-full items-start justify-start gap-x-3'>
+            <p className='f-12-450 text-GRAY_900 w-[150px] flex-shrink-0 truncate capitalize' title={key}>
               {key}
             </p>
-            <p className='f-12-450 text-GRAY_1000 max-w-[400px] flex-1 truncate px-2 py-1.5' title={value}>
+            <p className='f-12-450 text-GRAY_1000 min-w-0 flex-1 px-2 text-wrap break-words' title={value}>
               {value?.toString()?.trim() || '-'}
             </p>
           </div>

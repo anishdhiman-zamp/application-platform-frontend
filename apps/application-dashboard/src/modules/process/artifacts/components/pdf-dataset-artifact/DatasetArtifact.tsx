@@ -90,6 +90,7 @@ type DatasetByIdProps = {
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
   missingFields?: MissingFieldItemType[];
+  requiredMissingFields?: MissingFieldItemType[];
   hasMissingFields?: boolean;
 };
 
@@ -111,6 +112,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   updateFilterConfigInParent,
   parentSelectedFilters,
   missingFields,
+  requiredMissingFields,
   hasMissingFields,
 }) => {
   const searchParams = useSearchParams();
@@ -322,23 +324,33 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     tableRef.current?.api?.refreshServerSide();
 
     if (Array.isArray(rowId)) {
-      // Handle multiple row IDs
       rowId.forEach((id) => {
         completedFieldsDispatch({
           type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
           payload: {
             datasetId: id as string,
-            field: { rowId: id, columnId },
+            field: {
+              rowId: id,
+              columnId,
+              isRequired:
+                requiredMissingFields?.find((field) => field.id === id && field.column === columnId)?.is_required ??
+                false,
+            },
           },
         });
       });
     } else {
-      // Handle single row ID
       completedFieldsDispatch({
         type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
         payload: {
           datasetId: id as string,
-          field: { rowId: rowId as string, columnId },
+          field: {
+            rowId: rowId as string,
+            columnId,
+            isRequired:
+              requiredMissingFields?.find((field) => field.id === rowId && field.column === columnId)?.is_required ??
+              false,
+          },
         },
       });
     }
@@ -451,7 +463,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   };
 
   const scrollToMissingField = (index: number) => {
-    const { id, column } = missingFields?.[index] ?? {};
+    const { id, column } = requiredMissingFields?.[index] ?? {};
 
     if (!id || !column) return;
 
@@ -466,7 +478,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   };
 
   const goNext = () => {
-    if (currentIndex < (missingFields?.length ?? 0) - 1) {
+    if (currentIndex < (requiredMissingFields?.length ?? 0) - 1) {
       setCurrentIndex((prev) => {
         const next = prev + 1;
 
@@ -708,7 +720,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               onColumnMoved={(event) => handleColumnMoved(event, id as string)}
               onGridReady={() => setGridReady(true)}
               containerStyle={containerStyle}
-              missingFields={missingFields}
+              missingFields={requiredMissingFields}
               completedFields={currentDatasetCompletedFields}
               gridStyle={hasMissingFields ? { height: 'calc(100vh - 245px)' } : { height: 'calc(100vh - 210px)' }}
               {...(datasetArtifacts?.data?.config?.is_drilldown_enabled
@@ -721,7 +733,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           </div>
           {gridReady && hasMissingFields && (
             <MissingFieldControl
-              totalMissingFields={missingFields?.length ?? 0}
+              totalMissingFields={requiredMissingFields?.length ?? 0}
               currentIndex={currentIndex}
               goPrevious={goPrevious}
               goNext={goNext}

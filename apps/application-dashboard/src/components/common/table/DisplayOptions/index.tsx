@@ -9,6 +9,7 @@ import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing'
 import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
+import TooltipV2 from 'components/common/TooltipV2';
 
 type DisplayOptionsProps = {
   tableRef: RefObject<AgGridReact | null>;
@@ -63,13 +64,10 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
     <div className='relative z-100' ref={menuRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
-            className='flex items-center gap-1 ring-0! ring-offset-0! select-none focus-visible:outline-hidden'
-            size='small'
-            variant='outline'
-          >
-            <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={12} />
-            Display
+          <Button className='flex h-5.5 w-5.5 items-center justify-center p-1 select-none' size='small' variant='ghost'>
+            <TooltipV2 tooltipBody='Display options' className='cursor-pointer'>
+              <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
+            </TooltipV2>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='z-9999 max-h-[300px] min-w-[180px]! overflow-y-auto' sideOffset={5}>

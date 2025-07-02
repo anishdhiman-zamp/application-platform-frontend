@@ -216,6 +216,17 @@ const Table: FC<TableProps> = ({
     return missingFields && missingFields?.length > 0;
   }, [missingFields]);
 
+  const getValueClass = (params: MapAny) => {
+    if (isValueEmpty(params?.value) && checkIsMissingField(params ?? [])) {
+      return '!text-RED_900';
+    }
+    if (isValueEmpty(params?.value)) {
+      return '!text-GRAY_500';
+    }
+
+    return '!text-GRAY_1000';
+  };
+
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -239,7 +250,7 @@ const Table: FC<TableProps> = ({
       cellClass: (params: MapAny) => {
         const baseClasses = 'f-11-400 content-center !px-2 py-1';
         const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
-        const valueClass = isValueEmpty(params?.value) ? '!text-GRAY_500' : '!text-GRAY_1000';
+        const valueClass = getValueClass(params ?? []);
 
         return cn(baseClasses, valueClass, interactiveClass, cellClass);
       },

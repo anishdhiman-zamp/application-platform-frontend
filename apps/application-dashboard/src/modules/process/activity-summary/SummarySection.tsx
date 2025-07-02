@@ -84,7 +84,6 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
         </div>
         {summary?.summary?.summary_items?.map((section) => <Summary key={section?.title} data={section} />)}
       </CommonWrapper>
-      <div className='bg-GRAY_400 h-px w-full' />
       <CommonWrapper
         isLoading={isLoadingArtifacts}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -94,7 +93,7 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
         isNoData={!artifacts?.artifacts?.length}
         noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
-        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 py-5'
+        className='border-GRAY_400 flex w-full flex-col items-start justify-start gap-y-3 border-t-[0.5px] px-6 py-5'
       >
         <p className='f-13-550'>Artifacts</p>
         {artifacts?.artifacts?.map((artifact) => (

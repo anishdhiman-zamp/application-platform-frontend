@@ -1,4 +1,4 @@
-import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+import { EmailArtifactsResponseType, type MissingFieldItemType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
@@ -89,7 +89,15 @@ export interface HandleShowArtifactsProps extends EmitHITLActionPayload {
   artifactId: string;
   action?: CTA_ACTION;
   filters?: MapAny;
-  ctaConfig?: MapAny;
+  ctaConfig?: {
+    icon_identifier: string;
+    variant: string;
+    dataset_to_missing_fields_map: MissingFieldsConfigType;
+    dataset_artifacts: {
+      cells: MissingFieldItemType[];
+      dataset_id: string;
+    }[];
+  };
 }
 
 export type EmitHITLActionPayload = {
@@ -98,3 +106,11 @@ export type EmitHITLActionPayload = {
   ctaActionId?: string;
   ctaValue?: string;
 };
+
+export type MissingFieldsConfigType = Record<
+  string,
+  {
+    cells: MissingFieldItemType[];
+    filters: MapAny;
+  }
+>;
