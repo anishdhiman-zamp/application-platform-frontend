@@ -120,6 +120,7 @@ const Activity = () => {
       setArtifactId(artifactId);
       setArtifactType(artifactType);
       setFilters(filters ?? {});
+
       setMissingFields(ctaConfig?.dataset_to_missing_fields_map ?? {});
       setEmitHITLActionPayload({
         logGroupId,

@@ -79,4 +79,5 @@ export type FormatColumnsParamsType = {
   isProcess?: boolean;
   isMenuDisabled?: boolean;
   missingFields?: MissingFieldItemType[];
+  wrapLink?: boolean;
 };

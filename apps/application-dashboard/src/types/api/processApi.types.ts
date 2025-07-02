@@ -192,7 +192,7 @@ export type CtasType = {
 export type MissingFieldItemType = {
   column: string;
   id: string;
-  is_required?: boolean;
+  is_required: boolean;
   confidence?: string;
 };
 

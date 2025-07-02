@@ -11,9 +11,10 @@ import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import ProgressBar from 'components/common/RingProgress';
 import { toast } from 'components/common/toast/Toast';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 
 interface ExportDatasetProps {
   query: string;
@@ -75,13 +76,11 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
 
   return (
     <div className='relative z-50 h-5.5 w-5.5 cursor-pointer rounded' onClick={downloadCsv}>
-      <Tooltip
+      <TooltipV2
         tooltipBody={hasFilters ? 'Export filtered' : 'Export all'}
-        tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
         className='z-1 h-full w-full'
-        tooltipBodystyle='f-10-400'
+        side={SIDE_OPTIONS.BOTTOM}
         disabled={isPolling}
-        position={TooltipPositions.BOTTOM}
       >
         <div className='hover:bg-GRAY_100 flex h-full w-full items-center justify-center rounded'>
           <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
@@ -91,7 +90,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
             </div>
           )}
         </div>
-      </Tooltip>
+      </TooltipV2>
       {isPolling && showExportStatus && (
         <div
           ref={dropdownRef}
