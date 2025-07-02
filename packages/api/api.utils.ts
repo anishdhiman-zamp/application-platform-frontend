@@ -1,4 +1,4 @@
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 
 import { ENVIRONMENT, MULTI_REGION_ENABLED, REGION_LIST } from './constants';
 
@@ -33,8 +33,8 @@ export const getApiDomainByRegion = async (email = '', changeSession = true) => 
       }
     }
 
-    const region = successfulRegion.find((result) => result.value.status === 200)?.value.region;
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region ?? '');
+    // const region = successfulRegion.find((result) => result.value.status === 200)?.value.region;
+    // setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region ?? '');
     const allDomains = successfulRegion.map((result) => ({
       domain: getApiDomain(ENVIRONMENT, result.value.region ?? ''),
       region: result.value.region,

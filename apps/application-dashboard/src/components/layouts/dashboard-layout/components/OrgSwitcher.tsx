@@ -7,6 +7,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { useAppSelector } from 'hooks/toolkit';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import useGetAllOrganizations from '@/hooks/useGetAllOrganizations';
 import { useLogout } from '@/hooks/useLogout';
@@ -14,27 +15,33 @@ import DropdownToggle from '@/modules/payments/move-money/components/DropdownTog
 import { MapAny } from '@/types/commonTypes';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 
-const OrgData = ['bg-ORANGE_200', 'bg-GREEN_300', 'bg-RED_200'];
+const OrgData = ['BG_ORANGE_200', 'BG_GREEN_300', 'BG_RED_200', 'BG_BLUE_300', 'BG_BLUE_200'];
 
 const OrgSwitcher = () => {
   const { user } = useAppSelector((state: RootState) => state.user);
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<MapAny>();
   const { logout, isLoggingOut } = useLogout();
-
+  const router = useRouter();
   const organizations = useGetAllOrganizations();
 
   const handleOrgChange = (org: MapAny) => {
+    if (org.organization_id === selectedOrg?.organization_id) return;
+
     setSelectedOrg(org);
     setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, org.region);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
+
+    router.push('/');
+
     setTimeout(() => {
       window.location.reload();
-    }, 500);
+    }, 100);
   };
 
   const selectedOrgColor =
-    OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ?? OrgData[0];
+    OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ??
+    'bg-GRAY_200';
 
   useEffect(() => {
     setSelectedOrg(organizations?.find((org) => org.organization_id === user?.orgs?.[0]?.organization_id));

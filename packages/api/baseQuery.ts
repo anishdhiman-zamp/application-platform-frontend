@@ -30,9 +30,6 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
 ) => {
   await mutex.waitForUnlock();
 
-  const orgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID);
-  console.log('orgId', orgId);
-
   const result = await baseQuery(args, api, extraOptions);
   const path = window.location.pathname;
 
