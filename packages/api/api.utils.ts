@@ -45,7 +45,7 @@ export const getApiDomainByRegion = async (email = '', changeSession = true) => 
   }
 };
 
-const getApiDomain = (environment = '', region = '') => {
+export const getApiDomain = (environment = '', region = '') => {
   switch (environment) {
     case 'production':
       return `https://api${region}.zamp.ai`;

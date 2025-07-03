@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { useAppSelector } from 'hooks/toolkit';
+import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
@@ -13,21 +13,22 @@ import { ORG_COLORS } from '@/constants/common.constants';
 import useGetAllOrganizations from '@/hooks/useGetAllOrganizations';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
+import { setOrganizations } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
-import { MapAny } from '@/types/commonTypes';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 
 const OrgSwitcher = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state: RootState) => state.user);
   const { logout, isLoggingOut } = useLogout();
 
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
-  const [selectedOrg, setSelectedOrg] = useState<MapAny>();
+  const [selectedOrg, setSelectedOrg] = useState<Organization>();
 
   const { organizations, loading, error } = useGetAllOrganizations();
 
-  const handleOrgChange = (org: MapAny) => {
+  const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
 
     setSelectedOrg(org);
@@ -49,7 +50,10 @@ const OrgSwitcher = () => {
   );
 
   useEffect(() => {
-    setSelectedOrg(organizations?.find((org) => org.organization_id === user?.orgs?.[0]?.organization_id));
+    if (organizations?.length) {
+      setSelectedOrg(organizations?.find((org) => org.organization_id === user?.orgs?.[0]?.organization_id));
+      dispatch(setOrganizations(organizations));
+    }
   }, [organizations, user]);
 
   return (
