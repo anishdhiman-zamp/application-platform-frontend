@@ -101,14 +101,14 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     updateLocalStorage(columnOrderingVisibility, datasetId);
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (isSelectAll = true) => {
     tableRef?.current?.api?.setColumnsVisible(
       columns.map((column) => column.getColId()),
-      true,
+      isSelectAll,
     );
     const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
       ...columnItem,
-      isVisible: true,
+      isVisible: isSelectAll,
     }));
 
     updateLocalStorage(columnOrderingVisibility, datasetId);
@@ -186,8 +186,11 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           />
           <div className='f-12-500 text-GRAY_1000 flex w-full justify-between'>
             <div>Columns</div>
-            <div className='cursor-pointer' onClick={handleSelectAll}>
-              Select All
+            <div
+              className='cursor-pointer'
+              onClick={() => handleSelectAll(!columnsChecked.every((col) => col.isVisible))}
+            >
+              {columnsChecked.every((col) => col.isVisible) ? 'Deselect All' : 'Select All'}
             </div>
           </div>
         </div>
