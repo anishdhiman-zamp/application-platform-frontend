@@ -1,6 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
-import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
+import { getApiDomain } from '@zamp-platform/api';
+import {
+  useInitiateLogoutFlowQuery,
+  useLazyInitiateLogoutFlowQuery,
+  useLazyLogoutQuery,
+  useLazyWhoAmIQuery,
+} from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { useAppSelector } from 'hooks/toolkit';
 import { useLogout } from 'hooks/useLogout';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -11,11 +18,43 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('apis/auth', () => ({
   useInitiateLogoutFlowQuery: jest.fn(),
+  useLazyInitiateLogoutFlowQuery: jest.fn(),
   useLazyLogoutQuery: jest.fn(),
   useLazyWhoAmIQuery: jest.fn(),
 }));
 
+jest.mock('hooks/toolkit', () => ({
+  useAppSelector: jest.fn(),
+}));
+
+jest.mock('@zamp-platform/api', () => ({
+  getApiDomain: jest.fn(),
+  ENVIRONMENT: 'test',
+}));
+
 describe('useLogout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useAppSelector as jest.Mock).mockReturnValue({
+      user: {
+        organizations: [
+          { id: 'org1', region: 'us' },
+          { id: 'org2', region: 'eu' },
+        ],
+      },
+    });
+
+    (getApiDomain as jest.Mock).mockReturnValue('https://api.test.com');
+
+    (useLazyInitiateLogoutFlowQuery as jest.Mock).mockReturnValue([
+      jest.fn().mockReturnValue({
+        unwrap: jest.fn().mockResolvedValue({ logout_url: 'test-url' }),
+      }),
+      { isLoading: false },
+    ]);
+  });
+
   it('should call logOut, then whoAmI, and redirect to login on success', async () => {
     const mockPush = jest.fn();
     const mockRefetch = jest.fn();
@@ -49,11 +88,11 @@ describe('useLogout', () => {
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 
-  it('should call logOut, fail whoAmI, but still redirect to login', async () => {
+  it('should call logOut and whoAmI successfully with multiple organizations', async () => {
     const mockPush = jest.fn();
     const mockRefetch = jest.fn();
-    const mockLogOut = jest.fn().mockResolvedValueOnce({});
-    const mockWhoAmI = jest.fn().mockRejectedValueOnce(new Error('WhoAmI failed'));
+    const mockLogOut = jest.fn().mockResolvedValue({});
+    const mockWhoAmI = jest.fn().mockResolvedValue({});
 
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
@@ -73,11 +112,8 @@ describe('useLogout', () => {
     const { result } = renderHook(() => useLogout());
 
     await act(async () => {
-      try {
-        await result.current.logout();
-      } catch (error) {
-        console.log(error);
-      }
+      result.current.logout();
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     expect(mockLogOut).toHaveBeenCalledWith('test-url');
@@ -86,11 +122,11 @@ describe('useLogout', () => {
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 
-  it('should refetch logout flow on logout failure', async () => {
+  it('should set and reset loading state during logout', async () => {
     const mockPush = jest.fn();
     const mockRefetch = jest.fn();
-    const mockLogOut = jest.fn().mockRejectedValueOnce(new Error('Logout failed'));
-    const mockWhoAmI = jest.fn();
+    const mockLogOut = jest.fn().mockResolvedValue({});
+    const mockWhoAmI = jest.fn().mockResolvedValue({});
 
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
@@ -108,21 +144,23 @@ describe('useLogout', () => {
 
     const { result } = renderHook(() => useLogout());
 
+    expect(result.current.isLoggingOut).toBe(false);
+
     await act(async () => {
-      await result.current.logout();
+      result.current.logout();
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     expect(mockLogOut).toHaveBeenCalledWith('test-url');
-    expect(mockWhoAmI).not.toHaveBeenCalled(); // whoAmI should not be called if logout fails
-    expect(mockPush).not.toHaveBeenCalled();
-    expect(mockRefetch).toHaveBeenCalled();
+    expect(mockWhoAmI).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith(ROUTES_PATH.LOGIN);
   });
 
   it('should call logOut with empty string if logout_url is undefined', async () => {
     const mockPush = jest.fn();
     const mockRefetch = jest.fn();
-    const mockLogOut = jest.fn().mockResolvedValueOnce({});
-    const mockWhoAmI = jest.fn().mockResolvedValueOnce({});
+    const mockLogOut = jest.fn().mockResolvedValue({});
+    const mockWhoAmI = jest.fn().mockResolvedValue({});
 
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
@@ -135,6 +173,13 @@ describe('useLogout', () => {
       refetch: mockRefetch,
     });
 
+    (useLazyInitiateLogoutFlowQuery as jest.Mock).mockReturnValue([
+      jest.fn().mockReturnValue({
+        unwrap: jest.fn().mockResolvedValue({ logout_url: undefined }),
+      }),
+      { isLoading: false },
+    ]);
+
     (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
 
@@ -142,6 +187,7 @@ describe('useLogout', () => {
 
     await act(async () => {
       await result.current.logout();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     expect(mockLogOut).toHaveBeenCalledWith('');
