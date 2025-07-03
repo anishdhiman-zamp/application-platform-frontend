@@ -8,6 +8,8 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 const useGetAllOrganizations = () => {
   const [organizations, setOrganizations] = useState<Organization[] | null>(null);
   const { user } = useAppSelector((state: RootState) => state.user);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<boolean>(false);
 
   const fetchOrganizations = async () => {
     const domains = await getApiDomainByRegion(user?.user_email, false);
@@ -32,13 +34,17 @@ const useGetAllOrganizations = () => {
     );
 
     setOrganizations(successfulRegion.flatMap((result) => result.value.data));
+    setLoading(false);
+    setError(organizations.every((result) => result.status === 'rejected'));
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchOrganizations();
   }, [user?.user_email]);
 
-  return organizations;
+  //return loading,error,organizations checking all the states
+  return { organizations, loading, error };
 };
 
 export default useGetAllOrganizations;

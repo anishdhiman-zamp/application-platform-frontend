@@ -21,7 +21,8 @@ export const getApiDomainByRegion = async (email = '', changeSession = true) => 
     );
 
     const successfulRegion = apiDomains.filter(
-      (result): result is PromiseFulfilledResult<{ region: string; status: number }> => result.status === 'fulfilled',
+      (result): result is PromiseFulfilledResult<{ region: string; status: number }> =>
+        result.status === 'fulfilled' && result.value.status === 200,
     );
 
     // Reorder successfulRegion if userRegion exists
@@ -33,8 +34,6 @@ export const getApiDomainByRegion = async (email = '', changeSession = true) => 
       }
     }
 
-    // const region = successfulRegion.find((result) => result.value.status === 200)?.value.region;
-    // setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region ?? '');
     const allDomains = successfulRegion.map((result) => ({
       domain: getApiDomain(ENVIRONMENT, result.value.region ?? ''),
       region: result.value.region,

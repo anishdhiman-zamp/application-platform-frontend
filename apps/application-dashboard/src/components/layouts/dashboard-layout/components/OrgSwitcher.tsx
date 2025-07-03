@@ -9,14 +9,13 @@ import { useAppSelector } from 'hooks/toolkit';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
+import { ORG_COLORS } from '@/constants/common.constants';
 import useGetAllOrganizations from '@/hooks/useGetAllOrganizations';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import type { Organization } from '@/types/api/auth.types';
 import { MapAny } from '@/types/commonTypes';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
-
-const OrgData = ['BG_ORANGE_200', 'BG_GREEN_300', 'BG_RED_200', 'BG_BLUE_300', 'BG_BLUE_200'];
 
 const OrgSwitcher = () => {
   const router = useRouter();
@@ -26,7 +25,7 @@ const OrgSwitcher = () => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<MapAny>();
 
-  const organizations = useGetAllOrganizations();
+  const { organizations, loading, error } = useGetAllOrganizations();
 
   const handleOrgChange = (org: MapAny) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -44,7 +43,7 @@ const OrgSwitcher = () => {
 
   const selectedOrgColor = useMemo(
     () =>
-      OrgData[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ??
+      ORG_COLORS[organizations?.findIndex((org) => org.organization_id === selectedOrg?.organization_id) ?? 0] ??
       'bg-GRAY_200',
     [organizations, selectedOrg],
   );
@@ -78,15 +77,17 @@ const OrgSwitcher = () => {
           sideOffset={5}
         >
           <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
-            {organizations?.map((item: Organization, idx) => (
-              <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
-                <OrgCard
-                  isSelected={item?.organization_id === selectedOrg?.organization_id}
-                  name={item?.name}
-                  className={OrgData[idx]}
-                />
-              </DropdownMenuItem>
-            ))}
+            {!loading &&
+              !error &&
+              organizations?.map((item: Organization, idx) => (
+                <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
+                  <OrgCard
+                    isSelected={item?.organization_id === selectedOrg?.organization_id}
+                    name={item?.name}
+                    className={ORG_COLORS[idx]}
+                  />
+                </DropdownMenuItem>
+              ))}
           </div>
           <div className='border-GRAY_400 mt-0.5 border-t pt-0.5' onClick={logout}>
             <div
