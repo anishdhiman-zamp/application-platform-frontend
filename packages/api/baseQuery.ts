@@ -5,32 +5,40 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
 
 import { API_DOMAIN } from './api.utils';
-import { ABORT_ERROR, LOGIN_PATH } from './constants';
+import { ABORT_ERROR, LOGIN_PATH, REQUEST_TIMEOUT } from './constants';
 
 const mutex = new Mutex();
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: `${API_DOMAIN}/`,
-  credentials: 'include',
-  prepareHeaders: (headers) => {
-    headers.set('Accept', 'application/json');
-    headers.set(
-      LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
-      getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
-    );
+// Custom FetchArgs type to support timeout and domain
+interface CustomFetchArgs extends FetchArgs {
+  timeout?: number;
+  domain?: string;
+}
 
-    return headers;
-  },
-});
+const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN) =>
+  fetchBaseQuery({
+    baseUrl: `${domain}/`,
+    credentials: 'include',
+    prepareHeaders: (headers) => {
+      headers.set('Accept', 'application/json');
+      headers.set(
+        LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
+        getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
+      );
 
-const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+      return headers;
+    },
+    timeout: timeout,
+  });
+
+const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
   extraOptions,
 ) => {
   await mutex.waitForUnlock();
 
-  const result = await baseQuery(args, api, extraOptions);
+  const result = await baseQuery(args.timeout, args.domain)(args, api, extraOptions);
   const path = window.location.pathname;
 
   const isLoginRoute = path === LOGIN_PATH;
