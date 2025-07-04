@@ -123,6 +123,7 @@ export const LoginForm = () => {
     try {
       const responses = await Promise.allSettled(
         domains?.map(async (domain) => {
+
           const apiUrl = `${domain.domain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
           return fetch(apiUrl, {
