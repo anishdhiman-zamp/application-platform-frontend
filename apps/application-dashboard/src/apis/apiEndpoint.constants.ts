@@ -1,4 +1,5 @@
 export const API_ENDPOINTS = {
+  ORGANIZATIONS_GET: `organizations/`,
   MEMBERSHIP_REQUESTS_ALL_GET: `organizations/membership-requests`,
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,
@@ -130,10 +131,3 @@ export const API_ENDPOINTS = {
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
 };
-
-export const enum REQUEST_TYPES {
-  POST = 'POST',
-  PUT = 'PUT',
-  PATCH = 'PATCH',
-  DELETE = 'DELETE',
-}

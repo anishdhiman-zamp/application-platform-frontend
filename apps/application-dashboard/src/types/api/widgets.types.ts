@@ -44,6 +44,8 @@ export type WidgetDataRequestType = {
     time_columns?: string;
     periodicity?: PERIODICITY_TYPES;
     currency?: string;
+    pageId?: string;
+    sheetId?: string;
   };
 };
 

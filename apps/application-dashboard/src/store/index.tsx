@@ -1,8 +1,8 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import baseApi from 'services/api';
 import layoutConfigsSliceReducer from 'store/slices/layout-configs';
 import userSliceReducer from 'store/slices/user';
+import { baseApi } from '@/services/baseApi';
 
 export const store = configureStore({
   reducer: {

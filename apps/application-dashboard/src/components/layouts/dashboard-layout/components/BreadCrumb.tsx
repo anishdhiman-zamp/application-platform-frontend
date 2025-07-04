@@ -116,7 +116,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
     }
 
     return breadcrumbStack as BreadcrumbItem[];
-  }, [pathname, searchParams?.toString(), pages, datasets]);
+  }, [pathname, searchParams?.toString(), pages, datasets, processes]);
 
   const handleBreadcrumbClick = (link: string, index?: number) => {
     if (index === 0) router.back();

@@ -8,7 +8,7 @@ import { POLLING_STATUS } from 'constants/common.constants';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import usePolling from 'hooks/usePolling';
 import { ADMIN_DATASET_LISTING_COLUMNS } from 'modules/admin/admin.constants';
-import { AdminDeleteDatasetDetailsType } from 'modules/admin/admin.types';
+import { AdminDeleteDatasetDetailsType, EditDatasetType } from 'modules/admin/admin.types';
 import AdminDatasetActions from 'modules/admin/AdminDatasetActions';
 import AdminDatasetDelete from 'modules/admin/AdminDatasetDelete';
 import AdminDatasetTransform from 'modules/admin/AdminDatasetTransform';
@@ -36,6 +36,7 @@ const AdminDatasetListing = () => {
   const [isCreateTransformationOpen, setIsCreateTransformationOpen] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
   const [pollingMessage, setPollingMessage] = useState('');
+  const [editDataset, setEditDataset] = useState<EditDatasetType>();
 
   const { startPolling } = usePolling();
 
@@ -106,6 +107,16 @@ const AdminDatasetListing = () => {
       });
   };
 
+  const handleEditDataset = (dataset: EditDatasetType) => {
+    setEditDataset(dataset);
+    setIsCreateDatasetOpen(true);
+  };
+
+  const handleCloseCreateDataset = () => {
+    setIsCreateDatasetOpen(false);
+    setEditDataset(undefined);
+  };
+
   const columns: ColDef[] = useMemo(
     () => [
       ...ADMIN_DATASET_LISTING_COLUMNS,
@@ -115,6 +126,7 @@ const AdminDatasetListing = () => {
         cellRenderer: AdminDatasetActions,
         cellRendererParams: {
           onDelete: handleDeleteDataset,
+          onEditDataset: handleEditDataset,
         },
         sortable: false,
         filter: false,
@@ -170,9 +182,10 @@ const AdminDatasetListing = () => {
       </div>
       {isCreateDatasetOpen && (
         <CreateDataset
-          onClose={() => setIsCreateDatasetOpen(false)}
+          onClose={handleCloseCreateDataset}
           isOpen={isCreateDatasetOpen}
           onSuccessfulCreate={handleSuccessfulCreateDataset}
+          editDataset={editDataset}
         />
       )}
       {isCreateTransformationOpen && (

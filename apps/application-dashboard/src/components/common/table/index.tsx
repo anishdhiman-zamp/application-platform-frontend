@@ -15,12 +15,18 @@ import {
   EventApiModule,
   FillEndEvent,
   GetContextMenuItemsParams,
+  type GetRowIdParams,
+  GridReadyEvent,
   IServerSideDatasource,
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
   RowApiModule,
   RowClickedEvent,
+  RowDragEndEvent,
+  RowDragModule,
+  ScrollApiModule,
+  SelectEditorModule,
   SizeColumnsToContentStrategy,
   SizeColumnsToFitGridStrategy,
   SizeColumnsToFitProvidedWidthStrategy,
@@ -40,6 +46,7 @@ import {
   MultiFilterModule,
   RichSelectModule,
   RowGroupingPanelModule,
+  ServerSideRowModelApiModule,
   ServerSideRowModelModule,
   SetFilterModule,
   SideBarModule,
@@ -47,7 +54,9 @@ import {
 } from 'ag-grid-enterprise';
 import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
+import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
+import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
 import CustomGroupHeader from 'components/common/table/CustomHeader/CustomGroupHeader';
@@ -63,6 +72,7 @@ import {
 } from 'components/common/table/table.constants';
 
 ModuleRegistry.registerModules([
+  ScrollApiModule,
   ClientSideRowModelModule,
   ColumnMenuModule,
   ContextMenuModule,
@@ -72,6 +82,7 @@ ModuleRegistry.registerModules([
   NumberFilterModule,
   DateFilterModule,
   ServerSideRowModelModule,
+  ServerSideRowModelApiModule,
   SideBarModule,
   FiltersToolPanelModule,
   ColumnsToolPanelModule,
@@ -98,6 +109,8 @@ ModuleRegistry.registerModules([
   RowApiModule,
   ColumnAutoSizeModule,
   EventApiModule,
+  RowDragModule,
+  SelectEditorModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -130,8 +143,13 @@ interface TableProps {
   columnLevelStats?: MapAny;
   cellClass?: string;
   headerClass?: string;
-  onGridReady?: () => void;
+  onGridReady?: (params: GridReadyEvent) => void;
   menuTitle?: string;
+  enableRowDrag?: boolean;
+  onRowDragEnd?: (event: RowDragEndEvent) => void;
+  missingFields?: MissingFieldItemType[];
+  completedFields?: { rowId: string; columnId: string }[];
+  shouldShowNA?: boolean;
 }
 
 export type TableColumnType = {
@@ -172,7 +190,43 @@ const Table: FC<TableProps> = ({
   headerClass,
   onGridReady,
   menuTitle,
+  enableRowDrag = false,
+  onRowDragEnd,
+  missingFields,
+  completedFields,
+  shouldShowNA = false,
 }) => {
+  const checkIsMissingField = useCallback(
+    (params: MapAny) => {
+      return missingFields?.some(
+        (field) => field?.id === params.node.data?.id && field?.column === params.column.getColId(),
+      );
+    },
+    [missingFields],
+  );
+
+  const checkIsFieldCompleted = useCallback(
+    (rowId: string, columnId: string) => {
+      return completedFields?.some((field) => field?.rowId === rowId && field?.columnId === columnId);
+    },
+    [completedFields],
+  );
+
+  const hasMissingFields = useMemo(() => {
+    return missingFields && missingFields?.length > 0;
+  }, [missingFields]);
+
+  const getValueClass = (params: MapAny) => {
+    if (isValueEmpty(params?.value) && checkIsMissingField(params ?? [])) {
+      return '!text-RED_900';
+    }
+    if (isValueEmpty(params?.value)) {
+      return '!text-GRAY_500';
+    }
+
+    return '!text-GRAY_1000';
+  };
+
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -181,7 +235,11 @@ const Table: FC<TableProps> = ({
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
       valueFormatter: (params: ValueFormatterParams) => {
-        if (!params.value) {
+        if (checkIsMissingField(params ?? []) && isValueEmpty(params.value)) {
+          return 'Required*';
+        }
+
+        if (shouldShowNA && isValueEmpty(params.value)) {
           return 'N/A';
         }
 
@@ -192,9 +250,27 @@ const Table: FC<TableProps> = ({
       cellClass: (params: MapAny) => {
         const baseClasses = 'f-11-400 content-center !px-2 py-1';
         const interactiveClass = onCellDoubleClicked || onRowClicked ? 'cursor-pointer' : '';
-        const valueClass = !params?.value ? '!text-GRAY_500' : '!text-GRAY_1000';
+        const valueClass = getValueClass(params ?? []);
 
         return cn(baseClasses, valueClass, interactiveClass, cellClass);
+      },
+      cellClassRules: {
+        'missing-focus': (params) => {
+          const focused = params.api.getFocusedCell();
+
+          return !!(
+            focused &&
+            focused.rowIndex === params.node.rowIndex &&
+            focused.column.getColId() === params.column.getColId() &&
+            checkIsMissingField(params ?? [])
+          );
+        },
+        'missing-completed': (params) => {
+          const isCompleted =
+            checkIsFieldCompleted(params.node.data?.id, params.column.getColId()) && checkIsMissingField(params ?? []);
+
+          return isCompleted;
+        },
       },
       allowedAggFuncs: Object.keys(AggregationFunctionMap),
       flex: 1,
@@ -210,7 +286,7 @@ const Table: FC<TableProps> = ({
       },
       ...columnConfig,
     };
-  }, [columnConfig]);
+  }, [columnConfig, missingFields, completedFields, shouldShowNA, isValueEmpty]);
 
   const icons = useMemo<MapAny>(() => {
     return myIcons;
@@ -286,6 +362,10 @@ const Table: FC<TableProps> = ({
     [onDrilldownClick, onRowPropertiesClick, menuTitle],
   );
 
+  const getRowId = useCallback((params: GetRowIdParams) => {
+    return params.data?.id;
+  }, []);
+
   return (
     <div style={containerStyle}>
       <div className='dataset' style={gridStyle}>
@@ -316,6 +396,10 @@ const Table: FC<TableProps> = ({
           suppressDragLeaveHidesColumns
           onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}
+          rowDragManaged={enableRowDrag}
+          rowDragEntireRow={enableRowDrag}
+          onRowDragEnd={onRowDragEnd}
+          {...(hasMissingFields ? { getRowId } : {})}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

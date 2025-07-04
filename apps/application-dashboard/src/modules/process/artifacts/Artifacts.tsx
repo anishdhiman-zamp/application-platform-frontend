@@ -4,13 +4,19 @@ import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArti
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
-import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
-import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
+import {
+  ARTIFACT_TYPE,
+  type EmitHITLActionPayload,
+  type HandleShowArtifactsProps,
+  PDF_DATASET_TAB,
+} from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
+import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
 import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
@@ -42,7 +48,9 @@ interface ArtifactsProps {
   artifactType: ARTIFACT_TYPE;
   artifactId: string;
   filters: MapAny;
-  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  onArtifactClick: (props: HandleShowArtifactsProps) => void;
+  missingFields: MapAny;
+  emitHITLActionPayload: EmitHITLActionPayload;
 }
 
 const Artifacts = ({
@@ -55,6 +63,8 @@ const Artifacts = ({
   artifactId,
   onArtifactClick,
   filters,
+  missingFields,
+  emitHITLActionPayload,
 }: ArtifactsProps) => {
   const params = useParams();
   const processId = params?.processId as string;
@@ -105,11 +115,15 @@ const Artifacts = ({
         return (
           <>
             <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-              <DatasetArtifact
-                datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
-                filters={filters}
-                key={id}
-              />
+              <CompletedFieldsProvider>
+                <DatasetTabView
+                  datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
+                  filters={filters}
+                  missingFields={missingFields}
+                  emitHITLActionPayload={emitHITLActionPayload}
+                  key={id}
+                />
+              </CompletedFieldsProvider>
             </TabsContent>
             <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
               <PdfArtifact pdfArtifact={artifactData as PdfDatasetArtifactsResponseType} artifactId={id} key={id} />
@@ -129,7 +143,15 @@ const Artifacts = ({
 
       case ARTIFACT_TYPE.DATASET:
         return (
-          <DatasetArtifact datasetArtifact={artifactData as DatasetArtifactsResponseType} filters={filters} key={id} />
+          <CompletedFieldsProvider>
+            <DatasetTabView
+              datasetArtifact={artifactData as DatasetArtifactsResponseType}
+              filters={filters}
+              missingFields={missingFields}
+              emitHITLActionPayload={emitHITLActionPayload}
+              key={id}
+            />
+          </CompletedFieldsProvider>
         );
 
       case ARTIFACT_TYPE.PDF:

@@ -10,7 +10,7 @@ export enum CUSTOM_COLUMNS_TYPE {
   PAYMENTS_ACCOUNT_STATUS = 'payments-account-status',
 }
 
-export enum DISPLAY_OPTIONS {
+export const enum DISPLAY_OPTIONS {
   COLUMNS = 'columns',
   GROUP_BY = 'group_by',
   CURRENCY = 'currency',

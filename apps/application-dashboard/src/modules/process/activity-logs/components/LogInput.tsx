@@ -6,7 +6,7 @@ import { useEmitActivityLogsMutation } from '@/apis/processes';
 import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useAppSelector } from '@/hooks/toolkit';
-import useAudienceMembers from '@/hooks/useAudienceMembers';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { PROCESS_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 
 interface LogInputProps {
@@ -19,24 +19,14 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
   const [inputValue, setInputValue] = useState('');
 
   const { user } = useAppSelector((state) => state.user);
-  const { audiencesData, loading: isLoadingAudienceMembers } = useAudienceMembers({
+  const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.PROCESS,
     resourceId: processId,
   });
 
-  const enableSendMessage = useMemo(() => {
-    const userPrivilege = audiencesData?.find((audience) => audience.user?.user_id === user?.user_id)?.privilege;
-
-    const organisationPrivilege = audiencesData?.find((audience) => audience.resource_audience_type === 'organization');
-
-    const hasEditorPrivileges = (privilege: PROCESS_ACCESS_PRIVILEGES) =>
-      privilege === PROCESS_ACCESS_PRIVILEGES.ADMIN || privilege === PROCESS_ACCESS_PRIVILEGES.EDITOR;
-
-    return (
-      hasEditorPrivileges(userPrivilege as PROCESS_ACCESS_PRIVILEGES) ||
-      (organisationPrivilege && hasEditorPrivileges(organisationPrivilege?.privilege as PROCESS_ACCESS_PRIVILEGES))
-    );
-  }, [audiencesData, user]);
+  const currentUserHasEditAccess = useMemo(() => {
+    return checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.EDITOR) || checkUserPrivilege(PROCESS_ACCESS_PRIVILEGES.ADMIN);
+  }, [checkUserPrivilege]);
 
   const [emitActivityLogs, { isLoading }] = useEmitActivityLogsMutation();
 
@@ -104,13 +94,13 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
           aria-label='Message input'
           className='f-13-450 w-full resize-none overflow-y-auto rounded-none border-none px-4 shadow-none'
           rows={1}
-          disabled={isLoading || isLoadingAudienceMembers || !enableSendMessage}
+          disabled={isLoading || !currentUserHasEditAccess}
         />
         <div className='flex justify-end p-2'>
           <Button
             size='icon'
             onClick={handleSubmit}
-            disabled={!inputValue.trim() || isLoading || isLoadingAudienceMembers || !enableSendMessage}
+            disabled={!inputValue.trim() || isLoading || !currentUserHasEditAccess}
             aria-label='Send message'
             className='!size-6'
           >

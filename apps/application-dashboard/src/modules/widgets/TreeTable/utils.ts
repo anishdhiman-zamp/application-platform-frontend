@@ -293,3 +293,12 @@ export const getFilterContext = (
 
   return columnFilterConfigs;
 };
+
+/**
+ * Checks if a value is empty, null, or undefined.
+ * @param {string | null | undefined} value - The value to check.
+ * @returns {boolean} True if the value is empty.
+ */
+export const isValueEmpty = (value: string | null | undefined) => {
+  return value === '' || value === null || value === undefined;
+};

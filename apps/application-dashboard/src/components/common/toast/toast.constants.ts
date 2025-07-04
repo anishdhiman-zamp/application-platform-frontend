@@ -69,6 +69,10 @@ export enum TOAST_MESSAGES {
 
   LOADING_POLICY_CREATION = 'Policy creation in progress',
   LOADING_POLICY_UPDATE = 'Policy update in progress',
+
+  SUCCESS_UPDATE_MISSING_FIELD = 'Missing field updated successfully',
+  ERROR_UPDATE_MISSING_FIELD = 'Missing field update failed',
+  IN_PROGRESS_UPDATE_MISSING_FIELD = 'Missing field update in progress',
 }
 
 export const TaggingMessages = {
@@ -81,4 +85,10 @@ export const RuleDeletionMessages = {
   SUCCESS: TOAST_MESSAGES.SUCCESS_RULE_DELETION,
   ERROR: TOAST_MESSAGES.ERROR_RULE_DELETION,
   IN_PROGRESS: TOAST_MESSAGES.IN_PROGRESS_RULE_DELETION,
+};
+
+export const UpdateMissingFieldsMessages = {
+  SUCCESS: TOAST_MESSAGES.SUCCESS_UPDATE_MISSING_FIELD,
+  ERROR: TOAST_MESSAGES.ERROR_UPDATE_MISSING_FIELD,
+  IN_PROGRESS: TOAST_MESSAGES.IN_PROGRESS_UPDATE_MISSING_FIELD,
 };

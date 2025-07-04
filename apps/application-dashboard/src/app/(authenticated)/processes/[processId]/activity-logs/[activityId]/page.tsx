@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { captureException } from '@sentry/browser';
+import { API_DOMAIN } from '@zamp-platform/api';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
 import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -12,12 +12,16 @@ import {
   useLazyGetArtifactsByArtifactIdQuery,
 } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
-import { API_DOMAIN } from '@/constants/api.constants';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
-import { ARTIFACT_TYPE, CTA_ACTION, PDF_DATASET_TAB } from '@/modules/process/process.types';
+import {
+  ARTIFACT_TYPE,
+  type EmitHITLActionPayload,
+  type HandleShowArtifactsProps,
+  PDF_DATASET_TAB,
+} from '@/modules/process/process.types';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -43,6 +47,13 @@ const Activity = () => {
   );
   const [artifactId, setArtifactId] = useState<string>(artifactIdFromUrl as string);
   const [filters, setFilters] = useState<MapAny>({});
+  const [missingFields, setMissingFields] = useState<MapAny>({});
+  const [emitHITLActionPayload, setEmitHITLActionPayload] = useState<EmitHITLActionPayload>({
+    logGroupId: '',
+    hitlRequestId: '',
+    ctaActionId: '',
+    ctaValue: '',
+  });
 
   const [getActivityLogs] = useLazyGetActivityLogsQuery();
   const [getArtifacts] = useLazyGetActivityArtifactsQuery();
@@ -86,7 +97,17 @@ const Activity = () => {
   );
 
   const handleShowArtifacts = useCallback(
-    (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => {
+    ({
+      artifactType,
+      artifactId,
+      action,
+      filters,
+      ctaConfig,
+      logGroupId,
+      hitlRequestId,
+      ctaActionId,
+      ctaValue,
+    }: HandleShowArtifactsProps) => {
       if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
         handleGetArtifacts(artifactId);
 
@@ -99,6 +120,14 @@ const Activity = () => {
       setArtifactId(artifactId);
       setArtifactType(artifactType);
       setFilters(filters ?? {});
+
+      setMissingFields(ctaConfig?.dataset_to_missing_fields_map ?? {});
+      setEmitHITLActionPayload({
+        logGroupId,
+        hitlRequestId,
+        ctaActionId,
+        ctaValue,
+      });
 
       if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
         setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
@@ -121,9 +150,6 @@ const Activity = () => {
     url: `${API_DOMAIN}/processes/events/${activityId}`,
     eventListeners: {
       update: handleUpdate,
-    },
-    onError: (error) => {
-      captureException(error);
     },
   });
 
@@ -218,6 +244,8 @@ const Activity = () => {
             artifactId={artifactId}
             filters={filters}
             onArtifactClick={handleShowArtifacts}
+            missingFields={missingFields}
+            emitHITLActionPayload={emitHITLActionPayload}
           />
         )}
       </ResizablePanel>

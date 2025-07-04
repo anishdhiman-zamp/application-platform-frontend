@@ -8,9 +8,11 @@ import {
   FillEndEvent,
   IServerSideDatasource,
   RowClickedEvent,
+  RowDragEndEvent,
   Theme,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
+import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
 import Table from 'components/common/table';
 
@@ -39,6 +41,12 @@ export interface DatasetTableProps {
   enableCellSelection?: boolean;
   onGridReady?: () => void;
   menuTitle?: string;
+  enableRowDrag?: boolean;
+  onRowDragEnd?: (event: RowDragEndEvent) => void;
+  showStatusBar?: boolean;
+  missingFields?: MissingFieldItemType[];
+  completedFields?: { rowId: string; columnId: string }[];
+  shouldShowNA?: boolean;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -66,6 +74,12 @@ const DatasetTable: FC<DatasetTableProps> = ({
   enableCellSelection = true,
   onGridReady,
   menuTitle,
+  enableRowDrag,
+  onRowDragEnd,
+  showStatusBar = true,
+  missingFields,
+  completedFields,
+  shouldShowNA = false,
 }) => {
   return (
     <div id='dataset-table'>
@@ -78,7 +92,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
         totalRows={totalRows}
         serverSideDatasource={serverSideDatasource}
         onCellEditRequest={onCellEditRequest}
-        showStatusBar
+        showStatusBar={showStatusBar}
         enableCellSelection={enableCellSelection}
         suppressCellFocus={suppressCellFocus}
         onColumnVisible={onColumnVisible}
@@ -95,6 +109,11 @@ const DatasetTable: FC<DatasetTableProps> = ({
         cellClass={cellClass}
         onGridReady={onGridReady}
         menuTitle={menuTitle}
+        enableRowDrag={enableRowDrag}
+        onRowDragEnd={onRowDragEnd}
+        missingFields={missingFields}
+        completedFields={completedFields}
+        shouldShowNA={shouldShowNA}
       />
     </div>
   );
