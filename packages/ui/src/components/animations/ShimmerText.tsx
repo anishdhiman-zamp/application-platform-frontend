@@ -1,16 +1,26 @@
 'use client';
 
+/*
+ * ShimmerText displays a text label with an animated shimmer effect
+ * Basically a color flows from left to right over the text).
+ *
+ * Usage:
+ * - A base gray text (visible).
+ * - A shimmer overlay text with a blue gradient (initially hidden via `text-transparent`).
+ * - The shimmer effect animates the gradient background from right to left.
+ */
+
 import { cn } from '@zamp-platform/ui/utils';
 import { FC, useEffect, useRef } from 'react';
 
-type ShimmerEffectPropsType = {
+interface ShimmerEffectProps {
   text: string;
   shimmerControlRef?: React.RefObject<(() => void) | null>; // for animation callback
   shimmerTextClassName?: string;
   baseTextClassName?: string;
-};
+}
 
-export const ShimmerText: FC<ShimmerEffectPropsType> = ({
+export const ShimmerText: FC<ShimmerEffectProps> = ({
   text,
   shimmerControlRef,
   shimmerTextClassName,

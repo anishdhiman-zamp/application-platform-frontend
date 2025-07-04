@@ -1,36 +1,30 @@
 'use client';
 
+/*
+ * `RevealElement` animates its children into view when the component enters the viewport.
+ * It uses Framer Motion's `useInView` to detect visibility and triggers a parent-child
+ * staggered animation defined in `REVEAL_ELEMENT_PARENT_MOTION_VARIANTS` and
+ * `REVEAL_ELEMENT_CHILD_MOTION_VARIANTS`.
+ *
+ * Usage:
+ * - Wrap any elements inside <RevealElement> to animate them
+ * - The animation starts from left to right
+ * - The animation is staggered (i.e, revealed one by one) and slower between children
+ */
+
+import {
+  REVEAL_ELEMENT_CHILD_MOTION_VARIANTS,
+  REVEAL_ELEMENT_PARENT_MOTION_VARIANTS,
+} from '../../constants/animations.constants';
 import { motion, useInView } from 'motion/react';
 import { useEffect, useRef, ReactNode, Children, isValidElement, cloneElement, useState } from 'react';
 
-type RevealElementPropsType = {
+interface RevealElementProps {
   className?: string;
   children: ReactNode;
-};
+}
 
-const containerMotionVariants = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.3, // slower between children
-      when: 'beforeChildren',
-    },
-  },
-};
-
-const itemMotionVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.6, // slower animation per item
-      ease: 'easeOut',
-    },
-  },
-};
-
-export const RevealElement = ({ className, children }: RevealElementPropsType) => {
+export const RevealElement = ({ className, children }: RevealElementProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true });
   const [animate, setAnimate] = useState<'hidden' | 'visible'>('hidden');
@@ -43,7 +37,7 @@ export const RevealElement = ({ className, children }: RevealElementPropsType) =
     <motion.div
       ref={containerRef}
       className={className}
-      variants={containerMotionVariants}
+      variants={REVEAL_ELEMENT_PARENT_MOTION_VARIANTS}
       initial='hidden'
       animate={animate}
     >
@@ -51,7 +45,7 @@ export const RevealElement = ({ className, children }: RevealElementPropsType) =
         isValidElement(child) ? (
           <motion.div
             key={child.key ?? `reveal-${idx}`}
-            variants={itemMotionVariants}
+            variants={REVEAL_ELEMENT_CHILD_MOTION_VARIANTS}
             className='flex w-auto flex-wrap'
           >
             {cloneElement(child)}

@@ -211,11 +211,10 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
     animate: {
       scaleY: 1,
       transition: {
-        duration: 0.35, // 350ms speed from 0 to 1
+        duration: 0.5, // 500ms speed from 0 to 1
         ease: 'easeOut',
       },
     },
-    style: { transformOrigin: 'top center' },
   },
   // Second animation: body content reveal
   {
@@ -226,7 +225,7 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
       transition: {
         duration: 0.3,
         ease: 'easeOut',
-        delay: 0.1, // delay after line animation
+        // delay: 0.1, // delay after line animation
       },
     },
   },

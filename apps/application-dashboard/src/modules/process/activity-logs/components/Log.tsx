@@ -10,6 +10,7 @@ import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } 
 import { motion } from 'motion/react';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
+import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 type LogProps = {
@@ -39,9 +40,10 @@ const Log: FC<LogProps> = ({
     log_group_id,
   } = data;
   const lineRef = useRef<HTMLDivElement>(null);
-  const shimmerControlRef = useRef<(() => void) | null>(null);
+  const shimmerControlRef = useRef<defaultFnType | null>(null);
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
   const [lineHeight, setLineHeight] = useState(0);
+  const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
 
   const isSenderInfoVisible = useMemo(() => {
     return (
@@ -78,33 +80,38 @@ const Log: FC<LogProps> = ({
     return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
   }, [updated_at]);
 
-  // stroke shimmer sequence loop logic
+  const strokeShimmerSequence = (
+    showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
+    shimmerControlRef: React.MutableRefObject<(() => void) | null>,
+    cancelledRef: React.MutableRefObject<boolean>,
+  ) => {
+    if (cancelledRef.current) return;
+
+    // 1. Show blue stroke
+    showBlueStrokeRef.current?.(true);
+
+    // 2. After 300ms, hide stroke and start shimmer
+    setTimeout(() => {
+      if (cancelledRef.current) return;
+
+      showBlueStrokeRef.current?.(false);
+      shimmerControlRef.current?.();
+
+      // 3. After shimmer, loop again
+      setTimeout(() => {
+        if (!cancelledRef.current) {
+          strokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
+        }
+      }, 2000); // shimmer duration
+    }, 300); // stroke visible duration
+  };
+
   const runStrokeShimmerLoop = (
     showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
     shimmerControlRef: React.MutableRefObject<(() => void) | null>,
     cancelledRef: React.MutableRefObject<boolean>,
   ) => {
-    const loop = () => {
-      if (cancelledRef.current) return;
-
-      // 1. Show blue stroke (this also triggers rotate)
-      showBlueStrokeRef.current?.(true);
-
-      // 2. After 300ms, hide stroke and start shimmer
-      setTimeout(() => {
-        if (cancelledRef.current) return;
-
-        showBlueStrokeRef.current?.(false);
-        shimmerControlRef.current?.();
-
-        // 3. After shimmer completes, restart the sequence
-        setTimeout(() => {
-          if (!cancelledRef.current) loop();
-        }, 2000); // shimmer duration
-      }, 300); // stroke visible duration
-    };
-
-    loop();
+    strokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
   };
 
   useEffect(() => {
@@ -122,7 +129,6 @@ const Log: FC<LogProps> = ({
     if (lineRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          console.log('observed entry height', entry.contentRect.height);
           setLineHeight(entry.contentRect.height);
         }
       });
@@ -149,7 +155,6 @@ const Log: FC<LogProps> = ({
         <motion.div
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
-          style={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].style}
         >
           <LogMessageAnimation
             text={formattedTime}
@@ -157,18 +162,18 @@ const Log: FC<LogProps> = ({
               'f-12-450 text-GRAY_700 flex w-[60px] shrink-0 items-start justify-start text-left break-words whitespace-nowrap',
             )}
             delay={0.2}
+            showAnimation={staggerAnimationBegin}
           />
         </motion.div>
       ) : [LOG_STATUS.LOADING, LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(status as LOG_STATUS) &&
         sender_type === SENDER_TYPE.SYSTEM ? (
-        <div className='flex w-[60px] shrink-0 items-start justify-start'></div>
+        <div className='w-[60px] shrink-0' />
       ) : (
         <div className='flex w-[60px] shrink-0 items-start justify-start'>
           <motion.div
-            className='f-12-450 text-GRAY_700 whitespace-nowrap'
+            className='f-12-450 text-GRAY_700 origin-top whitespace-nowrap'
             initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
             animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
-            style={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].style}
           >
             {formattedTime}
           </motion.div>
@@ -186,6 +191,7 @@ const Log: FC<LogProps> = ({
               duration: 0.5,
               ease: 'linear',
             }}
+            onAnimationComplete={() => setStaggerAnimationBegin(true)}
             className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
           >
             <LogStatusIndicator
@@ -201,10 +207,9 @@ const Log: FC<LogProps> = ({
           <div className='relative h-full'>
             {!isLastLog && (
               <motion.div
-                className='absolute inset-0 flex flex-col items-center'
+                className='absolute inset-0 flex origin-top flex-col items-center'
                 initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].initial}
                 animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].animate}
-                style={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].style}
               >
                 <div className='bg-GRAY_100 w-[1px] min-w-[1px] flex-1' ref={lineRef} />
               </motion.div>
@@ -213,18 +218,19 @@ const Log: FC<LogProps> = ({
         </div>
         {/* body */}
         <motion.div
-          className='bg-yellow-10 flex w-full flex-col items-start justify-start pb-10'
+          className='bg-yellow-10 flex w-full origin-top flex-col items-start justify-start pb-10'
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
         >
           <LogMessageAnimation
             text={message}
-            className={cn('f-13-450 w-full text-left break-words')}
+            className={'f-13-450 w-full text-left break-words'}
             delay={0.2}
             shimmer={status === LOG_STATUS.LOADING}
             shimmerControlRef={shimmerControlRef}
             isLastLog={isLastLog}
             senderType={sender_type}
+            showAnimation={staggerAnimationBegin}
           />
 
           {thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />}

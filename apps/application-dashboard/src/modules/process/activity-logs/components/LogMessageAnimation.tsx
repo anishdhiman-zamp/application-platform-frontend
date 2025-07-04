@@ -19,7 +19,6 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
   text,
   className = '',
   delay = 0,
-  show = true,
   showAnimation = true,
   shimmer = false,
   shimmerControlRef,
@@ -33,7 +32,7 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
   }
 
   if (isLastLog && isSystemSender && !shimmer) {
-    return <StaggerText text={text} show={show} showAnimation={showAnimation} delay={delay} className={className} />;
+    return <StaggerText text={text} showAnimation={showAnimation} delay={delay} className={className} />;
   }
 
   return <p className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', className)}>{text}</p>;

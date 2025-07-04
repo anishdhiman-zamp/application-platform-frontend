@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { LOG_STATUS } from 'modules/process/process.types';
 import { motion, useInView } from 'motion/react';
 import { COLORS } from '@/constants/colors';
@@ -28,7 +28,7 @@ const LogStatusIndicator = ({
   const [showBlueStroke, setShowBlueStroke] = useState(false);
   const [rotation, setRotation] = useState(initialIndicatorAngle);
 
-  // snap rotation to nearest 90° when stops
+  // stops rotation to nearest 90° angle
   const adjustRotationToNearest90 = (prevAngle: number, isErrorShape: boolean): number => {
     const normalizedAngle = ((prevAngle % 360) + 360) % 360;
 
@@ -93,4 +93,4 @@ const LogStatusIndicator = ({
   );
 };
 
-export default LogStatusIndicator;
+export default memo(LogStatusIndicator);
