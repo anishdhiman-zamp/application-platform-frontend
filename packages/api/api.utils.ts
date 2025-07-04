@@ -1,11 +1,11 @@
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 
 import { ENVIRONMENT, MULTI_REGION_ENABLED, REGION_LIST } from './constants';
 
-export const getApiDomainByRegion = async (email = '') => {
-  const region = getUserRegion();
+export const getApiDomainByRegion = async (email = '', changeSession = true) => {
+  const userRegion = getUserRegion();
 
-  if (ENVIRONMENT === 'production' && !region && MULTI_REGION_ENABLED) {
+  if (ENVIRONMENT === 'production' && !userRegion && MULTI_REGION_ENABLED) {
     const apiDomains = await Promise.allSettled(
       REGION_LIST.map(async (region) => {
         return fetch(`${getApiDomain(ENVIRONMENT, region)}/auth/verify/email`, {
@@ -20,29 +20,42 @@ export const getApiDomainByRegion = async (email = '') => {
       }),
     );
 
-    const successfulRegion = apiDomains
-      .filter(
-        (result): result is PromiseFulfilledResult<{ region: string; status: number }> => result.status === 'fulfilled',
-      )
-      .find((result) => result.value.status === 200)?.value.region;
+    const successfulRegion = apiDomains.filter(
+      (result): result is PromiseFulfilledResult<{ region: string; status: number }> =>
+        result.status === 'fulfilled' && result.value.status === 200,
+    );
 
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, successfulRegion ?? '');
+    // Reorder successfulRegion if userRegion exists
+    if (userRegion) {
+      const idx = successfulRegion.findIndex((result) => result.value.region === userRegion);
+      if (idx > 0 && changeSession) {
+        const [matched] = successfulRegion.splice(idx, 1);
+        successfulRegion.unshift(matched);
+      }
+    }
+
+    const allDomains = successfulRegion.map((result) => ({
+      domain: getApiDomain(ENVIRONMENT, result.value.region ?? ''),
+      region: result.value.region,
+    }));
+
     reinitializeApiDomain();
 
-    return getApiDomain(ENVIRONMENT, successfulRegion ?? '');
+    return allDomains;
   }
-
-  return getApiDomain(ENVIRONMENT, region);
 };
 
-const getApiDomain = (environment = '', region = '') => {
+export const getApiDomain = (environment = '', region = '') => {
   switch (environment) {
     case 'production':
       return `https://api${region}.zamp.ai`;
     case 'staging':
       return `https://api-stg${region}.zamp.ai`;
-    case 'development':
-      return `https://api-dev${region}.zamp.ai`;
+    case 'development': {
+      const reg = region.length ? region : '-dev';
+
+      return `https://api${reg}.zamp.ai`;
+    }
     default:
       return 'http://localhost:8080';
   }

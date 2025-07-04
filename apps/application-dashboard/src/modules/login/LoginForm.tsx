@@ -1,6 +1,5 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { getApiDomainByRegion, REQUEST_TYPES } from '@zamp-platform/api';
-import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
@@ -12,6 +11,7 @@ import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
 import Input from 'components/common/input';
@@ -111,53 +111,69 @@ export const LoginForm = () => {
 
       return;
     }
-    const apiDomain = await getApiDomainByRegion(email);
+    const domains = await getApiDomainByRegion(email);
 
     try {
-      const apiUrl = `${apiDomain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const responses = await Promise.allSettled(
+        domains.map(async (domain) => {
+          const apiUrl = `${domain.domain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
-      const response = await fetch(apiUrl, {
-        method: REQUEST_TYPES.POST,
-        body: JSON.stringify({
-          email,
+          return fetch(apiUrl, {
+            method: REQUEST_TYPES.POST,
+            body: JSON.stringify({
+              email,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          });
         }),
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        credentials: 'include',
-      });
+      );
 
-      const respJson = await response.json();
+      responses.forEach(async (response, idx) => {
+        if (response.status === 'rejected') {
+          setError('Network error occurred');
+          setHasError(true);
+          setLoading(false);
 
-      setHasError(false);
-
-      if (response.status !== API_STATUS_CODES.OK) {
-        setError(respJson.error);
-        removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
-        setHasError(true);
-        setLoading(false);
-
-        return;
-      }
-
-      setLoginFlow(respJson);
-      setProviderLogo(respJson?.ui?.nodes?.[0]?.attributes?.logo_url);
-
-      // if the number of login methods is 1 and it is OIDC, we can directly login
-      if (respJson?.ui?.nodes?.length == 1) {
-        const loginNode = respJson.ui.nodes[0];
-
-        if (loginNode?.group === LOGIN_GROUPS.OIDC) {
-          await initiateOidcLogin(
-            respJson.ui.action,
-            respJson.ui.method,
-            loginNode.attributes.value as LOGIN_PROVIDERS,
-          );
+          return;
         }
-      } else {
-        setLoading(false);
-      }
+
+        const respJson = await response.value.json();
+
+        setHasError(false);
+
+        if (response.value.status !== API_STATUS_CODES.OK) {
+          setError(respJson.error);
+          removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
+          setHasError(true);
+          setLoading(false);
+
+          return;
+        }
+
+        if (idx === 0) {
+          setLoginFlow(respJson);
+          setProviderLogo(respJson?.ui?.nodes?.[0]?.attributes?.logo_url);
+        }
+
+        // if the number of login methods is 1 and it is OIDC, we can directly login
+        if (respJson?.ui?.nodes?.length == 1) {
+          const loginNode = respJson.ui.nodes[0];
+
+          if (loginNode?.group === LOGIN_GROUPS.OIDC) {
+            await initiateOidcLogin(
+              respJson.ui.action,
+              respJson.ui.method,
+              loginNode.attributes.value as LOGIN_PROVIDERS,
+            );
+          }
+        } else {
+          setLoading(false);
+        }
+      });
     } catch {
       setHasError(true);
       setLoading(false);
