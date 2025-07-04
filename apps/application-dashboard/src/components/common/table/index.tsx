@@ -56,6 +56,7 @@ import { AgGridReact, CustomStatusPanelProps } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
 import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
+import { formatArrayValue } from '@/modules/data/data.utils';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
@@ -227,6 +228,33 @@ const Table: FC<TableProps> = ({
     return '!text-GRAY_1000';
   };
 
+  const formatCellValue = useCallback(
+    (params: ValueFormatterParams) => {
+      const { value } = params;
+      const isMissingField = checkIsMissingField(params);
+      const isEmpty = isValueEmpty(value);
+
+      // Handle missing required fields
+      if (isMissingField && isEmpty) {
+        return 'Required*';
+      }
+
+      // Handle empty values with N/A display
+      if (shouldShowNA && isEmpty) {
+        return 'N/A';
+      }
+
+      // Handle array values
+      if (Array.isArray(value)) {
+        return formatArrayValue(value);
+      }
+
+      // Return original value for all other cases
+      return value;
+    },
+    [checkIsMissingField, shouldShowNA, isValueEmpty],
+  );
+
   // @ts-ignore cellStyle is not typed
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -234,17 +262,7 @@ const Table: FC<TableProps> = ({
       filter: 'agTextColumnFilter',
       suppressHeaderMenuButton: true,
       suppressHeaderContextMenu: true,
-      valueFormatter: (params: ValueFormatterParams) => {
-        if (checkIsMissingField(params ?? []) && isValueEmpty(params.value)) {
-          return 'Required*';
-        }
-
-        if (shouldShowNA && isValueEmpty(params.value)) {
-          return 'N/A';
-        }
-
-        return params.value;
-      },
+      valueFormatter: formatCellValue,
       floatingFilter: false,
       headerClass: cn('f-12-600 text-GRAY_1000', headerClass),
       cellClass: (params: MapAny) => {
