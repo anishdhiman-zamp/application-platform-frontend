@@ -67,7 +67,6 @@ export type Workspace = {
 export type Organization = {
   organization_id: string;
   name: string;
-  region: string;
   resource_audience_policies: {
     privilege: string;
     resource_audience_type: string;

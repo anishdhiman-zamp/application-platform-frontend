@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { useSelector } from 'react-redux';
+import { useInitiateLogoutFlowQuery, useLazyLogoutQuery } from 'apis/auth';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import Image from 'next/image';
@@ -7,15 +8,24 @@ import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
-import { useLogout } from '@/hooks/useLogout';
 import { Button } from 'components/common/button/Button';
 import { NoAccessPagePropsType } from 'components/common/noAccess/noAcessPage.types';
 
 const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
   const router = useRouter();
-  const { logout, isLoggingOut } = useLogout();
-
+  const { data: initiateLogoutFlow, refetch: refetchLogoutFlow } = useInitiateLogoutFlowQuery();
+  const [logOut] = useLazyLogoutQuery();
   const user_email = useSelector((state: RootState) => state?.user?.user)?.user_email;
+
+  const handleLogout = async () => {
+    logOut(initiateLogoutFlow?.logout_url ?? '')
+      .then(() => {
+        router.push(ROUTES_PATH.LOGIN);
+      })
+      .catch(() => {
+        refetchLogoutFlow();
+      });
+  };
 
   const handleHomeBtn = () => {
     router.push(ROUTES_PATH.HOME);
@@ -43,13 +53,7 @@ const NoAccessPage: FC<NoAccessPagePropsType> = ({ type }) => {
         <Button type={BUTTON_TYPES.SECONDARY} id='back-to-home' size={SIZE_TYPES.SMALL} onClick={handleHomeBtn}>
           Back to Home
         </Button>
-        <Button
-          type={BUTTON_TYPES.SECONDARY}
-          id='logout'
-          size={SIZE_TYPES.SMALL}
-          onClick={logout}
-          disabled={isLoggingOut}
-        >
+        <Button type={BUTTON_TYPES.SECONDARY} id='logout' size={SIZE_TYPES.SMALL} onClick={handleLogout}>
           Logout
         </Button>
       </div>

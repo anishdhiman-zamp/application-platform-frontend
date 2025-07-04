@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LOADER_STATUS } from 'modules/data/data.types';
-import { type Organization, Session, Workspace } from 'types/api/auth.types';
+import { Session, Workspace } from 'types/api/auth.types';
 import { MapAny } from 'types/commonTypes';
 
 export type DatasetBulkLoadersType = { id: string; status: LOADER_STATUS; title: string; description: string };
@@ -16,7 +16,6 @@ export type UserState = {
   roles?: { id: string; name: string }[];
   dashboardLoader: boolean;
   datasetBulkLoaders?: DatasetBulkLoadersType[];
-  organizations?: Organization[];
 };
 
 const initialState: UserState = {
@@ -29,7 +28,6 @@ const initialState: UserState = {
   workspace: null,
   dashboardLoader: false,
   datasetBulkLoaders: [],
-  organizations: [],
 };
 
 export const userSlice = createSlice({
@@ -62,9 +60,6 @@ export const userSlice = createSlice({
     },
     setDashboardLoader: (state, action: PayloadAction<boolean>) => {
       state.dashboardLoader = action.payload;
-    },
-    setOrganizations: (state, action: PayloadAction<Organization[]>) => {
-      state.organizations = action.payload;
     },
     addDatasetBulkLoaders: (
       state,
@@ -104,7 +99,6 @@ export const {
   removeDatasetBulkLoader,
   setWorkspace,
   setDashboardLoader,
-  setOrganizations,
 } = userSlice.actions;
 
 export default userSlice.reducer;
