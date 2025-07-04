@@ -43,6 +43,7 @@ export const getApiDomainByRegion = async (email = '', changeSession = true) => 
 
     return allDomains;
   }
+  return [{ domain: getApiDomain(ENVIRONMENT, userRegion), region: userRegion }];
 };
 
 export const getApiDomain = (environment = '', region = '') => {
