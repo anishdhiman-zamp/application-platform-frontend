@@ -19,7 +19,7 @@ default:
       memory: 250Mi
   replicaCount: 1
   image:
-    repository: 913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-zamp-rosetta-svc
+    repository: 913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-application-platform-frontend-ecr
     tag: v1
     imagePullPolicy: Always
   signoz:
