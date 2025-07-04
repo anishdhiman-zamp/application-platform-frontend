@@ -225,7 +225,6 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
       transition: {
         duration: 0.3,
         ease: 'easeOut',
-        // delay: 0.1, // delay after line animation
       },
     },
   },
