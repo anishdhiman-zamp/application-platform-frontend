@@ -1,5 +1,6 @@
 import { type FC, memo, type RefObject, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, RevealElement } from '@zamp-platform/ui';
+import { LOG_STATUS } from 'modules/process/process.types';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import { ACCORDION_LIST } from '@/constants/icons';
@@ -8,12 +9,14 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/ut
 interface ReasoningAccordionProps {
   thoughtSteps: string[];
   logGroupId: string;
+  isLastLog?: boolean;
+  status: LOG_STATUS;
 }
 
 const STORAGE_KEY = LOCAL_STORAGE_KEYS.OPEN_LOG_GROUP_IDS;
 const ACCORDION_ITEM = 'item-1';
 
-const ReasoningAccordion = ({ thoughtSteps, logGroupId }: ReasoningAccordionProps) => {
+const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: ReasoningAccordionProps) => {
   const [openValue, setOpenValue] = useState<string | undefined>();
   const lastItemRef = useRef<HTMLDivElement>(null);
   const prevStepsLengthRef = useRef<number>(thoughtSteps.length);
@@ -60,6 +63,15 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId }: ReasoningAccordionProp
       }
     }
   }, [thoughtSteps, openValue]);
+
+  // Automatically open/close last log's accordion based on reasoning completion
+  useEffect(() => {
+    if (isLastLog && status !== LOG_STATUS.SUCCESS) {
+      setOpenValue(ACCORDION_ITEM);
+    } else {
+      setOpenValue(undefined);
+    }
+  }, [isLastLog, status]);
 
   return (
     <Accordion

@@ -16,6 +16,7 @@ import { cn } from '@/utils/common';
 type LogProps = {
   indexNum?: number;
   isFirstLog?: boolean;
+  isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
   handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
@@ -26,6 +27,7 @@ type LogProps = {
 
 const Log: FC<LogProps> = ({
   isFirstLog = false,
+  isLastLogOfDate = false,
   isLastLog = false,
   data,
   handleShowArtifacts,
@@ -165,8 +167,7 @@ const Log: FC<LogProps> = ({
             showAnimation={staggerAnimationBegin}
           />
         </motion.div>
-      ) : [LOG_STATUS.LOADING, LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(status as LOG_STATUS) &&
-        sender_type === SENDER_TYPE.SYSTEM ? (
+      ) : status === LOG_STATUS.LOADING && sender_type === SENDER_TYPE.SYSTEM ? (
         <div className='w-[60px] shrink-0' />
       ) : (
         <div className='flex w-[60px] shrink-0 items-start justify-start'>
@@ -185,8 +186,8 @@ const Log: FC<LogProps> = ({
         <div className='relative flex w-5 flex-col items-center gap-[2px] pt-[2px] pr-5'>
           {/* Indicator */}
           <motion.div
-            initial={isLastLog ? { y: initialYValue } : false}
-            animate={isLastLog ? { y: 0 } : false}
+            initial={isLastLogOfDate ? { y: initialYValue } : false}
+            animate={isLastLogOfDate ? { y: 0 } : false}
             transition={{
               duration: 0.5,
               ease: 'linear',
@@ -205,7 +206,7 @@ const Log: FC<LogProps> = ({
 
           {/* Line */}
           <div className='relative h-full'>
-            {!isLastLog && (
+            {!isLastLogOfDate && (
               <motion.div
                 className='absolute inset-0 flex origin-top flex-col items-center'
                 initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].initial}
@@ -228,12 +229,19 @@ const Log: FC<LogProps> = ({
             delay={0.2}
             shimmer={status === LOG_STATUS.LOADING}
             shimmerControlRef={shimmerControlRef}
-            isLastLog={isLastLog}
+            isLastLogOfDate={isLastLogOfDate}
             senderType={sender_type}
             showAnimation={staggerAnimationBegin}
           />
 
-          {thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />}
+          {thought_steps?.length > 0 && (
+            <ReasoningAccordion
+              thoughtSteps={thought_steps}
+              logGroupId={log_group_id}
+              isLastLog={isLastLog}
+              status={statusIndicatorColor.status}
+            />
+          )}
           {ctas && (
             <LogCta
               ctas={ctas}

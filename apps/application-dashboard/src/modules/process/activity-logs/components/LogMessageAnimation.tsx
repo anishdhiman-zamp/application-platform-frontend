@@ -11,7 +11,7 @@ type LogMessageAnimationProps = {
   showAnimation?: boolean;
   shimmer?: boolean;
   shimmerControlRef?: React.RefObject<(() => void) | null>;
-  isLastLog?: boolean;
+  isLastLogOfDate?: boolean;
   senderType?: SENDER_TYPE;
 };
 
@@ -22,7 +22,7 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
   showAnimation = true,
   shimmer = false,
   shimmerControlRef,
-  isLastLog = false,
+  isLastLogOfDate = false,
   senderType,
 }) => {
   const isSystemSender = senderType === SENDER_TYPE.SYSTEM;
@@ -31,7 +31,7 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
     return <ShimmerText text={text} shimmerControlRef={shimmerControlRef} />;
   }
 
-  if (isLastLog && isSystemSender && !shimmer) {
+  if (isLastLogOfDate && isSystemSender && !shimmer) {
     return <StaggerText text={text} showAnimation={showAnimation} delay={delay} className={className} />;
   }
 

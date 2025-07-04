@@ -30,10 +30,8 @@ const LogStatusIndicator = ({
 
   // stops rotation to nearest 90° angle
   const adjustRotationToNearest90 = (prevAngle: number, isErrorShape: boolean): number => {
-    const normalizedAngle = ((prevAngle % 360) + 360) % 360;
-
     if (isErrorShape) return prevAngle;
-
+    const normalizedAngle = ((prevAngle % 360) + 360) % 360;
     const rotationAdjustment = 90 - (normalizedAngle % 90);
 
     return prevAngle + rotationAdjustment;

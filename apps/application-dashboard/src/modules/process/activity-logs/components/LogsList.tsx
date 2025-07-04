@@ -24,6 +24,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
       const isFirstLogOfDate =
         index === 0 || format(new Date(logs?.activity_logs[index - 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
 
+      const isLastLog = index === logs?.activity_logs?.length - 1;
       const isLastLogOfDate =
         index === logs?.activity_logs?.length - 1 ||
         format(new Date(logs?.activity_logs[index + 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
@@ -35,6 +36,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
         showDateSeparator,
         isFirstLogOfDate,
         isLastLogOfDate,
+        isLastLog,
         log,
       };
     });
@@ -52,25 +54,28 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
 
   return (
     <>
-      {logsWithSeparators?.map(({ key, showDateSeparator, isFirstLogOfDate, isLastLogOfDate, log }, index) => {
-        const isOverallLastLog = index === logsWithSeparators?.length - 1;
+      {logsWithSeparators?.map(
+        ({ key, showDateSeparator, isFirstLogOfDate, isLastLogOfDate, isLastLog, log }, index) => {
+          const isOverallLastLog = index === logsWithSeparators?.length - 1;
 
-        return (
-          <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
-            {showDateSeparator && <DateSeparator date={log?.updated_at} />}
-            {isOverallLastLog && <div ref={bottomRef} />}
-            <Log
-              indexNum={index}
-              data={log}
-              isLastLog={isLastLogOfDate}
-              isFirstLog={isFirstLogOfDate}
-              handleShowArtifacts={handleShowArtifacts}
-              processId={processId}
-              activityId={activityId}
-            />
-          </div>
-        );
-      })}
+          return (
+            <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
+              {showDateSeparator && <DateSeparator date={log?.updated_at} />}
+              {isOverallLastLog && <div ref={bottomRef} />}
+              <Log
+                indexNum={index}
+                data={log}
+                isLastLogOfDate={isLastLogOfDate}
+                isLastLog={isLastLog}
+                isFirstLog={isFirstLogOfDate}
+                handleShowArtifacts={handleShowArtifacts}
+                processId={processId}
+                activityId={activityId}
+              />
+            </div>
+          );
+        },
+      )}
     </>
   );
 };
