@@ -9,7 +9,7 @@ export enum LOCAL_STORAGE_KEYS {
   LAST_VISITED_PAGE_ID = 'LAST_VISITED_PAGE_ID',
   COLUMN_ORDERING_VISIBILITY = 'COLUMN_ORDERING_VISIBILITY',
   XZAMP_ORGANIZATION_ID = 'X-Zamp-Organization-Id',
-  ORG_REGION = 'ORG_REGION_v1',
+  ORG_REGION = 'ORG_REGION_V2',
 }
 
 export const getFromLocalStorage = (key: string) => {
