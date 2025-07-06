@@ -1,28 +1,29 @@
 import { DatasetType, ProviderType } from 'modules/admin/admin.types';
+import { ValueFormatType } from 'types/api/dataset.types';
+import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 
 export type GetDatasetDisplayConfigRequestType = {
   datasetId: string;
 };
 
-export type displayConfigType = {
+export type DisplayConfigType = {
   column: string;
   alias?: string;
   is_hidden: string;
   is_editable: string;
-  type: string;
+  type: CUSTOM_COLUMNS_TYPE;
   config: {
-    amount_column: string;
-    currency_column: string;
+    value_format: ValueFormatType[];
   };
 };
 
 export type GetDatasetDisplayConfigResponseType = {
-  display_config: displayConfigType[];
+  display_config: DisplayConfigType[];
 };
 
 export type PostDatasetDisplayConfigRequestType = {
   datasetId: string;
-  body: { display_config: displayConfigType[] };
+  body: { display_config: DisplayConfigType[] };
 };
 
 export type PostDatasetDisplayConfigResponseType = {

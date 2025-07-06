@@ -1,23 +1,43 @@
 import { useMemo, useState } from 'react';
 import { Tabs, TabsContent } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
+import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
-import DatasetArtifact from 'modules/process/artifacts/components/DatasetArtifact';
-import EmailArtifact from 'modules/process/artifacts/components/EmailArtifact';
-import { ARTIFACT_TYPE, type CTA_ACTION, PDF_DATASET_TAB } from 'modules/process/process.types';
+import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
+import {
+  ARTIFACT_TYPE,
+  type EmitHITLActionPayload,
+  type HandleShowArtifactsProps,
+  PDF_DATASET_TAB,
+} from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { COLORS } from '@/constants/colors';
-import type { EmailArtifactsResponseType, PdfArtifactsResponseType } from '@/types/api/processApi.types';
+import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
+import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
+import type {
+  BrowserArtifactsResponseType,
+  DatasetArtifactsResponseType,
+  EmailArtifactsResponseType,
+  PdfArtifactsResponseType,
+  PdfDatasetArtifactsResponseType,
+} from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
-const PdfArtifact = dynamic(() => import('modules/process/artifacts/components/PdfArtifact'), {
+const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
   ssr: false,
+  loading: () => <ArtifactLoader />,
 });
+
+const BrowserArtifact = dynamic(
+  () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
+  {
+    ssr: false,
+    loading: () => <ArtifactLoader />,
+  },
+);
 
 interface ArtifactsProps {
   onClose: () => void;
@@ -28,7 +48,9 @@ interface ArtifactsProps {
   artifactType: ARTIFACT_TYPE;
   artifactId: string;
   filters: MapAny;
-  onArtifactClick: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  onArtifactClick: (props: HandleShowArtifactsProps) => void;
+  missingFields: MapAny;
+  emitHITLActionPayload: EmitHITLActionPayload;
 }
 
 const Artifacts = ({
@@ -41,22 +63,23 @@ const Artifacts = ({
   artifactId,
   onArtifactClick,
   filters,
+  missingFields,
+  emitHITLActionPayload,
 }: ArtifactsProps) => {
-  const searchParams = useSearchParams();
   const params = useParams();
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
 
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
 
   const {
     data: artifacts,
-    isLoading,
+    isFetching,
     isError,
     refetch,
   } = useGetArtifactsByArtifactIdQuery(
     {
-      processId: processId as string,
+      processId,
       activityRunId: activityId as string,
       artifact_ids: artifactId,
     },
@@ -75,12 +98,74 @@ const Artifacts = ({
       };
     }
 
+    const artifact = artifacts.artifacts[0];
+
     return {
-      id: artifacts.artifacts[0]?.id ?? '',
-      artifactData: artifacts.artifacts[0]?.artifact_data ?? null,
-      title: artifacts.artifacts[0]?.artifact_data?.display_name ?? '',
+      id: artifact?.id ?? '',
+      artifactData: artifact?.artifact_data ?? null,
+      title: artifact?.artifact_data?.display_name ?? '',
     };
   }, [artifacts]);
+
+  const artifactComponent = useMemo(() => {
+    if (!artifactData || !id) return null;
+
+    switch (artifactType) {
+      case ARTIFACT_TYPE.PDF_DATASET:
+        return (
+          <>
+            <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
+              <CompletedFieldsProvider>
+                <DatasetTabView
+                  datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
+                  filters={filters}
+                  missingFields={missingFields}
+                  emitHITLActionPayload={emitHITLActionPayload}
+                  key={id}
+                />
+              </CompletedFieldsProvider>
+            </TabsContent>
+            <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
+              <PdfArtifact pdfArtifact={artifactData as PdfDatasetArtifactsResponseType} artifactId={id} key={id} />
+            </TabsContent>
+          </>
+        );
+
+      case ARTIFACT_TYPE.EMAIL:
+        return (
+          <EmailArtifactWrapper
+            artifactData={artifactData as EmailArtifactsResponseType}
+            artifactId={id}
+            processId={processId}
+            key={id}
+          />
+        );
+
+      case ARTIFACT_TYPE.DATASET:
+        return (
+          <CompletedFieldsProvider>
+            <DatasetTabView
+              datasetArtifact={artifactData as DatasetArtifactsResponseType}
+              filters={filters}
+              missingFields={missingFields}
+              emitHITLActionPayload={emitHITLActionPayload}
+              key={id}
+            />
+          </CompletedFieldsProvider>
+        );
+
+      case ARTIFACT_TYPE.PDF:
+        return <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />;
+
+      case ARTIFACT_TYPE.BROWSER:
+        return (
+          <BrowserArtifact browserArtifact={artifactData as BrowserArtifactsResponseType} artifactId={id} key={id} />
+        );
+
+      default:
+        return null;
+    }
+  }, [artifactType, artifactData, id, filters]);
 
   return (
     <div className='animate-fade-in relative h-full w-full'>
@@ -98,35 +183,14 @@ const Artifacts = ({
           onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
         />
         <CommonWrapper
-          isLoading={isLoading}
-          loader={
-            <div className='bg-BG_GRAY_2 flex h-full w-full flex-col items-center justify-center gap-y-1'>
-              <SvgSpriteLoader id='stand' size={14} color={COLORS.GRAY_600} />
-              <span className='f-13-450 text-GRAY_600 animate-pulse'>Loading artifact...</span>
-            </div>
-          }
+          isLoading={isFetching}
+          loader={<ArtifactLoader />}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isError}
           refetchFunction={refetch}
           className='h-full w-full'
         >
-          {artifactType === ARTIFACT_TYPE.PDF_DATASET && artifactData && id && (
-            <>
-              <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-                <DatasetArtifact
-                  datasetArtifact={artifactData as PdfArtifactsResponseType}
-                  filters={filters}
-                  key={id}
-                />
-              </TabsContent>
-              <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
-                <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />
-              </TabsContent>
-            </>
-          )}
-          {artifactType === ARTIFACT_TYPE.EMAIL && artifactData && id && (
-            <EmailArtifact emailArtifact={artifactData as EmailArtifactsResponseType} artifactId={id} key={id} />
-          )}
+          {artifactComponent}
         </CommonWrapper>
 
         <AllArtifactsSideDrawer

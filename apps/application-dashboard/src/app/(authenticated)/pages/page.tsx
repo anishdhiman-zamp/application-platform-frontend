@@ -9,7 +9,7 @@ export default function Page() {
     refetchOnMountOrArgChange: false,
   });
 
-  const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
+  const { pushToMostRelevantPage } = usePersistedPageNavigation({ pagesList: pages ?? [] });
 
   useEffect(() => {
     if (pages) {

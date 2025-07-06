@@ -11,10 +11,10 @@ import {
   BROWSER,
   DATASET,
   DONE_EMPTY_STATE,
+  FILE,
   GMAIL,
   IN_PROGRESS_EMPTY_STATE,
   NEEDS_ATTENTION_EMPTY_STATE,
-  SPRINKLR,
 } from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
@@ -90,9 +90,11 @@ export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.BROWSER]: {
     icon_url: BROWSER,
   },
-  [ARTIFACT_TYPE.EXTERNAL_LINK]: {
-    // icon_url: COUPA,
-    icon_url: SPRINKLR,
+  [ARTIFACT_TYPE.PDF]: {
+    icon_url: FILE,
+  },
+  [ARTIFACT_TYPE.DATASET]: {
+    icon_url: DATASET,
   },
 };
 

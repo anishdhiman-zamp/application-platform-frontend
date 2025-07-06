@@ -7,6 +7,7 @@ export const ROUTES_PATH = {
   DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages',
+  PROCESSES: '/processes',
   PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   NO_ACCESS: '/no-access',
@@ -19,8 +20,8 @@ export const ROUTES_PATH = {
   ADMIN_ASSETS: '/admin/assets',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
-  PROCESS: '/processes',
-  PROCESS_ACTIVITY_LOGS: '/processes/:activityId',
+  PROCESS: '/processes/:processId',
+  PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   SETTINGS: '/settings',
@@ -60,17 +61,12 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
   return `${ROUTES_PATH.ADMIN_DATASETS}/${datasetId}`;
 };
 
-export const getProcessRouteById = (processId: string, process: string, status?: string) => {
-  return `${ROUTES_PATH.PROCESS}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
+export const getProcessRouteById = (processId: string, status?: string) => {
+  return `${ROUTES_PATH.PROCESS.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
 };
 
-export const getProcessActivityLogsRouteById = (
-  processId: string,
-  process: string,
-  activityId: string,
-  status?: string,
-) => {
-  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':activityId', activityId)}${processId ? `?processId=${processId}` : ''}${process ? `&process=${process}` : ''}${status ? `&status=${status}` : ''}`;
+export const getProcessActivityLogsRouteById = (processId: string, activityId: string, status?: string) => {
+  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':activityId', activityId)}${status ? `?status=${status}` : ''}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

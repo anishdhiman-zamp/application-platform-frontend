@@ -33,6 +33,7 @@ describe('usePersistedPageNavigation', () => {
       updated_at: new Date().toISOString(),
       fractional_index: 0,
       organization_id: 'org1',
+      sheets: [],
     },
     {
       page_id: 'page2',
@@ -42,6 +43,7 @@ describe('usePersistedPageNavigation', () => {
       updated_at: new Date().toISOString(),
       fractional_index: 0,
       organization_id: 'org1',
+      sheets: [],
     },
   ];
 
@@ -107,7 +109,7 @@ describe('usePersistedPageNavigation', () => {
 
       (getFromLocalStorage as jest.Mock).mockReturnValue(lastVisitedPageId);
 
-      const { result } = renderHook(() => usePersistedPageNavigation(pages));
+      const { result } = renderHook(() => usePersistedPageNavigation({ pagesList: pages }));
 
       act(() => result.current.pushToMostRelevantPage());
 
@@ -130,7 +132,7 @@ describe('usePersistedPageNavigation', () => {
     const pagesList: PageResponseType[] = [];
     const pageId = 'test-page';
 
-    const { result } = renderHook(() => usePersistedPageNavigation(pagesList));
+    const { result } = renderHook(() => usePersistedPageNavigation({ pagesList }));
 
     act(() => result.current.setLastVisitedPage(pageId));
 

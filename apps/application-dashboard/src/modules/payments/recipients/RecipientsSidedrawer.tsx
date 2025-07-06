@@ -6,8 +6,8 @@ import RecipientDetails from 'modules/payments/recipients/RecipientDetails';
 import RecipientsList from 'modules/payments/recipients/RecipientsList';
 import { AnimatePresence, motion } from 'motion/react';
 import { useGetRecipientListQuery } from '@/apis/payments';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { PAYMENT_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource';
-import { useResourceAccess } from '@/modules/shareResource/hooks/useResourceAccess';
 import { RecipientDetailsType } from '@/types/api/paymentApi.types';
 type RecipientsSideDrawerProps = {
   onClose: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,7 +44,7 @@ const RecipientsSideDrawer: FC<RecipientsSideDrawerProps> = ({ onClose, isOpen }
     });
   };
 
-  const { checkUserPrivilege } = useResourceAccess(ResourceType.PAYMENTS, '');
+  const { checkUserPrivilege } = useResourceAccess({ resourceType: ResourceType.PAYMENTS });
 
   const allowActions = useMemo(() => {
     return (

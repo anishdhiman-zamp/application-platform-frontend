@@ -18,7 +18,24 @@ const nextConfig = {
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder'],
   productionBrowserSourceMaps: true,
   images: {
-    remotePatterns: [new URL('https://l0lws8ltlx4vwaic.public.blob.vercel-storage.com/**')],
+    remotePatterns: [new URL(`${process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL}/**`)],
+  },
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+        ],
+      },
+    ];
   },
 };
 

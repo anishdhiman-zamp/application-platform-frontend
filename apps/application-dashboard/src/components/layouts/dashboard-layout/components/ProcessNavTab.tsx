@@ -1,8 +1,6 @@
 'use client';
 
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { getProcessRouteById } from 'constants/routeConfig';
-import { useRouter } from 'next/navigation';
 import { cn } from 'utils/common';
 import { ICON_SPRITE_TYPES } from '@/constants/icons';
 
@@ -10,24 +8,15 @@ interface ProcessNavTabProps {
   label: string;
   processId: string;
   isSelected?: boolean;
-  disable?: boolean;
 }
 
-const ProcessNavTab = ({ label, processId, isSelected, disable = false }: ProcessNavTabProps) => {
-  const router = useRouter();
-
+const ProcessNavTab = ({ label, isSelected }: ProcessNavTabProps) => {
   return (
     <div
       className={cn(
         'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
-        disable ? 'cursor-not-allowed opacity-50' : '',
       )}
-      onClick={() => {
-        if (!disable) {
-          router.push(getProcessRouteById(processId, label));
-        }
-      }}
     >
       <SvgSpriteLoader
         iconCategory={ICON_SPRITE_TYPES.GENERAL}

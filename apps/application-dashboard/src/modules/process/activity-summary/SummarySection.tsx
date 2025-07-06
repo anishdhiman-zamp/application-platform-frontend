@@ -1,22 +1,27 @@
 import { type FC } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Summary from 'modules/process/activity-summary/components/Summary';
 import ArtifactsSkeleton from 'modules/process/activity-summary/loaders/ArtifactsSkeleton';
-import type { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
-import { useParams, useSearchParams } from 'next/navigation';
+import type { HandleShowArtifactsProps } from 'modules/process/process.types';
+import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useGetActivitySummaryQuery } from '@/apis/processes';
+import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { COLORS } from '@/constants/colors';
 import ArtifactTag from '@/modules/process/common/ArtifactTag';
 import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
+import { defaultFnType } from '@/types/commonTypes';
 
 type SummarySectionProps = {
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION) => void;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
+  isExpanded: boolean;
+  onExpand: defaultFnType;
 };
 
-const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
-  const searchParams = useSearchParams();
+const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpanded, onExpand }) => {
   const params = useParams();
-  const processId = searchParams?.get('processId') as string;
+  const processId = params?.processId as string;
   const activityId = params?.activityId;
 
   const {
@@ -64,10 +69,21 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         errorCardStyle='w-full h-1/2'
         className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pt-5 pb-6'
       >
-        <p className='f-13-550'>Key Details</p>
+        <div className='flex w-full items-center justify-between'>
+          <p className='f-13-550'>Key Details</p>
+          <TooltipV2 tooltipBody={isExpanded ? 'Collapse' : 'Expand'}>
+            <SvgSpriteLoader
+              id={isExpanded ? 'minimize-01' : 'expand-01'}
+              size={12}
+              color={COLORS.GRAY_1000}
+              onClick={onExpand}
+              className='animate-opacity cursor-pointer transition-all duration-300'
+              key={isExpanded ? 'minimize-01' : 'expand-01'}
+            />
+          </TooltipV2>
+        </div>
         {summary?.summary?.summary_items?.map((section) => <Summary key={section?.title} data={section} />)}
       </CommonWrapper>
-      <div className='bg-GRAY_400 h-px w-full' />
       <CommonWrapper
         isLoading={isLoadingArtifacts}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -77,16 +93,22 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts }) => {
         isNoData={!artifacts?.artifacts?.length}
         noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
-        className='flex w-full flex-col items-start justify-start gap-y-3 px-6 py-5'
+        className='border-GRAY_400 flex w-full flex-col items-start justify-start gap-y-3 border-t-[0.5px] px-6 py-5'
       >
         <p className='f-13-550'>Artifacts</p>
         {artifacts?.artifacts?.map((artifact) => (
           <ArtifactTag
             key={artifact?.id}
             displayName={artifact?.artifact_data?.display_name}
-            type={artifact?.artifact_type}
-            onClick={() => handleShowArtifacts(artifact?.artifact_type, artifact?.id ?? '')}
-            displayClassName='max-w-80'
+            artifactType={artifact?.artifact_type}
+            iconIdentifier={artifact?.artifact_data?.icon_identifier}
+            onClick={() =>
+              handleShowArtifacts({
+                artifactType: artifact?.artifact_type,
+                artifactId: artifact?.id ?? '',
+              })
+            }
+            displayClassName='max-w-[200px]'
           />
         ))}
       </CommonWrapper>

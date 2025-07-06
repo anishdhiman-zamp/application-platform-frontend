@@ -28,6 +28,7 @@ export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
 export const GROUP_COLLAPSE_ICON = IMAGE_PREFIX + '/icons/group-collapse.svg';
 export const CONNECT_ACCOUNT = IMAGE_PREFIX + '/images/connect-account.svg';
 export const DATASET_TABLE = IMAGE_PREFIX + '/icons/dataset-table.svg';
+export const ALIGN_CENTER = IMAGE_PREFIX + '/icons/align-center.svg';
 
 // Bank Icons
 export const ADCB_SVG = IMAGE_PREFIX + '/icons/bank-icons/adcb.svg';
@@ -122,10 +123,20 @@ export const SALESFORCE = IMAGE_PREFIX + '/icons/agents/artifacts/salesforce.svg
 export const SLACK = IMAGE_PREFIX + '/icons/agents/artifacts/slack.svg';
 export const VIDEO = IMAGE_PREFIX + '/icons/agents/artifacts/video.svg';
 export const SPRINKLR = IMAGE_PREFIX + '/icons/agents/artifacts/sprinklr.svg';
+export const REDIRECT = IMAGE_PREFIX + '/icons/agents/artifacts/redirect.svg';
+export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 
 export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.png';
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.png';
 export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.png';
+
+// Video Artifact
+export const PAUSED_OVERLAY = IMAGE_PREFIX + '/icons/agents/video-artifact/paused-overlay.svg';
+export const PLAYING = IMAGE_PREFIX + '/icons/agents/video-artifact/playing.svg';
+export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
+
+export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
+export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 
 export enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',

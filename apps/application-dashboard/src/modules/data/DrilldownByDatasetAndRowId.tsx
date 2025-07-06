@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useGetDatasetDrilldownQuery } from 'apis/dataset';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
+import { useGetDatasetDrilldownQuery } from '@/apis/dataset';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';

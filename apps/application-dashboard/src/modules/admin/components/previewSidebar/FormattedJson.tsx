@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import { FormattedJsonPropsType } from 'modules/admin/admin.types';
-import { displayConfigType } from 'types/api/admin.types';
+import { DisplayConfigType } from 'types/api/admin.types';
 import { toast } from 'components/common/toast/Toast';
 
 const highlightDifferences = (
-  original: displayConfigType[],
-  formatted: displayConfigType[],
+  original: DisplayConfigType[],
+  formatted: DisplayConfigType[],
   searchQuery: string,
   indent = 2,
 ) => {

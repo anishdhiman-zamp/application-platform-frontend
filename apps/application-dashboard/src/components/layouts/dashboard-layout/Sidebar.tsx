@@ -9,7 +9,7 @@ import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import { useLogout } from 'hooks/useLogout';
 import Link from 'next/link';
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
 import { useHash } from '@/hooks/useHash';
@@ -26,8 +26,6 @@ const Sidebar = () => {
   const pathTrim = usePathname();
   const hash = useHash();
   const pathname = pathTrim + hash;
-  const searchParams = useSearchParams();
-  const processId = searchParams?.get('processId');
 
   const { logout } = useLogout();
   const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
@@ -36,13 +34,18 @@ const Sidebar = () => {
   const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { pushToMostRelevantPage } = usePersistedPageNavigation(pages ?? []);
+  const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
+    pagesList: pages ?? [],
+    processesList: processes ?? [],
+  });
 
   useEffect(() => {
-    if (pages) {
+    if (processes) {
+      pushToMostRelevantProcess();
+    } else if (pages) {
       pushToMostRelevantPage();
     }
-  }, [pages]);
+  }, [pages, processes]);
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -52,7 +55,7 @@ const Sidebar = () => {
         <div className='h-full'>
           <div className='border-GRAY_400 border-b px-2 pb-4'>
             {SIDEBAR_ITEMS.map((item) => (
-              <Link href={item.path} key={item.label} className='cursor-pointer'>
+              <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
                 <SidebarTab
                   key={item?.label}
                   name={item?.label}
@@ -71,15 +74,11 @@ const Sidebar = () => {
                 loader={<SkeletonLoaderSidebarPages />}
               >
                 {processes?.map((process) => (
-                  <Link
-                    href={getProcessRouteById(process?.id, process?.display_name)}
-                    key={process?.id}
-                    className='cursor-pointer'
-                  >
+                  <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
                     <ProcessNavTab
                       label={process?.display_name}
                       processId={process?.id}
-                      isSelected={processId === process?.id}
+                      isSelected={params?.processId === process?.id}
                     />
                   </Link>
                 ))}
@@ -95,7 +94,7 @@ const Sidebar = () => {
                 loader={<SkeletonLoaderSidebarPages />}
               >
                 {pages?.map((item) => (
-                  <Link href={getPageRouteById(item?.page_id)} key={item?.page_id} className='cursor-pointer'>
+                  <Link prefetch href={getPageRouteById(item?.page_id)} key={item?.page_id} className='cursor-pointer'>
                     <PageNavTab
                       key={item?.page_id}
                       label={item?.name}

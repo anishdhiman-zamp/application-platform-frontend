@@ -1,5 +1,12 @@
 import type { MapAny } from 'types/commonTypes';
-import type { ARTIFACT_TYPE, CTA_ACTION, CTA_COMPONENT_TYPE, SENDER_TYPE } from '@/modules/process/process.types';
+import type {
+  ARTIFACT_TYPE,
+  CTA_ACTION,
+  CTA_COMPONENT_TYPE,
+  EMAIL_STATUS,
+  SENDER_TYPE,
+} from '@/modules/process/process.types';
+
 export type StatusSummaryItem = {
   status_summary: {
     status: string;
@@ -50,9 +57,10 @@ export type DatasetType = {
   dataset_name: string;
 };
 
-export type PdfArtifactsResponseType = {
+export type PdfDatasetArtifactsResponseType = {
   display_name: string;
   status: string;
+  icon_identifier: string;
   datasets: DatasetType[];
   pdf_file: {
     file_display_name: string;
@@ -60,9 +68,32 @@ export type PdfArtifactsResponseType = {
   };
 };
 
-export type EmailArtifactsResponseType = {
+export type DatasetArtifactsResponseType = {
   display_name: string;
   status: string;
+  icon_identifier: string;
+  datasets: DatasetType[];
+};
+
+export type PdfArtifactsResponseType = {
+  display_name: string;
+  status: string;
+  icon_identifier: string;
+  pdf_file: {
+    file_display_name: string;
+    file_id: string;
+  };
+};
+
+export type EmailAttachmentType = {
+  file_id: string;
+  file_display_name: string;
+};
+
+export type EmailArtifactsResponseType = {
+  display_name: string;
+  status: EMAIL_STATUS;
+  icon_identifier: string;
   heading: string;
   date: string;
   from_mail_id: string;
@@ -72,20 +103,23 @@ export type EmailArtifactsResponseType = {
   cc_mail_ids: string[];
   bcc_mail_ids: string[];
   to_mail_ids: string[];
-  attachments: {
-    file_id: string;
-    file_display_name: string;
-  }[];
+  attachments: EmailAttachmentType[];
 };
 
 export type BrowserArtifactsResponseType = {
   display_name: string;
   status: string;
+  icon_identifier: string;
   browser_url: string;
+  browser_session_recording: {
+    file_id: string;
+    file_display_name: string;
+  };
 };
 
 export type OtherArtifactsResponseType = {
   display_name: string;
+  icon_identifier: string;
   url: string;
 };
 
@@ -95,7 +129,9 @@ export type ActivityArtifactsItemType = {
   organization_id: string;
   artifact_type: ARTIFACT_TYPE;
   artifact_data:
+    | PdfDatasetArtifactsResponseType
     | PdfArtifactsResponseType
+    | DatasetArtifactsResponseType
     | EmailArtifactsResponseType
     | BrowserArtifactsResponseType
     | OtherArtifactsResponseType;
@@ -132,8 +168,32 @@ export type CtasType = {
   artifact_type: ARTIFACT_TYPE;
   cta_component_type: CTA_COMPONENT_TYPE;
   cta_action: CTA_ACTION;
-  icon_identifier: string;
+  cta_action_id: string;
+  hitl_request_id: string;
+  cta_value: string;
+  cta_config: {
+    icon_identifier: string;
+    variant: string;
+    dataset_to_missing_fields_map: Record<
+      string,
+      {
+        cells: MissingFieldItemType[];
+        filters: MapAny;
+      }
+    >;
+    dataset_artifacts: {
+      cells: MissingFieldItemType[];
+      dataset_id: string;
+    }[];
+  };
   filter_metadata: MapAny;
+};
+
+export type MissingFieldItemType = {
+  column: string;
+  id: string;
+  is_required: boolean;
+  confidence?: string;
 };
 
 export type LogsContentType = {
@@ -161,14 +221,20 @@ export type ActivitySummaryResponseType = {
 };
 
 export type ActivitySummaryItemType = {
-  header: Record<string, string>;
+  header: {
+    key: string;
+    value: string;
+  };
   status: string;
   summary_items: ActivitySummaryItem[];
 };
 
 export type ActivitySummaryItem = {
   title: string;
-  values: Record<string, string>;
+  values: {
+    key: string;
+    value: string;
+  }[];
 };
 
 export type ActivityArtifactsByIdRequestType = {
@@ -196,4 +262,19 @@ export type DatasetArtifactsRequestType = {
   activityRunId: string;
   datasetId: string;
   query_config?: string;
+};
+
+export type EmitHITLActionRequestType = {
+  processId: string;
+  activityRunId: string;
+  payload: {
+    hitl_request_id: string;
+    log_group_id: string;
+    submitted_by: string;
+    responses: {
+      action_id: string;
+      values: string[];
+      cta_component_type?: CTA_COMPONENT_TYPE;
+    }[];
+  };
 };

@@ -10,7 +10,11 @@ import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/Cu
 import PaymentsAccountStatusCell from '@/components/common/table/CustomCellRenderers/PaymentsAccountStatus';
 import RecipientNameCell from '@/components/common/table/CustomCellRenderers/RecipientNameCell';
 import StatusBadgeCell from '@/components/common/table/CustomCellRenderers/StatusBadgeCell';
-import { RuleDeletionMessages, TaggingMessages } from '@/components/common/toast/toast.constants';
+import {
+  RuleDeletionMessages,
+  TaggingMessages,
+  UpdateMissingFieldsMessages,
+} from '@/components/common/toast/toast.constants';
 import ActivityCurrentStatus from '@/modules/process/activity-runs/components/ActivityCurrentStatus';
 import ActivityStatus from '@/modules/process/activity-runs/components/ActivityStatus';
 import DocumentPill from '@/modules/process/activity-runs/components/DocumentPill';
@@ -104,6 +108,7 @@ export const TEAM_OPTIONS_LIST = [
 export const DatasetActionMessages = {
   [DATASET_ACTION_TYPE.TAGGING]: TaggingMessages,
   [DATASET_ACTION_TYPE.RULE_DELETION]: RuleDeletionMessages,
+  [DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD]: UpdateMissingFieldsMessages,
 };
 
 export const COLUMN_WIDTHS = {

@@ -117,7 +117,6 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
             </div>
           </div>
         </div>
-
         {isShowDashboardLoader && showDashboardLoader && <DashboardLoader isFadingOut={isFadingOutEffect} />}
       </div>
     </Provider>

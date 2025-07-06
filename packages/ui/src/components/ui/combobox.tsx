@@ -25,6 +25,7 @@ type ComboboxProps = {
   optionsLoading?: boolean;
   isPortalNeeded?: boolean;
   listClassName?: string;
+  labelClassName?: string;
 };
 
 export function Combobox({
@@ -44,6 +45,7 @@ export function Combobox({
   isPortalNeeded = false,
   listClassName,
   groupClassName,
+  labelClassName,
 }: ComboboxProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -60,6 +62,7 @@ export function Combobox({
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
           className={cn('pointer-events-auto z-1003 min-w-(--radix-popover-trigger-width) p-0', contentClassName)}
+          id='combobox-content'
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
@@ -87,7 +90,7 @@ export function Combobox({
                       className={cn('flex items-center', itemClassName)}
                     >
                       {option?.icon && option?.icon}
-                      {option?.label}
+                      <span className={labelClassName}>{option?.label}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>

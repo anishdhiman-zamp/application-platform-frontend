@@ -28,6 +28,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const [activeTab, setActiveTab] = useState<string>(status || '');
   const initialLoadDone = useRef(false);
 
+  useEffect(() => {
+    initialLoadDone.current = false;
+  }, [processId]);
+
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
@@ -49,7 +53,9 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
         undefined,
       ),
     },
-    { skip: !processId },
+    {
+      skip: !processId,
+    },
   );
 
   const {
@@ -131,17 +137,19 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
           ))}
         </TabsList>
 
-        <TabsContent value={activeTab}>
-          <ActivityByStatus
-            processId={processId}
-            status={activeTab}
-            filterConfigData={filterConfigData}
-            isFilterConfigLoading={isFilterConfigLoading}
-            isFilterConfigError={isFilterConfigError}
-            isFilterConfigUninitialized={isFilterConfigUninitialized}
-            refetchFilterConfig={refetchFilterConfig}
-          />
-        </TabsContent>
+        {activeTab && (
+          <TabsContent value={activeTab}>
+            <ActivityByStatus
+              processId={processId}
+              status={activeTab}
+              filterConfigData={filterConfigData}
+              isFilterConfigLoading={isFilterConfigLoading}
+              isFilterConfigError={isFilterConfigError}
+              isFilterConfigUninitialized={isFilterConfigUninitialized}
+              refetchFilterConfig={refetchFilterConfig}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </CommonWrapper>
   );

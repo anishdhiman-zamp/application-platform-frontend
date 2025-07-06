@@ -1,5 +1,6 @@
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { baseApi } from '@/services/baseApi';
 import type { DatasetDataResponseType, DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import type {
   ActivityArtifactsByIdRequestType,
@@ -11,6 +12,7 @@ import type {
   ActivitySummaryResponseType,
   DatasetArtifactsRequestType,
   EmitActivityLogsRequestType,
+  EmitHITLActionRequestType,
   ProcessActivityRunsRequestType,
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
@@ -88,6 +90,13 @@ const Processes = baseApi.injectEndpoints({
         params: { query_config },
       }),
     }),
+    emitHITLAction: builder.mutation<void, EmitHITLActionRequestType>({
+      query: ({ processId, activityRunId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.EMIT_HITL_ACTION_POST, { processId, activityRunId }),
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -109,4 +118,5 @@ export const {
   useLazyGetSignedUrlByArtifactIdQuery,
   useGetDatasetArtifactsQuery,
   useLazyGetDatasetArtifactsQuery,
+  useEmitHITLActionMutation,
 } = Processes;

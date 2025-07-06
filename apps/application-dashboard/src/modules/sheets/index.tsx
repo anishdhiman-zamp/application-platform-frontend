@@ -21,11 +21,12 @@ interface SheetsProps {
   pageId: string;
   sheetId: string;
   isPageLoading: boolean;
+  isBff?: boolean;
 }
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
+const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const {
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
@@ -178,6 +179,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading }: SheetsProps) => {
                       widgetInstances={sheetDetails?.widget_instances ?? []}
                       handleWidgetHeightChange={handleWidgetHeightChange}
                       sheetId={sheetId}
+                      isBff={isBff}
                     />
                   </div>
                 </div>

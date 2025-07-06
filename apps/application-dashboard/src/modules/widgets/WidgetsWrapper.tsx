@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
-import AGChartsWidgets from 'modules/widgets/AGChartsWidgets';
 import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
 import { DRILLDOWN_VERSION_V2 } from 'modules/widgets/Pivot/pivot.constants';
@@ -23,6 +22,8 @@ import {
   WidgetInstanceType,
 } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
+import AGChartsWidgetsBff from '@/modules/widgets/AGChartsWidgetsBff';
+import AGChartsWidgets from '@/modules/widgets/AgChartWidgets';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { useFiltersContextStore } from 'components/filter/filters.context';
 
@@ -36,6 +37,7 @@ interface WidgetsWrapperProps {
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   sheetId: string;
   setActiveWidget?: (widgetId: string) => void;
+  isBff?: boolean;
 }
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
@@ -48,6 +50,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   defaultCurrency,
   handleWidgetHeightChange,
   sheetId,
+  isBff,
 }) => {
   const router = useRouter();
   const params = useParams();
@@ -269,7 +272,22 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     case WIDGET_TYPES.LINE_CHART:
     case WIDGET_TYPES.PIE_CHART:
     case WIDGET_TYPES.DONUT_CHART:
-      return (
+      return isBff ? (
+        <AGChartsWidgetsBff
+          widgetDetails={widgetDetails}
+          currentPageFilters={currentPageFilters}
+          isFilterInitialized={isFilterInitialized}
+          onNodeClick={version === DRILLDOWN_VERSION_V2 ? onNodeClickV2 : onNodeClick}
+          periodicity={periodicity.periodicity ?? PERIODICITY_TYPES.DAILY}
+          timeColumns={periodicity.timeColumn ?? ''}
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
+          activeWidget={activeWidget}
+          isFilterLoading={isFilterLoading}
+          currency={currency?.[0] ?? undefined}
+          sheetId={sheetId}
+        />
+      ) : (
         <AGChartsWidgets
           widgetDetails={widgetDetails}
           currentPageFilters={currentPageFilters}

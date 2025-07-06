@@ -9,13 +9,6 @@ jest.mock('next/font/google', () => ({
   })),
 }));
 
-jest.mock('services/api', () => ({
-  __esModule: true,
-  default: {
-    injectEndpoints: jest.fn(() => ({})),
-  },
-}));
-
 describe('getUpdatedColumnOrderingVisibility', () => {
   it('should create new column visibility entries for columns not in current visibility', () => {
     const currentVisibility: ColumnOrderingVisibilityType[] = [];

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { type FC, memo } from 'react';
 import { LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import Image from 'next/image';
 import { ADAM_ICON } from '@/constants/icons';
@@ -54,4 +54,4 @@ const SenderInfo: FC<SenderInfoProps> = ({ senderType, status, senderDetails }) 
   );
 };
 
-export default SenderInfo;
+export default memo(SenderInfo);

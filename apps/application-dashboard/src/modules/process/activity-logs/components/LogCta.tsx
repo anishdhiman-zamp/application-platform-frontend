@@ -1,37 +1,114 @@
-import { type FC, memo } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { type FC, memo, useState } from 'react';
+import { Button, type ButtonProps } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
-import { type ARTIFACT_TYPE, type CTA_ACTION, CTA_COMPONENT_TYPE } from 'modules/process/process.types';
+import { CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
+import { useEmitHITLActionMutation } from '@/apis/processes';
+import { toast } from '@/components/common/toast/Toast';
+import { useAppSelector } from '@/hooks/toolkit';
 import type { CtasType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+
 type LogCtaProps = {
   ctas: CtasType[];
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  logGroupId: string;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
+  processId: string;
+  activityId: string;
 };
 
-const LogCta: FC<LogCtaProps> = ({ ctas, handleShowArtifacts }) => {
-  const artifactTypeCta = ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.ARTIFACT);
-  const buttonTypeCta = ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.BUTTON);
+const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, processId, activityId }) => {
+  const userId = useAppSelector((state) => state.user.user?.user_id);
+  const [ctaLoading, setCtaLoading] = useState<string[]>([]);
+
+  const artifactTypeCtas = ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.ARTIFACT);
+  const buttonTypeCtas = ctas.filter((cta) =>
+    [
+      CTA_COMPONENT_TYPE.BUTTON,
+      CTA_COMPONENT_TYPE.OVERRIDE_MISSING_FIELDS_BUTTON,
+      CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+    ].includes(cta.cta_component_type),
+  );
+
+  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+
+  const handleEmitHITLAction = (cta: CtasType) => {
+    const payload = {
+      hitl_request_id: cta?.hitl_request_id,
+      log_group_id: logGroupId,
+      submitted_by: userId ?? '',
+      responses: [{ action_id: cta?.cta_action_id, values: [cta?.cta_value] }],
+    };
+
+    setCtaLoading((prev) => [...prev, `${cta?.id}-${cta?.display_name}`]);
+
+    emitHITLAction({
+      processId,
+      activityRunId: activityId,
+      payload,
+    })
+      .unwrap()
+      .then(() => {
+        setCtaLoading((prev) => prev.filter((id) => id !== `${cta?.id}-${cta?.display_name}`));
+      })
+      .catch((error) => {
+        toast.error(error.data.message ?? 'Something went wrong');
+        setCtaLoading((prev) => prev.filter((id) => id !== `${cta?.id}-${cta?.display_name}`));
+      });
+  };
+
+  const handleButtonClick = (cta: CtasType) => {
+    if (cta?.cta_component_type === CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON) {
+      handleShowArtifacts({
+        artifactType: cta?.artifact_type,
+        artifactId: cta?.id ?? '',
+        action: cta?.cta_action,
+        filters: cta?.filter_metadata,
+        ctaConfig: cta?.cta_config,
+        logGroupId,
+        hitlRequestId: cta?.hitl_request_id,
+        ctaActionId: cta?.cta_action_id,
+      });
+    } else {
+      handleEmitHITLAction(cta);
+    }
+  };
 
   return (
     <div className='mt-3 flex w-full flex-col items-start justify-start gap-y-2'>
-      <div className='flex w-full flex-wrap items-start justify-start gap-x-2 gap-y-2'>
-        {artifactTypeCta?.map((cta) => (
+      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
+        {artifactTypeCtas?.map((cta) => (
           <ArtifactTag
             key={cta?.id}
             displayName={cta?.display_name}
-            type={cta?.artifact_type}
+            artifactType={cta?.artifact_type}
+            iconIdentifier={cta?.cta_config?.icon_identifier}
+            ctaAction={cta?.cta_action}
             onClick={() =>
-              handleShowArtifacts(cta?.artifact_type, cta?.id ?? '', cta?.cta_action, cta?.filter_metadata)
+              handleShowArtifacts({
+                artifactType: cta?.artifact_type,
+                artifactId: cta?.id ?? '',
+                action: cta?.cta_action,
+                filters: cta?.filter_metadata,
+              })
             }
             displayClassName='max-w-40'
           />
         ))}
-        {buttonTypeCta?.map((cta) => (
-          <Button key={cta?.id} className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'>
-            <SvgSpriteLoader id={'check'} size={12} className='shrink-0' />
-            <span className='f-12-450 truncate'>{cta?.display_name}</span>
+      </div>
+      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
+        {buttonTypeCtas?.map((cta) => (
+          <Button
+            variant={(cta?.cta_config?.variant as ButtonProps['variant']) ?? 'secondary'}
+            key={`${cta?.id}-${cta?.display_name}`}
+            className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'
+            onClick={() => handleButtonClick(cta)}
+            disabled={isLoading || ctaLoading.includes(`${cta?.id}-${cta?.display_name}`)}
+            isLoading={isLoading && ctaLoading.includes(`${cta?.id}-${cta?.display_name}`)}
+          >
+            {cta?.cta_config?.icon_identifier && (
+              <SvgSpriteLoader id={cta?.cta_config?.icon_identifier ?? 'check'} size={12} className='shrink-0' />
+            )}
+            <span className='f-12-500 truncate capitalize'>{cta?.display_name}</span>
           </Button>
         ))}
       </div>

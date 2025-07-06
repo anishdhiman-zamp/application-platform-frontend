@@ -943,3 +943,13 @@
   > * {
   opacity: 0;
 }
+
+.ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ProseMirror {
+  min-height: 200px;
+  scrollbar-width: none;
+}

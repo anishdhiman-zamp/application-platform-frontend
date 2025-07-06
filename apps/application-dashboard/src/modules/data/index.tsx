@@ -4,13 +4,16 @@ import { useLazyGetDatasetListingQuery } from 'apis/dataset';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { ListingPropsType } from 'modules/data/data.types';
 import { formatData } from 'modules/data/data.utils';
+import { useRouter } from 'next/navigation';
 import { OrderType } from 'types/components/table.type';
+import { getDatasetRouteById } from '@/constants/routeConfig';
 import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
   const [getDatasetListing] = useLazyGetDatasetListingQuery();
   const columns = useMemo(() => LISTING_COLUMNS, []);
+  const router = useRouter();
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
@@ -31,6 +34,9 @@ const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
         )
           .unwrap()
           .then((data) => {
+            data?.datasets?.forEach((dataset) => {
+              router.prefetch(getDatasetRouteById(dataset?.id));
+            });
             parameters.success({
               rowData: formatData(data?.datasets ?? []),
               ...(parameters.request.startRow === 0 ? { rowCount: data?.total_count } : {}),

@@ -5,7 +5,8 @@
   "files": [
     "eslint.js",
     "tsconfig.json",
-    "eslint-lib.js"
+    "eslint-lib.js",
+    "jest.config.ts"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.34.0",
@@ -18,6 +19,8 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "prettier": "latest"
+    "prettier": "latest",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
   }
 }
