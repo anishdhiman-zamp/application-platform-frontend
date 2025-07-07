@@ -46,7 +46,7 @@ jobs:
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
           echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-dev-us-app-dashboard" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
+          echo "ASSETS_S3_BUCKET=zamp-dev-application-platform-assets" >> $GITHUB_OUTPUT # Static assets bucket with CloudFront CDN
           echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
@@ -268,6 +268,13 @@ jobs:
           aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
+          # Debug: Show exact values being set
+          echo "=== Helm Parameters Debug ==="
+          echo "Setting default.image.repository=${ECR_REPO_URI}"
+          echo "Setting default.image.tag=${IMAGE_TAG}"
+          echo "=============================="
+          
+          # Fixed parameter order: --set BEFORE --values (like working TMS workflow)
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \
@@ -275,7 +282,8 @@ jobs:
               --values helm/${VALUES_FILE} \
               --wait \
               --timeout 10m0s \
-              --create-namespace
+              --create-namespace \
+              --debug
 
   slack-notification:
     name: Slack Notification
