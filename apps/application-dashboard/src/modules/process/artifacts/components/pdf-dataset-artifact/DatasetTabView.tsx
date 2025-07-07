@@ -150,6 +150,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                   trackWidth={2}
                   size={16}
                   progress={progress}
+                  animate={false}
                 />
                 <span className='f-11-500 text-GRAY_1000'>
                   {completedRequiredFieldsCount}/{missingRequiredFieldsCount} Required
