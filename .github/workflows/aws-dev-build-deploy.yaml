@@ -82,6 +82,15 @@ jobs:
       - name: "Checkout repository on : ${{ github.REF }}"
         uses: actions/checkout@v4
 
+      - name: "Debug Environment Variables"
+        run: |
+          echo "=== Job Environment Variables ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'" 
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "APP_NAME: '$APP_NAME'"
+          echo "================================"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
