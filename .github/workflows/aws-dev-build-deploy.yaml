@@ -161,6 +161,15 @@ jobs:
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
           IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
           
+          # Debug: Print build variables
+          echo "=== Build Debug Info ==="
+          echo "ECR_REGISTRY: $ECR_REGISTRY"
+          echo "ECR_REPO: $ECR_REPO"
+          echo "ECR_REPO_URI: $ECR_REPO_URI"
+          echo "IMAGE_TAG: $IMAGE_TAG"
+          echo "Full Image: $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
+          echo "========================="
+          
           # Build Docker image using the Dockerfile
           # Application is already built, so Docker will just package it
           docker buildx build \
@@ -245,6 +254,16 @@ jobs:
 
       - name: Deploy
         run: |
+          # Debug: Print environment variables
+          echo "=== Debug Info ==="
+          echo "ECR_REPO_URI: ${ECR_REPO_URI}"
+          echo "IMAGE_TAG: ${IMAGE_TAG}"
+          echo "APP_NAME: ${APP_NAME}"
+          echo "NAMESPACE: ${NAMESPACE}"
+          echo "HELM_CHART_NAME: ${HELM_CHART_NAME}"
+          echo "VALUES_FILE: ${VALUES_FILE}"
+          echo "================="
+          
           # This assumes your Helm chart is in S3.
           aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz

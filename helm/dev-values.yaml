@@ -19,8 +19,8 @@ default:
       memory: 250Mi
   replicaCount: 1
   image:
-    repository: 913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-application-platform-frontend-ecr
-    tag: v1
+    repository: "" # Set dynamically via workflow
+    tag: "" # Set dynamically via workflow  
     imagePullPolicy: Always
   signoz:
     enabled: false
