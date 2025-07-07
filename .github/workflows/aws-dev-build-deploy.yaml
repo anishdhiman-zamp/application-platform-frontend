@@ -233,7 +233,7 @@ jobs:
       HELM_REPOSITORY: ${{needs.prepare-env.outputs.HELM_REPOSITORY}}
       HELM_CHART_NAME: ${{needs.prepare-env.outputs.HELM_CHART_NAME}}
       NAMESPACE: ${{needs.prepare-env.outputs.NAMESPACE}}
-      ECR_REPO_URI: ${{needs.build-push-image.outputs.ECR_REPO_URI}}
+      ECR_REPO: ${{needs.prepare-env.outputs.ECR_REPO}}
       IMAGE_TAG: ${{needs.build-push-image.outputs.IMAGE_TAG}}
       BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
@@ -272,44 +272,14 @@ jobs:
 
       - name: Deploy
         run: |
-          # Debug: Print environment variables
-          echo "=== Debug Info ==="
-          echo "ECR_REPO_URI: ${ECR_REPO_URI}"
-          echo "IMAGE_TAG: ${IMAGE_TAG}"
-          echo "APP_NAME: ${APP_NAME}"
-          echo "NAMESPACE: ${NAMESPACE}"
-          echo "HELM_CHART_NAME: ${HELM_CHART_NAME}"
-          echo "VALUES_FILE: ${VALUES_FILE}"
-          echo "================="
+          # Construct ECR repository URI directly (like TMS workflow pattern)
+          ECR_REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
           
           # This assumes your Helm chart is in S3.
           aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
-          # Debug: Show exact values being set
-          echo "=== Helm Parameters Debug ==="
-          echo "Setting default.image.repository='${ECR_REPO_URI}'"
-          echo "Setting default.image.tag='${IMAGE_TAG}'"
-          echo "=============================="
-          
-          # Validate ECR_REPO_URI is not empty before deploying
-          if [ -z "$ECR_REPO_URI" ]; then
-            echo "ERROR: ECR_REPO_URI is empty in deploy step!"
-            echo "This means the build step failed to output ECR_REPO_URI correctly"
-            exit 1
-          fi
-          
-          # Test helm template first to validate what's being generated
-          echo "=== Testing Helm Template ==="
-          helm template test-release ./${HELM_CHART_NAME} \
-              --namespace ${NAMESPACE} \
-              --set default.image.repository="${ECR_REPO_URI}" \
-              --set default.image.tag="${IMAGE_TAG}" \
-              --values helm/${VALUES_FILE} | grep -A 3 -B 3 "image:"
-          echo "=== Template Test Complete ==="
-          
-          # Now deploy if template test passed
-          echo "=== Deploying ==="
+          # Deploy directly
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \
@@ -317,8 +287,7 @@ jobs:
               --values helm/${VALUES_FILE} \
               --wait \
               --timeout 10m0s \
-              --create-namespace \
-              --debug
+              --create-namespace
 
   slack-notification:
     name: Slack Notification
