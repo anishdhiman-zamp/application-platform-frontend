@@ -1,5 +1,5 @@
-import { REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import baseApi from 'services/api';
+import { REQUEST_TYPES } from '@zamp-platform/api';
+import { baseApi } from '@/services/baseApi';
 import { SignedUrlBodyType, SignedUrlResponseType } from '@/types/api/fileUpload.types';
 
 const FileUpload = baseApi.injectEndpoints({

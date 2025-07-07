@@ -55,7 +55,7 @@ const Sidebar = () => {
         <div className='h-full'>
           <div className='border-GRAY_400 border-b px-2 pb-4'>
             {SIDEBAR_ITEMS.map((item) => (
-              <Link href={item.path} key={item.label} className='cursor-pointer'>
+              <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
                 <SidebarTab
                   key={item?.label}
                   name={item?.label}
@@ -74,7 +74,7 @@ const Sidebar = () => {
                 loader={<SkeletonLoaderSidebarPages />}
               >
                 {processes?.map((process) => (
-                  <Link href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
+                  <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
                     <ProcessNavTab
                       label={process?.display_name}
                       processId={process?.id}
@@ -94,7 +94,7 @@ const Sidebar = () => {
                 loader={<SkeletonLoaderSidebarPages />}
               >
                 {pages?.map((item) => (
-                  <Link href={getPageRouteById(item?.page_id)} key={item?.page_id} className='cursor-pointer'>
+                  <Link prefetch href={getPageRouteById(item?.page_id)} key={item?.page_id} className='cursor-pointer'>
                     <PageNavTab
                       key={item?.page_id}
                       label={item?.name}

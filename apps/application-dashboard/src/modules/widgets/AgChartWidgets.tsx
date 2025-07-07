@@ -18,6 +18,7 @@ import {
 } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -108,6 +109,13 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       periodicity as PERIODICITY_TYPES,
     );
   }, [widgetDetails, transformedData, stackedValues]);
+
+  useWidgetLoadTime(
+    `${widgetDetails.widget_instance_id}-${currentPageFilters}-${periodicity}`,
+    isFetching,
+    isLoading || isFilterLoading,
+    transformedData?.length > 0,
+  );
 
   return (
     <div

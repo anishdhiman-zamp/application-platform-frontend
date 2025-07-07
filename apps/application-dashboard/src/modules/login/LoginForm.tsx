@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { API_ENDPOINTS, REQUEST_TYPES } from 'apis/apiEndpoint.constants';
-import { API_DOMAIN } from 'constants/api.constants';
+import { getApiDomainByRegion, REQUEST_TYPES } from '@zamp-platform/api';
+import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
@@ -111,9 +111,10 @@ export const LoginForm = () => {
 
       return;
     }
+    const apiDomain = await getApiDomainByRegion(email);
 
     try {
-      const apiUrl = `${API_DOMAIN}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const apiUrl = `${apiDomain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
       const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,

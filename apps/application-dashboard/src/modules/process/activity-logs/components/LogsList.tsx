@@ -2,14 +2,13 @@ import { FC, useEffect, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import DateSeparator from 'modules/process/activity-logs/components/DateSeparator';
 import Log from 'modules/process/activity-logs/components/Log';
-import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
+import { type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
 
 interface LogsListProps {
   logs: ActivityLogsResponseType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
   processId: string;
   activityId: string;
 }

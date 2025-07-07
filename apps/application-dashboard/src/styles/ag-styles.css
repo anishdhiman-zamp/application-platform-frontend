@@ -192,13 +192,14 @@
 }
 
 .ag-cell-range-single-cell {
-  border-radius: 4px;
+  border-radius: 4px !important;
+  border: 1.5px solid #2546f5 !important;
 }
 
 .ag-fill-handle {
   border-radius: 100%;
   border-width: 1px;
-  border-color: white;
+  border-color: #2546f5;
 }
 
 #dataset-table .ag-menu {
@@ -213,10 +214,53 @@
   opacity: 1 !important; /* Show when row is hovered */
 }
 
-.ag-cell-focus::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid #2546f5;
-  pointer-events: none;
+.ag-input-field-input {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ag-picker-field-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ag-cell-focus {
+  border: 1.5px solid #2546f5;
+  border-radius: 4px;
+}
+
+.ag-status-bar {
+  min-height: 30px;
+  border-top: 1px solid #c9c9c9;
+  background-color: #fafafa;
+  padding: 0 16px;
+}
+
+.missing-focus {
+  border: 1.5px solid #e10909 !important;
+  border-radius: 4px;
+}
+
+.missing-focus:has(.ag-input-field-input) {
+  border: 1.5px solid #2546f5 !important;
+}
+
+.missing-focus .ag-fill-handle {
+  border: 1.5px solid #e10909 !important;
+  background-color: #e10909 !important;
+}
+
+.missing-completed {
+  background-color: #fef9da !important;
+  border: 1px solid #fcedb9 !important;
+  border-radius: 0px !important;
+}
+
+.missing-completed:has(.ag-input-field-input) {
+  border: 1.5px solid #2546f5 !important;
+}
+
+.missing-completed .ag-fill-handle {
+  border: 1.5px solid #fef9da !important;
+  background-color: #fef9da !important;
 }

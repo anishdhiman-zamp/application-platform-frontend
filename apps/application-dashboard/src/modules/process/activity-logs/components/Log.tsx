@@ -5,22 +5,15 @@ import LogStatusIndicator from 'modules/process/activity-logs/components/LogStat
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
-import {
-  type ARTIFACT_TYPE,
-  CONTENT_TYPE,
-  type CTA_ACTION,
-  LOG_STATUS,
-  SENDER_TYPE,
-} from 'modules/process/process.types';
+import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
 import { capitalizeFirstLetter, cn } from '@/utils/common';
 
 type LogProps = {
   isLastLog?: boolean;
   data: ActivityLogsItemType;
-  handleShowArtifacts: (artifactType: ARTIFACT_TYPE, artifactId: string, action?: CTA_ACTION, filters?: MapAny) => void;
+  handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
   isExpanded?: boolean;
   processId: string;
   activityId: string;

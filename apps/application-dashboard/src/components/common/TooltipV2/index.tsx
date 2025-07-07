@@ -9,6 +9,7 @@ type TooltipV2Props = {
   className?: string;
   tooltipClassName?: string;
   asChildTrigger?: boolean;
+  disabled?: boolean;
 };
 
 const TooltipV2: FC<TooltipV2Props> = ({
@@ -18,11 +19,12 @@ const TooltipV2: FC<TooltipV2Props> = ({
   className,
   tooltipClassName,
   asChildTrigger = false,
+  disabled = false,
 }) => {
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger className={className} asChild={asChildTrigger}>
+        <TooltipTrigger className={className} asChild={asChildTrigger} disabled={disabled}>
           {children}
         </TooltipTrigger>
         {tooltipBody && (

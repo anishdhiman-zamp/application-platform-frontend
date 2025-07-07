@@ -44,6 +44,7 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
           artifacts={artifactsData}
           status={data?.status as ACTIVITY_RUN_STATUS}
           activityId={data?.id}
+          isDisabled={artifactsData?.length === 0}
         />
       </div>
     </div>
