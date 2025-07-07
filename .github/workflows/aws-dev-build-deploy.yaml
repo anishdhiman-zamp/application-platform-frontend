@@ -188,10 +188,10 @@ jobs:
             exit 1
           fi
           
-          # Build Docker image using the Dockerfile
+          # Build Docker image using the Dockerfile  
           # Application is already built, so Docker will just package it
           docker buildx build \
-            --platform linux/amd64 \
+            --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
