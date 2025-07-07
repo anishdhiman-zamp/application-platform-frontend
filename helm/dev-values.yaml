@@ -3,6 +3,7 @@ global:
     name: application-platform-frontend-dev
 
 projectName: zamp  # required
+serviceName: application-platform-frontend
 default:
   annotations:
     all:
@@ -19,8 +20,8 @@ default:
       memory: 250Mi
   replicaCount: 1
   image:
-    repository: "" # Set dynamically via workflow
-    tag: "" # Set dynamically via workflow  
+    repository: "913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-application-platform-frontend-ecr"
+    tag: "latest"
     imagePullPolicy: Always
   signoz:
     enabled: false
