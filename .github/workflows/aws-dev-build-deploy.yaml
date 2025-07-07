@@ -39,7 +39,7 @@ jobs:
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
           echo "SLACK_WEBHOOK_URL=DEV_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
-          echo "ECR_REPO=zamp-dev-us-application-platform-ecr" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-dev-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
           echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
           echo "EKS_CLUSTER=zamp-dev-us-cluster" >> $GITHUB_OUTPUT
