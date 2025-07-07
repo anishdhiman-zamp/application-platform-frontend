@@ -9,17 +9,71 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "remoteCache": {
-    "signature": true
+    "signature": true,
+    "enabled": true
   },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "pages/**/*.{ts,tsx,js,jsx}",
+        "components/**/*.{ts,tsx,js,jsx}",
+        "public/**/*",
+        "next.config.js",
+        "package.json",
+        "tsconfig.json",
+        "tailwind.config.js",
+        "postcss.config.js",
+        ".env*",
+        "!src/**/*.test.{ts,tsx,js,jsx}",
+        "!src/**/*.spec.{ts,tsx,js,jsx}",
+        "!pages/**/*.test.{ts,tsx,js,jsx}",
+        "!pages/**/*.spec.{ts,tsx,js,jsx}",
+        "!components/**/*.test.{ts,tsx,js,jsx}",
+        "!components/**/*.spec.{ts,tsx,js,jsx}",
+        "!**/__tests__/**",
+        "!**/*.stories.{ts,tsx,js,jsx}",
+        "!**/node_modules/**"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NODE_ENV", "NEXT_PUBLIC_*"],
+      "cache": true
     },
     "test": {
-      "outputs": []
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
+        "__tests__/**/*.{ts,tsx,js,jsx}",
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/*.spec.{ts,tsx,js,jsx}",
+        "jest.config.*",
+        "vitest.config.*",
+        "package.json"
+      ],
+      "outputs": ["coverage/**"]
     },
     "lint": {
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "pages/**/*.{ts,tsx,js,jsx}",
+        "components/**/*.{ts,tsx,js,jsx}",
+        ".eslintrc.*",
+        "eslint.config.*",
+        "package.json"
+      ],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "pages/**/*.{ts,tsx}",
+        "components/**/*.{ts,tsx}",
+        "tsconfig.json",
+        "next-env.d.ts",
+        "package.json"
+      ],
       "outputs": []
     },
     "dev": {
@@ -31,7 +85,8 @@
     },
     "storybook": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["src/**", "stories/**", ".storybook/**"]
     }
   }
 }
