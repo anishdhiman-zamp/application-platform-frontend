@@ -152,6 +152,13 @@ jobs:
         env:
           NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
+          # Debug: Show all environment variables first
+          echo "=== Environment Variables Debug ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "=================================="
+          
           # Construct ECR registry URL (like TMS workflow pattern)
           ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
@@ -159,12 +166,18 @@ jobs:
           
           # Debug: Print build variables
           echo "=== Build Debug Info ==="
-          echo "ECR_REGISTRY: $ECR_REGISTRY"
-          echo "ECR_REPO: $ECR_REPO"
-          echo "ECR_REPO_URI: $ECR_REPO_URI"
-          echo "IMAGE_TAG: $IMAGE_TAG"
-          echo "Full Image: $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
+          echo "ECR_REGISTRY: '$ECR_REGISTRY'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "ECR_REPO_URI: '$ECR_REPO_URI'"
+          echo "IMAGE_TAG: '$IMAGE_TAG'"
+          echo "Full Image: '$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'"
           echo "========================="
+          
+          # Validate that ECR_REPO_URI is not empty
+          if [ -z "$ECR_REPO_URI" ]; then
+            echo "ERROR: ECR_REPO_URI is empty!"
+            exit 1
+          fi
           
           # Build Docker image using the Dockerfile
           # Application is already built, so Docker will just package it
@@ -266,11 +279,28 @@ jobs:
 
           # Debug: Show exact values being set
           echo "=== Helm Parameters Debug ==="
-          echo "Setting default.image.repository=${ECR_REPO_URI}"
-          echo "Setting default.image.tag=${IMAGE_TAG}"
+          echo "Setting default.image.repository='${ECR_REPO_URI}'"
+          echo "Setting default.image.tag='${IMAGE_TAG}'"
           echo "=============================="
           
-          # Fixed parameter order: --set BEFORE --values (like working TMS workflow)
+          # Validate ECR_REPO_URI is not empty before deploying
+          if [ -z "$ECR_REPO_URI" ]; then
+            echo "ERROR: ECR_REPO_URI is empty in deploy step!"
+            echo "This means the build step failed to output ECR_REPO_URI correctly"
+            exit 1
+          fi
+          
+          # Test helm template first to validate what's being generated
+          echo "=== Testing Helm Template ==="
+          helm template test-release ./${HELM_CHART_NAME} \
+              --namespace ${NAMESPACE} \
+              --set default.image.repository="${ECR_REPO_URI}" \
+              --set default.image.tag="${IMAGE_TAG}" \
+              --values helm/${VALUES_FILE} | grep -A 3 -B 3 "image:"
+          echo "=== Template Test Complete ==="
+          
+          # Now deploy if template test passed
+          echo "=== Deploying ==="
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \
