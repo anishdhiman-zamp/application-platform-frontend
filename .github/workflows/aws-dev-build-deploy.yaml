@@ -39,14 +39,14 @@ jobs:
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
           echo "SLACK_WEBHOOK_URL=DEV_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
-          echo "ECR_REPO=zamp-dev-us-application-platform-ecr" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-dev-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
           echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
           echo "EKS_CLUSTER=zamp-dev-us-cluster" >> $GITHUB_OUTPUT
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
           echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-dev-us-app-dashboard" >> $GITHUB_OUTPUT # FIXME: Replace with your S3 bucket for assets
+          echo "ASSETS_S3_BUCKET=zamp-dev-application-platform-assets" >> $GITHUB_OUTPUT # Static assets bucket with CloudFront CDN
           echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
@@ -82,6 +82,15 @@ jobs:
       - name: "Checkout repository on : ${{ github.REF }}"
         uses: actions/checkout@v4
 
+      - name: "Debug Environment Variables"
+        run: |
+          echo "=== Job Environment Variables ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'" 
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "APP_NAME: '$APP_NAME'"
+          echo "================================"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -95,12 +104,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
-      - name: Construct AWS registry url
-        id: registry
-        run: |
-          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
-          echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_ENV
-          echo "::set-output name=ECR_REGISTRY::$ECR_REGISTRY"
+
 
       - name: "Install AWS CLI"
         run: |
@@ -155,16 +159,39 @@ jobs:
       - id: build
         name: Build and Push Image
         env:
-          ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
+          # Debug: Show all environment variables first
+          echo "=== Environment Variables Debug ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "=================================="
+          
+          # Construct ECR registry URL (like TMS workflow pattern)
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
           IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
           
-          # Build Docker image using the Dockerfile
+          # Debug: Print build variables
+          echo "=== Build Debug Info ==="
+          echo "ECR_REGISTRY: '$ECR_REGISTRY'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "ECR_REPO_URI: '$ECR_REPO_URI'"
+          echo "IMAGE_TAG: '$IMAGE_TAG'"
+          echo "Full Image: '$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'"
+          echo "========================="
+          
+          # Validate that ECR_REPO_URI is not empty
+          if [ -z "$ECR_REPO_URI" ]; then
+            echo "ERROR: ECR_REPO_URI is empty!"
+            exit 1
+          fi
+          
+          # Build Docker image using the Dockerfile  
           # Application is already built, so Docker will just package it
           docker buildx build \
-            --platform linux/amd64 \
+            --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
@@ -206,7 +233,7 @@ jobs:
       HELM_REPOSITORY: ${{needs.prepare-env.outputs.HELM_REPOSITORY}}
       HELM_CHART_NAME: ${{needs.prepare-env.outputs.HELM_CHART_NAME}}
       NAMESPACE: ${{needs.prepare-env.outputs.NAMESPACE}}
-      ECR_REPO_URI: ${{needs.build-push-image.outputs.ECR_REPO_URI}}
+      ECR_REPO: ${{needs.prepare-env.outputs.ECR_REPO}}
       IMAGE_TAG: ${{needs.build-push-image.outputs.IMAGE_TAG}}
       BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
@@ -245,10 +272,14 @@ jobs:
 
       - name: Deploy
         run: |
+          # Construct ECR repository URI directly (like TMS workflow pattern)
+          ECR_REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+          
           # This assumes your Helm chart is in S3.
           aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
+          # Deploy directly
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 
 interface ProgressBarProps {
   size?: number;
@@ -12,6 +12,7 @@ interface ProgressBarProps {
   spinnerMode?: boolean;
   spinnerSpeed?: number;
   className?: string;
+  animate?: boolean;
 }
 
 const ProgressBar: FC<ProgressBarProps> = ({
@@ -22,6 +23,7 @@ const ProgressBar: FC<ProgressBarProps> = ({
   indicatorWidth = 2,
   indicatorColor = `#111619`,
   className = '',
+  animate = true,
 }) => {
   const timerId = useRef<ReturnType<typeof setInterval>>(null);
   const [currentProgress, setCurrentProgress] = useState(0);
@@ -29,9 +31,15 @@ const ProgressBar: FC<ProgressBarProps> = ({
   const center = size / 2,
     radius = center - (trackWidth > indicatorWidth ? trackWidth : indicatorWidth),
     dashArray = 2 * Math.PI * radius,
-    dashOffset = dashArray * ((100 - currentProgress) / 100);
+    dashOffset = dashArray * ((100 - (animate ? currentProgress : progress)) / 100);
 
   useEffect(() => {
+    if (!animate) {
+      setCurrentProgress(progress);
+
+      return;
+    }
+
     timerId.current = setInterval(() => {
       setCurrentProgress((prev) => {
         if (prev === progress) {
@@ -48,7 +56,7 @@ const ProgressBar: FC<ProgressBarProps> = ({
     return () => {
       clearInterval(timerId.current as ReturnType<typeof setInterval>);
     };
-  }, [progress]);
+  }, [progress, animate]);
 
   return (
     <div className={`${className}`} style={{ width: size, height: size }}>
