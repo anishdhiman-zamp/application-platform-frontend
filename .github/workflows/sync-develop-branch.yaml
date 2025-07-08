@@ -22,4 +22,4 @@ jobs:
           git pull origin main
           git checkout development
           git reset main --hard
-          git push origin dev -f
+          git push origin development -f
