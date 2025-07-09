@@ -38,12 +38,6 @@ export const AuthGuard: FC<Props> = (props) => {
       identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
 
       dispatch(setWorkspace(defaultWorkspace));
-      const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
-
-      if (preLogoutPath) {
-        removeFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
-        router.push(preLogoutPath);
-      }
     }
   }, [session, isSuccess, dispatch, router]);
 
