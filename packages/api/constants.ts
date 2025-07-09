@@ -22,7 +22,25 @@ export const enum REQUEST_TYPES {
   DELETE = 'DELETE',
 }
 
-export const REGION_LIST = ['', '-sg', '-me'];
+export const REGIONS_MAP = {
+  us: {
+    label: 'United States',
+    suffix: '',
+    shortHand: 'USA',
+  },
+  sg: {
+    label: 'Singapore',
+    suffix: '-sg',
+    shortHand: 'SG',
+  },
+  me: {
+    label: 'Middle East',
+    suffix: '-me',
+    shortHand: 'ME',
+  },
+};
+
+export const REGION_LIST = Object.values(REGIONS_MAP).map((region) => region.suffix);
 
 export const ERROR_TOKENS = {
   INVALID_TOKEN: 'INVALID_TOKEN',

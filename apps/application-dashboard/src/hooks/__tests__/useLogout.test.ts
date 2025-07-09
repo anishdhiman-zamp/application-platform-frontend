@@ -34,7 +34,7 @@ describe('useLogout', () => {
       refetch: mockRefetch,
     });
 
-    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut]);
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
 
     const { result } = renderHook(() => useLogout());
@@ -67,7 +67,7 @@ describe('useLogout', () => {
       refetch: mockRefetch,
     });
 
-    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut]);
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
 
     const { result } = renderHook(() => useLogout());
@@ -103,7 +103,7 @@ describe('useLogout', () => {
       refetch: mockRefetch,
     });
 
-    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut]);
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
 
     const { result } = renderHook(() => useLogout());
@@ -135,7 +135,7 @@ describe('useLogout', () => {
       refetch: mockRefetch,
     });
 
-    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut]);
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
 
     const { result } = renderHook(() => useLogout());

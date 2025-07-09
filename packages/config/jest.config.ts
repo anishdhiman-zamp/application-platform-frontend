@@ -27,6 +27,9 @@ const config: Config = {
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
 
   moduleNameMapper: {
+    '^@zamp-platform/api$': '<rootDir>/../../packages/api/index.ts',
+    '^@zamp-platform/utils/(.*)$': '<rootDir>/../../packages/utils/$1',
+    '^@zamp-platform/utils$': '<rootDir>/../../packages/utils/index.ts',
     '^@zamp-platform/svg-loader$': '<rootDir>/../../packages/svg-loader/svg-loader.ts',
     '^@zamp-platform/svg-loader/(.*)$': '<rootDir>/../../packages/svg-loader/$1',
     '^@zamp-platform/ui$': '<rootDir>/../../packages/ui/src/components/index.ts',

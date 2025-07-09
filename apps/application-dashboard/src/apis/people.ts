@@ -35,6 +35,7 @@ import {
 import { formRequestUrlWithParams } from 'utils/common';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
+import type { Organization } from '@/types/api/auth.types';
 
 const People = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -252,6 +253,12 @@ const People = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
     }),
+    getOrganizations: builder.query<Organization[], void>({
+      query: () => ({
+        url: API_ENDPOINTS.ORGANIZATIONS_GET,
+      }),
+      providesTags: [APITags.GET_USER_INVITATIONS],
+    }),
   }),
 });
 
@@ -279,4 +286,5 @@ export const {
   useGetTeamPendingApprovalsQuery,
   useGetTeamPendingApprovalsByResourceIdQuery,
   useDeleteAudienceInvitationMutation,
+  useGetOrganizationsQuery,
 } = People;

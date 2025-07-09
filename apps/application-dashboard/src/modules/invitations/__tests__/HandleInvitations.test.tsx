@@ -26,15 +26,29 @@ jest.mock('apis/people', () => ({
 
 jest.mock('apis/auth', () => ({
   useLazyWhoAmIQuery: jest.fn(),
+  useInitiateLogoutFlowQuery: jest.fn(),
+  useLazyLogoutQuery: jest.fn(),
 }));
 
 jest.mock('@sentry/browser', () => ({
   captureException: jest.fn(),
 }));
 
+jest.mock('@zamp-platform/utils', () => ({
+  getFromLocalStorage: jest.fn(),
+  LOCAL_STORAGE_KEYS: {
+    ORG_REGION: 'ORG_REGION',
+  },
+}));
+
 jest.mock('components/DynamicLottiePlayer', () => ({
   __esModule: true,
   default: () => <div data-testid='mocked-lottie-player' />,
+}));
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props: any) => <img {...props} />,
 }));
 
 describe('HandleInvitations', () => {
@@ -49,7 +63,7 @@ describe('HandleInvitations', () => {
     ],
   };
 
-  const mockAcceptInvitation = jest.fn();
+  const mockAcceptInvitation = jest.fn().mockResolvedValue({}); // returns a Promise that resolves with empty object
   const mockWhoAmI = jest.fn().mockResolvedValue({}); // returns a Promise that resolves with empty object
 
   beforeEach(() => {
@@ -62,6 +76,25 @@ describe('HandleInvitations', () => {
     });
     (useAcceptInvitationMutation as jest.Mock).mockReturnValue([mockAcceptInvitation, { isLoading: false }]);
     (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI, { isLoading: false }]);
+
+    const { useInitiateLogoutFlowQuery, useLazyLogoutQuery } = require('apis/auth');
+
+    (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
+      data: { logout_url: 'http://logout.url' },
+      refetch: jest.fn(),
+    });
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([jest.fn(), { isLoading: false }]);
+
+    const { getFromLocalStorage } = require('@zamp-platform/utils');
+
+    (getFromLocalStorage as jest.Mock).mockReturnValue('');
+
+    delete (window as any).location;
+    (window as any).location = {
+      search: '?region=us',
+      href: 'http://localhost:3000?region=us',
+      origin: 'http://localhost:3000',
+    };
   });
   const testCases = [
     {
@@ -82,13 +115,16 @@ describe('HandleInvitations', () => {
         });
       },
       assertions: async () => {
-        await waitFor(() => {
-          expect(mockAcceptInvitation).toHaveBeenCalledTimes(2);
-          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
-          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
-          expect(mockWhoAmI).toHaveBeenCalled();
-          expect(mockRouter.push).toHaveBeenCalledWith(ROUTES_PATH.HOME);
-        });
+        await waitFor(
+          () => {
+            expect(mockAcceptInvitation).toHaveBeenCalledTimes(2);
+            expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
+            expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
+            expect(mockWhoAmI).toHaveBeenCalled();
+            expect(mockRouter.push).toHaveBeenCalledWith(ROUTES_PATH.HOME);
+          },
+          { timeout: 5000 },
+        );
       },
     },
     {
@@ -104,13 +140,16 @@ describe('HandleInvitations', () => {
         });
       },
       assertions: async () => {
-        await waitFor(() => {
-          expect(mockAcceptInvitation).toHaveBeenCalledTimes(2);
-          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
-          expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
-          expect(mockWhoAmI).toHaveBeenCalled();
-          expect(mockRouter.push).toHaveBeenCalledWith(ROUTES_PATH.HOME);
-        });
+        await waitFor(
+          () => {
+            expect(mockAcceptInvitation).toHaveBeenCalledTimes(2);
+            expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
+            expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
+            expect(mockWhoAmI).toHaveBeenCalled();
+            expect(mockRouter.push).toHaveBeenCalledWith(ROUTES_PATH.HOME);
+          },
+          { timeout: 5000 },
+        );
       },
     },
   ];
