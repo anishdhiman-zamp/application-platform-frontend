@@ -25,8 +25,6 @@ const RegionsSelectDropdown: FC<RegionsSelectDropdownProps> = ({ regions, defaul
     return regions.map((region) => {
       const formattedRegion = region.length ? region.replace('-', '') : 'us';
 
-      console.log(formattedRegion, 'formattedRegion');
-
       return {
         label: REGIONS_MAP[formattedRegion as keyof typeof REGIONS_MAP]?.shortHand,
         value: region,

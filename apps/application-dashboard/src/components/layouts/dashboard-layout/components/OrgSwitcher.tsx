@@ -6,6 +6,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Loader2 } from 'lucide-react';
+import { useWhoAmIQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -20,6 +21,7 @@ const OrgSwitcher = () => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
   const [isOrgSwitchIsInProgress, setIsOrgSwitchIsInProgress] = useState(false);
+  const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
 
   const { logout, isLoggingOut } = useLogout();
   const {
@@ -29,6 +31,8 @@ const OrgSwitcher = () => {
   } = useGetOrganizationsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
+
+  const defaultOrgName = useMemo(() => session?.orgs[0].name ?? '', [session]);
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -77,9 +81,9 @@ const OrgSwitcher = () => {
                   'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
                 )}
               >
-                {selectedOrg?.name[0]}
+                {selectedOrg?.name[0] || defaultOrgName[0]}
               </div>
-              <div className='f-12-450 flex-1'>{selectedOrg?.name}</div>
+              <div className='f-12-450 flex-1'>{selectedOrg?.name || defaultOrgName}</div>
               <DropdownToggle
                 isLoading={isOrgSwitchIsInProgress}
                 isShowMenu={isOrgSwitcherMenuOpen}

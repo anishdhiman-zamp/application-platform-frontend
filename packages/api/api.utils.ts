@@ -4,7 +4,7 @@ import { ENVIRONMENT, MULTI_REGION_ENABLED, REGION_LIST, REGIONS_MAP } from './c
 
 export const getApiDomainAndRegions = async (email = '') => {
   const region = getCurrentRegion();
-  const allRegions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) ?? '[]');
+  const allRegions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) || '[]');
 
   if (ENVIRONMENT === 'production' && MULTI_REGION_ENABLED && (allRegions.length === 0 || !region)) {
     const allRegions = await Promise.allSettled(
