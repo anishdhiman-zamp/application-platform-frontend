@@ -27,5 +27,5 @@ export async function GET() {
 
 export async function HEAD() {
   // Simple HEAD request for health check without body
-  return NextResponse.json(null, { status: 200 });
+  return NextResponse.json(null, { status: 200, headers: { 'Content-Length': '0' } });
 }
