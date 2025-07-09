@@ -6,7 +6,7 @@ export const getApiDomainAndRegions = async (email = '') => {
   const region = getCurrentRegion();
   const allRegions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) ?? '[]');
 
-  if (ENVIRONMENT === 'production' && allRegions.length === 0 && !region && MULTI_REGION_ENABLED) {
+  if (ENVIRONMENT === 'production' && MULTI_REGION_ENABLED && (allRegions.length === 0 || !region)) {
     const allRegions = await Promise.allSettled(
       REGION_LIST.map(async (region) => {
         return fetch(`${getApiDomain(ENVIRONMENT, region)}/auth/verify/email`, {
