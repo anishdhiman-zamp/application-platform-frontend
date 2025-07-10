@@ -176,20 +176,23 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
         <TabsList className='mx-4 my-3 flex h-full w-full flex-nowrap items-center justify-start gap-2.5 overflow-x-auto bg-white whitespace-nowrap [scrollbar-width:none]'>
           {visibleTabs.map((tab) => {
             const requiredCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => c.is_required)?.length ?? 0;
+            const hasMissingFields = missingFields?.[tab.dataset_id]?.cells?.length > 0;
 
             return (
               <TabsTrigger
                 key={tab.dataset_id}
                 value={tab.dataset_id}
-                className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 rounded! border-none px-2! py-1!'
+                className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 items-center rounded! border-none px-2! py-1!'
               >
                 <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
                 <span className={cn('f-12-500 ml-1.5', { 'text-GRAY_1000': activeTab === tab.dataset_id })}>
                   {tab.dataset_name}
                 </span>
-                <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
-                  {requiredCount}
-                </span>
+                {hasMissingFields && (
+                  <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
+                    {requiredCount}
+                  </span>
+                )}
               </TabsTrigger>
             );
           })}
