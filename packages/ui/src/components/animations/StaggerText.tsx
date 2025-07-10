@@ -57,11 +57,18 @@ export const StaggerText: FC<StaggeredTextProps> = ({ text, className = '', dela
       initial='hidden'
       animate={showAnimation ? 'show' : 'hidden'}
       className={cn('text-GRAY_1000 inline-flex flex-wrap', className)}
+      data-testid='stagger-text-container'
+      data-state={showAnimation ? 'show' : 'hidden'}
     >
       {letters.map((letter, i) => (
-        <motion.span key={`${letter}-${i}`} custom={i} variants={variants} className='inline-block'>
-          {letter === ' ' ? '\u00A0' : letter}
-        </motion.span>
+        <motion.span
+          key={`${letter}-${i}`}
+          custom={i}
+          variants={variants}
+          className='inline-block'
+          data-testid='stagger-letter'
+          dangerouslySetInnerHTML={{ __html: letter === ' ' ? '&nbsp;' : letter }}
+        />
       ))}
     </motion.div>
   );

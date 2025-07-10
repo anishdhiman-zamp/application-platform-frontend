@@ -17,7 +17,7 @@ import {
   REVEAL_ELEMENT_PARENT_MOTION_VARIANTS,
 } from '../../constants/animations.constants';
 import { motion, useInView } from 'motion/react';
-import { useEffect, useRef, ReactNode, Children, isValidElement, cloneElement, useState } from 'react';
+import { useEffect, useRef, ReactNode, Children, isValidElement, cloneElement, useState, ReactElement } from 'react';
 
 interface RevealElementProps {
   className?: string;
@@ -40,18 +40,32 @@ export const RevealElement = ({ className, children }: RevealElementProps) => {
       variants={REVEAL_ELEMENT_PARENT_MOTION_VARIANTS}
       initial='hidden'
       animate={animate}
+      data-testid='reveal-element'
+      data-animate-state={animate}
     >
-      {Children.map(children, (child, idx) =>
-        isValidElement(child) ? (
+      {Children.map(children, (child, idx) => {
+        if (!isValidElement(child)) {
+          return <span data-testid='non-element-child'>{child}</span>;
+        }
+
+        // Create a new props object with the test ID
+        const childProps = {
+          ...(child.props as Record<string, unknown>),
+          'data-testid': `reveal-element-content-${idx}`,
+        };
+
+        return (
           <motion.div
             key={child.key ?? `reveal-${idx}`}
             variants={REVEAL_ELEMENT_CHILD_MOTION_VARIANTS}
             className='flex w-auto flex-wrap'
+            data-testid='reveal-element-child'
+            data-child-index={idx}
           >
-            {cloneElement(child)}
+            {cloneElement(child, childProps)}
           </motion.div>
-        ) : null,
-      )}
+        );
+      })}
     </motion.div>
   );
 };
