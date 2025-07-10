@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ShimmerText Component matches snapshot with custom classes 1`] = `
+exports[`ShimmerText matches snapshot with custom classes 1`] = `
 <div
   class="relative inline-block leading-none"
 >
   <span
-    class="f-13-450 block leading-[13px] text-[#C0C0C0] custom-base"
+    class="f-13-450 block leading-[13px] custom-base"
+    style="color: rgb(192, 192, 192);"
   >
     Snapshot Test
   </span>
@@ -19,12 +20,13 @@ exports[`ShimmerText Component matches snapshot with custom classes 1`] = `
 </div>
 `;
 
-exports[`ShimmerText Component matches snapshot with default props 1`] = `
+exports[`ShimmerText matches snapshot with default props 1`] = `
 <div
   class="relative inline-block leading-none"
 >
   <span
-    class="f-13-450 block leading-[13px] text-[#C0C0C0]"
+    class="f-13-450 block leading-[13px]"
+    style="color: rgb(192, 192, 192);"
   >
     Snapshot Test
   </span>
@@ -34,25 +36,6 @@ exports[`ShimmerText Component matches snapshot with default props 1`] = `
     style="background-size: 200% 100%; background-repeat: no-repeat; background-position: 120% 0%;"
   >
     Snapshot Test
-  </span>
-</div>
-`;
-
-exports[`ShimmerText Component renders with default props 1`] = `
-<div
-  class="relative inline-block leading-none"
->
-  <span
-    class="f-13-450 block leading-[13px] text-[#C0C0C0]"
-  >
-    Test Text
-  </span>
-  <span
-    aria-hidden="true"
-    class="f-13-450 pointer-events-none absolute top-0 left-0 bg-clip-text leading-[13px] text-transparent"
-    style="background-size: 200% 100%; background-repeat: no-repeat; background-position: 120% 0%;"
-  >
-    Test Text
   </span>
 </div>
 `;
