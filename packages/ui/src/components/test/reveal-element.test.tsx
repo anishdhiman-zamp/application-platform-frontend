@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import { RevealElement } from '../animations/RevealElement';
-import { motion } from 'motion/react';
 
 // Mock the useInView hook
 const mockUseInView = jest.fn();
@@ -8,6 +7,17 @@ const mockUseInView = jest.fn();
 jest.mock('motion/react', () => ({
   ...jest.requireActual('motion/react'),
   useInView: () => mockUseInView(),
+  motion: {
+    ...jest.requireActual('motion/react').motion,
+    div: jest.fn().mockImplementation(({ children, ...props }) => {
+      // Mock motion.div for snapshot testing
+      return (
+        <div data-testid='motion-div' {...props}>
+          {children}
+        </div>
+      );
+    }),
+  },
 }));
 
 describe('RevealElement', () => {
@@ -77,16 +87,57 @@ describe('RevealElement', () => {
     // Set the mock to return true for inView
     mockUseInView.mockReturnValue(true);
 
-    const { container } = render(
+    render(
       <RevealElement>
         <div>Test</div>
       </RevealElement>,
     );
 
-    // The animation state should be 'visible' when in view
-    const motionDiv = container.firstChild as HTMLElement;
-    expect(motionDiv).toHaveAttribute('style');
-    // The style will be set by framer-motion, we can't directly test the exact values
-    // as they're handled by the animation library
+    // Verify the animation state through data attributes
+    const container = screen.getByTestId('reveal-element');
+    expect(container).toHaveAttribute('data-animate-state', 'visible');
+  });
+
+  // Snapshot test - hidden state (not in view)
+  it('matches snapshot when not in view', () => {
+    mockUseInView.mockReturnValue(false);
+
+    const { container } = render(
+      <RevealElement className='test-container'>
+        <div>Child 1</div>
+        <div>Child 2</div>
+      </RevealElement>,
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  // Snapshot test - visible state (in view)
+  it('matches snapshot when in view', () => {
+    mockUseInView.mockReturnValue(true);
+
+    const { container } = render(
+      <RevealElement className='test-container'>
+        <div>Visible Child 1</div>
+        <div>Visible Child 2</div>
+      </RevealElement>,
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  // Snapshot test - with custom class and multiple children
+  it('matches snapshot with custom class and multiple children', () => {
+    mockUseInView.mockReturnValue(true);
+
+    const { container } = render(
+      <RevealElement className='custom-class'>
+        <div className='child-1'>First</div>
+        <div className='child-2'>Second</div>
+        <div className='child-3'>Third</div>
+      </RevealElement>,
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -14,6 +14,18 @@ describe('StaggerText Component', () => {
     expect(letters).toHaveLength(4); // 'T', 'e', 's', 't'
   });
 
+  // Snapshot test
+  it('matches snapshot with default props', () => {
+    const { container } = render(<StaggerText text='Test Snapshot' />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  // Snapshot test with custom class
+  it('matches snapshot with custom class', () => {
+    const { container } = render(<StaggerText text='Custom Class' className='custom-class' />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   // Test with custom class
   it('applies custom className', () => {
     render(<StaggerText text='Test' className='custom-class' />);
