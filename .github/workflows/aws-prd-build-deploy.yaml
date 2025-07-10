@@ -1,4 +1,4 @@
-name: AWS Production Application Platform Frontend - Build and Deploy
+name: AWS Prd-ME Application Platform Frontend - Build and Deploy
 
 on:
   workflow_dispatch:
@@ -8,6 +8,10 @@ on:
 
 env:
   APP_NAME: application-platform-frontend
+
+concurrency:
+  group: frontend-prd-deploy
+  cancel-in-progress: false
 
 jobs:
   prepare-env:
