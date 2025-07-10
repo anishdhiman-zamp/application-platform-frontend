@@ -1,22 +1,22 @@
-name: AWS Dev Application Platform Frontend - Build and Deploy
+name: AWS Staging Application Platform Frontend - Build and Deploy
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - development
+      - staging # FIXME: Update to your staging branch name
 
 env:
   APP_NAME: application-platform-frontend
 
 concurrency:
-  group: frontend-dev-deploy
+  group: frontend-stg-deploy
   cancel-in-progress: false
 
 jobs:
   prepare-env:
     name: Prepare Env
-    runs-on: arc-runner-set-aws-dev
+    runs-on: arc-runner-set-aws-stg # FIXME: Update to your staging runner
     timeout-minutes: 2
     outputs:
       SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
@@ -41,25 +41,25 @@ jobs:
           TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
           # FIXME: Replace with your actual values
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
-          echo "SLACK_WEBHOOK_URL=DEV_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
+          echo "SLACK_WEBHOOK_URL=STG_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
-          echo "ECR_REPO=zamp-dev-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
-          echo "HELM_REPOSITORY=zamp-dev-us-helmcharts-latest" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-stg-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
+          echo "HELM_REPOSITORY=zamp-stg-us-helmcharts-latest" >> $GITHUB_OUTPUT
           echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
-          echo "EKS_CLUSTER=zamp-dev-us-cluster" >> $GITHUB_OUTPUT
+          echo "EKS_CLUSTER=zamp-stg-us-cluster" >> $GITHUB_OUTPUT
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
-          echo "AWS_ACCOUNT_ID=913524915637" >> $GITHUB_OUTPUT # FIXME: Replace with your account ID
-          echo "VALUES_FILE=dev-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-dev-application-platform-assets" >> $GITHUB_OUTPUT # Static assets bucket with CloudFront CDN
-          echo "BUILD_ENV=awsdev" >> $GITHUB_OUTPUT
+          echo "AWS_ACCOUNT_ID=586794458011" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=stg-values.yaml" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-stg-application-platform-assets" >> $GITHUB_OUTPUT
+          echo "BUILD_ENV=awsstg" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
-          echo "ENVIRONMENT=development" >> $GITHUB_OUTPUT
+          echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
 
       - name: Output Branch name
         run: |
           echo ":seedling: Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
-          echo ":rocket: Environment: development" >> $GITHUB_STEP_SUMMARY
+          echo ":rocket: Environment: staging" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
     needs:
@@ -68,7 +68,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: arc-runner-set-aws-dev
+    runs-on: arc-runner-set-aws-stg # FIXME: Update to your staging runner
     env:
       AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
@@ -104,11 +104,9 @@ jobs:
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in staging account
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
-
-
 
       - name: "Install AWS CLI"
         run: |
@@ -126,14 +124,12 @@ jobs:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
   
-
       - uses: actions/cache@v4
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
-
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -199,12 +195,11 @@ jobs:
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
-            --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
+            --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
             --build-arg PORT=3000 \
             --build-arg SKIP_INSTALL=true \
             --build-arg SKIP_BUILD=true \
             --push .
-          
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
@@ -222,7 +217,7 @@ jobs:
 
   deploy-to-eks:
     name: Deploy to EKS
-    runs-on: arc-runner-set-aws-dev
+    runs-on: arc-runner-set-aws-stg # FIXME: Update to your staging runner
     timeout-minutes: 15
     permissions:
       id-token: write
@@ -250,7 +245,7 @@ jobs:
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in staging account
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 

@@ -3,6 +3,7 @@ global:
     name: application-platform-frontend-prd
 
 projectName: zamp  # required
+serviceName: application-platform-frontend
 default:
   annotations:
     all:
@@ -19,8 +20,8 @@ default:
       memory: 1024Mi
   replicaCount: 1
   image:
-    repository: 
-    tag: 
+    repository: "916079538338.dkr.ecr.me-central-1.amazonaws.com/zamp-prd-me-application-platform-frontend-ecr"
+    tag: "latest"
     imagePullPolicy: Always
   signoz:
     enabled: false

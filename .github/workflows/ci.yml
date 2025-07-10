@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   lint-and-test:
@@ -24,6 +25,8 @@ jobs:
     
     - name: Run tests with coverage
       run: npm run test
+      env:
+        CI: true
     
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
@@ -39,5 +42,14 @@ jobs:
         echo "You can download the full report from the artifacts section." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "Coverage files:" >> $GITHUB_STEP_SUMMARY
+        if [ -f "coverage/lcov.info" ]; then
+          echo "- LCOV Report: coverage/lcov.info" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [ -f "coverage/coverage-final.json" ]; then
+          echo "- JSON Report: coverage/coverage-final.json" >> $GITHUB_STEP_SUMMARY
+        fi
+        if [ -d "coverage/lcov-report" ]; then
+          echo "- HTML Report: coverage/lcov-report/index.html" >> $GITHUB_STEP_SUMMARY
+        fi
 
  
