@@ -32,7 +32,7 @@ const OrgSwitcher = () => {
     refetchOnMountOrArgChange: false,
   });
 
-  const defaultOrgName = useMemo(() => session?.orgs[0].name ?? '', [session]);
+  const defaultOrgName = useMemo(() => session?.orgs?.[0]?.name ?? '', [session]);
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -81,7 +81,7 @@ const OrgSwitcher = () => {
                   'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
                 )}
               >
-                {selectedOrg?.name[0] || defaultOrgName[0]}
+                {selectedOrg?.name?.[0] || defaultOrgName[0]}
               </div>
               <div className='f-12-450 flex-1'>{selectedOrg?.name || defaultOrgName}</div>
               <DropdownToggle
