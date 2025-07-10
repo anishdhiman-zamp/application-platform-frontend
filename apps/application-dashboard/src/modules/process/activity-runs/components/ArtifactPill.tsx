@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
@@ -19,6 +19,7 @@ type Artifact = {
   icon_identifier: string;
   artifact_type: ARTIFACT_TYPE;
   status: string;
+  isDisabled: boolean;
 };
 
 type ArtifactPillProps = {
@@ -26,66 +27,52 @@ type ArtifactPillProps = {
   artifacts: Artifact[];
   status: string;
   activityId: string;
+  isDisabled: boolean;
 };
 
-const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProps) => {
+const ArtifactPill = ({ count, artifacts, status, activityId, isDisabled }: ArtifactPillProps) => {
   const [open, setOpen] = useState(false);
 
   const params = useParams();
   const processId = params?.processId as string;
 
   const router = useRouter();
-  const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
+  const [getArtifact] = useLazyGetArtifactsByArtifactIdQuery();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const isDisabled = useMemo(() => {
-    return count === 0;
-  }, [count]);
+  const handleSelect = useCallback(
+    (artifactId: string) => {
+      if (!artifactId) return;
+      const artifact = artifacts?.find((artifact) => artifact?.id === artifactId);
 
-  const handleGetArtifacts = (artifactId: string) => {
-    if (!artifactId) return;
+      if (artifact?.artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK) {
+        getArtifact({
+          processId: processId as string,
+          activityRunId: activityId as string,
+          artifact_ids: artifactId,
+        })
+          .unwrap()
+          .then((res) => {
+            const artifactData = res?.artifacts?.[0]?.artifact_data as OtherArtifactsResponseType;
 
-    getArtifact({
-      processId: processId as string,
-      activityRunId: activityId as string,
-      artifact_ids: artifactId,
-    })
-      .unwrap()
-      .then((res) => {
-        const artifactData = res?.artifacts?.[0]?.artifact_data as OtherArtifactsResponseType;
+            if (artifactData?.url) {
+              window.open(artifactData?.url, '_blank');
+            }
+            toast.loading('Redirecting...');
+          })
+          .catch((err) => {
+            toast.error(err?.data?.message ?? 'Failed to redirect');
+          });
 
-        if (artifactData?.url) {
-          window.open(artifactData?.url, '_blank');
-        }
-      })
-      .catch((err) => {
-        toast.error(err?.data?.message ?? 'Failed to redirect');
-      });
-  };
+        return;
+      }
 
-  const handleSelect = (value: string) => {
-    const artifact = artifacts?.find((artifact) => artifact?.id === value);
+      const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
 
-    if (artifact?.artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK) {
-      handleGetArtifacts(artifact?.id as string);
-
-      return;
-    }
-
-    const path = getProcessActivityLogsRouteById(processId as string, activityId, status);
-
-    router.push(`${path}&artifactId=${artifact?.id}&artifactType=${artifact?.artifact_type}`);
-  };
-
-  useEffect(() => {
-    if (isLoadingArtifact) {
-      toast.loading('Redirecting...', {
-        id: 'redirecting',
-      });
-    } else {
-      toast.dismiss('redirecting');
-    }
-  }, [isLoadingArtifact]);
+      router.push(`${path}&artifactId=${artifact?.id}&artifactType=${artifact?.artifact_type}`);
+    },
+    [processId, activityId, status],
+  );
 
   useEffect(() => {
     if (!buttonRef.current) return;
@@ -108,25 +95,27 @@ const ArtifactPill = ({ count, artifacts, status, activityId }: ArtifactPillProp
     };
   }, [open]);
 
+  const options = useMemo(() => {
+    return artifacts?.map((artifact) => ({
+      value: artifact?.id,
+      label: artifact?.display_name,
+      icon: (
+        <ImageWithFallback
+          fallback={artifact?.artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK ? LINK : DATASET}
+          src={getArtifactPrefixIconSrc(artifact?.artifact_type, artifact?.icon_identifier)}
+          alt={artifact?.display_name}
+          width={12}
+          height={12}
+          priority
+        />
+      ),
+    }));
+  }, [artifacts]);
+
   return (
     <Combobox
-      options={artifacts?.map((artifact) => ({
-        value: artifact?.id,
-        label: artifact?.display_name,
-        icon: (
-          <ImageWithFallback
-            fallback={artifact?.artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK ? LINK : DATASET}
-            src={getArtifactPrefixIconSrc(artifact?.artifact_type, artifact?.icon_identifier)}
-            alt={artifact?.display_name}
-            width={12}
-            height={12}
-            priority
-          />
-        ),
-      }))}
-      onSelect={(option) => {
-        handleSelect(option?.value as string);
-      }}
+      options={options}
+      onSelect={(option) => handleSelect(option?.value as string)}
       open={open}
       onOpenChange={setOpen}
       searchPlaceholder='Search artifacts'
@@ -177,4 +166,4 @@ const OverlayContent = () => {
   );
 };
 
-export default ArtifactPill;
+export default memo(ArtifactPill);

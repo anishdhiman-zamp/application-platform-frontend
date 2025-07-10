@@ -63,13 +63,17 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
   return (
     <div className='relative z-100' ref={menuRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button className='flex h-5.5 w-5.5 items-center justify-center p-1 select-none' size='small' variant='ghost'>
-            <TooltipV2 tooltipBody='Display options' className='cursor-pointer'>
+        <TooltipV2 tooltipBody='Display options' className='cursor-pointer' asChildTrigger>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className='flex h-5.5 w-5.5 items-center justify-center p-1 select-none'
+              size='small'
+              variant='ghost'
+            >
               <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
-            </TooltipV2>
-          </Button>
-        </DropdownMenuTrigger>
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipV2>
         <DropdownMenuContent align='end' className='z-9999 max-h-[300px] min-w-[180px]! overflow-y-auto' sideOffset={5}>
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
             (option: MapAny) => (

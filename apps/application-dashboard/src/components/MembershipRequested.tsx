@@ -8,7 +8,7 @@ import { Button } from 'components/common/button/Button';
 type MembershipRequestedProps = {
   text: string;
   subText: string;
-  userEmail: string;
+  userEmail?: string;
   actionItems: {
     text: string;
     onClick: defaultFnType;
@@ -33,8 +33,12 @@ export const MembershipRequested = (props: MembershipRequestedProps) => {
       <div className='flex flex-col items-center justify-center'>
         <span className='f-16-600 mt-4'>{text}</span>
         <span className='f-13-400 text-GRAY_600 mt-6'>{subText}</span>
-        <span className='f-13-400 text-GRAY_600 mt-6'>You are logged in as</span>
-        <span className='f-13-600 text-GRAY_950 mt-1'>{userEmail}</span>
+        {userEmail && (
+          <>
+            <span className='f-13-400 text-GRAY_600 mt-6'>You are logged in as</span>
+            <span className='f-13-600 text-GRAY_950 mt-1'>{userEmail}</span>
+          </>
+        )}
       </div>
       <div className='mt-6 flex gap-2.5'>
         {actionItems.map((actionItem) => (

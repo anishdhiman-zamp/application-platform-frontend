@@ -798,3 +798,41 @@ export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) =>
     JSON.stringify({ ...currentColumnOrderingVisibility, [datasetId]: finalList }),
   );
 };
+
+/**
+ * Formats an array of objects or primitive values into a string.
+ *
+ * This function checks if the array consists of objects that each have a single key.
+ * If all objects share the same key, it concatenates the values associated with that key into a single string.
+ * If the array does not meet these conditions, it converts each item to a JSON string and joins them with a comma.
+ *
+ * @param {MapAny[]} value - The array of objects or primitive values to format.
+ * @returns {string} A string representation of the array, either by joining values of a common key or by JSON stringifying each item.
+ */
+export const formatArrayValue = (value: MapAny[]): string => {
+  // Check if it's an array of objects with same single key
+  if (
+    value?.length > 0 &&
+    value?.every((item) => typeof item === 'object' && item !== null) &&
+    value?.every((item) => Object.keys(item).length === 1)
+  ) {
+    const firstItem = value[0];
+    const firstKey = Object.keys(firstItem)[0];
+
+    // Check if all objects have the same key
+    if (value?.every((item) => Object.keys(item)[0] === firstKey)) {
+      // Join all values for that key
+      return value?.map((item) => item[firstKey]).join(', ');
+    }
+  }
+
+  return value
+    ?.map((item: MapAny) => {
+      if (typeof item === 'object') {
+        return JSON.stringify(item);
+      }
+
+      return item;
+    })
+    .join(', ');
+};

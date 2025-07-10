@@ -1,4 +1,5 @@
 export const API_ENDPOINTS = {
+  ORGANIZATIONS_GET: `organizations/`,
   MEMBERSHIP_REQUESTS_ALL_GET: `organizations/membership-requests`,
   INVITE_AUDIENCES_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/audiences/invitations`,
   INVITED_AUDIENCES_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/audiences/invitations`,

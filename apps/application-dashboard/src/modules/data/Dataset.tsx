@@ -335,7 +335,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     // Optimistic update
     node.setData(updatedRow);
 
-    if (source === 'edit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
+    if (source === 'commit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
   };
 
   const onFillEnd = (event: FillEndEvent) => {
