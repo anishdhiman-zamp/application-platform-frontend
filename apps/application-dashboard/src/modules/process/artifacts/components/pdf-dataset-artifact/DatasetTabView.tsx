@@ -15,7 +15,6 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
-import { useParams } from 'next/navigation';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import { COLORS } from '@/constants/colors';
@@ -33,6 +32,8 @@ interface DatasetArtifactProps {
   filters: MapAny;
   missingFields: MissingFieldsConfigType;
   emitHITLActionPayload: EmitHITLActionPayload;
+  processId: string;
+  activityId: string;
 }
 
 const DatasetTabView: FC<DatasetArtifactProps> = ({
@@ -40,8 +41,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   filters,
   missingFields,
   emitHITLActionPayload,
+  processId,
+  activityId,
 }) => {
-  const { processId, activityId } = useParams() as { processId: string; activityId: string };
   const userId = useAppSelector((state) => state.user?.user?.user_id);
 
   const {

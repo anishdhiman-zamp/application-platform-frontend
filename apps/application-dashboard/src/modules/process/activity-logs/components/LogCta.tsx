@@ -1,4 +1,4 @@
-import { type FC, memo, useState } from 'react';
+import { type FC, memo, useCallback, useState } from 'react';
 import { Button, type ButtonProps } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
@@ -26,10 +26,13 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
       CTA_COMPONENT_TYPE.BUTTON,
       CTA_COMPONENT_TYPE.OVERRIDE_MISSING_FIELDS_BUTTON,
       CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+      CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
     ].includes(cta.cta_component_type),
   );
 
   const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+
+  const getLoadingId = useCallback((cta: CtasType) => `${cta?.id}-${cta?.display_name}`, []);
 
   const handleEmitHITLAction = (cta: CtasType) => {
     const payload = {
@@ -39,7 +42,9 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
       responses: [{ action_id: cta?.cta_action_id, values: [cta?.cta_value] }],
     };
 
-    setCtaLoading((prev) => [...prev, `${cta?.id}-${cta?.display_name}`]);
+    const loadingId = getLoadingId(cta);
+
+    setCtaLoading((prev) => [...prev, loadingId]);
 
     emitHITLAction({
       processId,
@@ -48,16 +53,19 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
     })
       .unwrap()
       .then(() => {
-        setCtaLoading((prev) => prev.filter((id) => id !== `${cta?.id}-${cta?.display_name}`));
+        setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
       })
       .catch((error) => {
         toast.error(error.data.message ?? 'Something went wrong');
-        setCtaLoading((prev) => prev.filter((id) => id !== `${cta?.id}-${cta?.display_name}`));
+        setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
       });
   };
 
   const handleButtonClick = (cta: CtasType) => {
-    if (cta?.cta_component_type === CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON) {
+    if (
+      cta?.cta_component_type === CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON ||
+      cta?.cta_component_type === CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON
+    ) {
       handleShowArtifacts({
         artifactType: cta?.artifact_type,
         artifactId: cta?.id ?? '',
@@ -96,21 +104,27 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
         ))}
       </div>
       <div className='flex w-full flex-wrap items-start justify-start gap-2'>
-        {buttonTypeCtas?.map((cta) => (
-          <Button
-            variant={(cta?.cta_config?.variant as ButtonProps['variant']) ?? 'secondary'}
-            key={`${cta?.id}-${cta?.display_name}`}
-            className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'
-            onClick={() => handleButtonClick(cta)}
-            disabled={isLoading || ctaLoading.includes(`${cta?.id}-${cta?.display_name}`)}
-            isLoading={isLoading && ctaLoading.includes(`${cta?.id}-${cta?.display_name}`)}
-          >
-            {cta?.cta_config?.icon_identifier && (
-              <SvgSpriteLoader id={cta?.cta_config?.icon_identifier ?? 'check'} size={12} className='shrink-0' />
-            )}
-            <span className='f-12-500 truncate capitalize'>{cta?.display_name}</span>
-          </Button>
-        ))}
+        {buttonTypeCtas?.map((cta) => {
+          const loadingId = getLoadingId(cta);
+
+          return (
+            <Button
+              variant={(cta?.cta_config?.variant as ButtonProps['variant']) ?? 'secondary'}
+              key={loadingId}
+              className='f-12-500 h-6 max-w-40 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'
+              onClick={() => handleButtonClick(cta)}
+              disabled={isLoading || ctaLoading.includes(loadingId)}
+              isLoading={isLoading && ctaLoading.includes(loadingId)}
+            >
+              {cta?.cta_config?.icon_identifier && (
+                <SvgSpriteLoader id={cta?.cta_config?.icon_identifier} size={12} className='shrink-0' />
+              )}
+              <span className='f-12-500 truncate capitalize' title={cta?.display_name}>
+                {cta?.display_name}
+              </span>
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

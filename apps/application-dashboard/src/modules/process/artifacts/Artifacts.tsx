@@ -121,12 +121,19 @@ const Artifacts = ({
                   filters={filters}
                   missingFields={missingFields}
                   emitHITLActionPayload={emitHITLActionPayload}
+                  processId={processId}
+                  activityId={activityId as string}
                   key={id}
                 />
               </CompletedFieldsProvider>
             </TabsContent>
             <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
-              <PdfArtifact pdfArtifact={artifactData as PdfDatasetArtifactsResponseType} artifactId={id} key={id} />
+              <PdfArtifact
+                pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
+                artifactId={id}
+                processId={processId}
+                key={id}
+              />
             </TabsContent>
           </>
         );
@@ -137,6 +144,9 @@ const Artifacts = ({
             artifactData={artifactData as EmailArtifactsResponseType}
             artifactId={id}
             processId={processId}
+            activityId={activityId as string}
+            emitHITLActionPayload={emitHITLActionPayload}
+            onClose={onClose}
             key={id}
           />
         );
@@ -149,17 +159,31 @@ const Artifacts = ({
               filters={filters}
               missingFields={missingFields}
               emitHITLActionPayload={emitHITLActionPayload}
+              processId={processId}
+              activityId={activityId as string}
               key={id}
             />
           </CompletedFieldsProvider>
         );
 
       case ARTIFACT_TYPE.PDF:
-        return <PdfArtifact pdfArtifact={artifactData as PdfArtifactsResponseType} artifactId={id} key={id} />;
+        return (
+          <PdfArtifact
+            pdfArtifact={artifactData as PdfArtifactsResponseType}
+            artifactId={id}
+            processId={processId}
+            key={id}
+          />
+        );
 
       case ARTIFACT_TYPE.BROWSER:
         return (
-          <BrowserArtifact browserArtifact={artifactData as BrowserArtifactsResponseType} artifactId={id} key={id} />
+          <BrowserArtifact
+            browserArtifact={artifactData as BrowserArtifactsResponseType}
+            artifactId={id}
+            processId={processId}
+            key={id}
+          />
         );
 
       default:

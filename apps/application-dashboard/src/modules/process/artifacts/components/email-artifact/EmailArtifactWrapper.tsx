@@ -3,7 +3,6 @@ import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader'
 import EmailArtifact from 'modules/process/artifacts/components/email-artifact/EmailArtifact';
 import { EMAIL_STATUS, EmailArtifactWrapperProps } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
-import { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 const EmailEditorArtifact = dynamic(
   () => import('modules/process/artifacts/components/email-artifact/EmailEditorArtifact'),
@@ -13,25 +12,29 @@ const EmailEditorArtifact = dynamic(
   },
 );
 
-const EmailArtifactWrapper = ({ artifactData, artifactId, processId }: EmailArtifactWrapperProps) => {
+const EmailArtifactWrapper = ({
+  artifactData,
+  artifactId,
+  processId,
+  activityId,
+  emitHITLActionPayload,
+  onClose,
+}: EmailArtifactWrapperProps) => {
   switch (artifactData?.status) {
     case EMAIL_STATUS.DRAFT:
       return (
         <EmailEditorArtifact
-          emailArtifact={artifactData as EmailArtifactsResponseType}
+          emailArtifact={artifactData}
           artifactId={artifactId}
           processId={processId}
+          activityId={activityId}
+          emitHITLActionPayload={emitHITLActionPayload}
+          onClose={onClose}
           key={artifactId}
         />
       );
     default:
-      return (
-        <EmailArtifact
-          emailArtifact={artifactData as EmailArtifactsResponseType}
-          artifactId={artifactId}
-          key={artifactId}
-        />
-      );
+      return <EmailArtifact emailArtifact={artifactData} artifactId={artifactId} key={artifactId} />;
   }
 };
 
