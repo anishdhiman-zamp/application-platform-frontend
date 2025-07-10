@@ -29,6 +29,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
   attachments,
   processId,
   artifactId,
+  isEmailSending,
 }) => {
   const editor = useEditor({
     extensions: [
@@ -47,55 +48,66 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
   const toolbarConfigs: ToolbarConfig[] = useMemo(
     () => [
       {
+        id: '1',
         icon: 'flip-backward',
         onClick: () => editor?.chain().focus().undo().run(),
         tooltipBody: 'Undo',
       },
       {
-        icon: 'flip-forward',
+        id: '2',
+        icon: 'redo-01',
         onClick: () => editor?.chain().focus().redo().run(),
         showDivider: true,
         tooltipBody: 'Redo',
       },
       {
+        id: '3',
         showDivider: true,
         component: <FontSizeSelector editor={editor} />,
       },
       {
+        id: '4',
         icon: 'bold-02',
         onClick: () => editor?.chain().focus().toggleBold().run(),
         tooltipBody: 'Bold',
       },
       {
+        id: '5',
         icon: 'italic-01',
         onClick: () => editor?.chain().focus().toggleItalic().run(),
         tooltipBody: 'Italic',
       },
       {
+        id: '6',
         icon: 'underline-01',
         onClick: () => editor?.chain().focus().toggleUnderline().run(),
         tooltipBody: 'Underline',
       },
       {
+        id: '7',
         component: <TextAndBackgroundColor editor={editor} />,
         showDivider: true,
       },
       {
+        id: '8',
         component: <TextAlignmentSelector editor={editor} />,
       },
       {
+        id: '9',
         icon: 'list',
         onClick: () => editor?.chain().focus().toggleBulletList().run(),
         showDivider: true,
         tooltipBody: 'Bullet List',
       },
       {
+        id: '10',
         icon: 'strikethrough-01',
         onClick: () => editor?.chain().focus().toggleStrike().run(),
         showDivider: true,
         tooltipBody: 'Strikethrough',
       },
       {
+        id: '11',
         icon: 'type-strikethrough-01',
         onClick: () => editor?.commands.unsetAllMarks(),
         tooltipBody: 'Remove Formatting',
@@ -120,7 +132,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         {editor && (
           <div className='shadow-side-drawer-inner absolute bottom-4 z-1 flex h-8 w-fit items-center gap-2 rounded-md border bg-white px-2 py-1'>
             {toolbarConfigs.map((config) => (
-              <Fragment key={config.icon}>
+              <Fragment key={config?.id}>
                 {config.component ?? (
                   <TooltipV2 tooltipBody={config?.tooltipBody} asChildTrigger>
                     <Button onClick={config?.onClick} variant='ghost' size='xsmall' className='h-6 px-1'>
@@ -135,10 +147,15 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         )}
       </div>
       <div className={cn('border-GRAY_500 flex items-center justify-between border-t px-4 py-3', footerClassName)}>
-        <Button size='small' onClick={() => onSend?.(editor?.getHTML() || '')} disabled>
+        <Button
+          size='small'
+          onClick={() => onSend?.(editor?.getHTML() || '')}
+          disabled={isEmailSending}
+          isLoading={isEmailSending}
+        >
           Send
         </Button>
-        <Button variant='ghost' size='xxsmall' onClick={onDelete} disabled>
+        <Button variant='ghost' size='xxsmall' onClick={onDelete} disabled={isEmailSending}>
           <SvgSpriteLoader id='trash-01' />
         </Button>
       </div>

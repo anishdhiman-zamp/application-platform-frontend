@@ -62,9 +62,11 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import {
+  type CompletedField,
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
+import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -81,11 +83,9 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
-  isDrilldown?: boolean;
   pageSize?: number;
   isReadOnly?: boolean;
   containerStyle?: MapAny;
-  updateDatasetTitleInParent?: (title: string) => void;
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
@@ -97,6 +97,7 @@ type DatasetByIdProps = {
 type MissingFieldControlProps = {
   totalMissingFields: number;
   currentIndex: number;
+  completedFields: CompletedField[];
   goPrevious: defaultFnType;
   goNext: defaultFnType;
 };
@@ -107,7 +108,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   pageSize,
   isReadOnly = false,
   containerStyle,
-  updateDatasetTitleInParent,
   updateFiltersInParent,
   updateFilterConfigInParent,
   parentSelectedFilters,
@@ -170,7 +170,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [checkUserPrivilege]);
 
   const currentDatasetCompletedFields = useMemo(() => {
-    return completedFields[id] || [];
+    return completedFields[id]?.filter((field) => field.isRequired) ?? [];
   }, [completedFields, id]);
 
   const [gridReady, setGridReady] = useState<boolean>(false);
@@ -185,7 +185,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const [isRulesListingSideDrawerOpen, setIsRulesListingSideDrawerOpen] = useState(false);
   const [rowPropertiesData, setRowPropertiesData] = useState<MapAny>();
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
-  const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
@@ -205,6 +204,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     title: '',
     description: '',
   });
+  const [isInitialDataLoaded, setIsInitialDataLoaded] = useState<boolean>(false);
 
   const [updateDatasetData] = useUpdateDatasetDataMutation();
 
@@ -234,6 +234,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           firstLoadDone.current = true; // Mark first load as done
           if (drilldownFilters?.conditions === null) {
             setIsNoRowsOverlayVisible(true);
+            setIsInitialDataLoaded(true); // Mark data as loaded even for empty results
             parameters.success({
               rowData: [],
               rowCount: 0,
@@ -242,6 +243,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             const totalCount = cachedDatasetData?.data?.total_count ?? 0;
 
             setIsNoRowsOverlayVisible(totalCount === 0);
+            setIsInitialDataLoaded(true); // Mark data as loaded
             parameters.success({
               rowData: cachedDatasetData?.data?.rows ?? [],
               ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
@@ -259,9 +261,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               const totalCount = response?.data?.total_count;
 
               if (parameters.request.startRow === 0) {
-                setDatasetTitle(response?.title);
                 setTotalRows(totalCount);
                 setIsNoRowsOverlayVisible(totalCount === 0);
+                setIsInitialDataLoaded(true); // Mark data as loaded
                 dispatch({
                   type: filtersContextActions.SET_TOTAL_ROWS,
                   payload: { totalRows: totalCount },
@@ -275,6 +277,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               });
             })
             .catch(() => {
+              setIsInitialDataLoaded(true); // Mark data as loaded even on error
               parameters.fail();
             });
         }
@@ -402,12 +405,19 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const onCellEditRequest = (event: CellEditRequestEvent) => {
     const { colDef, newValue, data, source, node } = event;
     const { field } = colDef;
-    const updatedRow = { ...event.data, [field as string]: newValue };
+    const oldValue = data?.[field as string];
+    const value = isValueEmpty(newValue) ? (typeof oldValue === 'number' ? 0 : '-') : newValue;
+    const updatedRow = { ...event.data, [field as string]: value };
 
     // Optimistic update
     node.setData(updatedRow);
 
-    if (source === 'commit') updateApi({ rowId: data?.id as string, field: field as string, newValue });
+    if (source === 'commit')
+      updateApi({
+        rowId: data?.id as string,
+        field: field as string,
+        newValue: value,
+      });
   };
 
   const onFillEnd = (event: FillEndEvent) => {
@@ -619,7 +629,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     })
       .unwrap()
       .then((response) => {
-        setDatasetTitle(response?.title);
         setTotalRows(response?.data?.total_count);
         setCachedDatasetData(response);
         dispatch({
@@ -633,8 +642,14 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [filters, drilldownFilters, id, getDatasetArtifacts, processId, activityId]);
 
   useEffect(() => {
-    updateDatasetTitleInParent?.(datasetTitle);
-  }, [datasetTitle, updateDatasetTitleInParent]);
+    if (gridReady && isInitialDataLoaded && hasMissingFields && currentIndex === -1) {
+      //requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        setCurrentIndex(0);
+        scrollToMissingField(0);
+      });
+    }
+  }, [gridReady, isInitialDataLoaded, hasMissingFields, requiredMissingFields, currentIndex]);
 
   useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
 
@@ -735,6 +750,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             <MissingFieldControl
               totalMissingFields={requiredMissingFields?.length ?? 0}
               currentIndex={currentIndex}
+              completedFields={currentDatasetCompletedFields}
               goPrevious={goPrevious}
               goNext={goNext}
             />
@@ -778,14 +794,19 @@ export default withFiltersContext(DatasetArtifact);
 const MissingFieldControl: FC<MissingFieldControlProps> = ({
   totalMissingFields,
   currentIndex,
+  completedFields,
   goPrevious,
   goNext,
 }) => {
+  const remainingFields = useMemo(() => {
+    return totalMissingFields - completedFields?.length;
+  }, [totalMissingFields, completedFields]);
+
   return (
     <div className='animate-opacity border-GRAY_500 absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 transform items-center justify-center rounded-md border-[0.5px] bg-white'>
       <div className='flex items-center gap-x-2.5 p-2.5'>
-        <span className='f-11-500 text-RED_800 whitespace-nowrap'>
-          {formatPlural(totalMissingFields, 'missing field')}
+        <span className='f-11-500 text-RED_800 whitespace-nowrap select-none'>
+          {formatPlural(remainingFields, 'missing field')}
         </span>
         <div className='flex items-center gap-x-1.5'>
           <SvgSpriteLoader
@@ -795,7 +816,7 @@ const MissingFieldControl: FC<MissingFieldControlProps> = ({
             onClick={goPrevious}
             className={currentIndex <= 0 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
           />
-          <span className='f-11-500 text-GRAY_700 select-non whitespace-nowrap'>
+          <span className='f-11-500 text-GRAY_700 whitespace-nowrap select-none'>
             {currentIndex === -1 ? 0 : currentIndex + 1}/{totalMissingFields}
           </span>
           <SvgSpriteLoader

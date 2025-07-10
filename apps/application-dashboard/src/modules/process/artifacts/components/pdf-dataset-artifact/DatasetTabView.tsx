@@ -15,7 +15,6 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
-import { useParams } from 'next/navigation';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import { COLORS } from '@/constants/colors';
@@ -33,6 +32,8 @@ interface DatasetArtifactProps {
   filters: MapAny;
   missingFields: MissingFieldsConfigType;
   emitHITLActionPayload: EmitHITLActionPayload;
+  processId: string;
+  activityId: string;
 }
 
 const DatasetTabView: FC<DatasetArtifactProps> = ({
@@ -40,8 +41,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   filters,
   missingFields,
   emitHITLActionPayload,
+  processId,
+  activityId,
 }) => {
-  const { processId, activityId } = useParams() as { processId: string; activityId: string };
   const userId = useAppSelector((state) => state.user?.user?.user_id);
 
   const {
@@ -185,7 +187,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                 <span className={cn('f-12-500 ml-1.5', { 'text-GRAY_1000': activeTab === tab.dataset_id })}>
                   {tab.dataset_name}
                 </span>
-                {requiredCount > 0 && <span className='f-11-500 text-RED_800 ml-1'>{requiredCount}</span>}
+                <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
+                  {requiredCount}
+                </span>
               </TabsTrigger>
             );
           })}
@@ -217,7 +221,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       <TabsContent key={activeTab} value={activeTab} className='mt-0 h-full w-full'>
         <DatasetArtifact
           id={activeTab}
-          updateBreadcrumb={false}
           drilldownFilters={
             filters?.dataset_to_filter_map?.[activeTab]?.filters ?? missingFields?.[activeTab]?.filters ?? {}
           }
