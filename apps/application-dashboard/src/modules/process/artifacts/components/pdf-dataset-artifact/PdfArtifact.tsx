@@ -2,7 +2,6 @@ import { FC, memo, useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Skeleton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { useParams } from 'next/navigation';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -29,12 +28,10 @@ interface ToolbarProps {
 interface PdfArtifactProps {
   pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   artifactId: string;
+  processId: string;
 }
 
-const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId }) => {
-  const params = useParams();
-  const processId = params?.processId as string;
-
+const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState(1);

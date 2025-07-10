@@ -2,9 +2,21 @@
 import { useState } from 'react';
 import BodyAndFooter from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/BodyAndFooter';
 import Header from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Header';
-import { EmailEditorArtifactProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+import { type EmailEditorArtifactProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+import { useEmitHITLActionMutation } from '@/apis/processes';
+import { toast } from '@/components/common/toast/Toast';
+import { useAppSelector } from '@/hooks/toolkit';
+import { CTA_COMPONENT_TYPE } from '@/modules/process/process.types';
 
-const EmailEditorArtifact = ({ emailArtifact, artifactId, processId }: EmailEditorArtifactProps) => {
+const EmailEditorArtifact = ({
+  emailArtifact,
+  artifactId,
+  processId,
+  activityId,
+  emitHITLActionPayload,
+  onClose,
+}: EmailEditorArtifactProps) => {
+  const userId = useAppSelector((state) => state.user?.user?.user_id);
   const [header, setHeader] = useState({
     heading: emailArtifact.heading,
     to_mail_ids: emailArtifact.to_mail_ids ?? [],
@@ -12,8 +24,39 @@ const EmailEditorArtifact = ({ emailArtifact, artifactId, processId }: EmailEdit
     bcc_mail_ids: emailArtifact.bcc_mail_ids ?? [],
   });
 
+  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+
   const handleSend = (htmlString: string) => {
-    console.log({ htmlString, header });
+    const { logGroupId, hitlRequestId, ctaActionId } = emitHITLActionPayload;
+
+    if (!logGroupId || !hitlRequestId || !userId || !ctaActionId) {
+      toast.error('Missing required data for sending email');
+
+      return;
+    }
+
+    const payload = {
+      log_group_id: logGroupId,
+      hitl_request_id: hitlRequestId,
+      submitted_by: userId,
+      responses: [
+        {
+          action_id: ctaActionId,
+          values: [htmlString],
+          cta_component_type: CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
+        },
+      ],
+    };
+
+    emitHITLAction({ processId, activityRunId: activityId, payload })
+      .unwrap()
+      .then(() => {
+        toast.success('Email sent successfully');
+        onClose();
+      })
+      .catch((error) => {
+        toast.error(error.data.message ?? 'Something went wrong');
+      });
   };
 
   const handleDelete = () => {
@@ -35,6 +78,7 @@ const EmailEditorArtifact = ({ emailArtifact, artifactId, processId }: EmailEdit
           attachments={emailArtifact?.attachments}
           processId={processId}
           artifactId={artifactId}
+          isEmailSending={isLoading}
         />
       </div>
     </div>

@@ -1,7 +1,9 @@
+import type { EmitHITLActionPayload } from '@/modules/process/process.types';
 import { EmailArtifactsResponseType, EmailAttachmentType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
 export type ToolbarConfig = {
+  id: string;
   icon?: string;
   onClick?: defaultFnType;
   showDivider?: boolean;
@@ -29,10 +31,14 @@ export type BodyAndFooterProps = {
   attachments: EmailAttachmentType[];
   processId: string;
   artifactId: string;
+  isEmailSending: boolean;
 };
 
 export type EmailEditorArtifactProps = {
   emailArtifact: EmailArtifactsResponseType;
   artifactId: string;
   processId: string;
+  activityId: string;
+  emitHITLActionPayload: EmitHITLActionPayload;
+  onClose: defaultFnType;
 };

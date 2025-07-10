@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { useParams } from 'next/navigation';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -11,12 +10,10 @@ import type { BrowserArtifactsResponseType } from '@/types/api/processApi.types'
 interface BrowserArtifactProps {
   browserArtifact: BrowserArtifactsResponseType;
   artifactId: string;
+  processId: string;
 }
 
-const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, artifactId }) => {
-  const params = useParams();
-  const processId = params?.processId as string;
-
+const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, artifactId, processId }) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
