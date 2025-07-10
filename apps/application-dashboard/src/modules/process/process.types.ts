@@ -1,5 +1,5 @@
 import { EmailArtifactsResponseType, type MissingFieldItemType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
@@ -57,6 +57,7 @@ export enum CTA_COMPONENT_TYPE {
   BUTTON = 'BUTTON',
   OVERRIDE_MISSING_FIELDS_BUTTON = 'OVERRIDE_MISSING_FIELDS_BUTTON',
   REQUIRED_MISSING_FIELDS_BUTTON = 'REQUIRED_MISSING_FIELDS_BUTTON',
+  EMAIL_DRAFT_SEND_BUTTON = 'EMAIL_DRAFT_SEND_BUTTON',
 }
 
 export enum PDF_DATASET_TAB {
@@ -82,6 +83,9 @@ export type EmailArtifactWrapperProps = {
   artifactData: EmailArtifactsResponseType;
   artifactId: string;
   processId: string;
+  activityId: string;
+  emitHITLActionPayload: EmitHITLActionPayload;
+  onClose: defaultFnType;
 };
 
 export interface HandleShowArtifactsProps extends EmitHITLActionPayload {

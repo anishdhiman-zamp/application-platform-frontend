@@ -238,11 +238,12 @@
 
 .missing-focus {
   border: 1.5px solid #e10909 !important;
-  border-radius: 4px;
+  border-radius: 4px !important;
 }
 
 .missing-focus:has(.ag-input-field-input) {
   border: 1.5px solid #2546f5 !important;
+  border-radius: 4px !important;
 }
 
 .missing-focus .ag-fill-handle {
