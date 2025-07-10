@@ -187,7 +187,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                 <span className={cn('f-12-500 ml-1.5', { 'text-GRAY_1000': activeTab === tab.dataset_id })}>
                   {tab.dataset_name}
                 </span>
-                {requiredCount > 0 && <span className='f-11-500 text-RED_800 ml-1'>{requiredCount}</span>}
+                <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
+                  {requiredCount}
+                </span>
               </TabsTrigger>
             );
           })}
@@ -219,7 +221,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       <TabsContent key={activeTab} value={activeTab} className='mt-0 h-full w-full'>
         <DatasetArtifact
           id={activeTab}
-          updateBreadcrumb={false}
           drilldownFilters={
             filters?.dataset_to_filter_map?.[activeTab]?.filters ?? missingFields?.[activeTab]?.filters ?? {}
           }
