@@ -1,5 +1,6 @@
 import { type FC, memo, type RefObject, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, RevealElement } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { LOG_STATUS } from 'modules/process/process.types';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -83,18 +84,38 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
     >
       <RevealElement className='w-full'>
         <AccordionItem value={ACCORDION_ITEM} className='border-GRAY_100 w-full rounded-t-md rounded-br-md border'>
-          <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5'>
-            <motion.span
-              className='text-wrap break-words'
-              key={thoughtSteps?.at(-1)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {thoughtSteps?.length > 0 ? thoughtSteps?.at(-1) : 'See reasoning'}
-            </motion.span>
-          </AccordionTrigger>
-          <AccordionContent className='border-GRAY_100 f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4 [&::-webkit-scrollbar]:hidden'>
+          {/* {isLastLog && status === LOG_STATUS.LOADING && (
+            <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5'>
+              <motion.span
+                className='text-wrap break-words'
+                key={thoughtSteps?.at(-1)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {thoughtSteps?.length > 0 ? thoughtSteps?.at(-1) : 'See reasoning'}
+              </motion.span>
+            </AccordionTrigger>
+          )} */}
+          {status !== LOG_STATUS.LOADING && isLastLog && (
+            <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5'>
+              <motion.span
+                className='text-wrap break-words'
+                key={thoughtSteps?.at(-1)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {thoughtSteps?.length > 0 ? thoughtSteps?.at(-1) : 'See reasoning'}
+              </motion.span>
+            </AccordionTrigger>
+          )}
+          <AccordionContent
+            className={cn(
+              'f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4 [&::-webkit-scrollbar]:hidden',
+              isLastLog && status === LOG_STATUS.LOADING && 'border-transparent',
+            )}
+          >
             {thoughtSteps?.map((step, index) => (
               <ThoughtStepItem
                 key={index}
