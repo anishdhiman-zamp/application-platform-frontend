@@ -100,7 +100,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
                     delay: 0.1,
                   }}
                 >
-                  {status === LOG_STATUS.LOADING ? thoughtSteps?.at(-1) : 'See reasoning'}
+                  See reasoning
                 </motion.span>
               </AccordionTrigger>
             )}
