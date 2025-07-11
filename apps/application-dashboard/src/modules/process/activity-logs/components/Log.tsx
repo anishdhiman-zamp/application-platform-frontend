@@ -41,6 +41,10 @@ const Log: FC<LogProps> = ({
     updated_at,
     log_group_id,
   } = data;
+  const isLogsLoading = status === LOG_STATUS.LOADING;
+  const isLogsIncomplete = [LOG_STATUS.LOADING, LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(
+    status as LOG_STATUS,
+  );
   const lineRef = useRef<HTMLDivElement>(null);
   const shimmerControlRef = useRef<defaultFnType | null>(null);
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
@@ -152,8 +156,7 @@ const Log: FC<LogProps> = ({
 
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
-      {![LOG_STATUS.LOADING, LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(status as LOG_STATUS) &&
-      sender_type === SENDER_TYPE.SYSTEM ? (
+      {!isLogsIncomplete && sender_type === SENDER_TYPE.SYSTEM ? (
         <motion.div
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
@@ -167,7 +170,7 @@ const Log: FC<LogProps> = ({
             showAnimation={staggerAnimationBegin}
           />
         </motion.div>
-      ) : status === LOG_STATUS.LOADING && sender_type === SENDER_TYPE.SYSTEM ? (
+      ) : isLogsLoading && sender_type === SENDER_TYPE.SYSTEM ? (
         <div className='w-[60px] shrink-0' />
       ) : (
         <div className='flex w-[60px] shrink-0 items-start justify-start'>
@@ -219,7 +222,7 @@ const Log: FC<LogProps> = ({
         </div>
         {/* body */}
         <motion.div
-          className='bg-yellow-10 flex w-full origin-top flex-col items-start justify-start pb-10'
+          className='flex w-full origin-top flex-col items-start justify-start pb-10'
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
         >
@@ -227,7 +230,7 @@ const Log: FC<LogProps> = ({
             text={message}
             className={'f-13-450 w-full text-left break-words'}
             delay={0.2}
-            shimmer={status === LOG_STATUS.LOADING}
+            shimmer={isLogsLoading}
             shimmerControlRef={shimmerControlRef}
             isLastLogOfDate={isLastLogOfDate}
             senderType={sender_type}

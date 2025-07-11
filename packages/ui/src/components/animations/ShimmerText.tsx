@@ -14,7 +14,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { FC, useEffect, useRef } from 'react';
 import { COLORS } from '../../constants/constants';
 
-interface ShimmerEffectProps {
+interface ShimmerTextProps {
   text: string;
   shimmerControlRef?: React.RefObject<(() => void) | null>; // for animation callback
   shimmerTextClassName?: string;
@@ -25,7 +25,7 @@ interface ShimmerEffectProps {
   animationDuration?: number; // animation duration (in ms)
 }
 
-export const ShimmerText: FC<ShimmerEffectProps> = ({
+export const ShimmerText: FC<ShimmerTextProps> = ({
   text,
   shimmerControlRef,
   shimmerTextClassName,
@@ -84,6 +84,7 @@ export const ShimmerText: FC<ShimmerEffectProps> = ({
 
   return (
     <div className='relative inline-block leading-none'>
+      {/* font-size and leading should be same, eg. f-13-450 and leading-[13px] */}
       <span className={cn('f-13-450 block leading-[13px]', baseTextClassName)} style={{ color: baseColor }}>
         {text}
       </span>

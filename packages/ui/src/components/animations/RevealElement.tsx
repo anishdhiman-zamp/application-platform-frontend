@@ -50,7 +50,7 @@ export const RevealElement = ({ className, children }: RevealElementProps) => {
 
         // Create a new props object with the test ID
         const childProps = {
-          ...(child.props as Record<string, unknown>),
+          ...(child.props as React.HTMLAttributes<HTMLElement>),
           'data-testid': `reveal-element-content-${idx}`,
         };
 
@@ -62,7 +62,7 @@ export const RevealElement = ({ className, children }: RevealElementProps) => {
             data-testid='reveal-element-child'
             data-child-index={idx}
           >
-            {cloneElement(child, childProps)}
+            {cloneElement(child as ReactElement<typeof child.props>, childProps)}
           </motion.div>
         );
       })}

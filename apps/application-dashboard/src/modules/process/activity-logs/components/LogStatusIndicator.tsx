@@ -41,7 +41,7 @@ const LogStatusIndicator = ({
   useEffect(() => {
     if (!isInView || !showBlueStrokeRef || !isLoadingShape || !shouldRotate) return;
 
-    if (showBlueStrokeRef && status === LOG_STATUS.LOADING) {
+    if (status === LOG_STATUS.LOADING) {
       showBlueStrokeRef.current = (show) => {
         setShowBlueStroke(show);
         if (show) setRotation((prev) => prev + 90);

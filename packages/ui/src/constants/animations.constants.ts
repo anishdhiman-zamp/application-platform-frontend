@@ -1,5 +1,5 @@
 export const REVEAL_ELEMENT_PARENT_MOTION_VARIANTS = {
-  hidden: { opacity: 1 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {

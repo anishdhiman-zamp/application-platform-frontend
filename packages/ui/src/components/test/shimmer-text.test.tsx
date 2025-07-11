@@ -5,8 +5,7 @@ import { ShimmerText } from '../animations';
 
 // Mock the Web Animations API
 beforeEach(() => {
-  // @ts-ignore
-  window.Element.prototype.animate = jest.fn().mockImplementation(() => ({
+  (window.Element.prototype.animate as jest.Mock) = jest.fn().mockImplementation(() => ({
     cancel: jest.fn(),
     onfinish: null,
     addEventListener: jest.fn(),
@@ -16,7 +15,7 @@ beforeEach(() => {
 
   // Mock getComputedStyle
   const mockGetComputedStyle = jest.fn().mockImplementation((element: HTMLElement) => {
-    const style: Record<string, any> = {
+    const style: Record<string, string | (() => string)> = {
       color: element.style.color || 'rgb(192, 192, 192)', // Use actual inline style if set
       backgroundImage: '',
       backgroundSize: '200% 100%',
@@ -84,7 +83,7 @@ describe('ShimmerText', () => {
     it('respects custom animation duration', () => {
       const duration = 1000;
       render(<ShimmerText text='Test' animationDuration={duration} />);
-      expect(window.Element.prototype.animate).toHaveBeenCalledWith(
+      expect(window.Element.prototype.animate as jest.Mock).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({
           duration,
@@ -144,7 +143,7 @@ describe('ShimmerText', () => {
   // Test case 6: Ref control
   describe('Ref Control', () => {
     it('exposes animation control via ref', () => {
-      const ref = React.createRef<any>();
+      const ref = React.createRef<(() => void) | null>();
       render(<ShimmerText text='Test' shimmerControlRef={ref} />);
       expect(typeof ref.current).toBe('function');
     });
