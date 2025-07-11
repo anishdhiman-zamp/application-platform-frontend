@@ -73,7 +73,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
           }
         })
         .catch((error) => {
-          toast.error(error.data.message ?? 'Something went wrong');
+          toast.error(error?.data?.message ?? 'Something went wrong');
         });
     }
   };
