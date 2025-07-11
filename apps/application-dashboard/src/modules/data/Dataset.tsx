@@ -460,7 +460,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           return;
       }
     }
-  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized]);
+  }, [filterConfigData?.data, filters, id, drilldownFilters, isFetching, isUninitialized, currentUserHasEditAccess]);
 
   useEffect(() => {
     if (gridReady && selectedFilters) {

@@ -102,6 +102,8 @@ export const getColumnMinWidth = (
 };
 
 const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
+  if (!missingFields?.length) return true;
+
   const rowId = params.data?.id;
 
   return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
@@ -137,13 +139,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       field: column?.column,
       hide: column?.metadata?.is_hidden,
       cellRendererParams: column?.metadata,
-      editable: (params: MapAny) => {
-        return !!(
+      editable: (params: MapAny) =>
+        !!(
           column?.metadata?.is_editable &&
           currentUserHasEditAccess &&
           checkIsCellEditable(params, missingFields || [])
-        );
-      },
+        ),
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,
@@ -185,6 +186,17 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
 
     if (column?.metadata?.config?.value_format) {
       formattedColumn = { ...formattedColumn, valueFormatter: getValueFormatter(column) };
+    }
+
+    if (column?.type === FILTER_TYPES.DATE_RANGE && !column?.metadata?.config?.value_format) {
+      formattedColumn = {
+        ...formattedColumn,
+        valueFormatter: (params: ValueFormatterParams) =>
+          getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy },
+            params.value,
+          ) as string,
+      };
     }
 
     if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {

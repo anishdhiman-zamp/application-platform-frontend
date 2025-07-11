@@ -56,7 +56,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
         setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
       })
       .catch((error) => {
-        toast.error(error.data.message ?? 'Something went wrong');
+        toast.error(error?.data?.message ?? 'Something went wrong');
         setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
       });
   };
