@@ -431,10 +431,12 @@ export const getValueFormatter = (
   return valueFormatter;
 };
 
-export const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
+export const getFormattedDate = (valueFormat: ValueFormatType, value: string | number) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
-  const date = new Date(createDateObjectFromUTCString(value));
+
+  // expect value to be in microseconds when it is a number
+  const date = typeof value === 'number' ? new Date(value / 1000) : new Date(createDateObjectFromUTCString(value));
 
   return isValid(date) ? format(date, validDateFormat) : value;
 };
