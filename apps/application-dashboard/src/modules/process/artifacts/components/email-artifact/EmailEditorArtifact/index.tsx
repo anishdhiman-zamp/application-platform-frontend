@@ -55,7 +55,7 @@ const EmailEditorArtifact = ({
         onClose();
       })
       .catch((error) => {
-        toast.error(error.data.message ?? 'Something went wrong');
+        toast.error(error?.data?.message ?? 'Something went wrong');
       });
   };
 

@@ -4,6 +4,7 @@ import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArti
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
+import PdfArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
@@ -25,11 +26,6 @@ import type {
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
-
-const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
-  ssr: false,
-  loading: () => <ArtifactLoader />,
-});
 
 const BrowserArtifact = dynamic(
   () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
@@ -133,6 +129,7 @@ const Artifacts = ({
                 artifactId={id}
                 processId={processId}
                 key={id}
+                isArtifactLoading={isFetching}
               />
             </TabsContent>
           </>
@@ -172,6 +169,7 @@ const Artifacts = ({
             pdfArtifact={artifactData as PdfArtifactsResponseType}
             artifactId={id}
             processId={processId}
+            isArtifactLoading={isFetching}
             key={id}
           />
         );
@@ -191,6 +189,10 @@ const Artifacts = ({
     }
   }, [artifactType, artifactData, id, filters]);
 
+  const showArtifactLoader = useMemo(() => {
+    return isFetching && artifactType !== ARTIFACT_TYPE.PDF && activeTab !== PDF_DATASET_TAB.PDF;
+  }, [isFetching, artifactType, activeTab]);
+
   return (
     <div className='animate-fade-in relative h-full w-full'>
       <Tabs
@@ -207,7 +209,7 @@ const Artifacts = ({
           onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
         />
         <CommonWrapper
-          isLoading={isFetching}
+          isLoading={showArtifactLoader}
           loader={<ArtifactLoader />}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isError}

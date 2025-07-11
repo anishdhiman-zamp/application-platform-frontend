@@ -1,16 +1,15 @@
-import { FC, memo, useEffect, useRef, useState } from 'react';
+import { FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Skeleton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
 import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 
@@ -29,9 +28,10 @@ interface PdfArtifactProps {
   pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   artifactId: string;
   processId: string;
+  isArtifactLoading: boolean;
 }
 
-const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId }) => {
+const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId, isArtifactLoading }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState(1);
@@ -47,6 +47,7 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId 
     data: signedUrl,
     isLoading: isSignedUrlLoading,
     isError: isSignedUrlError,
+    isUninitialized: isSignedUrlUninitialized,
     refetch: refetchSignedUrl,
   } = useGetSignedUrlByArtifactIdQuery(
     {
@@ -139,17 +140,17 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId 
     return () => observer.current?.disconnect();
   }, [numPages]);
 
+  const commonLoading = useMemo(() => {
+    return isSignedUrlLoading || isArtifactLoading || isSignedUrlUninitialized;
+  }, [isSignedUrlLoading, isArtifactLoading, isSignedUrlUninitialized]);
+
   return (
     <CommonWrapper
-      isLoading={isSignedUrlLoading}
+      isLoading={commonLoading}
       isError={isSignedUrlError}
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={
-        <div className='flex h-full w-full items-center justify-center'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
-        </div>
-      }
+      loader={<ArtifactLoader />}
       className='bg-BG_GRAY_1 h-full w-full'
     >
       <div

@@ -102,6 +102,8 @@ export const getColumnMinWidth = (
 };
 
 const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
+  if (!missingFields?.length) return true;
+
   const rowId = params.data?.id;
 
   return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
