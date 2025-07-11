@@ -188,6 +188,17 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       formattedColumn = { ...formattedColumn, valueFormatter: getValueFormatter(column) };
     }
 
+    if (column?.type === FILTER_TYPES.DATE_RANGE && !column?.metadata?.config?.value_format) {
+      formattedColumn = {
+        ...formattedColumn,
+        valueFormatter: (params: ValueFormatterParams) =>
+          getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy },
+            params.value,
+          ) as string,
+      };
+    }
+
     if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
       const tagColorMap: MapAny = {};
 
