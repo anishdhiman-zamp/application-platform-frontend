@@ -139,13 +139,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       field: column?.column,
       hide: column?.metadata?.is_hidden,
       cellRendererParams: column?.metadata,
-      editable: (params: MapAny) => {
-        return !!(
+      editable: (params: MapAny) =>
+        !!(
           column?.metadata?.is_editable &&
           currentUserHasEditAccess &&
           checkIsCellEditable(params, missingFields || [])
-        );
-      },
+        ),
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,
