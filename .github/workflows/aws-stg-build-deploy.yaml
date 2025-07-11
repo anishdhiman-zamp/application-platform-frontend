@@ -44,7 +44,7 @@ jobs:
           echo "SLACK_WEBHOOK_URL=STG_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
           echo "ECR_REPO=zamp-stg-us-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
-          echo "HELM_REPOSITORY=zamp-stg-us-helmcharts-latest" >> $GITHUB_OUTPUT
+          echo "HELM_REPOSITORY=zamp-stg-us-helmcharts" >> $GITHUB_OUTPUT
           echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
           echo "EKS_CLUSTER=zamp-stg-us-cluster" >> $GITHUB_OUTPUT
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
