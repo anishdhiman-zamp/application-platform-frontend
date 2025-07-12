@@ -701,39 +701,14 @@ export const updateLocalStorage = (columnOrderingVisibility: ColumnOrderingVisib
   );
 };
 
-export const extractDatasetsFromUrl = (url: string): DatasetUrlDataType => {
-  try {
-    const queryString = url?.split('?')?.[1];
-
-    if (!queryString) {
-      throw new Error('No query string found in URL.');
-    }
-
-    const searchParams = new URLSearchParams(queryString);
-    const encodedDatasets = searchParams.get('datasets');
-
-    if (!encodedDatasets) {
-      throw new Error('No "datasets" parameter found in URL.');
-    }
-
-    const decodedDatasets = decodeURIComponent(encodedDatasets);
-
-    return JSON.parse(decodedDatasets);
-  } catch (error) {
-    console.error('Failed to extract datasets from URL:', (error as Error)?.message);
-
-    return {};
-  }
-};
-
-export const parseDatasets = (url: string, datasetIds: string[]): DatasetTabType[] => {
-  const datasets = extractDatasetsFromUrl(url);
-
-  return datasetIds?.map((id) => ({
-    id,
-    title: datasets[id]?.title || '',
-    filters: datasets[id]?.filters || {},
+export const parseDatasets = (datasets: DatasetUrlDataType): DatasetTabType[] => {
+  const returnDatasets = Object.entries(datasets).map(([key, value]) => ({
+    id: key,
+    title: value?.title || '',
+    filters: value?.filters || {},
   }));
+
+  return returnDatasets;
 };
 
 /**

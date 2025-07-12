@@ -1,79 +1,71 @@
+'use client';
+
 import { memo, useEffect, useMemo, useState } from 'react';
+import type { DatasetUrlDataType } from 'modules/data/data.types';
 import { formatUrlFilters, parseDatasets } from 'modules/data/data.utils';
 import DatasetById from 'modules/data/Dataset';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { MenuItem, TAB_TYPES } from 'types/common/components';
+import type { FilterConfig } from 'modules/widgets/Pivot/pivot.types';
+import { useSearchParams } from 'next/navigation';
+import { TAB_TYPES } from 'types/common/components';
 import { Tabs } from 'components/common/tabs/Tabs';
 
-const DrilldownMultiDataset = ({ datasetIds }: { datasetIds: string }) => {
-  const pathname = usePathname();
+interface Dataset {
+  id: string;
+  title: string;
+  filters?: Record<string, FilterConfig>;
+}
+
+const DrilldownMultiDataset = () => {
   const searchParams = useSearchParams();
+  const datasets = searchParams?.get('datasets');
+  const [selectedTab, setSelectedTab] = useState<string>('');
 
-  // Get the query string from searchParams
-  const queryString = searchParams ? searchParams.toString() : '';
+  const datasetArray = useMemo(() => {
+    if (!datasets) return [];
 
-  // Reconstruct asPath
-  const currentAsPath = `${pathname}${queryString ? '?' : ''}${queryString}`;
-
-  const [selectedTab, setSelectedTab] = useState<string>();
-
-  const datasetsArray = useMemo(
-    () => parseDatasets(currentAsPath || '', datasetIds?.split(',')),
-    [currentAsPath, datasetIds],
-  );
+    return parseDatasets(JSON.parse(datasets) as DatasetUrlDataType);
+  }, [datasets]);
 
   const tabs = useMemo(
     () =>
-      datasetsArray.map((tab) => ({
-        value: tab.id,
-        label: tab.title,
-      })) ?? [],
-    [datasetsArray],
+      datasetArray.map((dataset: Dataset) => ({
+        value: dataset?.id,
+        label: dataset?.title,
+      })),
+    [datasetArray],
   );
 
-  const currentTabIndex = useMemo(() => {
-    return tabs.findIndex((val) => (val as MenuItem).value === selectedTab);
-  }, [selectedTab, tabs]);
-
-  const handleTabSelect = (selected?: MenuItem) => {
-    if (!selected?.value || !selected.label) return;
-    setSelectedTab(selected.value as string);
-  };
+  const selectedDataset = useMemo(
+    () => datasetArray?.find((ds: Dataset) => ds?.id === selectedTab),
+    [datasetArray, selectedTab],
+  );
 
   useEffect(() => {
-    if (tabs?.length > 0) {
-      setSelectedTab(tabs[0].value as string);
-    }
-  }, [tabs]);
+    if (tabs?.length && !selectedTab) setSelectedTab(tabs[0]?.value as string);
+  }, [tabs, selectedTab]);
 
   return (
     <div className='h-full'>
       <div className='bg-BG_GRAY_2 border-BORDER_GRAY_400 rounded-tl-xl border-b p-3'>
-        {tabs?.length > 1 && (
-          <Tabs
-            list={tabs}
-            id='drilldown-tabs'
-            onSelect={handleTabSelect}
-            customSelectedIndex={currentTabIndex >= 0 ? currentTabIndex : 0}
-            type={TAB_TYPES.OUTLINE}
-            tabItemSelectedStyle='bg-white'
-          />
-        )}
+        <Tabs
+          list={tabs}
+          id='drilldown-tabs'
+          onSelect={(tab) => setSelectedTab(tab?.value as string)}
+          type={TAB_TYPES.OUTLINE}
+          tabItemSelectedStyle='bg-white'
+        />
       </div>
-      {selectedTab && (
+
+      {selectedTab && selectedDataset && (
         <DatasetById
           key={selectedTab}
           id={selectedTab}
           isDrilldown
-          drilldownFilters={formatUrlFilters(
-            JSON.stringify(datasetsArray.find((ds) => ds.id === selectedTab)?.filters),
-          )}
+          drilldownFilters={formatUrlFilters(JSON.stringify(selectedDataset.filters))}
         />
       )}
     </div>
   );
 };
-
-DrilldownMultiDataset.displayName = 'DrilldownMultiDataset';
 
 export default memo(DrilldownMultiDataset);

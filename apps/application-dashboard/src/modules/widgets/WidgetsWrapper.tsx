@@ -130,10 +130,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
   const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
     if (datasets?.length > 0) {
-      const path = getPageDrilldownMultiRoute(
-        params?.pageId as string,
-        datasets?.map((dataset) => dataset?.dataset_id),
-      );
+      const path = getPageDrilldownMultiRoute(params?.pageId as string);
 
       const encodedFilters = encodeURIComponent(JSON.stringify(filters));
 
