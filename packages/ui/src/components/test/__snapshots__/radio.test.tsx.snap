@@ -1,0 +1,245 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RadioGroup Component - Functional Tests matches snapshot for default radio group 1`] = `
+<div
+  aria-required="false"
+  class="grid gap-2"
+  data-testid="radio-group"
+  dir="ltr"
+  role="radiogroup"
+  style="outline: none;"
+  tabindex="0"
+>
+  <button
+    aria-checked="true"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="checked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="1"
+  >
+    <span
+      class="flex items-center justify-center"
+      data-state="checked"
+    >
+      <svg
+        class="lucide lucide-circle h-2 w-2 fill-current text-current"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
+    </span>
+  </button>
+  <button
+    aria-checked="false"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="unchecked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="2"
+  />
+</div>
+`;
+
+exports[`RadioGroup Component - Functional Tests matches snapshot for disabled radio group 1`] = `
+<div
+  aria-required="false"
+  class="grid gap-2"
+  data-disabled=""
+  data-testid="radio-group"
+  dir="ltr"
+  role="radiogroup"
+  style="outline: none;"
+  tabindex="-1"
+>
+  <button
+    aria-checked="true"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-disabled=""
+    data-radix-collection-item=""
+    data-state="checked"
+    disabled=""
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="1"
+  >
+    <span
+      class="flex items-center justify-center"
+      data-disabled=""
+      data-state="checked"
+    >
+      <svg
+        class="lucide lucide-circle h-2 w-2 fill-current text-current"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
+    </span>
+  </button>
+  <button
+    aria-checked="false"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-disabled=""
+    data-radix-collection-item=""
+    data-state="unchecked"
+    disabled=""
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="2"
+  />
+</div>
+`;
+
+exports[`RadioGroup Component - Functional Tests matches snapshot for radio group with custom classes 1`] = `
+<div
+  aria-required="false"
+  class="grid gap-2 custom-group"
+  data-testid="radio-group"
+  dir="ltr"
+  role="radiogroup"
+  style="outline: none;"
+  tabindex="0"
+>
+  <button
+    aria-checked="true"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 custom-radio"
+    data-radix-collection-item=""
+    data-state="checked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="1"
+  >
+    <span
+      class="flex items-center justify-center"
+      data-state="checked"
+    >
+      <svg
+        class="lucide lucide-circle h-2 w-2 fill-current text-current"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
+    </span>
+  </button>
+  <button
+    aria-checked="false"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="unchecked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="2"
+  />
+</div>
+`;
+
+exports[`RadioGroup Component - Functional Tests matches snapshot for radio group with selected state 1`] = `
+<div
+  aria-required="false"
+  class="grid gap-2"
+  data-testid="radio-group"
+  dir="ltr"
+  role="radiogroup"
+  style="outline: none;"
+  tabindex="0"
+>
+  <button
+    aria-checked="false"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="unchecked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="1"
+  />
+  <button
+    aria-checked="true"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="checked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="2"
+  >
+    <span
+      class="flex items-center justify-center"
+      data-state="checked"
+    >
+      <svg
+        class="lucide lucide-circle h-2 w-2 fill-current text-current"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+      </svg>
+    </span>
+  </button>
+  <button
+    aria-checked="false"
+    class="text-gray-1000 ring-offset-background focus-visible:ring-ring aspect-square h-3.5 w-3.5 cursor-pointer rounded-full border border-gray-400 focus:outline-hidden focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+    data-radix-collection-item=""
+    data-state="unchecked"
+    role="radio"
+    tabindex="-1"
+    type="button"
+    value="3"
+  />
+</div>
+`;

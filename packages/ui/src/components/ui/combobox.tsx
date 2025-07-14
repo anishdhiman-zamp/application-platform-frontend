@@ -77,7 +77,7 @@ export function Combobox({
                 {optionsLoading && (
                   <div className='space-y-2'>
                     {Array.from({ length: 10 }).map((_, index) => (
-                      <Skeleton key={index} className='h-8 w-full' />
+                      <Skeleton key={index} className='h-8 w-full' data-testid='skeleton' />
                     ))}
                   </div>
                 )}

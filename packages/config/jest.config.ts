@@ -21,6 +21,8 @@ const config: Config = {
 
   coverageProvider: 'v8',
 
+  coverageReporters: ['text', 'lcov', 'html', 'json'],
+
   moduleDirectories: ['node_modules', 'src'],
 
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],

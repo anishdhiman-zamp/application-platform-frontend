@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dialog Component - Critical Snapshot Tests matches snapshot for basic dialog 1`] = `
+<button
+  aria-controls="radix-«r1a»"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  data-state="closed"
+  type="button"
+>
+  Open
+</button>
+`;
+
+exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog with close button 1`] = `
+<button
+  aria-controls="radix-«r1g»"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  data-state="closed"
+  type="button"
+>
+  Open
+</button>
+`;
+
+exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog with header and footer 1`] = `
+<button
+  aria-controls="radix-«r1d»"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  data-state="closed"
+  type="button"
+>
+  Open
+</button>
+`;
+
+exports[`Dialog Component - Critical Snapshot Tests matches snapshot for large size 1`] = `
+<button
+  aria-controls="radix-«r1m»"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  data-state="closed"
+  type="button"
+>
+  Open
+</button>
+`;
+
+exports[`Dialog Component - Critical Snapshot Tests matches snapshot for small size 1`] = `
+<button
+  aria-controls="radix-«r1j»"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  data-state="closed"
+  type="button"
+>
+  Open
+</button>
+`;

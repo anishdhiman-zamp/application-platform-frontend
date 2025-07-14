@@ -1,10 +1,138 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 1`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
+>
+  default
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 2`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
+>
+  large
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 3`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-8 px-2 py-2 f-13-500"
+>
+  medium
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 4`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-7 px-3 f-12-500"
+>
+  small
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 5`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
+>
+  xsmall
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 6`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-5 rounded-sm px-0.5 py-1 f-11-500"
+>
+  xxsmall
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all sizes with default variant correctly 7`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 w-10"
+>
+  icon
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 1`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
+>
+  default
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 2`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+>
+  destructive
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 3`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
+>
+  outline
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 4`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-10 py-3 px-4 f-14-500"
+>
+  secondary
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 5`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
+>
+  ghost
+</button>
+`;
+
+exports[`Button Component - Critical Variant Tests renders all variants with default size correctly 6`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 py-3 px-4 f-14-500"
+>
+  link
+</button>
+`;
+
 exports[`Button Component - Functional Tests matches snapshot for default button 1`] = `
 <button
   class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
 >
   Snapshot
+</button>
+`;
+
+exports[`Button Component - Functional Tests matches snapshot for destructive variant 1`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
+>
+  Delete
+</button>
+`;
+
+exports[`Button Component - Functional Tests matches snapshot for icon size 1`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 w-10"
+>
+  🔍
+</button>
+`;
+
+exports[`Button Component - Functional Tests matches snapshot for outline variant 1`] = `
+<button
+  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
+>
+  Outline
 </button>
 `;
 
@@ -29,425 +157,5 @@ exports[`Button Component - Functional Tests matches snapshot when loading 1`] =
       d="M21 12a9 9 0 1 1-6.219-8.56"
     />
   </svg>
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
->
-  default
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 w-10"
->
-  default
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-10 py-3 px-4 f-14-500"
->
-  default
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-8 px-2 py-2 f-13-500"
->
-  default
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-7 px-3 f-12-500"
->
-  default
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  default
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="default" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-secondary hover:bg-primary/90 h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  default
-  -
-  xxsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
->
-  destructive
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 w-10"
->
-  destructive
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 py-3 px-4 f-14-500"
->
-  destructive
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-2 py-2 f-13-500"
->
-  destructive
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-7 px-3 f-12-500"
->
-  destructive
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  destructive
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="destructive" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  destructive
-  -
-  xxsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
->
-  ghost
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 w-10"
->
-  ghost
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
->
-  ghost
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 px-2 py-2 f-13-500"
->
-  ghost
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-7 px-3 f-12-500"
->
-  ghost
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  ghost
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="ghost" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  ghost
-  -
-  xxsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 py-3 px-4 f-14-500"
->
-  link
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 w-10"
->
-  link
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 py-3 px-4 f-14-500"
->
-  link
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-8 px-2 py-2 f-13-500"
->
-  link
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-7 px-3 f-12-500"
->
-  link
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  link
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="link" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  link
-  -
-  xxsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
->
-  outline
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-10"
->
-  outline
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-3 px-4 f-14-500"
->
-  outline
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2 py-2 f-13-500"
->
-  outline
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-3 f-12-500"
->
-  outline
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  outline
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="outline" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  outline
-  -
-  xxsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="default" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-10 py-3 px-4 f-14-500"
->
-  secondary
-  -
-  default
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="icon" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-10 w-10"
->
-  secondary
-  -
-  icon
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="large" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-10 py-3 px-4 f-14-500"
->
-  secondary
-  -
-  large
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="medium" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-8 px-2 py-2 f-13-500"
->
-  secondary
-  -
-  medium
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="small" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-7 px-3 f-12-500"
->
-  secondary
-  -
-  small
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="xsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-[26px] rounded-md px-2.5 py-1.5 f-11-500"
->
-  secondary
-  -
-  xsmall
-</button>
-`;
-
-exports[`Button Component - Snapshot Tests for variant & size renders variant="secondary" and size="xxsmall" correctly 1`] = `
-<button
-  class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-transparent text-primary border border-gray-400 hover:bg-secondary/80 h-5 rounded-sm px-0.5 py-1 f-11-500"
->
-  secondary
-  -
-  xxsmall
 </button>
 `;

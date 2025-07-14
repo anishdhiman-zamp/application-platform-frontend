@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Select component matches snapshot for default select 1`] = `
+<div>
+  <div
+    class="relative w-full"
+  >
+    <div
+      aria-controls="radix-«rn»"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      class="f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700"
+      data-slot="popover-trigger"
+      data-state="closed"
+      data-testid="select-trigger"
+      type="button"
+    >
+      <span
+        class="flex-1 truncate"
+      >
+        Snap
+      </span>
+      <svg
+        class="lucide lucide-chevron-down h-4 w-4 text-gray-900 opacity-50 transition-transform duration-200"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Select component matches snapshot for select with custom className 1`] = `
+<div>
+  <div
+    class="relative w-full custom-class"
+  >
+    <div
+      aria-controls="radix-«rp»"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      class="f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700"
+      data-slot="popover-trigger"
+      data-state="closed"
+      data-testid="select-trigger"
+      type="button"
+    >
+      <span
+        class="flex-1 truncate"
+      >
+        Custom Class
+      </span>
+      <svg
+        class="lucide lucide-chevron-down h-4 w-4 text-gray-900 opacity-50 transition-transform duration-200"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Select component matches snapshot for select with label 1`] = `
+<div>
+  <div
+    class="relative w-full"
+  >
+    <label
+      class="mb-1 block text-sm font-medium"
+    >
+      Test Label
+    </label>
+    <div
+      aria-controls="radix-«ro»"
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      class="f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700"
+      data-slot="popover-trigger"
+      data-state="closed"
+      data-testid="select-trigger"
+      type="button"
+    >
+      <span
+        class="flex-1 truncate"
+      >
+        Snap
+      </span>
+      <svg
+        class="lucide lucide-chevron-down h-4 w-4 text-gray-900 opacity-50 transition-transform duration-200"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;

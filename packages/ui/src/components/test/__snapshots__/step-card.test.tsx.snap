@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepCard matches snapshot with default layout 1`] = `
+<div
+  class="group/step-card relative flex items-start rounded-lg border-[0.5px] border-gray-500 bg-white"
+>
+  <div
+    class="absolute top-0 left-0 h-full w-6 rounded-l-lg bg-gray-100"
+  >
+    <div
+      class="bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
+    >
+      1
+    </div>
+  </div>
+  <div
+    class="ml-6 flex-1 p-5"
+  >
+    <p>
+      Snapshot content
+    </p>
+  </div>
+</div>
+`;
+
+exports[`StepCard matches snapshot with remove button and custom class 1`] = `
+<div
+  class="group/step-card relative flex items-start rounded-lg border-[0.5px] border-gray-500 bg-white extra-padding"
+>
+  <div
+    class="absolute -top-2.5 -right-2.5 z-1 h-5 w-5 cursor-pointer rounded-full border bg-white p-[2px] opacity-0 transition-opacity duration-300 group-hover/step-card:opacity-100"
+    data-testid="remove-button"
+  >
+    <svg
+      class="lucide lucide-x h-3.5 w-3.5 text-gray-900"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M18 6 6 18"
+      />
+      <path
+        d="m6 6 12 12"
+      />
+    </svg>
+  </div>
+  <div
+    class="absolute top-0 left-0 h-full w-6 rounded-l-lg bg-gray-100"
+  >
+    <div
+      class="bg-primary f-12-500 flex h-6 w-6 items-center justify-center rounded-tl-lg text-white"
+    >
+      5
+    </div>
+  </div>
+  <div
+    class="ml-6 flex-1 p-5"
+  >
+    <div>
+      More content
+    </div>
+  </div>
+</div>
+`;

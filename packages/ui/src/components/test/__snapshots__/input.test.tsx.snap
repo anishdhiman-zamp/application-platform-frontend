@@ -1,5 +1,93 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 1`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-14 f-17-400 border-input"
+    placeholder="xlarge size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 2`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-input"
+    placeholder="large size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 3`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input"
+    placeholder="medium size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 4`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-input"
+    placeholder="small size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 5`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-6 f-11-400 border-input"
+    placeholder="xsmall size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all sizes correctly 6`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-4 f-10-400 border-input"
+    placeholder="xxsmall size"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all variants correctly 1`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input"
+    placeholder="default variant"
+  />
+</div>
+`;
+
+exports[`Input Component - Critical Variant Tests renders all variants correctly 2`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-destructive"
+    placeholder="error variant"
+  />
+</div>
+`;
+
 exports[`Input Component - Functional Tests matches snapshot for default input 1`] = `
 <div
   class="relative flex items-center"
@@ -7,6 +95,28 @@ exports[`Input Component - Functional Tests matches snapshot for default input 1
   <input
     class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input"
     placeholder="Snapshot"
+  />
+</div>
+`;
+
+exports[`Input Component - Functional Tests matches snapshot for large size 1`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-input"
+    placeholder="Large Input"
+  />
+</div>
+`;
+
+exports[`Input Component - Functional Tests matches snapshot for small size 1`] = `
+<div
+  class="relative flex items-center"
+>
+  <input
+    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-input"
+    placeholder="Small Input"
   />
 </div>
 `;
@@ -40,27 +150,7 @@ exports[`Input Component - Functional Tests matches snapshot with icon 1`] = `
 </div>
 `;
 
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="large" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute left-6 w-6 h-6"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-input pl-16 pr-4.5"
-    placeholder="leading-large"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="medium" correctly 1`] = `
+exports[`Input Component - Icon Position Tests renders with leading icon correctly 1`] = `
 <div
   class="relative flex items-center"
 >
@@ -75,112 +165,12 @@ exports[`Input Component - Icon Position Tests renders with icon position="leadi
   </div>
   <input
     class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input pl-9 pr-2.5"
-    placeholder="leading-medium"
+    placeholder="Leading Icon"
   />
 </div>
 `;
 
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="small" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute left-3 w-4 h-4"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-input pl-9 pr-2"
-    placeholder="leading-small"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="xlarge" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute left-6 w-6 h-6"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-14 f-17-400 border-input pl-16 pr-4.5"
-    placeholder="leading-xlarge"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="xsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute left-2 w-3 h-3"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-6 f-11-400 border-input pl-6 pr-2"
-    placeholder="leading-xsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="leading" and size="xxsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute left-1.5 w-2 h-2"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-4 f-10-400 border-input pl-4 pr-1.5"
-    placeholder="leading-xxsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="large" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute right-6 w-6 h-6"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-input pl-16 pr-4.5"
-    placeholder="trailing-large"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="medium" correctly 1`] = `
+exports[`Input Component - Icon Position Tests renders with trailing icon correctly 1`] = `
 <div
   class="relative flex items-center"
 >
@@ -195,219 +185,7 @@ exports[`Input Component - Icon Position Tests renders with icon position="trail
   </div>
   <input
     class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input pl-9 pr-2.5"
-    placeholder="trailing-medium"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="small" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute right-3 w-4 h-4"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-input pl-9 pr-2"
-    placeholder="trailing-small"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="xlarge" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute right-6 w-6 h-6"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-14 f-17-400 border-input pl-16 pr-4.5"
-    placeholder="trailing-xlarge"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="xsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute right-2 w-3 h-3"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-6 f-11-400 border-input pl-6 pr-2"
-    placeholder="trailing-xsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Icon Position Tests renders with icon position="trailing" and size="xxsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <div
-    class="absolute right-1.5 w-2 h-2"
-  >
-    <span
-      data-testid="icon"
-    >
-      🔍
-    </span>
-  </div>
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-4 f-10-400 border-input pl-4 pr-1.5"
-    placeholder="trailing-xxsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="large" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-input"
-    placeholder="default-large"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="medium" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-input"
-    placeholder="default-medium"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="small" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-input"
-    placeholder="default-small"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="xlarge" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-14 f-17-400 border-input"
-    placeholder="default-xlarge"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="xsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-6 f-11-400 border-input"
-    placeholder="default-xsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="default" and size="xxsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-4 f-10-400 border-input"
-    placeholder="default-xxsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="large" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-12 f-16-400 border-destructive"
-    placeholder="error-large"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="medium" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-10 f-14-400 border-destructive"
-    placeholder="error-medium"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="small" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-8 f-12-400 border-destructive"
-    placeholder="error-small"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="xlarge" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-14 f-17-400 border-destructive"
-    placeholder="error-xlarge"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="xsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-6 f-11-400 border-destructive"
-    placeholder="error-xsmall"
-  />
-</div>
-`;
-
-exports[`Input Component - Snapshot Tests for variant & size renders variant="error" and size="xxsmall" correctly 1`] = `
-<div
-  class="relative flex items-center"
->
-  <input
-    class="p-3 flex w-full rounded-md border placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 bg-white [&:-webkit-autofill]:bg-white [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] file:border-0 file:bg-transparent file:text-sm file:font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50 h-4 f-10-400 border-destructive"
-    placeholder="error-xxsmall"
+    placeholder="Trailing Icon"
   />
 </div>
 `;

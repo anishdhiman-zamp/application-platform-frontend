@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Label matches snapshot 1`] = `
+<div>
+  <label
+    class="f-12-500 text-gray-900 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    for="test"
+  >
+    Test Label
+  </label>
+</div>
+`;

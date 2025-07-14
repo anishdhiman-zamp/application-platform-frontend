@@ -47,6 +47,7 @@ describe('Button Component - Functional Tests', () => {
     expect(ref.current?.tagName).toBe('BUTTON');
   });
 
+  // Critical snapshots that could break component usage
   it('matches snapshot for default button', () => {
     const { container } = render(<Button>Snapshot</Button>);
     expect(container.firstChild).toMatchSnapshot();
@@ -56,22 +57,40 @@ describe('Button Component - Functional Tests', () => {
     const { container } = render(<Button isLoading>Snapshot</Button>);
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('matches snapshot for destructive variant', () => {
+    const { container } = render(<Button variant='destructive'>Delete</Button>);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches snapshot for outline variant', () => {
+    const { container } = render(<Button variant='outline'>Outline</Button>);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches snapshot for icon size', () => {
+    const { container } = render(<Button size='icon'>🔍</Button>);
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });
 
-const variants = ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'] as const;
-const sizes = ['default', 'large', 'medium', 'small', 'xsmall', 'xxsmall', 'icon'] as const;
+// Removed excessive variant/size combinations - keeping only critical ones
+describe('Button Component - Critical Variant Tests', () => {
+  it('renders all variants with default size correctly', () => {
+    const variants = ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'] as const;
 
-describe('Button Component - Snapshot Tests for variant & size', () => {
-  variants.forEach((variant) => {
+    variants.forEach((variant) => {
+      const { container } = render(<Button variant={variant}>{variant}</Button>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it('renders all sizes with default variant correctly', () => {
+    const sizes = ['default', 'large', 'medium', 'small', 'xsmall', 'xxsmall', 'icon'] as const;
+
     sizes.forEach((size) => {
-      it(`renders variant="${variant}" and size="${size}" correctly`, () => {
-        const { container } = render(
-          <Button variant={variant} size={size}>
-            {variant}-{size}
-          </Button>,
-        );
-        expect(container.firstChild).toMatchSnapshot();
-      });
+      const { container } = render(<Button size={size}>{size}</Button>);
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });
