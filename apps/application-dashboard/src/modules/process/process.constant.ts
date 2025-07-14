@@ -223,7 +223,7 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
     animate: {
       opacity: 1,
       transition: {
-        duration: 0.3,
+        duration: 0.3, // 300ms speed from 0 to 1
         ease: 'easeOut',
       },
     },

@@ -1,4 +1,4 @@
-import { type FC, memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
@@ -42,9 +42,7 @@ const Log: FC<LogProps> = ({
     log_group_id,
   } = data;
   const isLogsLoading = status === LOG_STATUS.LOADING;
-  const isLogsIncomplete = [LOG_STATUS.LOADING, LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(
-    status as LOG_STATUS,
-  );
+  const staggerCompleteRef = useRef(false);
   const lineRef = useRef<HTMLDivElement>(null);
   const shimmerControlRef = useRef<defaultFnType | null>(null);
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
@@ -120,6 +118,10 @@ const Log: FC<LogProps> = ({
     strokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
   };
 
+  const handleLineHeightUpdate = useCallback(() => {
+    setLineHeight((prev) => prev + 1);
+  }, []);
+
   useEffect(() => {
     const stopStrokeShimmerLoopRef = { current: false };
 
@@ -156,28 +158,17 @@ const Log: FC<LogProps> = ({
 
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
-      {!isLogsIncomplete && sender_type === SENDER_TYPE.SYSTEM ? (
-        <motion.div
-          initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
-          animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
-        >
-          <LogMessageAnimation
-            text={formattedTime}
-            className={cn(
-              'f-12-450 text-GRAY_700 flex w-[60px] shrink-0 items-start justify-start text-left break-words whitespace-nowrap',
-            )}
-            delay={0.2}
-            showAnimation={staggerAnimationBegin}
-          />
-        </motion.div>
-      ) : isLogsLoading && sender_type === SENDER_TYPE.SYSTEM ? (
+      {isLogsLoading && sender_type === SENDER_TYPE.SYSTEM ? (
         <div className='w-[60px] shrink-0' />
       ) : (
         <div className='flex w-[60px] shrink-0 items-start justify-start'>
           <motion.div
             className='f-12-450 text-GRAY_700 origin-top whitespace-nowrap'
             initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
-            animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
+            animate={{
+              ...LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate,
+              opacity: !isLastLog || staggerAnimationBegin ? 1 : 0,
+            }}
           >
             {formattedTime}
           </motion.div>
@@ -232,9 +223,12 @@ const Log: FC<LogProps> = ({
             delay={0.2}
             shimmer={isLogsLoading}
             shimmerControlRef={shimmerControlRef}
-            isLastLogOfDate={isLastLogOfDate}
-            senderType={sender_type}
+            isLastLog={isLastLog}
             showAnimation={staggerAnimationBegin}
+            onStaggerComplete={() => {
+              staggerCompleteRef.current = true;
+              handleLineHeightUpdate();
+            }}
           />
 
           {thought_steps?.length > 0 && (
@@ -254,9 +248,14 @@ const Log: FC<LogProps> = ({
               handleShowArtifacts={handleShowArtifacts}
             />
           )}
-          {isSenderInfoVisible && (
-            <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />
-          )}
+          <motion.div
+            initial={{ opacity: isLastLog && !staggerCompleteRef.current ? 0 : 1 }}
+            animate={{ opacity: isLastLog && !staggerCompleteRef.current ? 0 : 1 }}
+          >
+            {isSenderInfoVisible && (
+              <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />
+            )}
+          </motion.div>
         </motion.div>
       </div>
     </div>

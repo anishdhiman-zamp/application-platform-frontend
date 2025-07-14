@@ -11,8 +11,9 @@ type LogMessageAnimationProps = {
   showAnimation?: boolean;
   shimmer?: boolean;
   shimmerControlRef?: React.RefObject<(() => void) | null>;
-  isLastLogOfDate?: boolean;
+  isLastLog?: boolean;
   senderType?: SENDER_TYPE;
+  onStaggerComplete?: () => void;
 };
 
 const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
@@ -22,17 +23,23 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
   showAnimation = true,
   shimmer = false,
   shimmerControlRef,
-  isLastLogOfDate = false,
-  senderType,
+  isLastLog = false,
+  onStaggerComplete,
 }) => {
-  const isSystemSender = senderType === SENDER_TYPE.SYSTEM;
-
-  if (shimmer && isSystemSender) {
+  if (shimmer) {
     return <ShimmerText text={text} shimmerControlRef={shimmerControlRef} />;
   }
 
-  if (isLastLogOfDate && isSystemSender && !shimmer) {
-    return <StaggerText text={text} showAnimation={showAnimation} delay={delay} className={className} />;
+  if (isLastLog && !shimmer) {
+    return (
+      <StaggerText
+        text={text}
+        showAnimation={showAnimation}
+        delay={delay}
+        className={className}
+        onStaggerAnimationComplete={onStaggerComplete}
+      />
+    );
   }
 
   return <p className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', className)}>{text}</p>;
