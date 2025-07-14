@@ -10,7 +10,6 @@ const config: Config = {
     '!src/**/*.{spec,test}.{js,jsx,ts,tsx}',
     '!src/**/*.mock.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/components/**/*.{js,jsx,ts,tsx}',
     '!src/apis/**/*.{js,jsx,ts,tsx}',
     '!src/types/**/*.{js,jsx,ts,tsx}',
     '!src/styles/**/*.{js,jsx,ts,tsx}',
@@ -63,6 +62,7 @@ const config: Config = {
         useESM: true,
         tsconfig: {
           jsx: 'react-jsx',
+          esModuleInterop: true,
         },
       },
     ],
