@@ -80,7 +80,7 @@ const Artifacts = ({
       artifact_ids: artifactId,
     },
     {
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: artifactType === ARTIFACT_TYPE.EMAIL,
       skip: !artifactId,
     },
   );

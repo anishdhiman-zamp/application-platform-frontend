@@ -1,12 +1,19 @@
 'use client';
-import { useState } from 'react';
+
+import { memo, useCallback, useEffect, useRef } from 'react';
 import BodyAndFooter from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/BodyAndFooter';
 import Header from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/Header';
-import { type EmailEditorArtifactProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
-import { useEmitHITLActionMutation } from '@/apis/processes';
+import type {
+  EmailEditorArtifactProps,
+  SENDER_HEADING_VALUES,
+} from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+import { useEmitHITLActionMutation, useUpdateArtifactMutation } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { useAppSelector } from '@/hooks/toolkit';
-import { CTA_COMPONENT_TYPE } from '@/modules/process/process.types';
+import { useEmailEditorState } from '@/modules/process/hooks/useEmailEditorState';
+import { ARTIFACT_TYPE, CTA_COMPONENT_TYPE, EMAIL_DATA_SECTION } from '@/modules/process/process.types';
+import type { EmailAttachmentType } from '@/types/api/processApi.types';
+import { debounce } from '@/utils/common';
 
 const EmailEditorArtifact = ({
   emailArtifact,
@@ -17,14 +24,53 @@ const EmailEditorArtifact = ({
   onClose,
 }: EmailEditorArtifactProps) => {
   const userId = useAppSelector((state) => state.user?.user?.user_id);
-  const [header, setHeader] = useState({
-    heading: emailArtifact.heading,
-    to_mail_ids: emailArtifact.to_mail_ids ?? [],
-    cc_mail_ids: emailArtifact.cc_mail_ids ?? [],
-    bcc_mail_ids: emailArtifact.bcc_mail_ids ?? [],
-  });
+  const isFirstRender = useRef(true);
+  const { emailData, updateSection } = useEmailEditorState(emailArtifact);
 
   const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+  const [updateArtifact] = useUpdateArtifactMutation();
+
+  const updateArtifactData = useCallback(
+    (data: typeof emailData) => {
+      if (!userId) return;
+
+      const payload = {
+        artifact_type: ARTIFACT_TYPE.EMAIL,
+        artifact_data: {
+          heading: data.header.heading,
+          body_html: data.content,
+          to_mail_ids: data.header.to_mail_ids,
+          cc_mail_ids: data.header.cc_mail_ids,
+          bcc_mail_ids: data.header.bcc_mail_ids,
+          attachments: data.attachments,
+          last_updated_by: {
+            id: userId,
+          },
+        },
+      };
+
+      updateArtifact({ processId, artifactId, payload })
+        .unwrap()
+        .catch((error) => {
+          toast.error(error?.data?.message ?? 'Something went wrong');
+        });
+    },
+    [artifactId, processId, userId],
+  );
+
+  const debouncedUpdateArtifact = useCallback(debounce(updateArtifactData, 1500), [updateArtifactData]);
+
+  const handleHeaderChange = (key: SENDER_HEADING_VALUES, value: string | string[] | EmailAttachmentType[]) => {
+    updateSection({ section: EMAIL_DATA_SECTION.HEADER, key, value });
+  };
+
+  const handleContentChange = (content: string) => {
+    updateSection({ section: EMAIL_DATA_SECTION.CONTENT, value: content });
+  };
+
+  const handleAttachmentsChange = (attachments: EmailAttachmentType[]) => {
+    updateSection({ section: EMAIL_DATA_SECTION.ATTACHMENTS, value: attachments });
+  };
 
   const handleSend = (htmlString: string) => {
     const { logGroupId, hitlRequestId, ctaActionId } = emitHITLActionPayload;
@@ -63,26 +109,34 @@ const EmailEditorArtifact = ({
     console.log('delete');
   };
 
-  const handleChangeHeading = (key: string, value: string | string[]) => {
-    setHeader({ ...header, [key]: value });
-  };
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+
+      return;
+    }
+
+    debouncedUpdateArtifact(emailData);
+  }, [emailData, debouncedUpdateArtifact]);
 
   return (
     <div className='bg-bg-gray-2 h-[calc(100vh-110px)] overflow-y-auto p-5'>
       <div className='border-GRAY_500 rounded-xl border-[0.5px] bg-white'>
-        <Header onChange={handleChangeHeading} value={header} />
+        <Header value={emailData.header} onHeaderChange={handleHeaderChange} />
         <BodyAndFooter
-          initialContent={emailArtifact.body_html || `<p>${emailArtifact.body_plain_text}</p>`}
+          initialContent={emailData.content}
           onSend={handleSend}
           onDelete={handleDelete}
-          attachments={emailArtifact?.attachments}
+          attachments={emailData.attachments}
           processId={processId}
           artifactId={artifactId}
           isEmailSending={isLoading}
+          onContentChange={handleContentChange}
+          onAttachmentsChange={handleAttachmentsChange}
         />
       </div>
     </div>
   );
 };
 
-export default EmailEditorArtifact;
+export default memo(EmailEditorArtifact);

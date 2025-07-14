@@ -1,9 +1,12 @@
 import { type FC } from 'react';
 import { EmailInputToChips, Input } from '@zamp-platform/ui';
 import { SENDER_HEADINGS } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/constants';
-import { HeaderProps } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+import {
+  HeaderProps,
+  SENDER_HEADING_VALUES,
+} from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 
-const Header: FC<HeaderProps> = ({ onChange, value }) => {
+const Header: FC<HeaderProps> = ({ value, onHeaderChange }) => {
   return (
     <>
       <div className='px-4'>
@@ -14,8 +17,8 @@ const Header: FC<HeaderProps> = ({ onChange, value }) => {
                 <td>{heading.label}</td>
                 <td className='w-full'>
                   <EmailInputToChips
-                    value={value[heading.value as keyof typeof value] as string[]}
-                    onChange={(emails) => onChange(heading.value, emails)}
+                    value={value[heading.value]}
+                    onChange={(emails) => onHeaderChange(heading.value, emails)}
                   />
                 </td>
               </tr>
@@ -27,7 +30,7 @@ const Header: FC<HeaderProps> = ({ onChange, value }) => {
         <span className='f-13-500 text-gray-700'>Subject</span>
         <Input
           value={value.heading}
-          onChange={(e) => onChange('heading', e.target.value)}
+          onChange={(e) => onHeaderChange(SENDER_HEADING_VALUES.HEADING, e.target.value)}
           className='f-14-450 h-5 border-none p-0 focus:ring-0'
           wrapperClassName='flex-1'
         />

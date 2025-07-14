@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useLazyGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
@@ -10,12 +10,15 @@ const Attachments = ({
   attachments,
   processId,
   artifactId,
+  onChange,
 }: {
   attachments: EmailAttachmentType[];
   processId: string;
   artifactId: string;
+  onChange: (attachments: EmailAttachmentType[]) => void;
 }) => {
-  const [attachmentsCopy, setAttachmentsCopy] = useState<EmailAttachmentType[]>(attachments);
+  const initialAttachments = useMemo(() => attachments, [attachments]);
+  const [attachmentsCopy, setAttachmentsCopy] = useState<EmailAttachmentType[]>(initialAttachments);
   const [getSignedUrlByArtifactId] = useLazyGetSignedUrlByArtifactIdQuery();
   const handleAttachmentDownload = (fileId: string) => {
     if (!processId || !fileId) return;
@@ -35,7 +38,13 @@ const Attachments = ({
   };
 
   const handleDeleteAttachment = (fileId: string) => {
-    setAttachmentsCopy(attachmentsCopy.filter((attachment) => attachment.file_id !== fileId));
+    setAttachmentsCopy((prev) => {
+      const newAttachments = prev.filter((attachment) => attachment.file_id !== fileId);
+
+      onChange(newAttachments);
+
+      return newAttachments;
+    });
   };
 
   return (

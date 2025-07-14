@@ -143,7 +143,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     },
     {
       skip: !id,
-      refetchOnMountOrArgChange: true,
+      refetchOnMountOrArgChange: false,
     },
   );
 

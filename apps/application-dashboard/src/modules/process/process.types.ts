@@ -1,4 +1,8 @@
-import { EmailArtifactsResponseType, type MissingFieldItemType } from '@/types/api/processApi.types';
+import {
+  EmailArtifactsResponseType,
+  type EmailAttachmentType,
+  type MissingFieldItemType,
+} from '@/types/api/processApi.types';
 import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
@@ -118,3 +122,22 @@ export type MissingFieldsConfigType = Record<
     filters: MapAny;
   }
 >;
+
+export const enum EMAIL_DATA_SECTION {
+  HEADER = 'header',
+  CONTENT = 'content',
+  ATTACHMENTS = 'attachments',
+}
+
+export type EmailHeaderType = {
+  heading: string;
+  to_mail_ids: string[];
+  cc_mail_ids: string[];
+  bcc_mail_ids: string[];
+};
+
+export type EmailDataTypes = {
+  header: EmailHeaderType;
+  content: string;
+  attachments: EmailAttachmentType[];
+};

@@ -1,3 +1,5 @@
+import { SENDER_HEADING_VALUES } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
+
 export const FONT_SIZES = [
   {
     label: 'Small',
@@ -20,14 +22,14 @@ export const FONT_SIZES = [
 export const SENDER_HEADINGS = [
   {
     label: 'To',
-    value: 'to_mail_ids',
+    value: SENDER_HEADING_VALUES.TO,
   },
   {
     label: 'Cc',
-    value: 'cc_mail_ids',
+    value: SENDER_HEADING_VALUES.CC,
   },
   {
     label: 'Bcc',
-    value: 'bcc_mail_ids',
+    value: SENDER_HEADING_VALUES.BCC,
   },
-];
+] as const;

@@ -17,6 +17,7 @@ import type {
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
+  UpdateArtifactRequestType,
 } from '@/types/api/processApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
@@ -97,6 +98,13 @@ const Processes = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
+    updateArtifact: builder.mutation<void, UpdateArtifactRequestType>({
+      query: ({ processId, artifactId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_ARTIFACT_PATCH, { processId, artifactId }),
+        method: REQUEST_TYPES.PATCH,
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -119,4 +127,5 @@ export const {
   useGetDatasetArtifactsQuery,
   useLazyGetDatasetArtifactsQuery,
   useEmitHITLActionMutation,
+  useUpdateArtifactMutation,
 } = Processes;

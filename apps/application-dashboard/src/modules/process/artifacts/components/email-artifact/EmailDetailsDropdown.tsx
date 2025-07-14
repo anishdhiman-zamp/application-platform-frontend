@@ -17,62 +17,58 @@ const EmailDetailsDropdown: FC<EmailDetailsDropdownProps> = ({ emailArtifact }) 
           <SvgSpriteLoader id='chevron-down' size={14} color={COLORS.GRAY_700} />
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        sideOffset={2}
-        align='start'
-        className='z-1001 flex min-w-[400px] flex-col gap-y-1 px-3 py-2'
-      >
-        {emailArtifact?.from_mail_id && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>from:</p>
-            <p className='f-13-400 text-GRAY_1000'>
-              {emailArtifact?.from_name && <span className='f-13-600'>{emailArtifact?.from_name}</span>}
-              <span className='f-13-500 text-GRAY_900'>{` <${emailArtifact?.from_mail_id}>`}</span>
-            </p>
-          </div>
-        )}
-        {emailArtifact?.to_mail_ids?.length > 0 && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>to:</p>
-            <div className='flex flex-wrap gap-1'>
-              <span className='f-13-400 text-GRAY_1000'>
-                {emailArtifact?.to_mail_ids?.map((email) => email).join(', ')}
+      <DropdownMenuContent sideOffset={4} align='end' className='z-1001 w-[600px] px-3 py-2'>
+        <div className='flex flex-col gap-y-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+          {emailArtifact?.from_mail_id && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>from:</p>
+              <div className='min-w-0 flex-1'>
+                <p className='f-13-400 text-GRAY_1000 whitespace-nowrap'>
+                  {emailArtifact?.from_name && <span className='f-13-600'>{emailArtifact.from_name}</span>}
+                  <span className='f-13-500 text-GRAY_900'>{` <${emailArtifact.from_mail_id}>`}</span>
+                </p>
+              </div>
+            </div>
+          )}
+          {emailArtifact?.to_mail_ids?.length > 0 && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>to:</p>
+              <span className='f-13-400 text-GRAY_1000 min-w-0 flex-1 whitespace-nowrap'>
+                {emailArtifact.to_mail_ids?.join(', ')}
               </span>
             </div>
-          </div>
-        )}
-        {emailArtifact?.date && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>date:</p>
-            <p className='f-13-400 text-GRAY_1000'>{getEmailDate(emailArtifact?.date)}</p>
-          </div>
-        )}
-        {emailArtifact?.heading && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>subject:</p>
-            <p className='f-13-400 text-GRAY_1000'>{emailArtifact?.heading}</p>
-          </div>
-        )}
-        {emailArtifact?.bcc_mail_ids?.length > 0 && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>bcc:</p>
-            <div className='flex flex-wrap gap-1'>
-              <span className='f-13-400 text-GRAY_1000'>
-                {emailArtifact?.bcc_mail_ids?.map((email) => email).join(', ')}
+          )}
+          {emailArtifact?.date && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>date:</p>
+              <span className='f-13-400 text-GRAY_1000 min-w-0 flex-1 whitespace-nowrap'>
+                {getEmailDate(emailArtifact.date)}
               </span>
             </div>
-          </div>
-        )}
-        {emailArtifact?.cc_mail_ids?.length > 0 && (
-          <div className='flex items-start gap-2'>
-            <p className='f-13-500 text-GRAY_600 w-[60px]'>cc:</p>
-            <div className='flex flex-wrap gap-1'>
-              <span className='f-13-400 text-GRAY_1000'>
-                {emailArtifact?.cc_mail_ids?.map((email) => email).join(', ')}
+          )}
+          {emailArtifact?.heading && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>subject:</p>
+              <span className='f-13-400 text-GRAY_1000 min-w-0 flex-1 whitespace-nowrap'>{emailArtifact.heading}</span>
+            </div>
+          )}
+          {emailArtifact?.bcc_mail_ids?.length > 0 && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>bcc:</p>
+              <span className='f-13-400 text-GRAY_1000 min-w-0 flex-1 whitespace-nowrap'>
+                {emailArtifact.bcc_mail_ids?.join(', ')}
               </span>
             </div>
-          </div>
-        )}
+          )}
+          {emailArtifact?.cc_mail_ids?.length > 0 && (
+            <div className='flex min-w-fit items-center gap-2'>
+              <p className='f-13-500 text-GRAY_600 w-[60px] flex-shrink-0'>cc:</p>
+              <span className='f-13-400 text-GRAY_1000 min-w-0 flex-1 whitespace-nowrap'>
+                {emailArtifact.cc_mail_ids?.join(', ')}
+              </span>
+            </div>
+          )}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
