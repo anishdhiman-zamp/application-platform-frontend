@@ -1,5 +1,5 @@
 import { type FC, memo, useCallback, useState } from 'react';
-import { Button, type ButtonProps } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
@@ -109,7 +109,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
 
           return (
             <Button
-              variant={(cta?.cta_config?.variant as ButtonProps['variant']) ?? 'secondary'}
+              variant={buttonTypeCtas?.length > 1 ? 'secondary' : 'default'}
               key={loadingId}
               className='f-12-500 h-6 max-w-40 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'
               onClick={() => handleButtonClick(cta)}
