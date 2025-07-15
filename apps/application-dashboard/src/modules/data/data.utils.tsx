@@ -825,3 +825,19 @@ export const formatArrayValue = (value: MapAny[]): string => {
     })
     .join(', ');
 };
+
+/**
+ * Prepares a query for dataset export by adding column ordering visibility.
+ * @param {string} baseQuery - The base query string to be prepared.
+ * @param {string} datasetId - The ID of the dataset to prepare the query for.
+ * @returns {string} The prepared query string with column ordering visibility.
+ */
+export const prepareExportQuery = (baseQuery: string, datasetId: string): string => {
+  const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((item) => ({
+    column: item?.colId,
+    is_hidden: !item?.isVisible,
+  }));
+  const parsedQuery = JSON.parse(baseQuery);
+
+  return JSON.stringify({ ...parsedQuery, export_columns: columnOrderingVisibility });
+};

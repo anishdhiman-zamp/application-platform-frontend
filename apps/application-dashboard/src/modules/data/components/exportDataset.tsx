@@ -9,6 +9,7 @@ import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
+import { prepareExportQuery } from 'modules/data/data.utils';
 import { useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -62,9 +63,14 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
 
   const downloadCsv = async () => {
     setShowExportStatus(true);
+    const mergedQuery = prepareExportQuery(query, datasetId);
 
     if (isPolling) return;
-    getDatasetExport({ datasetId, query_config: query })
+
+    getDatasetExport({
+      datasetId,
+      query_config: mergedQuery,
+    })
       .unwrap()
       .then((data) => {
         if (data?.workflow_id) {
