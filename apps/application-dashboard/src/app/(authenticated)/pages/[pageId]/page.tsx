@@ -52,6 +52,8 @@ const Page = () => {
   );
 
   const checkIsPageValid = () => {
+    if (!pages) return;
+
     const isValidPageId = pages?.some((page) => page.page_id === pageId);
 
     if (!isValidPageId) {
