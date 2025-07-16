@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { type RefObject, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import type { AgGridReact } from 'ag-grid-react';
 import {
   useLazyGetActionStatusQuery,
   useLazyGetDatasetExportQuery,
@@ -21,9 +22,10 @@ interface ExportDatasetProps {
   query: string;
   datasetId: string;
   hasFilters: boolean;
+  tableRef: RefObject<AgGridReact<any> | null>;
 }
 
-const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => {
+const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDatasetProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { startPolling } = usePolling();
@@ -63,7 +65,7 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
 
   const downloadCsv = async () => {
     setShowExportStatus(true);
-    const mergedQuery = prepareExportQuery(query, datasetId);
+    const mergedQuery = prepareExportQuery(query, tableRef);
 
     if (isPolling) return;
 

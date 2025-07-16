@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import { captureException } from '@sentry/browser';
 import {
   ColDef,
@@ -6,7 +7,7 @@ import {
   type SortDirection,
   ValueFormatterParams,
 } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import type { AgGridReact } from 'ag-grid-react';
 import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
 import {
   differenceInDays,
@@ -27,6 +28,7 @@ import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatT
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
 import {
+  capitalizeWords,
   createDateObjectFromUTCString,
   formatPlural,
   getCommaSeparatedNumber,
@@ -829,14 +831,18 @@ export const formatArrayValue = (value: MapAny[]): string => {
 /**
  * Prepares a query for dataset export by adding column ordering visibility.
  * @param {string} baseQuery - The base query string to be prepared.
- * @param {string} datasetId - The ID of the dataset to prepare the query for.
+ * @param {RefObject<AgGridReact<any> | null>} tableRef - Reference to the AG Grid table component.
  * @returns {string} The prepared query string with column ordering visibility.
  */
-export const prepareExportQuery = (baseQuery: string, datasetId: string): string => {
-  const columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId)?.map((item) => ({
-    column: item?.colId,
-    is_hidden: !item?.isVisible,
+export const prepareExportQuery = (baseQuery: string, tableRef: RefObject<AgGridReact<any> | null>): string => {
+  const columns = tableRef?.current?.api?.getAllGridColumns();
+
+  const columnOrderingVisibility = columns?.map((item) => ({
+    column: item?.getColId(),
+    is_hidden: !item?.isVisible(),
+    alias: capitalizeWords(item?.getColDef()?.headerName ?? item?.getColId()),
   }));
+
   const parsedQuery = JSON.parse(baseQuery);
 
   return JSON.stringify({ ...parsedQuery, export_columns: columnOrderingVisibility });

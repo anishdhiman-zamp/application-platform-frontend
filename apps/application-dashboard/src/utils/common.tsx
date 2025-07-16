@@ -550,3 +550,17 @@ export const getUserDisplayName = (user?: { name?: string; email?: string }) => 
 
 export const getUserNameFromAudience = (user?: AudiencesByResourceResponse) =>
   user?.user?.name || user?.user?.email?.split('@')[0] || '';
+
+/**
+ * Capitalizes the first letter of each word in a string.
+ * @param str - The string to be capitalized. e.g. this is a sample sentence
+ * @returns The capitalized string. e.g. This Is A Sample Sentence
+ */
+export const capitalizeWords = (str: string) => {
+  if (!str) return '';
+
+  return str
+    ?.split(' ')
+    .map((word) => word?.charAt(0)?.toUpperCase() + word?.slice(1))
+    .join(' ');
+};
