@@ -1,48 +1,35 @@
-import { FC, memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { useEffect, useMemo } from 'react';
+import { usePDFSlick } from '@pdfslick/react';
+import { captureException } from '@sentry/nextjs';
 import { Skeleton } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
+import SearchBar from 'modules/process/artifacts/components/pdf-dataset-artifact/SearchBar';
+import ToolBar from 'modules/process/artifacts/components/pdf-dataset-artifact/ToolBar';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { COLORS } from '@/constants/colors';
 import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
-import type { defaultFnType } from '@/types/commonTypes';
-import { cn } from '@/utils/common';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
-
-interface ToolbarProps {
-  pageNumber: number;
-  numPages: number;
-  previousPage: defaultFnType;
-  nextPage: defaultFnType;
-  zoomOut: defaultFnType;
-  zoomIn: defaultFnType;
-}
-
-interface PdfArtifactProps {
-  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
-  artifactId: string;
+type PDFViewerAppProps = {
   processId: string;
+  artifactId: string;
+  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   isArtifactLoading: boolean;
-}
+};
 
-const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId, isArtifactLoading }) => {
-  const [pageNumber, setPageNumber] = useState(1);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [scale, setScale] = useState(1);
-  const [isPdfLoading, setIsPdfLoading] = useState(true);
+const LoadingIndicator = () => (
+  <div className='flex h-full w-full items-center justify-center'>
+    <Skeleton className='h-[582px] w-[413px]' />
+  </div>
+);
 
-  const pageNumberRef = useRef(1);
-  const numPagesRef = useRef<number | null>(null);
-  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const observer = useRef<IntersectionObserver | null>(null);
+const ErrorFallback = ({ message }: { message: string }) => (
+  <div className='flex h-full w-full items-center justify-center'>
+    <span className='f-13-450 text-GRAY_600'>{message}</span>
+  </div>
+);
 
+const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading }: PDFViewerAppProps) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
@@ -51,7 +38,7 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId,
     refetch: refetchSignedUrl,
   } = useGetSignedUrlByArtifactIdQuery(
     {
-      processId: processId as string,
+      processId,
       artifactId,
       fileId: pdfArtifact?.pdf_file?.file_id,
     },
@@ -61,173 +48,45 @@ const PdfArtifact: FC<PdfArtifactProps> = ({ pdfArtifact, artifactId, processId,
     },
   );
 
-  const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
-  const zoomOut = () => setScale((prev) => Math.max(prev - 0.2, 0.5));
-  const previousPage = () => changePage(-1);
-  const nextPage = () => changePage(1);
+  const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(
+    signedUrl?.signed_url || '',
+    { scaleValue: 'page-fit' },
+  );
 
-  const scrollToPage = (page: number) => {
-    const el = pageRefs.current[page - 1];
-    const container = containerRef.current;
+  const isCommonLoading = useMemo(
+    () => isSignedUrlLoading || isArtifactLoading || isSignedUrlUninitialized,
+    [isSignedUrlLoading, isArtifactLoading, isSignedUrlUninitialized],
+  );
 
-    if (el && container) {
-      const topBarHeight = 54;
-
-      container.scrollTo({
-        top: el.offsetTop - topBarHeight,
-        behavior: 'smooth',
+  useEffect(() => {
+    if (error) {
+      captureException(error, {
+        extra: { signedUrl: signedUrl?.signed_url },
       });
     }
-  };
-
-  const changePage = (offset: number) => {
-    const currentNumPages = numPagesRef.current;
-    const currentPage = pageNumberRef.current;
-
-    if (!currentNumPages) return;
-
-    const newPage = Math.min(Math.max(currentPage + offset, 1), currentNumPages);
-
-    setPageNumber(newPage);
-    pageNumberRef.current = newPage;
-    scrollToPage(newPage);
-  };
-
-  const createIntersectionObserver = () =>
-    new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .map((entry) => ({
-            page: Number(entry.target.getAttribute('data-page') || '0'),
-            ratio: entry.intersectionRatio,
-          }));
-
-        if (visibleEntries.length > 0) {
-          const mostVisible = visibleEntries.reduce((max, current) => (current.ratio > max.ratio ? current : max));
-
-          setPageNumber(mostVisible.page);
-        }
-      },
-      { root: null, rootMargin: '0px', threshold: 0.5 },
-    );
-
-  const handleLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setIsPdfLoading(false);
-    numPagesRef.current = numPages;
-  };
-
-  useEffect(() => {
-    pageNumberRef.current = pageNumber;
-  }, [pageNumber]);
-
-  useEffect(() => {
-    numPagesRef.current = numPages;
-  }, [numPages]);
-
-  useEffect(() => {
-    if (!numPages) return;
-
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = createIntersectionObserver();
-
-    pageRefs.current.forEach((ref) => {
-      if (ref) observer.current?.observe(ref);
-    });
-
-    return () => observer.current?.disconnect();
-  }, [numPages]);
-
-  const commonLoading = useMemo(() => {
-    return isSignedUrlLoading || isArtifactLoading || isSignedUrlUninitialized;
-  }, [isSignedUrlLoading, isArtifactLoading, isSignedUrlUninitialized]);
+  }, [error, signedUrl]);
 
   return (
     <CommonWrapper
-      isLoading={commonLoading}
+      isLoading={isCommonLoading}
       isError={isSignedUrlError}
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}
-      className='bg-BG_GRAY_1 h-full w-full'
+      className='bg-BG_GRAY_1 pdfSlick h-full w-full px-4'
     >
-      <div
-        ref={containerRef}
-        className={cn('animate-fade-in h-full w-full overflow-scroll px-4 pt-4 pb-24', {
-          'flex flex-col items-center justify-center pb-0': isPdfLoading || (numPages === 1 && !isSignedUrlLoading),
-        })}
-      >
-        <Document
-          file={signedUrl?.signed_url}
-          loading={
-            <div className='animate-fade-in flex h-full w-full justify-center'>
-              <Skeleton className='h-[582px] w-[413px]' />
-            </div>
-          }
-          error={
-            <div className='animate-fade-in flex h-full w-full justify-center'>
-              <span className='f-13-450 text-GRAY_600'>Error loading artifact</span>
-            </div>
-          }
-          noData={
-            <div className='animate-fade-in flex h-full w-full justify-center'>
-              <span className='f-13-450 text-GRAY_600'>No data</span>
-            </div>
-          }
-          onLoadSuccess={handleLoadSuccess}
-          className='animate-fade-in'
-        >
-          {numPages &&
-            Array.from(new Array(numPages), (_, index) => (
-              <div
-                key={`page_${index + 1}`}
-                data-page={index + 1}
-                ref={(el) => {
-                  pageRefs.current[index] = el;
-                }}
-                className='flex h-full w-full justify-center'
-              >
-                <Page
-                  loading={null}
-                  width={413}
-                  height={582}
-                  pageNumber={index + 1}
-                  scale={scale}
-                  className='my-2.5 shadow-xl'
-                />
-              </div>
-            ))}
-        </Document>
-      </div>
+      {error && <ErrorFallback message={error?.message} />}
+      {!error && !isDocumentLoaded && <LoadingIndicator />}
 
-      {!isSignedUrlLoading && numPages && (
-        <PdfToolbar
-          pageNumber={pageNumber}
-          numPages={numPages}
-          previousPage={previousPage}
-          nextPage={nextPage}
-          zoomOut={zoomOut}
-          zoomIn={zoomIn}
-        />
+      {isDocumentLoaded && !error && <SearchBar {...{ usePDFSlickStore }} />}
+      {!error && (
+        <div className='relative h-full flex-1'>
+          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-26' />
+        </div>
       )}
+      {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} />}
     </CommonWrapper>
   );
 };
 
-const PdfToolbar = ({ pageNumber, numPages, previousPage, nextPage, zoomOut, zoomIn }: ToolbarProps) => {
-  return (
-    <div className='animate-fade-in absolute bottom-1.5 left-1/2 z-10 flex -translate-x-1/2 transform items-center gap-x-1.5 rounded-md bg-black px-2.5 py-1.5'>
-      <SvgSpriteLoader id='chevron-up' color={COLORS.WHITE} size={12} onClick={previousPage} />
-      <div className='f-11-500 flex items-center gap-x-1.5 text-white'>
-        Page <span className='bg-GRAY_950 rounded px-1 py-[2px]'>{pageNumber}</span> / {numPages || '--'}
-      </div>
-      <SvgSpriteLoader id='chevron-down' color={COLORS.WHITE} size={12} onClick={nextPage} />
-      <SvgSpriteLoader id='zoom-out' color={COLORS.WHITE} size={12} onClick={zoomOut} />
-      <SvgSpriteLoader id='zoom-in' color={COLORS.WHITE} size={12} onClick={zoomIn} />
-    </div>
-  );
-};
-
-export default memo(PdfArtifact);
+export default PdfArtifact;

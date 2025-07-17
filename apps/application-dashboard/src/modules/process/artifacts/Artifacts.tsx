@@ -4,7 +4,6 @@ import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArti
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
-import PdfArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
@@ -34,6 +33,10 @@ const BrowserArtifact = dynamic(
     loading: () => <ArtifactLoader />,
   },
 );
+
+const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
+  ssr: false,
+});
 
 interface ArtifactsProps {
   onClose: () => void;
@@ -125,11 +128,11 @@ const Artifacts = ({
             </TabsContent>
             <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
               <PdfArtifact
-                pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
-                artifactId={id}
                 processId={processId}
-                key={id}
+                artifactId={id}
+                pdfArtifact={artifactData as PdfArtifactsResponseType}
                 isArtifactLoading={isFetching}
+                key={id}
               />
             </TabsContent>
           </>
@@ -166,9 +169,9 @@ const Artifacts = ({
       case ARTIFACT_TYPE.PDF:
         return (
           <PdfArtifact
-            pdfArtifact={artifactData as PdfArtifactsResponseType}
-            artifactId={id}
             processId={processId}
+            artifactId={id}
+            pdfArtifact={artifactData as PdfArtifactsResponseType}
             isArtifactLoading={isFetching}
             key={id}
           />
