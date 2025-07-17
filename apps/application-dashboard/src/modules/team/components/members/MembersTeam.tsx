@@ -22,6 +22,7 @@ import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 
 const MembersTeam: FC<MembersTeamPropsType> = ({
+  userInfo,
   organizationId,
   teamsData,
   userId,
@@ -57,7 +58,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
       .then((res) => {
         const teamId = res?.team_id;
 
-        handleAddTeamToAudience({ user_id: userId, team_id: teamId });
+        handleAddTeamToAudience({ user_id: userId, team_id: teamId, team_name: payload?.name });
       })
       .catch(() => {
         toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_CREATE_ERROR);
@@ -68,10 +69,10 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
     postAddTeamToAudience({ organizationId, teamId: payload?.team_id, payload })
       .unwrap()
       .then((res) => {
-        toast.success(hasPeoplePolicy ? res?.message : TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_SUCCESS);
+        toast.success(hasPeoplePolicy ? res?.message : `${userInfo?.name} added to ${payload?.team_name}`);
       })
       .catch(() => {
-        toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_ASSIGN_ERROR);
+        toast.error(`Failed to add ${userInfo?.name} to ${payload?.team_id}`);
       });
   };
 
@@ -83,6 +84,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
     const updatedTeamInfo = {
       user_id: userId,
       team_id: teamId ?? '',
+      team_name: teamInfo?.name,
     };
 
     if (teamId) {
@@ -113,11 +115,11 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
 
     removeTeamFromAudience({ organizationId, teamId, payload })
       .unwrap()
-      .then((res) => {
-        toast.success(res?.message ?? TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_SUCCESS);
+      .then(() => {
+        toast.success(`${userInfo?.name} removed from ${item?.label}`);
       })
       .catch(() => {
-        toast.error(TEAM_PERMISSION_TOAST_MSG.TEAM_REMOVE_ERROR);
+        toast.error(`Failed to remove ${userInfo?.name} from ${item?.label}`);
       });
   };
 

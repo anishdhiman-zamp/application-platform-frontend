@@ -83,26 +83,25 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
         loader={<SkeletonLoaderListing columns={4} />}
       >
         <div className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          {allAudiencesAndTeamsData?.map((row, index) => {
-            return (
-              <div key={index} className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
-                <MembersName value={row?.email} member />
-                <MembersEmail value={row?.email} />
-                <MembersRole
-                  value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
-                  member
-                  hasPeoplePolicy={hasPeoplePolicy}
-                />
-                <MembersTeam
-                  organizationId={organizationId}
-                  teamsData={teamsData ?? []}
-                  userId={row?.user_id}
-                  userMappedTeams={row?.teams}
-                  hasPeoplePolicy={hasPeoplePolicy}
-                />
-              </div>
-            );
-          })}
+          {allAudiencesAndTeamsData?.map((row, index) => (
+            <div key={index} className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
+              <MembersName value={row?.name || row?.email} member />
+              <MembersEmail value={row?.email} />
+              <MembersRole
+                value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
+                member
+                hasPeoplePolicy={hasPeoplePolicy}
+              />
+              <MembersTeam
+                userInfo={{ user_id: row?.user_id, name: row?.name, email: row?.email }}
+                organizationId={organizationId}
+                teamsData={teamsData ?? []}
+                userId={row?.user_id}
+                userMappedTeams={row?.teams}
+                hasPeoplePolicy={hasPeoplePolicy}
+              />
+            </div>
+          ))}
         </div>
       </CommonWrapper>
     </>
