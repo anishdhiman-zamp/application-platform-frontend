@@ -39,7 +39,13 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
       hitl_request_id: cta?.hitl_request_id,
       log_group_id: logGroupId,
       submitted_by: userId ?? '',
-      responses: [{ action_id: cta?.cta_action_id, values: [cta?.cta_value] }],
+      responses: [
+        {
+          action_id: cta?.cta_action_id,
+          values: [cta?.cta_value],
+          cta_component_type: cta?.cta_component_type,
+        },
+      ],
     };
 
     const loadingId = getLoadingId(cta);
