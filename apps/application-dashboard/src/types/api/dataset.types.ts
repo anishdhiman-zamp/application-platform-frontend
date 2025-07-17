@@ -23,6 +23,7 @@ export type DatasetFilterConfigMetadataType = {
     movable?: boolean;
   };
   is_editable?: boolean;
+  is_required?: boolean;
 };
 
 export type DatasetFilterConfigResponseType = {

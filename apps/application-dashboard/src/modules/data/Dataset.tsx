@@ -403,6 +403,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
         handleSuccessfulUpdate,
         tableRef,
         handleRulesListingSideDrawerOpen,
+        isSelfServe: true,
       });
 
       if (columns?.length > 0) {
@@ -569,7 +570,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
             {!isReadOnly && <DatasetHistory />}
             {!isReadOnly && (
               <>
-                <DisplayOptions tableRef={tableRef} datasetId={id as string} />
+                <DisplayOptions tableRef={tableRef} datasetId={id as string} isSelfServe />
                 {filterConfigData?.config?.is_fx_enabled && (
                   <div className='flex items-center gap-2'>
                     <div className='border-GRAY_400 h-7 border-r'></div>

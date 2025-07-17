@@ -31,6 +31,7 @@ import {
   capitalizeWords,
   createDateObjectFromUTCString,
   formatPlural,
+  formatRelativeWithCustomLocale,
   getCommaSeparatedNumber,
   getTagColor,
   snakeCaseToSentenceCase,
@@ -40,6 +41,7 @@ import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/Act
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
 import { toast } from '@/components/common/toast/Toast';
 import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
+import { DisplayConfigType } from '@/types/api/admin.types';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
@@ -119,6 +121,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   isMenuDisabled,
   missingFields,
   wrapLink,
+  isSelfServe,
 }) => {
   const columns: ColDef[] = [];
 
@@ -180,6 +183,9 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
         isMenuDisabled,
+      dateFormat: column?.metadata?.config?.value_format?.find((item) => item.type === VALUE_FORMAT_TYPE.DATE_TIME)
+        ?.value,
+      isSelfServe,
     };
 
     if (column?.metadata?.config?.value_format) {
@@ -447,8 +453,11 @@ export const getFormattedDate = (valueFormat: ValueFormatType, value: string | n
 
   // expect value to be in microseconds when it is a number
   const date = typeof value === 'number' ? new Date(value / 1000) : new Date(createDateObjectFromUTCString(value));
+  const isValidDate = isValid(date);
 
-  return isValid(date) ? format(date, validDateFormat) : value;
+  if (dateFormat === DATE_FORMATS.RELATIVE) return isValidDate ? formatRelativeWithCustomLocale(date) : value;
+
+  return isValidDate ? format(date, validDateFormat) : value;
 };
 
 const getFormattedValueWithPrefix = (valueFormat: ValueFormatType, value: string) => {
@@ -822,6 +831,126 @@ export const formatArrayValue = (value: MapAny[]): string => {
       return item;
     })
     .join(', ');
+};
+
+export const getDefaultOrderDisplayConfig = (
+  allColumns: DisplayConfigType[],
+  tableRef: RefObject<AgGridReact<any> | null>,
+) => {
+  const orderedColumnIds = tableRef?.current?.api?.getAllGridColumns()?.map((column) => column.getColId()) ?? [];
+
+  // Create a map of existing columns for quick lookup
+  const columnMap: Record<string, DisplayConfigType> = {};
+
+  allColumns.forEach((column) => {
+    columnMap[column.column] = column;
+  });
+
+  // Build the updated display config with new order
+  const updatedDisplayConfig: DisplayConfigType[] = [];
+
+  // Add columns in the specified order
+  orderedColumnIds.forEach((columnId) => {
+    const column = columnMap[columnId];
+
+    if (column) {
+      updatedDisplayConfig.push(column);
+      delete columnMap[columnId]; // Remove from map to avoid duplicates
+    }
+  });
+
+  // Add remaining columns (not in the order array) to the end
+  Object.values(columnMap).forEach((column) => {
+    updatedDisplayConfig.push(column);
+  });
+
+  return updatedDisplayConfig;
+};
+
+export const getUpdatedDateFormatDisplayConfig = (
+  tableRef: RefObject<AgGridReact<any> | null>,
+  columnId: string,
+  value: string,
+  displayConfig: DisplayConfigType[],
+) => {
+  const columnDefs = tableRef.current?.api?.getAllGridColumns().map((col) => {
+    const def = col.getColDef();
+
+    if (def.field === columnId) {
+      return {
+        ...def,
+        headerComponentParams: {
+          ...def.headerComponentParams,
+          dateFormat: value,
+        },
+        valueFormatter: (params: ValueFormatterParams) =>
+          getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: value as string },
+            params.value as string,
+          ) as string,
+      };
+    }
+
+    return def;
+  });
+
+  tableRef.current?.api?.setGridOption('columnDefs', columnDefs);
+  tableRef.current?.api?.refreshCells({ columns: [columnId], force: true });
+  const displayConfigIndex = displayConfig?.findIndex((item) => item.column === columnId) ?? -1;
+
+  if (displayConfigIndex === -1) return displayConfig;
+  const updatedDisplayConfig =
+    displayConfig.map((item) => {
+      if (item.column === columnId) {
+        return {
+          ...item,
+          config: {
+            ...item.config,
+            value_format: [{ type: VALUE_FORMAT_TYPE.DATE_TIME, value: value as string }],
+          },
+        };
+      }
+
+      return item;
+    }) ?? [];
+
+  return updatedDisplayConfig;
+};
+
+export const getUpdatedAliasDisplayConfig = (
+  tableRef: RefObject<AgGridReact<any> | null>,
+  columnId: string,
+  value: string,
+  displayConfig: DisplayConfigType[],
+) => {
+  const columnDefs = tableRef.current?.api?.getAllGridColumns().map((col) => {
+    const def = col.getColDef();
+
+    if (def.field === columnId) {
+      return {
+        ...def,
+        headerName: value as string,
+        minWidth: getColumnMinWidth(value.length),
+      };
+    }
+
+    return def;
+  });
+
+  tableRef.current?.api?.setGridOption('columnDefs', columnDefs);
+  const displayConfigIndex = displayConfig?.findIndex((item) => item.column === columnId) ?? -1;
+
+  if (displayConfigIndex === -1) return displayConfig;
+  const updatedDisplayConfig =
+    displayConfig.map((item) => {
+      if (item.column === columnId) {
+        return { ...item, alias: value as string };
+      }
+
+      return item;
+    }) ?? [];
+
+  return updatedDisplayConfig;
 };
 
 /**

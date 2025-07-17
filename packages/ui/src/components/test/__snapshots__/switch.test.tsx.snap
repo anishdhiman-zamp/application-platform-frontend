@@ -3,14 +3,14 @@
 exports[`Switch Component - Functional Tests matches snapshot for checked state 1`] = `
 <button
   aria-checked="true"
-  class="focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40"
+  class="focus-visible:ring-ring focus-visible:ring-offset-background peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 h-5 w-9"
   data-state="checked"
   role="switch"
   type="button"
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="checked"
   />
 </button>
@@ -19,14 +19,14 @@ exports[`Switch Component - Functional Tests matches snapshot for checked state 
 exports[`Switch Component - Functional Tests matches snapshot for default state 1`] = `
 <button
   aria-checked="false"
-  class="focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40"
+  class="focus-visible:ring-ring focus-visible:ring-offset-background peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 h-5 w-9"
   data-state="unchecked"
   role="switch"
   type="button"
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="unchecked"
   />
 </button>
@@ -35,7 +35,7 @@ exports[`Switch Component - Functional Tests matches snapshot for default state 
 exports[`Switch Component - Functional Tests matches snapshot for disabled checked state 1`] = `
 <button
   aria-checked="true"
-  class="focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40"
+  class="focus-visible:ring-ring focus-visible:ring-offset-background peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 h-5 w-9"
   data-disabled=""
   data-state="checked"
   disabled=""
@@ -44,7 +44,7 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled check
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-disabled=""
     data-state="checked"
   />
@@ -54,7 +54,7 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled check
 exports[`Switch Component - Functional Tests matches snapshot for disabled state 1`] = `
 <button
   aria-checked="false"
-  class="focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40"
+  class="focus-visible:ring-ring focus-visible:ring-offset-background peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 h-5 w-9"
   data-disabled=""
   data-state="unchecked"
   disabled=""
@@ -63,7 +63,7 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled state
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-disabled=""
     data-state="unchecked"
   />
@@ -73,14 +73,14 @@ exports[`Switch Component - Functional Tests matches snapshot for disabled state
 exports[`Switch Component - Functional Tests matches snapshot with custom className 1`] = `
 <button
   aria-checked="false"
-  class="focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 custom-switch"
+  class="focus-visible:ring-ring focus-visible:ring-offset-background peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-gray-1000 data-[state=unchecked]:bg-GRAY_600 h-5 w-9 custom-switch"
   data-state="unchecked"
   role="switch"
   type="button"
   value="on"
 >
   <span
-    class="bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+    class="bg-background pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 h-4 w-4 data-[state=checked]:translate-x-4"
     data-state="unchecked"
   />
 </button>

@@ -21,6 +21,7 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  RenderApiModule,
   RowApiModule,
   RowClickedEvent,
   RowDragEndEvent,
@@ -112,6 +113,7 @@ ModuleRegistry.registerModules([
   EventApiModule,
   RowDragModule,
   SelectEditorModule,
+  RenderApiModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -151,6 +153,7 @@ interface TableProps {
   missingFields?: MissingFieldItemType[];
   completedFields?: { rowId: string; columnId: string }[];
   shouldShowNA?: boolean;
+  suppressScrollOnNewData?: boolean;
 }
 
 export type TableColumnType = {
@@ -196,6 +199,7 @@ const Table: FC<TableProps> = ({
   missingFields,
   completedFields,
   shouldShowNA = false,
+  suppressScrollOnNewData,
 }) => {
   const checkIsMissingField = useCallback(
     (params: MapAny) => {
@@ -408,6 +412,7 @@ const Table: FC<TableProps> = ({
           getContextMenuItems={getContextMenuItems}
           autoSizeStrategy={autoSizeStrategy}
           suppressServerSideFullWidthLoadingRow
+          suppressScrollOnNewData={suppressScrollOnNewData}
           serverSideInitialRowCount={100}
           autoGroupColumnDef={autoGroupColumnDef}
           enableCellTextSelection

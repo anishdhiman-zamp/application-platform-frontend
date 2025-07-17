@@ -15,9 +15,15 @@ type DisplayOptionsProps = {
   tableRef: RefObject<AgGridReact | null>;
   datasetId: string;
   isGroupByDisabled?: boolean;
+  isSelfServe?: boolean;
 };
 
-const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupByDisabled = false }) => {
+const DisplayOptions: FC<DisplayOptionsProps> = ({
+  tableRef,
+  datasetId,
+  isGroupByDisabled = false,
+  isSelfServe = false,
+}) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isColumnListingOpen, setIsColumnListingOpen] = useState(false);
@@ -92,7 +98,12 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({ tableRef, datasetId, isGroupB
         </DropdownMenuContent>
       </DropdownMenu>
       {isColumnListingOpen && (
-        <ColumnListing tableRef={tableRef} onClose={handleCloseColumnListing} datasetId={datasetId} />
+        <ColumnListing
+          tableRef={tableRef}
+          onClose={handleCloseColumnListing}
+          datasetId={datasetId}
+          isSelfServe={isSelfServe}
+        />
       )}
       {isGroupByOpen && <GroupBy onClose={handleCloseGroupBy} tableRef={tableRef} />}
     </div>

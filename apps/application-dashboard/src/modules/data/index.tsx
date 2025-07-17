@@ -1,58 +1,42 @@
 import { FC, useMemo } from 'react';
-import { IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
-import { useLazyGetDatasetListingQuery } from 'apis/dataset';
+import { RowClickedEvent } from 'ag-grid-community';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { ListingPropsType } from 'modules/data/data.types';
-import { formatData } from 'modules/data/data.utils';
-import { useRouter } from 'next/navigation';
-import { OrderType } from 'types/components/table.type';
-import { getDatasetRouteById } from '@/constants/routeConfig';
+import { useGetDatasetListingQuery } from '@/apis/dataset';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
-  const [getDatasetListing] = useLazyGetDatasetListingQuery();
+  const { data, isLoading } = useGetDatasetListingQuery({ page: 1, pageSize: PAGE_SIZE });
   const columns = useMemo(() => LISTING_COLUMNS, []);
-  const router = useRouter();
 
-  const serverSideDatasource: IServerSideDatasource = useMemo(() => {
-    return {
-      getRows: (parameters: IServerSideGetRowsParams): void => {
-        const sortModel =
-          parameters.request.sortModel?.map((item) => ({
-            column: item.colId,
-            desc: item.sort === OrderType.DESC,
-          })) ?? [];
+  const handleRowClicked = (event: RowClickedEvent) => {
+    const target = event?.event?.target as HTMLElement;
 
-        getDatasetListing(
-          {
-            page: Math.floor(parameters.request.endRow ?? 0) / PAGE_SIZE,
-            pageSize: PAGE_SIZE,
-            sort: JSON.stringify(sortModel),
-          },
-          true,
-        )
-          .unwrap()
-          .then((data) => {
-            data?.datasets?.forEach((dataset) => {
-              router.prefetch(getDatasetRouteById(dataset?.id));
-            });
-            parameters.success({
-              rowData: formatData(data?.datasets ?? []),
-              ...(parameters.request.startRow === 0 ? { rowCount: data?.total_count } : {}),
-            });
-          })
-          .catch(() => {
-            parameters.fail();
-          });
-      },
-    };
-  }, [getDatasetListing]);
+    if (target.closest('#edit-name-description')) return;
+
+    onRowClicked?.(event);
+  };
 
   return (
-    <div className='overflow-hidden rounded-tl-xl'>
-      <DataTable columns={columns} onRowClicked={onRowClicked} serverSideDatasource={serverSideDatasource} />
-    </div>
+    <CommonWrapper
+      isLoading={isLoading}
+      loader={<ZampLogoLoader />}
+      skeletonType={SkeletonTypes.CUSTOM}
+      className='h-full'
+    >
+      <div className='overflow-hidden rounded-tl-xl'>
+        <DataTable
+          columns={columns}
+          onRowClicked={handleRowClicked}
+          rows={data?.datasets ?? []}
+          suppressScrollOnNewData
+        />
+      </div>
+    </CommonWrapper>
   );
 };
 

@@ -3,8 +3,8 @@ import { cn as cnUI } from '@zamp-platform/ui/utils';
 import { type ClassValue } from 'clsx';
 import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
-import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
-import { format, startOfYear } from 'date-fns';
+import { CUSTOM_LOCALE, DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
+import { format, formatRelative, startOfYear } from 'date-fns';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
 
@@ -551,6 +551,9 @@ export const getUserDisplayName = (user?: { name?: string; email?: string }) => 
 export const getUserNameFromAudience = (user?: AudiencesByResourceResponse) =>
   user?.user?.name || user?.user?.email?.split('@')[0] || '';
 
+export const formatRelativeWithCustomLocale = (date?: Date) => {
+  return formatRelative(date ? date : new Date(), new Date(), { locale: CUSTOM_LOCALE });
+};
 /**
  * Capitalizes the first letter of each word in a string.
  * @param str - The string to be capitalized. e.g. this is a sample sentence

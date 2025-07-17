@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { cn } from 'utils/common';
 import BankNameCell from '@/components/common/table/CustomCellRenderers/BankNameCell';
 import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
+import DescriptionWithTooltip from '@/components/common/table/CustomCellRenderers/DescriptionWithTooltip';
+import EditNameDescription from '@/components/common/table/CustomCellRenderers/EditNameDescription';
 import PaymentsAccountStatusCell from '@/components/common/table/CustomCellRenderers/PaymentsAccountStatus';
 import RecipientNameCell from '@/components/common/table/CustomCellRenderers/RecipientNameCell';
 import StatusBadgeCell from '@/components/common/table/CustomCellRenderers/StatusBadgeCell';
@@ -38,11 +40,18 @@ export const LISTING_COLUMNS: ColDef[] = [
   {
     field: 'description',
     headerName: 'Description',
+    cellRenderer: DescriptionWithTooltip,
   },
-  // {
-  //   field: 'updated_at',
-  //   headerName: 'Last Updated',
-  // },
+  {
+    field: '',
+    headerName: '',
+    cellRenderer: EditNameDescription,
+    width: 108,
+    flex: 0,
+    minWidth: 108,
+    cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell'),
+    sortable: false,
+  },
   {
     field: '',
     headerName: '',
@@ -53,6 +62,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     flex: 0,
     minWidth: 108,
     cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell'),
+    sortable: false,
   },
 ];
 
