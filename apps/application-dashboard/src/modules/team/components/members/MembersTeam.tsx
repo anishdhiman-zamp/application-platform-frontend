@@ -17,6 +17,7 @@ import {
 import { MapAny } from 'types/commonTypes';
 import { checkIfCurrentUserIsMember } from 'utils/accessPermission/accessPermission.utils';
 import { cn, cyclicIterator } from 'utils/common';
+import { KEY_CODES } from '@/components/multiSelectInput/multiSelectInput.types';
 import { toast } from 'components/common/toast/Toast';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 
@@ -34,6 +35,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
   const [removeTeamFromAudience] = useRemoveTeamFromAudienceMutation();
   const [search, setSearch] = useState<string>('');
+  const [multiSelectInputKey, setMultiSelectInputKey] = useState(0);
   const [isCustomInputFocused, setIsCustomInputFocused] = useState<boolean>(false);
   const [openFullViewTeamTags, setOpenFullViewTeamTags] = useState<boolean>(false);
   const [randomColor, setRandomColor] = useState(() => teamsRandomColorRef.current());
@@ -175,6 +177,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
     handleCheckIfTeamExists(payload);
   };
 
+  // filter options list
   const filteredOptionListsData = [
     ...(teamsData
       ?.filter((item) => !selectedItems.some((selected) => selected?.value === item?.name))
@@ -194,8 +197,28 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
     ],
   ];
 
+  // sync selectedItems with userMappedTeams
+  const syncSelectedItemsWithUserMappedTeams = () => {
+    const updatedSelectedItems = selectedItems.map((selected) => {
+      const matchingUserTeam = userMappedTeams.find((team) => team?.value === selected?.value);
+
+      if (matchingUserTeam) {
+        return {
+          ...selected,
+          teamId: matchingUserTeam?.teamId,
+          teamMembershipId: matchingUserTeam?.teamMembershipId,
+        };
+      }
+
+      return selected;
+    });
+
+    setSelectedItems(updatedSelectedItems);
+  };
+
   useEffect(() => {
-    setSelectedItems(userMappedTeams);
+    syncSelectedItemsWithUserMappedTeams();
+    setMultiSelectInputKey((prev) => prev + 1);
   }, [userMappedTeams]);
 
   useEffect(() => {
@@ -247,6 +270,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
       ) : (
         <div>
           <MultiSelectInput
+            key={multiSelectInputKey}
             id='select-team'
             search={search}
             setSearch={setSearch}
@@ -265,6 +289,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
             selectOnlyFromList
             onCustomDeleteFn={handleRemoveAudienceFromTeam}
             closeDropdownOnSelect={hasPeoplePolicy}
+            allowedAddKeys={[KEY_CODES.ENTER, KEY_CODES.COMMA]}
           />
         </div>
       )}

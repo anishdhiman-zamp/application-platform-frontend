@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   USER_WHOAMI_GET: 'auth/whoami',
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
+  USER_TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/team-members`,
   TEAMS_BY_ORGANIZATION_ID_POST: `organizations/{{organizationId}}/teams`,
   ALL_TEAMS_BY_TEAM_ID_GET: `organizations/{{organizationId}}/teams/{{teamId}}`,
   ADD_TEAMS_TO_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/add`,
