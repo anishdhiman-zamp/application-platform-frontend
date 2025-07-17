@@ -17,7 +17,7 @@ import {
   format,
   isValid,
 } from 'date-fns';
-import { COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
+import { COLUMN_TYPE_WIDTH_MAP, COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
 import {
   ColumnOrderingVisibilityType,
   type DatasetTabType,
@@ -83,24 +83,19 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
-export const getColumnMinWidth = (
-  columnNameLength: number,
-  isActivityArtifactColumn: boolean,
-  isActivityStatusColumn: boolean,
-  isActivityDocumentColumn: boolean,
-): number => {
-  switch (true) {
-    case isActivityArtifactColumn:
-      return COLUMN_WIDTHS.ACTIVITY_ARTIFACT;
-    case isActivityStatusColumn:
-      return COLUMN_WIDTHS.ACTIVITY_STATUS;
-    case isActivityDocumentColumn:
-      return COLUMN_WIDTHS.ACTIVITY_DOCUMENT;
-    case columnNameLength > COLUMN_WIDTHS.CHAR_THRESHOLD:
-      return COLUMN_WIDTHS.BASE + COLUMN_WIDTHS.EXTRA_CHAR_WIDTH * (columnNameLength - COLUMN_WIDTHS.CHAR_THRESHOLD);
-    default:
-      return COLUMN_WIDTHS.BASE;
+export const getColumnMinWidth = (columnNameLength: number, customColumnType?: CUSTOM_COLUMNS_TYPE): number => {
+  // Check if it's a special activity column type first
+  if (customColumnType && customColumnType in COLUMN_TYPE_WIDTH_MAP) {
+    return COLUMN_TYPE_WIDTH_MAP[customColumnType as keyof typeof COLUMN_TYPE_WIDTH_MAP];
   }
+
+  // Handle dynamic width for long column names
+  if (columnNameLength > COLUMN_WIDTHS.CHAR_THRESHOLD) {
+    return COLUMN_WIDTHS.BASE + COLUMN_WIDTHS.EXTRA_CHAR_WIDTH * (columnNameLength - COLUMN_WIDTHS.CHAR_THRESHOLD);
+  }
+
+  // Default width
+  return COLUMN_WIDTHS.BASE;
 };
 
 const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
@@ -133,9 +128,6 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     const columnNameLength = column?.alias?.length ?? column?.column?.length;
     const columnWidth =
       columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column)?.width ?? 0;
-    const isActivityDocumentColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT;
-    const isActivityCurrentStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS;
-    const isActivityStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS;
 
     let formattedColumn: ColDef = {
       field: column?.column,
@@ -154,14 +146,15 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         values: column?.options,
       },
       suppressMovable: column?.metadata?.config?.movable,
-      headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias || column?.column),
-      minWidth: getColumnMinWidth(
-        columnNameLength,
-        isActivityCurrentStatusColumn,
-        isActivityStatusColumn,
-        isActivityDocumentColumn,
-      ),
-      maxWidth: isActivityStatusColumn ? COLUMN_WIDTHS.ACTIVITY_STATUS : undefined,
+      headerName:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
+          ? ''
+          : snakeCaseToSentenceCase(column?.alias || column?.column),
+      minWidth: getColumnMinWidth(columnNameLength, column?.metadata?.custom_type as CUSTOM_COLUMNS_TYPE),
+      maxWidth:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
+          ? COLUMN_WIDTHS.ACTIVITY_STATUS
+          : undefined,
       initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,
     };
 
@@ -183,7 +176,10 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
       headerBackgroundNeeded: false,
       className: isProcess && 'py-2 px-4 hover:bg-transparent',
-      hideFloatingFilter: isActivityCurrentStatusColumn || isActivityStatusColumn || isMenuDisabled,
+      hideFloatingFilter:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
+        isMenuDisabled,
     };
 
     if (column?.metadata?.config?.value_format) {
