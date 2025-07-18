@@ -7,6 +7,7 @@ import { useEmitHITLActionMutation } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { useAppSelector } from '@/hooks/toolkit';
 import type { CtasType } from '@/types/api/processApi.types';
+import { capitalizeFirstLetter } from '@/utils/common';
 
 type LogCtaProps = {
   ctas: CtasType[];
@@ -117,7 +118,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             <Button
               variant={buttonTypeCtas?.length > 1 ? 'secondary' : 'default'}
               key={loadingId}
-              className='f-12-500 h-6 max-w-40 gap-x-1.5 px-2.5 py-1.5 whitespace-nowrap'
+              className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5'
               onClick={() => handleButtonClick(cta)}
               disabled={isLoading || ctaLoading.includes(loadingId)}
               isLoading={isLoading && ctaLoading.includes(loadingId)}
@@ -125,9 +126,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
               {cta?.cta_config?.icon_identifier && (
                 <SvgSpriteLoader id={cta?.cta_config?.icon_identifier} size={12} className='shrink-0' />
               )}
-              <span className='f-12-500 truncate capitalize' title={cta?.display_name}>
-                {cta?.display_name}
-              </span>
+              <span className='f-12-500'>{capitalizeFirstLetter(cta?.display_name)}</span>
             </Button>
           );
         })}
