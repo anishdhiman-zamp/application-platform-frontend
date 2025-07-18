@@ -1,4 +1,4 @@
-import { type FC, Fragment, useMemo } from 'react';
+import { type FC, Fragment, useCallback, useMemo } from 'react';
 import { Color } from '@tiptap/extension-color';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Underline } from '@tiptap/extension-underline';
@@ -18,6 +18,8 @@ import {
   ToolbarConfig,
 } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 import TooltipV2 from '@/components/common/TooltipV2';
+import type { EmailAttachmentType } from '@/types/api/processApi.types';
+import { debounce } from '@/utils/common';
 
 const BodyAndFooter: FC<BodyAndFooterProps> = ({
   initialContent = '<p></p>',
@@ -30,7 +32,11 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
   processId,
   artifactId,
   isEmailSending,
+  onContentChange,
+  onAttachmentsChange,
 }) => {
+  const debouncedContentChange = debounce(onContentChange, 300);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -43,6 +49,10 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       }),
     ],
     content: initialContent,
+    autofocus: true,
+    onUpdate: ({ editor }) => {
+      debouncedContentChange?.(editor?.getHTML());
+    },
   });
 
   const toolbarConfigs: ToolbarConfig[] = useMemo(
@@ -55,7 +65,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       },
       {
         id: '2',
-        icon: 'redo-01',
+        icon: 'flip-forward',
         onClick: () => editor?.chain().focus().redo().run(),
         showDivider: true,
         tooltipBody: 'Redo',
@@ -116,6 +126,15 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
     [editor],
   );
 
+  const handleOnAttachmentChange = useCallback(
+    (attachments: EmailAttachmentType[]) => {
+      onAttachmentsChange?.(attachments);
+    },
+    [onAttachmentsChange],
+  );
+
+  const handleOnSend = useCallback(() => onSend?.(editor?.getHTML() || ''), [editor, onSend]);
+
   return (
     <>
       <div className={cn('relative h-[calc(100vh-376px)] overflow-hidden px-4 pt-0 pb-3', className)}>
@@ -125,7 +144,12 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
           </div>
           {attachments?.length > 0 && (
             <div className='min-h-12'>
-              <Attachments attachments={attachments} processId={processId} artifactId={artifactId} />
+              <Attachments
+                attachments={attachments}
+                processId={processId}
+                artifactId={artifactId}
+                onChange={handleOnAttachmentChange}
+              />
             </div>
           )}
         </div>
@@ -147,12 +171,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         )}
       </div>
       <div className={cn('border-GRAY_500 flex items-center justify-between border-t px-4 py-3', footerClassName)}>
-        <Button
-          size='small'
-          onClick={() => onSend?.(editor?.getHTML() || '')}
-          disabled={isEmailSending}
-          isLoading={isEmailSending}
-        >
+        <Button size='small' onClick={handleOnSend} disabled={isEmailSending} isLoading={isEmailSending}>
           Send
         </Button>
         <Button variant='ghost' size='xxsmall' onClick={onDelete} disabled={isEmailSending}>

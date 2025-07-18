@@ -104,6 +104,11 @@ export type SelectedItemsType = {
 };
 
 export type MembersTeamPropsType = {
+  userInfo: {
+    user_id: string;
+    name: string;
+    email: string;
+  };
   organizationId: string;
   userId: string;
   hasPeoplePolicy: boolean;
@@ -133,4 +138,5 @@ export type PostTeamsByOrganizationIdPayload = {
 export type PostAddTeamToAudiencePayload = {
   user_id: string;
   team_id: string;
+  team_name?: string;
 };

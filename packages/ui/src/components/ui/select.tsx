@@ -1,9 +1,9 @@
 'use client';
 
-import * as React from 'react';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@zamp-platform/ui/utils';
 import { ICON_SPRITE_TYPES, SizeType } from '@zamp-platform/ui/types';
+import { cn } from '@zamp-platform/ui/utils';
+import { ChevronDown } from 'lucide-react';
+import * as React from 'react';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '../assets';
 import { Combobox } from './combobox';
@@ -138,6 +138,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
               'f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
               value ? 'text-primary' : 'text-gray-700',
             )}
+            data-testid='select-trigger'
           >
             <span className='flex-1 truncate'>
               {selectedOption?.display_value || selectedOption?.label || placeholder}

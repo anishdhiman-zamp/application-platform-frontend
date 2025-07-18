@@ -143,7 +143,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     },
     {
       skip: !id,
-      refetchOnMountOrArgChange: true,
+      refetchOnMountOrArgChange: false,
     },
   );
 
@@ -693,6 +693,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 query={exportsDatasetQuery}
                 datasetId={id as string}
                 hasFilters={!!Object.keys(selectedFilters)?.length}
+                tableRef={tableRef}
               />
             )}
             {!isReadOnly && (

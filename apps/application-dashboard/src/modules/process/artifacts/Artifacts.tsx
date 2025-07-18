@@ -26,11 +26,6 @@ import type {
 } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
-const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
-  ssr: false,
-  loading: () => <ArtifactLoader />,
-});
-
 const BrowserArtifact = dynamic(
   () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
   {
@@ -38,6 +33,10 @@ const BrowserArtifact = dynamic(
     loading: () => <ArtifactLoader />,
   },
 );
+
+const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
+  ssr: false,
+});
 
 interface ArtifactsProps {
   onClose: () => void;
@@ -84,7 +83,7 @@ const Artifacts = ({
       artifact_ids: artifactId,
     },
     {
-      refetchOnMountOrArgChange: false,
+      refetchOnMountOrArgChange: artifactType === ARTIFACT_TYPE.EMAIL,
       skip: !artifactId,
     },
   );
@@ -129,9 +128,10 @@ const Artifacts = ({
             </TabsContent>
             <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
               <PdfArtifact
-                pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
-                artifactId={id}
                 processId={processId}
+                artifactId={id}
+                pdfArtifact={artifactData as PdfArtifactsResponseType}
+                isArtifactLoading={isFetching}
                 key={id}
               />
             </TabsContent>
@@ -169,9 +169,10 @@ const Artifacts = ({
       case ARTIFACT_TYPE.PDF:
         return (
           <PdfArtifact
-            pdfArtifact={artifactData as PdfArtifactsResponseType}
-            artifactId={id}
             processId={processId}
+            artifactId={id}
+            pdfArtifact={artifactData as PdfArtifactsResponseType}
+            isArtifactLoading={isFetching}
             key={id}
           />
         );
@@ -191,6 +192,10 @@ const Artifacts = ({
     }
   }, [artifactType, artifactData, id, filters]);
 
+  const showArtifactLoader = useMemo(() => {
+    return isFetching && artifactType !== ARTIFACT_TYPE.PDF && activeTab !== PDF_DATASET_TAB.PDF;
+  }, [isFetching, artifactType, activeTab]);
+
   return (
     <div className='animate-fade-in relative h-full w-full'>
       <Tabs
@@ -207,7 +212,7 @@ const Artifacts = ({
           onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
         />
         <CommonWrapper
-          isLoading={isFetching}
+          isLoading={showArtifactLoader}
           loader={<ArtifactLoader />}
           skeletonType={SkeletonTypes.CUSTOM}
           isError={isError}

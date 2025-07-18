@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DropdownMenu Components matches full menu structure snapshot 1`] = `
+<div
+  aria-hidden="true"
+  data-aria-hidden="true"
+>
+  <button
+    aria-controls="radix-«rn»"
+    aria-expanded="true"
+    aria-haspopup="menu"
+    data-state="open"
+    id="radix-«rm»"
+    type="button"
+  >
+    Menu
+  </button>
+</div>
+`;

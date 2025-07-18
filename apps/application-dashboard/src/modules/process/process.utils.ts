@@ -3,6 +3,7 @@ import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
+import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 /**
  * Formats date string to include day and time
@@ -55,3 +56,19 @@ export const formatTime = (time: number) => {
 
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
+
+/**
+ * Transforms email artifact data into a standardized format for display
+ * @param {EmailArtifactsResponseType} emailArtifact - The email artifact data
+ * @returns {Object} Formatted email data with header, content, and attachments
+ */
+export const getInitialEmailData = (emailArtifact: EmailArtifactsResponseType) => ({
+  header: {
+    heading: emailArtifact.heading,
+    to_mail_ids: emailArtifact.to_mail_ids ?? [],
+    cc_mail_ids: emailArtifact.cc_mail_ids ?? [],
+    bcc_mail_ids: emailArtifact.bcc_mail_ids ?? [],
+  },
+  content: emailArtifact.body_html || `<p>${emailArtifact.body_plain_text}</p>`,
+  attachments: emailArtifact.attachments ?? [],
+});

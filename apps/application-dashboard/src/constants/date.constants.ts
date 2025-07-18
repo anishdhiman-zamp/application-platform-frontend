@@ -1,4 +1,5 @@
-import { format } from 'date-fns';
+import format from 'date-fns/format';
+import enUS from 'date-fns/locale/en-US';
 import { OptionsType } from 'types/commonTypes';
 
 export const MONTH_NAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -27,6 +28,9 @@ export const DATE_FORMATS = {
   HH_MM_A: 'h:mm a',
   EEE_MMM_d_h_mm_a: 'EEE, MMM d, h:mm a',
   MMM_d_yyyy_h_mm_a: 'MMM d, yyyy, h:mma',
+  ddMMyyyy: 'dd/MM/yyyy',
+  RELATIVE: 'relative',
+  YYYYMMDD_SLASH: 'yyyy/MM/dd',
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);
@@ -184,4 +188,19 @@ export const PERIODICITY_REGEX = {
   [PERIODICITY_TYPES.YEARLY]: /\b(?:this\s+)?year\b/i,
   [PERIODICITY_TYPES.MONTHLY]: /\b(?:this\s+)?month\b/i,
   [PERIODICITY_TYPES.QUARTERLY]: /\b(?:this\s+)?quarter\b/i,
+};
+
+export const DAY_ONLY_MAP: Record<string, string> = {
+  lastWeek: "'Last' eeee",
+  yesterday: "'Yesterday'",
+  today: "'Today'",
+  tomorrow: "'Tomorrow'",
+  nextWeek: "'Next' eeee",
+  other: 'MM/dd/yyyy', // fallback for older/newer dates
+};
+
+// Create a custom locale with modified formatRelative
+export const CUSTOM_LOCALE = {
+  ...enUS,
+  formatRelative: (token: string) => DAY_ONLY_MAP[token],
 };

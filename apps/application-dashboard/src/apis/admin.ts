@@ -19,6 +19,7 @@ import {
   UpsertTemplateResponseType,
 } from 'types/api/admin.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 
 const Admin = baseApi.injectEndpoints({
@@ -27,6 +28,7 @@ const Admin = baseApi.injectEndpoints({
       query: ({ datasetId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.ADMIN_DATASET_DISPLAY_CONFIG_GET, { datasetId }),
       }),
+      providesTags: [APITags.GET_DATASET_DISPLAY_CONFIG],
     }),
     postDatasetDisplayConfig: builder.mutation<
       PostDatasetDisplayConfigResponseType,
@@ -61,6 +63,7 @@ const Admin = baseApi.injectEndpoints({
       query: () => ({
         url: API_ENDPOINTS.ADMIN_DATASET_ALL_GET,
       }),
+      providesTags: [APITags.GET_DATASET_ALL_LISTING],
     }),
     getTemplates: builder.mutation<GetTemplatesResponseType, GetTemplatesRequestType>({
       query: (body) => ({
@@ -75,6 +78,13 @@ const Admin = baseApi.injectEndpoints({
         method: REQUEST_TYPES.PATCH,
         body: rest,
       }),
+      // Invalidate tags based on a condition from params (arg)
+      onQueryStarted: async (arg, { dispatch }) => {
+        // Check the flag passed in the params and invalidate tags accordingly
+        if (arg.invalidateTags) {
+          dispatch(baseApi.util.invalidateTags(arg.invalidateTags));
+        }
+      },
     }),
     upsertTemplate: builder.mutation<UpsertTemplateResponseType, UpsertTemplateRequestType>({
       query: (body) => ({

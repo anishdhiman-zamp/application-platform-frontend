@@ -2,6 +2,24 @@
 @import 'tw-animate-css';
 @config '../tailwind.config.ts';
 
+@import '@pdfslick/react/dist/pdf_viewer.css' layer(utilities);
+
+/* Custom PDF Search Highlight Colors */
+@layer utilities {
+  /* Override PDF search highlight colors */
+  .pdfSlick .highlight {
+    opacity: 0.2 !important;
+    background: #2445ff !important;
+    mix-blend-mode: multiply !important;
+  }
+
+  .pdfSlick .highlight.selected {
+    opacity: 0.3 !important;
+    background: #2445ff !important;
+    mix-blend-mode: multiply !important;
+  }
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -31,6 +49,7 @@
 @layer utilities {
   :root {
     font-family: 'Inter';
+    color-scheme: light;
   }
 
   * > ::-webkit-scrollbar {
@@ -939,8 +958,7 @@
   line-height: 10px;
 }
 
-[data-sonner-toast][data-expanded='false'][data-front='false'][data-styled='false']
-  > * {
+[data-sonner-toast][data-expanded='false'][data-front='false'][data-styled='false'] > * {
   opacity: 0;
 }
 

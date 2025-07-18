@@ -34,15 +34,15 @@ default:
     injection:
       enabled: false
     volumeMount:
-      enabled: true
-      secrets:
-      - data:  
-          - fileName: ".env"
-            mountPath: "/home/node/app/.env"
-            secretKey: zamp-stg-us-application-platform-frontend-env
-        refreshInterval: 1h
-        secretStoreName: aws-secrets-manager
-        secretName: env
+      enabled: false
+      # secrets:
+      # - data:  
+      #     - fileName: ".env"
+      #       mountPath: "/home/node/app/.env"
+      #       secretKey: zamp-stg-us-application-platform-frontend-env
+      #   refreshInterval: 1h
+      #   secretStoreName: aws-secrets-manager
+      #   secretName: env
 deployment:
   - name: "svc"
     service:

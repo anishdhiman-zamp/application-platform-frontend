@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { cn } from 'utils/common';
 
 type CardsListProps = {
@@ -14,7 +14,9 @@ const CardsList: FC<CardsListProps> = ({
 }) => {
   return (
     <div className={cn('grid', gridClassName)}>
-      {cards?.map((cardData, index) => <CardComponent key={index} data={cardData} />)}
+      {cards?.map((cardData, index) => (
+        <CardComponent key={index} data={cardData} />
+      ))}
     </div>
   );
 };

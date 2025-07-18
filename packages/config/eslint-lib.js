@@ -29,7 +29,7 @@ module.exports = {
     'node_modules/',
     'dist/',
     '.turbo/',
-    'node_modules/',
+    'coverage/',
   ],
   overrides: [
     {

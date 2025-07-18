@@ -67,6 +67,11 @@ export type DatasetTabType = {
   filters?: Record<string, FilterConfig>;
 };
 
+export type HandleDisplayConfigUpdateParamsType = {
+  columnId: string;
+  value: string | boolean;
+};
+
 export type FormatColumnsParamsType = {
   filterConfig: DatasetFilterConfigResponseType[];
   currentUserHasEditAccess?: boolean;
@@ -80,4 +85,5 @@ export type FormatColumnsParamsType = {
   isMenuDisabled?: boolean;
   missingFields?: MissingFieldItemType[];
   wrapLink?: boolean;
+  isSelfServe?: boolean;
 };

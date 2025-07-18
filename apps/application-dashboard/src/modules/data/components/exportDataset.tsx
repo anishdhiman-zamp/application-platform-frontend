@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { type RefObject, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import type { AgGridReact } from 'ag-grid-react';
 import {
   useLazyGetActionStatusQuery,
   useLazyGetDatasetExportQuery,
@@ -9,6 +10,7 @@ import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
+import { prepareExportQuery } from 'modules/data/data.utils';
 import { useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -20,9 +22,10 @@ interface ExportDatasetProps {
   query: string;
   datasetId: string;
   hasFilters: boolean;
+  tableRef: RefObject<AgGridReact<any> | null>;
 }
 
-const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => {
+const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDatasetProps) => {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { startPolling } = usePolling();
@@ -62,9 +65,14 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
 
   const downloadCsv = async () => {
     setShowExportStatus(true);
+    const mergedQuery = prepareExportQuery(query, tableRef);
 
     if (isPolling) return;
-    getDatasetExport({ datasetId, query_config: query })
+
+    getDatasetExport({
+      datasetId,
+      query_config: mergedQuery,
+    })
       .unwrap()
       .then((data) => {
         if (data?.workflow_id) {

@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sheet Component - Functional Tests matches snapshot for basic sheet 1`] = `null`;
+
+exports[`Sheet Component - Functional Tests matches snapshot for sheet with all components 1`] = `null`;
+
+exports[`Sheet Component - Functional Tests matches snapshot for sheet with close button 1`] = `null`;
+
+exports[`Sheet Component - Functional Tests matches snapshot for sheet with custom classes 1`] = `null`;
+
+exports[`Sheet Component - Functional Tests matches snapshot for sheet with different sizes 1`] = `null`;

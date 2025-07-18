@@ -1,11 +1,13 @@
 'use client';
 
-import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { X } from 'lucide-react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@zamp-platform/ui/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { X } from 'lucide-react';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
+
+export const SHEET_ANIMATION_DURATION = 300;
 
 interface SheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
   open?: boolean;
@@ -31,7 +33,7 @@ const Sheet = ({ onOpenChange, open, ...props }: SheetProps) => {
         if (onOpenChange) {
           onOpenChange(false);
         }
-      }, 300); // Match this with your animation duration
+      }, SHEET_ANIMATION_DURATION);
     }
   };
 
@@ -46,7 +48,7 @@ const SheetPortal = SheetPrimitive.Portal;
 const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Overlay>) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-1001 bg-black/20 duration-300!',
+      `data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-1001 bg-black/20 duration-[${SHEET_ANIMATION_DURATION}ms]!`,
       className,
     )}
     {...props}
@@ -55,7 +57,7 @@ const SheetOverlay = ({ className, ...props }: React.ComponentProps<typeof Sheet
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  'fixed bg-background shadow-drawer-shadow transition-all duration-300! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!',
+  `fixed bg-background shadow-drawer-shadow transition-all duration-[${SHEET_ANIMATION_DURATION}ms]! ease-in-out flex flex-col rounded-lg m-4 z-1001 h-[calc(100vh-2rem)]!`,
   {
     variants: {
       side: {
@@ -138,13 +140,13 @@ SheetBody.displayName = 'SheetBody';
 
 export {
   Sheet,
-  SheetPortal,
-  SheetOverlay,
-  SheetTrigger,
+  SheetBody,
   SheetClose,
   SheetContent,
   SheetHeader,
-  SheetHeaderTitle,
   SheetHeaderActions,
-  SheetBody,
+  SheetHeaderTitle,
+  SheetOverlay,
+  SheetPortal,
+  SheetTrigger,
 };

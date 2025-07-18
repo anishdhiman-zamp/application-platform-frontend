@@ -86,6 +86,22 @@ export type GetTeamsByOrganizationIdResponseType = {
     },
   ];
 };
+
+export type GetUserTeamsByOrganizationIdResponseType = {
+  user_id: string;
+  name: string;
+  email: string;
+  teams: {
+    team_id: string;
+    name: string;
+    description: string;
+    metadata: {
+      color_hex_code: string;
+    };
+    team_membership_id: string;
+  }[];
+};
+
 export type GetTeamsByOrganizationIdRequestType = {
   organizationId: string;
 };

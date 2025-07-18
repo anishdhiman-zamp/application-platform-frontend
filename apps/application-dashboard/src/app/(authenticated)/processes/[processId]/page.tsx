@@ -15,7 +15,7 @@ const Process = () => {
   });
 
   const checkValidProcess = () => {
-    if (params?.processId) {
+    if (params?.processId && processes) {
       const processId = params?.processId as string;
       const isValidProcessId = processes?.some((process) => process.id === processId);
 

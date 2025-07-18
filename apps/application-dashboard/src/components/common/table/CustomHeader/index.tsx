@@ -1,22 +1,32 @@
-import { FC, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, KeyboardEvent, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ColDef, ColumnHeaderClickedEvent, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES, PIVOT_HEADER_BG } from 'constants/icons';
+import { PIVOT_HEADER_BG } from 'constants/icons';
+import { format } from 'date-fns';
 import AddTag from 'modules/data/AddTag';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { DatasetFilterConfigMetadataType, DatasetUpdateResponseType } from 'types/api/dataset.types';
-import { SIZE_TYPES } from 'types/common/components';
 import { MapAny } from 'types/commonTypes';
-import { ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
-import { cn } from 'utils/common';
-import { RuleColumnDetailsType } from '@/modules/data/data.types';
-import { Button } from 'components/common/button/Button';
+import { cn, formatRelativeWithCustomLocale } from 'utils/common';
+import { DATE_FORMATS } from '@/constants/date.constants';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
+import { ColumnOrderingVisibilityType, RuleColumnDetailsType } from '@/modules/data/data.types';
+import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
+import { ResourceType } from '@/types/api/policies.types';
 import PositionedMenuWrapper from 'components/common/PositionedMenuWrapper';
-import { CustomHeaderMenuOptions } from 'components/common/table/CustomHeader/customHeader.constants';
+import {
+  CustomHeaderMenuOptions,
+  DateFormatOptions,
+  DisplayTypeNonApplicableFilterTypes,
+  DisplayTypeOptions,
+} from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -39,6 +49,8 @@ type CustomHeaderProps = {
   className?: string;
   headerBackgroundNeeded?: boolean;
   hideFloatingFilter?: boolean;
+  dateFormat?: string;
+  isSelfServe?: boolean;
 };
 const CustomHeader: FC<CustomHeaderProps> = ({
   metadata,
@@ -53,10 +65,14 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   className,
   headerBackgroundNeeded = false,
   hideFloatingFilter = false,
+  dateFormat,
+  isSelfServe,
 }) => {
   const { colId, colDef } = column;
 
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const { handleAliasUpdate, handleDateFormatUpdate, handleTypeUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
 
   const {
     state: { selectedFilters },
@@ -65,6 +81,9 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddTagOpen, setIsAddTagOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isDateFormatOpen, setIsDateFormatOpen] = useState(false);
+  const [isTypeOpen, setIsTypeOpen] = useState(false);
+  const [headerName, setHeaderName] = useState(colDef?.headerName ?? colId);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const lastResizedTimeRef = useRef<number | null>(null); // Track last resize time
 
@@ -72,6 +91,15 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const isTagColumn = metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG;
   const sortState = tableRef?.current?.api?.getColumn(colId)?.getSort();
   const isFilterActive = tableRef?.current?.api?.getColumn(colId)?.isFilterActive();
+
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.DATASET,
+    resourceId: datasetId,
+  });
+
+  const isCurrentUserAdmin = useMemo(() => {
+    return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
+  }, [checkUserPrivilege]);
 
   const filteredMenuOptions = useMemo(
     () =>
@@ -85,10 +113,14 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     [isTagColumn, sortState],
   );
 
-  const handleMenuClose = () => setIsMenuOpen(false);
+  const handleMenuClose = () => {
+    handleHeaderNameBlur();
+    setIsMenuOpen(false);
+  };
 
   const handleMenuOptionClick = (option: CustomHeaderMenuOptionTypes) => {
     handleMenuClose();
+    let columnOrderingVisibility: ColumnOrderingVisibilityType[] = [];
 
     switch (option) {
       case CustomHeaderMenuOptionTypes.RULES:
@@ -118,6 +150,21 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         tableRef?.current?.api?.applyColumnState({
           state: [{ colId: colId, sort: null }],
         });
+        break;
+      case CustomHeaderMenuOptionTypes.DATE_FORMAT:
+        setIsDateFormatOpen(true);
+        break;
+      case CustomHeaderMenuOptionTypes.HIDE_COLUMN:
+        tableRef?.current?.api?.setColumnsVisible([colId], false);
+        columnOrderingVisibility = getColumnOrderingVisibilityForCurrentDataset(datasetId).map((columnItem) => ({
+          ...columnItem,
+          isVisible: columnItem.colId === colId ? !columnItem.isVisible : columnItem.isVisible,
+        }));
+
+        updateLocalStorage(columnOrderingVisibility, datasetId);
+        break;
+      case CustomHeaderMenuOptionTypes.TYPE:
+        setIsTypeOpen(true);
         break;
     }
   };
@@ -166,6 +213,16 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     setIsFilterOpen(false);
   };
 
+  const handleDateFormatClose = () => {
+    setIsDateFormatOpen(false);
+    setIsMenuOpen(true);
+  };
+
+  const handleTypeClose = () => {
+    setIsTypeOpen(false);
+    setIsMenuOpen(true);
+  };
+
   const handleColumnResizing = useCallback(
     (event: ColumnResizedEvent) => {
       if (event.column?.getId() !== colId) return;
@@ -178,6 +235,33 @@ const CustomHeader: FC<CustomHeaderProps> = ({
     },
     [colId],
   );
+
+  const handleHeaderNameBlur = () => {
+    const updatedHeaderName = headerName?.trim();
+
+    if (updatedHeaderName === colDef?.headerName || !updatedHeaderName) return;
+    handleAliasUpdate?.({ columnId: colId, value: updatedHeaderName });
+  };
+
+  const handleHeaderNameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      handleHeaderNameBlur();
+    }
+  };
+
+  const handleDateFormatChange = (value: string) => {
+    if (value === dateFormat) return;
+    handleDateFormatUpdate?.({ columnId: colId, value });
+  };
+
+  const handleTypeChange = (value: string) => {
+    if (value === metadata?.custom_type) return;
+
+    handleTypeUpdate?.({ columnId: colId, value });
+  };
 
   // Track column resize
   useEffect(() => {
@@ -198,6 +282,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
       tableRef?.current?.api?.removeEventListener('columnHeaderClicked', toggleMenu);
     };
   }, [colId, tableRef, toggleMenu, hideFloatingFilter]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      setHeaderName(colDef?.headerName ?? colId);
+    }
+  }, [isMenuOpen]);
 
   return (
     <div ref={menuRef} className='relative -mx-4 h-full w-full flex-1'>
@@ -245,6 +335,70 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           menuPosition={menuPosition}
           onClose={handleMenuClose}
         >
+          {isSelfServe && isCurrentUserAdmin && (
+            <Input
+              size='small'
+              placeholder='Header'
+              value={headerName}
+              onChange={(e) => setHeaderName(e.target.value)}
+              onBlur={handleHeaderNameBlur}
+              autoFocus
+              wrapperClassName='m-2'
+              error={!headerName?.trim()}
+              icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+              onKeyDown={handleHeaderNameKeyDown}
+            />
+          )}
+          {isSelfServe && isCurrentUserAdmin && filterType === FILTER_TYPES.DATE_RANGE && (
+            <div
+              className='hover:bg-GRAY_100 group flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMenuOptionClick(CustomHeaderMenuOptionTypes.DATE_FORMAT);
+              }}
+            >
+              <div className='flex items-center gap-1.5'>
+                <SvgSpriteLoader id='calendar' size={12} />
+                <span className='f-12-500'>Date Range</span>
+              </div>
+              <div className='flex items-center gap-1'>
+                <span className='f-11-450 text-gray-700'>
+                  {DateFormatOptions.find((item) => item.value === dateFormat)?.label ?? 'Full Date'}
+                </span>
+                <SvgSpriteLoader
+                  id='arrow-narrow-right'
+                  size={12}
+                  color={COLORS.GRAY_600}
+                  className='hidden group-hover:block'
+                />
+              </div>
+            </div>
+          )}
+          {isSelfServe && isCurrentUserAdmin && !DisplayTypeNonApplicableFilterTypes.includes(filterType) && (
+            <div
+              className='hover:bg-GRAY_100 group flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMenuOptionClick(CustomHeaderMenuOptionTypes.TYPE);
+              }}
+            >
+              <div className='flex items-center gap-1.5'>
+                <SvgSpriteLoader id='columns-02' size={12} />
+                <span className='f-12-500'>Type</span>
+              </div>
+              <div className='flex items-center gap-1'>
+                <span className='f-11-450 text-gray-700'>
+                  {DisplayTypeOptions.find((item) => item.value === metadata?.custom_type)?.label ?? 'Default'}
+                </span>
+                <SvgSpriteLoader
+                  id='arrow-narrow-right'
+                  size={12}
+                  color={COLORS.GRAY_600}
+                  className='hidden group-hover:block'
+                />
+              </div>
+            </div>
+          )}
           {filteredMenuOptions.map((option) => (
             <div
               key={option.value}
@@ -261,14 +415,12 @@ const CustomHeader: FC<CustomHeaderProps> = ({
           {isTagColumn && (
             <div className='px-2.5 py-3'>
               <Button
-                id='add-tag-button'
-                iconProps={{ id: 'tag-01', iconCategory: ICON_SPRITE_TYPES.FINANCE_AND_ECOMMERCE }}
-                size={SIZE_TYPES.SMALL}
-                className='w-full'
-                iconPosition={ICON_POSITION_TYPES.LEFT}
+                className='flex w-full items-center gap-1 [&_svg]:size-[14px]'
                 onClick={() => handleMenuOptionClick(CustomHeaderMenuOptionTypes.ADD_TAG)}
+                size='small'
               >
-                Add Tag
+                <SvgSpriteLoader id='tag-01' />
+                <span>Add Tag</span>
               </Button>
               {!!filtersCount && (
                 <div className='f-11-400 text-GRAY_700 mt-1.5'>
@@ -313,6 +465,86 @@ const CustomHeader: FC<CustomHeaderProps> = ({
                 }
               : {})}
           />
+        </PositionedMenuWrapper>
+      )}
+      {isDateFormatOpen && (
+        <PositionedMenuWrapper
+          id='custom-header-date-format-menu'
+          className='w-60 px-1 py-3'
+          childrenWrapperClassName='overflow-auto!'
+          menuPosition={menuPosition}
+          onClose={handleDateFormatClose}
+        >
+          <div className='mb-3.5 flex items-center gap-1.5 px-2'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-3.5 w-3.5 p-0 [&_svg]:size-3.5'
+              onClick={handleDateFormatClose}
+            >
+              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={COLORS.GRAY_900} />
+            </Button>
+            <span className='f-13-500'>Date Format</span>
+          </div>
+          <div>
+            {DateFormatOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant='ghost'
+                size='medium'
+                className={cn('w-full', {
+                  'bg-GRAY_100':
+                    dateFormat === option.value || (!dateFormat && option.value === DATE_FORMATS.ddMMMyyyy),
+                })}
+                onClick={() => handleDateFormatChange(option.value)}
+              >
+                <span className='f-12-500 w-[102px] text-left'>{option.label}</span>
+                <span className='f-11-450 w-[102px] text-left text-gray-900'>
+                  {DATE_FORMATS.RELATIVE === option.value
+                    ? formatRelativeWithCustomLocale()
+                    : format(new Date(), option.value)}
+                </span>
+                <SvgSpriteLoader
+                  id='check'
+                  size={12}
+                  color={COLORS.GRAY_900}
+                  className={cn('opacity-0', {
+                    'opacity-100':
+                      dateFormat === option.value || (!dateFormat && option.value === DATE_FORMATS.ddMMMyyyy),
+                  })}
+                />
+              </Button>
+            ))}
+          </div>
+        </PositionedMenuWrapper>
+      )}
+      {isTypeOpen && (
+        <PositionedMenuWrapper
+          id='custom-header-type-menu'
+          className='w-60 px-1 py-3'
+          childrenWrapperClassName='overflow-auto!'
+          menuPosition={menuPosition}
+          onClose={handleTypeClose}
+        >
+          <div className='mb-3.5 flex items-center gap-1.5 px-2'>
+            <Button variant='ghost' size='icon' className='h-3.5 w-3.5 p-0 [&_svg]:size-3.5' onClick={handleTypeClose}>
+              <SvgSpriteLoader id='arrow-narrow-left' size={14} color={COLORS.GRAY_900} />
+            </Button>
+            <span className='f-13-500'>Display type</span>
+          </div>
+          <div>
+            {DisplayTypeOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant='ghost'
+                size='medium'
+                className='w-full justify-between'
+                onClick={() => handleTypeChange(option.value)}
+              >
+                <span className='f-12-500'>{option.label}</span>
+              </Button>
+            ))}
+          </div>
         </PositionedMenuWrapper>
       )}
     </div>

@@ -18,7 +18,7 @@ export const ROUTES_PATH = {
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   ADMIN_ASSETS: '/admin/assets',
-  PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
+  PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
@@ -45,8 +45,8 @@ export const getPageDatasetRoute = (pageId: string, datasetId: string, query?: R
   }`;
 };
 
-export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {
-  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId).replace(':datasetIds', datasetIds?.join(','))}`;
+export const getPageDrilldownMultiRoute = (pageId: string) => {
+  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId)}`;
 };
 
 export const getPageDatasetDrilldownRoute = (pageId: string, datasetId: string, rowId: string) => {

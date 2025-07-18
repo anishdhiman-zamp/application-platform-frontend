@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Textarea matches snapshot (default) 1`] = `
+<textarea
+  class="border-input placeholder:text-GRAY_700 flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+  placeholder="Type here"
+/>
+`;

@@ -53,7 +53,7 @@ const PositionedMenuWrapper: FC<PositionedMenuWrapperProps> = ({
       ref={menuRef}
     >
       <div
-        className={cn('max-h-[300px] overflow-y-scroll', childrenWrapperClassName)}
+        className={cn('max-h-[400px] overflow-y-scroll', childrenWrapperClassName)}
         data-testid={`menu-wrapper-children-${id}`}
       >
         {children}

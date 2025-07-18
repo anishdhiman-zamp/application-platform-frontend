@@ -1,4 +1,7 @@
+import { FILTER_TYPES } from '@/components/filter/filter.types';
+import { DATE_FORMATS } from '@/constants/date.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 
 export const CustomHeaderMenuOptions = [
   {
@@ -26,4 +29,49 @@ export const CustomHeaderMenuOptions = [
     value: CustomHeaderMenuOptionTypes.FILTER,
     iconId: 'filter-lines',
   },
+  {
+    label: 'Hide column',
+    value: CustomHeaderMenuOptionTypes.HIDE_COLUMN,
+    iconId: 'eye-off',
+  },
 ];
+
+export const DateFormatOptions = [
+  {
+    label: 'Full Date',
+    value: DATE_FORMATS.ddMMMyyyy,
+  },
+  {
+    label: 'mm/dd/yyyy',
+    value: DATE_FORMATS.MMddyyyy,
+  },
+  {
+    label: 'dd/mm/yyyy',
+    value: DATE_FORMATS.ddMMyyyy,
+  },
+  {
+    label: 'yyyy/mm/dd',
+    value: DATE_FORMATS.YYYYMMDD_SLASH,
+  },
+  {
+    label: 'Relative',
+    value: DATE_FORMATS.RELATIVE,
+  },
+];
+
+export const DisplayTypeOptions = [
+  {
+    label: 'Chips',
+    value: CUSTOM_COLUMNS_TYPE.CHIP,
+  },
+  {
+    label: 'Tags',
+    value: CUSTOM_COLUMNS_TYPE.TAG,
+  },
+  {
+    label: 'Default',
+    value: '',
+  },
+];
+
+export const DisplayTypeNonApplicableFilterTypes = [FILTER_TYPES.AMOUNT_RANGE, FILTER_TYPES.DATE_RANGE];

@@ -82,7 +82,9 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
             />
           </TooltipV2>
         </div>
-        {summary?.summary?.summary_items?.map((section) => <Summary key={section?.title} data={section} />)}
+        {summary?.summary?.summary_items?.map((section) => (
+          <Summary key={section?.title} data={section} />
+        ))}
       </CommonWrapper>
       <CommonWrapper
         isLoading={isLoadingArtifacts}

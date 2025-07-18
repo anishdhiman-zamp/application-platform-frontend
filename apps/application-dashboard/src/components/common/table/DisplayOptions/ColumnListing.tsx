@@ -1,5 +1,6 @@
 import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -8,6 +9,11 @@ import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, ResponsiveGridLayoutType } from 'types/commonTypes';
+import { useGetDatasetDisplayConfigQuery } from '@/apis/admin';
+import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
+import { useResourceAccess } from '@/hooks/useResourceAccess';
+import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
+import { ResourceType } from '@/types/api/policies.types';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
@@ -20,9 +26,10 @@ type ColumnListingProps = {
   tableRef: RefObject<AgGridReact | null>;
   onClose: defaultFnType;
   datasetId: string;
+  isSelfServe?: boolean;
 };
 
-const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId }) => {
+const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId, isSelfServe = false }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
@@ -30,6 +37,26 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
   const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
   // State for grid layout
   const [layout, setLayout] = useState<ResponsiveGridLayoutType[]>([]);
+
+  const { checkUserPrivilege } = useResourceAccess({
+    resourceType: ResourceType.DATASET,
+    resourceId: datasetId,
+  });
+
+  const isCurrentUserAdmin = useMemo(() => {
+    return checkUserPrivilege(DATASET_ACCESS_PRIVILEGES.ADMIN);
+  }, [checkUserPrivilege]);
+
+  const { handleDefaultOrderUpdate } = useDisplayConfigUpdate(tableRef, datasetId);
+
+  const { data: displayConfigData } = useGetDatasetDisplayConfigQuery(
+    { datasetId },
+    { skip: !datasetId || !isCurrentUserAdmin },
+  );
+
+  const defaultColumnOrder = useMemo(() => {
+    return displayConfigData?.display_config?.map((item) => item.column);
+  }, [displayConfigData]);
 
   const handleCheckBoxClick = (column?: Column) => {
     if (!column) return;
@@ -120,6 +147,18 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     handleCheckBoxClick(column);
   };
 
+  const handleReset = () => {
+    const updatedLayout = defaultColumnOrder?.map((columnId, index) => ({
+      i: columnId,
+      x: 0,
+      y: index,
+      w: 1,
+      h: 1,
+    }));
+
+    onLayoutChange(updatedLayout);
+  };
+
   useEffect(() => {
     const allColumns = tableRef?.current?.api?.getColumns() ?? [];
     // Only get movable columns for display
@@ -171,7 +210,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
     <MenuWrapper
       id='display-options'
       className={`absolute! right-0 z-10 mt-1 min-w-[250px] overflow-visible!`}
-      childrenWrapperClassName='overflow-visible! max-h-[422px] w-full'
+      childrenWrapperClassName='overflow-visible! max-h-[462px] w-full'
       style={{ width: maxWidth }}
     >
       <div className='px-1 pt-1'>
@@ -245,6 +284,18 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId })
           ))}
         </ResponsiveGridLayout>
       </div>
+      {isSelfServe && (
+        <div className='flex justify-end gap-3 border-t p-1'>
+          <Button variant='ghost' size='small' className='px-1 text-gray-900' onClick={handleReset}>
+            Reset
+          </Button>
+          {isCurrentUserAdmin && (
+            <Button variant='ghost' size='small' className='px-1' onClick={handleDefaultOrderUpdate}>
+              Save as default view
+            </Button>
+          )}
+        </div>
+      )}
     </MenuWrapper>
   );
 };

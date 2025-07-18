@@ -14,6 +14,7 @@ import {
   type GetTeamPendingApprovalsResponse,
   GetTeamsByOrganizationIdRequestType,
   GetTeamsByOrganizationIdResponseType,
+  GetUserTeamsByOrganizationIdResponseType,
   InvitedAudiencesByOrganisationIdResponse,
   PatchChangeAudienceRoleInOrganizationType,
   PostAddTeamToAudienceRequestType,
@@ -112,6 +113,16 @@ const People = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_ALL_TEAMS],
       keepUnusedDataFor: 10,
+    }),
+    // User-wise teams
+    getUserTeamsByOrganizationId: builder.query<
+      GetUserTeamsByOrganizationIdResponseType[],
+      GetTeamsByOrganizationIdRequestType
+    >({
+      query: ({ organizationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.USER_TEAMS_BY_ORGANIZATION_ID_GET, { organizationId }),
+      }),
+      providesTags: [APITags.GET_ALL_TEAMS],
     }),
     postAddTeamToOrganization: builder.mutation<
       PostTeamsByOrganizationIdResponseType,
@@ -271,6 +282,7 @@ export const {
   useGetMembershipRequestsByOrganizationIdQuery,
   useGetOrganizationMembershipRequestsAllQuery,
   useGetTeamsByOrganizationIdQuery,
+  useGetUserTeamsByOrganizationIdQuery,
   usePostAddTeamToOrganizationMutation,
   usePostAddTeamToAudienceMutation,
   useRemoveTeamFromAudienceMutation,
