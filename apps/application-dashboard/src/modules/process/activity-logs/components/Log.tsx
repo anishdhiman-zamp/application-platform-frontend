@@ -1,4 +1,4 @@
-import { type FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
@@ -15,7 +15,6 @@ import { cn } from '@/utils/common';
 
 type LogProps = {
   indexNum?: number;
-  isFirstLog?: boolean;
   isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
@@ -26,7 +25,6 @@ type LogProps = {
 };
 
 const Log: FC<LogProps> = ({
-  isFirstLog = false,
   isLastLogOfDate = false,
   isLastLog = false,
   data,
@@ -46,9 +44,9 @@ const Log: FC<LogProps> = ({
   const lineRef = useRef<HTMLDivElement>(null);
   const shimmerControlRef = useRef<defaultFnType | null>(null);
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
-  const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
 
+  // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
     return (
       (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.SYSTEM) ||
@@ -56,6 +54,7 @@ const Log: FC<LogProps> = ({
     );
   }, [content_type, sender_type]);
 
+  // status indicator color
   const statusIndicatorColor = useMemo(() => {
     if (sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.REPLIED_TO_SECTION) {
       return {
@@ -80,11 +79,13 @@ const Log: FC<LogProps> = ({
     };
   }, [status, content_type, sender_type]);
 
+  // formatted time
   const formattedTime = useMemo(() => {
     return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
   }, [updated_at]);
 
-  const strokeShimmerSequence = (
+  // indicator-stroke shimmer sequence
+  const handleStrokeShimmerSequence = (
     showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
     shimmerControlRef: React.MutableRefObject<(() => void) | null>,
     cancelledRef: React.MutableRefObject<boolean>,
@@ -104,57 +105,30 @@ const Log: FC<LogProps> = ({
       // 3. After shimmer, loop again
       setTimeout(() => {
         if (!cancelledRef.current) {
-          strokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
+          handleStrokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
         }
       }, 2000); // shimmer duration
     }, 300); // stroke visible duration
   };
 
-  const runStrokeShimmerLoop = (
+  // indicator-stroke and shimmer loop
+  const runStrokeShimmerSequenceLoop = (
     showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
     shimmerControlRef: React.MutableRefObject<(() => void) | null>,
     cancelledRef: React.MutableRefObject<boolean>,
   ) => {
-    strokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
+    handleStrokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
   };
 
-  const handleLineHeightUpdate = useCallback(() => {
-    setLineHeight((prev) => prev + 1);
-  }, []);
-
   useEffect(() => {
-    const stopStrokeShimmerLoopRef = { current: false };
+    const stopStrokeShimmerSequenceLoopRef = { current: false };
 
-    runStrokeShimmerLoop(showBlueStrokeRef, shimmerControlRef, stopStrokeShimmerLoopRef);
+    runStrokeShimmerSequenceLoop(showBlueStrokeRef, shimmerControlRef, stopStrokeShimmerSequenceLoopRef);
 
     return () => {
-      stopStrokeShimmerLoopRef.current = true;
+      stopStrokeShimmerSequenceLoopRef.current = true;
     };
   }, []);
-
-  // line-height observer logic
-  useLayoutEffect(() => {
-    if (lineRef.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setLineHeight(entry.contentRect.height);
-        }
-      });
-
-      resizeObserver.observe(lineRef.current);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-  }, []);
-
-  // initial y value of indicator logic
-  const initialYValue = useMemo(() => {
-    if (isFirstLog) return 0;
-
-    return lineHeight > 0 ? -lineHeight : -58;
-  }, [isFirstLog, lineHeight]);
 
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
@@ -180,13 +154,13 @@ const Log: FC<LogProps> = ({
         <div className='relative flex w-5 flex-col items-center gap-[2px] pt-[2px] pr-5'>
           {/* Indicator */}
           <motion.div
-            initial={isLastLogOfDate ? { y: initialYValue } : false}
-            animate={isLastLogOfDate ? { y: 0 } : false}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: !isLastLog || staggerAnimationBegin ? 1 : 0 }}
             transition={{
               duration: 0.5,
               ease: 'linear',
+              // delay: 0.1,
             }}
-            onAnimationComplete={() => setStaggerAnimationBegin(true)}
             className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
           >
             <LogStatusIndicator
@@ -216,6 +190,7 @@ const Log: FC<LogProps> = ({
           className='flex w-full origin-top flex-col items-start justify-start pb-10'
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
+          onAnimationComplete={() => setStaggerAnimationBegin(true)}
         >
           <LogMessageAnimation
             text={message}
@@ -227,7 +202,6 @@ const Log: FC<LogProps> = ({
             showAnimation={staggerAnimationBegin}
             onStaggerComplete={() => {
               staggerCompleteRef.current = true;
-              handleLineHeightUpdate();
             }}
           />
 

@@ -21,8 +21,6 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
     return logs?.activity_logs?.map((log, index) => {
       const logDate = format(new Date(log.updated_at), DATE_FORMATS.YYYYMMDD);
       const showDateSeparator = logDate !== currentDate;
-      const isFirstLogOfDate =
-        index === 0 || format(new Date(logs?.activity_logs[index - 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
 
       const isLastLog = index === logs?.activity_logs?.length - 1;
       const isLastLogOfDate =
@@ -34,7 +32,6 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
       return {
         key: log?.log_group_id,
         showDateSeparator,
-        isFirstLogOfDate,
         isLastLogOfDate,
         isLastLog,
         log,
@@ -54,28 +51,25 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
 
   return (
     <>
-      {logsWithSeparators?.map(
-        ({ key, showDateSeparator, isFirstLogOfDate, isLastLogOfDate, isLastLog, log }, index) => {
-          const isOverallLastLog = index === logsWithSeparators?.length - 1;
+      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, isLastLog, log }, index) => {
+        const isOverallLastLog = index === logsWithSeparators?.length - 1;
 
-          return (
-            <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
-              {showDateSeparator && <DateSeparator date={log?.updated_at} />}
-              {isOverallLastLog && <div ref={bottomRef} />}
-              <Log
-                indexNum={index}
-                data={log}
-                isLastLogOfDate={isLastLogOfDate}
-                isLastLog={isLastLog}
-                isFirstLog={isFirstLogOfDate}
-                handleShowArtifacts={handleShowArtifacts}
-                processId={processId}
-                activityId={activityId}
-              />
-            </div>
-          );
-        },
-      )}
+        return (
+          <div key={`${key}${showDateSeparator ? '-separator' : ''}`}>
+            {showDateSeparator && <DateSeparator date={log?.updated_at} />}
+            {isOverallLastLog && <div ref={bottomRef} />}
+            <Log
+              indexNum={index}
+              data={log}
+              isLastLogOfDate={isLastLogOfDate}
+              isLastLog={isLastLog}
+              handleShowArtifacts={handleShowArtifacts}
+              processId={processId}
+              activityId={activityId}
+            />
+          </div>
+        );
+      })}
     </>
   );
 };

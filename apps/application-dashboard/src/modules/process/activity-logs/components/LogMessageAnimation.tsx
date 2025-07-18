@@ -30,7 +30,7 @@ const LogMessageAnimation: FC<LogMessageAnimationProps> = ({
     return <ShimmerText text={text} shimmerControlRef={shimmerControlRef} />;
   }
 
-  if (isLastLog && !shimmer) {
+  if (isLastLog) {
     return (
       <StaggerText
         text={text}

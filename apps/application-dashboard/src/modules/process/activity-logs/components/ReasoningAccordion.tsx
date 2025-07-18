@@ -16,6 +16,7 @@ interface ReasoningAccordionProps {
 
 const STORAGE_KEY = LOCAL_STORAGE_KEYS.OPEN_LOG_GROUP_IDS;
 const ACCORDION_ITEM = 'item-1';
+const ACCORDION_CONTENT_MAX_HEIGHT = 160;
 
 const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: ReasoningAccordionProps) => {
   const [openValue, setOpenValue] = useState<string | undefined>();
@@ -78,7 +79,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
     <Accordion
       type='single'
       collapsible
-      className={cn('mt-2 mb-8 w-full max-w-[485px] min-w-[180px]', openValue === ACCORDION_ITEM && 'mb-0.5')}
+      className={cn('mt-2 w-full max-w-[485px] min-w-[180px]')}
       value={openValue}
       onValueChange={setOpenValue}
     >
@@ -88,7 +89,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
             {!(status === LOG_STATUS.LOADING && isLastLog) && (
               <AccordionTrigger
                 className={cn(
-                  'f-12-450 text-GRAY_900 border-GRAY_100 absolute top-0 left-0 w-full gap-x-2 rounded-tl-md rounded-tr-md border bg-white p-1.5',
+                  'f-12-450 text-GRAY_900 border-GRAY_100 top-0 left-0 w-full gap-x-2 rounded-tl-md rounded-tr-md border bg-white p-1.5',
                   openValue !== ACCORDION_ITEM && 'rounded-br-md',
                 )}
               >
@@ -106,14 +107,13 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
             )}
 
             <motion.div
-              transition={{
-                duration: 0.3,
-                ease: 'easeOut',
-              }}
+              animate={{ maxHeight: openValue === ACCORDION_ITEM ? ACCORDION_CONTENT_MAX_HEIGHT : 0 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className='overflow-hidden'
             >
               <AccordionContent
                 className={cn(
-                  'f-12-450 border-GRAY_100 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll rounded-tl-md rounded-tr-md rounded-br-md border-x border-b bg-white px-4 pt-12 pb-4 [&::-webkit-scrollbar]:hidden',
+                  'f-12-450 border-GRAY_100 flex w-full flex-col gap-y-2 overflow-y-auto rounded-br-md border-x border-b bg-white px-4 py-4 [&::-webkit-scrollbar]:hidden',
                   isLastLog && status === LOG_STATUS.LOADING && 'border-t pt-4',
                 )}
               >
