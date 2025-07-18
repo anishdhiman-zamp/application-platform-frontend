@@ -15,6 +15,7 @@ import { cn } from '@/utils/common';
 
 type LogProps = {
   indexNum?: number;
+  isFirstLog?: boolean;
   isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
@@ -44,6 +45,7 @@ const Log: FC<LogProps> = ({
   const lineRef = useRef<HTMLDivElement>(null);
   const shimmerControlRef = useRef<defaultFnType | null>(null);
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
+  const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
 
   // sender info visibility
@@ -120,6 +122,10 @@ const Log: FC<LogProps> = ({
     handleStrokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
   };
 
+  const handleLineHeightUpdate = () => {
+    setLineHeight((prev) => prev + 1);
+  };
+
   useEffect(() => {
     const stopStrokeShimmerSequenceLoopRef = { current: false };
 
@@ -153,13 +159,14 @@ const Log: FC<LogProps> = ({
         {/* Indicator + Line */}
         <div className='relative flex w-5 flex-col items-center gap-[2px] pt-[2px] pr-5'>
           {/* Indicator */}
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: !isLastLog || staggerAnimationBegin ? 1 : 0 }}
             transition={{
               duration: 0.5,
               ease: 'linear',
-              // delay: 0.1,
+              delay: 0.1,
             }}
             className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
           >
@@ -171,9 +178,8 @@ const Log: FC<LogProps> = ({
               showBlueStrokeRef={showBlueStrokeRef}
             />
           </motion.div>
-
           {/* Line */}
-          <div className='relative h-full'>
+          <div className='relative h-full' id={`line-${lineHeight}`}>
             {!isLastLogOfDate && (
               <motion.div
                 className='absolute inset-0 flex origin-top flex-col items-center'
@@ -202,6 +208,7 @@ const Log: FC<LogProps> = ({
             showAnimation={staggerAnimationBegin}
             onStaggerComplete={() => {
               staggerCompleteRef.current = true;
+              handleLineHeightUpdate();
             }}
           />
 
