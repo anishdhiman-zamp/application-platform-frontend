@@ -15,7 +15,7 @@ export const REVEAL_ELEMENT_CHILD_MOTION_VARIANTS = {
     opacity: 1,
     transition: {
       duration: 0.6, // slower animation per item
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   },
 };
