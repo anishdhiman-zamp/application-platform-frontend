@@ -15,7 +15,6 @@ import { cn } from '@/utils/common';
 
 type LogProps = {
   indexNum?: number;
-  isFirstLog?: boolean;
   isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
