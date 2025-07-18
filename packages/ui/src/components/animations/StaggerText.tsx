@@ -30,7 +30,7 @@ export const StaggerText: FC<StaggeredTextProps> = ({
       transition: {
         delay: showAnimation ? delay + i * staggerRatePerLetter : 0,
         duration: 0.3,
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     }),
   };

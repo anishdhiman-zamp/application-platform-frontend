@@ -166,7 +166,6 @@ const Log: FC<LogProps> = ({
             transition={{
               duration: 0.5,
               ease: 'linear',
-              delay: 0.1,
             }}
             className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
           >
