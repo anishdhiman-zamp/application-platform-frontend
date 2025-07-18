@@ -212,7 +212,7 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
       scaleY: 1,
       transition: {
         duration: 0.5, // 500ms speed from 0 to 1
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     },
   },
@@ -224,7 +224,7 @@ export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
       opacity: 1,
       transition: {
         duration: 0.3, // 300ms speed from 0 to 1
-        ease: 'easeOut',
+        ease: 'easeOut' as const,
       },
     },
   },
