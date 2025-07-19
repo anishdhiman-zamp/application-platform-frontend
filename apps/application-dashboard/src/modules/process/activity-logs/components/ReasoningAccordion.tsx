@@ -113,8 +113,8 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
             >
               <AccordionContent
                 className={cn(
-                  'f-12-450 border-GRAY_100 flex w-full flex-col gap-y-2 overflow-y-auto rounded-br-md border-x border-b bg-white px-4 py-4 [&::-webkit-scrollbar]:hidden',
-                  isLastLog && status === LOG_STATUS.LOADING && 'border-t pt-4',
+                  'f-12-450 border-GRAY_100 flex max-h-[160px] w-full flex-col gap-y-2 overflow-y-auto rounded-br-md border-x border-b bg-white px-4 py-4 [&::-webkit-scrollbar]:hidden',
+                  isLastLog && status === LOG_STATUS.LOADING && 'rounded-tl-md rounded-tr-md border-t pt-4',
                 )}
               >
                 {thoughtSteps?.map((step, index) => (
