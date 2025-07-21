@@ -22,6 +22,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.PROCESS,
     resourceId: processId,
+    skipAudienceData: false,
   });
 
   const currentUserHasEditAccess = useMemo(() => {
