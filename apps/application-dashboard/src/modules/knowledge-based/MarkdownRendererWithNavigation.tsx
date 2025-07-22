@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
@@ -15,6 +15,7 @@ import { closeSidebar } from '@/store/slices/layout-configs';
 import { extractHeadersFromMarkdown, type HeaderItem } from '@/utils/markdownUtils';
 
 const MarkdownRendererWithNavigation = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [headers, setHeaders] = useState<HeaderItem[]>([]);
@@ -22,6 +23,16 @@ const MarkdownRendererWithNavigation = () => {
   const processId = params?.processId as string;
   const { data, isLoading, isError, refetch } = useGetKnowledgeBaseQuery({ processId });
   const [currentSelectedHeader, setCurrentSelectedHeader] = useState<string | null>(null);
+  const [isManualNavigation, setIsManualNavigation] = useState(false);
+
+  const handleManualHeaderSelection = useCallback((headerId: string | null) => {
+    setIsManualNavigation(true);
+    setCurrentSelectedHeader(headerId);
+
+    setTimeout(() => {
+      setIsManualNavigation(false);
+    }, 1000);
+  }, []);
 
   const getMarkdownContent = useCallback(async () => {
     if (!data || !data?.content_signed_url) return;
@@ -39,6 +50,58 @@ const MarkdownRendererWithNavigation = () => {
   useEffect(() => {
     dispatch(closeSidebar());
   }, []);
+
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (isManualNavigation) return;
+
+      const visibleHeaders = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+      if (visibleHeaders.length > 0) {
+        const topHeader = visibleHeaders[0];
+
+        setCurrentSelectedHeader(topHeader.target.id);
+      }
+    },
+    [isManualNavigation],
+  );
+
+  useEffect(() => {
+    if (!scrollContainerRef.current || headers.length === 0) return;
+
+    const observer = new IntersectionObserver(handleIntersection, {
+      root: scrollContainerRef.current,
+      rootMargin: '-10% -0px -90% 0px',
+      threshold: 0,
+    });
+
+    const headerElements: HTMLElement[] = [];
+
+    const collectHeaderElements = (headerItems: HeaderItem[]) => {
+      headerItems.forEach((header) => {
+        const element = document.getElementById(header.id);
+
+        if (element) {
+          headerElements.push(element);
+        }
+        if (header.children) {
+          collectHeaderElements(header.children);
+        }
+      });
+    };
+
+    collectHeaderElements(headers);
+
+    headerElements.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [headers, handleIntersection]);
 
   return (
     <CommonWrapper
@@ -59,10 +122,10 @@ const MarkdownRendererWithNavigation = () => {
           <KnowledgeBaseNavigation
             items={headers}
             currentSelectedHeader={currentSelectedHeader}
-            setCurrentSelectedHeader={setCurrentSelectedHeader}
+            setCurrentSelectedHeader={handleManualHeaderSelection}
           />
         </div>
-        <div className='markdown-body w-full overflow-y-auto p-6'>
+        <div ref={scrollContainerRef} className='markdown-body w-full overflow-y-auto p-6'>
           <div className='kb-viewer m-auto max-w-[800px] pb-20'>
             <ReactMarkdown rehypePlugins={[rehypeSlug]}>{markdownContent}</ReactMarkdown>
           </div>

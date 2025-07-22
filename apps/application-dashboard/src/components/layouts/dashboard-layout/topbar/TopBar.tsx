@@ -94,7 +94,7 @@ const Topbar = () => {
     }
 
     return <ShareButton />;
-  }, [pathname]);
+  }, [pathname, isKnowledgeBaseEnabled]);
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());
