@@ -37,6 +37,29 @@ type MetadataType = {
   view_name: string;
 };
 
+export type KnowledgeBaseRequestType = {
+  processId: string;
+};
+
+export interface KnowledgeBaseResponseType {
+  id: string;
+  organization_id: string;
+  process_id: string;
+  description: string;
+  version: number;
+  storage: {
+    provider: string;
+    bucket: string;
+    path: string;
+  };
+  metadata: {
+    notion_link: string;
+  };
+  content_signed_url: string;
+  effective_from: string; // ISO timestamp
+  effective_to: string; // ISO timestamp (could be "0001-01-01T00:00:00Z" as placeholder)
+}
+
 export type ActivityRunsDataResponseType = {
   rows: MapAny[];
   columns: MapAny[];

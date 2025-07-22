@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
@@ -17,7 +17,11 @@ import type { Organization } from '@/types/api/auth.types';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
-const OrgSwitcher = () => {
+type OrgSwitcherProps = {
+  isSidebarOpen: boolean;
+};
+
+export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
   const [isOrgSwitchIsInProgress, setIsOrgSwitchIsInProgress] = useState(false);
@@ -83,12 +87,16 @@ const OrgSwitcher = () => {
               >
                 {selectedOrg?.name?.[0] || defaultOrgName[0]}
               </div>
-              <div className='f-12-450 flex-1'>{selectedOrg?.name || defaultOrgName}</div>
-              <DropdownToggle
-                isLoading={isOrgSwitchIsInProgress}
-                isShowMenu={isOrgSwitcherMenuOpen}
-                setIsShowMenu={setIsOrgSwitcherMenuOpen}
-              />
+              <div className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
+                {selectedOrg?.name || defaultOrgName}
+              </div>
+              {isSidebarOpen && (
+                <DropdownToggle
+                  isLoading={isOrgSwitchIsInProgress}
+                  isShowMenu={isOrgSwitcherMenuOpen}
+                  setIsShowMenu={setIsOrgSwitcherMenuOpen}
+                />
+              )}
             </div>
           </div>
         </DropdownMenuTrigger>

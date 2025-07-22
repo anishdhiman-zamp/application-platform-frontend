@@ -123,6 +123,7 @@ export const API_ENDPOINTS = {
   ACTIVITY_RUNS_FILTER_CONFIG_GET: `processes/{{processId}}/activity-runs/filter-config`,
   ACTIVITY_RUNS_SUMMARY_GET: `processes/{{processId}}/activity-runs/status-summary`,
   ACTIVITY_RUNS_GET: `processes/{{processId}}/activity-runs`,
+  KNOWLEDGE_BASE_GET: `processes/{{processId}}/knowledge-base`,
   ACTIVITY_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/artifacts`,
   UPDATE_ARTIFACT_PATCH: `processes/{{processId}}/artifacts/{{artifactId}}`,
   ACTIVITY_RUN_LOGS_GET: `processes/{{processId}}/activity-logs/{{activityRunId}}/logs`,

@@ -1,0 +1,82 @@
+.kb-viewer h1,
+.kb-viewer h2,
+.kb-viewer h3,
+.kb-viewer h4,
+.kb-viewer h5,
+.kb-viewer h6 {
+  color: #000;
+}
+
+.kb-viewer h1 {
+  font-size: 26px;
+  font-weight: 550;
+  margin-top: 80px;
+}
+
+.kb-viewer h1:first-child {
+  font-size: 26px;
+  font-weight: 550;
+  margin-top: 10px;
+}
+
+.kb-viewer h2:first-child {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 10px;
+}
+
+.kb-viewer h1 + h2 {
+  padding-top: 32px;
+}
+
+.kb-viewer h2 + h3 {
+  padding-top: 16px;
+}
+
+.kb-viewer h2 {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer h3 {
+  font-size: 16px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer h4 {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer p {
+  font-size: 13px;
+  font-weight: 400;
+  margin-top: 8px;
+}
+
+.kb-viewer hr {
+  margin: 80px 0;
+  border-color: #ebebeb;
+}
+
+.kb-viewer ul {
+  list-style-type: disc;
+  padding-left: 1.25rem; /* same as pl-5 in Tailwind (20px) */
+}
+
+.kb-viewer ul p {
+  margin-top: 2px;
+}
+
+.kb-viewer ul li {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.kb-viewer strong {
+  font-size: 13px;
+  font-weight: 550;
+}

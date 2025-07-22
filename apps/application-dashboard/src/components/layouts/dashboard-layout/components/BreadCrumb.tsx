@@ -6,6 +6,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import {
   getDatasetRouteById,
+  getKnowledgeBasedRouteByProcessId,
   getPageDatasetRoute,
   getPageRouteById,
   getProcessActivityLogsRouteById,
@@ -97,6 +98,12 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
             breadcrumbStack.push({
               title: 'Activity Logs',
               href: getProcessActivityLogsRouteById(processId as string, activityId as string, status as string),
+            });
+          }
+          if (pathname.includes(getKnowledgeBasedRouteByProcessId(processId as string))) {
+            breadcrumbStack.push({
+              title: 'Knowledge Base',
+              href: getKnowledgeBasedRouteByProcessId(processId as string),
             });
           }
         }
