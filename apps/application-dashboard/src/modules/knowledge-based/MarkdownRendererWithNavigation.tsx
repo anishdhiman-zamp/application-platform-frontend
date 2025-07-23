@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
 import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -127,7 +128,9 @@ const MarkdownRendererWithNavigation = () => {
         </div>
         <div ref={scrollContainerRef} className='markdown-body w-full overflow-y-auto p-6'>
           <div className='kb-viewer m-auto max-w-[800px] pb-20'>
-            <ReactMarkdown rehypePlugins={[rehypeSlug]}>{markdownContent}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
+              {markdownContent}
+            </ReactMarkdown>
           </div>
         </div>
       </div>

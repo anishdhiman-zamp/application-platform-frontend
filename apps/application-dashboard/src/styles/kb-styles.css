@@ -95,3 +95,26 @@
   font-size: 13px;
   font-weight: 550;
 }
+
+.kb-viewer table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kb-viewer table th {
+  background-color: #f5f5f5;
+  font-weight: 550;
+  text-align: left;
+}
+
+.kb-viewer table td,
+.kb-viewer table th {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.kb-viewer table tr:nth-child(even) {
+  background-color: #fafafa;
+}
