@@ -131,6 +131,9 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     const columnNameLength = column?.alias?.length ?? column?.column?.length;
     const columnWidth =
       columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column)?.width ?? 0;
+    const valueFormat = Array.isArray(column.metadata?.config?.value_format)
+      ? column.metadata?.config?.value_format
+      : [column.metadata?.config?.value_format];
 
     let formattedColumn: ColDef = {
       field: column?.column,
@@ -183,8 +186,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
         isMenuDisabled,
-      dateFormat: column?.metadata?.config?.value_format?.find((item) => item.type === VALUE_FORMAT_TYPE.DATE_TIME)
-        ?.value,
+      dateFormat: valueFormat?.find((item) => item?.type === VALUE_FORMAT_TYPE.DATE_TIME)?.value,
       isSelfServe,
     };
 
