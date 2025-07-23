@@ -50,16 +50,6 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
     refetchOnMountOrArgChange: false,
   });
 
-  const isEditingBreadcrumbAllowed = useIsEditingBreadcrumbAllowed();
-
-  const updateBreadcrumb = useUpdateBreadcrumb(setIsEditing);
-
-  useOnClickOutside(menuRef, () => setIsMenuOpen(false));
-
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
-
   const breadcrumbStack = useMemo(() => {
     const breadcrumbStack = [];
 
@@ -136,11 +126,6 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
     return breadcrumbStack as BreadcrumbItem[];
   }, [pathname, searchParams?.toString(), pages, datasets, processes]);
 
-  const handleBreadcrumbClick = (link: string, index?: number) => {
-    if (index === 0) router.back();
-    else router.replace(link);
-  };
-
   const { firstBreadCrumb, middleBreadCrumbs, secondLastBreadCrumb, lastBreadCrumb } = useMemo(() => {
     const breadcrumbStackLength = breadcrumbStack?.length;
 
@@ -157,6 +142,25 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
       middleBreadCrumbs: breadcrumbStackLength > 3 ? breadcrumbStack.slice(1, -2) : [],
     };
   }, [breadcrumbStack]);
+
+  const isEditingBreadcrumbAllowed = useIsEditingBreadcrumbAllowed();
+
+  const updateBreadcrumb = useUpdateBreadcrumb({
+    setIsEditing,
+    setEditedName,
+    lastBreadCrumbTitle: lastBreadCrumb?.title ?? '',
+  });
+
+  useOnClickOutside(menuRef, () => setIsMenuOpen(false));
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  const handleBreadcrumbClick = (link: string, index?: number) => {
+    if (index === 0) router.back();
+    else router.replace(link);
+  };
 
   const handleLastBreadCrumbClick = () => {
     setIsEditing(true);

@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from 'utils/common';
 import { COLORS } from '@/constants/colors';
 
-interface PageNavTabProps {
+export interface PageNavTabProps {
   label: string;
   pageId: string;
   isSelected?: boolean;

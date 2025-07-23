@@ -69,6 +69,10 @@ export const API_ENDPOINTS = {
   SHARE_PAGE_TO_AUDIENCES_BY_PAGE_ID_POST: `pages/{{pageId}}/audiences`,
   CHANGE_AUDIENCE_ROLE_IN_PAGE_PATCH: `pages/{{pageId}}/audiences`,
   DELETE_AUDIENCE_FROM_PAGE_ACCESS: `pages/{{pageId}}/audiences`,
+  UPDATE_PAGE_INDEXES: `pages/update-indexes`,
+  UPDATE_SHEET_INDEXES: `pages/{{pageId}}/sheets/update-indexes`,
+  UPDATE_PAGE: `pages/{{pageId}}`,
+  UPDATE_SHEET_BY_PAGE_ID: `pages/{{pageId}}/sheets/{{sheetId}}`,
 
   PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,

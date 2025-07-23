@@ -11,8 +11,13 @@ import {
   SheetDetailsResponseType,
   SheetFilterConfigResponseType,
   SheetResponseType,
+  UpdatePageIndexesPayloadType,
+  UpdatePagePayloadType,
+  UpdateSheetByPageIdPayloadType,
+  UpdateSheetIndexesByPageIdPayloadType,
 } from 'types/api/pagesApi.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
 import type { ProcessesResponseType } from '@/types/api/processApi.types';
 
@@ -20,9 +25,11 @@ const Pages = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getPages: builder.query<PageResponseType[], void>({
       query: () => ({ url: API_ENDPOINTS.PAGES_GET }),
+      providesTags: [APITags.GET_PAGES],
     }),
     getPageDetails: builder.query<SheetResponseType, string>({
       query: (pageId) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_GET, { pageId }) }),
+      providesTags: [APITags.GET_PAGE_DETAILS],
     }),
     getSheetDetails: builder.query<SheetDetailsResponseType, SheetDetailsRequestType>({
       query: ({ pageId, sheetId }) => ({
@@ -61,6 +68,38 @@ const Pages = baseApi.injectEndpoints({
         body: body,
       }),
     }),
+    updatePageIndexes: builder.mutation<void, UpdatePageIndexesPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.UPDATE_PAGE_INDEXES,
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
+    updateSheetIndexesByPageId: builder.mutation<void, UpdateSheetIndexesByPageIdPayloadType>({
+      query: ({ pageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_SHEET_INDEXES, { pageId }),
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS]),
+    }),
+    updatePage: builder.mutation<void, UpdatePagePayloadType>({
+      query: ({ pageId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_PAGE, { pageId }),
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
+    updateSheetByPageId: builder.mutation<void, UpdateSheetByPageIdPayloadType>({
+      query: ({ pageId, sheetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_SHEET_BY_PAGE_ID, { pageId, sheetId }),
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES]),
+    }),
   }),
 });
 
@@ -75,4 +114,8 @@ export const {
   usePostPagesToAudiencesByPageIdMutation,
   usePatchChangeAudienceRoleInPageMutation,
   useDeleteAudienceFromPageAccessMutation,
+  useUpdatePageIndexesMutation,
+  useUpdateSheetIndexesByPageIdMutation,
+  useUpdatePageMutation,
+  useUpdateSheetByPageIdMutation,
 } = Pages;

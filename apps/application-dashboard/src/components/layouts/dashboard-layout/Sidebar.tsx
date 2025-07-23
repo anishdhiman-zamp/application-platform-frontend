@@ -1,8 +1,8 @@
 'use client';
 
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { getPageRouteById, getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
-import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
+import PagesNavigation from 'components/layouts/dashboard-layout/components/PagesNavigation';
 import ProcessNavTab from 'components/layouts/dashboard-layout/components/ProcessNavTab';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
@@ -35,6 +35,14 @@ const Sidebar = () => {
     pagesList: pages ?? [],
     processesList: processes ?? [],
   });
+
+  const sortedPages = useMemo(() => {
+    if (pages && pages?.length > 0) {
+      return [...pages].sort((a, b) => a?.fractional_index - b?.fractional_index);
+    }
+
+    return [];
+  }, [pages]);
 
   useEffect(() => {
     if (processes) {
@@ -82,27 +90,7 @@ const Sidebar = () => {
               </CommonWrapper>
             </div>
           )}
-          {!!pages?.length && (
-            <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
-              <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
-              <CommonWrapper
-                isLoading={isLoading}
-                skeletonType={SkeletonTypes.CUSTOM}
-                loader={<SkeletonLoaderSidebarPages />}
-              >
-                {pages?.map((item) => (
-                  <Link prefetch href={getPageRouteById(item?.page_id)} key={item?.page_id} className='cursor-pointer'>
-                    <PageNavTab
-                      key={item?.page_id}
-                      label={item?.name}
-                      pageId={item?.page_id}
-                      isSelected={params?.pageId === item?.page_id}
-                    />
-                  </Link>
-                ))}
-              </CommonWrapper>
-            </div>
-          )}
+          <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
         </div>
         <OrgSwitcher isSidebarOpen={isSidebarOpen} />
       </div>

@@ -125,3 +125,39 @@ export type AudiencesPageShareData = {
 export type PostPagesToAudiencesByPageIdType = { pageId: string; body: AudiencesPageShareData };
 export type PatchChangeAudienceRoleInPageType = { pageId: string; body: { audience_id: string; role: string } };
 export type DeleteAudienceFromPageAccessType = { pageId: string; body: { audience_id: string } };
+
+export interface UpdatePageIndexType {
+  page_id: string;
+  fractional_index: number;
+}
+
+export interface UpdatePageIndexesPayloadType {
+  pages: UpdatePageIndexType[];
+}
+
+export interface UpdateSheetIndexType {
+  sheet_id: string;
+  fractional_index: number;
+}
+
+export interface UpdateSheetIndexesByPageIdPayloadType {
+  pageId: string;
+  body: {
+    sheets: UpdateSheetIndexType[];
+  };
+}
+
+export interface UpdatePagePayloadType {
+  pageId: string;
+  body: {
+    name: string;
+  };
+}
+
+export interface UpdateSheetByPageIdPayloadType {
+  pageId: string;
+  sheetId: string;
+  body: {
+    name: string;
+  };
+}

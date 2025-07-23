@@ -1,7 +1,9 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { useGetPagesQuery } from 'apis/pages';
+import { Button, toast } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
+import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
@@ -9,6 +11,9 @@ import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -31,6 +36,21 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
   const [currency, setCurrency] = useState<string[]>(['USD']);
+  const [isEditingSheetName, setIsEditingSheetName] = useState(false);
+  const [sheetName, setSheetName] = useState('');
+  const [finalSheetName, setFinalSheetName] = useState<string>();
+  const [inputWidth, setInputWidth] = useState(150);
+  const spanRef = useRef<HTMLSpanElement>(null);
+  const [updateSheetByPageId] = useUpdateSheetByPageIdMutation();
+
+  const updateInputWidth = useCallback(() => {
+    if (spanRef.current && sheetDetails?.name) {
+      const spanWidth = spanRef.current.clientWidth;
+
+      setInputWidth(spanWidth ? spanWidth + 20 : 184);
+    }
+  }, []);
+
   const [widgetDetails, setWidgetDetails] = useState<{
     height: number;
     isSingleHeader: boolean;
@@ -48,7 +68,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
 
   const {
     data: pages,
-    isFetching: isSheetLoading,
+    isLoading: isSheetLoading,
     isError: isSheetDetailsError,
     refetch: refetchSheetDetails,
   } = useGetPagesQuery(undefined, {
@@ -81,6 +101,43 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     });
   }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId]);
 
+  const handleInputBlur = () => {
+    setIsEditingSheetName(false);
+    const trimmedName = sheetName?.trim();
+
+    if (trimmedName === sheetDetails?.name || !trimmedName) {
+      setSheetName(sheetDetails?.name ?? '');
+
+      return;
+    }
+
+    setFinalSheetName(trimmedName);
+
+    updateSheetByPageId({
+      pageId: pageId as string,
+      sheetId: sheetId as string,
+      body: {
+        name: trimmedName,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Sheet name updated successfully');
+      })
+      .catch(() => {
+        toast.error('Failed to update sheet name');
+        setSheetName(sheetDetails?.name ?? '');
+      });
+  };
+
+  const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleInputBlur();
+    }
+  };
+
   //Add the max-height on pivot table based on sheet layout height for pivot and current actual height of the grid
   useEffect(() => {
     if (typeof document !== 'undefined' && sheetLayout) {
@@ -102,6 +159,20 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
       isSingleHeader: true,
     });
   }, [pageId, sheetId]);
+
+  useEffect(() => {
+    if (sheetDetails) {
+      const name = sheetDetails?.name ?? '';
+
+      setSheetName(name);
+      setFinalSheetName(name);
+      setInputWidth(name.length * 15);
+    }
+  }, [sheetDetails]);
+
+  useEffect(() => {
+    updateInputWidth();
+  }, [sheetName]);
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
@@ -125,7 +196,35 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
           }
         >
           <div className='z-100 flex items-center justify-between px-5'>
-            <div className='f-24-450 text-GRAY_950'>{sheetDetails?.name}</div>
+            {isEditingSheetName ? (
+              <div className='relative inline-block'>
+                <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
+                  {sheetName}
+                </span>
+                <input
+                  value={sheetName}
+                  onChange={(e) => setSheetName(e.target.value)}
+                  onBlur={handleInputBlur}
+                  autoFocus
+                  style={{ width: `${inputWidth}px` }}
+                  className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
+                    'bg-white': sheetName?.length === 0,
+                  })}
+                  placeholder='Add sheet title'
+                  onKeyDown={handleEditKeyDown}
+                />
+              </div>
+            ) : (
+              <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+                <Button
+                  variant='ghost'
+                  className='text-GRAY_950 rounded-lg px-2.5 py-1'
+                  onClick={() => setIsEditingSheetName(true)}
+                >
+                  <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
+                </Button>
+              </TooltipV2>
+            )}
             <div className='flex items-center gap-2'>
               <FiltersWrapper
                 allowClear={false}
