@@ -961,16 +961,46 @@ export const getUpdatedAliasDisplayConfig = (
  * @param {RefObject<AgGridReact<any> | null>} tableRef - Reference to the AG Grid table component.
  * @returns {string} The prepared query string with column ordering visibility.
  */
-export const prepareExportQuery = (baseQuery: string, tableRef: RefObject<AgGridReact<any> | null>): string => {
-  const columns = tableRef?.current?.api?.getAllGridColumns();
 
-  const columnOrderingVisibility = columns?.map((item) => ({
-    column: item?.getColId(),
-    is_hidden: !item?.isVisible(),
-    alias: capitalizeWords(item?.getColDef()?.headerName ?? item?.getColId()),
+export const prepareExportQuery = (
+  baseQuery: string,
+  tableRef: RefObject<AgGridReact<any> | null>,
+  activityId?: string,
+): string => {
+  const columns = tableRef?.current?.api?.getAllGridColumns() || [];
+  const baseQueryObject = JSON.parse(baseQuery);
+
+  const rawFilters = baseQueryObject.filters ?? {};
+
+  const logical_operator = rawFilters.logical_operator ?? 'AND';
+  const conditions: FilterType[] = Array.isArray(rawFilters.conditions) ? rawFilters.conditions : [];
+
+  const updatedConditions = [...conditions];
+
+  if (activityId) {
+    updatedConditions.push({
+      column: 'activity_run_id',
+      operator: CONDITION_OPERATOR_TYPE.EQUAL,
+      value: activityId,
+    });
+  }
+
+  const updatedFilters = {
+    logical_operator,
+    conditions: updatedConditions,
+  };
+
+  const exportColumns = columns.map((column) => ({
+    column: column.getColId(),
+    is_hidden: !column.isVisible(),
+    alias: capitalizeWords(column.getColDef()?.headerName || column.getColId()),
   }));
 
-  const parsedQuery = JSON.parse(baseQuery);
+  const finalQuery = {
+    ...baseQueryObject,
+    filters: updatedFilters,
+    export_columns: exportColumns,
+  };
 
-  return JSON.stringify({ ...parsedQuery, export_columns: columnOrderingVisibility });
+  return JSON.stringify(finalQuery);
 };

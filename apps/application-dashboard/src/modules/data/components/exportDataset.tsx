@@ -11,7 +11,7 @@ import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { prepareExportQuery } from 'modules/data/data.utils';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -27,11 +27,14 @@ interface ExportDatasetProps {
 
 const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDatasetProps) => {
   const router = useRouter();
+  const params = useParams();
+  const activityId = params?.activityId as string;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { startPolling } = usePolling();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getDatasetExport] = useLazyGetDatasetExportQuery();
   const [getDatasetExportsSignedUrl] = useLazyGetDatasetExportsSignedUrlQuery();
+
   const [showExportStatus, setShowExportStatus] = useState(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
 
@@ -65,7 +68,7 @@ const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDataset
 
   const downloadCsv = async () => {
     setShowExportStatus(true);
-    const mergedQuery = prepareExportQuery(query, tableRef);
+    const mergedQuery = prepareExportQuery(query, tableRef, activityId);
 
     if (isPolling) return;
 
