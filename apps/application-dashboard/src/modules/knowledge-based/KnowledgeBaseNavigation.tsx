@@ -97,7 +97,7 @@ const KnowledgeBaseNavigation: FC<KnowledgeBaseNavigationProps> = ({
                     handleClick(item.id);
                   }}
                   className={cn(
-                    'f-13-500 block w-full cursor-pointer rounded bg-white px-2 py-1.5 text-left text-gray-900 hover:bg-blue-100 hover:bg-gray-100',
+                    'f-13-500 block h-auto w-full cursor-pointer rounded bg-white px-2 py-1.5 text-left whitespace-break-spaces text-gray-900 hover:bg-gray-100',
                     {
                       '!text-gray-1000': currentSelectedHeader === item.id,
                     },
