@@ -67,6 +67,14 @@
   padding-left: 1.25rem;
 }
 
+.kb-viewer ul ul {
+  list-style-type: circle;
+}
+
+.kb-viewer ul ul ul {
+  list-style-type: square;
+}
+
 .kb-viewer ol {
   font-size: 13px;
   margin-top: 16px;
