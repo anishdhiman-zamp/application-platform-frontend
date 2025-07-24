@@ -74,6 +74,10 @@ const Topbar = () => {
       );
     }
 
+    if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
+      return null;
+    }
+
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
@@ -81,7 +85,7 @@ const Topbar = () => {
         return (
           <div className='flex items-center gap-3'>
             <Link href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-              <Button id='knowledge-base-btn' size='small' variant='outline' className='w-[146px]'>
+              <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
                 <div className='flex gap-1'>
                   <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
                   Knowledge Base

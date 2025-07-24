@@ -12,7 +12,7 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
 import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
 import KnowledgeBaseNavigation from '@/modules/knowledge-based/KnowledgeBaseNavigation';
-import { closeSidebar } from '@/store/slices/layout-configs';
+import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { extractHeadersFromMarkdown, type HeaderItem } from '@/utils/markdownUtils';
 
 const MarkdownRendererWithNavigation = () => {
@@ -50,7 +50,11 @@ const MarkdownRendererWithNavigation = () => {
 
   useEffect(() => {
     dispatch(closeSidebar());
-  }, []);
+
+    return () => {
+      dispatch(openSidebar());
+    };
+  }, [dispatch]);
 
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {
