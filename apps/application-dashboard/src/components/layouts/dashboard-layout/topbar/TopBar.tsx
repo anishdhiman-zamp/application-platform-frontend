@@ -84,7 +84,7 @@ const Topbar = () => {
       if (isKnowledgeBaseEnabled)
         return (
           <div className='flex items-center gap-3'>
-            <Link href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+            <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
               <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
                 <div className='flex gap-1'>
                   <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
