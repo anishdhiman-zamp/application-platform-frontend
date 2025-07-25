@@ -151,7 +151,10 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       filterParams: {
         values: column?.options,
       },
-      suppressMovable: column?.metadata?.config?.movable,
+      suppressMovable:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT,
       headerName:
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
           ? ''

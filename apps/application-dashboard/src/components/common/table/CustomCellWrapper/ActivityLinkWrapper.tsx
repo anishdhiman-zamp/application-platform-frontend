@@ -19,9 +19,9 @@ const ActivityLinkWrapper = ({ children, data }: { children: React.ReactNode; da
           e.stopPropagation();
         }
       }}
-      className='flex h-full w-full items-center truncate px-4 py-1'
+      className='flex h-full w-full items-center px-4 py-1'
     >
-      {children}
+      <div className='min-w-0 flex-1 truncate'>{children}</div>
     </Link>
   );
 };
