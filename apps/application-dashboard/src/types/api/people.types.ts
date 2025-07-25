@@ -65,6 +65,17 @@ export type GetMembershipRequestsByOrganizationIdResponse = {
   status: string;
 }[];
 
+export interface TeamMembershipType {
+  team_membership_id: string;
+  team_id: string;
+  user_id: string;
+  user: {
+    name: string;
+    email: string;
+    user_id: string;
+  };
+}
+
 export type GetTeamsByOrganizationIdResponseType = {
   team_id: string;
   organization_id: string;
@@ -73,18 +84,7 @@ export type GetTeamsByOrganizationIdResponseType = {
   metadata: {
     color_hex_code: string;
   };
-  team_memberships: [
-    {
-      team_membership_id: string;
-      team_id: string;
-      user_id: string;
-      user: {
-        name: string;
-        email: string;
-        user_id: string;
-      };
-    },
-  ];
+  team_memberships: TeamMembershipType[];
 };
 
 export type GetUserTeamsByOrganizationIdResponseType = {
@@ -164,3 +164,16 @@ export type GetTeamPendingApprovalsByResourceIdPayload = {
   resourceId: string;
   resourceType: ResourceType;
 };
+
+export interface UpdateTeamRequestType {
+  organizationId: string;
+  teamId: string;
+  payload: {
+    name: string;
+  };
+}
+
+export interface DeleteTeamRequestType {
+  organizationId: string;
+  teamId: string;
+}

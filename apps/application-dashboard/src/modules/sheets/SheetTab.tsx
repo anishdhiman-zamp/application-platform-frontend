@@ -7,6 +7,7 @@ import { MenuItem } from 'types/common/components';
 import { useUpdateSheetByPageIdMutation } from '@/apis/pages';
 import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { preventAutoFocus } from '@/utils/common';
 
 interface SheetTabProps {
   tab: MenuItem;
@@ -169,9 +170,7 @@ const SheetTab: FC<SheetTabProps> = ({ tab, currentSheetId, handleTabSelect, isD
           sideOffset={16}
           className='p-0'
           style={{ width: containerWidth }}
-          onCloseAutoFocus={(e) => {
-            e.preventDefault();
-          }}
+          onCloseAutoFocus={preventAutoFocus}
         >
           <Input
             size='small'

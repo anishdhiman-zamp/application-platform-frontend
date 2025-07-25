@@ -19,6 +19,8 @@ export const API_ENDPOINTS = {
   ALL_TEAMS_BY_TEAM_ID_GET: `organizations/{{organizationId}}/teams/{{teamId}}`,
   ADD_TEAMS_TO_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/add`,
   REMOVE_TEAMS_FROM_AUDIENCE_POST: `organizations/{{organizationId}}/teams/{{teamId}}/remove`,
+  TEAMS_BY_ORGANIZATION_ID_PATCH: `organizations/{{organizationId}}/teams/{{teamId}}`,
+  TEAMS_BY_ORGANIZATION_ID_DELETE: `organizations/{{organizationId}}/teams/{{teamId}}`,
 
   TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
   TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,

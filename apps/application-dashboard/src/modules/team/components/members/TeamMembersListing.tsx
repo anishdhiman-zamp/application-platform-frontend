@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useRef } from 'react';
 import {
   useGetAudiencesByOrganisationIdQuery,
   useGetTeamsByOrganizationIdQuery,
@@ -9,16 +9,19 @@ import EmptyStateListing from 'modules/team/components/EmptyStateListing';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
 import MembersRole from 'modules/team/components/members/MembersRole';
-import MembersTeam from 'modules/team/components/members/MembersTeam';
+import MembersTeamV2 from 'modules/team/components/members/MembersTeamV2';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { TeamMembersListingPropsType } from 'modules/team/people.types';
 import { RootState } from 'store';
+import { TEAMS_COLORS } from '@/constants/colors';
+import { cyclicIterator } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData, hasPeoplePolicy }) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
 
   // get audiences data
   const { data: teamMembersData } = useGetAudiencesByOrganisationIdQuery(
@@ -92,13 +95,14 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
                 member
                 hasPeoplePolicy={hasPeoplePolicy}
               />
-              <MembersTeam
+              <MembersTeamV2
                 userInfo={{ user_id: row?.user_id, name: row?.name, email: row?.email }}
                 organizationId={organizationId}
                 teamsData={teamsData ?? []}
                 userId={row?.user_id}
                 userMappedTeams={row?.teams}
                 hasPeoplePolicy={hasPeoplePolicy}
+                teamsRandomColorRef={teamsRandomColorRef}
               />
             </div>
           ))}

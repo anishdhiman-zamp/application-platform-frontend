@@ -73,6 +73,9 @@ export enum TOAST_MESSAGES {
   SUCCESS_UPDATE_MISSING_FIELD = 'Missing field updated successfully',
   ERROR_UPDATE_MISSING_FIELD = 'Missing field update failed',
   IN_PROGRESS_UPDATE_MISSING_FIELD = 'Missing field update in progress',
+
+  SUCCESS_TEAM_NAME_UPDATED = 'Team name updated successfully',
+  ERROR_TEAM_NAME_UPDATE = 'Failed to update team name',
 }
 
 export const TaggingMessages = {
