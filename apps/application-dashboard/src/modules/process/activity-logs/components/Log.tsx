@@ -7,6 +7,7 @@ import ReasoningAccordion from 'modules/process/activity-logs/components/Reasoni
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
+import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
 import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
@@ -14,7 +15,6 @@ import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 type LogProps = {
-  indexNum?: number;
   isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
@@ -50,8 +50,8 @@ const Log: FC<LogProps> = ({
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
     return (
-      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.SYSTEM) ||
-      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.USER)
+      content_type === CONTENT_TYPE.REPLIED_TO_SECTION &&
+      (sender_type === SENDER_TYPE.SYSTEM || sender_type === SENDER_TYPE.USER)
     );
   }, [content_type, sender_type]);
 
@@ -85,40 +85,13 @@ const Log: FC<LogProps> = ({
     return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
   }, [updated_at]);
 
-  // indicator-stroke shimmer sequence
-  const handleStrokeShimmerSequence = (
-    showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
-    shimmerControlRef: React.MutableRefObject<(() => void) | null>,
-    cancelledRef: React.MutableRefObject<boolean>,
-  ) => {
-    if (cancelledRef.current) return;
-
-    // 1. Show blue stroke
-    showBlueStrokeRef.current?.(true);
-
-    // 2. After 300ms, hide stroke and start shimmer
-    setTimeout(() => {
-      if (cancelledRef.current) return;
-
-      showBlueStrokeRef.current?.(false);
-      shimmerControlRef.current?.();
-
-      // 3. After shimmer, loop again
-      setTimeout(() => {
-        if (!cancelledRef.current) {
-          handleStrokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
-        }
-      }, 2000); // shimmer duration
-    }, 300); // stroke visible duration
-  };
-
   // indicator-stroke and shimmer loop
   const runStrokeShimmerSequenceLoop = (
     showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
     shimmerControlRef: React.MutableRefObject<(() => void) | null>,
     cancelledRef: React.MutableRefObject<boolean>,
   ) => {
-    handleStrokeShimmerSequence(showBlueStrokeRef, shimmerControlRef, cancelledRef);
+    handleStrokeShimmerSequence({ showBlueStrokeRef, shimmerControlRef, cancelledRef });
   };
 
   const handleLineHeightUpdate = () => {
