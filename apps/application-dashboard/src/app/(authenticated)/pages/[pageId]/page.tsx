@@ -20,7 +20,6 @@ const Page = () => {
   const {
     data: pageDetails,
     isLoading,
-    isFetching,
     isError,
     refetch,
   } = useGetPageDetailsQuery(pageId as string, { refetchOnMountOrArgChange: false, skip: !pageId });
@@ -77,7 +76,7 @@ const Page = () => {
           sheetId={currentSheetId as string}
           isPageLoading={isLoading}
         />
-        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} />
+        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isLoading} />
       </div>
     </CommonWrapper>
   );

@@ -265,3 +265,11 @@
   border: 1.5px solid #fef9da !important;
   background-color: #fef9da !important;
 }
+
+#activity-by-status-table .ag-cell-wrapper {
+  height: 100%;
+}
+
+#activity-by-status-table .ag-cell-value {
+  height: 100%;
+}

@@ -25,6 +25,7 @@ export const ROUTES_PATH = {
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   SETTINGS: '/settings',
+  KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
 };
 
 export const getPageRouteById = (pageId: string) => {
@@ -67,6 +68,10 @@ export const getProcessRouteById = (processId: string, status?: string) => {
 
 export const getProcessActivityLogsRouteById = (processId: string, activityId: string, status?: string) => {
   return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':activityId', activityId)}${status ? `?status=${status}` : ''}`;
+};
+
+export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

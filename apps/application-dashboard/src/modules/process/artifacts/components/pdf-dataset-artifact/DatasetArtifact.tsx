@@ -649,7 +649,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         scrollToMissingField(0);
       });
     }
-  }, [gridReady, isInitialDataLoaded, hasMissingFields, requiredMissingFields, currentIndex]);
+  }, [gridReady, isInitialDataLoaded, hasMissingFields, requiredMissingFields, currentIndex, id]);
 
   useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
 

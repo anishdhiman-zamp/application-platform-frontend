@@ -1,26 +1,36 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useWhoAmIQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ORG_COLORS } from '@/constants/common.constants';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { useLogout } from '@/hooks/useLogout';
 import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
+import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
-const OrgSwitcher = () => {
+type OrgSwitcherProps = {
+  isSidebarOpen: boolean;
+};
+
+export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
+  const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
-  const [isOrgSwitchIsInProgress, setIsOrgSwitchIsInProgress] = useState(false);
   const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
 
   const { logout, isLoggingOut } = useLogout();
@@ -37,14 +47,11 @@ const OrgSwitcher = () => {
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
 
-    setIsOrgSwitchIsInProgress(true);
+    dispatch(setIsOrgSwitchIsInProgress(true));
 
     setSelectedOrg(org);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 10);
+    router.push(ROUTES_PATH.PROCESSES);
   };
 
   const selectedOrgColor = useMemo(
@@ -83,12 +90,16 @@ const OrgSwitcher = () => {
               >
                 {selectedOrg?.name?.[0] || defaultOrgName[0]}
               </div>
-              <div className='f-12-450 flex-1'>{selectedOrg?.name || defaultOrgName}</div>
-              <DropdownToggle
-                isLoading={isOrgSwitchIsInProgress}
-                isShowMenu={isOrgSwitcherMenuOpen}
-                setIsShowMenu={setIsOrgSwitcherMenuOpen}
-              />
+              <div className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
+                {selectedOrg?.name || defaultOrgName}
+              </div>
+              {isSidebarOpen && (
+                <DropdownToggle
+                  isLoading={isOrgSwitchIsInProgress}
+                  isShowMenu={isOrgSwitcherMenuOpen}
+                  setIsShowMenu={setIsOrgSwitcherMenuOpen}
+                />
+              )}
             </div>
           </div>
         </DropdownMenuTrigger>

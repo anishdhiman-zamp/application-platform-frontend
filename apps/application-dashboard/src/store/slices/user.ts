@@ -16,6 +16,7 @@ export type UserState = {
   roles?: { id: string; name: string }[];
   dashboardLoader: boolean;
   datasetBulkLoaders?: DatasetBulkLoadersType[];
+  isOrgSwitchIsInProgress?: boolean;
 };
 
 const initialState: UserState = {
@@ -28,6 +29,7 @@ const initialState: UserState = {
   workspace: null,
   dashboardLoader: false,
   datasetBulkLoaders: [],
+  isOrgSwitchIsInProgress: false,
 };
 
 export const userSlice = createSlice({
@@ -80,6 +82,9 @@ export const userSlice = createSlice({
 
       return state;
     },
+    setIsOrgSwitchIsInProgress: (state, action: PayloadAction<boolean>) => {
+      state.isOrgSwitchIsInProgress = action.payload;
+    },
     resetUser: () => {
       return initialState;
     },
@@ -99,6 +104,7 @@ export const {
   removeDatasetBulkLoader,
   setWorkspace,
   setDashboardLoader,
+  setIsOrgSwitchIsInProgress,
 } = userSlice.actions;
 
 export default userSlice.reducer;

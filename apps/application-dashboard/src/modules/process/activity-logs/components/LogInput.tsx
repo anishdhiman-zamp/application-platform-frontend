@@ -23,6 +23,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
     resourceType: ResourceType.PROCESS,
     resourceId: processId,
     skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const currentUserHasEditAccess = useMemo(() => {
