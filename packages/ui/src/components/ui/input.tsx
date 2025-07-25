@@ -34,7 +34,7 @@ const sizeMap: Record<SizeType, string> = {
   xlarge: 'w-6 h-6',
   large: 'w-6 h-6',
   medium: 'w-4 h-4',
-  small: 'w-4 h-4',
+  small: 'w-3.5 h-3.5',
   xsmall: 'w-3 h-3',
   xxsmall: 'w-2 h-2',
 };
@@ -43,7 +43,7 @@ const positionMap: Record<SizeType, string> = {
   xlarge: 'left-6',
   large: 'left-6',
   medium: 'left-3',
-  small: 'left-3',
+  small: 'left-2',
   xsmall: 'left-2',
   xxsmall: 'left-1.5',
 };
@@ -52,7 +52,7 @@ const paddingMap: Record<SizeType, string> = {
   xlarge: 'pl-16 pr-4.5',
   large: 'pl-16 pr-4.5',
   medium: 'pl-9 pr-2.5',
-  small: 'pl-9 pr-2',
+  small: 'pl-7 pr-2',
   xsmall: 'pl-6 pr-2',
   xxsmall: 'pl-4 pr-1.5',
 };

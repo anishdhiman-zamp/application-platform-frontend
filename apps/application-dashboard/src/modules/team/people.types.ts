@@ -1,5 +1,9 @@
-import { KeyboardEvent, MutableRefObject } from 'react';
-import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
+import { KeyboardEvent, MutableRefObject, RefObject } from 'react';
+import {
+  AudiencesByOrganisationIdResponse,
+  InvitedAudiencesByOrganisationIdResponse,
+  TeamMembershipType,
+} from 'types/api/people.types';
 import { defaultFnType } from 'types/commonTypes';
 export enum TEAM_TABS_TYPES {
   TEAM_MEMBERS = 'team_members',
@@ -103,30 +107,38 @@ export type SelectedItemsType = {
   validationMessage?: string;
 };
 
+export interface TeamType {
+  team_id: string;
+  name: string;
+  description: string;
+  metadata: { color_hex_code: string };
+  team_memberships: TeamMembershipType[];
+}
+
+export interface UserMappedTeamType {
+  value: string;
+  label: string;
+  valid: boolean;
+  color?: string;
+  isNew?: boolean;
+  teamId?: string;
+  teamMembershipId?: string;
+}
+
+export interface UserInfoType {
+  user_id: string;
+  name: string;
+  email: string;
+}
+
 export type MembersTeamPropsType = {
-  userInfo: {
-    user_id: string;
-    name: string;
-    email: string;
-  };
+  userInfo: UserInfoType;
   organizationId: string;
   userId: string;
   hasPeoplePolicy: boolean;
-  teamsData: {
-    team_id: string;
-    name: string;
-    description: string;
-    metadata: { color_hex_code: string };
-  }[];
-  userMappedTeams: {
-    value: string;
-    label: string;
-    valid: boolean;
-    color?: string;
-    isNew?: boolean;
-    teamId?: string;
-    teamMembershipId?: string;
-  }[];
+  teamsData: TeamType[];
+  userMappedTeams: UserMappedTeamType[];
+  teamsRandomColorRef: RefObject<() => string>;
 };
 
 export type PostTeamsByOrganizationIdPayload = {
@@ -140,3 +152,13 @@ export type PostAddTeamToAudiencePayload = {
   team_id: string;
   team_name?: string;
 };
+
+export interface TeamItemProps {
+  team: TeamType;
+  userMappedTeams: UserMappedTeamType[];
+  onSelectTeamToBeDeleted: defaultFnType;
+  userInfo: UserInfoType;
+  onAddUserToTeam: (team: UserMappedTeamType) => void;
+  hasPeoplePolicy: boolean;
+  onRemoveUserFromTeam: (teamId: string) => void;
+}

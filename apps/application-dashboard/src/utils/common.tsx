@@ -567,3 +567,11 @@ export const capitalizeWords = (str: string) => {
     .map((word) => word?.charAt(0)?.toUpperCase() + word?.slice(1))
     .join(' ');
 };
+
+/**
+ * Prevent auto focus on popover trigger element after popover close
+ * @param e
+ */
+export const preventAutoFocus = (e: Event) => {
+  e.preventDefault();
+};
