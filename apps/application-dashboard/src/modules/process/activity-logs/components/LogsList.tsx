@@ -59,7 +59,6 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
             {showDateSeparator && <DateSeparator date={log?.updated_at} />}
             {isOverallLastLog && <div ref={bottomRef} />}
             <Log
-              indexNum={index}
               data={log}
               isLastLogOfDate={isLastLogOfDate}
               isLastLog={isLastLog}
