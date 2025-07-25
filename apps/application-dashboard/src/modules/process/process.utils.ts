@@ -1,3 +1,4 @@
+import { MutableRefObject } from 'react';
 import { format } from 'date-fns';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
@@ -72,3 +73,40 @@ export const getInitialEmailData = (emailArtifact: EmailArtifactsResponseType) =
   content: emailArtifact.body_html || `<p>${emailArtifact.body_plain_text}</p>`,
   attachments: emailArtifact.attachments ?? [],
 });
+
+/**
+ * Handles the stroke shimmer sequence for a log.
+ * @param {Object} params - The parameters for the stroke shimmer sequence.
+ * @param {MutableRefObject<((show: boolean) => void) | null>} params.showBlueStrokeRef - The ref to the show blue stroke function.
+ * @param {MutableRefObject<(() => void) | null>} params.shimmerControlRef - The ref to the shimmer control function.
+ * @param {MutableRefObject<boolean>} params.cancelledRef - The ref to the cancelled flag.
+ */
+export const handleStrokeShimmerSequence = ({
+  showBlueStrokeRef,
+  shimmerControlRef,
+  cancelledRef,
+}: {
+  showBlueStrokeRef: MutableRefObject<((show: boolean) => void) | null>;
+  shimmerControlRef: MutableRefObject<(() => void) | null>;
+  cancelledRef: MutableRefObject<boolean>;
+}) => {
+  if (cancelledRef.current) return;
+
+  // 1. Show blue stroke
+  showBlueStrokeRef.current?.(true);
+
+  // 2. After 300ms, hide stroke and start shimmer
+  setTimeout(() => {
+    if (cancelledRef.current) return;
+
+    showBlueStrokeRef.current?.(false);
+    shimmerControlRef.current?.();
+
+    // 3. After shimmer, loop again
+    setTimeout(() => {
+      if (!cancelledRef.current) {
+        handleStrokeShimmerSequence({ showBlueStrokeRef, shimmerControlRef, cancelledRef });
+      }
+    }, 2000); // shimmer duration
+  }, 300); // stroke visible duration
+};

@@ -202,3 +202,30 @@ export const EMPTY_STATE_BY_STATUS = {
     iconUrl: DONE_EMPTY_STATE,
   },
 };
+
+export const LINE_BODY_LOGS_ANIMATION_SEQUENCE = [
+  // First animation: line animation
+  {
+    id: 'line',
+    initial: { scaleY: 0 },
+    animate: {
+      scaleY: 1,
+      transition: {
+        duration: 0.5, // 500ms speed from 0 to 1
+        ease: 'easeOut' as const,
+      },
+    },
+  },
+  // Second animation: body content reveal
+  {
+    id: 'body',
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.3, // 300ms speed from 0 to 1
+        ease: 'easeOut' as const,
+      },
+    },
+  },
+];

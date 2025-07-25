@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RevealElement matches snapshot when in view 1`] = `
+<div
+  animate="visible"
+  class="test-container"
+  data-animate-state="visible"
+  data-testid="reveal-element"
+  initial="hidden"
+  variants="[object Object]"
+>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="0"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      data-testid="reveal-element-content-0"
+    >
+      Visible Child 1
+    </div>
+  </div>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="1"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      data-testid="reveal-element-content-1"
+    >
+      Visible Child 2
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RevealElement matches snapshot when not in view 1`] = `
+<div
+  animate="hidden"
+  class="test-container"
+  data-animate-state="hidden"
+  data-testid="reveal-element"
+  initial="hidden"
+  variants="[object Object]"
+>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="0"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      data-testid="reveal-element-content-0"
+    >
+      Child 1
+    </div>
+  </div>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="1"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      data-testid="reveal-element-content-1"
+    >
+      Child 2
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RevealElement matches snapshot with custom class and multiple children 1`] = `
+<div
+  animate="visible"
+  class="custom-class"
+  data-animate-state="visible"
+  data-testid="reveal-element"
+  initial="hidden"
+  variants="[object Object]"
+>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="0"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      class="child-1"
+      data-testid="reveal-element-content-0"
+    >
+      First
+    </div>
+  </div>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="1"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      class="child-2"
+      data-testid="reveal-element-content-1"
+    >
+      Second
+    </div>
+  </div>
+  <div
+    class="flex w-auto flex-wrap"
+    data-child-index="2"
+    data-testid="reveal-element-child"
+    variants="[object Object]"
+  >
+    <div
+      class="child-3"
+      data-testid="reveal-element-content-2"
+    >
+      Third
+    </div>
+  </div>
+</div>
+`;

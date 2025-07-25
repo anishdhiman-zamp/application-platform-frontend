@@ -21,6 +21,8 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
     return logs?.activity_logs?.map((log, index) => {
       const logDate = format(new Date(log.updated_at), DATE_FORMATS.YYYYMMDD);
       const showDateSeparator = logDate !== currentDate;
+
+      const isLastLog = index === logs?.activity_logs?.length - 1;
       const isLastLogOfDate =
         index === logs?.activity_logs?.length - 1 ||
         format(new Date(logs?.activity_logs[index + 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
@@ -31,6 +33,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
         key: log?.log_group_id,
         showDateSeparator,
         isLastLogOfDate,
+        isLastLog,
         log,
       };
     });
@@ -48,7 +51,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
 
   return (
     <>
-      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, log }, index) => {
+      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, isLastLog, log }, index) => {
         const isOverallLastLog = index === logsWithSeparators?.length - 1;
 
         return (
@@ -56,8 +59,10 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
             {showDateSeparator && <DateSeparator date={log?.updated_at} />}
             {isOverallLastLog && <div ref={bottomRef} />}
             <Log
+              indexNum={index}
               data={log}
-              isLastLog={isLastLogOfDate}
+              isLastLogOfDate={isLastLogOfDate}
+              isLastLog={isLastLog}
               handleShowArtifacts={handleShowArtifacts}
               processId={processId}
               activityId={activityId}

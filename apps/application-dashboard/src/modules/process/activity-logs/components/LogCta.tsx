@@ -1,5 +1,5 @@
 import { type FC, memo, useCallback, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { Button, RevealElement } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
@@ -90,7 +90,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
 
   return (
     <div className='mt-3 flex w-full flex-col items-start justify-start gap-y-2'>
-      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
+      <RevealElement className='flex w-full flex-wrap items-start justify-start gap-2'>
         {artifactTypeCtas?.map((cta) => (
           <ArtifactTag
             key={cta?.id}
@@ -109,8 +109,8 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             displayClassName='max-w-40'
           />
         ))}
-      </div>
-      <div className='flex w-full flex-wrap items-start justify-start gap-2'>
+      </RevealElement>
+      <RevealElement className='flex w-full flex-wrap items-start justify-start gap-2'>
         {buttonTypeCtas?.map((cta) => {
           const loadingId = getLoadingId(cta);
 
@@ -130,7 +130,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             </Button>
           );
         })}
-      </div>
+      </RevealElement>
     </div>
   );
 };
