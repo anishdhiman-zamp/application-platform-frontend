@@ -1,18 +1,15 @@
 import { type FC } from 'react';
 import { ShimmerText, StaggerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { SENDER_TYPE } from 'modules/process/process.types';
 
 type LogMessageAnimationProps = {
   text: string;
   className?: string;
   delay?: number;
-  show?: boolean;
   showAnimation?: boolean;
   shimmer?: boolean;
   shimmerControlRef?: React.RefObject<(() => void) | null>;
   isLastLog?: boolean;
-  senderType?: SENDER_TYPE;
   onStaggerComplete?: () => void;
 };
 

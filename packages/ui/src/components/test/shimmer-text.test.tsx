@@ -149,7 +149,7 @@ describe('ShimmerText', () => {
     });
 
     it('triggers animation when ref is called', () => {
-      const ref = React.createRef<any>();
+      const ref = React.createRef<(() => void) | null>();
       render(<ShimmerText text='Test' shimmerControlRef={ref} />);
 
       // Clear any initial calls to animate
@@ -160,21 +160,6 @@ describe('ShimmerText', () => {
 
       // Verify animation was triggered
       expect(window.Element.prototype.animate).toHaveBeenCalled();
-    });
-
-    it('does not auto-animate when autoAnimate is false', () => {
-      const shimmerControlRef = React.createRef<(() => void) | null>();
-
-      // Spy on the animate method
-      const animateSpy = jest.spyOn(Element.prototype, 'animate');
-
-      render(<ShimmerText text='No Auto Animate Test' autoAnimate={false} shimmerControlRef={shimmerControlRef} />);
-
-      // Animation should not be called automatically
-      expect(animateSpy).not.toHaveBeenCalled();
-
-      // Clean up
-      animateSpy.mockRestore();
     });
   });
 

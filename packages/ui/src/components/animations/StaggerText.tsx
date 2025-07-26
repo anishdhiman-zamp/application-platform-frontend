@@ -4,7 +4,7 @@ import { type FC } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'motion/react';
 
-interface StaggeredTextProps {
+interface StaggeredTextPropsType {
   text: string;
   className?: string;
   delay?: number;
@@ -12,7 +12,7 @@ interface StaggeredTextProps {
   onStaggerAnimationComplete?: () => void;
 }
 
-export const StaggerText: FC<StaggeredTextProps> = ({
+export const StaggerText: FC<StaggeredTextPropsType> = ({
   text,
   className = '',
   delay = 0,
