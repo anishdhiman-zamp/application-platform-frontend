@@ -5,13 +5,13 @@ import TeamItem from 'modules/team/components/members/TeamItem';
 import {
   MembersTeamPropsType,
   PostAddTeamToAudiencePayload,
-  TEAM_MEMBERS_PRIVILEGES,
   TeamType,
   UserMappedTeamType,
 } from 'modules/team/people.types';
 import { usePostAddTeamToAudienceMutation, usePostAddTeamToOrganizationMutation } from '@/apis/people';
 import { useAppSelector } from '@/hooks/toolkit';
 import { RootState } from '@/store';
+import { checkIfCurrentUserIsSystemAdmin } from '@/utils/accessPermission/accessPermission.utils';
 import { capitalizeWords } from '@/utils/common';
 
 const MembersTeamV2: FC<MembersTeamPropsType> = ({
@@ -20,7 +20,6 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   userInfo,
   hasPeoplePolicy,
   teamsRandomColorRef,
-  memberPrivilege,
 }) => {
   const [search, setSearch] = useState('');
   const [filteredTeams, setFilteredTeams] = useState<TeamType[]>([]);
@@ -31,6 +30,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const isSystemAdmin = useMemo(() => checkIfCurrentUserIsSystemAdmin(), []);
 
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();
@@ -165,7 +165,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   return (
     <>
       <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
-        <PopoverTrigger disabled={memberPrivilege !== TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN}>
+        <PopoverTrigger disabled={!isSystemAdmin}>
           <div className='flex cursor-pointer flex-wrap gap-1.5 px-2 py-2.5'>
             {userTeams?.length > 0 ? (
               userTeams?.map((team) => (
