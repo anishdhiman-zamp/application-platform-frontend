@@ -1,9 +1,9 @@
 import { FC, useEffect, useMemo, useRef } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import DateSeparator from 'modules/process/activity-logs/components/DateSeparator';
 import Log from 'modules/process/activity-logs/components/Log';
 import { type HandleShowArtifactsProps } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
 
 interface LogsListProps {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -26,7 +27,6 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
 import {
   generateColIdsVisibilityConfig,

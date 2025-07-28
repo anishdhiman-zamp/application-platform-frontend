@@ -1,4 +1,4 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { FilterDefaultValueType, SheetFilterType } from 'types/api/pagesApi.types';
 import { MapAny } from 'types/commonTypes';
 import { getPastDateByNumberOfDays } from 'utils/common';

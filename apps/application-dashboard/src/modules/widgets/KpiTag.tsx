@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { useGetWidgetDataQuery } from 'apis/widgets';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';

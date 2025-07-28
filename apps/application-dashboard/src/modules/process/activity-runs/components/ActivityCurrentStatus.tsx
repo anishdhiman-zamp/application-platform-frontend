@@ -1,8 +1,8 @@
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { getFormattedDate } from '@/modules/data/data.utils';
 import ArtifactPill from '@/modules/process/activity-runs/components/ArtifactPill';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';

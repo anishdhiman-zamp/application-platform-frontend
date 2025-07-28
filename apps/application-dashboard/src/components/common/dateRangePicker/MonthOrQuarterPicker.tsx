@@ -1,12 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
-import {
-  DATE_RANGE_TYPES,
-  DateRangeKeys,
-  DateRangeValue,
-  MonthsConfig,
-  QuartersConfig,
-} from 'constants/date.constants';
+import { DATE_RANGE_TYPES, DateRangeKeys, DateRangeValue, MonthsConfig, QuartersConfig } from '@zamp-platform/utils';
 import { MapAny } from 'types/commonTypes';
 import { getYearList } from 'components/common/dateRangePicker/dateRangePicker.utils';
 

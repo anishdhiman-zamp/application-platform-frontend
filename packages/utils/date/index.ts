@@ -1,6 +1,17 @@
-import format from 'date-fns/format';
+import { format, formatRelative } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
-import { OptionsType } from 'types/commonTypes';
+
+interface OptionsType {
+  label?: React.ReactNode;
+  value: string | number;
+  id?: string;
+  spriteIcon?: string;
+  icon?: React.ReactNode;
+  isDisabled?: boolean;
+  metadata?: Record<string, unknown>;
+  options?: OptionsType[];
+  desc?: string;
+}
 
 export const MONTH_NAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -57,7 +68,6 @@ export const formatDateToZFormat = (date: Date) => {
 export const getUtcDate = (data: string | number) => {
   const inputDate = new Date(data);
 
-  // Manually format using the extracted UTC parts with date-fns
   return new Date(
     inputDate.getUTCFullYear(),
     inputDate.getUTCMonth(),
@@ -94,7 +104,6 @@ export const DATE_FILTER_OPTIONS: OptionsType[] = [
 ];
 
 export type dateFilterValueType = { start: Date | undefined; end: Date | undefined; periodicity?: PERIODICITY_TYPES };
-// export type dateFilterValueType = { start: Date | null; end: Date | null };
 
 export type RangeType = {
   startDate?: Date | undefined;
@@ -196,11 +205,15 @@ export const DAY_ONLY_MAP: Record<string, string> = {
   today: "'Today'",
   tomorrow: "'Tomorrow'",
   nextWeek: "'Next' eeee",
-  other: 'MM/dd/yyyy', // fallback for older/newer dates
+  other: 'MM/dd/yyyy',
 };
 
 // Create a custom locale with modified formatRelative
 export const CUSTOM_LOCALE = {
   ...enUS,
   formatRelative: (token: string) => DAY_ONLY_MAP[token],
+};
+
+export const formatRelativeWithCustomLocale = (date?: Date) => {
+  return formatRelative(date ? date : new Date(), new Date(), { locale: CUSTOM_LOCALE });
 };

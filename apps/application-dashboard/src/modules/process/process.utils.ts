@@ -1,8 +1,8 @@
 import { MutableRefObject } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 

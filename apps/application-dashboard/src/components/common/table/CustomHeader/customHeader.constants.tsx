@@ -1,5 +1,5 @@
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 

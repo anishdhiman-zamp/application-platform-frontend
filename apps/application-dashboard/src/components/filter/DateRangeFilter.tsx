@@ -1,10 +1,5 @@
 import React, { FC } from 'react';
-import {
-  DATE_FILTER_CATEGORIES,
-  DATE_RANGE_TYPES,
-  dateFilterValueType,
-  PERIODICITY_TYPES,
-} from 'constants/date.constants';
+import { DATE_FILTER_CATEGORIES, DATE_RANGE_TYPES, dateFilterValueType, PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import DateRangePicker from 'components/common/dateRangePicker';
 

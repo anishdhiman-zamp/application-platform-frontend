@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { useGetWidgetDataQuery } from 'apis/widgets';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import NoPivotData from 'modules/widgets/Pivot/loader/NoPivotData';
 import PivotTableLoader from 'modules/widgets/Pivot/loader/PivotTableLoader';
 import StackedPivot from 'modules/widgets/Pivot/StackedPivot';

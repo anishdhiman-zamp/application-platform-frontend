@@ -11,7 +11,7 @@ import {
   DateRangeValue,
   PERIODICITY_OPTIONS,
   RangeType,
-} from 'constants/date.constants';
+} from '@zamp-platform/utils';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { format } from 'date-fns';
 import { EventCallbackType, MenuItem, TAB_TYPES } from 'types/common/components';

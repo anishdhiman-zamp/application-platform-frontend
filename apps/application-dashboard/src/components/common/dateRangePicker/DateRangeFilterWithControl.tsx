@@ -1,5 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
-import { DATE_RANGE_TYPES } from 'constants/date.constants';
+import { DATE_RANGE_TYPES } from '@zamp-platform/utils';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { OptionsType } from 'types/commonTypes';

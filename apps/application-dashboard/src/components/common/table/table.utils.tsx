@@ -1,5 +1,5 @@
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { IServerSideGetRowsRequest, themeQuartz } from 'ag-grid-community';
-import { DATE_FORMATS } from 'constants/date.constants';
 import { format } from 'date-fns';
 import { MapAny } from 'types/commonTypes';
 import {
