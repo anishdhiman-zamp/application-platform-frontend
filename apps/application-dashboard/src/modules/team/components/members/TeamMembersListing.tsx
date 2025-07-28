@@ -12,7 +12,7 @@ import MembersRole from 'modules/team/components/members/MembersRole';
 import MembersTeamV2 from 'modules/team/components/members/MembersTeamV2';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
-import { TeamMembersListingPropsType } from 'modules/team/people.types';
+import { TEAM_MEMBERS_PRIVILEGES, TeamMembersListingPropsType } from 'modules/team/people.types';
 import { RootState } from 'store';
 import { TEAMS_COLORS } from '@/constants/colors';
 import { cyclicIterator } from '@/utils/common';
@@ -103,6 +103,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
                 userMappedTeams={row?.teams}
                 hasPeoplePolicy={hasPeoplePolicy}
                 teamsRandomColorRef={teamsRandomColorRef}
+                memberPrivilege={row?.privilege as TEAM_MEMBERS_PRIVILEGES}
               />
             </div>
           ))}

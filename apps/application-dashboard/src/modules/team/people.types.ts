@@ -139,6 +139,7 @@ export type MembersTeamPropsType = {
   teamsData: TeamType[];
   userMappedTeams: UserMappedTeamType[];
   teamsRandomColorRef: RefObject<() => string>;
+  memberPrivilege: TEAM_MEMBERS_PRIVILEGES;
 };
 
 export type PostTeamsByOrganizationIdPayload = {

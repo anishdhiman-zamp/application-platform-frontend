@@ -5,6 +5,7 @@ import TeamItem from 'modules/team/components/members/TeamItem';
 import {
   MembersTeamPropsType,
   PostAddTeamToAudiencePayload,
+  TEAM_MEMBERS_PRIVILEGES,
   TeamType,
   UserMappedTeamType,
 } from 'modules/team/people.types';
@@ -19,6 +20,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   userInfo,
   hasPeoplePolicy,
   teamsRandomColorRef,
+  memberPrivilege,
 }) => {
   const [search, setSearch] = useState('');
   const [filteredTeams, setFilteredTeams] = useState<TeamType[]>([]);
@@ -163,7 +165,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   return (
     <>
       <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
-        <PopoverTrigger>
+        <PopoverTrigger disabled={memberPrivilege !== TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN}>
           <div className='flex cursor-pointer flex-wrap gap-1.5 px-2 py-2.5'>
             {userTeams?.length > 0 ? (
               userTeams?.map((team) => (
