@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { DATE_FORMATS, PERIODICITY_OPTIONS } from 'constants/date.constants';
+import { DATE_FORMATS, PERIODICITY_OPTIONS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { RuleFilters } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { DateRangePicker, RangeFocus } from 'react-date-range';
-import { DATE_RANGE_TYPES, DateRangeValue, RangeType } from 'constants/date.constants';
+import { DATE_RANGE_TYPES, DateRangeValue, RangeType } from '@zamp-platform/utils';
 import { DateRangePickerNavigator } from 'components/common/dateRangePicker/DateRangePickerNavigator';
 
 interface DateRangePickerWrapperProps {

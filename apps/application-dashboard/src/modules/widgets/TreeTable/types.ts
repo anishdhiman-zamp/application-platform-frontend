@@ -1,4 +1,4 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
 import { WIDGET_TYPES, WidgetDataResponseType, WidgetInstanceType } from 'types/api/widgets.types';
 import { MapAny, OptionsType } from 'types/commonTypes';

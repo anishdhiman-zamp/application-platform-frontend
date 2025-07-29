@@ -1,7 +1,9 @@
+import { type EmitHITLActionPayload } from '@/modules/process/process.types';
 import { EmailArtifactsResponseType, EmailAttachmentType } from '@/types/api/processApi.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
 export type ToolbarConfig = {
+  id: string;
   icon?: string;
   onClick?: defaultFnType;
   showDivider?: boolean;
@@ -9,14 +11,23 @@ export type ToolbarConfig = {
   tooltipBody?: string;
 };
 
+export enum SENDER_HEADING_VALUES {
+  TO = 'to_mail_ids',
+  CC = 'cc_mail_ids',
+  BCC = 'bcc_mail_ids',
+  HEADING = 'heading',
+}
+
+export type HeaderValueType = {
+  [SENDER_HEADING_VALUES.TO]: string[];
+  [SENDER_HEADING_VALUES.CC]: string[];
+  [SENDER_HEADING_VALUES.BCC]: string[];
+  [SENDER_HEADING_VALUES.HEADING]: string;
+};
+
 export type HeaderProps = {
-  onChange: (key: string, value: string | string[]) => void;
-  value: {
-    heading: string;
-    to_mail_ids: string[];
-    cc_mail_ids: string[];
-    bcc_mail_ids: string[];
-  };
+  onHeaderChange: (key: SENDER_HEADING_VALUES, value: string | string[]) => void;
+  value: HeaderValueType;
 };
 
 export type BodyAndFooterProps = {
@@ -29,10 +40,16 @@ export type BodyAndFooterProps = {
   attachments: EmailAttachmentType[];
   processId: string;
   artifactId: string;
+  isEmailSending: boolean;
+  onContentChange: (content: string) => void;
+  onAttachmentsChange: (attachments: EmailAttachmentType[]) => void;
 };
 
 export type EmailEditorArtifactProps = {
   emailArtifact: EmailArtifactsResponseType;
   artifactId: string;
   processId: string;
+  activityId: string;
+  emitHITLActionPayload: EmitHITLActionPayload;
+  onClose: defaultFnType;
 };

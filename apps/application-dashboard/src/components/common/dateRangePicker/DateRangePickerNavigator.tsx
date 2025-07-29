@@ -1,6 +1,6 @@
 import React from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { MonthsConfig } from 'constants/date.constants';
+import { MonthsConfig } from '@zamp-platform/utils';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { getYearList } from 'components/common/dateRangePicker/dateRangePicker.utils';
 

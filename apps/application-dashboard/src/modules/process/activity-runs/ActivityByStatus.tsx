@@ -281,7 +281,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef}>
+        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef} id='activity-by-status-table'>
           <DatasetTable
             tableRef={tableRef}
             columns={columns}
@@ -290,7 +290,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             totalRows={totalRows}
             customTheme={myThemeWithProcess}
             headerClass='f-12-450 text-GRAY_700'
-            cellClass='text-[13px]! font-[450]! px-4!'
+            cellClass='text-[13px]! font-[450]! px-0! py-0!'
             suppressCellFocus
             gridStyle={{ height: 'calc(100vh - 150px)' }}
             enableCellSelection={false}

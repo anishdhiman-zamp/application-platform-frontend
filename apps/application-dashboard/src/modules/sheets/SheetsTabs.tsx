@@ -1,13 +1,25 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useAppSelector } from 'hooks/toolkit';
+import DraggableSheetTab from 'modules/sheets/DraggableSheetTab';
+import SheetTab from 'modules/sheets/SheetTab';
 import { useParams, useRouter } from 'next/navigation';
 import { RootState } from 'store';
-import { MenuItem, SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
+import { MenuItem } from 'types/common/components';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { Button } from 'components/common/button/Button';
+import { useUpdateSheetIndexesByPageIdMutation } from '@/apis/pages';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -21,8 +33,13 @@ interface SheetsTabsProps {
 const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
   const router = useRouter();
   const params = useParams();
+  const [tabOrder, setTabOrder] = useState<string[]>(tabs.map((tab) => tab.value as string));
+  const [activeId, setActiveId] = useState<string | null>(null);
   const pageId = params?.pageId as string;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const [updateSheetIndexesByPageId] = useUpdateSheetIndexesByPageIdMutation();
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleTabSelect = (selected?: MenuItem) => {
     if (!selected?.value) return;
@@ -37,9 +54,39 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
         storedData[validPageId] = String(selected?.value);
       }
     }
-
     localStorage.setItem(LOCAL_STORAGE_KEYS.DATA_SHEET_ID, JSON.stringify(storedData));
   };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    setActiveId(null);
+    if (active.id !== over?.id) {
+      const oldIndex = tabOrder.indexOf(active.id as string);
+      const newIndex = tabOrder.indexOf((over?.id as string) ?? '');
+      const updatedTabOrder = arrayMove(tabOrder, oldIndex, newIndex);
+
+      updateSheetIndexesByPageId({
+        pageId,
+        body: {
+          sheets: updatedTabOrder.map((id, index) => ({ sheet_id: id, fractional_index: index + 1 })),
+        },
+      })
+        .unwrap()
+        .then(() => {
+          toast.success('Sheet order updated successfully');
+        })
+        .catch(() => {
+          toast.error('Failed to update sheet order');
+        });
+      setTabOrder(updatedTabOrder);
+    }
+  };
+
+  // Sync tabOrder with tabs whenever tabs changes
+  useEffect(() => {
+    setTabOrder(tabs.map((tab) => tab.value as string));
+  }, [tabs]);
 
   return (
     <div
@@ -51,24 +98,45 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
         isLoading={isPageLoading}
-        className='flex items-center gap-3'
         loader={<div className='bg-GRAY_50 block h-8 w-25 animate-pulse rounded-md' />}
+        className='w-fit'
       >
-        {tabs?.map((tab) => (
-          <Button
-            key={tab?.value}
-            id='sheets-tabs'
-            onClick={() => handleTabSelect(tab)}
-            type={BUTTON_TYPES.SECONDARY}
-            className={cn(
-              'w-fit rounded-lg!',
-              currentSheetId === tab?.value ? '!bg-BG_GRAY_2 !border-GRAY_500' : '!border-GRAY_400 bg-white',
-            )}
-            size={SIZE_TYPES.MEDIUM}
-          >
-            <div className={`f-12-450 whitespace-nowrap transition-all duration-100`}>{tab?.label}</div>
-          </Button>
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={(event) => setActiveId(String(event.active.id))}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={tabOrder} strategy={horizontalListSortingStrategy}>
+            <div className='flex gap-3'>
+              {tabOrder.map((id) => {
+                const tab = tabs.find((t) => t.value === id);
+
+                if (!tab) return null;
+
+                return (
+                  <DraggableSheetTab
+                    key={tab.value}
+                    tab={tab}
+                    currentSheetId={currentSheetId}
+                    handleTabSelect={handleTabSelect}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+          <DragOverlay>
+            {activeId ? (
+              <div className='-rotate-2'>
+                <SheetTab
+                  tab={tabs.find((t) => t.value === activeId) ?? { value: '', label: '' }}
+                  currentSheetId={currentSheetId}
+                  handleTabSelect={handleTabSelect}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </CommonWrapper>
 
       <Tooltip

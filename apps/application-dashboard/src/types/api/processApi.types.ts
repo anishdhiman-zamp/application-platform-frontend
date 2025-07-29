@@ -37,6 +37,29 @@ type MetadataType = {
   view_name: string;
 };
 
+export type KnowledgeBaseRequestType = {
+  processId: string;
+};
+
+export interface KnowledgeBaseResponseType {
+  id: string;
+  organization_id: string;
+  process_id: string;
+  description: string;
+  version: number;
+  storage: {
+    provider: string;
+    bucket: string;
+    path: string;
+  };
+  metadata: {
+    notion_link: string;
+  };
+  content_signed_url: string;
+  effective_from: string; // ISO timestamp
+  effective_to: string; // ISO timestamp (could be "0001-01-01T00:00:00Z" as placeholder)
+}
+
 export type ActivityRunsDataResponseType = {
   rows: MapAny[];
   columns: MapAny[];
@@ -88,22 +111,6 @@ export type PdfArtifactsResponseType = {
 export type EmailAttachmentType = {
   file_id: string;
   file_display_name: string;
-};
-
-export type EmailArtifactsResponseType = {
-  display_name: string;
-  status: EMAIL_STATUS;
-  icon_identifier: string;
-  heading: string;
-  date: string;
-  from_mail_id: string;
-  from_name: string;
-  body_html: string;
-  body_plain_text: string;
-  cc_mail_ids: string[];
-  bcc_mail_ids: string[];
-  to_mail_ids: string[];
-  attachments: EmailAttachmentType[];
 };
 
 export type BrowserArtifactsResponseType = {
@@ -276,5 +283,37 @@ export type EmitHITLActionRequestType = {
       values: string[];
       cta_component_type?: CTA_COMPONENT_TYPE;
     }[];
+  };
+};
+
+export interface EmailUpdatePayloadType {
+  heading: string;
+  body_html: string;
+  to_mail_ids: string[];
+  cc_mail_ids: string[];
+  bcc_mail_ids: string[];
+  attachments: EmailAttachmentType[];
+  last_updated_by: {
+    id: string;
+    name?: string;
+  };
+}
+
+export interface EmailArtifactsResponseType extends EmailUpdatePayloadType {
+  display_name: string;
+  status: EMAIL_STATUS;
+  icon_identifier: string;
+  date: string;
+  from_mail_id: string;
+  body_plain_text: string;
+  from_name: string;
+}
+
+export type UpdateArtifactRequestType = {
+  processId: string;
+  artifactId: string;
+  payload: {
+    artifact_type: ARTIFACT_TYPE;
+    artifact_data: EmailUpdatePayloadType;
   };
 };

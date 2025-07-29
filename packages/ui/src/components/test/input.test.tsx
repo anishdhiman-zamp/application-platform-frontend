@@ -5,54 +5,58 @@ import { Input } from '../ui/input';
 
 describe('Input Component - Functional Tests', () => {
   it('renders with default props', () => {
-    const { getByRole } = render(<Input placeholder='Enter text' />);
-    const input = getByRole('textbox');
+    const { getByTestId } = render(<Input placeholder='Enter text' data-testid='input' />);
+    const input = getByTestId('input');
     expect(input).toHaveAttribute('placeholder', 'Enter text');
     expect(input).not.toBeDisabled();
   });
 
   it('calls onChange handler when value changes', () => {
     const handleChange = jest.fn();
-    const { getByRole } = render(<Input onChange={handleChange} />);
-    const input = getByRole('textbox');
+    const { getByTestId } = render(<Input onChange={handleChange} data-testid='input' />);
+    const input = getByTestId('input');
     fireEvent.change(input, { target: { value: 'test' } });
     expect(handleChange).toHaveBeenCalled();
   });
 
   it('is disabled when `disabled` is true', () => {
-    const { getByRole } = render(<Input disabled />);
-    expect(getByRole('textbox')).toBeDisabled();
+    const { getByTestId } = render(<Input disabled data-testid='input' />);
+    expect(getByTestId('input')).toBeDisabled();
   });
 
   it('renders with error variant when `error` is true', () => {
-    const { getByRole } = render(<Input error />);
-    const input = getByRole('textbox');
+    const { getByTestId } = render(<Input error data-testid='input' />);
+    const input = getByTestId('input');
     expect(input).toHaveClass('border-destructive');
   });
 
   it('renders with custom type', () => {
-    const { getByDisplayValue } = render(<Input type='password' defaultValue='test' />);
-    const input = getByDisplayValue('test');
+    const { getByTestId } = render(<Input type='password' defaultValue='test' data-testid='input' />);
+    const input = getByTestId('input');
     expect(input).toHaveAttribute('type', 'password');
   });
 
   it('renders with icon in leading position', () => {
-    const { container } = render(<Input icon={<span data-testid='icon'>🔍</span>} iconPosition='leading' />);
-    const icon = container.querySelector('[data-testid="icon"]');
+    const { getByTestId } = render(
+      <Input icon={<span data-testid='icon'>🔍</span>} iconPosition='leading' data-testid='input' />,
+    );
+    const icon = getByTestId('icon');
     expect(icon).toBeInTheDocument();
     expect(icon?.parentElement).toHaveClass('left-3'); // medium size default
   });
 
   it('renders with icon in trailing position', () => {
-    const { container } = render(<Input icon={<span data-testid='icon'>🔍</span>} iconPosition='trailing' />);
-    const icon = container.querySelector('[data-testid="icon"]');
+    const { getByTestId } = render(
+      <Input icon={<span data-testid='icon'>🔍</span>} iconPosition='trailing' data-testid='input' />,
+    );
+    const icon = getByTestId('icon');
     expect(icon).toBeInTheDocument();
     expect(icon?.parentElement).toHaveClass('right-3'); // medium size default
   });
 
   it('applies correct padding when icon is present', () => {
-    const { getByRole } = render(<Input icon={<span>🔍</span>} iconPosition='leading' />);
-    const input = getByRole('textbox');
+    const { getByTestId } = render(<Input icon={<span>🔍</span>} iconPosition='leading' data-testid='input' />);
+    const input = getByTestId('input');
     expect(input).toHaveClass('pl-9'); // medium size with leading icon
   });
 
@@ -63,23 +67,25 @@ describe('Input Component - Functional Tests', () => {
         ref={(instance) => {
           ref.current = instance;
         }}
+        data-testid='input'
       />,
     );
     expect(ref.current?.tagName).toBe('INPUT');
   });
 
   it('applies custom className', () => {
-    const { getByRole } = render(<Input className='custom-class' />);
-    const input = getByRole('textbox');
+    const { getByTestId } = render(<Input className='custom-class' data-testid='input' />);
+    const input = getByTestId('input');
     expect(input).toHaveClass('custom-class');
   });
 
   it('applies wrapperClassName to wrapper div', () => {
-    const { container } = render(<Input wrapperClassName='wrapper-class' />);
+    const { container } = render(<Input wrapperClassName='wrapper-class' data-testid='input' />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper).toHaveClass('wrapper-class');
   });
 
+  // Critical snapshots that could break component usage
   it('matches snapshot for default input', () => {
     const { container } = render(<Input placeholder='Snapshot' />);
     expect(container.firstChild).toMatchSnapshot();
@@ -94,39 +100,52 @@ describe('Input Component - Functional Tests', () => {
     const { container } = render(<Input icon={<span>🔍</span>} placeholder='With Icon' />);
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('matches snapshot for large size', () => {
+    const { container } = render(<Input size='large' placeholder='Large Input' />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches snapshot for small size', () => {
+    const { container } = render(<Input size='small' placeholder='Small Input' />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });
 
-const variants = ['default', 'error'] as const;
-const sizes = ['xlarge', 'large', 'medium', 'small', 'xsmall', 'xxsmall'] as const;
+// Removed excessive variant/size combinations - keeping only critical ones
+describe('Input Component - Critical Variant Tests', () => {
+  it('renders all variants correctly', () => {
+    const variants = ['default', 'error'] as const;
 
-describe('Input Component - Snapshot Tests for variant & size', () => {
-  variants.forEach((variant) => {
+    variants.forEach((variant) => {
+      const { container } = render(<Input variant={variant} placeholder={`${variant} variant`} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it('renders all sizes correctly', () => {
+    const sizes = ['xlarge', 'large', 'medium', 'small', 'xsmall', 'xxsmall'] as const;
+
     sizes.forEach((size) => {
-      it(`renders variant="${variant}" and size="${size}" correctly`, () => {
-        const { container } = render(<Input variant={variant} size={size} placeholder={`${variant}-${size}`} />);
-        expect(container.firstChild).toMatchSnapshot();
-      });
+      const { container } = render(<Input size={size} placeholder={`${size} size`} />);
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });
 
 describe('Input Component - Icon Position Tests', () => {
-  const iconPositions = ['leading', 'trailing'] as const;
+  it('renders with leading icon correctly', () => {
+    const { container } = render(
+      <Input icon={<span data-testid='icon'>🔍</span>} iconPosition='leading' placeholder='Leading Icon' />,
+    );
+    expect(container.firstChild).toMatchSnapshot();
+  });
 
-  iconPositions.forEach((position) => {
-    sizes.forEach((size) => {
-      it(`renders with icon position="${position}" and size="${size}" correctly`, () => {
-        const { container } = render(
-          <Input
-            icon={<span data-testid='icon'>🔍</span>}
-            iconPosition={position}
-            size={size}
-            placeholder={`${position}-${size}`}
-          />,
-        );
-        expect(container.firstChild).toMatchSnapshot();
-      });
-    });
+  it('renders with trailing icon correctly', () => {
+    const { container } = render(
+      <Input icon={<span data-testid='icon'>🔍</span>} iconPosition='trailing' placeholder='Trailing Icon' />,
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
 

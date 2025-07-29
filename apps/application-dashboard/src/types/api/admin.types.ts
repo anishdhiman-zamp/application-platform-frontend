@@ -1,6 +1,8 @@
 import { DatasetType, ProviderType } from 'modules/admin/admin.types';
 import { ValueFormatType } from 'types/api/dataset.types';
+import { MapAny } from 'types/commonTypes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
+import { APITags } from '@/constants/api.constants';
 
 export type GetDatasetDisplayConfigRequestType = {
   datasetId: string;
@@ -146,14 +148,34 @@ export type UpsertTemplateResponseType = {
   action_id: string;
 };
 
+export interface DatasetColumnConfig {
+  is_required: boolean;
+}
+
+export interface Rule {
+  id: string;
+  priority: number;
+  value_to_apply: string;
+  sql_condition: string;
+  sql_args: MapAny;
+}
+export interface DatasetConfig {
+  columns: Record<string, DatasetColumnConfig>;
+  custom_column_groups: { type: string; config: Record<string, string> }[];
+  rules: Record<string, Rule[]>;
+}
+
 export type UpdateDatasetRequestType = {
   datasetId: string;
-  title: string;
-  description: string;
-  dedup_columns: string[];
-  cluster_columns: string[];
-  partition_columns: string[];
-  order_by_column: string;
+  title?: string;
+  description?: string;
+  dedup_columns?: string[];
+  cluster_columns?: string[];
+  partition_columns?: string[];
+  order_by_column?: string;
+  display_config?: DisplayConfigType[];
+  dataset_config?: DatasetConfig;
+  invalidateTags?: APITags[];
 };
 
 export type UpdateDatasetResponseType = {

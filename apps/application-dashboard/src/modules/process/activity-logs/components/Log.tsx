@@ -1,16 +1,21 @@
-import { type FC, memo, useMemo } from 'react';
+import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
+import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
-import { LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
+import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
+import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
+import { motion } from 'motion/react';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
-import { capitalizeFirstLetter, cn } from '@/utils/common';
+import { defaultFnType } from '@/types/commonTypes';
+import { cn } from '@/utils/common';
 
 type LogProps = {
+  isLastLogOfDate?: boolean;
   isLastLog?: boolean;
   data: ActivityLogsItemType;
   handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
@@ -19,7 +24,14 @@ type LogProps = {
   activityId: string;
 };
 
-const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, processId, activityId }) => {
+const Log: FC<LogProps> = ({
+  isLastLogOfDate = false,
+  isLastLog = false,
+  data,
+  handleShowArtifacts,
+  processId,
+  activityId,
+}) => {
   const {
     content: { message, thought_steps, ctas, sender_type, sender_details },
     status,
@@ -27,14 +39,23 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, proce
     updated_at,
     log_group_id,
   } = data;
+  const isLogsLoading = status === LOG_STATUS.LOADING;
+  const staggerCompleteRef = useRef(false);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const shimmerControlRef = useRef<defaultFnType | null>(null);
+  const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
+  const [lineHeight, setLineHeight] = useState(0);
+  const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
 
+  // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
     return (
-      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.SYSTEM) ||
-      (content_type === CONTENT_TYPE.REPLIED_TO_SECTION && sender_type === SENDER_TYPE.USER)
+      content_type === CONTENT_TYPE.REPLIED_TO_SECTION &&
+      (sender_type === SENDER_TYPE.SYSTEM || sender_type === SENDER_TYPE.USER)
     );
   }, [content_type, sender_type]);
 
+  // status indicator color
   const statusIndicatorColor = useMemo(() => {
     if (sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.REPLIED_TO_SECTION) {
       return {
@@ -59,48 +80,135 @@ const Log: FC<LogProps> = ({ isLastLog = false, data, handleShowArtifacts, proce
     };
   }, [status, content_type, sender_type]);
 
+  // formatted time
   const formattedTime = useMemo(() => {
     return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
   }, [updated_at]);
 
+  // indicator-stroke and shimmer loop
+  const runStrokeShimmerSequenceLoop = (
+    showBlueStrokeRef: React.MutableRefObject<((show: boolean) => void) | null>,
+    shimmerControlRef: React.MutableRefObject<(() => void) | null>,
+    cancelledRef: React.MutableRefObject<boolean>,
+  ) => {
+    handleStrokeShimmerSequence({ showBlueStrokeRef, shimmerControlRef, cancelledRef });
+  };
+
+  const handleLineHeightUpdate = () => {
+    setLineHeight((prev) => prev + 1);
+  };
+
+  useEffect(() => {
+    const stopStrokeShimmerSequenceLoopRef = { current: false };
+
+    runStrokeShimmerSequenceLoop(showBlueStrokeRef, shimmerControlRef, stopStrokeShimmerSequenceLoopRef);
+
+    return () => {
+      stopStrokeShimmerSequenceLoopRef.current = true;
+    };
+  }, []);
+
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
-      <div className='flex w-14 shrink-0 items-start justify-start'>
-        <span className='f-12-450 text-GRAY_700 whitespace-nowrap'>{formattedTime}</span>
-      </div>
-      <div
-        className={cn(
-          'border-GRAY_100 relative flex w-full min-w-0 flex-col items-start justify-start border-l pb-10 pl-5',
-          {
-            'border-white pb-0': isLastLog,
-          },
-        )}
-      >
-        <div className={cn('absolute top-0 -left-2.5 flex w-5 items-start justify-center bg-white pt-[2px] pb-2')}>
-          <LogStatusIndicator
-            status={statusIndicatorColor.status}
-            fillColor={statusIndicatorColor.fillColor}
-            strokeColor={statusIndicatorColor.strokeColor}
-          />
+      {isLogsLoading && sender_type === SENDER_TYPE.SYSTEM ? (
+        <div className='w-[60px] shrink-0' />
+      ) : (
+        <div className='flex w-[60px] shrink-0 items-start justify-start'>
+          <motion.div
+            className='f-12-450 text-GRAY_700 origin-top whitespace-nowrap'
+            initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
+            animate={{
+              ...LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate,
+              opacity: !isLastLog || staggerAnimationBegin ? 1 : 0,
+            }}
+          >
+            {formattedTime}
+          </motion.div>
         </div>
-        <p
-          className={cn('f-13-450 text-GRAY_1000 w-full text-left break-words', {
-            'animate-pulse': status === LOG_STATUS.LOADING,
-          })}
+      )}
+
+      <div className='flex h-full w-full'>
+        {/* Indicator + Line */}
+        <div className='relative flex w-5 flex-col items-center gap-[2px] pt-[2px] pr-5'>
+          {/* Indicator */}
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: !isLastLog || staggerAnimationBegin ? 1 : 0 }}
+            transition={{
+              duration: 0.5,
+              ease: 'linear',
+            }}
+            className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
+          >
+            <LogStatusIndicator
+              fillColor={statusIndicatorColor.fillColor}
+              strokeColor={statusIndicatorColor.strokeColor}
+              status={statusIndicatorColor.status}
+              shouldRotate={sender_type === SENDER_TYPE.SYSTEM && content_type === CONTENT_TYPE.MESSAGE_SECTION}
+              showBlueStrokeRef={showBlueStrokeRef}
+            />
+          </motion.div>
+          {/* Line */}
+          <div className='relative h-full' id={`line-${lineHeight}`}>
+            {!isLastLogOfDate && (
+              <motion.div
+                className='absolute inset-0 flex origin-top flex-col items-center'
+                initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].initial}
+                animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[0].animate}
+              >
+                <div className='bg-GRAY_100 w-[1px] min-w-[1px] flex-1' ref={lineRef} />
+              </motion.div>
+            )}
+          </div>
+        </div>
+        {/* body */}
+        <motion.div
+          className='flex w-full origin-top flex-col items-start justify-start pb-10'
+          initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
+          animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
+          onAnimationComplete={() => setStaggerAnimationBegin(true)}
         >
-          {capitalizeFirstLetter(message)}
-        </p>
-        {thought_steps?.length > 0 && <ReasoningAccordion thoughtSteps={thought_steps} logGroupId={log_group_id} />}
-        {ctas && (
-          <LogCta
-            ctas={ctas}
-            logGroupId={log_group_id}
-            processId={processId}
-            activityId={activityId}
-            handleShowArtifacts={handleShowArtifacts}
+          <LogMessageAnimation
+            text={message}
+            className={'f-13-450 w-full text-left break-words'}
+            delay={0.2}
+            shimmer={isLogsLoading}
+            shimmerControlRef={shimmerControlRef}
+            isLastLog={isLastLog}
+            showAnimation={staggerAnimationBegin}
+            onStaggerComplete={() => {
+              staggerCompleteRef.current = true;
+              handleLineHeightUpdate();
+            }}
           />
-        )}
-        {isSenderInfoVisible && <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />}
+
+          {thought_steps?.length > 0 && (
+            <ReasoningAccordion
+              thoughtSteps={thought_steps}
+              logGroupId={log_group_id}
+              isLastLog={isLastLog}
+              status={statusIndicatorColor.status}
+            />
+          )}
+          {ctas && (
+            <LogCta
+              ctas={ctas}
+              logGroupId={log_group_id}
+              processId={processId}
+              activityId={activityId}
+              handleShowArtifacts={handleShowArtifacts}
+            />
+          )}
+          <motion.div
+            initial={{ opacity: isLastLog && !staggerCompleteRef.current ? 0 : 1 }}
+            animate={{ opacity: isLastLog && !staggerCompleteRef.current ? 0 : 1 }}
+          >
+            {isSenderInfoVisible && (
+              <SenderInfo senderType={sender_type} senderDetails={sender_details} status={status} />
+            )}
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

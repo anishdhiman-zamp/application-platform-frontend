@@ -9,7 +9,7 @@ import {
   PERIODICITY_TYPES,
   QuartersConfig,
   RangeType,
-} from 'constants/date.constants';
+} from '@zamp-platform/utils';
 import { endOfMonth, endOfQuarter, endOfYear, startOfMonth, startOfQuarter, startOfYear, sub } from 'date-fns';
 import { DAY_TYPES, DIRECTION_TYPES, OFFSET_TYPES } from 'types/common/components/date';
 import { OptionsType } from 'types/commonTypes';

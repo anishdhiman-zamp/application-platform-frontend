@@ -1,4 +1,6 @@
+import type { RefObject } from 'react';
 import { captureException } from '@sentry/browser';
+import { DATE_FORMATS, formatRelativeWithCustomLocale, VALID_DATE_FORMATS } from '@zamp-platform/utils';
 import {
   ColDef,
   type ColumnMovedEvent,
@@ -6,8 +8,7 @@ import {
   type SortDirection,
   ValueFormatterParams,
 } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
-import { DATE_FORMATS, VALID_DATE_FORMATS } from 'constants/date.constants';
+import type { AgGridReact } from 'ag-grid-react';
 import {
   differenceInDays,
   differenceInHours,
@@ -16,7 +17,7 @@ import {
   format,
   isValid,
 } from 'date-fns';
-import { COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
+import { COLUMN_TYPE_WIDTH_MAP, COLUMN_WIDTHS, CustomColumnsMapping } from 'modules/data/data.constants';
 import {
   ColumnOrderingVisibilityType,
   type DatasetTabType,
@@ -27,6 +28,7 @@ import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatT
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
 import {
+  capitalizeWords,
   createDateObjectFromUTCString,
   formatPlural,
   getCommaSeparatedNumber,
@@ -38,6 +40,7 @@ import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/Act
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
 import { toast } from '@/components/common/toast/Toast';
 import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
+import { DisplayConfigType } from '@/types/api/admin.types';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomDateTimeEditor from 'components/common/table/CustomCellEditors/CustomDateTimeEditor';
 import CustomTagEditor from 'components/common/table/CustomCellEditors/CustomTagEditor';
@@ -81,27 +84,24 @@ export const formatData = (data: DatasetType[]): DatasetType[] => {
   }));
 };
 
-export const getColumnMinWidth = (
-  columnNameLength: number,
-  isActivityArtifactColumn: boolean,
-  isActivityStatusColumn: boolean,
-  isActivityDocumentColumn: boolean,
-): number => {
-  switch (true) {
-    case isActivityArtifactColumn:
-      return COLUMN_WIDTHS.ACTIVITY_ARTIFACT;
-    case isActivityStatusColumn:
-      return COLUMN_WIDTHS.ACTIVITY_STATUS;
-    case isActivityDocumentColumn:
-      return COLUMN_WIDTHS.ACTIVITY_DOCUMENT;
-    case columnNameLength > COLUMN_WIDTHS.CHAR_THRESHOLD:
-      return COLUMN_WIDTHS.BASE + COLUMN_WIDTHS.EXTRA_CHAR_WIDTH * (columnNameLength - COLUMN_WIDTHS.CHAR_THRESHOLD);
-    default:
-      return COLUMN_WIDTHS.BASE;
+export const getColumnMinWidth = (columnNameLength: number, customColumnType?: CUSTOM_COLUMNS_TYPE): number => {
+  // Check if it's a special activity column type first
+  if (customColumnType && customColumnType in COLUMN_TYPE_WIDTH_MAP) {
+    return COLUMN_TYPE_WIDTH_MAP[customColumnType as keyof typeof COLUMN_TYPE_WIDTH_MAP];
   }
+
+  // Handle dynamic width for long column names
+  if (columnNameLength > COLUMN_WIDTHS.CHAR_THRESHOLD) {
+    return COLUMN_WIDTHS.BASE + COLUMN_WIDTHS.EXTRA_CHAR_WIDTH * (columnNameLength - COLUMN_WIDTHS.CHAR_THRESHOLD);
+  }
+
+  // Default width
+  return COLUMN_WIDTHS.BASE;
 };
 
 const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType[]): boolean => {
+  if (!missingFields?.length) return true;
+
   const rowId = params.data?.id;
 
   return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
@@ -120,6 +120,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   isMenuDisabled,
   missingFields,
   wrapLink,
+  isSelfServe,
 }) => {
   const columns: ColDef[] = [];
 
@@ -129,36 +130,39 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     const columnNameLength = column?.alias?.length ?? column?.column?.length;
     const columnWidth =
       columnOrderingVisibility?.find((columnLocal) => columnLocal.colId === column?.column)?.width ?? 0;
-    const isActivityDocumentColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT;
-    const isActivityCurrentStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS;
-    const isActivityStatusColumn = column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS;
+    const valueFormat = Array.isArray(column.metadata?.config?.value_format)
+      ? column.metadata?.config?.value_format
+      : [column.metadata?.config?.value_format];
 
     let formattedColumn: ColDef = {
       field: column?.column,
       hide: column?.metadata?.is_hidden,
       cellRendererParams: column?.metadata,
-      editable: (params: MapAny) => {
-        return !!(
+      editable: (params: MapAny) =>
+        !!(
           column?.metadata?.is_editable &&
           currentUserHasEditAccess &&
           checkIsCellEditable(params, missingFields || [])
-        );
-      },
+        ),
       suppressFillHandle: !column?.metadata?.is_editable,
       filter: AG_GRID_FILTER_TYPES[column.type as keyof typeof AG_GRID_FILTER_TYPES] ?? '',
       sort: sortColumn === column?.column ? (sortOrder as SortDirection) : undefined,
       filterParams: {
         values: column?.options,
       },
-      suppressMovable: column?.metadata?.config?.movable,
-      headerName: isActivityStatusColumn ? '' : snakeCaseToSentenceCase(column?.alias || column?.column),
-      minWidth: getColumnMinWidth(
-        columnNameLength,
-        isActivityCurrentStatusColumn,
-        isActivityStatusColumn,
-        isActivityDocumentColumn,
-      ),
-      maxWidth: isActivityStatusColumn ? COLUMN_WIDTHS.ACTIVITY_STATUS : undefined,
+      suppressMovable:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT,
+      headerName:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
+          ? ''
+          : snakeCaseToSentenceCase(column?.alias || column?.column),
+      minWidth: getColumnMinWidth(columnNameLength, column?.metadata?.custom_type as CUSTOM_COLUMNS_TYPE),
+      maxWidth:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
+          ? COLUMN_WIDTHS.ACTIVITY_STATUS
+          : undefined,
       initialWidth: columnWidth > 0 ? columnWidth : COLUMN_WIDTHS.BASE,
     };
 
@@ -180,11 +184,27 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
       headerBackgroundNeeded: false,
       className: isProcess && 'py-2 px-4 hover:bg-transparent',
-      hideFloatingFilter: isActivityCurrentStatusColumn || isActivityStatusColumn || isMenuDisabled,
+      hideFloatingFilter:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
+        isMenuDisabled,
+      dateFormat: valueFormat?.find((item) => item?.type === VALUE_FORMAT_TYPE.DATE_TIME)?.value,
+      isSelfServe,
     };
 
     if (column?.metadata?.config?.value_format) {
       formattedColumn = { ...formattedColumn, valueFormatter: getValueFormatter(column) };
+    }
+
+    if (column?.type === FILTER_TYPES.DATE_RANGE && !column?.metadata?.config?.value_format) {
+      formattedColumn = {
+        ...formattedColumn,
+        valueFormatter: (params: ValueFormatterParams) =>
+          getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy },
+            params.value,
+          ) as string,
+      };
     }
 
     if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
@@ -431,12 +451,17 @@ export const getValueFormatter = (
   return valueFormatter;
 };
 
-export const getFormattedDate = (valueFormat: ValueFormatType, value: string) => {
+export const getFormattedDate = (valueFormat: ValueFormatType, value: string | number) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
-  const date = new Date(createDateObjectFromUTCString(value));
 
-  return isValid(date) ? format(date, validDateFormat) : value;
+  // expect value to be in microseconds when it is a number
+  const date = typeof value === 'number' ? new Date(value / 1000) : new Date(createDateObjectFromUTCString(value));
+  const isValidDate = isValid(date);
+
+  if (dateFormat === DATE_FORMATS.RELATIVE) return isValidDate ? formatRelativeWithCustomLocale(date) : value;
+
+  return isValidDate ? format(date, validDateFormat) : value;
 };
 
 const getFormattedValueWithPrefix = (valueFormat: ValueFormatType, value: string) => {
@@ -687,39 +712,14 @@ export const updateLocalStorage = (columnOrderingVisibility: ColumnOrderingVisib
   );
 };
 
-export const extractDatasetsFromUrl = (url: string): DatasetUrlDataType => {
-  try {
-    const queryString = url?.split('?')?.[1];
-
-    if (!queryString) {
-      throw new Error('No query string found in URL.');
-    }
-
-    const searchParams = new URLSearchParams(queryString);
-    const encodedDatasets = searchParams.get('datasets');
-
-    if (!encodedDatasets) {
-      throw new Error('No "datasets" parameter found in URL.');
-    }
-
-    const decodedDatasets = decodeURIComponent(encodedDatasets);
-
-    return JSON.parse(decodedDatasets);
-  } catch (error) {
-    console.error('Failed to extract datasets from URL:', (error as Error)?.message);
-
-    return {};
-  }
-};
-
-export const parseDatasets = (url: string, datasetIds: string[]): DatasetTabType[] => {
-  const datasets = extractDatasetsFromUrl(url);
-
-  return datasetIds?.map((id) => ({
-    id,
-    title: datasets[id]?.title || '',
-    filters: datasets[id]?.filters || {},
+export const parseDatasets = (datasets: DatasetUrlDataType): DatasetTabType[] => {
+  const returnDatasets = Object.entries(datasets).map(([key, value]) => ({
+    id: key,
+    title: value?.title || '',
+    filters: value?.filters || {},
   }));
+
+  return returnDatasets;
 };
 
 /**
@@ -835,4 +835,174 @@ export const formatArrayValue = (value: MapAny[]): string => {
       return item;
     })
     .join(', ');
+};
+
+export const getDefaultOrderDisplayConfig = (
+  allColumns: DisplayConfigType[],
+  tableRef: RefObject<AgGridReact<any> | null>,
+) => {
+  const orderedColumnIds = tableRef?.current?.api?.getAllGridColumns()?.map((column) => column.getColId()) ?? [];
+
+  // Create a map of existing columns for quick lookup
+  const columnMap: Record<string, DisplayConfigType> = {};
+
+  allColumns.forEach((column) => {
+    columnMap[column.column] = column;
+  });
+
+  // Build the updated display config with new order
+  const updatedDisplayConfig: DisplayConfigType[] = [];
+
+  // Add columns in the specified order
+  orderedColumnIds.forEach((columnId) => {
+    const column = columnMap[columnId];
+
+    if (column) {
+      updatedDisplayConfig.push(column);
+      delete columnMap[columnId]; // Remove from map to avoid duplicates
+    }
+  });
+
+  // Add remaining columns (not in the order array) to the end
+  Object.values(columnMap).forEach((column) => {
+    updatedDisplayConfig.push(column);
+  });
+
+  return updatedDisplayConfig;
+};
+
+export const getUpdatedDateFormatDisplayConfig = (
+  tableRef: RefObject<AgGridReact<any> | null>,
+  columnId: string,
+  value: string,
+  displayConfig: DisplayConfigType[],
+) => {
+  const columnDefs = tableRef.current?.api?.getAllGridColumns().map((col) => {
+    const def = col.getColDef();
+
+    if (def.field === columnId) {
+      return {
+        ...def,
+        headerComponentParams: {
+          ...def.headerComponentParams,
+          dateFormat: value,
+        },
+        valueFormatter: (params: ValueFormatterParams) =>
+          getFormattedDate(
+            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: value as string },
+            params.value as string,
+          ) as string,
+      };
+    }
+
+    return def;
+  });
+
+  tableRef.current?.api?.setGridOption('columnDefs', columnDefs);
+  tableRef.current?.api?.refreshCells({ columns: [columnId], force: true });
+  const displayConfigIndex = displayConfig?.findIndex((item) => item.column === columnId) ?? -1;
+
+  if (displayConfigIndex === -1) return displayConfig;
+  const updatedDisplayConfig =
+    displayConfig.map((item) => {
+      if (item.column === columnId) {
+        return {
+          ...item,
+          config: {
+            ...item.config,
+            value_format: [{ type: VALUE_FORMAT_TYPE.DATE_TIME, value: value as string }],
+          },
+        };
+      }
+
+      return item;
+    }) ?? [];
+
+  return updatedDisplayConfig;
+};
+
+export const getUpdatedAliasDisplayConfig = (
+  tableRef: RefObject<AgGridReact<any> | null>,
+  columnId: string,
+  value: string,
+  displayConfig: DisplayConfigType[],
+) => {
+  const columnDefs = tableRef.current?.api?.getAllGridColumns().map((col) => {
+    const def = col.getColDef();
+
+    if (def.field === columnId) {
+      return {
+        ...def,
+        headerName: value as string,
+        minWidth: getColumnMinWidth(value.length),
+      };
+    }
+
+    return def;
+  });
+
+  tableRef.current?.api?.setGridOption('columnDefs', columnDefs);
+  const displayConfigIndex = displayConfig?.findIndex((item) => item.column === columnId) ?? -1;
+
+  if (displayConfigIndex === -1) return displayConfig;
+  const updatedDisplayConfig =
+    displayConfig.map((item) => {
+      if (item.column === columnId) {
+        return { ...item, alias: value as string };
+      }
+
+      return item;
+    }) ?? [];
+
+  return updatedDisplayConfig;
+};
+
+/**
+ * Prepares a query for dataset export by adding column ordering visibility.
+ * @param {string} baseQuery - The base query string to be prepared.
+ * @param {RefObject<AgGridReact<any> | null>} tableRef - Reference to the AG Grid table component.
+ * @returns {string} The prepared query string with column ordering visibility.
+ */
+
+export const prepareExportQuery = (
+  baseQuery: string,
+  tableRef: RefObject<AgGridReact<any> | null>,
+  activityId?: string,
+): string => {
+  const columns = tableRef?.current?.api?.getAllGridColumns() || [];
+  const baseQueryObject = JSON.parse(baseQuery);
+
+  const rawFilters = baseQueryObject.filters ?? {};
+
+  const logical_operator = rawFilters.logical_operator ?? 'AND';
+  const conditions: FilterType[] = Array.isArray(rawFilters.conditions) ? rawFilters.conditions : [];
+
+  const updatedConditions = [...conditions];
+
+  if (activityId) {
+    updatedConditions.push({
+      column: 'activity_run_id',
+      operator: CONDITION_OPERATOR_TYPE.EQUAL,
+      value: activityId,
+    });
+  }
+
+  const updatedFilters = {
+    logical_operator,
+    conditions: updatedConditions,
+  };
+
+  const exportColumns = columns.map((column) => ({
+    column: column.getColId(),
+    is_hidden: !column.isVisible(),
+    alias: capitalizeWords(column.getColDef()?.headerName || column.getColId()),
+  }));
+
+  const finalQuery = {
+    ...baseQueryObject,
+    filters: updatedFilters,
+    export_columns: exportColumns,
+  };
+
+  return JSON.stringify(finalQuery);
 };

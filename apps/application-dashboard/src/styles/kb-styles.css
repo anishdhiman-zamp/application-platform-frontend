@@ -1,0 +1,120 @@
+.kb-viewer h1,
+.kb-viewer h2,
+.kb-viewer h3,
+.kb-viewer h4,
+.kb-viewer h5,
+.kb-viewer h6 {
+  color: #000;
+}
+
+.kb-viewer h1 {
+  font-size: 26px;
+  font-weight: 550;
+  margin-top: 80px;
+}
+
+.kb-viewer h1:first-child {
+  font-size: 26px;
+  font-weight: 550;
+  margin-top: 10px;
+}
+
+.kb-viewer h2:first-child {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 10px;
+}
+
+.kb-viewer h1 + h2 {
+  padding-top: 32px;
+}
+
+.kb-viewer h2 + h3 {
+  padding-top: 16px;
+}
+
+.kb-viewer h2 {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer h3 {
+  font-size: 16px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer h4 {
+  font-size: 22px;
+  font-weight: 550;
+  padding-top: 32px;
+}
+
+.kb-viewer p {
+  font-size: 13px;
+  font-weight: 400;
+  margin-top: 8px;
+}
+
+.kb-viewer hr {
+  margin: 80px 0;
+  border-color: #ebebeb;
+}
+
+.kb-viewer ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+}
+
+.kb-viewer ul ul {
+  list-style-type: circle;
+}
+
+.kb-viewer ul ul ul {
+  list-style-type: square;
+}
+
+.kb-viewer ol {
+  font-size: 13px;
+  margin-top: 16px;
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+}
+
+.kb-viewer ul p {
+  margin-top: 2px;
+}
+
+.kb-viewer ul li {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.kb-viewer strong {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.kb-viewer table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kb-viewer table th {
+  background-color: #f5f5f5;
+  font-weight: 550;
+  text-align: left;
+}
+
+.kb-viewer table td,
+.kb-viewer table th {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.kb-viewer table tr:nth-child(even) {
+  background-color: #fafafa;
+}

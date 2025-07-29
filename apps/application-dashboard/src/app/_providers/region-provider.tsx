@@ -1,7 +1,7 @@
 'use client';
 
 import React, { FC, ReactNode, useEffect } from 'react';
-import { getApiDomainByRegion, reinitializeApiDomain } from '@zamp-platform/api';
+import { getApiDomainAndRegions, reinitializeApiDomain } from '@zamp-platform/api';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 
 interface RegionProviderProps {
@@ -27,7 +27,7 @@ export const RegionProvider: FC<RegionProviderProps> = ({ children }) => {
 
         if (lastLoggedInEmail) {
           // Use the existing function to determine region
-          await getApiDomainByRegion(lastLoggedInEmail);
+          await getApiDomainAndRegions(lastLoggedInEmail);
         }
       } catch (error) {
         console.error('Failed to initialize region:', error);

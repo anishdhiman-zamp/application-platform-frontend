@@ -1,53 +1,94 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { LOG_STATUS } from 'modules/process/process.types';
+import { motion, useInView } from 'motion/react';
+import { COLORS } from '@/constants/colors';
 
 type LogStatusIndicatorProps = {
   fillColor: string;
   strokeColor: string;
   status: LOG_STATUS;
+  shouldRotate?: boolean;
+  showBlueStrokeRef?: React.MutableRefObject<((show: boolean) => void) | null>;
 };
 
-const LogStatusIndicator = ({ fillColor, strokeColor, status }: LogStatusIndicatorProps) => {
-  switch (status) {
-    case LOG_STATUS.NEEDS_ATTENTION:
-    case LOG_STATUS.FAILED:
-    case LOG_STATUS.LOADING:
-      return (
-        <svg width='14' height='13' viewBox='0 0 14 13' fill='none' xmlns='http://www.w3.org/2000/svg'>
-          <rect
-            x='0.813571'
-            y='6.07129'
-            width='8.75'
-            height='8.75'
-            rx='1.875'
-            transform='rotate(-45 0.813571 6.07129)'
-            fill={fillColor}
-            fillOpacity='0.16'
-            stroke={strokeColor}
-            strokeWidth='1.25'
-          />
-        </svg>
-      );
-    case LOG_STATUS.VOID:
-    case LOG_STATUS.SUCCESS:
-    case LOG_STATUS.MESSAGE_FROM_USER:
-    case LOG_STATUS.MESSAGE_FROM_ADAM:
-    case LOG_STATUS.DONE:
-      return (
-        <svg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'>
-          <rect
-            x='0.625'
-            y='0.625'
-            width='8.75'
-            height='8.75'
-            rx='1.875'
-            fill={fillColor}
-            stroke={strokeColor}
-            strokeWidth='1.25'
-          />
-        </svg>
-      );
-  }
+const LogStatusIndicator = ({
+  fillColor,
+  strokeColor,
+  status,
+  shouldRotate = true,
+  showBlueStrokeRef,
+}: LogStatusIndicatorProps) => {
+  const svgSize = 14;
+  const svgRectSize = 8.75;
+  const isLoadingShape = status === LOG_STATUS.LOADING;
+  const isErrorShape = [LOG_STATUS.NEEDS_ATTENTION, LOG_STATUS.FAILED].includes(status);
+  const initialIndicatorAngle = shouldRotate ? 45 : 0;
+  const internalRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(internalRef, { once: false });
+  const [showBlueStroke, setShowBlueStroke] = useState(false);
+  const [rotation, setRotation] = useState(initialIndicatorAngle);
+
+  // stops rotation to nearest 90° angle
+  const adjustRotationToNearest90 = (prevAngle: number, isErrorShape: boolean): number => {
+    if (isErrorShape) return prevAngle;
+    const normalizedAngle = ((prevAngle % 360) + 360) % 360;
+    const rotationAdjustment = 90 - (normalizedAngle % 90);
+
+    return prevAngle + rotationAdjustment;
+  };
+
+  // triggers stroke color and rotation
+  useEffect(() => {
+    if (!isInView || !showBlueStrokeRef || !isLoadingShape || !shouldRotate) return;
+
+    if (isLoadingShape) {
+      showBlueStrokeRef.current = (show) => {
+        setShowBlueStroke(show);
+        if (show) setRotation((prev) => prev + 90);
+      };
+    }
+
+    return () => {
+      showBlueStrokeRef.current = null;
+    };
+  }, [showBlueStrokeRef, isInView, isLoadingShape, shouldRotate]);
+
+  useEffect(() => {
+    const isActive = showBlueStroke || isLoadingShape;
+
+    if (isActive || !shouldRotate) return;
+
+    setRotation((prev) => adjustRotationToNearest90(prev, isErrorShape));
+  }, [status, shouldRotate, isLoadingShape, isErrorShape, showBlueStrokeRef]);
+
+  return (
+    <div ref={internalRef}>
+      <motion.svg
+        width={svgSize}
+        height={svgSize}
+        viewBox={`0 0 ${svgSize} ${svgSize}`}
+        fill={fillColor}
+        xmlns='http://www.w3.org/2000/svg'
+        style={{ transformOrigin: 'center center' }}
+        initial={{ rotate: initialIndicatorAngle }}
+        animate={{ rotate: rotation }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+      >
+        <rect
+          width={svgRectSize}
+          height={svgRectSize}
+          rx={1.875}
+          x={(svgSize - svgRectSize) / 2}
+          y={(svgSize - svgRectSize) / 2}
+          fill={showBlueStroke ? COLORS.BLUE_100 : fillColor}
+          fillOpacity={isErrorShape || isLoadingShape ? '0.1' : '0.6'}
+          stroke={showBlueStroke ? COLORS.BLUE_450 : strokeColor}
+          strokeWidth={1.25}
+          style={{ transition: 'stroke 0.3s ease-in-out' }}
+        />
+      </motion.svg>
+    </div>
+  );
 };
 
 export default memo(LogStatusIndicator);

@@ -22,6 +22,8 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.PROCESS,
     resourceId: processId,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const currentUserHasEditAccess = useMemo(() => {
@@ -73,7 +75,7 @@ const LogInput: FC<LogInputProps> = ({ processId, activityId }) => {
           }
         })
         .catch((error) => {
-          toast.error(error.data.message ?? 'Something went wrong');
+          toast.error(error?.data?.message ?? 'Something went wrong');
         });
     }
   };

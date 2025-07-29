@@ -50,6 +50,7 @@ const Dataset = baseApi.injectEndpoints({
       query: ({ datasetId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILTER_CONFIG_GET, { datasetId }),
       }),
+      providesTags: [APITags.GET_DATASET_FILTER_CONFIG],
     }),
     getDatasetData: builder.query<DatasetDataResponseType, DatasetDataRequestType>({
       query: ({ datasetId, query_config }) => ({
@@ -195,7 +196,6 @@ export const {
   useLazyGetDatasetExportQuery,
   useLazyGetDatasetExportsSignedUrlQuery,
   useGetDatasetDrilldownQuery,
-  useLazyGetDatasetListingQuery,
   useGetDatasetListingQuery,
   useUpdateDatasetDataMutation,
   useLazyGetActionStatusQuery,

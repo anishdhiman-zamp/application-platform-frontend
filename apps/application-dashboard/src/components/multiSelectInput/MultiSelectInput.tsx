@@ -50,6 +50,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
   onCustomDeleteFn,
   closeDropdownOnSelect = false,
   labelCasing,
+  allowedAddKeys = [KEY_CODES.ENTER, KEY_CODES.COMMA, KEY_CODES.SPACE],
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,7 +102,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     }
 
     if (selectOnlyFromList) {
-      if (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) {
+      if (allowedAddKeys.includes(keyEvent)) {
         e.preventDefault();
 
         const selectedOption = (filteredDropdownOptions ?? [])[hoveredOptionIndex ?? 0];
@@ -123,10 +124,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     } else {
       const trimmedSearch = search?.trim();
 
-      if (
-        (keyEvent === KEY_CODES.ENTER || keyEvent === KEY_CODES.COMMA || keyEvent === KEY_CODES.SPACE) &&
-        trimmedSearch
-      ) {
+      if (allowedAddKeys.includes(keyEvent) && trimmedSearch) {
         e.preventDefault();
         onValidateAndAdd({
           value: trimmedSearch,
@@ -188,10 +186,8 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
       }
 
       setInputArrayList(updatedItems);
-
-      handleSetInputFocus();
     },
-    [inputArrayList, setInputArrayList, setShowValidationError, handleSetInputFocus],
+    [inputArrayList, setInputArrayList, setShowValidationError],
   );
 
   const handleClickOutside = useCallback(
@@ -234,7 +230,7 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
     if (!debouncedSearch?.trim()) return combinedOptions;
 
     const filteredOptions = combinedOptions?.filter((option) =>
-      option?.value?.toLowerCase().startsWith(debouncedSearch?.toLowerCase()),
+      option?.label?.toLowerCase().startsWith(debouncedSearch?.toLowerCase()),
     );
 
     setOpenDropdownOptions(filteredOptions?.length > 0);
@@ -319,7 +315,10 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
                   iconCategory={ICON_SPRITE_TYPES.GENERAL}
                   width={10}
                   height={10}
-                  onClick={() => handleRemoveItem(item, index)}
+                  onClick={(e) => {
+                    handleRemoveItem(item, index);
+                    e.stopPropagation();
+                  }}
                   color={item?.valid ? COLORS.GRAY_700 : COLORS.GRAY_900}
                   className='cursor-pointer'
                 />

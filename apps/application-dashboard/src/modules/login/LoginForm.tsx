@@ -1,17 +1,24 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { getApiDomainByRegion, REQUEST_TYPES } from '@zamp-platform/api';
-import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { captureException } from '@sentry/nextjs';
+import { getApiDomainAndRegions, REQUEST_TYPES } from '@zamp-platform/api';
+import {
+  getFromLocalStorage,
+  LOCAL_STORAGE_KEYS,
+  removeFromLocalStorage,
+  setToLocalStorage,
+} from '@zamp-platform/utils';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
 import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
+import RegionsSelectDropdown from 'modules/login/RegionsSelectDropdown';
 import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, removeFromLocalStorage, setToLocalStorage } from 'utils/localstorage';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 import { MapAny } from '@/types/commonTypes';
 import Input from 'components/common/input';
@@ -23,6 +30,8 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
+  const [allRegions, setAllRegions] = useState<string[]>([]);
+  const [defaultRegion, setDefaultRegion] = useState<string>('');
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -111,7 +120,15 @@ export const LoginForm = () => {
 
       return;
     }
-    const apiDomain = await getApiDomainByRegion(email);
+    const { domain: apiDomain, regions } = await getApiDomainAndRegions(email);
+
+    if (regions.length >= 1 && allRegions.length === 0) {
+      setAllRegions(regions);
+
+      setLoading(false);
+
+      return;
+    }
 
     try {
       const apiUrl = `${apiDomain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
@@ -164,6 +181,26 @@ export const LoginForm = () => {
     }
   };
 
+  const setRegionFromUrlParams = (region: string) => {
+    setDefaultRegion(region);
+    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region);
+  };
+
+  useEffect(() => {
+    try {
+      const regions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) ?? '[]');
+      const urlParams = new URLSearchParams(window.location.search);
+      const region = urlParams.get('region');
+
+      if (region) setRegionFromUrlParams(!region?.length || region === 'us' ? '' : `-${region?.toLowerCase()}`);
+
+      setAllRegions(regions);
+    } catch (error) {
+      captureException(error);
+      setAllRegions([]);
+    }
+  }, []);
+
   const inputDisabled = loading;
 
   if (!hasError && loginFlow && loginFlow?.ui?.nodes?.length > 1) {
@@ -179,19 +216,22 @@ export const LoginForm = () => {
       <div className='rounded-4.5 shadow-table-filter-menu border-GRAY_100 z-50 w-[580px] border bg-white px-16 py-[82px]'>
         <Image src={ZAMP_FULL_LOGO} priority alt='ZAMP' width={98} height={24} />
         <form onSubmit={handleSubmit}>
-          <Input
-            id='login-email'
-            placeholder='Enter your email address'
-            className='mt-10'
-            name='email'
-            type='email'
-            value={email}
-            error={error ? error : ''}
-            autoFocus
-            onChange={handleEmailChange}
-            disabled={inputDisabled}
-            size={SIZE_TYPES.LARGE}
-          />
+          <div className='mt-10 flex gap-2'>
+            <Input
+              id='login-email'
+              placeholder='Enter your email address'
+              className='flex-1'
+              name='email'
+              type='email'
+              value={email}
+              error={error ? error : ''}
+              autoFocus
+              onChange={handleEmailChange}
+              disabled={inputDisabled}
+              size={SIZE_TYPES.LARGE}
+            />
+            <RegionsSelectDropdown defaultRegion={defaultRegion} regions={allRegions} />
+          </div>
           <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
         </form>
       </div>

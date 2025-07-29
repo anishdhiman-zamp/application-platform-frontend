@@ -1,8 +1,10 @@
+import { MutableRefObject } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
+import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 /**
  * Formats date string to include day and time
@@ -54,4 +56,57 @@ export const formatTime = (time: number) => {
   const seconds = time % 60;
 
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+/**
+ * Transforms email artifact data into a standardized format for display
+ * @param {EmailArtifactsResponseType} emailArtifact - The email artifact data
+ * @returns {Object} Formatted email data with header, content, and attachments
+ */
+export const getInitialEmailData = (emailArtifact: EmailArtifactsResponseType) => ({
+  header: {
+    heading: emailArtifact.heading,
+    to_mail_ids: emailArtifact.to_mail_ids ?? [],
+    cc_mail_ids: emailArtifact.cc_mail_ids ?? [],
+    bcc_mail_ids: emailArtifact.bcc_mail_ids ?? [],
+  },
+  content: emailArtifact.body_html || `<p>${emailArtifact.body_plain_text}</p>`,
+  attachments: emailArtifact.attachments ?? [],
+});
+
+/**
+ * Handles the stroke shimmer sequence for a log.
+ * @param {Object} params - The parameters for the stroke shimmer sequence.
+ * @param {MutableRefObject<((show: boolean) => void) | null>} params.showBlueStrokeRef - The ref to the show blue stroke function.
+ * @param {MutableRefObject<(() => void) | null>} params.shimmerControlRef - The ref to the shimmer control function.
+ * @param {MutableRefObject<boolean>} params.cancelledRef - The ref to the cancelled flag.
+ */
+export const handleStrokeShimmerSequence = ({
+  showBlueStrokeRef,
+  shimmerControlRef,
+  cancelledRef,
+}: {
+  showBlueStrokeRef: MutableRefObject<((show: boolean) => void) | null>;
+  shimmerControlRef: MutableRefObject<(() => void) | null>;
+  cancelledRef: MutableRefObject<boolean>;
+}) => {
+  if (cancelledRef.current) return;
+
+  // 1. Show blue stroke
+  showBlueStrokeRef.current?.(true);
+
+  // 2. After 300ms, hide stroke and start shimmer
+  setTimeout(() => {
+    if (cancelledRef.current) return;
+
+    showBlueStrokeRef.current?.(false);
+    shimmerControlRef.current?.();
+
+    // 3. After shimmer, loop again
+    setTimeout(() => {
+      if (!cancelledRef.current) {
+        handleStrokeShimmerSequence({ showBlueStrokeRef, shimmerControlRef, cancelledRef });
+      }
+    }, 2000); // shimmer duration
+  }, 300); // stroke visible duration
 };

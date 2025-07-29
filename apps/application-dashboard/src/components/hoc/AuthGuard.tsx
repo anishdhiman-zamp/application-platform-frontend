@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FC, ReactNode, useEffect } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 import { useWhoAmIQuery } from 'apis/auth';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
@@ -38,29 +38,25 @@ export const AuthGuard: FC<Props> = (props) => {
       identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
 
       dispatch(setWorkspace(defaultWorkspace));
-      const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
-
-      if (preLogoutPath) {
-        removeFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
-        router.push(preLogoutPath);
-      }
     }
   }, [session, isSuccess, dispatch, router]);
 
   useEffect(() => {
     if (isError && pathname !== props.loginRoute) {
-      const redirectTo = searchParams?.get('redirect_to');
-      const query = redirectTo ? `?redirect_to=${redirectTo}` : '';
-
-      router.push(`${props.loginRoute}${query}`);
+      router.push(`${props.loginRoute}`);
     }
   }, [isError, pathname, props.loginRoute, router, searchParams]);
 
   useEffect(() => {
     if (isSuccess && session?.user_id && pathname === props.loginRoute) {
-      const redirectTo = searchParams?.get('redirect_to');
+      const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
 
-      router.push(redirectTo || '/');
+      if (preLogoutPath) {
+        removeFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
+        router.push(preLogoutPath);
+      } else {
+        router.push(ROUTES_PATH.HOME);
+      }
     }
   }, [isSuccess, session?.user_id, pathname, props.loginRoute, router, searchParams]);
 

@@ -6,19 +6,20 @@ import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
 import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
 import 'ag-charts-enterprise';
 
 const Page = () => {
   const params = useParams();
   const pathname = useHash();
+  const router = useRouter();
 
   const pageId = params?.pageId;
   const {
     data: pageDetails,
     isLoading,
-    isFetching,
     isError,
     refetch,
   } = useGetPageDetailsQuery(pageId as string, { refetchOnMountOrArgChange: false, skip: !pageId });
@@ -49,8 +50,21 @@ const Page = () => {
     [pageDetails],
   );
 
+  const checkIsPageValid = () => {
+    if (!pages) return;
+
+    const isValidPageId = pages?.some((page) => page.page_id === pageId);
+
+    if (!isValidPageId) {
+      router.push(ROUTES_PATH.HOME);
+    }
+  };
+
   useEffect(() => {
     persistLastVisitedPage(pageId as string);
+
+    //on org switch/ invalid page, redirect to valid page
+    checkIsPageValid();
   }, [pageId, pages]);
 
   return (
@@ -62,7 +76,7 @@ const Page = () => {
           sheetId={currentSheetId as string}
           isPageLoading={isLoading}
         />
-        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isFetching} />
+        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isLoading} />
       </div>
     </CommonWrapper>
   );

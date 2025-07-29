@@ -7,6 +7,7 @@ import {
   AudiencesByOrganisationIdResponse,
   DeleteAudienceFromOrganizationAccessType,
   type DeleteAudienceInvitationRequestType,
+  DeleteTeamRequestType,
   GetMembershipRequestsByOrganizationIdRequest,
   GetMembershipRequestsByOrganizationIdResponse,
   GetMyInvitationsResponseType,
@@ -14,6 +15,7 @@ import {
   type GetTeamPendingApprovalsResponse,
   GetTeamsByOrganizationIdRequestType,
   GetTeamsByOrganizationIdResponseType,
+  GetUserTeamsByOrganizationIdResponseType,
   InvitedAudiencesByOrganisationIdResponse,
   PatchChangeAudienceRoleInOrganizationType,
   PostAddTeamToAudienceRequestType,
@@ -22,6 +24,7 @@ import {
   PostTeamsByOrganizationIdRequestType,
   PostTeamsByOrganizationIdResponseType,
   RemoveTeamFromAudienceRequestType,
+  UpdateTeamRequestType,
 } from 'types/api/people.types';
 import {
   type GetDualAdminPolicyResponse,
@@ -35,6 +38,7 @@ import {
 import { formRequestUrlWithParams } from 'utils/common';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
+import type { Organization } from '@/types/api/auth.types';
 
 const People = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -112,6 +116,16 @@ const People = baseApi.injectEndpoints({
       providesTags: [APITags.GET_ALL_TEAMS],
       keepUnusedDataFor: 10,
     }),
+    // User-wise teams
+    getUserTeamsByOrganizationId: builder.query<
+      GetUserTeamsByOrganizationIdResponseType[],
+      GetTeamsByOrganizationIdRequestType
+    >({
+      query: ({ organizationId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.USER_TEAMS_BY_ORGANIZATION_ID_GET, { organizationId }),
+      }),
+      providesTags: [APITags.GET_USER_WISE_TEAMS],
+    }),
     postAddTeamToOrganization: builder.mutation<
       PostTeamsByOrganizationIdResponseType,
       PostTeamsByOrganizationIdRequestType
@@ -129,7 +143,7 @@ const People = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
-      invalidatesTags: [APITags.GET_ALL_TEAMS],
+      invalidatesTags: [APITags.GET_USER_WISE_TEAMS, APITags.GET_ALL_TEAMS, APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     removeTeamFromAudience: builder.mutation<PostResponseType, RemoveTeamFromAudienceRequestType>({
       query: ({ organizationId, teamId, payload }) => ({
@@ -137,7 +151,7 @@ const People = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
-      invalidatesTags: [APITags.GET_ALL_TEAMS],
+      invalidatesTags: [APITags.GET_USER_WISE_TEAMS, APITags.GET_ALL_TEAMS, APITags.GET_PEOPLE_TEAM_MEMBERS],
     }),
     getMyInvitations: builder.query<GetMyInvitationsResponseType, void>({
       query: () => ({
@@ -252,6 +266,27 @@ const People = baseApi.injectEndpoints({
       }),
       providesTags: [APITags.GET_TEAM_PENDING_APPROVALS],
     }),
+    getOrganizations: builder.query<Organization[], void>({
+      query: () => ({
+        url: API_ENDPOINTS.ORGANIZATIONS_GET,
+      }),
+      providesTags: [APITags.GET_USER_INVITATIONS],
+    }),
+    updateTeam: builder.mutation<void, UpdateTeamRequestType>({
+      query: ({ organizationId, teamId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_PATCH, { organizationId, teamId }),
+        method: REQUEST_TYPES.PATCH,
+        body: payload,
+      }),
+      invalidatesTags: [APITags.GET_ALL_TEAMS, APITags.GET_PEOPLE_TEAM_MEMBERS, APITags.GET_USER_WISE_TEAMS],
+    }),
+    deleteTeam: builder.mutation<void, DeleteTeamRequestType>({
+      query: ({ organizationId, teamId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.TEAMS_BY_ORGANIZATION_ID_DELETE, { organizationId, teamId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: [APITags.GET_ALL_TEAMS, APITags.GET_PEOPLE_TEAM_MEMBERS, APITags.GET_USER_WISE_TEAMS],
+    }),
   }),
 });
 
@@ -264,6 +299,7 @@ export const {
   useGetMembershipRequestsByOrganizationIdQuery,
   useGetOrganizationMembershipRequestsAllQuery,
   useGetTeamsByOrganizationIdQuery,
+  useGetUserTeamsByOrganizationIdQuery,
   usePostAddTeamToOrganizationMutation,
   usePostAddTeamToAudienceMutation,
   useRemoveTeamFromAudienceMutation,
@@ -279,4 +315,7 @@ export const {
   useGetTeamPendingApprovalsQuery,
   useGetTeamPendingApprovalsByResourceIdQuery,
   useDeleteAudienceInvitationMutation,
+  useGetOrganizationsQuery,
+  useUpdateTeamMutation,
+  useDeleteTeamMutation,
 } = People;

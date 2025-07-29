@@ -9,6 +9,10 @@ on:
 env:
   APP_NAME: application-platform-frontend
 
+concurrency:
+  group: frontend-dev-deploy
+  cancel-in-progress: false
+
 jobs:
   prepare-env:
     name: Prepare Env

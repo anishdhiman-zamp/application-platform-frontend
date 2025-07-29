@@ -2,7 +2,7 @@
 
 import { Toaster as Sonner, toast } from 'sonner';
 import { SvgSpriteLoader } from '../assets';
-import { COLORS } from '../../constants';
+import { COLORS } from '../../constants/constants';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -23,9 +23,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       closeButton
       icons={{
-        success: <SvgSpriteLoader id='check-circle' size={20} color={COLORS.GRAY_900} />,
-        error: <SvgSpriteLoader id='x-circle' size={20} color={COLORS.GRAY_900} />,
-        warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.GRAY_900} />,
+        success: <SvgSpriteLoader id='check-circle' size={20} color={COLORS.GREEN_300} />,
+        error: <SvgSpriteLoader id='x-circle' size={20} color={COLORS.RED_800} />,
+        warning: <SvgSpriteLoader id='alert-circle' size={20} color={COLORS.ORANGE_200} />,
         close: <SvgSpriteLoader id='x-close' size={16} color={COLORS.GRAY_900} />,
       }}
       {...props}

@@ -10,6 +10,7 @@ type TooltipV2Props = {
   tooltipClassName?: string;
   asChildTrigger?: boolean;
   disabled?: boolean;
+  scrollableBody?: boolean;
 };
 
 const TooltipV2: FC<TooltipV2Props> = ({
@@ -20,7 +21,14 @@ const TooltipV2: FC<TooltipV2Props> = ({
   tooltipClassName,
   asChildTrigger = false,
   disabled = false,
+  scrollableBody = false,
 }) => {
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (scrollableBody) {
+      e.stopPropagation();
+    }
+  };
+
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -28,7 +36,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
           {children}
         </TooltipTrigger>
         {tooltipBody && (
-          <TooltipContent className={tooltipClassName} side={side} sideOffset={10}>
+          <TooltipContent className={tooltipClassName} side={side} sideOffset={10} onWheel={handleWheel}>
             {tooltipBody}
           </TooltipContent>
         )}

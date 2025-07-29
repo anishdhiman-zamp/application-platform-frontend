@@ -1,11 +1,11 @@
 import { FC, useMemo, useState } from 'react';
 import { ListCard } from '@zamp-platform/ui';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ReviewPolicyUpdatePopover from 'modules/policies/components/ReviewPolicyUpdatePopover';
 import PolicyActionsDropdown from 'modules/policies/listing/PolicyActionsDropdown';
 import PolicyAttributeTags from 'modules/policies/listing/PolicyAttributeTags';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import PolicyApproveCard from '@/modules/dualAdmin/components.tsx/PolicyApproveCard';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { PolicyDetailsType, PolicyMutateActionType } from '@/types/api/paymentApi.types';

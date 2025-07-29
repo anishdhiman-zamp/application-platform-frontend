@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import {
   CellDoubleClickedEvent,
   CellStyleModule,
@@ -26,7 +27,6 @@ import {
   ValidationModule,
 } from 'ag-grid-enterprise';
 import { AgGridReact } from 'ag-grid-react';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { getDatasetRouteById, getPageDatasetRoute, getPageDrilldownMultiRoute } from 'constants/routeConfig';
 import {
   generateColIdsVisibilityConfig,
@@ -469,10 +469,7 @@ const StackedPivot = ({
 
   const navigateToDatasetV2 = (datasets: { dataset_id: string; dataset_name: string }[], filters: ParentFilters) => {
     if (datasets?.length > 0) {
-      const path = getPageDrilldownMultiRoute(
-        params?.pageId as string,
-        datasets?.map((dataset) => dataset?.dataset_id),
-      );
+      const path = getPageDrilldownMultiRoute(params?.pageId as string);
 
       const encodedFilters = encodeURIComponent(JSON.stringify(filters));
 

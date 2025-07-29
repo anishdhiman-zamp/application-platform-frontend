@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format, isToday, isYesterday } from 'date-fns';
 import { DATE_SEPARATOR } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { DATE_SEPARATOR_MAPPING } from '@/modules/process/process.constant';
 
 interface DateSeparatorProps {

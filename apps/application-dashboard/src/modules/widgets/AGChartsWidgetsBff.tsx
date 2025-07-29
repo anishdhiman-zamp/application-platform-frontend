@@ -1,9 +1,9 @@
 'use client';
 
 import { FC, useMemo, useRef } from 'react';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { type AgChartInstance, AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
-import { PERIODICITY_TYPES } from 'constants/date.constants';
 import { WIDGET_LOADER } from 'constants/lottie/widget-loader';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';

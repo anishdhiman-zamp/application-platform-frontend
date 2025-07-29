@@ -1,4 +1,4 @@
-import { type FC, Fragment, useMemo } from 'react';
+import { type FC, Fragment, useCallback, useMemo } from 'react';
 import { Color } from '@tiptap/extension-color';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Underline } from '@tiptap/extension-underline';
@@ -18,6 +18,8 @@ import {
   ToolbarConfig,
 } from 'modules/process/artifacts/components/email-artifact/EmailEditorArtifact/types';
 import TooltipV2 from '@/components/common/TooltipV2';
+import type { EmailAttachmentType } from '@/types/api/processApi.types';
+import { debounce } from '@/utils/common';
 
 const BodyAndFooter: FC<BodyAndFooterProps> = ({
   initialContent = '<p></p>',
@@ -29,7 +31,12 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
   attachments,
   processId,
   artifactId,
+  isEmailSending,
+  onContentChange,
+  onAttachmentsChange,
 }) => {
+  const debouncedContentChange = debounce(onContentChange, 300);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -42,60 +49,75 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
       }),
     ],
     content: initialContent,
+    autofocus: true,
+    onUpdate: ({ editor }) => {
+      debouncedContentChange?.(editor?.getHTML());
+    },
   });
 
   const toolbarConfigs: ToolbarConfig[] = useMemo(
     () => [
       {
+        id: '1',
         icon: 'flip-backward',
         onClick: () => editor?.chain().focus().undo().run(),
         tooltipBody: 'Undo',
       },
       {
+        id: '2',
         icon: 'flip-forward',
         onClick: () => editor?.chain().focus().redo().run(),
         showDivider: true,
         tooltipBody: 'Redo',
       },
       {
+        id: '3',
         showDivider: true,
         component: <FontSizeSelector editor={editor} />,
       },
       {
+        id: '4',
         icon: 'bold-02',
         onClick: () => editor?.chain().focus().toggleBold().run(),
         tooltipBody: 'Bold',
       },
       {
+        id: '5',
         icon: 'italic-01',
         onClick: () => editor?.chain().focus().toggleItalic().run(),
         tooltipBody: 'Italic',
       },
       {
+        id: '6',
         icon: 'underline-01',
         onClick: () => editor?.chain().focus().toggleUnderline().run(),
         tooltipBody: 'Underline',
       },
       {
+        id: '7',
         component: <TextAndBackgroundColor editor={editor} />,
         showDivider: true,
       },
       {
+        id: '8',
         component: <TextAlignmentSelector editor={editor} />,
       },
       {
+        id: '9',
         icon: 'list',
         onClick: () => editor?.chain().focus().toggleBulletList().run(),
         showDivider: true,
         tooltipBody: 'Bullet List',
       },
       {
+        id: '10',
         icon: 'strikethrough-01',
         onClick: () => editor?.chain().focus().toggleStrike().run(),
         showDivider: true,
         tooltipBody: 'Strikethrough',
       },
       {
+        id: '11',
         icon: 'type-strikethrough-01',
         onClick: () => editor?.commands.unsetAllMarks(),
         tooltipBody: 'Remove Formatting',
@@ -103,6 +125,15 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
     ],
     [editor],
   );
+
+  const handleOnAttachmentChange = useCallback(
+    (attachments: EmailAttachmentType[]) => {
+      onAttachmentsChange?.(attachments);
+    },
+    [onAttachmentsChange],
+  );
+
+  const handleOnSend = useCallback(() => onSend?.(editor?.getHTML() || ''), [editor, onSend]);
 
   return (
     <>
@@ -113,14 +144,19 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
           </div>
           {attachments?.length > 0 && (
             <div className='min-h-12'>
-              <Attachments attachments={attachments} processId={processId} artifactId={artifactId} />
+              <Attachments
+                attachments={attachments}
+                processId={processId}
+                artifactId={artifactId}
+                onChange={handleOnAttachmentChange}
+              />
             </div>
           )}
         </div>
         {editor && (
           <div className='shadow-side-drawer-inner absolute bottom-4 z-1 flex h-8 w-fit items-center gap-2 rounded-md border bg-white px-2 py-1'>
             {toolbarConfigs.map((config) => (
-              <Fragment key={config.icon}>
+              <Fragment key={config?.id}>
                 {config.component ?? (
                   <TooltipV2 tooltipBody={config?.tooltipBody} asChildTrigger>
                     <Button onClick={config?.onClick} variant='ghost' size='xsmall' className='h-6 px-1'>
@@ -135,10 +171,10 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
         )}
       </div>
       <div className={cn('border-GRAY_500 flex items-center justify-between border-t px-4 py-3', footerClassName)}>
-        <Button size='small' onClick={() => onSend?.(editor?.getHTML() || '')} disabled>
+        <Button size='small' onClick={handleOnSend} disabled={isEmailSending} isLoading={isEmailSending}>
           Send
         </Button>
-        <Button variant='ghost' size='xxsmall' onClick={onDelete} disabled>
+        <Button variant='ghost' size='xxsmall' onClick={onDelete} disabled={isEmailSending}>
           <SvgSpriteLoader id='trash-01' />
         </Button>
       </div>

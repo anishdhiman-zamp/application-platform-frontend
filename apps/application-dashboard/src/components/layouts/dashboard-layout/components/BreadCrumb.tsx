@@ -1,10 +1,12 @@
 'use client';
 
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
 import {
   getDatasetRouteById,
+  getKnowledgeBasedRouteByProcessId,
   getPageDatasetRoute,
   getPageRouteById,
   getProcessActivityLogsRouteById,
@@ -16,7 +18,11 @@ import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigat
 import { BreadcrumbItem } from 'store/slices/layout-configs';
 import { capitalizeFirstLetter, cn } from 'utils/common';
 import { useGetAllDatasetsQuery } from '@/apis/admin';
-import { MODULE_TYPE } from '@/types/commonTypes';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
+import useUpdateBreadcrumb from '@/hooks/useUpdateBreadcrumb';
+import { MODULE_TYPE, SIDE_OPTIONS } from '@/types/commonTypes';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
 interface BreadCrumbProps {
@@ -31,6 +37,8 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
   const pathname = usePathname();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState<string>();
 
   const { data: pages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -41,12 +49,6 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
   const { data: processes } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-
-  useOnClickOutside(menuRef, () => setIsMenuOpen(false));
-
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
 
   const breadcrumbStack = useMemo(() => {
     const breadcrumbStack = [];
@@ -88,6 +90,12 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
               href: getProcessActivityLogsRouteById(processId as string, activityId as string, status as string),
             });
           }
+          if (pathname.includes(getKnowledgeBasedRouteByProcessId(processId as string))) {
+            breadcrumbStack.push({
+              title: 'Knowledge Base',
+              href: getKnowledgeBasedRouteByProcessId(processId as string),
+            });
+          }
         }
         break;
       case MODULE_TYPE.DATASETS:
@@ -118,30 +126,70 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
     return breadcrumbStack as BreadcrumbItem[];
   }, [pathname, searchParams?.toString(), pages, datasets, processes]);
 
+  const { firstBreadCrumb, middleBreadCrumbs, secondLastBreadCrumb, lastBreadCrumb } = useMemo(() => {
+    const breadcrumbStackLength = breadcrumbStack?.length;
+
+    if (!breadcrumbStackLength)
+      return {
+        firstBreadCrumb: { href: '', title: '' },
+        middleBreadCrumbs: [],
+      };
+
+    return {
+      firstBreadCrumb: breadcrumbStackLength > 1 ? breadcrumbStack[0] : null,
+      secondLastBreadCrumb: breadcrumbStackLength > 2 ? breadcrumbStack[breadcrumbStackLength - 2] : null,
+      lastBreadCrumb: breadcrumbStack[breadcrumbStackLength - 1],
+      middleBreadCrumbs: breadcrumbStackLength > 3 ? breadcrumbStack.slice(1, -2) : [],
+    };
+  }, [breadcrumbStack]);
+
+  const isEditingBreadcrumbAllowed = useIsEditingBreadcrumbAllowed();
+
+  const updateBreadcrumb = useUpdateBreadcrumb({
+    setIsEditing,
+    setEditedName,
+    lastBreadCrumbTitle: lastBreadCrumb?.title ?? '',
+  });
+
+  useOnClickOutside(menuRef, () => setIsMenuOpen(false));
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
   const handleBreadcrumbClick = (link: string, index?: number) => {
     if (index === 0) router.back();
     else router.replace(link);
   };
 
-  const { firstBreadCrumb, lastTwoBreadCrumbs, middleBreadCrumbs } = useMemo(() => {
-    if (!breadcrumbStack?.length)
-      return {
-        firstBreadCrumb: { href: '', title: '' },
-        lastTwoBreadCrumbs: [],
-        middleBreadCrumbs: [],
-      };
+  const handleLastBreadCrumbClick = () => {
+    setIsEditing(true);
+  };
 
-    return {
-      firstBreadCrumb: breadcrumbStack[0],
-      lastTwoBreadCrumbs:
-        breadcrumbStack?.length === 2
-          ? breadcrumbStack.slice(-1)
-          : breadcrumbStack?.length >= 2
-            ? breadcrumbStack.slice(-2)
-            : [],
-      middleBreadCrumbs: breadcrumbStack?.length > 3 ? breadcrumbStack.slice(1, -2) : [],
-    };
-  }, [breadcrumbStack]);
+  const handleEditBlur = () => {
+    const trimmedName = editedName?.trim();
+
+    if (!trimmedName || trimmedName === lastBreadCrumb?.title) {
+      setIsEditing(false);
+      setEditedName(lastBreadCrumb?.title ?? '');
+
+      return;
+    }
+    updateBreadcrumb(trimmedName);
+  };
+
+  const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      handleEditBlur();
+    }
+  };
+
+  useEffect(() => {
+    if (params && lastBreadCrumb) setEditedName(lastBreadCrumb?.title ?? '');
+  }, [lastBreadCrumb, params]);
 
   return (
     <div
@@ -161,13 +209,12 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
       <div className='f-13-400 text-GRAY_700 flex items-center gap-1'>
         {firstBreadCrumb && (
           <button
-            className={cn({ 'f-13-500 text-GRAY_1000': !lastTwoBreadCrumbs?.length }, 'cursor-pointer')}
+            className={cn({ 'f-13-500 text-GRAY_1000': !lastBreadCrumb }, 'cursor-pointer')}
             onClick={() => handleBreadcrumbClick(firstBreadCrumb.href ?? '')}
           >
-            {`${firstBreadCrumb.title}`}
+            {`${firstBreadCrumb.title} ${lastBreadCrumb ? '/' : ''}`}
           </button>
         )}
-        {lastTwoBreadCrumbs?.length > 0 && <div>/</div>}
         {middleBreadCrumbs?.length > 0 && (
           <div className='group relative flex cursor-pointer items-center gap-1' ref={menuRef}>
             <div className='group-hover:text-GRAY_1000' onClick={toggleMenu}>
@@ -193,17 +240,35 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
             )}
           </div>
         )}
-        {lastTwoBreadCrumbs?.map((item, index) => (
-          <button
-            key={`${item.title}-${index}`}
-            className={cn('cursor-pointer', {
-              'f-13-500 text-GRAY_1000 !cursor-default': index == lastTwoBreadCrumbs?.length - 1,
-            })}
-            onClick={() => index !== lastTwoBreadCrumbs?.length - 1 && handleBreadcrumbClick(item.href ?? '', index)}
-          >
-            {`${item.title}${index < lastTwoBreadCrumbs?.length - 1 ? ' / ' : ''}`}
+        {secondLastBreadCrumb && (
+          <button className='cursor-pointer' onClick={() => handleBreadcrumbClick(secondLastBreadCrumb.href ?? '')}>
+            {`${secondLastBreadCrumb.title}`}
           </button>
-        ))}
+        )}
+        {lastBreadCrumb &&
+          (isEditingBreadcrumbAllowed ? (
+            <>
+              {isEditing ? (
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  size='small'
+                  className='text-gray-1000'
+                  onBlur={handleEditBlur}
+                  autoFocus
+                  onKeyDown={handleEditKeyDown}
+                />
+              ) : (
+                <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+                  <Button variant='ghost' size='xsmall' className='h-6 p-1' onClick={handleLastBreadCrumbClick}>
+                    <span className='f-13-500 text-gray-1000'>{editedName}</span>
+                  </Button>
+                </TooltipV2>
+              )}
+            </>
+          ) : (
+            <div className='f-13-500 text-GRAY_1000'>{lastBreadCrumb.title}</div>
+          ))}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { DisplayConfigToggleType } from 'modules/widgets/displayConfig/displayConfig.types';
@@ -7,7 +8,6 @@ import { getToggleConfigFromLocalStorage } from 'modules/widgets/displayConfig/d
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import ToggleSwitch from '@/components/common/toggleSwitch';
-import { PERIODICITY_TYPES } from '@/constants/date.constants';
 import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 
 interface PivotConfigDropdownProps {

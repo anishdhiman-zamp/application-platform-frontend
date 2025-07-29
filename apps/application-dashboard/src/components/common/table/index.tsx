@@ -21,6 +21,7 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  RenderApiModule,
   RowApiModule,
   RowClickedEvent,
   RowDragEndEvent,
@@ -112,6 +113,7 @@ ModuleRegistry.registerModules([
   EventApiModule,
   RowDragModule,
   SelectEditorModule,
+  RenderApiModule,
   ValidationModule /* Development Only */,
 ]);
 
@@ -151,6 +153,7 @@ interface TableProps {
   missingFields?: MissingFieldItemType[];
   completedFields?: { rowId: string; columnId: string }[];
   shouldShowNA?: boolean;
+  suppressScrollOnNewData?: boolean;
 }
 
 export type TableColumnType = {
@@ -196,6 +199,7 @@ const Table: FC<TableProps> = ({
   missingFields,
   completedFields,
   shouldShowNA = false,
+  suppressScrollOnNewData,
 }) => {
   const checkIsMissingField = useCallback(
     (params: MapAny) => {
@@ -219,13 +223,13 @@ const Table: FC<TableProps> = ({
 
   const getValueClass = (params: MapAny) => {
     if (isValueEmpty(params?.value) && checkIsMissingField(params ?? [])) {
-      return '!text-RED_900';
+      return '!text-RED_900 italic';
     }
     if (isValueEmpty(params?.value)) {
       return '!text-GRAY_500';
     }
 
-    return '!text-GRAY_1000';
+    return '!text-GRAY_1000 normal';
   };
 
   const formatCellValue = useCallback(
@@ -236,7 +240,7 @@ const Table: FC<TableProps> = ({
 
       // Handle missing required fields
       if (isMissingField && isEmpty) {
-        return 'Required*';
+        return '*Required';
       }
 
       // Handle empty values with N/A display
@@ -285,7 +289,9 @@ const Table: FC<TableProps> = ({
         },
         'missing-completed': (params) => {
           const isCompleted =
-            checkIsFieldCompleted(params.node.data?.id, params.column.getColId()) && checkIsMissingField(params ?? []);
+            !isValueEmpty(params?.value) &&
+            checkIsFieldCompleted(params.node.data?.id, params.column.getColId()) &&
+            checkIsMissingField(params ?? []);
 
           return isCompleted;
         },
@@ -406,6 +412,7 @@ const Table: FC<TableProps> = ({
           getContextMenuItems={getContextMenuItems}
           autoSizeStrategy={autoSizeStrategy}
           suppressServerSideFullWidthLoadingRow
+          suppressScrollOnNewData={suppressScrollOnNewData}
           serverSideInitialRowCount={100}
           autoGroupColumnDef={autoGroupColumnDef}
           enableCellTextSelection

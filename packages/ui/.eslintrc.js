@@ -6,6 +6,7 @@ const config = {
     project: './tsconfig.json',
     tsconfigRootDir: '.',
   },
+  ignorePatterns: ['coverage/', 'node_modules/', 'dist/', '.turbo/'],
 };
 
 module.exports = config;

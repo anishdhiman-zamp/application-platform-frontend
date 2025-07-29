@@ -35,3 +35,9 @@ export const checkIfCurrentUserIsMember = () => {
  * @returns string
  */
 export const getUserId = () => store.getState()?.user?.user?.user_id ?? '';
+
+export const checkIfCurrentUserIsSystemAdmin = () => {
+  const userRole = store.getState()?.user?.roles?.find((role) => role.id === UserRoleIdType.USER)?.name;
+
+  return userRole === PERMISSION_ROLES.SYSTEM_ADMIN;
+};

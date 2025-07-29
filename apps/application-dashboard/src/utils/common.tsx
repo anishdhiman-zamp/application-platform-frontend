@@ -1,9 +1,9 @@
 import { MouseEventHandler } from 'react';
 import { cn as cnUI } from '@zamp-platform/ui/utils';
+import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from '@zamp-platform/utils';
 import { type ClassValue } from 'clsx';
 import { CHIP_COLORS, CUSTOM_FILTER_COLORS } from 'constants/colors';
 import { SCREEN_BREAKPOINTS } from 'constants/common.constants';
-import { DATE_FILTER_CATEGORIES, DATE_FILTER_OPTIONS } from 'constants/date.constants';
 import { format, startOfYear } from 'date-fns';
 import type { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import { DateFilterValueType } from 'components/filter/DateRangeFilter';
@@ -550,3 +550,25 @@ export const getUserDisplayName = (user?: { name?: string; email?: string }) => 
 
 export const getUserNameFromAudience = (user?: AudiencesByResourceResponse) =>
   user?.user?.name || user?.user?.email?.split('@')[0] || '';
+
+/**
+ * Capitalizes the first letter of each word in a string.
+ * @param str - The string to be capitalized. e.g. this is a sample sentence
+ * @returns The capitalized string. e.g. This Is A Sample Sentence
+ */
+export const capitalizeWords = (str: string) => {
+  if (!str) return '';
+
+  return str
+    ?.split(' ')
+    .map((word) => word?.charAt(0)?.toUpperCase() + word?.slice(1))
+    .join(' ');
+};
+
+/**
+ * Prevent auto focus on popover trigger element after popover close
+ * @param e
+ */
+export const preventAutoFocus = (e: Event) => {
+  e.preventDefault();
+};

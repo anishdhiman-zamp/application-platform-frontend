@@ -1,0 +1,227 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] = `
+<div
+  data-orientation="horizontal"
+  dir="ltr"
+>
+  <div
+    aria-orientation="horizontal"
+    class="bg-muted text-muted-foreground inline-flex h-6 items-center justify-center gap-1 rounded"
+    data-orientation="horizontal"
+    role="tablist"
+    style="outline: none;"
+    tabindex="0"
+  >
+    <button
+      aria-controls="radix-«r9»-content-tab1"
+      aria-selected="true"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="active"
+      id="radix-«r9»-trigger-tab1"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Tab 1
+    </button>
+    <button
+      aria-controls="radix-«r9»-content-tab2"
+      aria-selected="false"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="inactive"
+      id="radix-«r9»-trigger-tab2"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Tab 2
+    </button>
+  </div>
+  <div
+    aria-labelledby="radix-«r9»-trigger-tab1"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="active"
+    id="radix-«r9»-content-tab1"
+    role="tabpanel"
+    style="animation-duration: 0s;"
+    tabindex="0"
+  >
+    Content 1
+  </div>
+  <div
+    aria-labelledby="radix-«r9»-trigger-tab2"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="inactive"
+    hidden=""
+    id="radix-«r9»-content-tab2"
+    role="tabpanel"
+    tabindex="0"
+  />
+</div>
+`;
+
+exports[`Tabs Component - Functional Tests matches snapshot for tabs with custom classes 1`] = `
+<div
+  class="custom-tabs"
+  data-orientation="horizontal"
+  dir="ltr"
+>
+  <div
+    aria-orientation="horizontal"
+    class="bg-muted text-muted-foreground inline-flex h-6 items-center justify-center gap-1 rounded custom-list"
+    data-orientation="horizontal"
+    role="tablist"
+    style="outline: none;"
+    tabindex="0"
+  >
+    <button
+      aria-controls="radix-«rc»-content-tab1"
+      aria-selected="true"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border custom-trigger"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="active"
+      id="radix-«rc»-trigger-tab1"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Styled Tab
+    </button>
+  </div>
+  <div
+    aria-labelledby="radix-«rc»-trigger-tab1"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden custom-content"
+    data-orientation="horizontal"
+    data-state="active"
+    id="radix-«rc»-content-tab1"
+    role="tabpanel"
+    style="animation-duration: 0s;"
+    tabindex="0"
+  >
+    Styled Content
+  </div>
+</div>
+`;
+
+exports[`Tabs Component - Functional Tests matches snapshot for tabs with multiple triggers 1`] = `
+<div
+  data-orientation="horizontal"
+  dir="ltr"
+>
+  <div
+    aria-orientation="horizontal"
+    class="bg-muted text-muted-foreground inline-flex h-6 items-center justify-center gap-1 rounded"
+    data-orientation="horizontal"
+    role="tablist"
+    style="outline: none;"
+    tabindex="0"
+  >
+    <button
+      aria-controls="radix-«re»-content-tab1"
+      aria-selected="true"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="active"
+      id="radix-«re»-trigger-tab1"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      First
+    </button>
+    <button
+      aria-controls="radix-«re»-content-tab2"
+      aria-selected="false"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="inactive"
+      id="radix-«re»-trigger-tab2"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Second
+    </button>
+    <button
+      aria-controls="radix-«re»-content-tab3"
+      aria-selected="false"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="inactive"
+      id="radix-«re»-trigger-tab3"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Third
+    </button>
+    <button
+      aria-controls="radix-«re»-content-tab4"
+      aria-selected="false"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      data-orientation="horizontal"
+      data-radix-collection-item=""
+      data-state="inactive"
+      id="radix-«re»-trigger-tab4"
+      role="tab"
+      tabindex="-1"
+      type="button"
+    >
+      Fourth
+    </button>
+  </div>
+  <div
+    aria-labelledby="radix-«re»-trigger-tab1"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="active"
+    id="radix-«re»-content-tab1"
+    role="tabpanel"
+    style="animation-duration: 0s;"
+    tabindex="0"
+  >
+    First Content
+  </div>
+  <div
+    aria-labelledby="radix-«re»-trigger-tab2"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="inactive"
+    hidden=""
+    id="radix-«re»-content-tab2"
+    role="tabpanel"
+    tabindex="0"
+  />
+  <div
+    aria-labelledby="radix-«re»-trigger-tab3"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="inactive"
+    hidden=""
+    id="radix-«re»-content-tab3"
+    role="tabpanel"
+    tabindex="0"
+  />
+  <div
+    aria-labelledby="radix-«re»-trigger-tab4"
+    class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+    data-orientation="horizontal"
+    data-state="inactive"
+    hidden=""
+    id="radix-«re»-content-tab4"
+    role="tabpanel"
+    tabindex="0"
+  />
+</div>
+`;

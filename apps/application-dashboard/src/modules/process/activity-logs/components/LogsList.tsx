@@ -1,9 +1,9 @@
 import { FC, useEffect, useMemo, useRef } from 'react';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import DateSeparator from 'modules/process/activity-logs/components/DateSeparator';
 import Log from 'modules/process/activity-logs/components/Log';
 import { type HandleShowArtifactsProps } from 'modules/process/process.types';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
 
 interface LogsListProps {
@@ -21,6 +21,8 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
     return logs?.activity_logs?.map((log, index) => {
       const logDate = format(new Date(log.updated_at), DATE_FORMATS.YYYYMMDD);
       const showDateSeparator = logDate !== currentDate;
+
+      const isLastLog = index === logs?.activity_logs?.length - 1;
       const isLastLogOfDate =
         index === logs?.activity_logs?.length - 1 ||
         format(new Date(logs?.activity_logs[index + 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
@@ -31,6 +33,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
         key: log?.log_group_id,
         showDateSeparator,
         isLastLogOfDate,
+        isLastLog,
         log,
       };
     });
@@ -48,7 +51,7 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
 
   return (
     <>
-      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, log }, index) => {
+      {logsWithSeparators?.map(({ key, showDateSeparator, isLastLogOfDate, isLastLog, log }, index) => {
         const isOverallLastLog = index === logsWithSeparators?.length - 1;
 
         return (
@@ -57,7 +60,8 @@ const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, act
             {isOverallLastLog && <div ref={bottomRef} />}
             <Log
               data={log}
-              isLastLog={isLastLogOfDate}
+              isLastLogOfDate={isLastLogOfDate}
+              isLastLog={isLastLog}
               handleShowArtifacts={handleShowArtifacts}
               processId={processId}
               activityId={activityId}

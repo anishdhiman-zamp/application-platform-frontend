@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import PaymentDetailsSkeleton from 'modules/payments/payment-details/PaymentDetailsSkeleton';
 import { PAYMENT_STATUS_TYPES } from 'modules/payments/payments.types';
@@ -11,7 +12,6 @@ import { toast } from '@/components/common/toast/Toast';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { COLORS } from '@/constants/colors';
-import { DATE_FORMATS } from '@/constants/date.constants';
 import { cn, createDateObjectFromUTCString, getCommaSeparatedNumber } from '@/utils/common';
 
 type PaymentDetailsProps = {

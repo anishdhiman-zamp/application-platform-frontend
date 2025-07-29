@@ -1,4 +1,4 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { ColumnFilterConfig, type ParentFilters, PIVOT_DATA_TYPES } from 'modules/widgets/Pivot/pivot.types';
 import { parseType } from 'modules/widgets/Pivot/pivot.utils';
 import { getDateRangeWithPeriodicity } from 'modules/widgets/widgets.utils';

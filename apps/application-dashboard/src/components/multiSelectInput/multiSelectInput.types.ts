@@ -58,6 +58,7 @@ export type MultiSelectInputPropsType = {
   optionalOpenDropdownOptions?: boolean;
   closeDropdownOnSelect?: boolean;
   labelCasing?: string;
+  allowedAddKeys?: string[];
 };
 
 export const KEY_CODES = {

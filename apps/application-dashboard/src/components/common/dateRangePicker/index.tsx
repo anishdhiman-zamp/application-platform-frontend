@@ -8,7 +8,7 @@ import {
   PERIODICITY_OPTIONS,
   PERIODICITY_TYPES,
   RangeType,
-} from 'constants/date.constants';
+} from '@zamp-platform/utils';
 import { EventCallbackType } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -62,7 +62,7 @@ const DateRangePicker: FC<DateFilterProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<DATE_FILTER_CATEGORIES>(
     defaultValue?.category ? (defaultValue?.category as DATE_FILTER_CATEGORIES) : DATE_FILTER_CATEGORIES.ALL_TIME,
   );
-  const [selectedPeriodicity, setSelectedPeriodicity] = useState(PERIODICITY_OPTIONS[0]);
+  const [selectedPeriodicity, setSelectedPeriodicity] = useState<OptionsType>(PERIODICITY_OPTIONS[0] as OptionsType);
   const [range, setRange] = useState<RangeType>({
     startDate: defaultValue?.start ?? undefined,
     endDate: defaultValue?.end ?? undefined,

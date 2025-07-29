@@ -1,5 +1,5 @@
 import React from 'react';
-import { DATE_FILTER_CATEGORIES } from 'constants/date.constants';
+import { DATE_FILTER_CATEGORIES } from '@zamp-platform/utils';
 import { MapAny } from 'types/commonTypes';
 import DateRangeFilter, { DateFilterValueType } from 'components/filter/DateRangeFilter';
 

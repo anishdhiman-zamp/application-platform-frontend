@@ -12,6 +12,7 @@ interface DataTableProps {
   serverSideDatasource?: IServerSideDatasource;
   overrideThemeParams?: MapAny;
   gridStyle?: MapAny;
+  suppressScrollOnNewData?: boolean;
 }
 
 const DataTable: FC<DataTableProps> = ({
@@ -21,6 +22,7 @@ const DataTable: FC<DataTableProps> = ({
   serverSideDatasource,
   overrideThemeParams = {},
   gridStyle = { height: 'calc(100vh - 50px)', width: '100%' },
+  suppressScrollOnNewData,
 }) => {
   const customTheme = getDataTableTheme({ ...DATA_TABLE_THEME_PARAMS, ...overrideThemeParams });
 
@@ -34,6 +36,7 @@ const DataTable: FC<DataTableProps> = ({
       serverSideDatasource={serverSideDatasource}
       suppressCellFocus
       gridStyle={gridStyle}
+      suppressScrollOnNewData={suppressScrollOnNewData}
     />
   );
 };

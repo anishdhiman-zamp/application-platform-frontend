@@ -13,10 +13,13 @@ import type {
   DatasetArtifactsRequestType,
   EmitActivityLogsRequestType,
   EmitHITLActionRequestType,
+  KnowledgeBaseRequestType,
+  KnowledgeBaseResponseType,
   ProcessActivityRunsRequestType,
   SignedUrlByArtifactIdRequestType,
   SignedUrlByArtifactIdResponseType,
   StatusSummaryItem,
+  UpdateArtifactRequestType,
 } from '@/types/api/processApi.types';
 import { formRequestUrlWithParams } from '@/utils/common';
 
@@ -97,6 +100,18 @@ const Processes = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
+    getKnowledgeBase: builder.query<KnowledgeBaseResponseType, KnowledgeBaseRequestType>({
+      query: ({ processId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.KNOWLEDGE_BASE_GET, { processId }),
+      }),
+    }),
+    updateArtifact: builder.mutation<void, UpdateArtifactRequestType>({
+      query: ({ processId, artifactId, payload }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_ARTIFACT_PATCH, { processId, artifactId }),
+        method: REQUEST_TYPES.PATCH,
+        body: payload,
+      }),
+    }),
   }),
 });
 
@@ -119,4 +134,6 @@ export const {
   useGetDatasetArtifactsQuery,
   useLazyGetDatasetArtifactsQuery,
   useEmitHITLActionMutation,
+  useGetKnowledgeBaseQuery,
+  useUpdateArtifactMutation,
 } = Processes;

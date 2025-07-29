@@ -1,4 +1,4 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { widgetData, widgetInstanceDetails } from 'modules/widgets/Pivot/__tests__/pivot.utils.mock';
 import {
   AGGridPivotNode,

@@ -1,5 +1,9 @@
-import { EmailArtifactsResponseType, type MissingFieldItemType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import {
+  EmailArtifactsResponseType,
+  type EmailAttachmentType,
+  type MissingFieldItemType,
+} from '@/types/api/processApi.types';
+import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
@@ -57,6 +61,7 @@ export enum CTA_COMPONENT_TYPE {
   BUTTON = 'BUTTON',
   OVERRIDE_MISSING_FIELDS_BUTTON = 'OVERRIDE_MISSING_FIELDS_BUTTON',
   REQUIRED_MISSING_FIELDS_BUTTON = 'REQUIRED_MISSING_FIELDS_BUTTON',
+  EMAIL_DRAFT_SEND_BUTTON = 'EMAIL_DRAFT_SEND_BUTTON',
 }
 
 export enum PDF_DATASET_TAB {
@@ -82,6 +87,9 @@ export type EmailArtifactWrapperProps = {
   artifactData: EmailArtifactsResponseType;
   artifactId: string;
   processId: string;
+  activityId: string;
+  emitHITLActionPayload: EmitHITLActionPayload;
+  onClose: defaultFnType;
 };
 
 export interface HandleShowArtifactsProps extends EmitHITLActionPayload {
@@ -114,3 +122,22 @@ export type MissingFieldsConfigType = Record<
     filters: MapAny;
   }
 >;
+
+export const enum EMAIL_DATA_SECTION {
+  HEADER = 'header',
+  CONTENT = 'content',
+  ATTACHMENTS = 'attachments',
+}
+
+export type EmailHeaderType = {
+  heading: string;
+  to_mail_ids: string[];
+  cc_mail_ids: string[];
+  bcc_mail_ids: string[];
+};
+
+export type EmailDataTypes = {
+  header: EmailHeaderType;
+  content: string;
+  attachments: EmailAttachmentType[];
+};

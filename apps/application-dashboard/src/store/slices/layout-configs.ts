@@ -46,10 +46,27 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
+    closeSidebar: (state) => {
+      state.isSidebarOpen = false;
+
+      return state;
+    },
+    openSidebar: (state) => {
+      state.isSidebarOpen = true;
+
+      return state;
+    },
   },
 });
 
-export const { addModal, removeModal, addFullPageLayout, removeFullPageLayout, toggleSidebar } =
-  layoutConfigsSlice.actions;
+export const {
+  addModal,
+  removeModal,
+  addFullPageLayout,
+  removeFullPageLayout,
+  toggleSidebar,
+  closeSidebar,
+  openSidebar,
+} = layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

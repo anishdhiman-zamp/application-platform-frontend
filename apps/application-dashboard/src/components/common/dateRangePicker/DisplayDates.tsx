@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { DateRangeKeys } from 'constants/date.constants';
+import { DateRangeKeys } from '@zamp-platform/utils';
 import { defaultFnType } from 'types/commonTypes';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import { getPlacehoderDate } from 'components/common/dateRangePicker/dateRangePicker.utils';

@@ -1,5 +1,8 @@
 import { type FC, memo, type RefObject, useEffect, useRef, useState } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, RevealElement } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
+import { LOG_STATUS } from 'modules/process/process.types';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import { ACCORDION_LIST } from '@/constants/icons';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
@@ -7,12 +10,15 @@ import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/ut
 interface ReasoningAccordionProps {
   thoughtSteps: string[];
   logGroupId: string;
+  isLastLog?: boolean;
+  status: LOG_STATUS;
 }
 
 const STORAGE_KEY = LOCAL_STORAGE_KEYS.OPEN_LOG_GROUP_IDS;
 const ACCORDION_ITEM = 'item-1';
+const ACCORDION_CONTENT_MAX_HEIGHT = 160;
 
-const ReasoningAccordion = ({ thoughtSteps, logGroupId }: ReasoningAccordionProps) => {
+const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: ReasoningAccordionProps) => {
   const [openValue, setOpenValue] = useState<string | undefined>();
   const lastItemRef = useRef<HTMLDivElement>(null);
   const prevStepsLengthRef = useRef<number>(thoughtSteps.length);
@@ -60,29 +66,70 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId }: ReasoningAccordionProp
     }
   }, [thoughtSteps, openValue]);
 
+  // Automatically open/close last log's accordion based on reasoning completion
+  useEffect(() => {
+    if (isLastLog && status !== LOG_STATUS.SUCCESS) {
+      setOpenValue(ACCORDION_ITEM);
+    } else {
+      setOpenValue(undefined);
+    }
+  }, [isLastLog, status]);
+
   return (
     <Accordion
       type='single'
       collapsible
-      className='mt-2 w-full max-w-[485px] min-w-[180px]'
+      className={cn('mt-2 w-full max-w-[485px] min-w-[180px]')}
       value={openValue}
       onValueChange={setOpenValue}
     >
-      <AccordionItem value={ACCORDION_ITEM} className='border-GRAY_100 w-full rounded-t-md rounded-br-md border'>
-        <AccordionTrigger className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5'>
-          <span className='text-wrap break-words'>See reasoning</span>
-        </AccordionTrigger>
-        <AccordionContent className='border-GRAY_100 f-12-450 flex max-h-40 w-full flex-col gap-y-2 overflow-y-scroll border-t p-4 [&::-webkit-scrollbar]:hidden'>
-          {thoughtSteps?.map((step, index) => (
-            <ThoughtStepItem
-              key={index}
-              step={step}
-              isLast={index === thoughtSteps?.length - 1}
-              lastItemRef={lastItemRef}
-            />
-          ))}
-        </AccordionContent>
-      </AccordionItem>
+      <RevealElement className='w-full'>
+        <AccordionItem value={ACCORDION_ITEM} className='w-full border-0'>
+          <div className='relative'>
+            {!(status === LOG_STATUS.LOADING && isLastLog) && (
+              <AccordionTrigger
+                className={cn(
+                  'f-12-450 text-GRAY_900 border-GRAY_100 top-0 left-0 w-full gap-x-2 rounded-tl-md rounded-tr-md border bg-white p-1.5',
+                  openValue !== ACCORDION_ITEM && 'rounded-br-md',
+                )}
+              >
+                <motion.span
+                  className='text-wrap break-words'
+                  key={thoughtSteps?.at(-1)}
+                  transition={{
+                    duration: 0.3,
+                    delay: 0.1,
+                  }}
+                >
+                  See reasoning
+                </motion.span>
+              </AccordionTrigger>
+            )}
+
+            <motion.div
+              animate={{ maxHeight: openValue === ACCORDION_ITEM ? ACCORDION_CONTENT_MAX_HEIGHT : 0 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className='overflow-hidden'
+            >
+              <AccordionContent
+                className={cn(
+                  'f-12-450 border-GRAY_100 flex max-h-[160px] w-full flex-col gap-y-2 overflow-y-auto rounded-br-md border-x border-b bg-white px-4 py-4 [&::-webkit-scrollbar]:hidden',
+                  isLastLog && status === LOG_STATUS.LOADING && 'rounded-tl-md rounded-tr-md border-t pt-4',
+                )}
+              >
+                {thoughtSteps?.map((step, index) => (
+                  <ThoughtStepItem
+                    key={index}
+                    step={step}
+                    isLast={index === thoughtSteps?.length - 1}
+                    lastItemRef={lastItemRef}
+                  />
+                ))}
+              </AccordionContent>
+            </motion.div>
+          </div>
+        </AccordionItem>
+      </RevealElement>
     </Accordion>
   );
 };

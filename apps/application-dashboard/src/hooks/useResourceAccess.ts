@@ -51,8 +51,8 @@ const checkPrivilege = (
 export const useResourceAccess = ({
   resourceType,
   resourceId = '',
-  skipAudienceData,
-  skipTeamsData,
+  skipAudienceData = true,
+  skipTeamsData = true,
 }: UseResourceAccessProps) => {
   const { user } = useAppSelector((state: RootState) => state.user);
 

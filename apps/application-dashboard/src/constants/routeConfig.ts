@@ -18,13 +18,14 @@ export const ROUTES_PATH = {
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   ADMIN_ASSETS: '/admin/assets',
-  PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi/:datasetIds',
+  PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   SETTINGS: '/settings',
+  KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
 };
 
 export const getPageRouteById = (pageId: string) => {
@@ -45,8 +46,8 @@ export const getPageDatasetRoute = (pageId: string, datasetId: string, query?: R
   }`;
 };
 
-export const getPageDrilldownMultiRoute = (pageId: string, datasetIds: string[]) => {
-  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId).replace(':datasetIds', datasetIds?.join(','))}`;
+export const getPageDrilldownMultiRoute = (pageId: string) => {
+  return `${ROUTES_PATH.PAGE_DRILLDOWN_MULTI.replace(':pageId', pageId)}`;
 };
 
 export const getPageDatasetDrilldownRoute = (pageId: string, datasetId: string, rowId: string) => {
@@ -67,6 +68,10 @@ export const getProcessRouteById = (processId: string, status?: string) => {
 
 export const getProcessActivityLogsRouteById = (processId: string, activityId: string, status?: string) => {
   return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':activityId', activityId)}${status ? `?status=${status}` : ''}`;
+};
+
+export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

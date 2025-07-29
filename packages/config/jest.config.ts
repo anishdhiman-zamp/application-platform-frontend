@@ -10,7 +10,6 @@ const config: Config = {
     '!src/**/*.{spec,test}.{js,jsx,ts,tsx}',
     '!src/**/*.mock.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/components/**/*.{js,jsx,ts,tsx}',
     '!src/apis/**/*.{js,jsx,ts,tsx}',
     '!src/types/**/*.{js,jsx,ts,tsx}',
     '!src/styles/**/*.{js,jsx,ts,tsx}',
@@ -22,11 +21,16 @@ const config: Config = {
 
   coverageProvider: 'v8',
 
+  coverageReporters: ['text', 'lcov', 'html', 'json'],
+
   moduleDirectories: ['node_modules', 'src'],
 
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
 
   moduleNameMapper: {
+    '^@zamp-platform/api$': '<rootDir>/../../packages/api/index.ts',
+    '^@zamp-platform/utils/(.*)$': '<rootDir>/../../packages/utils/$1',
+    '^@zamp-platform/utils$': '<rootDir>/../../packages/utils/index.ts',
     '^@zamp-platform/svg-loader$': '<rootDir>/../../packages/svg-loader/svg-loader.ts',
     '^@zamp-platform/svg-loader/(.*)$': '<rootDir>/../../packages/svg-loader/$1',
     '^@zamp-platform/ui$': '<rootDir>/../../packages/ui/src/components/index.ts',
@@ -60,6 +64,7 @@ const config: Config = {
         useESM: true,
         tsconfig: {
           jsx: 'react-jsx',
+          esModuleInterop: true,
         },
       },
     ],

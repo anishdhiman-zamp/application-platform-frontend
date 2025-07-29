@@ -1,4 +1,4 @@
-import { PERIODICITY_TYPES } from 'constants/date.constants';
+import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { MapAny } from 'types/commonTypes';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';

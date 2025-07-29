@@ -10,6 +10,7 @@ export enum LOCAL_STORAGE_KEYS {
   COLUMN_ORDERING_VISIBILITY = 'COLUMN_ORDERING_VISIBILITY',
   XZAMP_ORGANIZATION_ID = 'X-Zamp-Organization-Id',
   ORG_REGION = 'ORG_REGION_V2',
+  ALL_REGIONS = 'ALL_REGIONS',
 }
 
 export const getFromLocalStorage = (key: string) => {

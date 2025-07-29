@@ -1,13 +1,13 @@
 'use client';
 
-import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { Circle } from 'lucide-react';
+import * as React from 'react';
 
 import { cn } from '@zamp-platform/ui/utils';
 
 const RadioGroup = ({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) => {
-  return <RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} />;
+  return <RadioGroupPrimitive.Root data-testid='radio-group' className={cn('grid gap-2', className)} {...props} />;
 };
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 

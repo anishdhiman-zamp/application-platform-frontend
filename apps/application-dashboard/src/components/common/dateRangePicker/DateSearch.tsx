@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FC, KeyboardEvent, useEffect, useRef } from 'react';
+import { DateRangeKeys } from '@zamp-platform/utils';
 import { COLORS } from 'constants/colors';
-import { DateRangeKeys } from 'constants/date.constants';
 import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { SIZE_TYPES } from 'types/common/components';

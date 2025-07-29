@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { type RefObject, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import type { AgGridReact } from 'ag-grid-react';
 import {
   useLazyGetActionStatusQuery,
   useLazyGetDatasetExportQuery,
@@ -9,7 +10,8 @@ import { COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
-import { useRouter } from 'next/navigation';
+import { prepareExportQuery } from 'modules/data/data.utils';
+import { useParams, useRouter } from 'next/navigation';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -20,15 +22,19 @@ interface ExportDatasetProps {
   query: string;
   datasetId: string;
   hasFilters: boolean;
+  tableRef: RefObject<AgGridReact<any> | null>;
 }
 
-const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => {
+const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDatasetProps) => {
   const router = useRouter();
+  const params = useParams();
+  const activityId = params?.activityId as string;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { startPolling } = usePolling();
   const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getDatasetExport] = useLazyGetDatasetExportQuery();
   const [getDatasetExportsSignedUrl] = useLazyGetDatasetExportsSignedUrlQuery();
+
   const [showExportStatus, setShowExportStatus] = useState(false);
   const [isPolling, setIsPolling] = useState<boolean>(false);
 
@@ -62,9 +68,14 @@ const ExportDataset = ({ query, datasetId, hasFilters }: ExportDatasetProps) => 
 
   const downloadCsv = async () => {
     setShowExportStatus(true);
+    const mergedQuery = prepareExportQuery(query, tableRef, activityId);
 
     if (isPolling) return;
-    getDatasetExport({ datasetId, query_config: query })
+
+    getDatasetExport({
+      datasetId,
+      query_config: mergedQuery,
+    })
       .unwrap()
       .then((data) => {
         if (data?.workflow_id) {

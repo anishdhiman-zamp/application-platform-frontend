@@ -1,5 +1,17 @@
-import { format } from 'date-fns';
-import { OptionsType } from 'types/commonTypes';
+import { format, formatRelative } from 'date-fns';
+import enUS from 'date-fns/locale/en-US';
+
+interface OptionsType {
+  label?: React.ReactNode;
+  value: string | number;
+  id?: string;
+  spriteIcon?: string;
+  icon?: React.ReactNode;
+  isDisabled?: boolean;
+  metadata?: Record<string, unknown>;
+  options?: OptionsType[];
+  desc?: string;
+}
 
 export const MONTH_NAME = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -27,6 +39,9 @@ export const DATE_FORMATS = {
   HH_MM_A: 'h:mm a',
   EEE_MMM_d_h_mm_a: 'EEE, MMM d, h:mm a',
   MMM_d_yyyy_h_mm_a: 'MMM d, yyyy, h:mma',
+  ddMMyyyy: 'dd/MM/yyyy',
+  RELATIVE: 'relative',
+  YYYYMMDD_SLASH: 'yyyy/MM/dd',
 };
 
 export const VALID_DATE_FORMATS = Object.values(DATE_FORMATS);
@@ -53,7 +68,6 @@ export const formatDateToZFormat = (date: Date) => {
 export const getUtcDate = (data: string | number) => {
   const inputDate = new Date(data);
 
-  // Manually format using the extracted UTC parts with date-fns
   return new Date(
     inputDate.getUTCFullYear(),
     inputDate.getUTCMonth(),
@@ -90,7 +104,6 @@ export const DATE_FILTER_OPTIONS: OptionsType[] = [
 ];
 
 export type dateFilterValueType = { start: Date | undefined; end: Date | undefined; periodicity?: PERIODICITY_TYPES };
-// export type dateFilterValueType = { start: Date | null; end: Date | null };
 
 export type RangeType = {
   startDate?: Date | undefined;
@@ -184,4 +197,23 @@ export const PERIODICITY_REGEX = {
   [PERIODICITY_TYPES.YEARLY]: /\b(?:this\s+)?year\b/i,
   [PERIODICITY_TYPES.MONTHLY]: /\b(?:this\s+)?month\b/i,
   [PERIODICITY_TYPES.QUARTERLY]: /\b(?:this\s+)?quarter\b/i,
+};
+
+export const DAY_ONLY_MAP: Record<string, string> = {
+  lastWeek: "'Last' eeee",
+  yesterday: "'Yesterday'",
+  today: "'Today'",
+  tomorrow: "'Tomorrow'",
+  nextWeek: "'Next' eeee",
+  other: 'MM/dd/yyyy',
+};
+
+// Create a custom locale with modified formatRelative
+export const CUSTOM_LOCALE = {
+  ...enUS,
+  formatRelative: (token: string) => DAY_ONLY_MAP[token],
+};
+
+export const formatRelativeWithCustomLocale = (date?: Date) => {
+  return formatRelative(date ? date : new Date(), new Date(), { locale: CUSTOM_LOCALE });
 };

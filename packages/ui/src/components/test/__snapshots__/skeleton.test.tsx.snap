@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Skeleton matches snapshot (default) 1`] = `
+<div
+  class="animate-pulse rounded-md bg-gray-100"
+/>
+`;
+
+exports[`Skeleton matches snapshot with custom styles and children 1`] = `
+<div
+  class="animate-pulse rounded-md bg-gray-100 h-4 w-16"
+>
+  <span>
+    Content
+  </span>
+</div>
+`;

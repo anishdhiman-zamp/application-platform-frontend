@@ -54,7 +54,7 @@ module.exports = {
       version: 'detect',
     },
   },
-  ignorePatterns: ['*.webp', '*.png', 'fonts.css', 'eslint.js', '**/next.config.js', 'dist'],
+  ignorePatterns: ['*.webp', '*.png', 'fonts.css', 'eslint.js', '**/next.config.js', 'dist', 'coverage/'],
   rules: {
     'no-unused-vars': 'off',
     'react/no-unescaped-entities': 'off',

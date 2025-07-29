@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { useAppSelector } from 'hooks/toolkit';
@@ -12,6 +12,7 @@ import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoadingInvitedTeamMembersData }) => {
+  const reversedData = useMemo(() => data?.slice().reverse(), [data]);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: invitedTeamMembersData } = useGetInvitedAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -37,8 +38,8 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
             loader={<SkeletonLoaderListing />}
             className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
-            {data.map((row, index) => (
-              <InvitedMemberCard key={index} row={row} organizationId={organizationId} />
+            {reversedData?.map((row, index) => (
+              <InvitedMemberCard key={`${row?.email}-${index}`} row={row} organizationId={organizationId} />
             ))}
           </CommonWrapper>
         </div>

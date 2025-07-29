@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@zamp-platform/ui/utils';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 
 const dialogVariants = cva(
   'fixed left-[50%] top-[50%] z-1001 flex translate-x-[-50%] translate-y-[-50%] flex-col rounded-lg bg-white shadow-lg duration-200 max-h-[60vh]',
@@ -13,6 +13,7 @@ const dialogVariants = cva(
       size: {
         large: 'w-[80vw]',
         medium: 'w-[60vw]',
+        medium_small: 'w-[50vw]',
         small: 'w-[40vw]',
       },
     },
@@ -52,7 +53,7 @@ const DialogContent = ({
   showCloseButton?: boolean;
   title?: string;
   description?: string;
-  size?: 'large' | 'medium' | 'small';
+  size?: 'large' | 'medium' | 'medium_small' | 'small';
   dialogueOverlayClassName?: string;
 }) => (
   <DialogPortal>

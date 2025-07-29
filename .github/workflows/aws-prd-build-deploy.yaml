@@ -1,0 +1,327 @@
+name: AWS Prd-ME Application Platform Frontend - Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main # FIXME: Update to your production branch name
+
+env:
+  APP_NAME: application-platform-frontend
+
+concurrency:
+  group: frontend-prd-deploy
+  cancel-in-progress: false
+
+jobs:
+  prepare-env:
+    name: Prepare Env
+    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    timeout-minutes: 2
+    outputs:
+      SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
+      SSH_PRIVATE_KEY: ${{ steps.vars.outputs.SSH_PRIVATE_KEY }}
+      HELM_CHART_NAME: ${{ steps.vars.outputs.HELM_CHART_NAME }}
+      AWS_ACCOUNT_ID: ${{ steps.vars.outputs.AWS_ACCOUNT_ID }}
+      VALUES_FILE: ${{ steps.vars.outputs.VALUES_FILE }}
+      HELM_REPOSITORY: ${{ steps.vars.outputs.HELM_REPOSITORY }}
+      ECR_REPO: ${{ steps.vars.outputs.ECR_REPO }}
+      NAMESPACE: ${{ steps.vars.outputs.NAMESPACE }}
+      EKS_CLUSTER: ${{ steps.vars.outputs.EKS_CLUSTER }}
+      AWS_REGION: ${{ steps.vars.outputs.AWS_REGION }}
+      ENVIRONMENT: ${{ steps.vars.outputs.ENVIRONMENT }}
+      BUILD_ENV: ${{ steps.vars.outputs.BUILD_ENV }}
+      APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
+      TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
+      ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+
+    steps:
+      - id: vars
+        run: |
+          TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
+          # FIXME: Replace with your actual values
+          echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
+          echo "SLACK_WEBHOOK_URL=PRD_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
+          echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=zamp-prd-me-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
+          echo "HELM_REPOSITORY=zamp-prd-me-helmcharts-latest" >> $GITHUB_OUTPUT
+          echo "NAMESPACE=application-platform-frontend" >> $GITHUB_OUTPUT
+          echo "EKS_CLUSTER=zamp-prd-me-cluster" >> $GITHUB_OUTPUT
+          echo "AWS_REGION=me-central-1" >> $GITHUB_OUTPUT
+          echo "AWS_ACCOUNT_ID=916079538338" >> $GITHUB_OUTPUT
+          echo "VALUES_FILE=prd-values.yaml" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-prd-me-application-platform-assets" >> $GITHUB_OUTPUT
+          echo "BUILD_ENV=awsprd" >> $GITHUB_OUTPUT
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
+
+      - name: Output Branch name
+        run: |
+          echo ":seedling: Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+          echo ":rocket: Environment: production" >> $GITHUB_STEP_SUMMARY
+
+  build-push-image:
+    needs:
+      - prepare-env
+    name: Build and Push Image
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    env:
+      AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
+      ECR_REPO: ${{ needs.prepare-env.outputs.ECR_REPO }}
+      APP_NAME: ${{ needs.prepare-env.outputs.APP_NAME }}
+      SSH_PRIVATE_KEY: ${{ needs.prepare-env.outputs.SSH_PRIVATE_KEY }}
+      ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
+      TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
+      ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+    outputs:
+      IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
+      ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
+
+    steps:
+      - name: "Checkout repository on : ${{ github.REF }}"
+        uses: actions/checkout@v4
+
+      - name: "Debug Environment Variables"
+        run: |
+          echo "=== Job Environment Variables ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'" 
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "APP_NAME: '$APP_NAME'"
+          echo "================================"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 'Set up AWS credentials using OIDC'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in production account
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      - name: "Install AWS CLI"
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+  
+      - name: "Login to Amazon ECR"
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+          driver: remote
+  
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
+
+      - name: Install dependencies
+        run: |
+          # Install all dependencies (will use cache if available)
+          npm ci
+
+      - name: Build application
+        env:
+          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          TIMESTAMP: "${TIMESTAMP}"
+        run: |
+          echo "Building application with environment variables:"
+          echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
+          echo "TIMESTAMP: $TIMESTAMP"
+          
+          # Build the application
+          npm run build
+          
+          echo "Build completed successfully!"
+          echo "Build artifacts:"
+          ls -la apps/application-dashboard/.next/
+
+      - id: build
+        name: Build and Push Image
+        env:
+          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+        run: |
+          # Debug: Show all environment variables first
+          echo "=== Environment Variables Debug ==="
+          echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
+          echo "AWS_REGION: '$AWS_REGION'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "=================================="
+          
+          # Construct ECR registry URL (like TMS workflow pattern)
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+          ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
+          IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
+          
+          # Debug: Print build variables
+          echo "=== Build Debug Info ==="
+          echo "ECR_REGISTRY: '$ECR_REGISTRY'"
+          echo "ECR_REPO: '$ECR_REPO'"
+          echo "ECR_REPO_URI: '$ECR_REPO_URI'"
+          echo "IMAGE_TAG: '$IMAGE_TAG'"
+          echo "Full Image: '$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'"
+          echo "========================="
+          
+          # Validate that ECR_REPO_URI is not empty
+          if [ -z "$ECR_REPO_URI" ]; then
+            echo "ERROR: ECR_REPO_URI is empty!"
+            exit 1
+          fi
+          
+          # Build Docker image using the Dockerfile  
+          # Application is already built, so Docker will just package it
+          docker buildx build \
+            --platform linux/arm64 \
+            -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
+            --build-arg TIMESTAMP="${TIMESTAMP}" \
+            --build-arg NEXT_PUBLIC_ENVIRONMENT=production \
+            --build-arg PORT=3000 \
+            --build-arg SKIP_INSTALL=true \
+            --build-arg SKIP_BUILD=true \
+            --push .
+          
+          echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo ":whale2:App Image Tag: ${IMAGE_TAG} " >> $GITHUB_STEP_SUMMARY
+
+      - id: upload-assets
+        name: Upload Static Files to S3
+        run: |
+          # Upload Next.js static files directly from the built application
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          
+          echo "Static assets uploaded to S3 successfully!"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+
+  deploy-to-eks:
+    name: Deploy to EKS
+    runs-on: arc-runner-set-aws-prd # FIXME: Update to your production runner
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    needs:
+      - prepare-env
+      - build-push-image
+    env:
+      APP_NAME: ${{needs.prepare-env.outputs.APP_NAME}}
+      AWS_REGION: ${{needs.prepare-env.outputs.AWS_REGION}}
+      EKS_CLUSTER: ${{needs.prepare-env.outputs.EKS_CLUSTER}}
+      HELM_REPOSITORY: ${{needs.prepare-env.outputs.HELM_REPOSITORY}}
+      HELM_CHART_NAME: ${{needs.prepare-env.outputs.HELM_CHART_NAME}}
+      NAMESPACE: ${{needs.prepare-env.outputs.NAMESPACE}}
+      ECR_REPO: ${{needs.prepare-env.outputs.ECR_REPO}}
+      IMAGE_TAG: ${{needs.build-push-image.outputs.IMAGE_TAG}}
+      BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
+      AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
+      VALUES_FILE: ${{needs.prepare-env.outputs.VALUES_FILE}}
+
+    steps:
+      - name: "Checkout repository on : ${{ github.REF }}"
+        uses: actions/checkout@v4
+
+      - name: 'Set up AWS credentials using OIDC'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in production account
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      - name: "Install AWS CLI"
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - uses: azure/setup-helm@v4
+        name: Install Helm
+        with:
+          version: "v3.7.2"
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.22.0"
+        id: install
+
+      - name: "Set up kubectl"
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
+
+      - name: Deploy
+        run: |
+          # Construct ECR repository URI directly (like TMS workflow pattern)
+          ECR_REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+          
+          # This assumes your Helm chart is in S3.
+          aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz . # FIXME: adjust chart version
+          tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
+
+          # Deploy directly
+          helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
+              --namespace ${NAMESPACE} \
+              --set default.image.repository="${ECR_REPO_URI}" \
+              --set default.image.tag="${IMAGE_TAG}" \
+              --values helm/${VALUES_FILE} \
+              --wait \
+              --timeout 10m0s \
+              --create-namespace
+
+  slack-notification:
+    name: Slack Notification
+    if: always()
+    runs-on: ubuntu-latest
+    needs:
+      - prepare-env
+      - build-push-image
+      - deploy-to-eks
+    env:
+      SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
+      ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v3
+      - name: Update slack message body
+        id: body
+        run: |
+          if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
+          then
+            echo "SLACK_MESSAGE=Success :white_check_mark:" >> $GITHUB_OUTPUT
+          elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
+          then
+            echo "SLACK_MESSAGE=Failed :x:" >> $GITHUB_OUTPUT
+          elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
+          then
+            echo "SLACK_MESSAGE=Cancelled :grey_exclamation:" >> $GITHUB_OUTPUT
+          fi
+      - name: Slack Notification
+        uses: Zampfi/town_crier@main
+        env:
+          SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
+          SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
+          SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
+          SLACK_TITLE: Build Status
+          ZAMP_ENV: ${{ env.ENVIRONMENT }}
+          SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+          SLACK_USERNAME: Zamp-Devops
+          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }} 
