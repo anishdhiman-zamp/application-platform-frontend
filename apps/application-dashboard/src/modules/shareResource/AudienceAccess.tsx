@@ -99,7 +99,9 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
     ? orgName
     : checkIfResourceTypeTeam
       ? teamInfo?.name
-      : convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) || 'Unknown';
+      : user?.name ||
+        convertEmailUsernameToName(getUserNameFromEmail(user?.email || resourceAudienceType)) ||
+        'Unknown';
   const customAvatarWord = (checkIfResourceTypeOrg ? customerName : userName) || 'Unknown';
   const showRoleChangeDropdown =
     currentUserHasAdminAccess &&
@@ -207,7 +209,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
               )}
               <div
                 className={cn(
-                  'flex items-center justify-center gap-1 whitespace-nowrap',
+                  'flex items-center justify-center gap-1 whitespace-nowrap capitalize',
                   checkIfResourceTypeTeam && 'rounded px-1.5 py-0.5',
                 )}
                 style={{

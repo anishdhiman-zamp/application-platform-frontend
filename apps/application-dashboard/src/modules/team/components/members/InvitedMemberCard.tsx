@@ -30,7 +30,7 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
   return (
     <div className={cn(`border-b-0.5 border-DIVIDER_GRAY group relative grid w-full grid-cols-9`)}>
       <div className='col-span-3'>
-        <MembersName value={row?.email} />
+        <MembersName name={row?.name ?? row?.email} value={row?.email} />
       </div>
       <div className='col-span-3'>
         <MembersEmail value={row?.email} />

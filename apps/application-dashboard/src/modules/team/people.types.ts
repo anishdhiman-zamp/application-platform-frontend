@@ -47,6 +47,7 @@ export type InvitedMembersListingPropsType = {
 };
 
 export type MembersNamePropsType = {
+  name?: string;
   value: string;
   member?: boolean;
 };

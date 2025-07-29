@@ -88,7 +88,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
         <div className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           {allAudiencesAndTeamsData?.map((row, index) => (
             <div key={index} className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
-              <MembersName value={row?.name || row?.email} member />
+              <MembersName name={row?.name || row?.email} value={row?.email} member />
               <MembersEmail value={row?.email} />
               <MembersRole
                 value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
