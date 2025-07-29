@@ -12,7 +12,16 @@
  * - The animation is staggered (i.e, revealed one by one) and slower between children
  */
 
-import { useEffect, useRef, ReactNode, Children, isValidElement, cloneElement, useState, ReactElement } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  ReactNode,
+  Children,
+  isValidElement,
+  cloneElement,
+  useState,
+  ReactElement,
+} from 'react';
 import {
   REVEAL_ELEMENT_CHILD_MOTION_VARIANTS,
   REVEAL_ELEMENT_PARENT_MOTION_VARIANTS,

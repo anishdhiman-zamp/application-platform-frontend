@@ -11,7 +11,7 @@
  */
 
 import { cn } from '@zamp-platform/ui/utils';
-import { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { COLORS } from '../../constants/constants';
 
 interface ShimmerTextProps {

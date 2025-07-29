@@ -1,3 +1,4 @@
+import React from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 
 const Skeleton = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {

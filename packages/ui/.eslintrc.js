@@ -6,6 +6,22 @@ const config = {
     project: './tsconfig.json',
     tsconfigRootDir: '.',
   },
+  env: {
+    jest: true,
+    browser: true,
+    node: true,
+    es6: true,
+  },
+  globals: {
+    module: 'readonly',
+    global: 'readonly',
+    window: 'readonly',
+    document: 'readonly',
+    console: 'readonly',
+    setTimeout: 'readonly',
+    clearTimeout: 'readonly',
+    NodeJS: 'readonly',
+  },
   ignorePatterns: ['coverage/', 'node_modules/', 'dist/', '.turbo/'],
 };
 

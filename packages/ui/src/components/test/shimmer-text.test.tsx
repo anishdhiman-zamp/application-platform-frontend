@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import * as React from 'react';
 import { ShimmerText } from '../animations';
 

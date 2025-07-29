@@ -30,12 +30,12 @@ export interface SelectProps {
   variant?: SizeType;
   className?: string;
   label?: string;
-  fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>;
-  value?: SelectOption['display_value'] | SelectOption['value'];
+  fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>; // eslint-disable-line no-unused-vars
+  value?: SelectOption['display_value'] | SelectOption['value']; // eslint-disable-line no-unused-vars
   onValueChange?: (value: SelectOption['display_value'] | SelectOption['value']) => void;
   onBlur?: () => void;
   clearOptions?: boolean;
-  setShouldClearOptions?: (shouldClearOptions: boolean) => void;
+  setShouldClearOptions?: (_shouldClearOptions: boolean) => void; // eslint-disable-line no-unused-vars
 }
 
 const RenderIcon = ({ icon, className }: { icon: SelectIcon; className?: string }) => {
@@ -65,10 +65,10 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       clearOptions,
       setShouldClearOptions,
     },
-    ref,
+    _ref, // eslint-disable-line no-unused-vars
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [page, setPage] = useState(1);
+    const [_page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [dynamicOptions, setDynamicOptions] = useState<SelectOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<Pick<
@@ -94,7 +94,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       if (!fetchOptions) return;
       setLoading(true);
       try {
-        const result = await fetchOptions(page);
+        const result = await fetchOptions(_page);
         setDynamicOptions((prev) => [...prev, ...result.options]);
         if (result.hasMore) setPage((p) => p + 1);
       } catch (error) {

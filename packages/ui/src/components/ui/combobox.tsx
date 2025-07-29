@@ -9,9 +9,9 @@ type ComboboxOption = Omit<SelectOption, 'icon'> & { icon?: React.ReactNode };
 
 type ComboboxProps = {
   options: Array<ComboboxOption>;
-  onSelect: (option: ComboboxOption) => void;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onSelect: (option: ComboboxOption) => void; // eslint-disable-line no-unused-vars
+  open: boolean; // eslint-disable-line no-unused-vars
+  onOpenChange: (open: boolean) => void; // eslint-disable-line no-unused-vars
   placeholder?: string;
   triggerClassName?: string;
   contentClassName?: string;
@@ -82,17 +82,21 @@ export function Combobox({
                   </div>
                 )}
                 {!optionsLoading &&
-                  options?.map((option) => (
-                    <CommandItem
-                      key={option?.id ?? option?.value.toString()}
-                      value={option?.label}
-                      onSelect={() => onSelect(option)}
-                      className={cn('flex items-center', itemClassName)}
-                    >
-                      {option?.icon && option?.icon}
-                      <span className={labelClassName}>{option?.label}</span>
-                    </CommandItem>
-                  ))}
+                  options?.map(
+                    (
+                      option, // eslint-disable-line no-unused-vars
+                    ) => (
+                      <CommandItem
+                        key={option?.id ?? option?.value.toString()}
+                        value={option?.label}
+                        onSelect={() => onSelect(option)}
+                        className={cn('flex items-center', itemClassName)}
+                      >
+                        {option?.icon && option?.icon}
+                        <span className={labelClassName}>{option?.label}</span>
+                      </CommandItem>
+                    ),
+                  )}
               </CommandGroup>
             </CommandList>
           </Command>
