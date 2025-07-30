@@ -46,6 +46,7 @@ const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
+  const processId = params?.processId;
 
   const dispatch = useAppDispatch();
 
@@ -54,15 +55,19 @@ const Topbar = () => {
 
   useEffect(() => {
     if (ldClient) {
-      evaluate(FEATURE_FLAGS.KNOWLEDGE_BASED)
-        .then((res) => {
-          setIsKnowledgeBaseEnabled(res);
+      evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
+        .then((res: string[]) => {
+          if (res?.includes(processId ?? '')) {
+            setIsKnowledgeBaseEnabled(true);
+          } else {
+            setIsKnowledgeBaseEnabled(false);
+          }
         })
         .catch(() => {
           setIsKnowledgeBaseEnabled(false);
         });
     }
-  }, [evaluate, ldClient]);
+  }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
     if (pathname?.includes(ROUTES_PATH.PAYMENTS)) {
@@ -98,7 +103,7 @@ const Topbar = () => {
     }
 
     return <ShareButton />;
-  }, [pathname, isKnowledgeBaseEnabled]);
+  }, [pathname, isKnowledgeBaseEnabled, processId]);
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());

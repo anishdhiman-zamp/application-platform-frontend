@@ -17,5 +17,5 @@ export enum FEATURE_FLAGS {
   PEOPLE_MEMBERSHIP_REQUESTS = 'people-membership-requests',
   ADMIN_PAGE = 'admin-page',
   FGAC = 'fgac',
-  KNOWLEDGE_BASED = 'knowledge-based',
+  ENABLE_KNOWLEDGE_BASE = 'enable-knowledge-base',
 }
