@@ -222,11 +222,12 @@ const Artifacts = ({
           {artifactComponent}
         </CommonWrapper>
 
-        <AllArtifactsSideDrawer
-          onClose={() => setAllArtifactsSideDrawerOpen(false)}
-          isOpen={allArtifactsSideDrawerOpen}
-          onArtifactClick={onArtifactClick}
-        />
+        {allArtifactsSideDrawerOpen && (
+          <AllArtifactsSideDrawer
+            onClose={() => setAllArtifactsSideDrawerOpen(false)}
+            onArtifactClick={onArtifactClick}
+          />
+        )}
       </Tabs>
     </div>
   );

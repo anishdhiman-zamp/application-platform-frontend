@@ -1,24 +1,25 @@
 'use client';
 
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
-import { AnimatePresence, motion } from 'motion/react';
-import Image from 'next/image';
+import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery } from '@/apis/processes';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { COLORS } from '@/constants/colors';
+import { DATASET, LINK } from '@/constants/icons';
 import { ActivityArtifactsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 interface AllArtifactsDialogProps {
   onClose: defaultFnType;
-  isOpen: boolean;
   onArtifactClick: (props: HandleShowArtifactsProps) => void;
 }
 
-const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDialogProps) => {
+const AllArtifactsDialog = ({ onClose, onArtifactClick }: AllArtifactsDialogProps) => {
   const params = useParams();
   const processId = params?.processId as string;
   const activityId = params?.activityId;
@@ -27,6 +28,7 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
     data: artifacts,
     isLoading: isLoadingArtifacts,
     isError: isErrorArtifacts,
+    refetch: refetchArtifacts,
   } = useGetActivityArtifactsQuery(
     { processId: processId as string, activityRunId: activityId as string },
     {
@@ -41,59 +43,53 @@ const AllArtifactsDialog = ({ onClose, isOpen, onArtifactClick }: AllArtifactsDi
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          key='backdrop'
-          className='absolute z-50 flex h-full w-full items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+    <div className='absolute z-50 flex h-full w-full items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'>
+      <div className='animate-opacity relative h-full w-full overflow-y-auto rounded-xl'>
+        <div onClick={onClose} className='absolute top-5 left-4 cursor-pointer' aria-label='Close'>
+          <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
+        </div>
+
+        <CommonWrapper
+          className='absolute left-8 flex h-full flex-col items-start justify-start gap-y-2 overflow-y-auto p-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+          isLoading={isLoadingArtifacts}
+          isError={isErrorArtifacts}
+          skeletonType={SkeletonTypes.CUSTOM}
+          loader={
+            <>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <SkeletonElement className='h-24 w-80 rounded-lg' key={index} />
+              ))}
+            </>
+          }
+          refetchFunction={refetchArtifacts}
+          errorCardStyle='w-full h-full'
         >
-          <motion.div
-            key='content'
-            className='relative h-full w-full overflow-y-auto rounded-xl'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div onClick={onClose} className='absolute top-5 left-5 cursor-pointer' aria-label='Close'>
-              <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
-            </div>
-
-            <div className='absolute left-10 flex h-full flex-col items-start justify-start gap-y-2 overflow-y-auto p-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-              <h2 className='text-GRAY_1000 f-14-500'>All Artifacts</h2>
-
-              {isLoadingArtifacts || isErrorArtifacts
-                ? Array.from({ length: 5 }).map((_, index) => (
-                    <SkeletonElement className='h-24 w-80 rounded-lg' key={index} />
-                  ))
-                : artifacts?.artifacts?.map((artifact) => (
-                    <ArtifactItem
-                      key={artifact?.id}
-                      artifact={artifact}
-                      onClick={() =>
-                        handleArtifactClick({
-                          artifactType: artifact?.artifact_type,
-                          artifactId: artifact?.id ?? '',
-                        })
-                      }
-                    />
-                  ))}
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          <h2 className='text-GRAY_1000 f-14-500'>All Artifacts</h2>
+          {artifacts?.artifacts?.map((artifact) => (
+            <ArtifactItem
+              key={artifact?.id}
+              artifact={artifact}
+              onClick={() =>
+                handleArtifactClick({
+                  artifactType: artifact?.artifact_type,
+                  artifactId: artifact?.id ?? '',
+                })
+              }
+            />
+          ))}
+        </CommonWrapper>
+      </div>
+    </div>
   );
 };
 
 const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemType; onClick: () => void }) => {
   const {
     artifact_type,
-    artifact_data: { display_name },
+    artifact_data: { display_name, icon_identifier },
   } = artifact;
+
+  const iconSrc = getArtifactPrefixIconSrc(artifact_type, icon_identifier);
 
   return (
     <div
@@ -102,17 +98,15 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
       aria-label={`${artifact_type} artifact`}
       role='button'
     >
-      <Image
-        src={
-          ARTIFACT_ICON_MAPPING[artifact_type as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url ??
-          ARTIFACT_ICON_MAPPING[ARTIFACT_TYPE.PDF_DATASET]?.icon_url
-        }
+      <ImageWithFallback
+        fallback={artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK ? LINK : DATASET}
+        src={iconSrc}
         alt={display_name}
         width={14}
         height={14}
         priority
       />
-      <p className='text-GRAY_1000 f-14-500'>{display_name}</p>
+      <p className='text-GRAY_1000 f-14-500 w-full break-words'>{display_name}</p>
     </div>
   );
 };
