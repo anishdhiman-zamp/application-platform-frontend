@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 2000 --experimental-https -H local.zamp.ai",
+    "dev-coder": "next dev -p 2000 -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
+    "start-coder": "next start -H 0.0.0.0",
     "lint": "eslint --fix . --ext .ts,.tsx,.js,.jsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
