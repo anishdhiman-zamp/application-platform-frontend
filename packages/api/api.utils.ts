@@ -1,6 +1,6 @@
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 
-import { ENVIRONMENT, MULTI_REGION_ENABLED, REGION_LIST, REGIONS_MAP } from './constants';
+import { DEV_API_URL, ENVIRONMENT, MULTI_REGION_ENABLED, REGION_LIST, REGIONS_MAP } from './constants';
 
 export const getApiDomainAndRegions = async (email = '') => {
   const region = getCurrentRegion();
@@ -46,7 +46,7 @@ const getApiDomain = (environment = '', region = '') => {
     case 'staging':
       return `https://api-stg${region}.zamp.ai`;
     case 'development': {
-      return `https://api-dev${region}.zamp.ai`;
+      return DEV_API_URL;
     }
     default:
       return 'http://localhost:8080';

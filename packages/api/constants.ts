@@ -1,6 +1,7 @@
 export const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION;
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
+export const DEV_API_URL = process.env.NEXT_PUBLIC_DEV_API_URL;
 export const AZURE_CLIENT_ID = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID ?? '';
 export const AZURE_AUTHORITY = process.env.NEXT_PUBLIC_AZURE_AUTHORITY ?? '';
 export const AZURE_REDIRECT = process.env.NEXT_PUBLIC_AZURE_REDIRECT || '/';
