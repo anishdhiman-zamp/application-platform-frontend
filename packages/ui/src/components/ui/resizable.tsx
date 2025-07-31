@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import * as ResizablePrimitive from 'react-resizable-panels';
 import {

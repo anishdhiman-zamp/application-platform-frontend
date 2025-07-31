@@ -1,4 +1,5 @@
-export enum ICON_SPRITE_TYPES {
+/* eslint-disable no-unused-vars */
+export const enum ICON_SPRITE_TYPES {
   ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',
   ARROWS = 'arrows',
   CHARTS = 'charts',
