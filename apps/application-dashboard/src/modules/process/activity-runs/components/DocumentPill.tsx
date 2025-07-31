@@ -1,6 +1,6 @@
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { COLORS } from '@/constants/colors';
-import { ICON_SPRITE_TYPES } from '@/constants/icons';
 
 const DocumentPill = ({ value }: { value: string }) => {
   if (!value) return <span className='f-13-450 text-GRAY_500'>N/A</span>;

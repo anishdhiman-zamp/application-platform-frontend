@@ -1,10 +1,10 @@
 import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
   usePostInviteAudiencesByOrganisationIdMutation,
 } from 'apis/people';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';

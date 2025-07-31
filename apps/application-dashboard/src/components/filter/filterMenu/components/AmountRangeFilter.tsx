@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { debounce, useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
 import { OptionsType } from 'types/commonTypes';

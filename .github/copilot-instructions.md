@@ -228,7 +228,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 
 import { useGetPagesQuery } from 'apis/pages';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
 import CommonWrapper from 'components/commonWrapper';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';

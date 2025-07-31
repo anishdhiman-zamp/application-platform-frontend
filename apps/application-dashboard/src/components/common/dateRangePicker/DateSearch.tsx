@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, KeyboardEvent, useEffect, useRef } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { DateRangeKeys } from '@zamp-platform/utils';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';

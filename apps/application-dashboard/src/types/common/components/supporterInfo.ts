@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
 export enum SUPPORT_INFO_TYPES {
   GUIDE = 'GUIDE',

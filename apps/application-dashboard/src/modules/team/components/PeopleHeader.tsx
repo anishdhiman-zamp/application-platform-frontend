@@ -1,5 +1,5 @@
 import React, { FC, useRef, useState } from 'react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';

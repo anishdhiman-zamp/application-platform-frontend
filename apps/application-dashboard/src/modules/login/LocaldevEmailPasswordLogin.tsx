@@ -1,8 +1,9 @@
 'use client';
 import React, { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
-import { ICON_SPRITE_TYPES, ZAMP_ICON_BLACK } from 'constants/icons';
+import { ZAMP_ICON_BLACK } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';

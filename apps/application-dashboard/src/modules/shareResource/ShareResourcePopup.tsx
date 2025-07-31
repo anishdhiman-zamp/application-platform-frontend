@@ -1,13 +1,13 @@
 import { FC, useMemo, useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   useDeleteAudienceFromResourceMutation,
   usePatchChangeAudienceRoleInResourceMutation,
   usePostShareResourceToAudiencesMutation,
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useAppSelector } from 'hooks/toolkit';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';

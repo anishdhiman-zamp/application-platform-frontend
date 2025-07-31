@@ -1,9 +1,9 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
 import { useUpdateDatasetDataMutation } from 'apis/dataset';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { convertFilterModelToRuleFilters } from 'modules/data/data.utils';
 import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import { DatasetUpdateResponseType } from 'types/api/dataset.types';

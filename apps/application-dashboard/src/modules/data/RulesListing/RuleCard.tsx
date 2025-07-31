@@ -1,7 +1,8 @@
 import { FC, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { DATE_FORMATS } from '@zamp-platform/utils';
-import { ICON_SPRITE_TYPES, RULE_ICON } from 'constants/icons';
+import { RULE_ICON } from 'constants/icons';
 import { format } from 'date-fns';
 import { RULE_ACTIONS } from 'modules/data/RulesListing/ruleListing.constants';
 import { RULE_ACTION_TYPES } from 'modules/data/RulesListing/ruleListing.types';

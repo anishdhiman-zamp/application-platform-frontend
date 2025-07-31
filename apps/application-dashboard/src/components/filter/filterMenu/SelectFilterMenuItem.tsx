@@ -1,5 +1,5 @@
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { POSITION_TYPES } from 'types/common/components';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import Input from 'components/common/input';
