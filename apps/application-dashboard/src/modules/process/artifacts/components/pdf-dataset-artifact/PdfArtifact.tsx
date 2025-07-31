@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { usePDFSlick } from '@pdfslick/react';
 import { captureException } from '@sentry/nextjs';
 import { Skeleton } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import SearchBar from 'modules/process/artifacts/components/pdf-dataset-artifact/SearchBar';
 import ToolBar from 'modules/process/artifacts/components/pdf-dataset-artifact/ToolBar';
@@ -15,11 +16,14 @@ type PDFViewerAppProps = {
   artifactId: string;
   pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   isArtifactLoading: boolean;
+  className?: string;
 };
 
 const LoadingIndicator = () => (
-  <div className='flex h-full w-full items-center justify-center'>
-    <Skeleton className='h-[582px] w-[413px]' />
+  <div className='flex h-full w-full items-center justify-center p-4'>
+    <div className='aspect-[8.5/11] max-h-full w-full max-w-md rounded-sm border border-gray-200 bg-white shadow-md'>
+      <Skeleton className='h-full w-full rounded-sm' />
+    </div>
   </div>
 );
 
@@ -29,7 +33,7 @@ const ErrorFallback = ({ message }: { message: string }) => (
   </div>
 );
 
-const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading }: PDFViewerAppProps) => {
+const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, className }: PDFViewerAppProps) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
@@ -73,7 +77,7 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading }: 
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}
-      className='bg-BG_GRAY_1 pdfSlick h-full w-full px-4'
+      className={cn('bg-BG_GRAY_1 pdfSlick relative h-full w-full px-4', className)}
     >
       {error && <ErrorFallback message={error?.message} />}
       {!error && !isDocumentLoaded && <LoadingIndicator />}

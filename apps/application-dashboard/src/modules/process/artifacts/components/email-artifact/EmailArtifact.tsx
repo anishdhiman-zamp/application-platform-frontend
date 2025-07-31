@@ -1,6 +1,7 @@
 import { type FC, useState } from 'react';
 import { toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import EmailDetailsDropdown from 'modules/process/artifacts/components/email-artifact/EmailDetailsDropdown';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
@@ -107,11 +108,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
         {/* Body */}
         {emailArtifact?.body_html ? (
           <div className='relative w-full flex-1 overflow-hidden p-4'>
-            {loading && (
-              <div className='bg-opacity-80 absolute inset-0 z-10 flex items-center justify-center bg-white'>
-                <span className='f-13-400 text-GRAY_700'>Loading...</span>
-              </div>
-            )}
+            {loading && <ArtifactLoader />}
             <iframe
               srcDoc={emailArtifact?.body_html}
               title='Email content'

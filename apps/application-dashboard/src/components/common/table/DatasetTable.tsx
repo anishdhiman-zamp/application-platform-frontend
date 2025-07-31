@@ -1,11 +1,13 @@
 import { FC, RefObject } from 'react';
 import {
+  type CellClickedEvent,
   CellDoubleClickedEvent,
   CellEditRequestEvent,
   ColDef,
   ColumnMovedEvent,
   ColumnVisibleEvent,
   FillEndEvent,
+  GridReadyEvent,
   IServerSideDatasource,
   RowClickedEvent,
   RowDragEndEvent,
@@ -39,7 +41,7 @@ export interface DatasetTableProps {
   cellClass?: string;
   suppressCellFocus?: boolean;
   enableCellSelection?: boolean;
-  onGridReady?: () => void;
+  onGridReady?: (params: GridReadyEvent) => void;
   menuTitle?: string;
   enableRowDrag?: boolean;
   onRowDragEnd?: (event: RowDragEndEvent) => void;
@@ -47,6 +49,8 @@ export interface DatasetTableProps {
   missingFields?: MissingFieldItemType[];
   completedFields?: { rowId: string; columnId: string }[];
   shouldShowNA?: boolean;
+  onCellClicked?: (event: CellClickedEvent) => void;
+  useGetRowId?: boolean;
 }
 
 const DatasetTable: FC<DatasetTableProps> = ({
@@ -80,6 +84,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
   missingFields,
   completedFields,
   shouldShowNA = false,
+  onCellClicked,
+  useGetRowId = false,
 }) => {
   return (
     <div id='dataset-table'>
@@ -114,6 +120,8 @@ const DatasetTable: FC<DatasetTableProps> = ({
         missingFields={missingFields}
         completedFields={completedFields}
         shouldShowNA={shouldShowNA}
+        onCellClicked={onCellClicked}
+        useGetRowId={useGetRowId}
       />
     </div>
   );

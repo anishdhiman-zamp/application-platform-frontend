@@ -421,9 +421,9 @@ export const getFilters = (filtersString: string, filterConfig: DatasetFilterCon
 
 export const getValueFormatter = (
   column: DatasetFilterConfigResponseType,
-): ((params: ValueFormatterParams) => string) => {
-  const valueFormatter = (params: ValueFormatterParams) => {
-    let formattedValue = params.value;
+): ((params?: ValueFormatterParams, value?: string, data?: MapAny) => string) => {
+  const valueFormatter = (params?: ValueFormatterParams, value?: string, data?: MapAny) => {
+    let formattedValue = value ?? params?.value;
     const valueFormats = Array.isArray(column.metadata?.config?.value_format)
       ? column.metadata?.config?.value_format
       : [column.metadata?.config?.value_format];
@@ -440,7 +440,7 @@ export const getValueFormatter = (
           formattedValue = getFormattedValueWithPrefix(valueFormat, formattedValue);
           break;
         case VALUE_FORMAT_TYPE.COLUMN_PREFIX:
-          formattedValue = getFormattedValueWithColumnPrefix(valueFormat, formattedValue, params.data);
+          formattedValue = getFormattedValueWithColumnPrefix(valueFormat, formattedValue, data ?? params?.data);
           break;
       }
     });

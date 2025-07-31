@@ -1,6 +1,7 @@
 // Re-export all components
 export * from './ui/accordion';
 export * from './ui/attribute';
+export * from './ui/autosize-textarea';
 export * from './ui/button';
 export * from './ui/checkbox';
 export * from './ui/combobox';
