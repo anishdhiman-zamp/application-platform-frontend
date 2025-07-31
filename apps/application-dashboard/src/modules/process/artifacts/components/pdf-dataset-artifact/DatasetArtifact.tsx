@@ -1,15 +1,16 @@
 'use client';
 
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { captureException } from '@sentry/browser';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import {
+  type CellClickedEvent,
   CellEditRequestEvent,
   ColDef,
   FillEndEvent,
+  type GridApi,
   IServerSideDatasource,
   IServerSideGetRowsParams,
-  IServerSideGetRowsRequest,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import {
@@ -33,7 +34,6 @@ import {
 import {
   formatColumns,
   formatDrilldownFilters,
-  formatUrlFilters,
   getFilters,
   handleApiError,
   handleColumnMoved,
@@ -46,19 +46,17 @@ import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import DatasetRowView from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DatasetRowView';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import {
-  DatasetActionStatusResponseType,
-  DatasetDataResponseType,
-  DatasetUpdateResponseType,
-} from 'types/api/dataset.types';
+import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { type defaultFnType, MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import {
@@ -66,6 +64,7 @@ import {
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
+import { DATASET_VIEW_TYPE } from '@/modules/process/process.types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -90,8 +89,8 @@ type DatasetByIdProps = {
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
   parentSelectedFilters?: MapAny;
   missingFields?: MissingFieldItemType[];
-  requiredMissingFields?: MissingFieldItemType[];
   hasMissingFields?: boolean;
+  showPdfSearch?: boolean;
 };
 
 type MissingFieldControlProps = {
@@ -100,6 +99,7 @@ type MissingFieldControlProps = {
   completedFields: CompletedField[];
   goPrevious: defaultFnType;
   goNext: defaultFnType;
+  className?: string;
 };
 
 const DatasetArtifact: FC<DatasetByIdProps> = ({
@@ -112,8 +112,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   updateFilterConfigInParent,
   parentSelectedFilters,
   missingFields,
-  requiredMissingFields,
   hasMissingFields,
+  showPdfSearch,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -126,11 +126,16 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const firstLoadDone = useRef(false);
 
+  const requiredMissingFields = useMemo(() => {
+    return missingFields?.filter((field) => field.is_required) ?? [];
+  }, [missingFields]);
+
+  useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
+  const { startPolling } = usePolling();
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
   });
-
   const {
     data: filterConfigData,
     refetch: refetchFilterConfig,
@@ -146,10 +151,16 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       refetchOnMountOrArgChange: false,
     },
   );
-
   const [getActionStatus] = useLazyGetActionStatusQuery();
-  const [getDatasetArtifacts, { data: datasetArtifacts, isError: lazyloadDatasetArtifactsError }] =
-    useLazyGetDatasetArtifactsQuery();
+  const [
+    getDatasetArtifacts,
+    {
+      data: datasetArtifacts,
+      isError: lazyloadDatasetArtifactsError,
+      isFetching: isFetchingDatasetArtifacts,
+      isUninitialized: isUninitializedDatasetArtifacts,
+    },
+  ] = useLazyGetDatasetArtifactsQuery();
 
   const {
     dispatch,
@@ -160,8 +171,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     state: { completedFields },
     dispatch: completedFieldsDispatch,
   } = useCompletedFields();
-
-  const { startPolling } = usePolling();
 
   const currentUserHasEditAccess = useMemo(() => {
     return (
@@ -188,7 +197,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
   const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
   const [deleteRuleId, setDeleteRuleId] = useState<string>();
   const [pollingMessage, setPollingMessage] = useState<string>('');
@@ -205,8 +213,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     description: '',
   });
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState<boolean>(false);
-
+  const [activeTab, setActiveTab] = useState<DATASET_VIEW_TYPE>(DATASET_VIEW_TYPE.ROWS);
+  const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [updateDatasetData] = useUpdateDatasetDataMutation();
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number>(0);
+  const [rowData, setRowData] = useState<MapAny | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string>('');
+  const [isServerSideDataLoading, setIsServerSideDataLoading] = useState<boolean>(false);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
@@ -222,68 +235,42 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           pageSize,
         );
 
-        const filterModel = parameters?.request?.filterModel;
-        const isDefaultFilters = checkIsObjectEmpty(filterModel ?? {})
-          ? false
-          : Object.values(filterModel ?? {}).every((filter) => filter?.isDefault);
-
         removeCellFocus(tableRef);
         setExportsDatasetQuery(queryConfig);
-        if (!firstLoadDone.current || isDefaultFilters) {
-          // Use Cached Data for First Load
-          firstLoadDone.current = true; // Mark first load as done
-          if (drilldownFilters?.conditions === null) {
-            setIsNoRowsOverlayVisible(true);
-            setIsInitialDataLoaded(true); // Mark data as loaded even for empty results
-            parameters.success({
-              rowData: [],
-              rowCount: 0,
-            });
-          } else if (!checkIsObjectEmpty(cachedDatasetData)) {
-            const totalCount = cachedDatasetData?.data?.total_count ?? 0;
+        getDatasetArtifacts({
+          processId: processId as string,
+          activityRunId: activityId as string,
+          datasetId: id as string,
+          query_config: queryConfig,
+        })
+          .unwrap()
+          .then((response) => {
+            const totalCount = response?.data?.total_count;
 
-            setIsNoRowsOverlayVisible(totalCount === 0);
-            setIsInitialDataLoaded(true); // Mark data as loaded
-            parameters.success({
-              rowData: cachedDatasetData?.data?.rows ?? [],
-              ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
-            });
-          }
-        } else {
-          getDatasetArtifacts({
-            processId: processId as string,
-            activityRunId: activityId as string,
-            datasetId: id as string,
-            query_config: queryConfig,
-          })
-            .unwrap()
-            .then((response) => {
-              const totalCount = response?.data?.total_count;
-
-              if (parameters.request.startRow === 0) {
-                setTotalRows(totalCount);
-                setIsNoRowsOverlayVisible(totalCount === 0);
-                setIsInitialDataLoaded(true); // Mark data as loaded
-                dispatch({
-                  type: filtersContextActions.SET_TOTAL_ROWS,
-                  payload: { totalRows: totalCount },
-                });
-              }
-              parameters.success({
-                rowData: response?.data?.rows,
-                ...(parameters.request.startRow === 0
-                  ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
-                  : {}),
+            if (parameters.request.startRow === 0) {
+              setTotalRows(totalCount);
+              setSelectedRowIndex(0);
+              setIsNoRowsOverlayVisible(totalCount === 0);
+              setIsInitialDataLoaded(true); // Mark data as loaded
+              dispatch({
+                type: filtersContextActions.SET_TOTAL_ROWS,
+                payload: { totalRows: totalCount },
               });
-            })
-            .catch(() => {
-              setIsInitialDataLoaded(true); // Mark data as loaded even on error
-              parameters.fail();
+            }
+            parameters.success({
+              rowData: response?.data?.rows,
+              ...(parameters.request.startRow === 0
+                ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
+                : {}),
             });
-        }
+          })
+          .catch(() => {
+            setIsInitialDataLoaded(true); // Mark data as loaded even on error
+            parameters.fail();
+          });
       },
     };
-  }, [id, fxCurrency, cachedDatasetData, drilldownFilters, getDatasetArtifacts, processId, activityId, pageSize]);
+  }, [id, fxCurrency, getDatasetArtifacts, processId, activityId, pageSize]);
 
   const handleSuccessfulUpdate = (
     data: DatasetUpdateResponseType,
@@ -324,7 +311,12 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
 
   const handleUpdateCompletedFields = (rowId: string | string[], columnId: string) => {
     toast.success(DatasetActionMessages[DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD].SUCCESS);
+    setIsServerSideDataLoading(true);
     tableRef.current?.api?.refreshServerSide();
+
+    setTimeout(() => {
+      setIsServerSideDataLoading(false);
+    }, 1000);
 
     if (Array.isArray(rowId)) {
       rowId.forEach((id) => {
@@ -359,48 +351,49 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }
   };
 
-  const updateApi = ({
-    rowId,
-    field,
-    newValue,
-    operator = CONDITION_OPERATOR_TYPE.EQUAL,
-  }: {
-    rowId: string | string[];
-    field: string;
-    newValue: string;
-    operator?: CONDITION_OPERATOR_TYPE;
-  }) => {
-    updateDatasetData({
-      datasetId: id as string,
-      data: {
-        filters: {
-          logical_operator: LogicalOperatorType.OperatorLogicalAnd,
-          conditions: [
-            {
-              column: 'id',
-              value: rowId,
-              operator: operator,
-            },
-          ],
+  const updateApi = useCallback(
+    ({
+      rowId,
+      field,
+      newValue,
+      operator = CONDITION_OPERATOR_TYPE.EQUAL,
+    }: {
+      rowId: string | string[];
+      field: string;
+      newValue: string;
+      operator?: CONDITION_OPERATOR_TYPE;
+    }) => {
+      updateDatasetData({
+        datasetId: id as string,
+        data: {
+          filters: {
+            logical_operator: LogicalOperatorType.OperatorLogicalAnd,
+            conditions: [
+              {
+                column: 'id',
+                value: rowId,
+                operator: operator,
+              },
+            ],
+          },
+          update: {
+            column: field as string,
+            value: newValue,
+          },
         },
-        update: {
-          column: field as string,
-          value: newValue,
-        },
-      },
-    })
-      .unwrap()
-      .then((response) => {
-        if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
-          handleUpdateCompletedFields(rowId, field);
-        } else {
-          handleSuccessfulUpdate(response, false, DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD, rowId, field);
-        }
       })
-      .catch((err) => {
-        handleApiError(err);
-      });
-  };
+        .unwrap()
+        .then((response) => {
+          if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
+            handleUpdateCompletedFields(rowId, field);
+          } else {
+            handleSuccessfulUpdate(response, false, DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD, rowId, field);
+          }
+        })
+        .catch(handleApiError);
+    },
+    [id, handleUpdateCompletedFields, handleSuccessfulUpdate, handleApiError],
+  );
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
     const { colDef, newValue, data, source, node } = event;
@@ -414,7 +407,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
 
     if (source === 'commit')
       updateApi({
-        rowId: data?.id as string,
+        rowId: data?.id ?? (data?._zamp_id as string),
         field: field as string,
         newValue: value,
       });
@@ -439,7 +432,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     for (let i = loopStartIndex; i <= loopEndIndex; i++) {
       const row = tableRef.current?.api?.getDisplayedRowAtIndex(i);
 
-      rowIds.push(row?.data?._zamp_id as string);
+      rowIds.push(row?.data?.id ?? (row?.data?._zamp_id as string));
       if (i === startIndex) {
         newValue = row?.data?.[field as string] as string;
       }
@@ -484,6 +477,20 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       api?.ensureNodeVisible(rowNode);
       api?.ensureColumnVisible(column, 'middle');
       api?.setFocusedCell(rowNode?.rowIndex as number, column);
+      setSelectedKey(column);
+      setSelectedRowIndex(rowNode?.rowIndex as number);
+      setRowData(rowNode?.data as MapAny);
+    }
+  };
+
+  const scrollToCell = (rowIndex: string, column: string) => {
+    const api = tableRef.current?.api;
+    const rowNode = api?.getRowNode(rowIndex);
+
+    if (rowNode) {
+      api?.ensureNodeVisible(rowNode);
+      api?.ensureColumnVisible(column, 'middle');
+      api?.setFocusedCell(rowNode?.rowIndex as number, column);
     }
   };
 
@@ -509,6 +516,59 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         return next;
       });
     }
+  };
+
+  const handleCellClicked = (event: CellClickedEvent) => {
+    setSelectedRowIndex(event.node.rowIndex as number);
+    setRowData(event.data);
+  };
+
+  const navigateRow = (direction: 1 | -1) => {
+    const newIndex = selectedRowIndex + direction;
+
+    if (!gridApi) return;
+
+    // Ask grid to ensure row is visible (triggers server fetch if needed)
+    gridApi.ensureIndexVisible(newIndex, 'bottom');
+
+    // Wait for a short time to allow row to load
+    setTimeout(() => {
+      const rowNode = gridApi.getDisplayedRowAtIndex(newIndex);
+
+      if (rowNode?.data) {
+        setSelectedRowIndex(newIndex);
+        setRowData(rowNode.data);
+      } else {
+        console.warn('Row data not available yet');
+      }
+    }, 0);
+  };
+
+  const handleTextareaChange = (key: string, value: string, rowId: string) => {
+    if (!rowData) return;
+
+    // Optimistic update of local state
+    const updatedRowData = { ...rowData, [key]: value };
+
+    setRowData(updatedRowData);
+
+    // Update the grid data as well
+    if (gridApi) {
+      const rowNode = gridApi.getDisplayedRowAtIndex(selectedRowIndex);
+
+      if (rowNode?.data) {
+        const updatedGridData = { ...rowNode.data, [key]: value };
+
+        rowNode.setData(updatedGridData);
+      }
+    }
+
+    // Call the API to update the server
+    updateApi({
+      rowId: rowId,
+      field: key,
+      newValue: value,
+    });
   };
 
   useEffect(() => {
@@ -592,6 +652,26 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   ]);
 
   useEffect(() => {
+    if (filterConfigData?.data?.length && !isFetching && !isUninitialized) {
+      syncFilterConfigHiddenColumnsInLocalStorage(id as string, filterConfigData?.data);
+
+      const columns = formatColumns({
+        filterConfig: filterConfigData?.data,
+        currentUserHasEditAccess,
+        datasetId: id,
+        handleSuccessfulUpdate,
+        tableRef,
+        handleRulesListingSideDrawerOpen,
+        missingFields,
+      });
+
+      if (columns?.length > 0) {
+        setColumns(columns);
+      }
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
     if (gridReady && selectedFilters) {
       tableRef.current?.api?.setFilterModel(selectedFilters);
       updateFiltersInParent?.(selectedFilters);
@@ -607,43 +687,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [isNoRowsOverlayVisible]);
 
   useEffect(() => {
-    firstLoadDone.current = false;
-    if (drilldownFilters?.conditions === null) return;
-    const urlFilters = formatUrlFilters(filters ?? '');
-    const queryConfig = getEncodedRequest(
-      {} as IServerSideGetRowsRequest,
-      fxCurrency?.[0],
-      false,
-      false,
-      false,
-      hiddenColumnFilters,
-      urlFilters ?? drilldownFilters,
-      pageSize,
-    );
-
-    getDatasetArtifacts({
-      processId: processId as string,
-      activityRunId: activityId as string,
-      datasetId: id as string,
-      query_config: queryConfig,
-    })
-      .unwrap()
-      .then((response) => {
-        setTotalRows(response?.data?.total_count);
-        setCachedDatasetData(response);
-        dispatch({
-          type: filtersContextActions.SET_TOTAL_ROWS,
-          payload: { totalRows: response?.data?.total_count },
-        });
-      })
-      .catch((err) => {
-        captureException(err);
-      });
-  }, [filters, drilldownFilters, id, getDatasetArtifacts, processId, activityId]);
-
-  useEffect(() => {
     if (gridReady && isInitialDataLoaded && hasMissingFields && currentIndex === -1) {
-      //requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         setCurrentIndex(0);
         scrollToMissingField(0);
@@ -651,10 +695,16 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }
   }, [gridReady, isInitialDataLoaded, hasMissingFields, requiredMissingFields, currentIndex, id]);
 
-  useOnClickOutside(datasetTableRef, () => removeCellFocus(tableRef));
+  useEffect(() => {
+    if (isInitialDataLoaded) {
+      if (activeTab === DATASET_VIEW_TYPE.ROWS && selectedRowIndex === 0) {
+        setRowData(datasetArtifacts?.data?.rows?.[0] as MapAny);
+      }
+    }
+  }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, activeTab, selectedRowIndex]);
 
   return (
-    <>
+    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DATASET_VIEW_TYPE)}>
       <CommonWrapper
         className={cn('h-full', {
           'flex flex-col items-center justify-center': isFetching,
@@ -675,9 +725,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           </div>
         }
       >
-        <div className={cn('flex flex-wrap items-center justify-between gap-y-3 px-4 py-3 pr-8')}>
+        <div className='flex flex-wrap items-center justify-between gap-y-3 px-4 py-3'>
           <div className='flex items-center py-0'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='pl-0' />
+            <FiltersWrapper label='' filterConfig={filtersConfig ?? []} className='pl-0' />
           </div>
 
           <div className='relative flex items-center gap-2.5'>
@@ -698,7 +748,11 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             )}
             {!isReadOnly && (
               <>
-                <DisplayOptions tableRef={tableRef} datasetId={id as string} />
+                <DisplayOptions
+                  tableRef={tableRef}
+                  datasetId={id as string}
+                  disabled={activeTab === DATASET_VIEW_TYPE.ROWS}
+                />
                 {filterConfigData?.config?.is_fx_enabled && (
                   <div className='flex items-center gap-2'>
                     <div className='border-GRAY_400 h-7 border-r'></div>
@@ -714,6 +768,24 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 )}
               </>
             )}
+            <TabsList className='gap-x-1'>
+              <TabsTrigger
+                value={DATASET_VIEW_TYPE.ROWS}
+                className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
+              >
+                <TooltipV2 tooltipBody='Switch to List View'>
+                  <SvgSpriteLoader id='rows-01' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
+                </TooltipV2>
+              </TabsTrigger>
+              <TabsTrigger
+                value={DATASET_VIEW_TYPE.GRID}
+                className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
+              >
+                <TooltipV2 tooltipBody='Switch to Table View'>
+                  <SvgSpriteLoader id='layout-grid-02' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
+                </TooltipV2>
+              </TabsTrigger>
+            </TabsList>
           </div>
         </div>
 
@@ -722,8 +794,15 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           errorCardTitle='Failed to load dataset'
           errorCardSubTitle='Please try again later'
           refetchFunction={handleRefetchDataset}
+          className='relative h-full w-full'
         >
-          <div className='sensitive relative z-10 h-full w-full' ref={datasetTableRef}>
+          <div
+            className={cn('sensitive absolute inset-0 z-10 h-full w-full', {
+              'pointer-events-none opacity-0': activeTab === DATASET_VIEW_TYPE.ROWS,
+              'opacity-100': activeTab !== DATASET_VIEW_TYPE.ROWS,
+            })}
+            ref={datasetTableRef}
+          >
             <DatasetTable
               tableRef={tableRef}
               columns={columns}
@@ -734,7 +813,10 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               onFillEnd={onFillEnd}
               onRowPropertiesClick={(data) => setRowPropertiesData(data)}
               onColumnMoved={(event) => handleColumnMoved(event, id as string)}
-              onGridReady={() => setGridReady(true)}
+              onGridReady={(params) => {
+                setGridApi(params?.api);
+                setGridReady(true);
+              }}
               containerStyle={containerStyle}
               missingFields={requiredMissingFields}
               completedFields={currentDatasetCompletedFields}
@@ -745,18 +827,51 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                       handleDrilldownClick(data, id as string, params?.pageId as string, router),
                   }
                 : {})}
+              onCellClicked={handleCellClicked}
+              useGetRowId
             />
           </div>
-          {gridReady && hasMissingFields && (
-            <MissingFieldControl
-              totalMissingFields={requiredMissingFields?.length ?? 0}
-              currentIndex={currentIndex}
+
+          <div
+            className={cn('absolute inset-0 z-20 h-full w-full', {
+              'pointer-events-none opacity-0': activeTab === DATASET_VIEW_TYPE.GRID,
+              'opacity-100': activeTab !== DATASET_VIEW_TYPE.GRID,
+            })}
+          >
+            <DatasetRowView
+              totalRows={totalRows}
+              rowData={rowData}
+              datasetId={id as string}
+              selectedRowIndex={selectedRowIndex}
+              navigateRow={navigateRow}
+              gridApi={gridApi}
+              columns={columns}
+              hasMissingFields={hasMissingFields ?? false}
+              isDatasetFetching={
+                (isFetchingDatasetArtifacts || isUninitializedDatasetArtifacts) && !isServerSideDataLoading
+              }
+              selectedKey={selectedKey}
+              onChange={(key, value, rowId) => handleTextareaChange(key, value, rowId)}
+              requiredMissingFields={requiredMissingFields}
+              missingFields={missingFields}
+              currentUserHasEditAccess={currentUserHasEditAccess}
               completedFields={currentDatasetCompletedFields}
-              goPrevious={goPrevious}
-              goNext={goNext}
+              onValueClick={(rowIndex, column) => scrollToCell(rowIndex, column)}
+              showPdfSearch={showPdfSearch}
+              filterConfig={filterConfigData?.data}
             />
-          )}
+          </div>
         </CommonWrapper>
+        {gridReady && hasMissingFields && (
+          <MissingFieldControl
+            totalMissingFields={requiredMissingFields?.length ?? 0}
+            currentIndex={currentIndex}
+            completedFields={currentDatasetCompletedFields}
+            goPrevious={goPrevious}
+            goNext={goNext}
+            className={activeTab === DATASET_VIEW_TYPE.ROWS ? '' : ''}
+          />
+        )}
       </CommonWrapper>
       {isRulesListingSideDrawerOpen && (
         <RulesListingSideDrawer
@@ -769,10 +884,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           onDeleteRuleId={() => setDeleteRuleId('')}
         />
       )}
+
       {rowPropertiesData && (
         <RowPropertiesSideDrawer
           data={rowPropertiesData}
-          onClose={() => setRowPropertiesData(undefined)}
+          onClose={() => {
+            setRowPropertiesData(undefined);
+          }}
           datasetId={id as string}
           isDrillDownEnabled={datasetArtifacts?.data?.config?.is_drilldown_enabled}
           columns={columns}
@@ -786,7 +904,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           onSuccess={handleDeleteRuleSuccess}
         />
       )}
-    </>
+    </Tabs>
   );
 };
 
@@ -798,13 +916,19 @@ const MissingFieldControl: FC<MissingFieldControlProps> = ({
   completedFields,
   goPrevious,
   goNext,
+  className,
 }) => {
   const remainingFields = useMemo(() => {
     return totalMissingFields - completedFields?.length;
   }, [totalMissingFields, completedFields]);
 
   return (
-    <div className='animate-opacity border-GRAY_500 absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 transform items-center justify-center rounded-md border-[0.5px] bg-white'>
+    <div
+      className={cn(
+        'animate-opacity border-GRAY_500 absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 transform items-center justify-center rounded-md border-[0.5px] bg-white',
+        className,
+      )}
+    >
       <div className='flex items-center gap-x-2.5 p-2.5'>
         <span className='f-11-500 text-RED_800 whitespace-nowrap select-none'>
           {formatPlural(remainingFields, 'missing field')}

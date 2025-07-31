@@ -69,6 +69,11 @@ export enum PDF_DATASET_TAB {
   PDF = 'PDF',
 }
 
+export enum DATASET_VIEW_TYPE {
+  ROWS = 'ROWS',
+  GRID = 'GRID',
+}
+
 export enum CTA_ACTION {
   NONE = 'NONE',
   VIEW_EMAIL = 'VIEW_EMAIL',

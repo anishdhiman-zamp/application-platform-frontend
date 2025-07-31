@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Tabs, TabsContent } from '@zamp-platform/ui';
+import { Tabs } from '@zamp-platform/ui';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
+import { withArtifactContext } from 'modules/process/artifacts/context/artifact.context';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
@@ -112,30 +113,30 @@ const Artifacts = ({
     switch (artifactType) {
       case ARTIFACT_TYPE.PDF_DATASET:
         return (
-          <>
-            <TabsContent value={PDF_DATASET_TAB.DATASET} className='mt-0 h-full w-full flex-1'>
-              <CompletedFieldsProvider>
-                <DatasetTabView
-                  datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
-                  filters={filters}
-                  missingFields={missingFields}
-                  emitHITLActionPayload={emitHITLActionPayload}
-                  processId={processId}
-                  activityId={activityId as string}
-                  key={id}
-                />
-              </CompletedFieldsProvider>
-            </TabsContent>
-            <TabsContent value={PDF_DATASET_TAB.PDF} className='mt-0 h-full w-full flex-1'>
-              <PdfArtifact
-                processId={processId}
-                artifactId={id}
-                pdfArtifact={artifactData as PdfArtifactsResponseType}
-                isArtifactLoading={isFetching}
+          <div className='flex h-full w-full flex-1'>
+            <CompletedFieldsProvider>
+              <DatasetTabView
                 key={id}
+                datasetArtifact={artifactData as PdfDatasetArtifactsResponseType}
+                filters={filters}
+                missingFields={missingFields}
+                emitHITLActionPayload={emitHITLActionPayload}
+                processId={processId}
+                activityId={activityId as string}
+                showPdfSearch
+                className='w-3/5'
               />
-            </TabsContent>
-          </>
+            </CompletedFieldsProvider>
+
+            <PdfArtifact
+              key={id}
+              pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
+              artifactId={id}
+              processId={processId}
+              isArtifactLoading={isFetching}
+              className='w-2/5'
+            />
+          </div>
         );
 
       case ARTIFACT_TYPE.EMAIL:
@@ -208,7 +209,6 @@ const Artifacts = ({
           onExpand={onExpand}
           isExpanded={isExpanded}
           title={title}
-          isPdfDataset={artifactType === ARTIFACT_TYPE.PDF_DATASET}
           onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
         />
         <CommonWrapper
@@ -233,4 +233,4 @@ const Artifacts = ({
   );
 };
 
-export default Artifacts;
+export default withArtifactContext(Artifacts);

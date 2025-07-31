@@ -1,7 +1,5 @@
 import type { FC } from 'react';
-import { TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { PDF_DATASET_TAB } from 'modules/process/process.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 import { type defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
@@ -10,19 +8,11 @@ interface ArtifactTopbarProps {
   onClose: defaultFnType;
   onExpand: defaultFnType;
   isExpanded: boolean;
-  isPdfDataset: boolean;
   title?: string;
   onOpenAllArtifacts: defaultFnType;
 }
 
-const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
-  onClose,
-  onExpand,
-  isExpanded,
-  isPdfDataset,
-  title,
-  onOpenAllArtifacts,
-}) => {
+const ArtifactTopbar: FC<ArtifactTopbarProps> = ({ onClose, onExpand, isExpanded, title, onOpenAllArtifacts }) => {
   return (
     <div className='border-GRAY_100 flex h-15 w-full shrink-0 items-center justify-between overflow-hidden border-b'>
       <div className='flex w-full items-center justify-center gap-x-2 p-4'>
@@ -40,27 +30,6 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
       </div>
 
       <div className='flex min-w-max items-center justify-center gap-x-3.5 p-4'>
-        {isPdfDataset && (
-          <TabsList className='gap-x-1'>
-            <TabsTrigger
-              value={PDF_DATASET_TAB.DATASET}
-              className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
-            >
-              <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to Dataset'}>
-                <SvgSpriteLoader id='coins-stacked-04' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
-              </TooltipV2>
-            </TabsTrigger>
-            <TabsTrigger
-              value={PDF_DATASET_TAB.PDF}
-              className='flex h-6 w-[26px] shrink-0 items-center justify-center p-1.5'
-            >
-              <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={'Switch to PDF'}>
-                <SvgSpriteLoader id='file-02' size={14} color={COLORS.GRAY_1000} className='cursor-pointer' />
-              </TooltipV2>
-            </TabsTrigger>
-          </TabsList>
-        )}
-
         <TooltipV2 side={SIDE_OPTIONS.TOP} tooltipBody={isExpanded ? 'Collapse' : 'Expand'}>
           <SvgSpriteLoader
             id={isExpanded ? 'minimize-01' : 'expand-01'}

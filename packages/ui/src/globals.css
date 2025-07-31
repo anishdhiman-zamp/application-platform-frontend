@@ -11,12 +11,14 @@
     opacity: 0.2 !important;
     background: #2445ff !important;
     mix-blend-mode: multiply !important;
+    border-radius: 0px !important;
   }
 
   .pdfSlick .highlight.selected {
     opacity: 0.3 !important;
     background: #2445ff !important;
     mix-blend-mode: multiply !important;
+    border-radius: 0px !important;
   }
 }
 
@@ -870,6 +872,12 @@
 
 .f-11-600 {
   font-weight: 600;
+  line-height: 0.875rem;
+  font-size: 0.6875rem;
+}
+
+.f-11-550 {
+  font-weight: 550;
   line-height: 0.875rem;
   font-size: 0.6875rem;
 }
