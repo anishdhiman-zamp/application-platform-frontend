@@ -113,7 +113,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   parentSelectedFilters,
   missingFields,
   hasMissingFields,
-  showPdfSearch,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -857,7 +856,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               currentUserHasEditAccess={currentUserHasEditAccess}
               completedFields={currentDatasetCompletedFields}
               onValueClick={(rowIndex, column) => scrollToCell(rowIndex, column)}
-              showPdfSearch={showPdfSearch}
               filterConfig={filterConfigData?.data}
             />
           </div>

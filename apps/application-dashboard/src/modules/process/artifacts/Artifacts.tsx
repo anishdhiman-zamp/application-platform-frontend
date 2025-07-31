@@ -124,7 +124,7 @@ const Artifacts = ({
                 processId={processId}
                 activityId={activityId as string}
                 showPdfSearch
-                className='w-3/5'
+                className='w-2/5'
               />
             </CompletedFieldsProvider>
 
@@ -134,7 +134,7 @@ const Artifacts = ({
               artifactId={id}
               processId={processId}
               isArtifactLoading={isFetching}
-              className='w-2/5'
+              className='w-3/5'
             />
           </div>
         );
