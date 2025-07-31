@@ -70,7 +70,10 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
         className='flex w-full flex-col items-start justify-start gap-y-3 px-6 pt-5 pb-6'
       >
         <div className='flex w-full items-center justify-between'>
-          <p className='f-13-550'>Key Details</p>
+          <div className='flex items-center gap-x-1.5'>
+            <SvgSpriteLoader id='asterisk-02' size={16} color={COLORS.GRAY_1000} />
+            <p className='f-13-550'>Key Details</p>
+          </div>
           <TooltipV2 tooltipBody={isExpanded ? 'Collapse' : 'Expand'}>
             <SvgSpriteLoader
               id={isExpanded ? 'minimize-01' : 'expand-01'}
@@ -95,9 +98,12 @@ const SummarySection: FC<SummarySectionProps> = ({ handleShowArtifacts, isExpand
         isNoData={!artifacts?.artifacts?.length}
         noDataBanner={<NoWidgetData className='h-[400px]' text='No artifacts found' />}
         errorCardStyle='w-full h-1/2'
-        className='border-GRAY_400 flex w-full flex-col items-start justify-start gap-y-3 border-t-[0.5px] px-6 py-5'
+        className='border-GRAY_400 flex w-full flex-col items-start justify-start gap-y-2 border-t-[0.5px] px-6 py-5'
       >
-        <p className='f-13-550'>Artifacts</p>
+        <div className='mb-2 flex items-center gap-x-1.5'>
+          <SvgSpriteLoader id='stand' size={16} color={COLORS.GRAY_1000} />
+          <p className='f-13-550'>Artifacts</p>
+        </div>
         {artifacts?.artifacts?.map((artifact) => (
           <ArtifactTag
             key={artifact?.id}

@@ -1,18 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_DOMAIN } from '@zamp-platform/api';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
-import { useSSE } from '@zamp-platform/utils';
 import { useParams, useSearchParams } from 'next/navigation';
-import {
-  useLazyGetActivityArtifactsQuery,
-  useLazyGetActivityLogsQuery,
-  useLazyGetActivitySummaryQuery,
-  useLazyGetArtifactsByArtifactIdQuery,
-} from '@/apis/processes';
+import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
+import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
 import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
@@ -55,9 +49,6 @@ const Activity = () => {
     ctaValue: '',
   });
 
-  const [getActivityLogs] = useLazyGetActivityLogsQuery();
-  const [getArtifacts] = useLazyGetActivityArtifactsQuery();
-  const [getActivitySummary] = useLazyGetActivitySummaryQuery();
   const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
@@ -115,7 +106,7 @@ const Activity = () => {
       }
 
       setShowSummary(false);
-      panelRef.current?.resize(50);
+      panelRef.current?.resize(35);
 
       setArtifactId(artifactId);
       setArtifactType(artifactType);
@@ -136,38 +127,17 @@ const Activity = () => {
     [panelRef, handleGetArtifacts],
   );
 
-  const handleUpdate = (event: MessageEvent) => {
-    const data = event?.data;
-
-    if (!data) return;
-
-    getActivityLogs({ processId: processId as string, activityRunId: activityId as string });
-    getArtifacts({ processId: processId as string, activityRunId: activityId as string });
-    getActivitySummary({ processId: processId as string, activityRunId: activityId as string });
-  };
-
-  const { close: closeSSE } = useSSE({
-    url: `${API_DOMAIN}/processes/events/${activityId}`,
-    eventListeners: {
-      update: handleUpdate,
-    },
-  });
+  useActivitySSE({ activityId, processId });
 
   useEffect(() => {
     if (!isExpanded) {
       if (showSummary) {
         panelRef.current?.resize(70);
       } else {
-        panelRef.current?.resize(50);
+        panelRef.current?.resize(35);
       }
     }
   }, [isExpanded, showSummary]);
-
-  useEffect(() => {
-    return () => {
-      closeSSE();
-    };
-  }, []);
 
   useEffect(() => {
     if (isLoadingArtifact) {
@@ -184,7 +154,7 @@ const Activity = () => {
       <ResizablePanel
         id={RESIZABLE_PANEL_ID.LOGS}
         order={1}
-        defaultSize={showSummary ? 70 : isExpanded ? 0 : 50}
+        defaultSize={showSummary ? 70 : isExpanded ? 0 : 35}
         minSize={isExpanded ? 0 : 30}
         maxSize={isExpanded ? 0 : 70}
         className={cn('transition-all duration-300 ease-in-out', {
@@ -224,7 +194,7 @@ const Activity = () => {
       <ResizablePanel
         id={showSummary ? RESIZABLE_PANEL_ID.SUMMARY : RESIZABLE_PANEL_ID.ARTIFACTS}
         order={2}
-        defaultSize={showSummary ? 30 : isExpanded ? 100 : 50}
+        defaultSize={showSummary ? 30 : isExpanded ? 100 : 65}
         minSize={isExpanded ? 100 : 30}
         maxSize={isExpanded ? 100 : 70}
         className={cn('transition-all duration-300 ease-in-out', {

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { type TUsePDFSlickStore } from '@pdfslick/react';
 import { Button, Input } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { cn } from '@zamp-platform/ui/utils';
+import { useArtifactContextStore } from 'modules/process/artifacts/context/artifact.context';
 import { COLORS } from '@/constants/colors';
 import type { MapAny } from '@/types/commonTypes';
 import { formatPlural } from '@/utils/common';
@@ -13,6 +15,7 @@ interface SearchBarProps {
 const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
   const pdfSlick = usePDFSlickStore((s) => s.pdfSlick);
   const searchRef = useRef<HTMLInputElement>(null);
+  const { state } = useArtifactContextStore();
 
   const [term, setTerm] = useState('');
   const [searchResults, setSearchResults] = useState({ current: 0, total: 0 });
@@ -35,7 +38,20 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
       eventBus.off('updatefindmatchescount', handleSearchResults);
       eventBus.off('updatefindcontrolstate', handleSearchResults);
     };
-  }, [pdfSlick]);
+  }, [pdfSlick, state.searchTerm]);
+
+  useEffect(() => {
+    if (state.searchTerm) {
+      setTerm(state.searchTerm);
+      pdfSlick?.eventBus.dispatch('find', {
+        type: '',
+        query: state.searchTerm,
+        caseSensitive: false,
+        highlightAll: true,
+        entireWord: false,
+      });
+    }
+  }, [state.searchTerm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -84,8 +100,18 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
     pdfSlick?.eventBus.dispatch('find', { type: '' });
   };
 
+  const handlePrevious = () => {
+    if (searchResults?.total === 0 || searchResults?.current <= 1) return;
+    handleFindAgain(true);
+  };
+
+  const handleNext = () => {
+    if (searchResults?.total === 0 || searchResults?.current >= searchResults?.total) return;
+    handleFindAgain(false);
+  };
+
   return (
-    <div className='w-full py-3'>
+    <div className='my-3 h-16 w-full'>
       <div className='relative w-full'>
         <Input
           ref={(el) => {
@@ -126,8 +152,10 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
                 size={16}
                 id='chevron-up'
                 color={COLORS.GRAY_900}
-                onClick={() => handleFindAgain(true)}
-                className='flex-shrink-0 cursor-pointer rounded p-0.5'
+                onClick={handlePrevious}
+                className={cn('flex-shrink-0 cursor-pointer rounded p-0.5', {
+                  '!cursor-not-allowed': searchResults?.total === 0 || searchResults?.current <= 1,
+                })}
               />
               <span className='f-11-450 text-GRAY_700 text-center whitespace-nowrap select-none'>
                 {searchResults?.current} / {searchResults?.total}
@@ -136,8 +164,10 @@ const SearchBar = ({ usePDFSlickStore }: SearchBarProps) => {
                 size={16}
                 id='chevron-down'
                 color={COLORS.GRAY_900}
-                onClick={() => handleFindAgain(false)}
-                className='flex-shrink-0 cursor-pointer rounded p-0.5'
+                onClick={handleNext}
+                className={cn('flex-shrink-0 cursor-pointer rounded p-0.5', {
+                  '!cursor-not-allowed': searchResults?.total === 0 || searchResults?.current >= searchResults?.total,
+                })}
               />
             </div>
           </div>

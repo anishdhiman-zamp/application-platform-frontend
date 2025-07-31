@@ -16,6 +16,7 @@ type DisplayOptionsProps = {
   datasetId: string;
   isGroupByDisabled?: boolean;
   isSelfServe?: boolean;
+  disabled?: boolean;
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({
@@ -23,6 +24,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   datasetId,
   isGroupByDisabled = false,
   isSelfServe = false,
+  disabled = false,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -75,6 +77,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
               className='flex h-5.5 w-5.5 items-center justify-center p-1 select-none'
               size='small'
               variant='ghost'
+              disabled={disabled}
             >
               <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
             </Button>

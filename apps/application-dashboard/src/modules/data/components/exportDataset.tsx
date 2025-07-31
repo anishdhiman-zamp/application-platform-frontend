@@ -93,7 +93,7 @@ const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDataset
         side={SIDE_OPTIONS.BOTTOM}
         disabled={isPolling}
       >
-        <div className='hover:bg-GRAY_100 flex h-full w-full items-center justify-center rounded'>
+        <div className='hover:bg-GRAY_100 flex h-full w-full cursor-pointer items-center justify-center rounded'>
           <SvgSpriteLoader id='download-02' width={14} height={14} className='text-GRAY_900' />
           {isPolling && (
             <div className='absolute bottom-px left-[3px]'>

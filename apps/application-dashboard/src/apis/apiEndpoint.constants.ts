@@ -139,4 +139,5 @@ export const API_ENDPOINTS = {
   ACTIVITY_SIGNED_URL_BY_FILE_ID_GET: `processes/{{processId}}/artifacts/{{artifactId}}/signed-url/{{fileId}}`,
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
+  PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
 };

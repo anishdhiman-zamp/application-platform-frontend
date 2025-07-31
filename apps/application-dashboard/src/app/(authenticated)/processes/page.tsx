@@ -38,7 +38,7 @@ export default function Page() {
       isLoading={true}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
+        <div className='z-50 flex h-screen w-full items-center justify-center bg-white'>
           <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
         </div>
       }
