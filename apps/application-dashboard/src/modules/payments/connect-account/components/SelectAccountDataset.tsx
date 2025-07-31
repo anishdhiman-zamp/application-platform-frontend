@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { DATASET_TABLE, ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { DATASET_TABLE } from 'constants/icons';
 import { ACCOUNT_DATASET_OPTIONS } from 'modules/payments/connect-account/connect-account-dummydata';
 import Image from 'next/image';
 import Input from 'components/common/input';

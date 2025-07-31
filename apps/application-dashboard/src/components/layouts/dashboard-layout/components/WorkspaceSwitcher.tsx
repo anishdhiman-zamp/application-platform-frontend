@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { WORKSPACE_ITEMS } from 'constants/dummyData';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { cn } from 'utils/common';
 // import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';

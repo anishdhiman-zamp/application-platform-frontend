@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { IMPORT_ALLOWED_FILE_FORMATS } from 'modules/data/components/importDataset/importData.constants';
 import { ImportFileWrapperPropsType } from 'modules/data/components/importDataset/importData.types';
 import ImportFile from 'modules/data/components/importDataset/ImportFile';

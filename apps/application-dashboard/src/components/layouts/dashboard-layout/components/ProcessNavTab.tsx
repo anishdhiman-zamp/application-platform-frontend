@@ -1,8 +1,8 @@
 'use client';
 
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from 'utils/common';
-import { ICON_SPRITE_TYPES } from '@/constants/icons';
 
 interface ProcessNavTabProps {
   label: string;

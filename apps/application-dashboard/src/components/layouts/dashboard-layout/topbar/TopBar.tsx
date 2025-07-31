@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES, KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';

@@ -10,8 +10,8 @@ import React, {
   useState,
 } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { defaultFn, MapAny } from 'types/commonTypes';
 import { checkObjOrArrType, cn } from 'utils/common';
 import { Dropdown } from 'components/common/dropdown';

@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ERROR_BUTTON_TEXT } from 'constants/auth.constants';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';

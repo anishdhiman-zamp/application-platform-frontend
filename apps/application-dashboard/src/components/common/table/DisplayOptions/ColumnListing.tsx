@@ -2,9 +2,10 @@ import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, use
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
+import { DRAG_ICON } from 'constants/icons';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';

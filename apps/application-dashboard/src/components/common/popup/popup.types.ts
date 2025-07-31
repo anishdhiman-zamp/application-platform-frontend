@@ -1,4 +1,4 @@
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { defaultFnType } from 'types/commonTypes';
 
 export type PopupProps = {

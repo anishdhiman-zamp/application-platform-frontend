@@ -1,7 +1,8 @@
 import React, { ChangeEvent, DragEvent, FC, RefObject, useEffect, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { AgGridReact } from 'ag-grid-react';
-import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
+import { DRAG_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';

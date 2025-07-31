@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Combobox } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ARTIFACT_TYPE } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,7 +9,7 @@ import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
 import { toast } from '@/components/common/toast/Toast';
 import { COLORS } from '@/constants/colors';
-import { DATASET, ICON_SPRITE_TYPES, LINK } from '@/constants/icons';
+import { DATASET, LINK } from '@/constants/icons';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
