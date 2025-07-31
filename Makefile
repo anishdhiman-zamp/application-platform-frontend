@@ -25,7 +25,7 @@ NODE := npm
 # Create necessary directories
 $(shell mkdir -p $(PID_DIR) $(LOG_DIR))
 
-.PHONY: help install install-dev install-prod dev dev-hot dev-stop dev-clean dev-restart dev-status dev-logs dev-tail dev-tail-stop health debug check-port check-ports check-all-ports kill-all-node check-stray clean-tail force-kill-port
+.PHONY: help install install-dev install-prod sync-secrets dev dev-hot dev-stop dev-clean dev-restart dev-status dev-logs dev-tail dev-tail-stop health debug check-port check-ports check-all-ports kill-all-node check-stray clean-tail force-kill-port
 
 help: ## Show this help message
 	@echo "Application Platform Frontend Development Orchestration"
@@ -73,6 +73,15 @@ install-prod: ## Install production dependencies only
 	@echo -e "\033[34mInstalling production dependencies only...\033[0m"
 	@$(NODE) ci --only=production
 	@echo -e "\033[32m✅ Production dependencies installed\033[0m"
+
+# =============================================================================
+# SECRETS MANAGEMENT
+# =============================================================================
+
+sync-secrets: ## Sync secrets and update environment files
+	@echo -e "\033[34mSyncing secrets for Application Platform Frontend...\033[0m"
+	@./sync-secrets.sh
+	@echo -e "\033[32m✅ Secrets sync complete\033[0m"
 
 # =============================================================================
 # MAIN DEVELOPMENT COMMANDS
