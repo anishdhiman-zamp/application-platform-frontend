@@ -17,6 +17,8 @@ type DisplayOptionsProps = {
   isGroupByDisabled?: boolean;
   isSelfServe?: boolean;
   disabled?: boolean;
+  displayOptionPosition?: 'left' | 'right';
+  columnListingPosition?: 'left' | 'right';
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({
@@ -25,6 +27,8 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   isGroupByDisabled = false,
   isSelfServe = false,
   disabled = false,
+  displayOptionPosition = 'left',
+  columnListingPosition = 'left',
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -69,12 +73,12 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   };
 
   return (
-    <div className='relative z-100' ref={menuRef}>
+    <div className='relative z-40' ref={menuRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <TooltipV2 tooltipBody='Display options' className='cursor-pointer' asChildTrigger>
           <DropdownMenuTrigger asChild>
             <Button
-              className='flex h-5.5 w-5.5 items-center justify-center p-1 select-none'
+              className='flex h-5.5 w-5.5 items-center justify-center p-1 ring-0 select-none focus-visible:ring-0 focus-visible:ring-offset-0'
               size='small'
               variant='ghost'
               disabled={disabled}
@@ -83,7 +87,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
             </Button>
           </DropdownMenuTrigger>
         </TooltipV2>
-        <DropdownMenuContent align='end' className='z-9999 max-h-[300px] min-w-[180px]! overflow-y-auto' sideOffset={5}>
+        <DropdownMenuContent align='end' className='max-h-[300px] !min-w-[180px] overflow-y-auto' sideOffset={5}>
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
             (option: MapAny) => (
               <DropdownMenuItem
@@ -99,16 +103,17 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
             ),
           )}
         </DropdownMenuContent>
+        {isColumnListingOpen && (
+          <ColumnListing
+            tableRef={tableRef}
+            onClose={handleCloseColumnListing}
+            datasetId={datasetId}
+            isSelfServe={isSelfServe}
+            position={columnListingPosition}
+          />
+        )}
+        {isGroupByOpen && <GroupBy onClose={handleCloseGroupBy} tableRef={tableRef} position={displayOptionPosition} />}
       </DropdownMenu>
-      {isColumnListingOpen && (
-        <ColumnListing
-          tableRef={tableRef}
-          onClose={handleCloseColumnListing}
-          datasetId={datasetId}
-          isSelfServe={isSelfServe}
-        />
-      )}
-      {isGroupByOpen && <GroupBy onClose={handleCloseGroupBy} tableRef={tableRef} />}
     </div>
   );
 };

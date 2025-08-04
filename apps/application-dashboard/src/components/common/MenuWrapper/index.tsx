@@ -1,4 +1,4 @@
-import React, { type CSSProperties, FC, ReactNode } from 'react';
+import { type CSSProperties, FC, ReactNode } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { defaultFnType } from 'types/commonTypes';
