@@ -265,7 +265,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   return (
     <>
       <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div className='z-1000 flex items-center justify-between pr-8'>
+        <div className='z-1000 flex items-center justify-between pr-4'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
