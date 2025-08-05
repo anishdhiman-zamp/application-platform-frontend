@@ -16,6 +16,7 @@ interface DocumentPillProps extends ICellRendererParams {
 const DocumentPill = ({ value, data }: DocumentPillProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState<string>('');
 
   if (!value) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
 
@@ -24,22 +25,31 @@ const DocumentPill = ({ value, data }: DocumentPillProps) => {
   const remainingItems = values.slice(1);
   const hasMoreItems = remainingItems.length > 0;
 
-  // const [getArtifacts] = useLazyGetActivityArtifactsQuery();
-
   const handleItemClick = (item: string) => {
+    setSelectedFileName(item);
     setPreviewOpen(true);
-    console.log(item, data);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setSelectedFileName('');
   };
 
   return (
-    <div className='flex w-full items-center gap-2 overflow-x-scroll [scrollbar-width:none]'>
+    <div className='flex max-w-full items-center gap-2'>
       {/* First item */}
       <div
-        className='bg-GRAY_100 flex w-fit cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'
+        className='bg-GRAY_100 flex max-w-[150px] min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'
         onClick={() => handleItemClick(firstItem)}
       >
-        <SvgSpriteLoader id='file-02' iconCategory={ICON_SPRITE_TYPES.FILES} size={12} color={COLORS.GRAY_1000} />
-        <p className='f-11-400 text-GRAY_1000 max-w-[50px] truncate' title={firstItem}>
+        <SvgSpriteLoader
+          id='file-02'
+          iconCategory={ICON_SPRITE_TYPES.FILES}
+          size={12}
+          color={COLORS.GRAY_1000}
+          className='flex-shrink-0'
+        />
+        <p className='f-11-400 text-GRAY_1000 truncate' title={firstItem}>
           {firstItem}
         </p>
       </div>
@@ -48,7 +58,7 @@ const DocumentPill = ({ value, data }: DocumentPillProps) => {
       {hasMoreItems && (
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
-            <p className='f-13-400 text-GRAY_700 hover:text-GRAY_1000 cursor-pointer transition-colors'>
+            <p className='f-13-400 text-GRAY_700 hover:text-GRAY_1000 flex-shrink-0 cursor-pointer transition-colors'>
               +{remainingItems.length}
             </p>
           </DropdownMenuTrigger>
@@ -56,20 +66,28 @@ const DocumentPill = ({ value, data }: DocumentPillProps) => {
             {remainingItems.map((item, index) => (
               <DropdownMenuItem
                 key={index}
-                onClick={() => handleItemClick(item)}
-                className='bg-GRAY_100 flex w-full cursor-pointer items-center justify-between rounded-md px-1 py-1'
+                className='bg-GRAY_100 flex w-full items-center justify-between gap-x-6 rounded-md px-1 py-1'
               >
                 <TooltipV2 tooltipBody='View' side={SIDE_OPTIONS.BOTTOM}>
-                  <div className='bg-GRAY_200 flex cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'>
+                  <div
+                    className='bg-GRAY_200 flex max-w-[100px] min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'
+                    onClick={() => handleItemClick(item)}
+                  >
                     <SvgSpriteLoader
                       id='file-02'
                       iconCategory={ICON_SPRITE_TYPES.FILES}
                       size={12}
                       color={COLORS.GRAY_1000}
+                      className='flex-shrink-0'
                     />
-                    <p className='f-11-400 text-GRAY_1000 max-w-[50px] truncate' title={item}>
+                    <p className='f-11-400 text-GRAY_1000 truncate' title={item}>
                       {item}
                     </p>
+                  </div>
+                </TooltipV2>
+                <TooltipV2 tooltipBody='Download' side={SIDE_OPTIONS.BOTTOM}>
+                  <div className='hover:bg-GRAY_200 flex items-center rounded p-1'>
+                    <SvgSpriteLoader id='download-02' size={12} className='shrink-0 cursor-pointer' />
                   </div>
                 </TooltipV2>
               </DropdownMenuItem>
@@ -78,7 +96,15 @@ const DocumentPill = ({ value, data }: DocumentPillProps) => {
         </DropdownMenu>
       )}
 
-      {previewOpen && <DocumentPreviewDialog />}
+      {previewOpen && (
+        <DocumentPreviewDialog
+          isOpen={previewOpen}
+          onClose={handleClosePreview}
+          selectedFileName={selectedFileName}
+          data={data}
+          availableFiles={values}
+        />
+      )}
     </div>
   );
 };
