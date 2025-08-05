@@ -138,7 +138,7 @@ const DocumentPreviewDialog = ({
                 });
               }}
             />
-            <p className='f-13-500 text-GRAY_1000 transition-colors'>
+            <p className='f-13-500 text-GRAY_1000 transition-colors select-none'>
               {currentFileIndex + 1}/{formatPlural(availableFiles.length, 'file', 'files')}
             </p>
           </div>
