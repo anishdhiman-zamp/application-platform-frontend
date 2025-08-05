@@ -8,6 +8,7 @@ export enum CUSTOM_COLUMNS_TYPE {
   ACTIVITY_STATUS = 'activity_status',
   BANK_NAME = 'bank-name',
   PAYMENTS_ACCOUNT_STATUS = 'payments-account-status',
+  DOCUMENT = 'document',
 }
 
 export const enum DISPLAY_OPTIONS {

@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { getFirstLetters } from '@/utils/common';
 
 type RecipientNameCellProps = {
@@ -6,7 +5,7 @@ type RecipientNameCellProps = {
   className?: string;
 };
 
-const RecipientNameCell: FC<RecipientNameCellProps> = ({ value }) => {
+const RecipientNameCell = ({ value }: RecipientNameCellProps) => {
   if (!value) return <></>;
 
   return (
