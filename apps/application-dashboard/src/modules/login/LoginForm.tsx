@@ -51,6 +51,8 @@ export const LoginForm = () => {
 
       urlObj.searchParams.set('hd', emailDomain);
 
+      console.log('urlObj', urlObj.toString(), urlObj, respJson);
+
       setHasError(false);
       window.location.href = urlObj.toString();
     } catch (error) {

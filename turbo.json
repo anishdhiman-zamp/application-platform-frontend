@@ -13,6 +13,16 @@
     "enabled": true
   },
   "tasks": {
+    "start": {
+      "persistent": true
+    },
+    "dev-coder": {
+      "cache": false,
+      "persistent": true
+    },
+    "start-coder": {
+      "persistent": true
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": [

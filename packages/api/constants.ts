@@ -1,6 +1,7 @@
 export const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION;
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT;
+export const DEV_API_URL = process.env.NEXT_PUBLIC_DEV_API_URL;
 export const AZURE_CLIENT_ID = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID ?? '';
 export const AZURE_AUTHORITY = process.env.NEXT_PUBLIC_AZURE_AUTHORITY ?? '';
 export const AZURE_REDIRECT = process.env.NEXT_PUBLIC_AZURE_REDIRECT || '/';
@@ -14,6 +15,8 @@ export const ABORT_ERROR = 'AbortError: signal is aborted without reason';
 export const PLATFORM_TMS = 'TMS';
 export const MULTI_REGION_ENABLED = process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED === 'true';
 export const LOGIN_PATH = '/login';
+export const ORG_SWITCH_IN_PROGRESS_ERROR = 'Aborted due to org switch in progress';
+export const CUSTOM_ERROR = 'CUSTOM_ERROR';
 
 export const enum REQUEST_TYPES {
   POST = 'POST',
