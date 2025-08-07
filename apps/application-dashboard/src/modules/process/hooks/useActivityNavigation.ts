@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { captureException } from '@sentry/browser';
 import { parseIntSafely } from 'modules/process/process.utils';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useLazyGetActivityRunsQuery } from '@/apis/processes';
+import { useGetActivityRunsQuery, useLazyGetActivityRunsQuery } from '@/apis/processes';
 import { PAGE_SIZE } from '@/components/common/table/table.constants';
 import { getEncodedRequest } from '@/components/common/table/table.utils';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
@@ -10,32 +10,14 @@ import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
 import { MapAny } from '@/types/commonTypes';
 
-interface NavigationState {
-  currentIndex: number;
-  totalCount: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-  isLoading: boolean;
-}
-
 export const useActivityNavigation = (processId: string) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [getActivityRuns] = useLazyGetActivityRunsQuery();
 
   const urlIndex = parseIntSafely(searchParams?.get('currentIndex'), -1);
   const urlTotal = parseIntSafely(searchParams?.get('totalRows'), 0);
   const status = searchParams?.get('status');
   const filterContext = searchParams?.get('filterContext');
-
-  const [navigationState, setNavigationState] = useState<NavigationState>({
-    currentIndex: urlIndex,
-    totalCount: urlTotal,
-    hasNext: urlIndex < urlTotal - 1,
-    hasPrevious: urlIndex > 0,
-    isLoading: true,
-  });
-  const [currentPageRows, setCurrentPageRows] = useState<MapAny[]>([]);
 
   const filters = useMemo(() => {
     const decoded = filterContext ? JSON.parse(decodeURIComponent(filterContext)) : {};
@@ -52,8 +34,12 @@ export const useActivityNavigation = (processId: string) => {
     };
   }, [filterContext, status]);
 
-  const buildQueryConfig = useCallback(() => {
-    const request = {
+  const currentPage = useMemo(() => {
+    return urlIndex !== -1 ? Math.floor(urlIndex / PAGE_SIZE) + 1 : 1;
+  }, [urlIndex]);
+
+  const encodedQueryConfig = useMemo(() => {
+    const baseRequest = {
       startRow: 0,
       endRow: PAGE_SIZE,
       rowGroupCols: [],
@@ -65,57 +51,52 @@ export const useActivityNavigation = (processId: string) => {
       filterModel: filters,
     };
 
-    return JSON.parse(getEncodedRequest(request));
+    return JSON.parse(getEncodedRequest(baseRequest));
   }, [filters]);
 
-  const fetchPageRows = useCallback(
-    async (page: number) => {
-      const queryConfig = buildQueryConfig();
-      const response = await getActivityRuns({
-        processId,
-        query_config: JSON.stringify({
-          ...queryConfig,
-          pagination: { page, page_size: PAGE_SIZE },
-        }),
-      }).unwrap();
-
-      return response;
+  const { data: initialData, isLoading: isInitialLoading } = useGetActivityRunsQuery(
+    {
+      processId,
+      query_config: JSON.stringify({
+        ...encodedQueryConfig,
+        pagination: { page: currentPage, page_size: PAGE_SIZE },
+      }),
     },
-    [buildQueryConfig, getActivityRuns, processId],
+    {
+      skip: urlIndex === -1 || urlTotal === 0,
+      refetchOnMountOrArgChange: false,
+    },
+  );
+  const [triggerFetchPage, { isLoading: isLoadingOtherPage }] = useLazyGetActivityRunsQuery();
+
+  const fetchPageRows = useCallback(
+    async (pageNumber: number): Promise<MapAny[]> => {
+      try {
+        const { data } = await triggerFetchPage({
+          processId,
+          query_config: JSON.stringify({
+            ...encodedQueryConfig,
+            pagination: { page: pageNumber, page_size: PAGE_SIZE },
+          }),
+        });
+
+        return data?.rows || [];
+      } catch (err) {
+        captureException(err);
+
+        return [];
+      }
+    },
+    [processId, encodedQueryConfig],
   );
 
-  const initializeFromURL = useCallback(async () => {
-    if (urlIndex === -1 || urlTotal === 0) return;
-
-    const page = Math.ceil((urlIndex + 1) / PAGE_SIZE);
-
-    setNavigationState((prev) => ({ ...prev, isLoading: true }));
-
-    try {
-      const response = await fetchPageRows(page);
-
-      setCurrentPageRows(response.rows || []);
-      setNavigationState({
-        currentIndex: urlIndex,
-        totalCount: urlTotal,
-        hasNext: urlIndex < urlTotal - 1,
-        hasPrevious: urlIndex > 0,
-        isLoading: false,
-      });
-    } catch (err) {
-      captureException(err);
-      setNavigationState((prev) => ({ ...prev, isLoading: false }));
-    }
-  }, [urlIndex, urlTotal, fetchPageRows]);
-
-  const fetchAdjacentActivity = useCallback(
+  const navigateToActivity = useCallback(
     async (direction: 'next' | 'previous') => {
-      const { currentIndex, totalCount } = navigationState;
+      const currentIndex = urlIndex;
+      const totalCount = urlTotal;
       const targetIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
 
       if (targetIndex < 0 || targetIndex >= totalCount) return;
-
-      setNavigationState((prev) => ({ ...prev, isLoading: true }));
 
       const currentPageStart = Math.floor(currentIndex / PAGE_SIZE) * PAGE_SIZE;
       const isSamePage = targetIndex >= currentPageStart && targetIndex < currentPageStart + PAGE_SIZE;
@@ -123,29 +104,15 @@ export const useActivityNavigation = (processId: string) => {
 
       let rows: MapAny[] = [];
 
-      if (isSamePage && currentPageRows.length > 0) {
-        rows = currentPageRows;
+      if (isSamePage && initialData?.rows?.length) {
+        rows = initialData.rows;
       } else {
-        try {
-          const response = await fetchPageRows(Math.floor(targetIndex / PAGE_SIZE) + 1);
-
-          rows = response?.rows || [];
-          setCurrentPageRows(rows);
-        } catch (err) {
-          captureException(err);
-          setNavigationState((prev) => ({ ...prev, isLoading: false }));
-
-          return;
-        }
+        rows = await fetchPageRows(Math.floor(targetIndex / PAGE_SIZE) + 1);
       }
 
       const targetActivity = rows[indexInPage];
 
-      if (!targetActivity) {
-        setNavigationState((prev) => ({ ...prev, isLoading: false }));
-
-        return;
-      }
+      if (!targetActivity) return;
 
       const route = getProcessActivityLogsRouteById(
         processId,
@@ -158,16 +125,16 @@ export const useActivityNavigation = (processId: string) => {
 
       router.replace(route);
     },
-    [navigationState, fetchPageRows, currentPageRows, filters, router, processId, status],
+    [initialData, filters, router, processId, status, urlIndex, urlTotal],
   );
 
-  useEffect(() => {
-    initializeFromURL();
-  }, [initializeFromURL]);
-
   return {
-    ...navigationState,
-    goToNextActivity: () => fetchAdjacentActivity('next'),
-    goToPreviousActivity: () => fetchAdjacentActivity('previous'),
+    currentIndex: urlIndex,
+    totalCount: urlTotal,
+    hasNext: urlIndex < urlTotal - 1,
+    hasPrevious: urlIndex > 0,
+    isLoading: isInitialLoading || isLoadingOtherPage,
+    goToNextActivity: () => navigateToActivity('next'),
+    goToPreviousActivity: () => navigateToActivity('previous'),
   };
 };
