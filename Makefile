@@ -334,11 +334,13 @@ force-kill-port: ## Forcefully kill any process using the frontend port
 	@for port in $(FRONTEND_PORT) $(FRONTEND_BUILD_PORT); do \
 		if command -v lsof >/dev/null 2>&1; then \
 			lsof -ti:$$port | xargs -r kill -9 2>/dev/null || true; \
+	if command -v lsof >/dev/null 2>&1; then \
+		lsof -ti:$$port | xargs -r kill -9 2>/dev/null || true; \
 	elif command -v ss >/dev/null 2>&1; then \
-			ss -tlnp | grep ":$$port " | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill -9 2>/dev/null || true; \
+		ss -tlnp | grep ":$$port " | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill -9 2>/dev/null || true; \
 	elif command -v netstat >/dev/null 2>&1; then \
-			netstat -tlnp | grep ":$$port " | awk '{print $$7}' | sed 's/\/.*//' | xargs -r kill -9 2>/dev/null || true; \
-		fi; \
+		netstat -tlnp | grep ":$$port " | awk '{print $$7}' | sed 's/\/.*//' | xargs -r kill -9 2>/dev/null || true; \
+	fi; \
 	done
 	@echo -e "\033[32m✅ Ports $(FRONTEND_PORT) and $(FRONTEND_BUILD_PORT) should now be free\033[0m"
 
