@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Toaster as Sonner, toast } from 'sonner';
 import { SvgSpriteLoader } from '../assets';
 import { COLORS } from '../../constants/constants';

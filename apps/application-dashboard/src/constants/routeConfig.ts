@@ -66,8 +66,23 @@ export const getProcessRouteById = (processId: string, status?: string) => {
   return `${ROUTES_PATH.PROCESS.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
 };
 
-export const getProcessActivityLogsRouteById = (processId: string, activityId: string, status?: string) => {
-  return `${ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':activityId', activityId)}${status ? `?status=${status}` : ''}`;
+export const getProcessActivityLogsRouteById = (
+  processId: string,
+  activityId: string,
+  status?: string,
+  filterContext?: string,
+  currentIndex?: number,
+  totalRows?: number,
+) => {
+  const baseUrl = ROUTES_PATH.PROCESS_ACTIVITY_LOGS.replace(':processId', processId).replace(':activityId', activityId);
+  const queryParams = [];
+
+  if (status) queryParams.push(`status=${status}`);
+  if (filterContext) queryParams.push(`filterContext=${filterContext}`);
+  if (currentIndex !== undefined) queryParams.push(`currentIndex=${currentIndex}`);
+  if (totalRows !== undefined) queryParams.push(`totalRows=${totalRows}`);
+
+  return `${baseUrl}${queryParams.length > 0 ? `?${queryParams.join('&')}` : ''}`;
 };
 
 export const getKnowledgeBasedRouteByProcessId = (processId: string) => {

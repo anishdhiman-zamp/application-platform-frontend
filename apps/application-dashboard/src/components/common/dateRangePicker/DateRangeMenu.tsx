@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { RangeFocus } from 'react-date-range';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   DATE_FILTER_CATEGORIES,
   DATE_FORMATS,
@@ -12,7 +13,6 @@ import {
   PERIODICITY_OPTIONS,
   RangeType,
 } from '@zamp-platform/utils';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { format } from 'date-fns';
 import { EventCallbackType, MenuItem, TAB_TYPES } from 'types/common/components';
 import { MapAny, OptionsType } from 'types/commonTypes';

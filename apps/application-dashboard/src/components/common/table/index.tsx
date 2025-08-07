@@ -1,5 +1,6 @@
 import { FC, ReactNode, RefObject, useCallback, useMemo } from 'react';
 import {
+  type CellClickedEvent,
   CellDoubleClickedEvent,
   CellEditRequestEvent,
   CellStyleModule,
@@ -21,6 +22,7 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  PaginationModule,
   RenderApiModule,
   RowApiModule,
   RowClickedEvent,
@@ -115,6 +117,7 @@ ModuleRegistry.registerModules([
   SelectEditorModule,
   RenderApiModule,
   ValidationModule /* Development Only */,
+  PaginationModule,
 ]);
 
 interface TableProps {
@@ -154,6 +157,8 @@ interface TableProps {
   completedFields?: { rowId: string; columnId: string }[];
   shouldShowNA?: boolean;
   suppressScrollOnNewData?: boolean;
+  onCellClicked?: (event: CellClickedEvent) => void;
+  useGetRowId?: boolean;
 }
 
 export type TableColumnType = {
@@ -200,6 +205,8 @@ const Table: FC<TableProps> = ({
   completedFields,
   shouldShowNA = false,
   suppressScrollOnNewData,
+  onCellClicked,
+  useGetRowId = false,
 }) => {
   const checkIsMissingField = useCallback(
     (params: MapAny) => {
@@ -216,10 +223,6 @@ const Table: FC<TableProps> = ({
     },
     [completedFields],
   );
-
-  const hasMissingFields = useMemo(() => {
-    return missingFields && missingFields?.length > 0;
-  }, [missingFields]);
 
   const getValueClass = (params: MapAny) => {
     if (isValueEmpty(params?.value) && checkIsMissingField(params ?? [])) {
@@ -386,9 +389,12 @@ const Table: FC<TableProps> = ({
     [onDrilldownClick, onRowPropertiesClick, menuTitle],
   );
 
-  const getRowId = useCallback((params: GetRowIdParams) => {
-    return params.data?.id;
-  }, []);
+  const getRowId = useCallback(
+    (params: GetRowIdParams) => {
+      return params.data?.id ?? params.data?._zamp_id;
+    },
+    [useGetRowId],
+  );
 
   return (
     <div style={containerStyle}>
@@ -424,7 +430,8 @@ const Table: FC<TableProps> = ({
           rowDragManaged={enableRowDrag}
           rowDragEntireRow={enableRowDrag}
           onRowDragEnd={onRowDragEnd}
-          {...(hasMissingFields ? { getRowId } : {})}
+          onCellClicked={onCellClicked}
+          getRowId={useGetRowId ? getRowId : undefined}
           {...(serverSideDatasource
             ? {
                 rowModelType: 'serverSide',

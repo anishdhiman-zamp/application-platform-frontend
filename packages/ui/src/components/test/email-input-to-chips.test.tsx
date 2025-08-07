@@ -114,7 +114,7 @@ describe('EmailInputToChips - DOM Structure and Attribute Tests', () => {
     expect(chips).toHaveLength(2);
 
     // Test individual chip structure and CSS classes
-    chips.forEach((chip, index) => {
+    chips.forEach((chip) => {
       // Check for the custom size classes applied by EmailInputToChips
       expect(chip).toHaveClass('h-4', 'w-4');
       // Check for ghost variant classes (hover states)

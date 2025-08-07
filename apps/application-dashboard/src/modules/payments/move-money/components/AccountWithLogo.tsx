@@ -1,6 +1,7 @@
 import { KeyboardEvent, ReactNode } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { DEFAULT_BANK, ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { DEFAULT_BANK } from 'constants/icons';
 import Image from 'next/image';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';

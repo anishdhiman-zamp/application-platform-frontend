@@ -1,6 +1,6 @@
 import { FC, useMemo, useState } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ColDef } from 'ag-grid-community';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { getDatasetDrilldownRoute } from 'constants/routeConfig';
 import Properties from 'modules/data/RowProperties/Properties';
 import { ROW_PROPERTIES_TABS } from 'modules/data/RowProperties/rowProperties.constants';

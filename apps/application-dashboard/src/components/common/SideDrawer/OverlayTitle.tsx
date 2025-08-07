@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from 'utils/common';
 import { OverlayTitleProps } from 'components/common/SideDrawer/sideDrawer.types';
 

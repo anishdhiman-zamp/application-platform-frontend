@@ -6,6 +6,15 @@ const config = {
     project: './tsconfig.json',
     tsconfigRootDir: '.',
   },
+  env: {
+    jest: true,
+    browser: true,
+    node: true,
+    es6: true,
+  },
+  globals: {
+    NodeJS: 'readonly',
+  },
   ignorePatterns: ['coverage/', 'node_modules/', 'dist/', '.turbo/'],
 };
 

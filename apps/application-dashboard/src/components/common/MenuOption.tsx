@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { COLORS } from 'constants/colors';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { MenuOptionProps } from 'types/common/components/dropdown/dropdown.types';
 import { defaultFn } from 'types/commonTypes';
 import { cn } from 'utils/common';

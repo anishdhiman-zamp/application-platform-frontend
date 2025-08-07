@@ -1,7 +1,7 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
-import { ICON_SPRITE_TYPES } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
 import { DisplayConfigToggleType } from 'modules/widgets/displayConfig/displayConfig.types';
 import { getToggleConfigFromLocalStorage } from 'modules/widgets/displayConfig/displayConfig.utils';

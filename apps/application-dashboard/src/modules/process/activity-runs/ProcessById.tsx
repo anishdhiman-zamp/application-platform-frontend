@@ -8,6 +8,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useAppSelector } from '@/hooks/toolkit';
 import ActivityByStatus from '@/modules/process/activity-runs/ActivityByStatus';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
@@ -22,19 +23,17 @@ type ProcessByIdProps = {
 };
 
 const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
+  const initialLoadDone = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<string>(status || '');
-  const initialLoadDone = useRef(false);
-
-  useEffect(() => {
-    initialLoadDone.current = false;
-  }, [processId]);
 
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
+  const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
+
+  const [activeTab, setActiveTab] = useState<string>(status || '');
 
   const {
     data: activityRunsSummaryData,
@@ -54,7 +53,8 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       ),
     },
     {
-      skip: !processId,
+      skip: !processId || isOrgSwitchIsInProgress,
+      refetchOnMountOrArgChange: true,
     },
   );
 
@@ -69,8 +69,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       processId: processId as string,
     },
     {
-      skip: !processId,
-      refetchOnMountOrArgChange: false,
+      skip: !processId || isOrgSwitchIsInProgress,
     },
   );
 
@@ -94,6 +93,10 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       }
     }
   }, [activityRunsSummaryData]);
+
+  useEffect(() => {
+    initialLoadDone.current = false;
+  }, [processId]);
 
   return (
     <CommonWrapper

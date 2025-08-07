@@ -9,9 +9,9 @@ type ComboboxOption = Omit<SelectOption, 'icon'> & { icon?: React.ReactNode };
 
 type ComboboxProps = {
   options: Array<ComboboxOption>;
-  onSelect: (option: ComboboxOption) => void;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onSelect: (option: ComboboxOption) => void; // eslint-disable-line no-unused-vars
+  open: boolean; // eslint-disable-line no-unused-vars
+  onOpenChange: (open: boolean) => void; // eslint-disable-line no-unused-vars
   placeholder?: string;
   triggerClassName?: string;
   contentClassName?: string;

@@ -11,7 +11,7 @@ export const SHEET_ANIMATION_DURATION = 300;
 
 interface SheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
   open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void; // eslint-disable-line no-unused-vars
 }
 
 const Sheet = ({ onOpenChange, open, ...props }: SheetProps) => {

@@ -1,20 +1,14 @@
 import { FC, memo, useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  toast,
-} from '@zamp-platform/ui';
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
-import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
+import {
+  ARTIFACT_TYPE,
+  CTA_COMPONENT_TYPE,
+  EmitHITLActionPayload,
+  MissingFieldsConfigType,
+} from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import { COLORS } from '@/constants/colors';
@@ -34,6 +28,9 @@ interface DatasetArtifactProps {
   emitHITLActionPayload: EmitHITLActionPayload;
   processId: string;
   activityId: string;
+  className?: string;
+  showPdfSearch?: boolean;
+  artifactType?: ARTIFACT_TYPE;
 }
 
 const DatasetTabView: FC<DatasetArtifactProps> = ({
@@ -43,6 +40,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   emitHITLActionPayload,
   processId,
   activityId,
+  className,
+  showPdfSearch = false,
+  artifactType = ARTIFACT_TYPE.DATASET,
 }) => {
   const userId = useAppSelector((state) => state.user?.user?.user_id);
 
@@ -69,14 +69,8 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     );
   }, [datasetArtifact?.datasets, filterKeys]);
 
-  const [visibleTabs, setVisibleTabs] = useState(() => datasets.slice(0, 3));
   const [activeTab, setActiveTab] = useState<string>('');
   const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
-
-  const hiddenTabs = useMemo(
-    () => datasets.filter((tab) => !visibleTabs.some((v) => v.dataset_id === tab.dataset_id)),
-    [datasets, visibleTabs],
-  );
 
   const currentDatasetHasMissingFields = useMemo(
     () => (missingFields?.[activeTab]?.cells?.filter((cell) => cell.is_required) ?? []).length > 0,
@@ -86,20 +80,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   const progress = useMemo(() => {
     return (completedRequiredFieldsCount / missingRequiredFieldsCount) * 100;
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
-
-  const handleTabSelect = (datasetId: string) => {
-    const selectedTab = datasets.find((tab) => tab.dataset_id === datasetId);
-
-    if (!selectedTab) return;
-
-    const isVisible = visibleTabs.some((tab) => tab.dataset_id === datasetId);
-
-    if (!isVisible) {
-      setVisibleTabs([...visibleTabs.slice(0, 2), selectedTab]);
-    }
-
-    setActiveTab(datasetId);
-  };
 
   const handleSubmitAndContinue = async () => {
     const { logGroupId, hitlRequestId, ctaActionId, ctaValue } = emitHITLActionPayload;
@@ -132,7 +112,11 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   }, [datasets]);
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className='h-full w-full'>
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className={cn('border-GRAY_400 h-full w-full border-r', className)}
+    >
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
         {missingRequiredFieldsCount > 0 && (
           <div className='bg-GRAY_100 flex items-center justify-between px-4 py-1.5'>
@@ -172,9 +156,11 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
             </div>
           </div>
         )}
+      </div>
 
-        <TabsList className='mx-4 my-3 flex h-full w-full flex-nowrap items-center justify-start gap-2.5 overflow-x-auto bg-white whitespace-nowrap [scrollbar-width:none]'>
-          {visibleTabs.map((tab) => {
+      <div className='relative mx-4 my-3'>
+        <TabsList className='flex h-full w-full flex-nowrap items-center justify-start gap-1 overflow-x-auto bg-white pr-8 whitespace-nowrap [scrollbar-width:none]'>
+          {datasets.map((tab) => {
             const requiredCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => c.is_required)?.length ?? 0;
             const hasMissingFields = missingFields?.[tab.dataset_id]?.cells?.length > 0;
 
@@ -182,10 +168,14 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
               <TabsTrigger
                 key={tab.dataset_id}
                 value={tab.dataset_id}
-                className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 items-center rounded! border-none px-2! py-1!'
+                className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 max-w-[120px] items-center rounded! border-none px-2! py-1!'
               >
                 <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
-                <span className={cn('f-12-500 ml-1.5', { 'text-GRAY_1000': activeTab === tab.dataset_id })}>
+                <span
+                  className={cn('f-12-500 ml-1.5 truncate', {
+                    'text-GRAY_1000': activeTab === tab.dataset_id,
+                  })}
+                >
                   {tab.dataset_name}
                 </span>
                 {hasMissingFields && (
@@ -196,29 +186,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
               </TabsTrigger>
             );
           })}
-
-          {hiddenTabs.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className='hover:bg-GRAY_50 data-[state=open]:bg-GRAY_200 flex cursor-pointer items-center justify-center rounded border-none px-1.5 py-1'>
-                  <span className='f-12-500 text-GRAY_900'>+{hiddenTabs.length} more</span>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent sideOffset={4} className='gap-y-[3px] p-1'>
-                {hiddenTabs.map((tab) => (
-                  <DropdownMenuItem
-                    key={tab.dataset_id}
-                    onClick={() => handleTabSelect(tab.dataset_id)}
-                    className='hover:bg-GRAY_100 flex items-center gap-x-1.5 px-2.5 py-1.5'
-                  >
-                    <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={14} />
-                    <span className='f-13-450 text-GRAY_950'>{tab.dataset_name}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </TabsList>
+
+        {/* Gradient stays fixed to right edge */}
+        <div className='bg-gradient-to-white pointer-events-none absolute top-0 right-0 h-full w-[80px]' />
       </div>
 
       <TabsContent key={activeTab} value={activeTab} className='mt-0 h-full w-full'>
@@ -227,9 +198,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
           drilldownFilters={
             filters?.dataset_to_filter_map?.[activeTab]?.filters ?? missingFields?.[activeTab]?.filters ?? {}
           }
-          requiredMissingFields={missingFields?.[activeTab]?.cells?.filter((cell) => cell.is_required) ?? []}
           missingFields={missingFields?.[activeTab]?.cells ?? []}
           hasMissingFields={currentDatasetHasMissingFields}
+          showPdfSearch={showPdfSearch}
+          artifactType={artifactType}
         />
       </TabsContent>
     </Tabs>

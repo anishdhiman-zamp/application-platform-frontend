@@ -4,7 +4,6 @@ import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
 import { getFormattedDate } from '@/modules/data/data.utils';
-import ArtifactPill from '@/modules/process/activity-runs/components/ArtifactPill';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import type { MapAny } from '@/types/commonTypes';
 
@@ -17,8 +16,6 @@ type ActivityCurrentStatusProps = {
 };
 
 const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
-  const artifactsData = data?.artifacts_metadata;
-
   const message = value?.message;
 
   return (
@@ -39,13 +36,6 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
             data?.activity_updated_at ?? data?.updated_at,
           )}
         </p>
-        <ArtifactPill
-          count={artifactsData?.length ?? 0}
-          artifacts={artifactsData}
-          status={data?.status as ACTIVITY_RUN_STATUS}
-          activityId={data?.id}
-          isDisabled={artifactsData?.length === 0}
-        />
       </div>
     </div>
   );

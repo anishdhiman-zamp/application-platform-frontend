@@ -1,6 +1,7 @@
 import { MutableRefObject } from 'react';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
+import { formatArrayValue } from 'modules/data/data.utils';
 import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
@@ -109,4 +110,39 @@ export const handleStrokeShimmerSequence = ({
       }
     }, 2000); // shimmer duration
   }, 300); // stroke visible duration
+};
+
+/**
+ * Formats a value for display in a row
+ * @param {any} value - The value to format
+ * @returns {string} The formatted value
+ */
+export const formatRowValue = (value: unknown): string => {
+  if (value === null || value === undefined || value === '') {
+    return '-';
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return '-';
+    }
+
+    return formatArrayValue(value);
+  }
+
+  // For non-array values, convert to string
+  return value.toString();
+};
+
+/**
+ * Safely parses a string to an integer
+ * @param {string | null | undefined} value - The value to parse
+ * @param {number} fallback - The fallback value if parsing fails
+ * @returns {number} The parsed integer or the fallback value
+ */
+export const parseIntSafely = (value: string | null | undefined, fallback: number): number => {
+  if (!value) return fallback;
+  const parsed = parseInt(value, 10);
+
+  return isNaN(parsed) ? fallback : parsed;
 };

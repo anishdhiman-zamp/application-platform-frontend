@@ -1,19 +1,22 @@
-import React, { ChangeEvent, DragEvent, FC, RefObject, useEffect, useState } from 'react';
+import { ChangeEvent, DragEvent, FC, RefObject, useEffect, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { AgGridReact } from 'ag-grid-react';
-import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
+import { DRAG_ICON } from 'constants/icons';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
 type GroupByProps = {
   onClose: defaultFnType;
   tableRef: RefObject<AgGridReact | null>;
+  position?: 'left' | 'right';
 };
 
-const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
+const GroupBy: FC<GroupByProps> = ({ tableRef, onClose, position = 'left' }) => {
   // State to manage grouped and available columns
   const [searchTerm, setSearchTerm] = useState('');
   const [groupedColumns, setGroupedColumns] = useState<string[]>([]);
@@ -110,7 +113,10 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose }) => {
   return (
     <MenuWrapper
       id='group-by'
-      className='!absolute right-0 z-10 mt-1 h-fit min-h-[344px] min-w-[376px]'
+      className={cn(
+        '!absolute z-10 mt-1 h-fit min-h-[344px] min-w-[376px]',
+        position === 'left' ? 'right-0' : 'left-0',
+      )}
       childrenWrapperClassName='overflow-visible! min-h-[344px]! h-fit max-h-fit!'
     >
       <div className='px-3 py-1'>

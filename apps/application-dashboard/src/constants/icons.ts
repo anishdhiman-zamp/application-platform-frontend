@@ -139,30 +139,6 @@ export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 
-export enum ICON_SPRITE_TYPES {
-  ALERTS_AND_FEEDBACK = 'alerts-and-feedbacks',
-  ARROWS = 'arrows',
-  CHARTS = 'charts',
-  COMMUNICATION = 'communication',
-  COUNTRY_SET_1 = 'country-set-1',
-  COUNTRY_SET_2 = 'country-set-2',
-  CRYPTO_SET_1 = 'crypto-set-1',
-  CRYPTO_SET_2 = 'crypto-set-2',
-  CRYPTO_SET_3 = 'crypto-set-3',
-  EDITOR = 'editor',
-  EDUCATION = 'education',
-  FILES = 'files',
-  FINANCE_AND_ECOMMERCE = 'finance-and-ecommerce',
-  GENERAL = 'general',
-  LAYOUT = 'layout',
-  SECURITY = 'security',
-  TIME = 'time',
-  USERS = 'users',
-  COUNTRY_FLAGS = 'country-flags',
-  FIAT_CURRENCIES = 'fiat-currencies',
-  WEATHER = 'weather',
-}
-
 export enum SUPPORT_INFO_TYPES {
   GUIDE = 'GUIDE',
   ERROR = 'ERROR',

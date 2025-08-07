@@ -2,13 +2,15 @@ import { ChangeEvent, FC, MouseEvent, RefObject, useEffect, useMemo, useRef, use
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { Column } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { DRAG_ICON, ICON_SPRITE_TYPES } from 'constants/icons';
+import { DRAG_ICON } from 'constants/icons';
 import { getColumnOrderingVisibilityForCurrentDataset, updateLocalStorage } from 'modules/data/data.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, ResponsiveGridLayoutType } from 'types/commonTypes';
+import { cn } from 'utils/common';
 import { useGetDatasetDisplayConfigQuery } from '@/apis/admin';
 import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
@@ -27,9 +29,16 @@ type ColumnListingProps = {
   onClose: defaultFnType;
   datasetId: string;
   isSelfServe?: boolean;
+  position?: 'left' | 'right';
 };
 
-const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId, isSelfServe = false }) => {
+const ColumnListing: FC<ColumnListingProps> = ({
+  tableRef,
+  onClose,
+  datasetId,
+  isSelfServe = false,
+  position = 'left',
+}) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnsChecked, setColumnsChecked] = useState<ColumnVisibility[]>([]);
@@ -209,7 +218,7 @@ const ColumnListing: FC<ColumnListingProps> = ({ tableRef, onClose, datasetId, i
   return (
     <MenuWrapper
       id='display-options'
-      className={`absolute! right-0 z-10 mt-1 min-w-[250px] overflow-visible!`}
+      className={cn('absolute! z-10 mt-1 min-w-[250px] overflow-visible!', position === 'left' ? 'right-0' : 'left-0')}
       childrenWrapperClassName='overflow-visible! max-h-[462px] w-full'
       style={{ width: maxWidth }}
     >

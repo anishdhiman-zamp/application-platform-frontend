@@ -5,7 +5,7 @@ import { Button } from './button';
 
 interface EmailInputToChipsProps {
   value: string[];
-  onChange: (emails: string[]) => void;
+  onChange: (emails: string[]) => void; // eslint-disable-line no-unused-vars
   placeholder?: string;
   className?: string;
 }
