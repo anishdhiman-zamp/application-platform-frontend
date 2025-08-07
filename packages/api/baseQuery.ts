@@ -7,7 +7,7 @@ import { Mutex } from 'async-mutex';
 import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 
 import { API_DOMAIN } from './api.utils';
-import { ABORT_ERROR, LOGIN_PATH, REQUEST_TIMEOUT } from './constants';
+import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
 
 const mutex = new Mutex();
 
@@ -15,6 +15,10 @@ const mutex = new Mutex();
 interface CustomFetchArgs extends FetchArgs {
   timeout?: number;
   domain?: string;
+}
+
+interface UserState {
+  user?: { isOrgSwitchIsInProgress?: boolean };
 }
 
 const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN) =>
@@ -39,6 +43,17 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   extraOptions,
 ) => {
   await mutex.waitForUnlock();
+
+  const state = api.getState() as UserState;
+
+  if (state?.user?.isOrgSwitchIsInProgress) {
+    return {
+      error: {
+        status: CUSTOM_ERROR,
+        error: ORG_SWITCH_IN_PROGRESS_ERROR,
+      } as FetchBaseQueryError,
+    };
+  }
 
   const result = await baseQuery(args.timeout, args.domain)(args, api, extraOptions);
   const path = window.location.pathname;

@@ -15,6 +15,8 @@ export const ABORT_ERROR = 'AbortError: signal is aborted without reason';
 export const PLATFORM_TMS = 'TMS';
 export const MULTI_REGION_ENABLED = process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED === 'true';
 export const LOGIN_PATH = '/login';
+export const ORG_SWITCH_IN_PROGRESS_ERROR = 'Aborted due to org switch in progress';
+export const CUSTOM_ERROR = 'CUSTOM_ERROR';
 
 export const enum REQUEST_TYPES {
   POST = 'POST',
