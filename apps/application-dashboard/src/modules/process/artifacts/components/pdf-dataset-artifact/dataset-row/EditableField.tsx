@@ -48,7 +48,7 @@ const EditableField = ({
         onKeyDown={onKeyDown}
         placeholder={isRequired ? '*Required' : 'Optional'}
         className={cn(
-          'f-12-400 border-GRAY_400 focus:border-GRAY_600 focus:ring-GRAY_400 !min-h-6 w-[280px] overflow-hidden !rounded-md border bg-white px-1.5 py-1 shadow-none [scrollbar-width:none] focus:ring-3',
+          'f-12-400 border-GRAY_400 focus:border-GRAY_600 focus:ring-GRAY_400 !min-h-6 w-[560px] overflow-hidden !rounded-md border bg-white px-1.5 py-1 shadow-none [scrollbar-width:none] focus:ring-3',
           {
             'border-RED_200 placeholder:text-RED_900': isRequired,
             'bg-ORANGE_100 border-ORANGE_200': isCompleted && value,

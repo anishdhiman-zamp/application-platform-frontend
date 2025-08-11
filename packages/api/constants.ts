@@ -31,11 +31,6 @@ export const REGIONS_MAP = {
     suffix: '',
     shortHand: 'USA',
   },
-  sg: {
-    label: 'Singapore',
-    suffix: '-sg',
-    shortHand: 'SG',
-  },
   me: {
     label: 'Middle East',
     suffix: '-me',
