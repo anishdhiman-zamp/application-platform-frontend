@@ -18,6 +18,7 @@ import {
   UpdateMissingFieldsMessages,
 } from '@/components/common/toast/toast.constants';
 import ActivityCurrentStatus from '@/modules/process/activity-runs/components/ActivityCurrentStatus';
+import ActivtiyDocument from '@/modules/process/activity-runs/components/ActivityDocument';
 import ActivityStatus from '@/modules/process/activity-runs/components/ActivityStatus';
 import DocumentPill from '@/modules/process/activity-runs/components/DocumentPill';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
@@ -71,7 +72,7 @@ export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRend
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
   [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,
   [CUSTOM_COLUMNS_TYPE.USER_AVATAR]: RecipientNameCell,
-  [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: DocumentPill,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: ActivtiyDocument,
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS]: ActivityCurrentStatus,
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: ActivityStatus,
   [CUSTOM_COLUMNS_TYPE.BANK_NAME]: BankNameCell,

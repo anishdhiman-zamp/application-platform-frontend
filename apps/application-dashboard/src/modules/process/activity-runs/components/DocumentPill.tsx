@@ -18,11 +18,11 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<DocumentItem | null>(null);
 
-  if (!value || !value[0]?.name) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
+  if (value?.length === 0) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
 
   const firstItem = value[0];
-  const remainingItems = value.slice(1);
-  const hasMoreItems = remainingItems.length > 0;
+  const remainingItems = value?.slice(1);
+  const hasMoreItems = remainingItems?.length > 0;
 
   const handleItemClick = (item: DocumentItem) => {
     setSelectedFile(item);
