@@ -1,7 +1,11 @@
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from '@/constants/colors';
 
-const ActivtiyDocument = ({ value }: { value: string }) => {
+interface ActivityDocumentProps {
+  value: string;
+}
+
+const ActivityDocument = ({ value }: ActivityDocumentProps) => {
   if (!value) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
 
   return (
@@ -14,4 +18,4 @@ const ActivtiyDocument = ({ value }: { value: string }) => {
   );
 };
 
-export default ActivtiyDocument;
+export default ActivityDocument;

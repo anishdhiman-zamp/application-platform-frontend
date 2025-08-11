@@ -4,19 +4,19 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ICellRendererParams } from 'ag-grid-community';
 import DocumentPreviewDialog from 'modules/process/activity-runs/components/DocumentPreviewDialog';
-import type { DocumentItem } from 'modules/process/process.types';
+import type { DocumentItemType } from 'modules/process/process.types';
 import { SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 
 interface DocumentPillProps extends ICellRendererParams {
-  value: DocumentItem[];
+  value: DocumentItemType[];
 }
 
 const DocumentPill = ({ value }: DocumentPillProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<DocumentItem | null>(null);
+  const [selectedFile, setSelectedFile] = useState<DocumentItemType | null>(null);
 
   if (value?.length === 0) return <span className='f-13-450 text-GRAY_500'>N/A</span>;
 
@@ -24,7 +24,7 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
   const remainingItems = value?.slice(1);
   const hasMoreItems = remainingItems?.length > 0;
 
-  const handleItemClick = (item: DocumentItem) => {
+  const handleItemClick = (item: DocumentItemType) => {
     setSelectedFile(item);
     setPreviewOpen(true);
   };
@@ -62,9 +62,9 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
             </p>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='start' className='w-[168px] space-y-1 rounded-md p-1'>
-            {remainingItems?.map((item, index) => (
+            {remainingItems?.map((item) => (
               <DropdownMenuItem
-                key={index}
+                key={item?.name}
                 className='bg-GRAY_100 flex w-full items-center justify-between gap-x-6 rounded-md px-1 py-1'
               >
                 <TooltipV2 tooltipBody='View' side={SIDE_OPTIONS.BOTTOM}>

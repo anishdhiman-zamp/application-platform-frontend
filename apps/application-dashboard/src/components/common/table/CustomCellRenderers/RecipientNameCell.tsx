@@ -1,9 +1,9 @@
 import { getFirstLetters } from '@/utils/common';
 
-type RecipientNameCellProps = {
+interface RecipientNameCellProps {
   value: string;
   className?: string;
-};
+}
 
 const RecipientNameCell = ({ value }: RecipientNameCellProps) => {
   if (!value) return <></>;

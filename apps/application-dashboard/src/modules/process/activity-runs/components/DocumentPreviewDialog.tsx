@@ -4,7 +4,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
 import PdfArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact';
-import type { DocumentItem } from 'modules/process/process.types';
+import type { DocumentItemType } from 'modules/process/process.types';
 import { SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
@@ -13,12 +13,12 @@ import { formatPlural } from '@/utils/common';
 interface DocumentPreviewDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedFile: DocumentItem;
-  availableFiles: DocumentItem[];
+  selectedFile: DocumentItemType;
+  availableFiles: DocumentItemType[];
 }
 
 const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }: DocumentPreviewDialogProps) => {
-  const [currentFile, setCurrentFile] = useState<DocumentItem>(selectedFile);
+  const [currentFile, setCurrentFile] = useState<DocumentItemType>(selectedFile);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
 
   const handleNextFile = useCallback(() => {
@@ -26,7 +26,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
       const next = prev + 1;
 
       if (next < availableFiles.length) {
-        setCurrentFile(availableFiles[next] as DocumentItem);
+        setCurrentFile(availableFiles[next]);
 
         return next;
       }
@@ -40,7 +40,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
       const next = prev - 1;
 
       if (next >= 0) {
-        setCurrentFile(availableFiles[next] as DocumentItem);
+        setCurrentFile(availableFiles[next]);
 
         return next;
       }
@@ -126,11 +126,11 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
         {/* PDF Viewer */}
         <div className='flex flex-1 overflow-hidden'>
           <div className='flex-1 overflow-hidden'>
-            {selectedFile && (
+            {currentFile && (
               <PdfArtifact
-                processId={selectedFile?.artifacts_details?.process_id}
-                artifactId={selectedFile?.artifacts_details?.artifact_id}
-                fileId={selectedFile?.artifacts_details?.file_id}
+                processId={currentFile?.artifacts_details?.process_id}
+                artifactId={currentFile?.artifacts_details?.artifact_id}
+                fileId={currentFile?.artifacts_details?.file_id}
                 isArtifactLoading={false}
                 className='h-full'
               />

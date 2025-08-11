@@ -147,7 +147,7 @@ export type EmailDataTypes = {
   attachments: EmailAttachmentType[];
 };
 
-export interface DocumentItem {
+export interface DocumentItemType {
   name: string;
   extension: string;
   artifacts_details: {

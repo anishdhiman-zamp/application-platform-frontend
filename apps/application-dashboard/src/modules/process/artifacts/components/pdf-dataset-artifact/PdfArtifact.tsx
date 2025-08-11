@@ -11,7 +11,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 
-type PDFViewerAppProps = {
+interface PDFViewerAppProps {
   processId: string;
   artifactId: string;
   isArtifactLoading: boolean;
@@ -19,7 +19,7 @@ type PDFViewerAppProps = {
   fileId?: string;
   className?: string;
   isSearchBarEnabled?: boolean;
-};
+}
 
 const LoadingIndicator = () => (
   <div className='flex h-full w-full items-center justify-center p-4'>
