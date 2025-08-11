@@ -103,14 +103,8 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
           </div>
 
           {/* File name */}
-          <div className='bg-GRAY_100 flex max-w-[150px] min-w-0 items-center gap-1.5 rounded px-1.5 py-1'>
-            <SvgSpriteLoader
-              id='file-02'
-              iconCategory={ICON_SPRITE_TYPES.FILES}
-              size={12}
-              color={COLORS.GRAY_1000}
-              className='flex-shrink-0'
-            />
+          <div className='bg-GRAY_100 flex max-w-full min-w-0 items-center gap-1.5 rounded px-1.5 py-1'>
+            <SvgSpriteLoader id='file-02' size={12} color={COLORS.GRAY_1000} className='flex-shrink-0' />
             <p className='f-11-500 text-GRAY_1000 truncate' title={currentFile?.name}>
               {currentFile?.name}
             </p>

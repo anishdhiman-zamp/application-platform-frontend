@@ -38,7 +38,7 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
     <div className='flex max-w-full items-center gap-2'>
       {/* First item */}
       <div
-        className='bg-GRAY_100 flex max-w-[150px] min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'
+        className='bg-GRAY_100 flex max-w-full min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1'
         onClick={() => handleItemClick(firstItem)}
       >
         <SvgSpriteLoader
