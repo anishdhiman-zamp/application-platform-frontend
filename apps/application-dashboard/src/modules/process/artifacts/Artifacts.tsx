@@ -134,6 +134,7 @@ const Artifacts = ({
               artifactId={id}
               processId={processId}
               isArtifactLoading={isFetching}
+              isSearchBarEnabled
               className='w-1/2'
             />
           </div>
@@ -174,6 +175,7 @@ const Artifacts = ({
             artifactId={id}
             pdfArtifact={artifactData as PdfArtifactsResponseType}
             isArtifactLoading={isFetching}
+            isSearchBarEnabled
             key={id}
           />
         );

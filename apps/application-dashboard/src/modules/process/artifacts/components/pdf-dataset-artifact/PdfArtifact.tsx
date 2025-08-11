@@ -14,9 +14,11 @@ import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '
 type PDFViewerAppProps = {
   processId: string;
   artifactId: string;
-  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   isArtifactLoading: boolean;
+  pdfArtifact?: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
+  fileId?: string;
   className?: string;
+  isSearchBarEnabled?: boolean;
 };
 
 const LoadingIndicator = () => (
@@ -33,7 +35,15 @@ const ErrorFallback = ({ message }: { message: string }) => (
   </div>
 );
 
-const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, className }: PDFViewerAppProps) => {
+const PdfArtifact = ({
+  processId,
+  artifactId,
+  pdfArtifact,
+  fileId,
+  isArtifactLoading,
+  className,
+  isSearchBarEnabled = false,
+}: PDFViewerAppProps) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
@@ -44,10 +54,10 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
     {
       processId,
       artifactId,
-      fileId: pdfArtifact?.pdf_file?.file_id,
+      fileId: pdfArtifact?.pdf_file?.file_id || fileId || '',
     },
     {
-      skip: !processId || !artifactId || !pdfArtifact?.pdf_file?.file_id,
+      skip: !processId || !artifactId,
       refetchOnMountOrArgChange: false,
     },
   );
@@ -82,7 +92,7 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
       {error && <ErrorFallback message={error?.message} />}
       {!error && !isDocumentLoaded && <LoadingIndicator />}
 
-      {isDocumentLoaded && !error && <SearchBar {...{ usePDFSlickStore }} />}
+      {isDocumentLoaded && !error && isSearchBarEnabled && <SearchBar {...{ usePDFSlickStore }} />}
       {!error && (
         <div className='relative h-full flex-1'>
           <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-26' />
