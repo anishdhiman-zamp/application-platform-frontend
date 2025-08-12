@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { cn } from '@zamp-platform/ui/utils';
 import { ICellRendererParams } from 'ag-grid-community';
 import DocumentPreviewDialog from 'modules/process/activity-runs/components/DocumentPreviewDialog';
 import type { DocumentItemType } from 'modules/process/process.types';
@@ -43,7 +44,11 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
   const [selectedFile, setSelectedFile] = useState<DocumentItemType | null>(null);
 
   if (!Array.isArray(value) || value.length === 0) {
-    return <span className='f-13-450 text-GRAY_500'>{value ? String(value) : 'N/A'}</span>;
+    return (
+      <span className={cn('f-11-400', { 'text-GRAY_1000': value, 'text-GRAY_500': !value })}>
+        {value ? String(value) : 'N/A'}
+      </span>
+    );
   }
 
   const [firstItem, ...remainingItems] = value;

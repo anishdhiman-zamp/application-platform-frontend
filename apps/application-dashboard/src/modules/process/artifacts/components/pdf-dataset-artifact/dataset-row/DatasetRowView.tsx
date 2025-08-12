@@ -33,6 +33,7 @@ interface DatasetRowViewProps {
   onValueClick?: (rowIndex: string, column: string) => void;
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
+  isPdfDataset?: boolean;
 }
 
 const DatasetRowView: FC<DatasetRowViewProps> = ({
@@ -54,6 +55,7 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
   onValueClick,
   showPdfSearch,
   filterConfig,
+  isPdfDataset = false,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const selectedKeyRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,6 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
       container.scrollTop + elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
 
     container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-    setTimeout(() => textareaRef.current?.focus(), 100);
   }, [selectedKey]);
 
   // Memoize the sorted entries of `rowData` based on the specified `columnOrdering`
@@ -153,6 +154,7 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
                 showPdfSearch={showPdfSearch}
                 filterConfig={filterConfig}
                 rowData={rowData}
+                isPdfDataset={isPdfDataset}
               />
             ))}
         </div>

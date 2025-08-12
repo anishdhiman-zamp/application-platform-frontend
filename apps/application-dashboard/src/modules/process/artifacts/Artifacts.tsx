@@ -124,6 +124,7 @@ const Artifacts = ({
                 processId={processId}
                 activityId={activityId as string}
                 showPdfSearch
+                artifactType={ARTIFACT_TYPE.PDF_DATASET}
                 className='w-1/2'
               />
             </CompletedFieldsProvider>

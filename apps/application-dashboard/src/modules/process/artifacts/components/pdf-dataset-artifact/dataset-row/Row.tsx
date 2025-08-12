@@ -43,6 +43,7 @@ interface RowProps {
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
   rowData: MapAny;
+  isPdfDataset?: boolean;
 }
 
 const Row: FC<RowProps> = ({
@@ -64,6 +65,7 @@ const Row: FC<RowProps> = ({
   showPdfSearch,
   filterConfig = [],
   rowData,
+  isPdfDataset = false,
 }) => {
   const { dispatch } = useArtifactContextStore();
 
@@ -88,7 +90,9 @@ const Row: FC<RowProps> = ({
       return getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy }, value) as string;
     }
 
-    return valueFormatter?.(undefined, value, rowData) ?? value;
+    const formatted = valueFormatter?.(undefined, value, rowData) ?? value;
+
+    return formatted ?? '';
   }, [value, rowData, valueFormatter, columnConfig]);
 
   const isEditable = useMemo(
@@ -115,6 +119,7 @@ const Row: FC<RowProps> = ({
   const shouldShowInputDirectly = isEditable && isValueEmpty(value);
 
   useEffect(() => {
+    console.log('formattedValue', formattedValue);
     setEditingValue(formattedValue);
   }, [formattedValue]);
 
@@ -144,6 +149,7 @@ const Row: FC<RowProps> = ({
   };
 
   const handleEditSave = () => {
+    console.log('called Blur');
     if (editingValue !== value) {
       onChange?.(key, editingValue, rowId);
     }
@@ -194,9 +200,16 @@ const Row: FC<RowProps> = ({
           textareaRef={textareaRef}
           editTextareaRef={editTextareaRef}
           isClicked={isClicked}
+          isPdfDataset={isPdfDataset}
         />
       ) : (
-        <DisplayField value={formattedValue} isCompleted={isCompleted} isClicked={isClicked} onClick={handleClick} />
+        <DisplayField
+          value={formattedValue}
+          isCompleted={isCompleted}
+          isClicked={isClicked}
+          onClick={handleClick}
+          isPdfDataset={isPdfDataset}
+        />
       )}
 
       {showPdfSearch && (

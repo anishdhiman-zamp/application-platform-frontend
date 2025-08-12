@@ -136,6 +136,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
   const {
     data: filterConfigData,
@@ -861,6 +863,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               completedFields={currentDatasetCompletedFields}
               onValueClick={(rowIndex, column) => scrollToCell(rowIndex, column)}
               filterConfig={filterConfigData?.data}
+              isPdfDataset={artifactType === ARTIFACT_TYPE.PDF_DATASET}
             />
           </div>
         </CommonWrapper>

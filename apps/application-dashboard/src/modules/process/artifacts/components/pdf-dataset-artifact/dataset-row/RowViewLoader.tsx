@@ -22,9 +22,9 @@ const RowViewLoader: FC = () => (
           <div key={index} className='border-GRAY_100 flex w-full flex-col gap-y-2 border-b-[0.5px] px-6 pt-3 pb-4'>
             <div className='bg-GRAY_300 h-3 w-24 animate-pulse rounded' />
             {index % 2 === 0 ? (
-              <div className='bg-GRAY_300 h-6 w-[280px] animate-pulse rounded-md' />
+              <div className='bg-GRAY_300 h-6 w-full animate-pulse rounded-md' />
             ) : (
-              <div className='bg-GRAY_100 flex h-6 w-fit max-w-[280px] items-center rounded-md px-1.5 py-1'>
+              <div className='bg-GRAY_100 flex h-6 w-fit max-w-full items-center rounded-md px-1.5 py-1'>
                 <div className='bg-GRAY_300 h-3 w-20 animate-pulse rounded' />
               </div>
             )}

@@ -7,9 +7,10 @@ interface DisplayFieldProps {
   isClicked: boolean;
   onClick: () => void;
   onDoubleClick?: () => void;
+  isPdfDataset?: boolean;
 }
 
-const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick }: DisplayFieldProps) => {
+const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick, isPdfDataset }: DisplayFieldProps) => {
   return (
     <div
       className={cn(
@@ -17,6 +18,7 @@ const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick }:
         {
           'bg-ORANGE_100 underline underline-offset-2': isCompleted,
           'border-BLUE_700': isClicked,
+          'max-w-full': isPdfDataset,
         },
       )}
       onClick={onClick}
