@@ -119,7 +119,6 @@ const Row: FC<RowProps> = ({
   const shouldShowInputDirectly = isEditable && isValueEmpty(value);
 
   useEffect(() => {
-    console.log('formattedValue', formattedValue);
     setEditingValue(formattedValue);
   }, [formattedValue]);
 
@@ -149,7 +148,6 @@ const Row: FC<RowProps> = ({
   };
 
   const handleEditSave = () => {
-    console.log('called Blur');
     if (editingValue !== value) {
       onChange?.(key, editingValue, rowId);
     }
