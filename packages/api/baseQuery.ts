@@ -18,19 +18,19 @@ interface CustomFetchArgs extends FetchArgs {
 }
 
 interface UserState {
-  user?: { isOrgSwitchIsInProgress?: boolean };
+  user?: {
+    isOrgSwitchIsInProgress?: boolean;
+    user?: { orgs?: Array<{ organization_id: string }> };
+  };
 }
 
-const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN) =>
+const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string) =>
   fetchBaseQuery({
     baseUrl: `${domain}/`,
     credentials: 'include',
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
-      headers.set(
-        LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
-        getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
-      );
+      headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
 
       return headers;
     },
@@ -42,6 +42,7 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   api,
   extraOptions,
 ) => {
+  let currentOrgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '';
   await mutex.waitForUnlock();
 
   const state = api.getState() as UserState;
@@ -55,7 +56,14 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     };
   }
 
-  const result = await baseQuery(args.timeout, args.domain)(args, api, extraOptions);
+  if (
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE) === 'true' &&
+    state?.user?.user?.orgs?.[0]?.organization_id
+  ) {
+    currentOrgId = state?.user?.user?.orgs?.[0]?.organization_id;
+  }
+
+  const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
   const path = window.location.pathname;
 
   const isLoginRoute = path === LOGIN_PATH;
