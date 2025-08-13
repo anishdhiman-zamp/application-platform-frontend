@@ -32,7 +32,7 @@ export type HeaderProps = {
 
 export type BodyAndFooterProps = {
   initialContent: string;
-  onSend: (htmlString: string) => void;
+  onSend: () => void;
   onDelete: defaultFnType;
   className?: string;
   bodyClassName?: string;
