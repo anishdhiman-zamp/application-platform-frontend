@@ -596,7 +596,12 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             key: column.column,
             label: column.alias ?? snakeCaseToSentenceCase(column?.column),
             values: column.options,
-            type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+            type:
+              column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG
+                ? FILTER_TYPES.TAGS
+                : column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.DOCUMENT
+                  ? FILTER_TYPES.DOCUMENT
+                  : column?.type,
           }));
 
         dispatch({

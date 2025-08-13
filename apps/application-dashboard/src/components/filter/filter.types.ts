@@ -12,6 +12,7 @@ export enum FILTER_TYPES {
   AMOUNT_RANGE = 'amount-range',
   TAGS = 'tags',
   ARRAY_SEARCH = 'array-search',
+  DOCUMENT = 'document',
 }
 
 export interface FilterMenuType {

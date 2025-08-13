@@ -2,10 +2,10 @@ import { FC } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import SearchFilter from 'components/filter/filterMenu/components/SearchFilter';
-import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
+import { DOCUMENT_SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
-interface SearchFilterMenuItemProps {
+interface DocumentSearchFilterMenuItemProps {
   column: MapAny;
   values: string[];
   className?: string;
@@ -15,7 +15,7 @@ interface SearchFilterMenuItemProps {
   isDisabled?: boolean;
 }
 
-const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
+const DocumentSearchFilterMenuItem: FC<DocumentSearchFilterMenuItemProps> = ({
   column,
   className,
   isOpen = false,
@@ -45,10 +45,13 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
       label={label || camelCaseToNormalText(columnId)}
       isDisabled={isDisabled}
       initialSearchValue={selectedFilters[columnId]?.filter}
-      initialOperator={SEARCH_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)}
+      initialOperator={DOCUMENT_SEARCH_FILTER_OPTIONS.find(
+        (option) => option.value === selectedFilters[columnId]?.type,
+      )}
+      operatorOptions={DOCUMENT_SEARCH_FILTER_OPTIONS}
       onChange={setFilter}
     />
   );
 };
 
-export default SearchFilterMenuItem;
+export default DocumentSearchFilterMenuItem;

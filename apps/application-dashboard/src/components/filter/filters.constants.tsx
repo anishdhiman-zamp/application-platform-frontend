@@ -1,6 +1,7 @@
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import AmountRangeFilterMenuItem from 'components/filter/filterMenu/AmountRangeFilterMenuItem';
 import DateRangeFilterMenuItem from 'components/filter/filterMenu/DateRangeFilterMenuItem';
+import DocumentSearchFilterMenuItem from 'components/filter/filterMenu/DocumentSearchFilterMenuItem';
 import MultiSearchFilterMenuItem from 'components/filter/filterMenu/MultiSearchFilterMenuItem';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import SearchFilterMenuItem from 'components/filter/filterMenu/SearchFilterMenuItem';
@@ -60,6 +61,7 @@ export const AG_GRID_FILTER_TYPES = {
   [FILTER_TYPES.SINGLE_SELECT]: SingleSelectFilterMenuItem,
   [FILTER_TYPES.MULTI_SELECT]: MultiSelectFilterMenuItem,
   [FILTER_TYPES.TAGS]: TagsSelectFilterMenuItem,
+  [FILTER_TYPES.DOCUMENT]: DocumentSearchFilterMenuItem,
 };
 
 export const AG_GRID_FILTER_OPERATORS = {
@@ -100,6 +102,11 @@ export const SEARCH_FILTER_OPTIONS = [
   { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
   { label: 'begins with', value: CONDITION_OPERATOR_TYPE.STARTS_WITH },
   { label: 'ends with', value: CONDITION_OPERATOR_TYPE.ENDS_WITH },
+];
+
+export const DOCUMENT_SEARCH_FILTER_OPTIONS = [
+  { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
+  { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS },
 ];
 
 export const MULTI_SELECT_FILTER_OPTIONS = [
