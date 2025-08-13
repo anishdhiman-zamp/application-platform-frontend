@@ -46,7 +46,7 @@ const getApiDomain = (environment = '', region = '') => {
     case 'staging':
       return `https://api-stg${region}.zamp.ai`;
     case 'development': {
-      return DEV_API_URL;
+      return `https://api-dev-aws-us.zamp.ai`;
     }
     default:
       return 'http://localhost:8080';
