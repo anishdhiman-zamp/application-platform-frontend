@@ -15,10 +15,16 @@ const nextConfig = {
 
     return config;
   },
-  transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder'],
+  transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder', '@zamp-platform/chat'],
   productionBrowserSourceMaps: true,
   images: {
-    remotePatterns: [new URL(`${process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL}/**`)],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
+        pathname: '/**',
+      },
+    ],
   },
   async headers() {
     return [

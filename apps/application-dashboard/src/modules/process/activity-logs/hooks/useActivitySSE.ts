@@ -43,7 +43,7 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
     return () => {
       closeSSE();
     };
-  }, [closeSSE]);
+  }, []);
 
   return { closeSSE };
 }

@@ -100,10 +100,10 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   return result;
 };
 
-const baseApiProvider = (tagTypes: Record<string, string>) =>
+const baseApiProvider = (tagTypes?: Record<string, string>, reducerPath = 'api') =>
   createApi({
-    reducerPath: 'api',
-    tagTypes: Object.values(tagTypes),
+    reducerPath: reducerPath,
+    tagTypes: Object.values(tagTypes ?? {}),
     baseQuery: baseQueryWithAuth,
     endpoints: () => ({}),
     refetchOnMountOrArgChange: true,
