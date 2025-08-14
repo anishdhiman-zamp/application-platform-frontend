@@ -42,10 +42,13 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   api,
   extraOptions,
 ) => {
-  let currentOrgId = getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '';
-  await mutex.waitForUnlock();
-
   const state = api.getState() as UserState;
+  const currentOrgId =
+    state?.user?.user?.orgs?.[0]?.organization_id ||
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
+    '';
+
+  await mutex.waitForUnlock();
 
   if (state?.user?.isOrgSwitchIsInProgress) {
     return {
@@ -54,13 +57,6 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
         error: ORG_SWITCH_IN_PROGRESS_ERROR,
       } as FetchBaseQueryError,
     };
-  }
-
-  if (
-    getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE) === 'true' &&
-    state?.user?.user?.orgs?.[0]?.organization_id
-  ) {
-    currentOrgId = state?.user?.user?.orgs?.[0]?.organization_id;
   }
 
   const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
