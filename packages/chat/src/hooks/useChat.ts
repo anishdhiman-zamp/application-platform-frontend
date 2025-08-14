@@ -4,7 +4,13 @@ import { useSSE, UseSSEOptions } from '@zamp-platform/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
-import { ChatMessage, CreateConversationPayloadType, SSEEventType } from '../types/chat.types';
+import {
+  ChatMessage,
+  ChatMessageType,
+  type CreateConversationPayloadType,
+  SenderType,
+  SSEEventType,
+} from '../types/chat.types';
 
 export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'autoConnect'> {
   conversationId?: string;
@@ -23,10 +29,24 @@ export const useChat = (config: ChatConfig) => {
     useCreateConversationMutation();
 
   const createConversation = async (conversationPayload: CreateConversationPayloadType) => {
+    setMessages([
+      {
+        ...conversationPayload,
+        message_type: ChatMessageType.TEXT,
+        sender_type: SenderType.USER,
+        message_content: conversationPayload.message_content || { message: '' },
+        metadata: {},
+        timestamp: new Date().toISOString(),
+      },
+    ]);
     const response = await createConversationMutation(conversationPayload).unwrap();
     setConversationId(response.conversation_id);
     return response.conversation_id;
   };
+
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
@@ -85,6 +105,7 @@ export const useChat = (config: ChatConfig) => {
     ...connection,
     messages,
     sendMessage,
+    clearMessages,
     isSendingMessage,
     sendMessageError,
     createConversation,

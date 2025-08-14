@@ -10,13 +10,13 @@
 .kb-viewer h1 {
   font-size: 26px;
   font-weight: 550;
-  margin-top: 80px;
+  margin-top: 48px;
 }
 
 .kb-viewer h1:first-child {
   font-size: 26px;
   font-weight: 550;
-  margin-top: 10px;
+  margin-top: 32px;
 }
 
 .kb-viewer h2:first-child {
@@ -26,7 +26,7 @@
 }
 
 .kb-viewer h1 + h2 {
-  padding-top: 32px;
+  padding-top: 20px;
 }
 
 .kb-viewer h2 + h3 {
@@ -40,7 +40,7 @@
 }
 
 .kb-viewer h3 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 550;
   padding-top: 32px;
 }
@@ -52,13 +52,13 @@
 }
 
 .kb-viewer p {
-  font-size: 13px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 450;
   margin-top: 8px;
 }
 
 .kb-viewer hr {
-  margin: 80px 0;
+  margin: 48px 0;
   border-color: #ebebeb;
 }
 
@@ -87,12 +87,13 @@
 }
 
 .kb-viewer ul li {
-  font-size: 13px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 450;
+  margin-top: 6px;
 }
 
 .kb-viewer strong {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 550;
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
@@ -15,8 +15,12 @@ import KnowledgeBaseNavigation from '@/modules/knowledge-based/KnowledgeBaseNavi
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { extractHeadersFromMarkdown, type HeaderItem } from '@/utils/markdownUtils';
 
-const MarkdownRendererWithNavigation = () => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+interface MarkdownRendererWithNavigationPropsType {
+  hideNav?: boolean;
+  scrollRef?: React.RefObject<HTMLDivElement>;
+}
+
+const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: MarkdownRendererWithNavigationPropsType) => {
   const dispatch = useAppDispatch();
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [headers, setHeaders] = useState<HeaderItem[]>([]);
@@ -74,10 +78,10 @@ const MarkdownRendererWithNavigation = () => {
   );
 
   useEffect(() => {
-    if (!scrollContainerRef.current || headers.length === 0) return;
+    if (!scrollRef?.current || headers.length === 0) return;
 
     const observer = new IntersectionObserver(handleIntersection, {
-      root: scrollContainerRef.current,
+      root: scrollRef?.current,
       rootMargin: '-10% -0px -90% 0px',
       threshold: 0,
     });
@@ -121,22 +125,26 @@ const MarkdownRendererWithNavigation = () => {
         </div>
       }
     >
-      <div className='flex h-[calc(100vh-48px)] overflow-hidden'>
-        <div className='w-[320px] min-w-[320px] overflow-y-auto px-8 py-6'>
-          <h2 className='f-12-400 mb-2 text-gray-700'>In this Knowledge Base</h2>
-          <KnowledgeBaseNavigation
-            items={headers}
-            currentSelectedHeader={currentSelectedHeader}
-            setCurrentSelectedHeader={handleManualHeaderSelection}
-          />
-        </div>
-        <div ref={scrollContainerRef} className='markdown-body w-full overflow-y-auto p-6'>
+      <div className='flex'>
+        <div className='markdown-body w-full overflow-y-auto p-6'>
           <div className='kb-viewer m-auto max-w-[800px] pb-20'>
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
               {markdownContent}
             </ReactMarkdown>
           </div>
         </div>
+        {!hideNav && (
+          <div>
+            <div className='sticky top-0 z-50 max-h-[calc(100vh-60px)] w-[320px] min-w-[320px] overflow-y-auto bg-white px-8 py-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+              <h2 className='f-14-400 mb-2 text-gray-700'>In this Knowledge Base</h2>
+              <KnowledgeBaseNavigation
+                items={headers}
+                currentSelectedHeader={currentSelectedHeader}
+                setCurrentSelectedHeader={handleManualHeaderSelection}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </CommonWrapper>
   );

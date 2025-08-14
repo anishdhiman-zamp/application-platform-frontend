@@ -1,7 +1,7 @@
-import MarkdownRendererWithNavigation from '@/modules/knowledge-based/MarkdownRendererWithNavigation';
+import KnowledgeBaseHome from '@/modules/knowledge-based/KnowledgeBaseHome';
 
-const KnowledgeBase = () => {
-  return <MarkdownRendererWithNavigation />;
+const KnowledgeBasePage = () => {
+  return <KnowledgeBaseHome />;
 };
 
-export default KnowledgeBase;
+export default KnowledgeBasePage;
