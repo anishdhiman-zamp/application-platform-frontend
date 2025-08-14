@@ -1,5 +1,6 @@
 'use client';
 
+import { captureException } from '@sentry/browser';
 import { useSSE, UseSSEOptions } from '@zamp-platform/utils';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -86,15 +87,16 @@ export const useChat = (config: ChatConfig) => {
       }
 
       try {
+        setMessages((prev) => [...prev, messagePayload]);
         const response = await sendMessageMutation({
           conversationId: _conversationId,
           body: messagePayload,
         }).unwrap();
 
-        setMessages((prev) => [...prev, messagePayload]);
         return response;
       } catch (error) {
         console.error('Failed to send message:', error);
+        captureException(error);
         throw error;
       }
     },
