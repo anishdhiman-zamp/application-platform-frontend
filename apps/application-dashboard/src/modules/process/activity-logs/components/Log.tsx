@@ -198,6 +198,7 @@ const Log: FC<LogProps> = ({
               processId={processId}
               activityId={activityId}
               handleShowArtifacts={handleShowArtifacts}
+              isLastLog={isLastLog}
             />
           )}
           <motion.div

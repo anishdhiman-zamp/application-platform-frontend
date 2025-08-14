@@ -1,6 +1,7 @@
 import { type FC, memo, useCallback, useState } from 'react';
-import { Button, RevealElement } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import ConditionalRevealAnimation from 'modules/process/activity-logs/components/ConditionalRevealAnimationWrapper';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import { CTA_COMPONENT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
@@ -15,9 +16,17 @@ type LogCtaProps = {
   handleShowArtifacts: (props: HandleShowArtifactsProps) => void;
   processId: string;
   activityId: string;
+  isLastLog?: boolean;
 };
 
-const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, processId, activityId }) => {
+const LogCta: FC<LogCtaProps> = ({
+  ctas,
+  logGroupId,
+  handleShowArtifacts,
+  processId,
+  activityId,
+  isLastLog = false,
+}) => {
   const userId = useAppSelector((state) => state.user.user?.user_id);
   const [ctaLoading, setCtaLoading] = useState<string[]>([]);
 
@@ -90,7 +99,10 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
 
   return (
     <div className='mt-3 flex w-full flex-col items-start justify-start gap-y-2'>
-      <RevealElement className='flex w-full flex-wrap items-start justify-start gap-2'>
+      <ConditionalRevealAnimation
+        className='flex w-full flex-wrap items-start justify-start gap-2'
+        isLastLog={isLastLog}
+      >
         {artifactTypeCtas?.map((cta) => (
           <ArtifactTag
             key={cta?.id}
@@ -109,8 +121,11 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             displayClassName='max-w-40'
           />
         ))}
-      </RevealElement>
-      <RevealElement className='flex w-full flex-wrap items-start justify-start gap-2'>
+      </ConditionalRevealAnimation>
+      <ConditionalRevealAnimation
+        className='flex w-full flex-wrap items-start justify-start gap-2'
+        isLastLog={isLastLog}
+      >
         {buttonTypeCtas?.map((cta) => {
           const loadingId = getLoadingId(cta);
 
@@ -130,7 +145,7 @@ const LogCta: FC<LogCtaProps> = ({ ctas, logGroupId, handleShowArtifacts, proces
             </Button>
           );
         })}
-      </RevealElement>
+      </ConditionalRevealAnimation>
     </div>
   );
 };
