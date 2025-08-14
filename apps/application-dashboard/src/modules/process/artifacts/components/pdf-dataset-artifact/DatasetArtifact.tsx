@@ -64,7 +64,7 @@ import {
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
-import { DATASET_VIEW_TYPE } from '@/modules/process/process.types';
+import { ARTIFACT_TYPE, DATASET_VIEW_TYPE } from '@/modules/process/process.types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -91,6 +91,7 @@ type DatasetByIdProps = {
   missingFields?: MissingFieldItemType[];
   hasMissingFields?: boolean;
   showPdfSearch?: boolean;
+  artifactType?: ARTIFACT_TYPE;
 };
 
 type MissingFieldControlProps = {
@@ -113,6 +114,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   parentSelectedFilters,
   missingFields,
   hasMissingFields,
+  artifactType,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -751,6 +753,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                   tableRef={tableRef}
                   datasetId={id as string}
                   disabled={activeTab === DATASET_VIEW_TYPE.ROWS}
+                  displayOptionPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? 'right' : 'left'}
+                  columnListingPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? 'right' : 'left'}
                 />
                 {filterConfigData?.config?.is_fx_enabled && (
                   <div className='flex items-center gap-2'>

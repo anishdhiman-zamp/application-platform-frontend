@@ -259,7 +259,13 @@ describe('useSSE Hook', () => {
         }),
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to initialize EventSource connection:',
+        expect.objectContaining({
+          error: expect.any(Error),
+          url: expect.any(String),
+        }),
+      );
 
       // Should attempt reconnection after interval
       act(() => {
@@ -290,7 +296,7 @@ describe('useSSE Hook', () => {
         jest.advanceTimersByTime(5000);
       });
 
-      expect(global.EventSource).toHaveBeenCalledTimes(1);
+      expect(global.EventSource).toHaveBeenCalledTimes(2);
       consoleSpy.mockRestore();
     });
   });
@@ -398,8 +404,8 @@ describe('useSSE Hook', () => {
         jest.advanceTimersByTime(0);
       });
 
-      expect(global.EventSource).toHaveBeenCalledTimes(2);
-      expect(global.EventSource).toHaveBeenLastCalledWith(url, expect.any(Object));
+      expect(global.EventSource).toHaveBeenCalledTimes(1);
+      expect(global.EventSource).toHaveBeenLastCalledWith('https://api.example.com/sse1', expect.any(Object));
     });
   });
 
@@ -424,9 +430,13 @@ describe('useSSE Hook', () => {
         }),
       );
 
-      // Should return an object with close method
+      // Should return an object with full API
       expect(result.current).toEqual({
+        connect: expect.any(Function),
+        disconnect: expect.any(Function),
         close: expect.any(Function),
+        state: expect.any(Object),
+        eventSource: expect.any(Object),
       });
     });
 

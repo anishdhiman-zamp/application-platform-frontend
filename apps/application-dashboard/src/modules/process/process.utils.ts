@@ -133,3 +133,16 @@ export const formatRowValue = (value: unknown): string => {
   // For non-array values, convert to string
   return value.toString();
 };
+
+/**
+ * Safely parses a string to an integer
+ * @param {string | null | undefined} value - The value to parse
+ * @param {number} fallback - The fallback value if parsing fails
+ * @returns {number} The parsed integer or the fallback value
+ */
+export const parseIntSafely = (value: string | null | undefined, fallback: number): number => {
+  if (!value) return fallback;
+  const parsed = parseInt(value, 10);
+
+  return isNaN(parsed) ? fallback : parsed;
+};

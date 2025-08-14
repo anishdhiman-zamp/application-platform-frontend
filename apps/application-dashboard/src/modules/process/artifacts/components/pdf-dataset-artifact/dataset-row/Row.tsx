@@ -78,9 +78,8 @@ const Row: FC<RowProps> = ({
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
 
-  const isColumnVisible = useMemo(() => {
-    return getColumnOrderingVisibilityForCurrentDataset(datasetId).find((col) => col?.colId === key)?.isVisible ?? true;
-  }, [datasetId, key]);
+  const isColumnVisible =
+    getColumnOrderingVisibilityForCurrentDataset(datasetId).find((col) => col?.colId === key)?.isVisible ?? true;
 
   const valueFormatter = useMemo(() => (columnConfig ? getValueFormatter(columnConfig) : undefined), [columnConfig]);
 

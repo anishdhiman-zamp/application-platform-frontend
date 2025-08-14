@@ -11,7 +11,7 @@ import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
 import { identifyPostHogUser } from 'utils/postHog';
-import { getFromSessionStorage, removeFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
+import { getFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -48,11 +48,13 @@ export const AuthGuard: FC<Props> = (props) => {
   }, [isError, pathname, props.loginRoute, router, searchParams]);
 
   useEffect(() => {
+    console.log('isSuccess', isSuccess, session?.user_id, pathname, pathname === props.loginRoute);
     if (isSuccess && session?.user_id && pathname === props.loginRoute) {
       const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
 
+      console.log('preLogoutPath', preLogoutPath);
       if (preLogoutPath) {
-        removeFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
+        console.log('preLogoutPath LL', preLogoutPath);
         router.push(preLogoutPath);
       } else {
         router.push(ROUTES_PATH.HOME);

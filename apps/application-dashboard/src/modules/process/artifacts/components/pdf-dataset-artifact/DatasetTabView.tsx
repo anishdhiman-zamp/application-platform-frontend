@@ -3,7 +3,12 @@ import { Button, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-p
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
-import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
+import {
+  ARTIFACT_TYPE,
+  CTA_COMPONENT_TYPE,
+  EmitHITLActionPayload,
+  MissingFieldsConfigType,
+} from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import { COLORS } from '@/constants/colors';
@@ -25,6 +30,7 @@ interface DatasetArtifactProps {
   activityId: string;
   className?: string;
   showPdfSearch?: boolean;
+  artifactType?: ARTIFACT_TYPE;
 }
 
 const DatasetTabView: FC<DatasetArtifactProps> = ({
@@ -36,6 +42,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   activityId,
   className,
   showPdfSearch = false,
+  artifactType = ARTIFACT_TYPE.DATASET,
 }) => {
   const userId = useAppSelector((state) => state.user?.user?.user_id);
 
@@ -194,6 +201,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
           missingFields={missingFields?.[activeTab]?.cells ?? []}
           hasMissingFields={currentDatasetHasMissingFields}
           showPdfSearch={showPdfSearch}
+          artifactType={artifactType}
         />
       </TabsContent>
     </Tabs>

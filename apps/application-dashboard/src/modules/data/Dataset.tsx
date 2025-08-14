@@ -113,6 +113,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const {

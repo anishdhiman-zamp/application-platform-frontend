@@ -22,6 +22,7 @@ import {
   ModuleRegistry,
   NumberEditorModule,
   NumberFilterModule,
+  PaginationModule,
   RenderApiModule,
   RowApiModule,
   RowClickedEvent,
@@ -116,6 +117,7 @@ ModuleRegistry.registerModules([
   SelectEditorModule,
   RenderApiModule,
   ValidationModule /* Development Only */,
+  PaginationModule,
 ]);
 
 interface TableProps {

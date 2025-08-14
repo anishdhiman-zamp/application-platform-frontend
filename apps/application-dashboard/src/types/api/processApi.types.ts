@@ -307,6 +307,7 @@ export interface EmailArtifactsResponseType extends EmailUpdatePayloadType {
   from_mail_id: string;
   body_plain_text: string;
   from_name: string;
+  is_email_body_encoded: boolean;
 }
 
 export type UpdateArtifactRequestType = {

@@ -7,7 +7,7 @@ import { Mutex } from 'async-mutex';
 import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 
 import { API_DOMAIN } from './api.utils';
-import { ABORT_ERROR, LOGIN_PATH, REQUEST_TIMEOUT } from './constants';
+import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
 
 const mutex = new Mutex();
 
@@ -17,16 +17,20 @@ interface CustomFetchArgs extends FetchArgs {
   domain?: string;
 }
 
-const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN) =>
+interface UserState {
+  user?: {
+    isOrgSwitchIsInProgress?: boolean;
+    user?: { orgs?: Array<{ organization_id: string }> };
+  };
+}
+
+const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string) =>
   fetchBaseQuery({
     baseUrl: `${domain}/`,
     credentials: 'include',
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
-      headers.set(
-        LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
-        getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
-      );
+      headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
 
       return headers;
     },
@@ -38,9 +42,24 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   api,
   extraOptions,
 ) => {
+  const state = api.getState() as UserState;
+  const currentOrgId =
+    state?.user?.user?.orgs?.[0]?.organization_id ||
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
+    '';
+
   await mutex.waitForUnlock();
 
-  const result = await baseQuery(args.timeout, args.domain)(args, api, extraOptions);
+  if (state?.user?.isOrgSwitchIsInProgress) {
+    return {
+      error: {
+        status: CUSTOM_ERROR,
+        error: ORG_SWITCH_IN_PROGRESS_ERROR,
+      } as FetchBaseQueryError,
+    };
+  }
+
+  const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
   const path = window.location.pathname;
 
   const isLoginRoute = path === LOGIN_PATH;
@@ -85,10 +104,10 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   return result;
 };
 
-const baseApiProvider = (tagTypes: Record<string, string>) =>
+const baseApiProvider = (tagTypes?: Record<string, string>, reducerPath = 'api') =>
   createApi({
-    reducerPath: 'api',
-    tagTypes: Object.values(tagTypes),
+    reducerPath: reducerPath,
+    tagTypes: Object.values(tagTypes ?? {}),
     baseQuery: baseQueryWithAuth,
     endpoints: () => ({}),
     refetchOnMountOrArgChange: true,
