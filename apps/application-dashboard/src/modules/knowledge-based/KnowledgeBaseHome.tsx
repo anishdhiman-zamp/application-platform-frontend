@@ -94,7 +94,7 @@ const KnowledgeBaseHome = () => {
             <div className='flex h-full w-full flex-col items-center justify-center'>
               <div className='flex-grow'>
                 <div className='flex h-full w-[672px] flex-col items-center justify-center'>
-                  <div className='mb-9 flex items-center justify-center gap-1 rounded-full border border-blue-700 px-4 py-2 text-blue-700'>
+                  <div className='f-13-500 mb-9 flex items-center justify-center gap-1 rounded-full border border-blue-700 px-4 py-2 text-blue-700'>
                     <KBIcon /> Knowledge Base
                   </div>
                   <div className='f-22-550 mb-7 flex items-center gap-1 select-none'>
@@ -103,6 +103,7 @@ const KnowledgeBaseHome = () => {
                     Pace anything about {processName ?? 'Process'}
                   </div>
                   <KbChatInput
+                    placeholder='Ask away...'
                     onSubmit={handleSendMessage}
                     className='w-full max-w-[672px]'
                     inputValue={inputValue}
@@ -164,6 +165,7 @@ const KnowledgeBaseHome = () => {
             textAreaClassName='!pt-4 pb-4 !min-h-[26px]'
             placeholderClassName='!top-4'
             sendButtonClassName='!p-3'
+            placeholder='Ask away...'
             onFocus={() => setIsInputFocused(true)}
             onBlur={() => setIsInputFocused(false)}
           />

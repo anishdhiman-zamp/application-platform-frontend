@@ -10,6 +10,7 @@ import { cn } from '@/utils/common';
 
 interface KbChatInputProps {
   className?: string;
+  placeholder?: string;
   onSubmit: (inputValue: string) => void;
   inputValue: string;
   setInputValue: (inputValue: string) => void;
@@ -25,6 +26,7 @@ interface KbChatInputProps {
 
 const KbChatInput: FC<KbChatInputProps> = ({
   className,
+  placeholder,
   onSubmit,
   inputValue,
   setInputValue,
@@ -93,13 +95,17 @@ const KbChatInput: FC<KbChatInputProps> = ({
           {inputValue.length === 0 && (
             <div
               className={cn(
-                'f-13-450 pointer-events-none absolute top-2 left-4 z-10 flex items-center gap-1 text-gray-700 select-none',
+                'f-16-450 pointer-events-none absolute top-2 left-4 z-10 text-gray-700 select-none',
                 placeholderClassName,
               )}
             >
-              Ask follow up questions to
-              <PaceIcon height={12} width={12} />
-              Pace
+              {placeholder || (
+                <div className='flex items-center gap-1'>
+                  Ask follow up questions to
+                  <PaceIcon height={12} width={12} />
+                  Pace
+                </div>
+              )}
             </div>
           )}
           <Textarea
@@ -112,7 +118,7 @@ const KbChatInput: FC<KbChatInputProps> = ({
             placeholder=''
             aria-label='Message input'
             className={cn(
-              'f-13-450 w-full resize-none overflow-y-auto rounded-none border-none px-4 shadow-none',
+              'f-16-450 !text-16 w-full resize-none overflow-y-auto rounded-none border-none px-4 shadow-none',
               textAreaClassName,
             )}
             rows={1}

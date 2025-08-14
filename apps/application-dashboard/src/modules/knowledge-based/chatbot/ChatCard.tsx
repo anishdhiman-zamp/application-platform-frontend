@@ -14,7 +14,7 @@ const ChatCard: FC<ChatCardProps> = ({ message, senderType }) => {
     case SenderType.USER: {
       return (
         <div className='flex justify-end'>
-          <span className='f-13-450 bg-GRAY_1000 rounded-[8px] rounded-br-none p-3.5 text-white'>
+          <span className='f-16-450 bg-GRAY_1000 rounded-[8px] rounded-br-none p-3.5 text-white'>
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
               {message}
             </ReactMarkdown>
