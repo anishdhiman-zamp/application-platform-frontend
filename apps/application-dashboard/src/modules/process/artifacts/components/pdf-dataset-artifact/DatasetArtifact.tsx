@@ -59,6 +59,7 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
+import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import {
   type CompletedField,
   CompletedFieldsActions,
@@ -91,7 +92,6 @@ type DatasetByIdProps = {
   missingFields?: MissingFieldItemType[];
   hasMissingFields?: boolean;
   showPdfSearch?: boolean;
-  artifactType?: ARTIFACT_TYPE;
 };
 
 type MissingFieldControlProps = {
@@ -114,7 +114,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   parentSelectedFilters,
   missingFields,
   hasMissingFields,
-  artifactType,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -136,6 +135,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: id,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
   const {
     data: filterConfigData,
@@ -172,6 +173,10 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     state: { completedFields },
     dispatch: completedFieldsDispatch,
   } = useCompletedFields();
+
+  const {
+    state: { artifactType },
+  } = useArtifactContextStore();
 
   const currentUserHasEditAccess = useMemo(() => {
     return (
@@ -858,7 +863,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               requiredMissingFields={requiredMissingFields}
               missingFields={missingFields}
               currentUserHasEditAccess={currentUserHasEditAccess}
-              completedFields={currentDatasetCompletedFields}
               onValueClick={(rowIndex, column) => scrollToCell(rowIndex, column)}
               filterConfig={filterConfigData?.data}
             />

@@ -7,7 +7,7 @@ import { DATE_FORMATS } from '@zamp-platform/utils';
 import DisplayField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DisplayField';
 import EditableField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/EditableField';
 import { artifactContextActions, useArtifactContextStore } from 'modules/process/artifacts/context/artifact.context';
-import type { CompletedField } from 'modules/process/artifacts/context/completedFields.context';
+import { useCompletedFields } from 'modules/process/artifacts/context/completedFields.context';
 import type { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import type { MapAny } from 'types/commonTypes';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
@@ -32,7 +32,6 @@ interface RowProps {
   onChange?: (key: string, value: string, rowId: string) => void;
   missingFields?: MissingFieldItemType[];
   requiredMissingFields?: MissingFieldItemType[];
-  completedFields: CompletedField[];
   currentUserHasEditAccess: boolean;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   selectedKeyRef: RefObject<HTMLDivElement | null>;
@@ -43,6 +42,7 @@ interface RowProps {
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
   rowData: MapAny;
+  isPdfDataset?: boolean;
 }
 
 const Row: FC<RowProps> = ({
@@ -53,7 +53,6 @@ const Row: FC<RowProps> = ({
   onChange,
   missingFields = [],
   requiredMissingFields = [],
-  completedFields = [],
   currentUserHasEditAccess,
   textareaRef,
   selectedKeyRef,
@@ -64,8 +63,12 @@ const Row: FC<RowProps> = ({
   showPdfSearch,
   filterConfig = [],
   rowData,
+  isPdfDataset = false,
 }) => {
   const { dispatch } = useArtifactContextStore();
+  const {
+    state: { completedFields },
+  } = useCompletedFields();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingValue, setEditingValue] = useState('');
@@ -77,6 +80,10 @@ const Row: FC<RowProps> = ({
 
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
+  const currentDatasetCompletedFields = useMemo(
+    () => completedFields[datasetId]?.filter((field) => field.isRequired) ?? [],
+    [completedFields, datasetId],
+  );
 
   const isColumnVisible =
     getColumnOrderingVisibilityForCurrentDataset(datasetId).find((col) => col?.colId === key)?.isVisible ?? true;
@@ -106,10 +113,10 @@ const Row: FC<RowProps> = ({
 
   const isCompleted = useMemo(
     () =>
-      completedFields.some((field) => field?.columnId === key && field?.rowId === rowId) &&
+      currentDatasetCompletedFields.some((field) => field?.columnId === key && field?.rowId === rowId) &&
       !isValueEmpty(value) &&
       missingFields.some((field) => field?.column === key && field?.id === rowId),
-    [completedFields, key, rowId, value, missingFields],
+    [currentDatasetCompletedFields, key, rowId, value, missingFields],
   );
 
   const shouldShowInputDirectly = isEditable && isValueEmpty(value);
@@ -194,9 +201,16 @@ const Row: FC<RowProps> = ({
           textareaRef={textareaRef}
           editTextareaRef={editTextareaRef}
           isClicked={isClicked}
+          isPdfDataset={isPdfDataset}
         />
       ) : (
-        <DisplayField value={formattedValue} isCompleted={isCompleted} isClicked={isClicked} onClick={handleClick} />
+        <DisplayField
+          value={formattedValue}
+          isCompleted={isCompleted}
+          isClicked={isClicked}
+          onClick={handleClick}
+          isPdfDataset={isPdfDataset}
+        />
       )}
 
       {showPdfSearch && (

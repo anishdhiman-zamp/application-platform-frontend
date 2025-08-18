@@ -85,7 +85,6 @@ const LogCta: FC<LogCtaProps> = ({
       handleShowArtifacts({
         artifactType: cta?.artifact_type,
         artifactId: cta?.id ?? '',
-        action: cta?.cta_action,
         filters: cta?.filter_metadata,
         ctaConfig: cta?.cta_config,
         logGroupId,

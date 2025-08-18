@@ -33,7 +33,7 @@ const ErrorFallback = ({ message }: { message: string }) => (
   </div>
 );
 
-const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, className }: PDFViewerAppProps) => {
+const PdfArtifact = ({ processId, pdfArtifact, isArtifactLoading, className, artifactId }: PDFViewerAppProps) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
@@ -74,6 +74,7 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
     <CommonWrapper
       isLoading={isCommonLoading}
       isError={isSignedUrlError}
+      errorCardStyle='mx-auto'
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}

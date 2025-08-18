@@ -90,8 +90,8 @@ export enum EMAIL_STATUS {
 
 export type EmailArtifactWrapperProps = {
   artifactData: EmailArtifactsResponseType;
-  artifactId: string;
   processId: string;
+  artifactId: string;
   activityId: string;
   emitHITLActionPayload: EmitHITLActionPayload;
   onClose: defaultFnType;
