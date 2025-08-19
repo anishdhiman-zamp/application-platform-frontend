@@ -122,7 +122,7 @@ const EmailEditorArtifact = ({
   }, [emailData, debouncedUpdateArtifact]);
 
   return (
-    <div className='bg-BG_GRAY_2 h-full overflow-y-auto p-5'>
+    <div className='bg-BG_GRAY_2 h-[calc(100vh-110px)] overflow-y-auto p-5'>
       <div className='border-GRAY_500 flex h-full flex-col rounded-xl border-[0.5px] bg-white'>
         <Header value={emailData.header} onHeaderChange={handleHeaderChange} />
         <BodyAndFooter

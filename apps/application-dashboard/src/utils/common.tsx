@@ -168,6 +168,8 @@ export const getRandomColor = () => `rgb(${getColorValue()}, ${getColorValue()},
  */
 export const getFirstLetters = (str: string, length = 2) =>
   str
+    ?.trim()
+    ?.replace(/^['"]+|['"]+$/g, '') // remove leading/trailing quotes or apostrophes
     ?.split(' ')
     ?.map((word, index) => {
       if (index > 1 || !word?.length) return null;

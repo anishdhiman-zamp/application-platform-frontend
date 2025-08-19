@@ -64,7 +64,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
   };
 
   return (
-    <div className='bg-BG_GRAY_2 h-full w-full p-5'>
+    <div className='bg-BG_GRAY_2 h-[calc(100vh-110px)] w-full p-5'>
       <div className='border-GRAY_500 flex h-full flex-col items-start justify-start rounded-xl border-[0.5px] bg-white'>
         {/* Header */}
         <div className='flex w-full items-start justify-between px-4 py-3'>
