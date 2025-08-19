@@ -52,12 +52,8 @@ COPY apps/application-dashboard/public ./apps/application-dashboard/public
 COPY apps/application-dashboard/package.json ./apps/application-dashboard/package.json
 COPY node_modules ./node_modules
 
-# Set environment variables
-ENV NEXT_PUBLIC_ENVIRONMENT=production
-ENV PORT=3000
-
 # Expose port
-EXPOSE 3000
+EXPOSE ${PORT}
 
 # Switch to non-root user
 USER nextjs
