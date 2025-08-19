@@ -37,7 +37,7 @@ const EmailArtifact: FC<EmailArtifactProps> = ({ emailArtifact, artifactId }) =>
         window.open(res?.signed_url as string, '_blank');
       })
       .catch((err) => {
-        toast.error(err?.data?.message);
+        toast.error(err?.data?.message ?? 'Something went wrong');
       });
   };
 
