@@ -870,7 +870,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               currentUserHasEditAccess={currentUserHasEditAccess}
               onValueClick={(rowIndex, column) => scrollToCell(rowIndex, column)}
               filterConfig={filterConfigData?.data}
-              isPdfDataset={artifactType === ARTIFACT_TYPE.PDF_DATASET}
             />
           </div>
         </CommonWrapper>

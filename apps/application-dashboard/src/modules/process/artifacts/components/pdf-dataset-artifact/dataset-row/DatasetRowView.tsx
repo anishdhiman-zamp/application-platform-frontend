@@ -33,7 +33,6 @@ interface DatasetRowViewProps {
   onValueClick?: (rowIndex: string, column: string) => void;
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
-  isPdfDataset?: boolean;
 }
 
 const DatasetRowView: FC<DatasetRowViewProps> = ({
@@ -54,7 +53,6 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
   onValueClick,
   showPdfSearch,
   filterConfig,
-  isPdfDataset = false,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const selectedKeyRef = useRef<HTMLDivElement>(null);
