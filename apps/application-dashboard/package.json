@@ -41,6 +41,7 @@
     "@xyflow/react": "^12.5.5",
     "@zamp-platform/api": "*",
     "@zamp-platform/config": "*",
+    "@zamp-platform/chat": "*",
     "@zamp-platform/form-builder": "*",
     "@zamp-platform/svg-loader": "*",
     "@zamp-platform/ui": "*",

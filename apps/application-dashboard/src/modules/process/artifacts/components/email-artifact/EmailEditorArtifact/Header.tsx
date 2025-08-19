@@ -16,10 +16,13 @@ const Header: FC<HeaderProps> = ({ value, onHeaderChange }) => {
               <tr key={heading.value}>
                 <td>{heading.label}</td>
                 <td className='w-full'>
-                  <EmailInputToChips
-                    value={value[heading.value]}
-                    onChange={(emails) => onHeaderChange(heading.value, emails)}
-                  />
+                  <div className='flex gap-2 overflow-x-auto whitespace-nowrap [&::-webkit-scrollbar]:hidden'>
+                    <EmailInputToChips
+                      value={value[heading.value]}
+                      onChange={(emails) => onHeaderChange(heading.value, emails)}
+                      className='flex-shrink-0'
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -1,0 +1,14 @@
+{
+  "name": "@zamp-platform/chat",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "@zamp-platform/utils": "*",
+    "react": "^19"
+  },
+  "files": [
+    "./index.ts"
+  ]
+}

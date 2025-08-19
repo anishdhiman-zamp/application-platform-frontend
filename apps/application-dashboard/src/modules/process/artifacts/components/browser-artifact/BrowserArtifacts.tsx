@@ -8,12 +8,12 @@ import VideoPlayer from '@/modules/process/artifacts/components/browser-artifact
 import type { BrowserArtifactsResponseType } from '@/types/api/processApi.types';
 
 interface BrowserArtifactProps {
-  browserArtifact: BrowserArtifactsResponseType;
-  artifactId: string;
   processId: string;
+  artifactId: string;
+  browserArtifact: BrowserArtifactsResponseType;
 }
 
-const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, artifactId, processId }) => {
+const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, processId, artifactId }) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,

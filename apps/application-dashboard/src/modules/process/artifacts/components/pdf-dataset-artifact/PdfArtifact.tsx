@@ -84,6 +84,7 @@ const PdfArtifact = ({
     <CommonWrapper
       isLoading={isCommonLoading}
       isError={isSignedUrlError}
+      errorCardStyle='mx-auto'
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}
@@ -95,7 +96,7 @@ const PdfArtifact = ({
       {isDocumentLoaded && !error && isSearchBarEnabled && <SearchBar {...{ usePDFSlickStore }} />}
       {!error && (
         <div className='relative h-full flex-1'>
-          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-26' />
+          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-48' />
         </div>
       )}
       {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} />}

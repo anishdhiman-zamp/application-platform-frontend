@@ -2,193 +2,205 @@
 
 exports[`StaggerText Component matches snapshot with custom class 1`] = `
 <div
-  class="text-GRAY_1000 inline-flex flex-wrap custom-class"
+  class="text-GRAY_1000 break-words custom-class"
   data-state="show"
   data-testid="stagger-text-container"
 >
   <span
     class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
   >
-    C
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      C
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      u
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      s
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      t
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      o
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      m
+    </span>
+    <span
+      class="inline-block"
+    >
+       
+    </span>
   </span>
   <span
     class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
   >
-    u
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    s
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    t
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    o
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    m
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-     
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    C
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    l
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    a
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    s
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    s
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      C
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      l
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      a
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      s
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      s
+    </span>
   </span>
 </div>
 `;
 
 exports[`StaggerText Component matches snapshot with default props 1`] = `
 <div
-  class="text-GRAY_1000 inline-flex flex-wrap"
+  class="text-GRAY_1000 break-words"
   data-state="show"
   data-testid="stagger-text-container"
 >
   <span
     class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
   >
-    T
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      T
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      e
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      s
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      t
+    </span>
+    <span
+      class="inline-block"
+    >
+       
+    </span>
   </span>
   <span
     class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
   >
-    e
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    s
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    t
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-     
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    S
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    n
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    a
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    p
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    s
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    h
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    o
-  </span>
-  <span
-    class="inline-block"
-    data-testid="stagger-letter"
-    style="opacity: 0; transform: none;"
-  >
-    t
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      S
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      n
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      a
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      p
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      s
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      h
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      o
+    </span>
+    <span
+      class="inline-block"
+      data-testid="stagger-letter"
+      style="opacity: 0; transform: none;"
+    >
+      t
+    </span>
   </span>
 </div>
 `;

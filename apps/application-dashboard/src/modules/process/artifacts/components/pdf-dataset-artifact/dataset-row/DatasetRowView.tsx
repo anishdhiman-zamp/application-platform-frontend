@@ -4,13 +4,14 @@ import { GridApi } from 'ag-grid-community';
 import Row from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/Row';
 import RowHeader from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/RowHeader';
 import RowViewLoader from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/RowViewLoader';
-import type { CompletedField } from 'modules/process/artifacts/context/completedFields.context';
 import { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { getColumnOrderingVisibilityForCurrentDataset } from '@/modules/data/data.utils';
+import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
+import { ARTIFACT_TYPE } from '@/modules/process/process.types';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 
@@ -28,7 +29,6 @@ interface DatasetRowViewProps {
   onChange?: (key: string, value: string, rowId: string) => void;
   requiredMissingFields?: MissingFieldItemType[];
   missingFields?: MissingFieldItemType[];
-  completedFields: CompletedField[];
   currentUserHasEditAccess: boolean;
   onValueClick?: (rowIndex: string, column: string) => void;
   showPdfSearch?: boolean;
@@ -50,7 +50,6 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
   hasMissingFields,
   requiredMissingFields,
   missingFields,
-  completedFields,
   currentUserHasEditAccess,
   onValueClick,
   showPdfSearch,
@@ -61,6 +60,12 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
   const selectedKeyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [clickedField, setClickedField] = useState<string>('');
+
+  const {
+    state: { artifactType },
+  } = useArtifactContextStore();
+
+  const isPdfDataset = useMemo(() => artifactType === ARTIFACT_TYPE.PDF_DATASET, [artifactType]);
 
   const columnOrdering = getColumnOrderingVisibilityForCurrentDataset(datasetId);
 
@@ -143,7 +148,6 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
                 onChange={onChange}
                 missingFields={missingFields}
                 requiredMissingFields={requiredMissingFields}
-                completedFields={completedFields}
                 currentUserHasEditAccess={currentUserHasEditAccess}
                 textareaRef={textareaRef}
                 selectedKeyRef={selectedKeyRef}

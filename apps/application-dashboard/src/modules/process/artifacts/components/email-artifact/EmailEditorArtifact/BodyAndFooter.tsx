@@ -133,7 +133,7 @@ const BodyAndFooter: FC<BodyAndFooterProps> = ({
     [onAttachmentsChange],
   );
 
-  const handleOnSend = useCallback(() => onSend?.(editor?.getHTML() || ''), [editor, onSend]);
+  const handleOnSend = useCallback(() => onSend?.(), [onSend]);
 
   return (
     <>

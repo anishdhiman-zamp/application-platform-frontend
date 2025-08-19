@@ -18,19 +18,19 @@ interface CustomFetchArgs extends FetchArgs {
 }
 
 interface UserState {
-  user?: { isOrgSwitchIsInProgress?: boolean };
+  user?: {
+    isOrgSwitchIsInProgress?: boolean;
+    user?: { orgs?: Array<{ organization_id: string }> };
+  };
 }
 
-const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN) =>
+const baseQuery = (timeout = REQUEST_TIMEOUT, domain = API_DOMAIN, orgId: string) =>
   fetchBaseQuery({
     baseUrl: `${domain}/`,
     credentials: 'include',
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
-      headers.set(
-        LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID,
-        getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) || '',
-      );
+      headers.set(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, orgId);
 
       return headers;
     },
@@ -42,9 +42,13 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   api,
   extraOptions,
 ) => {
-  await mutex.waitForUnlock();
-
   const state = api.getState() as UserState;
+  const currentOrgId =
+    state?.user?.user?.orgs?.[0]?.organization_id ||
+    getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
+    '';
+
+  await mutex.waitForUnlock();
 
   if (state?.user?.isOrgSwitchIsInProgress) {
     return {
@@ -55,7 +59,7 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     };
   }
 
-  const result = await baseQuery(args.timeout, args.domain)(args, api, extraOptions);
+  const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
   const path = window.location.pathname;
 
   const isLoginRoute = path === LOGIN_PATH;
@@ -100,10 +104,10 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   return result;
 };
 
-const baseApiProvider = (tagTypes: Record<string, string>) =>
+const baseApiProvider = (tagTypes?: Record<string, string>, reducerPath = 'api') =>
   createApi({
-    reducerPath: 'api',
-    tagTypes: Object.values(tagTypes),
+    reducerPath: reducerPath,
+    tagTypes: Object.values(tagTypes ?? {}),
     baseQuery: baseQueryWithAuth,
     endpoints: () => ({}),
     refetchOnMountOrArgChange: true,

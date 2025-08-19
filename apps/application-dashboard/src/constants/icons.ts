@@ -136,6 +136,9 @@ export const PAUSED_OVERLAY = IMAGE_PREFIX + '/icons/agents/video-artifact/pause
 export const PLAYING = IMAGE_PREFIX + '/icons/agents/video-artifact/playing.svg';
 export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 
+// knowledge based
+export const KNOWLEDGE_BASED_ICON = IMAGE_PREFIX + '/images/kb-background.svg';
+
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 

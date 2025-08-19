@@ -56,6 +56,7 @@ const Dataset = baseApi.injectEndpoints({
       query: ({ datasetId, query_config }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_DATA_GET, { datasetId }),
         params: { query_config },
+        timeout: 120000,
       }),
     }),
     getDatasetExport: builder.query<DatasetExportResponseType, DatasetDataRequestType>({

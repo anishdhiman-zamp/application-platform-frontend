@@ -1,16 +1,20 @@
-import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
+import { Action, combineReducers, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import { chatApi } from '@zamp-platform/chat';
 import layoutConfigsSliceReducer from 'store/slices/layout-configs';
 import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
 
+const reducer = combineReducers({
+  [baseApi.reducerPath]: baseApi.reducer,
+  [chatApi.reducerPath]: chatApi.reducer,
+  user: userSliceReducer,
+  layoutConfig: layoutConfigsSliceReducer,
+});
+
 export const store = configureStore({
-  reducer: {
-    [baseApi.reducerPath]: baseApi.reducer,
-    user: userSliceReducer,
-    layoutConfig: layoutConfigsSliceReducer,
-  },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+  reducer: reducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware).concat(chatApi.middleware),
 });
 
 setupListeners(store.dispatch);

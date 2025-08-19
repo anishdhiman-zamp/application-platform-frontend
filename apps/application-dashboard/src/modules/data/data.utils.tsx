@@ -460,6 +460,8 @@ export const getFormattedDate = (valueFormat: ValueFormatType, value: string | n
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
 
+  if (typeof value === 'number' && value === 0) return '';
+
   // expect value to be in microseconds when it is a number
   const date = typeof value === 'number' ? new Date(value / 1000) : new Date(createDateObjectFromUTCString(value));
   const isValidDate = isValid(date);

@@ -2,19 +2,23 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
 import Summary from '@/modules/process/activity-summary/SummarySection';
 import Artifacts from '@/modules/process/artifacts/Artifacts';
-import { ARTIFACT_TAB_MAPPING, DEFAULT_ARTIFACT_TAB, RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
+import {
+  artifactContextActions,
+  ArtifactStateProvider,
+  useArtifactContextStore,
+} from '@/modules/process/artifacts/context/artifact.context';
+import { RESIZABLE_PANEL_ID } from '@/modules/process/process.constant';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
   type HandleShowArtifactsProps,
-  PDF_DATASET_TAB,
 } from '@/modules/process/process.types';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
@@ -22,24 +26,15 @@ import { cn } from '@/utils/common';
 
 const Activity = () => {
   const params = useParams();
-  const searchParams = useSearchParams();
 
   const processId = params?.processId as string;
   const activityId = params?.activityId as string;
-
-  const artifactIdFromUrl = searchParams?.get('artifactId');
-  const artifactTypeFromUrl = searchParams?.get('artifactType');
 
   const panelRef = useRef<ImperativePanelHandle>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showSummary, setShowSummary] = useState(artifactIdFromUrl ? false : true);
-  const [activeTab, setActiveTab] = useState<PDF_DATASET_TAB>(PDF_DATASET_TAB.DATASET);
-  const [artifactType, setArtifactType] = useState<ARTIFACT_TYPE>(
-    (artifactTypeFromUrl as ARTIFACT_TYPE) ?? ARTIFACT_TYPE.PDF_DATASET,
-  );
-  const [artifactId, setArtifactId] = useState<string>(artifactIdFromUrl as string);
+  const [showSummary, setShowSummary] = useState(true);
   const [filters, setFilters] = useState<MapAny>({});
   const [missingFields, setMissingFields] = useState<MapAny>({});
   const [emitHITLActionPayload, setEmitHITLActionPayload] = useState<EmitHITLActionPayload>({
@@ -50,6 +45,9 @@ const Activity = () => {
   });
 
   const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
+
+  useActivitySSE({ activityId, processId });
+  const { dispatch: artifactTypeDispatch } = useArtifactContextStore();
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
 
@@ -91,7 +89,6 @@ const Activity = () => {
     ({
       artifactType,
       artifactId,
-      action,
       filters,
       ctaConfig,
       logGroupId,
@@ -108,8 +105,15 @@ const Activity = () => {
       setShowSummary(false);
       panelRef.current?.resize(35);
 
-      setArtifactId(artifactId);
-      setArtifactType(artifactType);
+      artifactTypeDispatch({
+        type: artifactContextActions.SET_ARTIFACT_ID,
+        payload: { artifactId },
+      });
+
+      artifactTypeDispatch({
+        type: artifactContextActions.SET_ARTIFACT_TYPE,
+        payload: { artifactType },
+      });
       setFilters(filters ?? {});
 
       setMissingFields(ctaConfig?.dataset_to_missing_fields_map ?? {});
@@ -119,15 +123,9 @@ const Activity = () => {
         ctaActionId,
         ctaValue,
       });
-
-      if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
-        setActiveTab(action ? ARTIFACT_TAB_MAPPING[action as keyof typeof ARTIFACT_TAB_MAPPING] : DEFAULT_ARTIFACT_TAB);
-      }
     },
     [panelRef, handleGetArtifacts],
   );
-
-  useActivitySSE({ activityId, processId });
 
   useEffect(() => {
     if (!isExpanded) {
@@ -208,10 +206,6 @@ const Activity = () => {
             onClose={closeArtifacts}
             onExpand={toggleExpand}
             isExpanded={isExpanded}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            artifactType={artifactType}
-            artifactId={artifactId}
             filters={filters}
             onArtifactClick={handleShowArtifacts}
             missingFields={missingFields}
@@ -223,4 +217,12 @@ const Activity = () => {
   );
 };
 
-export default Activity;
+const ActivityPage = () => {
+  return (
+    <ArtifactStateProvider>
+      <Activity />
+    </ArtifactStateProvider>
+  );
+};
+
+export default ActivityPage;

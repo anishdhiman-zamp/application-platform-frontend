@@ -1,12 +1,17 @@
 import { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
+import { ARTIFACT_TYPE } from 'modules/process/process.types';
 import { MapAny } from 'types/commonTypes';
 
 const enum artifactContextActions {
   SET_SEARCH_TERM = 'SET_SEARCH_TERM',
+  SET_ARTIFACT_TYPE = 'SET_ARTIFACT_TYPE',
+  SET_ARTIFACT_ID = 'SET_ARTIFACT_ID',
 }
 
 interface ArtifactContextStateType {
   searchTerm: string;
+  artifactType: ARTIFACT_TYPE;
+  artifactId: string;
 }
 
 export interface ArtifactActionType {
@@ -16,6 +21,8 @@ export interface ArtifactActionType {
 
 const initialState: ArtifactContextStateType = {
   searchTerm: '',
+  artifactType: ARTIFACT_TYPE.PDF_DATASET,
+  artifactId: '',
 };
 
 const context = createContext<{
@@ -43,6 +50,18 @@ export const ArtifactStateProvider: FC<ArtifactStateProviderProps> = ({ children
             searchTerm: action?.payload?.searchTerm || '',
           };
 
+        case artifactContextActions.SET_ARTIFACT_TYPE:
+          return {
+            ...state,
+            artifactType: action?.payload?.artifactType || ARTIFACT_TYPE.PDF_DATASET,
+          };
+
+        case artifactContextActions.SET_ARTIFACT_ID:
+          return {
+            ...state,
+            artifactId: action?.payload?.artifactId || '',
+          };
+
         default:
           return state;
       }
@@ -53,14 +72,6 @@ export const ArtifactStateProvider: FC<ArtifactStateProviderProps> = ({ children
   return <Provider value={{ state, dispatch }}>{children}</Provider>;
 };
 
-const withArtifactContext = <T extends MapAny>(WrappedComponent: FC<T>) => {
-  return (props: T) => (
-    <ArtifactStateProvider>
-      <WrappedComponent {...props} />
-    </ArtifactStateProvider>
-  );
-};
-
 const useArtifactContextStore = () => useContext(context);
 
-export { artifactContextActions, useArtifactContextStore, withArtifactContext };
+export { artifactContextActions, useArtifactContextStore };

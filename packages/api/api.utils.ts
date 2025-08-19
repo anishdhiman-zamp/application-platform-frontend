@@ -44,7 +44,7 @@ const getApiDomain = (environment = '', region = '') => {
     case 'production':
       return `https://api${region}.zamp.ai`;
     case 'staging':
-      return `https://api-stg${region}.zamp.ai`;
+      return `https://api-stg-aws-us.zamp.ai`;
     case 'development': {
       return DEV_API_URL;
     }

@@ -14,8 +14,8 @@ const EmailEditorArtifact = dynamic(
 
 const EmailArtifactWrapper = ({
   artifactData,
-  artifactId,
   processId,
+  artifactId,
   activityId,
   emitHITLActionPayload,
   onClose,
@@ -24,13 +24,13 @@ const EmailArtifactWrapper = ({
     case EMAIL_STATUS.DRAFT:
       return (
         <EmailEditorArtifact
+          key={artifactId}
           emailArtifact={artifactData}
           artifactId={artifactId}
           processId={processId}
           activityId={activityId}
           emitHITLActionPayload={emitHITLActionPayload}
           onClose={onClose}
-          key={artifactId}
         />
       );
     default:
