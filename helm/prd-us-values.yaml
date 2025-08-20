@@ -2,7 +2,7 @@ global:
   service:
     name: application-platform-frontend-prd-us
 
-projectName: zamp  # required
+projectName: zamp # required
 serviceName: application-platform-frontend
 default:
   annotations:
@@ -13,12 +13,12 @@ default:
       service-name: application-platform-frontend-svc
   resources:
     request:
-      cpu: 600m  # Increased for US scale
-      memory: 600Mi  # Increased for US scale
+      cpu: 600m # Increased for US scale
+      memory: 600Mi # Increased for US scale
     limit:
-      cpu: 1200m  # Increased for US scale
-      memory: 1200Mi  # Increased for US scale
-  replicaCount: 3  # Increased for US scale
+      cpu: 1200m # Increased for US scale
+      memory: 1200Mi # Increased for US scale
+  replicaCount: 3 # Increased for US scale
   image:
     repository: 916079538338.dkr.ecr.us-east-1.amazonaws.com/zamp-prd-us-application-platform-frontend-ecr
     tag: v1
@@ -34,15 +34,7 @@ default:
     injection:
       enabled: false
     volumeMount:
-      enabled: true
-      secrets:
-      - data:  
-          - fileName: ".env"
-            mountPath: "/home/node/app/.env"
-            secretKey: zamp-prd-us-app-dashboard-frontend-secrets
-        refreshInterval: 1h
-        secretStoreName: zamp-prd-us-clustersecretstore
-        secretName: env
+      enabled: false
 deployment:
   - name: "svc"
     labels:
@@ -50,12 +42,12 @@ deployment:
     service:
       type: ClusterIP
       ports:
-      - port: 3000
-        name: api
+        - port: 3000
+          name: api
     serviceAccount:
-        create: true
-        annotations:
-          eks.amazonaws.com/role-arn: arn:aws:iam::916079538338:role/zamp-prd-us-application-platform-frontend-irsa-access-role
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::916079538338:role/zamp-prd-us-application-platform-frontend-irsa-access-role
     containers:
       - name: "svc"
         port: 3000
@@ -64,8 +56,8 @@ deployment:
           NEXT_PUBLIC_ENVIRONMENT: "production"
     autoscaling:
       enabled: true
-      minReplicas: 3  # Increased for US scale
-      maxReplicas: 8  # Increased for US scale
+      minReplicas: 3 # Increased for US scale
+      maxReplicas: 8 # Increased for US scale
       targetCPUUtilizationPercentage: 75
       targetMemoryUtilizationPercentage: 75
 
