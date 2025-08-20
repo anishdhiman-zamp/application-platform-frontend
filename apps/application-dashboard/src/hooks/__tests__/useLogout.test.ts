@@ -2,11 +2,20 @@ import { act, renderHook } from '@testing-library/react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useLogout } from 'hooks/useLogout';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+// Mock the session storage utility
+jest.mock('@/utils/sessionstorage', () => ({
+  SESSION_STORAGE_KEYS: { PATHNAME_PRE_LOGOUT: 'PATHNAME_PRE_LOGOUT' },
+  setToSessionStorage: jest.fn(),
+  getFromSessionStorage: jest.fn(),
+  removeFromSessionStorage: jest.fn(),
+}));
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
 }));
 
 jest.mock('apis/auth', () => ({
@@ -15,7 +24,16 @@ jest.mock('apis/auth', () => ({
   useLazyWhoAmIQuery: jest.fn(),
 }));
 
+// Mock the postHog utility
+jest.mock('utils/postHog', () => ({
+  resetPostHog: jest.fn(),
+}));
+
 describe('useLogout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should call logOut, then whoAmI, and redirect to login on success', async () => {
     const mockPush = jest.fn();
     const mockRefetch = jest.fn();
@@ -28,6 +46,7 @@ describe('useLogout', () => {
     });
 
     (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
@@ -61,6 +80,7 @@ describe('useLogout', () => {
     });
 
     (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
@@ -97,6 +117,7 @@ describe('useLogout', () => {
     });
 
     (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: { logout_url: 'test-url' },
@@ -129,6 +150,7 @@ describe('useLogout', () => {
     });
 
     (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
 
     (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
       data: undefined,
@@ -145,6 +167,38 @@ describe('useLogout', () => {
     });
 
     expect(mockLogOut).toHaveBeenCalledWith('');
+    expect(mockWhoAmI).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith(ROUTES_PATH.LOGIN);
+  });
+
+  it('should store full path with query parameters when search params exist', async () => {
+    const mockPush = jest.fn();
+    const mockRefetch = jest.fn();
+    const mockLogOut = jest.fn().mockResolvedValueOnce({});
+    const mockWhoAmI = jest.fn().mockResolvedValueOnce({});
+
+    (useRouter as jest.Mock).mockReturnValue({
+      push: mockPush,
+    });
+
+    (usePathname as jest.Mock).mockReturnValue('/dashboard');
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('tab=settings&view=list'));
+
+    (useInitiateLogoutFlowQuery as jest.Mock).mockReturnValue({
+      data: { logout_url: 'test-url' },
+      refetch: mockRefetch,
+    });
+
+    (useLazyLogoutQuery as jest.Mock).mockReturnValue([mockLogOut, { isLoading: false }]);
+    (useLazyWhoAmIQuery as jest.Mock).mockReturnValue([mockWhoAmI]);
+
+    const { result } = renderHook(() => useLogout());
+
+    await act(async () => {
+      await result.current.logout();
+    });
+
+    expect(mockLogOut).toHaveBeenCalledWith('test-url');
     expect(mockWhoAmI).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith(ROUTES_PATH.LOGIN);
   });

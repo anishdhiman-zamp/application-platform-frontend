@@ -11,7 +11,7 @@ const ToolBar = ({ usePDFSlickStore }: ToolBarProps) => {
   const { pageNumber, numPages, scale, pdfSlick } = usePDFSlickStore();
 
   return (
-    <div className='absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap'>
+    <div className='absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap'>
       {/* Download */}
       <SvgSpriteLoader
         id='download-02'

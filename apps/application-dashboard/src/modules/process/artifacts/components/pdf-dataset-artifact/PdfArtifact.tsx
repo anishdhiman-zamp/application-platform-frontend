@@ -86,7 +86,7 @@ const PdfArtifact = ({ processId, pdfArtifact, isArtifactLoading, className, art
       {isDocumentLoaded && !error && <SearchBar {...{ usePDFSlickStore }} />}
       {!error && (
         <div className='relative h-full flex-1'>
-          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-26' />
+          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-48' />
         </div>
       )}
       {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} />}

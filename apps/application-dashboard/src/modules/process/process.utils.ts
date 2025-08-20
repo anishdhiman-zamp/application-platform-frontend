@@ -146,3 +146,17 @@ export const parseIntSafely = (value: string | null | undefined, fallback: numbe
 
   return isNaN(parsed) ? fallback : parsed;
 };
+
+/**
+ * Encodes a string to base64
+ * @param {string} str - The string to encode
+ * @returns {string} The base64 encoded string
+ */
+export const base64Encode = (str: string) => {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+
+  return btoa(binary);
+};
