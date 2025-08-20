@@ -40,7 +40,7 @@ export const getApiDomainAndRegions = async (email = '') => {
 };
 
 const getApiDomain = (environment = '', region = '') => {
-  console.log('environment test>>>', environment);
+  console.log('environment test again>>>', environment);
   switch (environment) {
     case 'production':
       return `https://api${region}.zamp.ai`;

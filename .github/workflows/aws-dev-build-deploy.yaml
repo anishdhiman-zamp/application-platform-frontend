@@ -163,7 +163,7 @@ jobs:
       - id: build
         name: Build and Push Image
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend/"
         run: |
           # Debug: Show all environment variables first
           echo "=== Environment Variables Debug ==="
@@ -211,11 +211,11 @@ jobs:
         name: Upload Static Files to S3
         run: |
           # Upload Next.js static files directly from the built application
-          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
-          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public"
           
           echo "Static assets uploaded to S3 successfully!"
-          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
 
   deploy-to-eks:
     name: Deploy to EKS
