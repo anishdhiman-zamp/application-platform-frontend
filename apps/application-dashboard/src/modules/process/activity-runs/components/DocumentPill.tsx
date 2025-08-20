@@ -22,7 +22,8 @@ interface DocumentItemPillProps {
 
 const DocumentItemPill = ({ item, onClick, maxWidth = '100%' }: DocumentItemPillProps) => (
   <div
-    className={`bg-GRAY_100 flex max-w-[${maxWidth}] min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1`}
+    className={`bg-GRAY_100 flex min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1`}
+    style={{ maxWidth: maxWidth }}
     onClick={onClick}
   >
     <SvgSpriteLoader
@@ -78,18 +79,13 @@ const DocumentPill = ({ value }: DocumentPillProps) => {
             </p>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='start' className='w-[168px] space-y-1 rounded-md p-1'>
-            {remainingItems.map((item) => (
+            {remainingItems.map((item, index) => (
               <DropdownMenuItem
-                key={item.name}
+                key={`${item.name}-${index}`}
                 className='bg-GRAY_100 flex w-full items-center justify-between gap-x-6 rounded-md px-1 py-1'
               >
                 <TooltipV2 tooltipBody='View' side={SIDE_OPTIONS.BOTTOM}>
                   <DocumentItemPill item={item} onClick={() => openPreview(item)} maxWidth='100px' />
-                </TooltipV2>
-                <TooltipV2 tooltipBody='Download' side={SIDE_OPTIONS.BOTTOM}>
-                  <div className='hover:bg-GRAY_200 flex items-center rounded p-1'>
-                    <SvgSpriteLoader id='download-02' size={12} className='shrink-0 cursor-pointer' />
-                  </div>
                 </TooltipV2>
               </DropdownMenuItem>
             ))}

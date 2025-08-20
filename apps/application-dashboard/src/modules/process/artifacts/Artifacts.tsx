@@ -20,7 +20,6 @@ import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
   EmailArtifactsResponseType,
-  PdfArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
@@ -124,7 +123,7 @@ const Artifacts = ({
             <PdfArtifact
               key={id}
               artifactId={artifactId}
-              pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
+              fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
               processId={processId}
               isArtifactLoading={isFetching}
               isSearchBarEnabled
@@ -166,7 +165,7 @@ const Artifacts = ({
           <PdfArtifact
             processId={processId}
             artifactId={artifactId}
-            pdfArtifact={artifactData as PdfArtifactsResponseType}
+            fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
             isArtifactLoading={isFetching}
             isSearchBarEnabled
             key={id}

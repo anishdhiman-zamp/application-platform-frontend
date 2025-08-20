@@ -7,11 +7,9 @@ import { filtersContextActions, useFiltersContextStore } from 'components/filter
 
 interface DocumentSearchFilterMenuItemProps {
   column: MapAny;
-  values: string[];
   className?: string;
   isOpen?: boolean;
   label?: string;
-  showColumnLabel?: boolean;
   isDisabled?: boolean;
 }
 

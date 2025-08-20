@@ -9,14 +9,12 @@ import ToolBar from 'modules/process/artifacts/components/pdf-dataset-artifact/T
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 
 interface PDFViewerAppProps {
   processId: string;
   artifactId: string;
   isArtifactLoading: boolean;
-  pdfArtifact?: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
-  fileId?: string;
+  fileId: string;
   className?: string;
   isSearchBarEnabled?: boolean;
 }
@@ -38,7 +36,6 @@ const ErrorFallback = ({ message }: { message: string }) => (
 const PdfArtifact = ({
   processId,
   artifactId,
-  pdfArtifact,
   fileId,
   isArtifactLoading,
   className,
@@ -54,10 +51,10 @@ const PdfArtifact = ({
     {
       processId,
       artifactId,
-      fileId: pdfArtifact?.pdf_file?.file_id || fileId || '',
+      fileId,
     },
     {
-      skip: !processId || !artifactId,
+      skip: !processId || !artifactId || !fileId,
       refetchOnMountOrArgChange: false,
     },
   );

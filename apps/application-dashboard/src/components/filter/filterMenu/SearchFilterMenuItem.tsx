@@ -6,12 +6,12 @@ import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface SearchFilterMenuItemProps {
-  column: MapAny;
-  values: string[];
+  column: {
+    colId: string;
+  };
   className?: string;
   isOpen?: boolean;
   label?: string;
-  showColumnLabel?: boolean;
   isDisabled?: boolean;
 }
 
