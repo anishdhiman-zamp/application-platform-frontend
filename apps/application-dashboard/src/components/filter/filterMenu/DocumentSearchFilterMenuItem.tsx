@@ -6,7 +6,9 @@ import { DOCUMENT_SEARCH_FILTER_OPTIONS } from 'components/filter/filters.consta
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface DocumentSearchFilterMenuItemProps {
-  column: MapAny;
+  column: {
+    colId: string;
+  };
   className?: string;
   isOpen?: boolean;
   label?: string;

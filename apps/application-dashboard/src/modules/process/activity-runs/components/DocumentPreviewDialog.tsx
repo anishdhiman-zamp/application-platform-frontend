@@ -55,7 +55,9 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
 
   useEffect(() => {
     setCurrentFile(selectedFile);
-    const index = availableFiles.findIndex((file) => file?.name === selectedFile?.name);
+    const index = availableFiles.findIndex(
+      (file) => file?.artifacts_details?.file_id === selectedFile?.artifacts_details?.file_id,
+    );
 
     setCurrentFileIndex(index >= 0 ? index : 0);
   }, [selectedFile, availableFiles]);
