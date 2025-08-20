@@ -23,6 +23,7 @@ COPY apps/application-dashboard/.next/static ./apps/application-dashboard/.next/
 COPY apps/application-dashboard/public ./apps/application-dashboard/public
 COPY apps/application-dashboard/package.json ./apps/application-dashboard/package.json
 COPY node_modules ./node_modules
+COPY notes.txt ./notes.txt
 
 # Expose port
 EXPOSE 3000
