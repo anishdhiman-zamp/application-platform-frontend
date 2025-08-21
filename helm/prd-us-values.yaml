@@ -60,14 +60,3 @@ deployment:
       maxReplicas: 8 # Increased for US scale
       targetCPUUtilizationPercentage: 75
       targetMemoryUtilizationPercentage: 75
-
-ingress:
-  enabled: true
-  className: "traefik"
-  annotations: {}
-  hosts:
-    - host: application-platform-frontend-prd-us.zamp.ai
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
