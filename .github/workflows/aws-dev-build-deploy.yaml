@@ -146,7 +146,7 @@ jobs:
 
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend/"
           TIMESTAMP: "${TIMESTAMP}"
         run: |
           echo "Building application with environment variables:"

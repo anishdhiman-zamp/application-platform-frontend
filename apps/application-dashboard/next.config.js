@@ -24,6 +24,11 @@ const nextConfig = {
         hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'd2zmqfd18ltqnx.cloudfront.net',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {
