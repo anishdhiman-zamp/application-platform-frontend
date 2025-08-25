@@ -5,7 +5,7 @@ import SearchFilter from 'components/filter/filterMenu/components/SearchFilter';
 import { DOCUMENT_SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
-interface DocumentSearchFilterMenuItemProps {
+interface DocumentSearchFilterMenuItemType {
   column: {
     colId: string;
   };
@@ -15,7 +15,7 @@ interface DocumentSearchFilterMenuItemProps {
   isDisabled?: boolean;
 }
 
-const DocumentSearchFilterMenuItem: FC<DocumentSearchFilterMenuItemProps> = ({
+const DocumentSearchFilterMenuItem: FC<DocumentSearchFilterMenuItemType> = ({
   column,
   className,
   isOpen = false,

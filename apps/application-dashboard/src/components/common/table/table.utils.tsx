@@ -14,12 +14,14 @@ import {
 } from 'types/components/table.type';
 import { checkIsObjectEmpty } from 'utils/common';
 import { LOCAL_CURRENCY } from '@/modules/page/pages.constants';
+import type { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import {
   AggregationFunctionMap,
   ArrayFilters,
   LogicalOperatorMap,
   PAGE_SIZE,
 } from 'components/common/table/table.constants';
+import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -294,3 +296,20 @@ export const getEncodedRequest = (
 };
 
 export const getDataTableTheme = (params: MapAny) => themeQuartz.withParams(params);
+
+/**
+ * Get the type of the column
+ * @param column - The column to get the type of
+ * @returns The type of the column
+ */
+export const getColumnType = (column: DatasetFilterConfigResponseType) => {
+  if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG) {
+    return FILTER_TYPES.TAGS;
+  }
+
+  if (column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.DOCUMENT) {
+    return FILTER_TYPES.DOCUMENT;
+  }
+
+  return column?.type;
+};

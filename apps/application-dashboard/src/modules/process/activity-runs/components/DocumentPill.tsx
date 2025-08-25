@@ -6,7 +6,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { ICellRendererParams } from 'ag-grid-community';
 import DocumentPreviewDialog from 'modules/process/activity-runs/components/DocumentPreviewDialog';
 import type { DocumentItemType } from 'modules/process/process.types';
-import { SIDE_OPTIONS } from 'types/commonTypes';
+import { type defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 
@@ -14,13 +14,13 @@ interface DocumentPillProps extends ICellRendererParams {
   value: DocumentItemType[];
 }
 
-interface DocumentItemPillProps {
+interface DocumentItemPillType {
   item: DocumentItemType;
-  onClick: () => void;
+  onClick: defaultFnType;
   maxWidth?: string;
 }
 
-const DocumentItemPill = ({ item, onClick, maxWidth = '100%' }: DocumentItemPillProps) => (
+const DocumentItemPill = ({ item, onClick, maxWidth = '100%' }: DocumentItemPillType) => (
   <div
     className={`bg-GRAY_100 flex min-w-0 cursor-pointer items-center gap-1.5 rounded px-1.5 py-1`}
     style={{ maxWidth: maxWidth }}
