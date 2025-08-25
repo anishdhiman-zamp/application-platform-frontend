@@ -79,13 +79,13 @@ describe('LocalStorage Utilities', () => {
       expect(result).toBe(testValue);
     });
 
-    it('should return null when key does not exist', () => {
+    it('should return empty string when key does not exist', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
       const result = getFromLocalStorage('non-existent-key');
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('non-existent-key');
-      expect(result).toBe(null);
+      expect(result).toBe('');
     });
 
     it('should return empty string when window is undefined (SSR)', () => {
@@ -247,7 +247,7 @@ describe('LocalStorage Utilities', () => {
 
       // Verify removal
       const removedValue = getFromLocalStorage(testKey);
-      expect(removedValue).toBe(null);
+      expect(removedValue).toBe('');
     });
 
     it('should handle concurrent operations', () => {

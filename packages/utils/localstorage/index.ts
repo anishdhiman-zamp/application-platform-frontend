@@ -18,7 +18,8 @@ export const getFromLocalStorage = (key: string) => {
     return '';
   }
 
-  return localStorage.getItem(key);
+  const value = localStorage.getItem(key);
+  return value !== null ? value : '';
 };
 
 export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
