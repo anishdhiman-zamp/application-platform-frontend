@@ -1,12 +1,11 @@
 import React, { FC, useRef, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
 import { getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
-import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
 type PeopleHeaderPropsType = {
@@ -45,11 +44,9 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
           }}
           size={SIZE_TYPES.SMALL}
         />
-
         <Button
-          type={BUTTON_TYPES.PRIMARY}
-          id='invite-user-btn'
-          size={SIZE_TYPES.SMALL}
+          className='f-12-500 bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 flex h-7 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px] text-white hover:text-white active:text-white disabled:cursor-not-allowed'
+          data-testid='invite-user-btn'
           onClick={handleOpenInviteMembersPopup}
           disabled={checkIfMember}
         >
