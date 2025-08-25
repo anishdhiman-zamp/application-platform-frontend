@@ -160,7 +160,7 @@ export const OPERATOR = {
   ArrayIn: { label: 'is in', value: CONDITION_OPERATOR_TYPE.ARRAY_IN },
 };
 
-export const DESCRIPTION_OPERATORS = [OPERATOR.ArrayContains, OPERATOR.ArrayIn];
+export const DESCRIPTION_OPERATORS = [OPERATOR.ArrayIn, OPERATOR.ArrayContains];
 
 export const FILTER_OPERATOR_TYPE_MAP = {
   [CONDITION_OPERATOR_TYPE.IN]: FILTER_TYPES.MULTI_SELECT,

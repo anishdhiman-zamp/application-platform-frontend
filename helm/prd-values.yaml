@@ -13,11 +13,11 @@ default:
       service-name: application-platform-frontend-svc
   resources:
     request:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1000m
+      memory: 1000Mi
     limit:
       cpu: 1000m
-      memory: 1024Mi
+      memory: 1000Mi
   replicaCount: 1
   image:
     repository: "916079538338.dkr.ecr.me-central-1.amazonaws.com/zamp-prd-me-application-platform-frontend-ecr"
