@@ -51,3 +51,8 @@ apps/application-dashboard/coverage
 frontend.log
 .logs
 .pids
+
+# Playwright 
+apps/application-dashboard/tests/session-secrets/
+apps/application-dashboard/tests/playwright-report/
+apps/application-dashboard/tests/test-results/
