@@ -311,6 +311,12 @@
 
 /* Font */
 
+.f-64-400 {
+  font-weight: 400;
+  line-height: 64px;
+  font-size: 64px;
+}
+
 .f-40-500 {
   font-weight: 500;
   line-height: 45px;

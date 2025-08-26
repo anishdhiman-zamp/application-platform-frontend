@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginButton should match snapshot for default state 1`] = `
+<button
+  class="bg-BG_GRAY_3 relative mt-4 h-12 w-full rounded-md cursor-pointer!"
+  id="google-login"
+  type="submit"
+>
+  <div
+    class="color-transition before:bg-BG_GRAY_3 after:bg-BG_GRAY_4 relative z-10 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:translate-x-0 before:transform before:rounded-[6px] before:transition-transform before:duration-3000 before:ease-in-out after:absolute after:top-0 after:h-full after:w-full after:-translate-x-1/2 after:transform after:rounded-[6px] after:transition-transform after:duration-3000 after:ease-in-out [object Object]"
+  >
+    <div
+      class="absolute top-[12px] right-40 z-40 text-white"
+    >
+      <span
+        class="mr-10"
+      >
+        Login
+      </span>
+    </div>
+  </div>
+</button>
+`;
+
+exports[`LoginButton should match snapshot for loading state 1`] = `
+<button
+  class="bg-BG_GRAY_3 relative mt-4 h-12 w-full rounded-md cursor-not-allowed!"
+  id="google-login"
+  type="submit"
+>
+  <div
+    class="color-transition before:bg-BG_GRAY_3 after:bg-BG_GRAY_4 relative z-10 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:translate-x-0 before:transform before:rounded-[6px] before:transition-transform before:duration-3000 before:ease-in-out after:absolute after:top-0 after:h-full after:w-full after:-translate-x-1/2 after:transform after:rounded-[6px] after:transition-transform after:duration-3000 after:ease-in-out [object Object]"
+  >
+    <div
+      class="absolute top-[12px] right-40 z-40 text-white"
+    >
+      <span
+        class="mr-10"
+      >
+        Login
+      </span>
+    </div>
+  </div>
+</button>
+`;
+
+exports[`LoginButton should match snapshot with provider logo 1`] = `
+<button
+  class="bg-BG_GRAY_3 relative mt-4 h-12 w-full rounded-md cursor-pointer!"
+  id="google-login"
+  type="submit"
+>
+  <div
+    class="color-transition before:bg-BG_GRAY_3 after:bg-BG_GRAY_4 relative z-10 h-full w-full overflow-hidden rounded-md before:absolute before:top-0 before:h-full before:w-full before:translate-x-0 before:transform before:rounded-[6px] before:transition-transform before:duration-3000 before:ease-in-out after:absolute after:top-0 after:h-full after:w-full after:-translate-x-1/2 after:transform after:rounded-[6px] after:transition-transform after:duration-3000 after:ease-in-out [object Object]"
+  >
+    <div
+      class="absolute top-[12px] right-40 z-40 text-white"
+    >
+      <div
+        class="f-14-500 animate-opacity flex items-center justify-center gap-1.5 text-white"
+      >
+        <span>
+          Signing in with
+        </span>
+        <img
+          alt="provider logo"
+          height="20"
+          src="https://example.com/logo.png"
+          style="max-height: 20px;"
+          width="40"
+        />
+      </div>
+    </div>
+  </div>
+</button>
+`;

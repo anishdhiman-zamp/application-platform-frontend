@@ -35,7 +35,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
         <TooltipTrigger className={className} asChild={asChildTrigger} disabled={disabled}>
           {children}
         </TooltipTrigger>
-        {tooltipBody && (
+        {tooltipBody && !disabled && (
           <TooltipContent className={tooltipClassName} side={side} sideOffset={10} onWheel={handleWheel}>
             {tooltipBody}
           </TooltipContent>

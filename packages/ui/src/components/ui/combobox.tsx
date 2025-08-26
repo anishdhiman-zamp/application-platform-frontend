@@ -65,7 +65,7 @@ export function Combobox({
           id='combobox-content'
         >
           <Command shouldFilter={true}>
-            <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} />
+            <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} autoFocus />
             <CommandList className={cn('', listClassName)}>
               {!optionsLoading && <CommandEmpty>{emptyText}</CommandEmpty>}
               <CommandGroup
@@ -84,7 +84,7 @@ export function Combobox({
                 {!optionsLoading &&
                   options?.map((option) => (
                     <CommandItem
-                      key={option?.id ?? option?.value.toString()}
+                      key={option?.id ?? option?.value?.toString()}
                       value={option?.label}
                       onSelect={() => onSelect(option)}
                       className={cn('flex items-center', itemClassName)}

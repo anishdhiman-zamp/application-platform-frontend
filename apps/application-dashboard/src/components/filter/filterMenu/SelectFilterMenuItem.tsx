@@ -12,6 +12,8 @@ interface SelectFilterMenuItemProps {
   filtersConfig: FilterConfigType[];
   onAddFilter: (filter: string) => void;
   currentPageFilters: string[];
+  className?: string;
+  openClassName?: string;
 }
 
 const SelectFilterMenuItem = ({
@@ -21,6 +23,8 @@ const SelectFilterMenuItem = ({
   filtersConfig,
   onAddFilter,
   currentPageFilters,
+  className = 'left-0 top-full',
+  openClassName,
 }: SelectFilterMenuItemProps) => {
   const checkIfFilterIsSelected = (filterKey: string) => currentPageFilters?.includes(filterKey);
   const [search, setSearch] = useState('');
@@ -46,9 +50,12 @@ const SelectFilterMenuItem = ({
       ref={menuRef}
       style={{ minWidth: menuWidth }}
       className={cn(
-        `shadow-table-filter-menu absolute top-full left-0 z-1000 mt-1 min-w-[300px] rounded-md border bg-white`,
-        isOpen ? 'max-h-[500px] overflow-auto [&::-webkit-scrollbar]:hidden' : 'max-h-0 overflow-hidden border-0',
+        `shadow-table-filter-menu absolute z-1000 mt-1 min-w-[300px] rounded-md border bg-white`,
+        isOpen
+          ? `max-h-[500px] overflow-auto [&::-webkit-scrollbar]:hidden ${openClassName}`
+          : 'max-h-0 overflow-hidden border-0',
         getMenuPlacement() === POSITION_TYPES.LEFT ? '-right-full -translate-x-full' : '',
+        className,
       )}
     >
       <Input
