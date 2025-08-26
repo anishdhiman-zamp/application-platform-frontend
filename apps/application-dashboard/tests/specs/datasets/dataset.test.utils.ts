@@ -28,7 +28,7 @@ export async function selectAvailableOrganisation(page: Page, baseUrl: string, o
     test.skip(true, 'No organisations available');
   }
 
-  // Prefer Stripe if available, else select the first org
+  // Prefer Org if available, else select the first org
   const stripeOrg = await (async () => {
     for (const org of orgs) {
       const id = await org.getAttribute('data-testid');

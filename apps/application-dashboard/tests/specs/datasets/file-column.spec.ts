@@ -46,6 +46,8 @@ test.describe('File Column', () => {
       if (await errorCard.isVisible()) {
         console.log('Skipping test: API is not returning data');
         test.info().skip('API is not returning data');
+
+        return;
       }
 
       await expect(datasetTable).toBeVisible({ timeout: 10000 });
