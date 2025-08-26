@@ -40,10 +40,16 @@ test.describe('File Column', () => {
       const datasetTable = page.getByTestId('dataset-table');
       const errorCard = page.getByText('Failed to load dataset', { exact: true });
 
-      // Check if error card is visible within timeout; don't fail if it's not found
-      await errorCard.waitFor({ state: 'visible', timeout: 10000 });
+      // Safe check for error card visibility without throwing
+      let errorVisible = false;
 
-      if (await errorCard.isVisible()) {
+      try {
+        errorVisible = await errorCard.isVisible({ timeout: 10000 });
+      } catch {
+        errorVisible = false; // ignore timeout errors
+      }
+
+      if (errorVisible) {
         console.log('Skipping test: API is not returning data');
         test.info().skip('API is not returning data');
 
