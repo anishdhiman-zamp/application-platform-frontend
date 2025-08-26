@@ -38,17 +38,16 @@ test.describe('File Column', () => {
     await test.step('Verify Dataset Table', async () => {
       console.log('Verifying dataset table...');
       const datasetTable = page.getByTestId('dataset-table');
-      const errorCard = page.getByText('Failed to load dataset');
+      const errorCard = page.getByText('Failed to load dataset', { exact: true });
 
-      // Check for error state first with detailed failure info
+      // Check if error card is visible within timeout; don't fail if it's not found
       await errorCard.waitFor({ state: 'visible', timeout: 10000 });
 
       if (await errorCard.isVisible()) {
-        console.log('❌ Skipping test: API Error: API is not returning data');
-        test.skip(true, 'API is not returning data');
+        console.log('Skipping test: API is not returning data');
+        test.info().skip('API is not returning data');
       }
 
-      await datasetTable.waitFor({ state: 'visible', timeout: 10000 });
       await expect(datasetTable).toBeVisible({ timeout: 10000 });
     });
 
