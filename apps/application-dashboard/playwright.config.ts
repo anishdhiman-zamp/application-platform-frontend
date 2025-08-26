@@ -8,9 +8,9 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
   googleSSOConfig: {
     adminEmail: 'admin@zamp.ai',
     adminPassword: 'Zamp@123Zamp@!@#',
-    email: 'aditya.jain@zamp.ai', // use your google sso email
-    password: 'AdityaZamp04@', // use your google sso password
-    totpSecret: 'bpnzwmcu4wtm4hcxuthhb5b25m3vtvfs', // generate your totp secret => https://zxing.org/w/decode.jspx
+    email: '', // use your google sso email
+    password: '', // use your google sso password
+    totpSecret: '', // generate your totp secret => https://zxing.org/w/decode.jspx
   },
   // Prefer env-provided CDP endpoint when launching local Selenium/Chrome with --remote-debugging-port
   localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
