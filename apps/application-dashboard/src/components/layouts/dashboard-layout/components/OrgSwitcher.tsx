@@ -80,7 +80,10 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     <div>
       <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <div className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'>
+          <div
+            className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            data-testid='org-switcher-trigger'
+          >
             <div className='flex w-full items-center justify-between gap-2 select-none'>
               <div
                 className={cn(
@@ -116,7 +119,12 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
               isError={error}
             >
               {organizations?.map((item: Organization, idx) => (
-                <DropdownMenuItem className='p-0' onClick={() => handleOrgChange(item)} key={idx}>
+                <DropdownMenuItem
+                  className='p-0'
+                  onClick={() => handleOrgChange(item)}
+                  key={idx}
+                  data-testid={`org-switcher-item-${item?.name?.toLowerCase()}`}
+                >
                   <OrgCard
                     isSelected={item?.organization_id === selectedOrg?.organization_id}
                     name={item?.name}

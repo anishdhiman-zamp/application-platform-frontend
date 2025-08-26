@@ -88,7 +88,7 @@ const DatasetTable: FC<DatasetTableProps> = ({
   useGetRowId = false,
 }) => {
   return (
-    <div id='dataset-table'>
+    <div id='dataset-table' data-testid='dataset-table'>
       <Table
         tableRef={tableRef}
         columns={columns}
