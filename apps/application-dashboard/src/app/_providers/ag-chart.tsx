@@ -7,11 +7,7 @@ import { AG_CHART_KEY, AG_GRID_KEY } from '@/components/common/agGridTable/agGri
 const AgChartInit = () => {
   LicenseManager.setLicenseKey(AG_GRID_KEY);
   LicenseManagerCharts.setLicenseKey(AG_CHART_KEY);
-
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('Setting up Ag Grid Test IDs');
-    setupAgTestIds();
-  }
+  setupAgTestIds();
 
   return null;
 };

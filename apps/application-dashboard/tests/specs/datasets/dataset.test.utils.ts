@@ -54,14 +54,14 @@ export async function selectAvailableOrganisation(page: Page, baseUrl: string, o
  * @returns {Promise<void>}
  *
  * **/
-export async function selectAvailableDataset(page: Page, datasetName: string) {
-  const datasetCells = await page.getByTestId(/^ag-cell:row-id=.*;colId=title$/).all();
+export async function selectAvailableDatasetDescription(page: Page, datasetName: string) {
+  const datasetCells = await page.getByTestId(/^ag-cell:row-id=.*;colId=description$/).all();
 
   if (datasetCells.length === 0) {
     test.skip(true, 'No datasets available');
   }
 
-  // Prefer "Invoices" if available, else first dataset
+  // Prefer dataset with description if available, else first dataset
   for (const cell of datasetCells) {
     const text = (await cell.innerText()).trim();
 
