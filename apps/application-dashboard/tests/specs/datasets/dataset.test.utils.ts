@@ -29,7 +29,7 @@ export async function selectAvailableOrganisation(page: Page, baseUrl: string, o
   }
 
   // Prefer Org if available, else select the first org
-  const stripeOrg = await (async () => {
+  const org = await (async () => {
     for (const org of orgs) {
       const id = await org.getAttribute('data-testid');
 
@@ -39,7 +39,7 @@ export async function selectAvailableOrganisation(page: Page, baseUrl: string, o
     return null;
   })();
 
-  const selectedOrg = stripeOrg || orgs[0];
+  const selectedOrg = org || orgs[0];
 
   await selectedOrg.click();
   await page.waitForURL(`${baseUrl}/**`, { timeout: 10000 });
