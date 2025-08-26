@@ -50,8 +50,7 @@ const Widgets = baseApi.injectEndpoints({
         method: REQUEST_TYPES.PUT,
         body,
       }),
-      invalidatesTags: (_, error) =>
-        error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES, APITags.GET_WIDGET_DATA],
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES, APITags.GET_WIDGET_DATA]),
     }),
   }),
 });

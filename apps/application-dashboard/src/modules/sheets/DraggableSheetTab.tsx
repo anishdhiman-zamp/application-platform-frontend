@@ -4,15 +4,20 @@ import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@zamp-platform/ui/utils';
 import SheetTab from 'modules/sheets/SheetTab';
 import { MenuItem } from '@/types/common/components';
+import { defaultFnType } from '@/types/commonTypes';
 
 const DraggableSheetTab = ({
   tab,
   currentSheetId,
   handleTabSelect,
+  allSheets,
+  onCreateSheet,
 }: {
   tab: MenuItem;
   currentSheetId: string;
   handleTabSelect: (tab: MenuItem) => void;
+  allSheets?: MenuItem[];
+  onCreateSheet: defaultFnType;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tab.value });
   const style: CSSProperties = {
@@ -28,7 +33,13 @@ const DraggableSheetTab = ({
       {...listeners}
       className={cn('inline-flex', { invisible: isDragging })}
     >
-      <SheetTab tab={tab} currentSheetId={currentSheetId} handleTabSelect={handleTabSelect} />
+      <SheetTab
+        tab={tab}
+        currentSheetId={currentSheetId}
+        handleTabSelect={handleTabSelect}
+        allSheets={allSheets}
+        onCreateSheet={onCreateSheet}
+      />
     </div>
   );
 };
