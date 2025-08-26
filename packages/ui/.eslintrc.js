@@ -4,7 +4,7 @@ const config = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: './tsconfig.json',
-    tsconfigRootDir: __dirname, // Fixed: Use __dirname for absolute path
+    tsconfigRootDir: __dirname,
   },
   env: {
     jest: true,
