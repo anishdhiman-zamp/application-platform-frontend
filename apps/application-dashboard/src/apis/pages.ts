@@ -95,6 +95,13 @@ const Pages = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
     }),
+    deletePage: builder.mutation<void, string>({
+      query: (pageId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.DELETE_PAGE, { pageId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
     updateSheetByPageId: builder.mutation<void, UpdateSheetByPageIdPayloadType>({
       query: ({ pageId, sheetId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_SHEET_BY_PAGE_ID, { pageId, sheetId }),
@@ -159,6 +166,7 @@ export const {
   useUpdatePageIndexesMutation,
   useUpdateSheetIndexesByPageIdMutation,
   useUpdatePageMutation,
+  useDeletePageMutation,
   useUpdateSheetByPageIdMutation,
   useDeleteSheetByPageIdMutation,
   useCreateWidgetMutation,

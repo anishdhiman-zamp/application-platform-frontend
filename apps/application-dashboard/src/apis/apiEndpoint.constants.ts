@@ -76,6 +76,7 @@ export const API_ENDPOINTS = {
   UPDATE_PAGE_INDEXES: `pages/update-indexes`,
   UPDATE_SHEET_INDEXES: `pages/{{pageId}}/sheets/update-indexes`,
   UPDATE_PAGE: `pages/{{pageId}}`,
+  DELETE_PAGE: `pages/{{pageId}}`,
   UPDATE_SHEET_BY_PAGE_ID: `pages/{{pageId}}/sheets/{{sheetId}}`,
   DELETE_SHEET_BY_PAGE_ID: `pages/{{pageId}}/sheets/{{sheetId}}`,
   UPDATE_SHEET_LAYOUT_PUT: `pages/{{pageId}}/sheets/{{sheetId}}/update-layout`,

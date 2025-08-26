@@ -1,12 +1,27 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, FC } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@zamp-platform/ui/utils';
+import { getPageRouteById } from 'constants/routeConfig';
 import Link from 'next/link';
-import { getPageRouteById } from '@/constants/routeConfig';
-import PageNavTab, { PageNavTabProps } from 'components/layouts/dashboard-layout/components/PageNavTab';
+import { PageResponseType } from 'types/api/pagesApi.types';
+import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 
-const DraggablePageNavTab = ({ pageId, label, isSelected }: PageNavTabProps) => {
+interface DraggablePageNavTabProps {
+  pageId: string;
+  label: string;
+  isSelected: boolean;
+  page: PageResponseType;
+}
+
+const selectors = [
+  '#page-nav-tab-delete-page-button',
+  '#page-nav-tab-popover-trigger',
+  '#page-nav-tab-popover-content',
+  '#delete-page-dialog',
+];
+
+const DraggablePageNavTab: FC<DraggablePageNavTabProps> = ({ pageId, label, isSelected, page }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: pageId,
   });
@@ -23,8 +38,20 @@ const DraggablePageNavTab = ({ pageId, label, isSelected }: PageNavTabProps) => 
       {...listeners}
       className={cn('select-none', { invisible: isDragging })}
     >
-      <Link href={getPageRouteById(pageId)} className='cursor-pointer' prefetch>
-        <PageNavTab label={label} pageId={pageId} isSelected={isSelected} />
+      <Link
+        href={getPageRouteById(pageId)}
+        className='cursor-pointer'
+        prefetch
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+
+          if (selectors.some((selector) => target.closest(selector))) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+      >
+        <PageNavTab label={label} pageId={pageId} isSelected={isSelected} page={page} />
       </Link>
     </div>
   );

@@ -170,6 +170,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                         pageId={page.page_id}
                         label={page.name}
                         isSelected={params?.pageId === page.page_id}
+                        page={page}
                       />
                       {dropIndicatorIndex === idx && (
                         <div className='absolute right-0 bottom-0 left-0 z-10 h-0.5 rounded-full bg-black' />
@@ -186,6 +187,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                       label={pages?.find((p) => p.page_id === activeId)?.name || ''}
                       pageId={activeId}
                       isSelected={false}
+                      page={pages?.find((p) => p.page_id === activeId) || pages?.[0]}
                     />
                   </div>
                 ) : null}
