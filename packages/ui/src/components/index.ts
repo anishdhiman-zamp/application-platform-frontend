@@ -15,6 +15,7 @@ export * from './ui/popover';
 export * from './ui/radio';
 export * from './ui/resizable';
 export * from './ui/select';
+export * from './ui/select-button';
 export * from './ui/sheet';
 export * from './ui/skeleton';
 export * from './ui/step-card';

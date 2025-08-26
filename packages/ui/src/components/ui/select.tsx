@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { SvgSpriteLoader } from '../assets';
 import { Combobox } from './combobox';
+import { cva } from 'class-variance-authority';
 
 export interface SelectOption {
   id?: string;
@@ -22,12 +23,13 @@ export interface SelectIcon {
   category?: ICON_SPRITE_TYPES;
   id?: string;
   name?: string;
+  component?: React.ReactNode;
 }
 
 export interface SelectProps {
   options: SelectOption[];
   placeholder?: string;
-  variant?: SizeType;
+  variant?: 'small' | 'medium';
   className?: string;
   label?: string;
   fetchOptions?: (page: number) => Promise<{ options: SelectOption[]; hasMore: boolean }>; // eslint-disable-line no-unused-vars
@@ -36,7 +38,23 @@ export interface SelectProps {
   onBlur?: () => void;
   clearOptions?: boolean;
   setShouldClearOptions?: (_shouldClearOptions: boolean) => void; // eslint-disable-line no-unused-vars
+  controlClassName?: string;
 }
+
+const selectVariants = cva(
+  'f-13-400 border-input flex w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        medium: 'h-10',
+        small: 'h-8',
+      } satisfies Partial<Record<SizeType, string>>,
+    },
+    defaultVariants: {
+      variant: 'medium',
+    },
+  },
+);
 
 const RenderIcon = ({ icon, className }: { icon: SelectIcon; className?: string }) => {
   if (icon?.type === 'sprite') {
@@ -52,6 +70,11 @@ const RenderIcon = ({ icon, className }: { icon: SelectIcon; className?: string 
   return null;
 };
 
+const getInitialSelectedOption = (
+  initialOptions: SelectOption[],
+  value: SelectOption['display_value'] | SelectOption['value'],
+) => initialOptions.find((option) => option.value === value) ?? null;
+
 const Select = ({
   options: initialOptions,
   placeholder,
@@ -62,6 +85,8 @@ const Select = ({
   onValueChange,
   clearOptions,
   setShouldClearOptions,
+  controlClassName,
+  variant,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -85,6 +110,10 @@ const Select = ({
       fetchMoreOptions();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    setSelectedOption(getInitialSelectedOption(initialOptions, value));
+  }, [initialOptions, value]);
 
   const fetchMoreOptions = async () => {
     if (!fetchOptions) return;
@@ -130,10 +159,7 @@ const Select = ({
         itemClassName='flex items-center px-2 py-1.5'
       >
         <div
-          className={cn(
-            'f-13-400 border-input flex h-10 w-full cursor-pointer items-center rounded-md border bg-white px-3 outline-hidden placeholder:text-gray-700 focus:border-gray-600 focus:ring-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50',
-            value ? 'text-primary' : 'text-gray-700',
-          )}
+          className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
           data-testid='select-trigger'
         >
           <span className='flex-1 truncate'>

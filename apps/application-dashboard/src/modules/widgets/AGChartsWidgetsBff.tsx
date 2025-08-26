@@ -8,17 +8,12 @@ import { WIDGET_LOADER } from 'constants/lottie/widget-loader';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
+import { WidgetNodeClickParams } from 'modules/widgets/widget.types';
 import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widgets/widgets.constant';
 import { getChartOptions } from 'modules/widgets/widgets.utils';
 import { useParams } from 'next/navigation';
-import {
-  type DrillDownConfigType,
-  type FieldsMappingType,
-  type PieDonutChartFieldsMappingType,
-  WIDGET_TYPES,
-  WidgetInstanceType,
-} from 'types/api/widgets.types';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
+import { OptionsType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetTransformedWidgetDataQuery } from '@/apis/widgets';
 import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
@@ -34,14 +29,7 @@ interface WidgetsWrapperProps {
   >;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
-  onNodeClick: (
-    clickedNode: MapAny,
-    xAxis: string,
-    datasetId: string,
-    datasetDefaultFilters: string,
-    drilldown_config?: DrillDownConfigType,
-    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
-  ) => void;
+  onNodeClick: (params: WidgetNodeClickParams) => void;
   periodicity: string;
   timeColumns: string;
   groupWidgetsOptions: OptionsType[];

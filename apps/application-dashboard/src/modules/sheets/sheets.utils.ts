@@ -1,7 +1,15 @@
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
-import { FilterDefaultValueType, SheetFilterType } from 'types/api/pagesApi.types';
-import { MapAny } from 'types/commonTypes';
+import { getWidgetLayout } from 'modules/widgets/create/utils';
+import { WidgetSize } from 'modules/widgets/widget.types';
+import {
+  FilterDefaultValueType,
+  LayoutType,
+  SheetDetailsResponseType,
+  SheetFilterType,
+} from 'types/api/pagesApi.types';
+import { MapAny, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { getPastDateByNumberOfDays } from 'utils/common';
+import { WIDGET_TYPES } from '@/types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -81,4 +89,128 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
   });
 
   return defaultFilters;
+};
+
+/**
+ * Finds the last widget layout in the sheet layout
+ * @param sheetLayout - The sheet layout to find the last widget layout in
+ * @returns The last widget layout
+ */
+export const getLastWidgetLayout = (
+  sheetLayout?: {
+    h: number;
+    x: number;
+    y: number;
+    w: number;
+    i: string;
+  }[],
+) => {
+  let lastWidgetLayout: LayoutType = { x: 0, y: 0, h: 0, w: 0 };
+
+  if (!sheetLayout?.length) {
+    return lastWidgetLayout;
+  }
+
+  for (const layout of sheetLayout) {
+    if (layout.y > lastWidgetLayout.y) {
+      lastWidgetLayout = layout;
+    } else if (layout.y === lastWidgetLayout.y && layout.x >= lastWidgetLayout.x) {
+      lastWidgetLayout = layout;
+    }
+  }
+
+  return lastWidgetLayout;
+};
+
+type GetUpdatedSheetLayoutParams = {
+  targetWidgetIndex: number;
+  sheetLayout: ResponsiveGridLayoutType[];
+  size: WidgetSize;
+  sheetDetails: SheetDetailsResponseType;
+};
+
+export const getUpdatedSheetLayout = ({
+  targetWidgetIndex,
+  sheetLayout,
+  size,
+  sheetDetails,
+}: GetUpdatedSheetLayoutParams) => {
+  if (!sheetLayout?.length) {
+    return { newLayouts: [], widgetsToUpdate: [] };
+  }
+
+  const newLayouts: ResponsiveGridLayoutType[] = [];
+  const widgetsToUpdate: ResponsiveGridLayoutType[] = [];
+
+  // Handle first widget (index 0)
+  if (targetWidgetIndex === 0) {
+    const firstLayout = { ...sheetLayout[0], w: size === 'half' ? 8 : 16 };
+
+    newLayouts.push(firstLayout);
+    widgetsToUpdate.push(firstLayout);
+  } else {
+    newLayouts.push(sheetLayout[0]);
+  }
+
+  // Process remaining widgets
+  for (let i = 1; i < sheetLayout.length; i++) {
+    const originalLayout = sheetLayout[i];
+    const isTargetWidget = targetWidgetIndex === i;
+
+    // Find widget instance once
+    const instance = sheetDetails?.widget_instances?.find((widget) => widget.widget_instance_id === originalLayout.i);
+
+    // Determine widget size
+    const widgetSize = isTargetWidget ? size : originalLayout.w === 8 ? 'half' : 'full';
+
+    // Get updated layout
+    const updatedLayout = getWidgetLayout({
+      lastWidgetLayout: newLayouts[i - 1],
+      size: widgetSize,
+      visualizationType: instance?.widget_type as WIDGET_TYPES,
+    });
+
+    // Check if layout has changed
+    const hasLayoutChanged =
+      updatedLayout.w !== originalLayout.w ||
+      updatedLayout.x !== originalLayout.x ||
+      updatedLayout.y !== originalLayout.y;
+
+    if (hasLayoutChanged) {
+      const updatedLayoutWithId = { ...updatedLayout, i: originalLayout.i };
+
+      widgetsToUpdate.push(updatedLayoutWithId);
+      newLayouts.push(updatedLayoutWithId);
+    } else {
+      newLayouts.push({ ...updatedLayout, i: originalLayout.i });
+    }
+  }
+
+  return {
+    newLayouts,
+    widgetsToUpdate,
+  };
+};
+
+export const computeSheetLayout = (
+  sheetDetails: any,
+  widgetDetails: any,
+  getHfromWidgetHeight: (height: number) => number,
+) => {
+  return (
+    sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig: any) => {
+      const widgetType = sheetDetails?.widget_instances?.find(
+        (widget: any) => widget?.widget_instance_id === widgetConfig?.default_widget,
+      )?.widget_type;
+
+      return {
+        i: widgetConfig?.default_widget,
+        ...widgetConfig?.layout,
+        h:
+          widgetType === WIDGET_TYPES.PIVOT_TABLE && widgetDetails?.height > 0
+            ? Math.min(getHfromWidgetHeight(widgetDetails?.height), widgetConfig?.layout?.h)
+            : widgetConfig?.layout?.h,
+      };
+    }) ?? []
+  );
 };

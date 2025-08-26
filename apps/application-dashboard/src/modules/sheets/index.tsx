@@ -5,15 +5,23 @@ import { Button, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
+import { useAppSelector } from 'hooks/toolkit';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import EmptySheet from 'modules/sheets/EmptySheet';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
+import { computeSheetLayout, getLastWidgetLayout } from 'modules/sheets/sheets.utils';
+import useWidgetResize from 'modules/sheets/useWidgetResize';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
+import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
-import { WIDGET_TYPES } from 'types/api/widgets.types';
+import { useRouter } from 'next/navigation';
+import { RootState } from 'store';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
@@ -32,6 +40,9 @@ interface SheetsProps {
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
+  const router = useRouter();
+  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+
   const {
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
@@ -42,6 +53,10 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const [inputWidth, setInputWidth] = useState(150);
   const spanRef = useRef<HTMLSpanElement>(null);
   const [updateSheetByPageId] = useUpdateSheetByPageIdMutation();
+  const [sheetLayout, setSheetLayout] = useState<ResponsiveGridLayoutType[]>([]);
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
 
   const updateInputWidth = useCallback(() => {
     if (spanRef.current && sheetDetails?.name) {
@@ -79,27 +94,17 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     return pages?.find((page) => page.page_id === pageId)?.sheets?.find((sheet) => sheet.sheet_id === sheetId);
   }, [pages, pageId, sheetId]);
 
+  const handleWidgetResize = useWidgetResize({ pageId, sheetId, setSheetLayout });
+
   //converts the pixel height from pivot-table into grid-layout height
-  const getHfromWidgetHeight = (widgetHeight: number): number => {
+  const getHfromWidgetHeight = useCallback((widgetHeight: number): number => {
     return (widgetHeight + 20) / 76;
-  };
+  }, []);
 
-  const sheetLayout = useMemo(() => {
-    return sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => {
-      const widgetType = sheetDetails?.widget_instances?.find(
-        (widget) => widget?.widget_instance_id === widgetConfig?.default_widget,
-      )?.widget_type;
-
-      return {
-        i: widgetConfig?.default_widget,
-        ...widgetConfig?.layout,
-        h:
-          widgetType === WIDGET_TYPES.PIVOT_TABLE && widgetDetails?.height > 0
-            ? Math.min(getHfromWidgetHeight(widgetDetails?.height), widgetConfig?.layout?.h)
-            : widgetConfig?.layout?.h,
-      };
-    });
-  }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId]);
+  // Compute sheet layout with proper memoization
+  const computedSheetLayout = useMemo(() => {
+    return computeSheetLayout(sheetDetails, widgetDetails, getHfromWidgetHeight);
+  }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId, getHfromWidgetHeight]);
 
   const handleInputBlur = () => {
     setIsEditingSheetName(false);
@@ -138,10 +143,27 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     }
   };
 
+  const handleAddWidget = () => {
+    const lastWidgetLayout = getLastWidgetLayout(sheetLayout);
+
+    router.push(`?sheetId=${sheetId}&isWidget=true&layout=${JSON.stringify(lastWidgetLayout)}`);
+  };
+
+  const handleWidgetResizeWrapper = (widgetId: string, size: WidgetSize) => {
+    handleWidgetResize({ widgetId, size, sheetLayout, sheetDetails });
+  };
+
+  useEffect(() => {
+    // Only update local state when computed layout changes and local state is empty
+    if (computedSheetLayout.length > 0) {
+      setSheetLayout(computedSheetLayout);
+    }
+  }, [computedSheetLayout]);
+
   //Add the max-height on pivot table based on sheet layout height for pivot and current actual height of the grid
   useEffect(() => {
     if (typeof document !== 'undefined' && sheetLayout) {
-      if (sheetLayout && sheetDetails?.sheet_config?.sheet_layout[0]?.layout?.h == sheetLayout[0].h) {
+      if (sheetLayout && sheetDetails?.sheet_config?.sheet_layout?.[0]?.layout?.h === sheetLayout[0]?.h) {
         const substractedHeight = widgetDetails?.isSingleHeader ? 93 : 135;
 
         document.documentElement.style.setProperty(
@@ -174,9 +196,21 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     updateInputWidth();
   }, [sheetName]);
 
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
-      <div className='relative h-[calc(100vh-94px)] overflow-scroll py-6 pr-0 pl-3'>
+      <div className='relative h-[calc(100vh-94px)] overflow-x-hidden overflow-y-scroll py-6 pr-0 pl-3'>
         <CommonWrapper
           isLoading={isSheetLoading || isPageLoading}
           skeletonType={SkeletonTypes.CUSTOM}
@@ -235,57 +269,83 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                 isPeriodicityEnabled
                 isRightAligned
               />
-              {isFilterInitialized && !sheetDetails?.sheet_config?.currency?.hide_currency_filter && currency && (
-                <div className='flex items-center gap-2'>
-                  {!!filtersConfig?.length && <div className='border-GRAY_400 h-7 border-r'></div>}
-                  <SingleSelectFilter
-                    filterKey='currency'
-                    options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
-                    onFilterChange={(value) => setCurrency(value)}
-                    value={currency}
-                    showColumnLabel={false}
-                    label='Currency'
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {sheetDetails && (
-            <ResponsiveGridLayout
-              className='layout'
-              layout={sheetLayout}
-              cols={{ lg: 16, md: 16, sm: 16, xs: 16, xxs: 16 }}
-              breakpoints={SCREEN_BREAKPOINTS}
-              rowHeight={ROW_HEIGHT}
-              width={1200} // Adjust grid width as per container
-              margin={WIDGETS_LAYOUT_MARGIN}
-              isResizable={false}
-              isDraggable={false}
-              useCSSTransforms={false}
-            >
-              {sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => (
-                <div
-                  key={`widget-${widgetConfig?.default_widget}`}
-                  data-grid={sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)}
-                  className='bg-white'
-                >
-                  <div key={widgetConfig?.default_widget} className='h-full w-full'>
-                    <WidgetSwitcher
-                      widgetConfig={widgetConfig}
-                      currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
-                      defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
-                      widgetInstances={sheetDetails?.widget_instances ?? []}
-                      handleWidgetHeightChange={handleWidgetHeightChange}
-                      sheetId={sheetId}
-                      isBff={isBff}
+              {isFilterInitialized &&
+                !sheetDetails?.sheet_config?.currency?.hide_currency_filter &&
+                currency &&
+                !!sheetLayout?.length && (
+                  <div className='flex items-center gap-2'>
+                    {!!filtersConfig?.length && <div className='border-GRAY_400 h-7 border-r'></div>}
+                    <SingleSelectFilter
+                      filterKey='currency'
+                      options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
+                      onFilterChange={(value) => setCurrency(value)}
+                      value={currency}
+                      showColumnLabel={false}
+                      label='Currency'
                     />
                   </div>
-                </div>
-              ))}
-            </ResponsiveGridLayout>
-          )}
+                )}
+            </div>
+          </div>
+          <CommonWrapper
+            isNoData={!sheetLayout?.length}
+            noDataBanner={<EmptySheet onAddWidget={handleAddWidget} />}
+            className='pb-20'
+          >
+            {sheetDetails && (
+              <ResponsiveGridLayout
+                className='layout'
+                layout={sheetLayout}
+                cols={{ lg: 16, md: 16, sm: 16, xs: 16, xxs: 16 }}
+                breakpoints={SCREEN_BREAKPOINTS}
+                rowHeight={ROW_HEIGHT}
+                width={1200} // Adjust grid width as per container
+                margin={WIDGETS_LAYOUT_MARGIN}
+                isResizable={false}
+                isDraggable={false}
+                useCSSTransforms={false}
+              >
+                {sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => (
+                  <div
+                    key={`widget-${widgetConfig?.default_widget}`}
+                    data-grid={sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)}
+                    className='bg-white'
+                  >
+                    <div key={widgetConfig?.default_widget} className='h-full w-full'>
+                      <WidgetSwitcher
+                        widgetConfig={widgetConfig}
+                        currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
+                        defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
+                        widgetInstances={sheetDetails?.widget_instances ?? []}
+                        handleWidgetHeightChange={handleWidgetHeightChange}
+                        sheetId={sheetId}
+                        isBff={isBff}
+                        resizeProps={{
+                          size:
+                            sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)?.w === 8
+                              ? 'half'
+                              : 'full',
+                          onSizeChange: (size) => handleWidgetResizeWrapper(widgetConfig?.default_widget, size),
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </ResponsiveGridLayout>
+            )}
+          </CommonWrapper>
         </CommonWrapper>
+        {!!sheetLayout?.length && isSelfServePagesEnabled && (
+          <div
+            className={cn('fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all', {
+              'left-7/12 -translate-x-7/12': isSidebarOpen,
+            })}
+          >
+            <Button size='medium' variant='secondary' className='bg-white shadow' onClick={handleAddWidget}>
+              Add a widget
+            </Button>
+          </div>
+        )}
       </div>
     </InitializeSheetsFilters>
   );

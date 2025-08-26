@@ -1,20 +1,18 @@
 'use client';
 import { useEffect, useMemo } from 'react';
 import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
-import { useHash } from 'hooks/useHash';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import SheetsTabs from 'modules/sheets/SheetsTabs';
-import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
 import 'ag-charts-enterprise';
 
 const Page = () => {
   const params = useParams();
-  const pathname = useHash();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const pageId = params?.pageId;
   const {
@@ -23,13 +21,13 @@ const Page = () => {
     isError,
     refetch,
   } = useGetPageDetailsQuery(pageId as string, { refetchOnMountOrArgChange: false, skip: !pageId });
-  const { data: pages } = useGetPagesQuery(undefined, {
+  const { data: pages, isFetching: isFetchingPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
   const currentSheetId = useMemo(
-    () => getSheetIdFromPath(pathname, pageId as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
-    [pageDetails, pathname, pageId],
+    () => searchParams?.get('sheetId') ?? pageDetails?.sheets?.[0]?.sheet_id,
+    [pageDetails, searchParams],
   );
 
   useEffect(() => {
@@ -61,11 +59,13 @@ const Page = () => {
   };
 
   useEffect(() => {
+    if (isFetchingPages) return;
+
     persistLastVisitedPage(pageId as string);
 
     //on org switch/ invalid page, redirect to valid page
     checkIsPageValid();
-  }, [pageId, pages]);
+  }, [pageId, pages, isFetchingPages]);
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>

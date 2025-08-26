@@ -175,6 +175,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           selectedFilters: {},
           selectedFiltersInUI: {},
           selectedFiltersChangeCount: 0,
+          currentPageFilters: [],
         };
       }
 

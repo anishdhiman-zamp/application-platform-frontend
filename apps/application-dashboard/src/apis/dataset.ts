@@ -12,7 +12,6 @@ import {
   DatasetExportResponseType,
   DatasetExportsSignedUrlRequestType,
   DatasetExportsSignedUrlResponseType,
-  DatasetFilterConfigResponseType,
   DatasetListingRequestType,
   DatasetListingResponseType,
   DatasetUpdateRequestType,
@@ -21,6 +20,7 @@ import {
   type DownloadFileResponseType,
   GetAiTransformationRequestType,
   GetAiTransformationResponseType,
+  GetDatasetFilterConfigResponseType,
   GetFileImportHistoryResponseType,
   GetRulesByDatasetColumnsRequestType,
   GetRulesByDatasetColumnsResponseType,
@@ -40,13 +40,7 @@ import { baseApi } from '@/services/baseApi';
 
 const Dataset = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getDatasetFilterConfig: builder.query<
-      {
-        config: { is_file_import_enabled: boolean; is_fx_enabled: boolean };
-        data: DatasetFilterConfigResponseType[];
-      },
-      { datasetId: string }
-    >({
+    getDatasetFilterConfig: builder.query<GetDatasetFilterConfigResponseType, { datasetId: string }>({
       query: ({ datasetId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.DATASET_FILTER_CONFIG_GET, { datasetId }),
       }),

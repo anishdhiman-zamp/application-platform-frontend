@@ -3,6 +3,12 @@ import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import {
   AudiencesByPageIdRequest,
   AudiencesByPageIdResponse,
+  CreatePagePayloadType,
+  CreatePageResponseType,
+  CreateSheetPayloadType,
+  CreateSheetResponseType,
+  CreateWidgetPayloadType,
+  CreateWidgetResponseType,
   DeleteAudienceFromPageAccessType,
   PageResponseType,
   PatchChangeAudienceRoleInPageType,
@@ -15,6 +21,7 @@ import {
   UpdatePagePayloadType,
   UpdateSheetByPageIdPayloadType,
   UpdateSheetIndexesByPageIdPayloadType,
+  UpdateSheetLayoutPayloadType,
 } from 'types/api/pagesApi.types';
 import { formRequestUrlWithParams } from 'utils/common';
 import { APITags } from '@/constants/api.constants';
@@ -100,6 +107,39 @@ const Pages = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES]),
     }),
+    createWidget: builder.mutation<CreateWidgetResponseType, CreateWidgetPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.WIDGET_INSTANCE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      transformResponse: ({ data }) => data,
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES]),
+    }),
+    updateSheetLayout: builder.mutation<void, UpdateSheetLayoutPayloadType>({
+      query: ({ pageId, sheetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_SHEET_LAYOUT_PUT, { pageId, sheetId }),
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES]),
+    }),
+    createSheet: builder.mutation<CreateSheetResponseType, CreateSheetPayloadType>({
+      query: (body) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.SHEET_CREATE_POST, { pageId: body.page_id }),
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGE_DETAILS, APITags.GET_PAGES]),
+    }),
+    createPage: builder.mutation<CreatePageResponseType, CreatePagePayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.PAGES_CREATE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
   }),
 });
 
@@ -118,4 +158,8 @@ export const {
   useUpdateSheetIndexesByPageIdMutation,
   useUpdatePageMutation,
   useUpdateSheetByPageIdMutation,
+  useCreateWidgetMutation,
+  useUpdateSheetLayoutMutation,
+  useCreateSheetMutation,
+  useCreatePageMutation,
 } = Pages;
