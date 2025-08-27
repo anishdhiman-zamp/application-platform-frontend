@@ -30,6 +30,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
         <div
           className={cn('animate-opacity flex h-full items-center', className)}
           style={{ minHeight: height && height + 'px' }}
+          data-testid='api-error-card'
         >
           <div className='flex h-full w-full flex-col items-center justify-center gap-y-9'>
             <div className={cn('flex w-full flex-col items-center justify-center gap-y-3', contentClassName)}>
@@ -81,6 +82,7 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
         <div
           className={cn('animate-opacity flex h-fit items-center', className)}
           style={{ minHeight: height && height + 'px' }}
+          data-testid='kpi-error-card'
         >
           <div className='flex h-full w-full items-center justify-between'>
             <div className='hover:bg-GRAY_100 flex items-center gap-2 rounded-[6px] px-2 py-1.5'>

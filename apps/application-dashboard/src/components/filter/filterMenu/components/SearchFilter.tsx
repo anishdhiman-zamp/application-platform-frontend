@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useOnClickOutside } from 'hooks';
@@ -18,6 +18,7 @@ export interface SearchFilterProps {
   initialSearchValue?: string;
   initialOperator?: OptionsType;
   onChange: (value: MapAny) => void;
+  operatorOptions?: OptionsType[];
 }
 
 const SearchFilter: FC<SearchFilterProps> = ({
@@ -29,12 +30,13 @@ const SearchFilter: FC<SearchFilterProps> = ({
   initialSearchValue = '',
   initialOperator,
   onChange,
+  operatorOptions = SEARCH_FILTER_OPTIONS,
 }) => {
   const ref = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState(initialSearchValue);
   const [isConditionOptionsOpen, setIsConditionOptionsOpen] = useState(false);
-  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(initialOperator ?? SEARCH_FILTER_OPTIONS[0]);
+  const [selectedOperator, setSelectedOperator] = useState<OptionsType>(initialOperator ?? operatorOptions[0]);
 
   const setFilter = useCallback(
     (operator: string, searchValue: string) => {
@@ -115,7 +117,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
               ref={ref}
               className='text-GRAY_900 border-GRAY_400 shadow-table-filter-menu absolute top-full left-0 z-10 w-[256px] rounded-md border bg-white p-1'
             >
-              {SEARCH_FILTER_OPTIONS.map((option) => (
+              {operatorOptions.map((option) => (
                 <div
                   className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2'
                   key={option.value}

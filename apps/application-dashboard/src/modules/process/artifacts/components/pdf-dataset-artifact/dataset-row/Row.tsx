@@ -95,7 +95,9 @@ const Row: FC<RowProps> = ({
       return getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy }, value) as string;
     }
 
-    return valueFormatter?.(undefined, value, rowData) ?? value;
+    const formatted = valueFormatter?.(undefined, value, rowData) ?? value;
+
+    return formatted ?? '';
   }, [value, rowData, valueFormatter, columnConfig]);
 
   const isEditable = useMemo(

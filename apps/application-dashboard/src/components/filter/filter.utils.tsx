@@ -9,6 +9,7 @@ import {
   AMOUNT_RANGE_TYPE_SYMBOL_MAP,
   CONDITION_OPERATOR_TYPE,
   CONDITION_OPERATOR_TYPE_LABEL_MAP,
+  DOCUMENT_SEARCH_FILTER_OPTIONS,
   FILTER_KEYS,
   MULTI_SELECT_FILTER_OPTIONS,
   SEARCH_FILTER_OPTIONS,
@@ -152,6 +153,21 @@ export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfi
 
       if (count) {
         title = `${operatorLabel} ${selectedFilter?.values[0]?.split('.')?.pop()} ${count > 1 ? `+${count - 1}` : ''}`;
+      }
+
+      return {
+        ...config,
+        title,
+      };
+    }
+
+    case FILTER_TYPES.DOCUMENT: {
+      const filter = selectedFilters[key];
+      const operatorLabel = DOCUMENT_SEARCH_FILTER_OPTIONS.find((option) => option.value === filter?.type)?.label ?? '';
+      let title = filter?.filter ? `${operatorLabel} ${filter?.filter}` : '';
+
+      if (!filter) {
+        title = '';
       }
 
       return {
