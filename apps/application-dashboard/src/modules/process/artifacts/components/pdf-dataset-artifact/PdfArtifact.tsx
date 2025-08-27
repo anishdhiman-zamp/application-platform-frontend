@@ -17,6 +17,7 @@ interface PDFViewerAppProps {
   fileId: string;
   className?: string;
   isSearchBarEnabled?: boolean;
+  toolBarClassName?: string;
 }
 
 const LoadingIndicator = () => (
@@ -40,6 +41,7 @@ const PdfArtifact = ({
   isArtifactLoading,
   className,
   isSearchBarEnabled = false,
+  toolBarClassName,
 }: PDFViewerAppProps) => {
   const {
     data: signedUrl,
@@ -96,7 +98,7 @@ const PdfArtifact = ({
           <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-48' />
         </div>
       )}
-      {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} />}
+      {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} className={toolBarClassName} />}
     </CommonWrapper>
   );
 };
