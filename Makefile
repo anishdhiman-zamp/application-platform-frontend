@@ -60,16 +60,22 @@ help: ## Show this help message
 # =============================================================================
 
 install: ## Install all dependencies (including dev dependencies)
+	@echo -e "\033[34m4. 🔐 Syncing secrets...\033[0m"
+	@$(MAKE) sync-secrets
 	@echo -e "\033[34mInstalling all dependencies...\033[0m"
 	@$(NODE) install
 	@echo -e "\033[32m✅ All dependencies installed\033[0m"
 
 install-dev: ## Install development dependencies
+	@echo -e "\033[34m4. 🔐 Syncing secrets...\033[0m"
+	@$(MAKE) sync-secrets
 	@echo -e "\033[34mInstalling development dependencies...\033[0m"
 	@$(NODE) install
 	@echo -e "\033[32m✅ Development dependencies installed\033[0m"
 
 install-prod: ## Install production dependencies only
+	@echo -e "\033[34m4. 🔐 Syncing secrets...\033[0m"
+	@$(MAKE) sync-secrets
 	@echo -e "\033[34mInstalling production dependencies only...\033[0m"
 	@$(NODE) ci --only=production
 	@echo -e "\033[32m✅ Production dependencies installed\033[0m"
