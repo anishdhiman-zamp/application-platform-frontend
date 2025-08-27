@@ -52,6 +52,8 @@ export const useSSE = ({
     reconnectAttempts: 0,
   });
 
+  console.log('state', state);
+
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
       Object.entries(eventListeners).forEach(([type, handler]) => {

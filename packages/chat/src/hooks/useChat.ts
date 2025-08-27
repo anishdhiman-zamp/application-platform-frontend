@@ -1,8 +1,8 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
-import { useSSE, UseSSEOptions } from '@zamp-platform/utils';
-import { useCallback, useMemo, useState } from 'react';
+import { eventBus, UseSSEOptions } from '@zamp-platform/utils';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
 import {
@@ -54,9 +54,9 @@ export const useChat = (config: ChatConfig) => {
       try {
         const data = JSON.parse(event.data);
 
-        switch (data.type) {
+        switch (data.payload.type) {
           case SSEEventType.MESSAGE:
-            const newMessage: ChatMessage = data.message;
+            const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
             config.onNewMessage?.(newMessage);
             break;
@@ -68,17 +68,28 @@ export const useChat = (config: ChatConfig) => {
     [config],
   );
 
-  const sseConfig: UseSSEOptions = useMemo(
-    () => ({
-      ...config,
-      url: config.eventUrl,
-      onMessage: handleMessage,
-      autoConnect: false,
-    }),
-    [config, handleMessage],
-  );
+  // const sseConfig: UseSSEOptions = useMemo(
+  //   () => ({
+  //     ...config,
+  //     url: config.eventUrl,
+  //     onMessage: handleMessage,
+  //     autoConnect: false,
+  //   }),
+  //   [config, handleMessage],
+  // );
 
-  const connection = useSSE(sseConfig);
+  // const connection = useSSE(sseConfig);
+
+  useEffect(() => {
+    const sub = eventBus.subscribe('conversation', (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      console.log('conversation data', data.source_id, _conversationId);
+      if (data.source_id === _conversationId) {
+        handleMessage(event);
+      }
+    });
+    return sub.unsubscribe;
+  }, [handleMessage]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage) => {
@@ -104,7 +115,7 @@ export const useChat = (config: ChatConfig) => {
   );
 
   return {
-    ...connection,
+    // ...connection,
     messages,
     sendMessage,
     clearMessages,

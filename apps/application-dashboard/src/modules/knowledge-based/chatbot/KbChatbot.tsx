@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { API_DOMAIN } from '@zamp-platform/api';
 import {
   AnnotationType,
   type ChatMessage,
@@ -40,8 +39,6 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
   };
 
   const chat = useChat({
-    reconnectIntervalMs: 30000,
-    maxReconnectAttempts: 5,
     onNewMessage: () => {
       setIsLoading(false);
     },
@@ -49,7 +46,7 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
 
   const handleClose = () => {
     onClose?.();
-    chat.disconnect();
+    // chat.disconnect();
     chat.clearMessages();
   };
 
@@ -69,14 +66,14 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
       if (!conversationId) {
         throw new Error('Failed to create conversation');
       }
-      chat.connect(`${API_DOMAIN}/conversations/events/${conversationId}`);
+      // chat.connect();
     };
 
     if (userMessage) {
       init();
     }
 
-    return () => chat.disconnect();
+    // return () => chat.disconnect();
   }, [userMessage]);
 
   const handleSendMessage = async (inputValue: string) => {
@@ -124,7 +121,7 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
                 senderType={message?.sender_type}
               />
             ))}
-            {chat?.state?.error && <div className='text-red-500'>{chat?.state?.error}</div>}
+            {/* {chat?.state?.error && <div className='text-red-500'>{chat?.state?.error}</div>} */}
             {isLoading && (
               <div className='flex h-full w-full items-center gap-1.5 text-gray-700'>
                 <PaceIcon height={12} width={12} />
