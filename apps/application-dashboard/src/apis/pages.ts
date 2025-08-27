@@ -7,8 +7,6 @@ import {
   CreatePageResponseType,
   CreateSheetPayloadType,
   CreateSheetResponseType,
-  CreateWidgetPayloadType,
-  CreateWidgetResponseType,
   DeleteAudienceFromPageAccessType,
   DeleteSheetByPageIdPayloadType,
   PageResponseType,
@@ -117,15 +115,6 @@ const Pages = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
     }),
-    createWidget: builder.mutation<CreateWidgetResponseType, CreateWidgetPayloadType>({
-      query: (body) => ({
-        url: API_ENDPOINTS.WIDGET_INSTANCE_POST,
-        method: REQUEST_TYPES.POST,
-        body,
-      }),
-      transformResponse: ({ data }) => data,
-      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
-    }),
     updateSheetLayout: builder.mutation<void, UpdateSheetLayoutPayloadType>({
       query: ({ pageId, sheetId, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.UPDATE_SHEET_LAYOUT_PUT, { pageId, sheetId }),
@@ -169,7 +158,6 @@ export const {
   useDeletePageMutation,
   useUpdateSheetByPageIdMutation,
   useDeleteSheetByPageIdMutation,
-  useCreateWidgetMutation,
   useUpdateSheetLayoutMutation,
   useCreateSheetMutation,
   useCreatePageMutation,

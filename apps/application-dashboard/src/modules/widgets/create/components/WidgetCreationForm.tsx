@@ -4,6 +4,7 @@ import { FC, useEffect, useMemo, useRef } from 'react';
 import { Button, Input, Select, type SelectOption } from '@zamp-platform/ui';
 import { SelectButton } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { cn } from '@zamp-platform/ui/utils';
 import { useGetDatasetFilterConfigQuery, useGetDatasetListingQuery } from 'apis/dataset';
 import { CHART_SPECIFIC_FORM_MAP, SIZE_OPTIONS, VISUALIZATION_OPTIONS } from 'modules/widgets/create/constants';
 import { defaultFormData, useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
@@ -165,6 +166,7 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
               options={SIZE_OPTIONS}
               value={formData.size}
               onValueChange={(value: string) => handleInputChange('size', value)}
+              buttonClassName='w-8'
             />
           </div>
         )}
@@ -174,12 +176,13 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
           tooltipBody='Please configure the widget'
           side={SIDE_OPTIONS.TOP}
           isDisabledBody={!!formData.datasetId && !isDatasetFilterConfigFetching}
+          asChildTrigger
         >
           <Button
             size='medium'
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            disabled={!formData.datasetId || isDatasetFilterConfigFetching}
+            className={cn({ 'cursor-not-allowed opacity-50': !formData.datasetId || isDatasetFilterConfigFetching })}
           >
             Done
           </Button>

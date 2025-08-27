@@ -12,6 +12,7 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-
 import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useAppSelector } from 'hooks/toolkit';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import DraggableSheetTab from 'modules/sheets/DraggableSheetTab';
 import SheetTab from 'modules/sheets/SheetTab';
 import { useParams, useRouter } from 'next/navigation';
@@ -20,6 +21,7 @@ import { MenuItem } from 'types/common/components';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { useCreateSheetMutation, useUpdateSheetIndexesByPageIdMutation } from '@/apis/pages';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { DEFAULT_SHEET_DESCRIPTION, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
@@ -176,16 +178,18 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
         </DndContext>
       </CommonWrapper>
       {isSelfServePagesEnabled ? (
-        <Button
-          size='medium'
-          variant='secondary'
-          onClick={handleCreateSheet}
-          className='h-[34px] min-w-25 gap-1 [&_svg]:size-3.5'
-          isLoading={isCreatingSheet}
-        >
-          <SvgSpriteLoader id='plus' className='text-gray-500' />
-          <div className='whitespace-nowrap'>Add sheet</div>
-        </Button>
+        <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+          <Button
+            size='medium'
+            variant='secondary'
+            onClick={handleCreateSheet}
+            className='h-[34px] min-w-25 gap-1 [&_svg]:size-3.5'
+            isLoading={isCreatingSheet}
+          >
+            <SvgSpriteLoader id='plus' className='text-gray-500' />
+            <div className='whitespace-nowrap'>Add sheet</div>
+          </Button>
+        </PermissionGuard>
       ) : (
         <Tooltip
           tooltipBody='Coming soon'

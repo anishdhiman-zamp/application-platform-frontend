@@ -1,6 +1,5 @@
 import { WidgetDataValueType } from 'modules/widgets/widgets.constant';
-import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
-import { FilterModelType } from 'types/components/table.type';
+import { WidgetInstanceType } from 'types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -166,40 +165,6 @@ export interface DeleteSheetByPageIdPayloadType {
   pageId: string;
   sheetId: string;
 }
-export interface Field {
-  column: string;
-  aggregation?: string;
-  type: string;
-  field_type: string;
-  drilldown_filter_type?: FILTER_TYPES;
-  drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
-}
-
-export interface CreateWidgetDataMappingFields {
-  dataset_id: string;
-  fields: {
-    x_axis?: Field[];
-    y_axis?: Field[];
-    group_by?: Field[];
-    values?: Field[];
-    slices?: Field[];
-    primary_value?: Field[];
-  };
-  default_filters?: FilterModelType | null;
-  is_stacked?: boolean;
-}
-
-export interface CreateWidgetDataMappingsType {
-  version: string;
-  mappings: CreateWidgetDataMappingFields[];
-}
-
-export interface CreateWidgetPayloadType {
-  sheet_id: string;
-  title: string;
-  widget_type: WIDGET_TYPES;
-  data_mappings: CreateWidgetDataMappingsType;
-}
 
 interface LayoutUpdateItem {
   layout: LayoutType;
@@ -210,10 +175,6 @@ export interface UpdateSheetLayoutPayloadType {
   pageId: string;
   sheetId: string;
   body: LayoutUpdateItem[];
-}
-
-export interface CreateWidgetResponseType {
-  widget_instance_id: string;
 }
 
 export interface CreatePagePayloadType {
@@ -238,12 +199,4 @@ export interface CreateSheetResponseType {
   sheet: {
     sheet_id: string;
   };
-}
-
-export interface EditWidgetInstancePayloadType {
-  widget_instance_id: string;
-  sheet_id: string;
-  title: string;
-  widget_type: WIDGET_TYPES;
-  data_mappings: string;
 }

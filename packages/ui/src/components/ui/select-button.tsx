@@ -33,6 +33,14 @@ const RenderIcon = ({ icon, className }: { icon: SelectIcon; className?: string 
 
 const SelectButton = React.forwardRef<HTMLDivElement, SelectButtonProps>(
   ({ options, value, onValueChange, className, disabled, size = 'medium', buttonClassName }, ref) => {
+    const [sliderStyle, setSliderStyle] = React.useState<React.CSSProperties>({});
+
+    // Create refs for each option
+    const buttonRefs = React.useMemo(
+      () => options.map(() => React.createRef<HTMLButtonElement>()),
+      [options.length], // eslint-disable-line react-hooks/exhaustive-deps
+    );
+
     const handleSelect = React.useCallback(
       (optionValue: string) => {
         if (!disabled) {
@@ -42,42 +50,61 @@ const SelectButton = React.forwardRef<HTMLDivElement, SelectButtonProps>(
       [onValueChange, disabled],
     );
 
-    return (
-      <div ref={ref} className={cn('relative inline-flex items-center justify-center gap-1 rounded-md p-1', className)}>
-        {/* Sliding background indicator */}
-        <div
-          className={cn(
-            'absolute inset-0.5 rounded-md border border-gray-200 bg-white shadow-sm transition-all ease-in-out',
-            'transform-gpu',
-          )}
-          style={{
-            left: `${options.findIndex((opt) => opt.value === value) * (100 / options.length)}%`,
-            width: `${100 / options.length}%`,
-          }}
-        />
+    React.useLayoutEffect(() => {
+      const selectedIndex = options.findIndex((option) => option.value === value);
+      if (selectedIndex >= 0 && buttonRefs[selectedIndex]?.current) {
+        const selectedButton = buttonRefs[selectedIndex].current;
 
-        <TooltipProvider delayDuration={100}>
-          {options.map((option) => {
+        // Use offsetLeft relative to the container for more accurate positioning
+        const offsetLeft = selectedButton.offsetLeft;
+        const width = selectedButton.offsetWidth;
+        const height = selectedButton.offsetHeight;
+
+        setSliderStyle({
+          transform: `translateX(${offsetLeft}px)`,
+          width: `${width}px`,
+          height: `${height}px`,
+          opacity: 1,
+        });
+      } else {
+        setSliderStyle({
+          opacity: 0,
+        });
+      }
+    }, [value, options, buttonRefs]);
+
+    return (
+      <div ref={ref} className={cn('relative inline-flex items-center justify-center gap-1 rounded-md', className)}>
+        {/* Sliding background */}
+        <div
+          className='pointer-events-none absolute top-0 left-0 rounded-md border border-gray-400 bg-white opacity-0 shadow-sm transition-all duration-300 ease-in-out'
+          style={sliderStyle}
+        />
+        <TooltipProvider>
+          {options.map((option, index) => {
             const isSelected = option.value === value;
             return (
               <Tooltip key={option.value}>
                 <TooltipTrigger asChild>
                   <Button
+                    ref={buttonRefs[index]}
                     key={option.value}
                     variant='ghost'
                     size={size}
                     disabled={disabled}
-                    className={cn('relative z-10 transition-all ease-in-out', 'hover:bg-gray-50', buttonClassName)}
+                    className={cn(
+                      'relative z-10 border-transparent bg-transparent transition-colors duration-300 ease-in-out hover:bg-transparent',
+                      isSelected ? 'text-gray-1000 hover:text-gray-1000' : 'text-gray-700 hover:text-gray-900',
+                      buttonClassName,
+                    )}
                     onClick={() => handleSelect(option.value)}
                   >
                     <div className='flex items-center gap-2'>
                       {option.icon && (
                         <span
                           className={cn(
-                            'flex items-center justify-center border-gray-900 transition-colors ease-in-out',
-                            {
-                              'text-gray-1000 border-gray-1000': isSelected,
-                            },
+                            'flex items-center justify-center transition-colors duration-300 ease-in-out',
+                            isSelected ? 'text-gray-1000 border-gray-1000' : 'border-gray-900 text-gray-900',
                           )}
                         >
                           <RenderIcon icon={option.icon} />

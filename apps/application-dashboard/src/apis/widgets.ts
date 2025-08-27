@@ -1,10 +1,16 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
-import { WidgetDataRequestType, WidgetDataResponseType, WidgetInstanceResponseType } from 'types/api/widgets.types';
+import {
+  CreateWidgetPayloadType,
+  CreateWidgetResponseType,
+  EditWidgetInstancePayloadType,
+  WidgetDataRequestType,
+  WidgetDataResponseType,
+  WidgetInstanceResponseType,
+} from 'types/api/widgets.types';
 import { formRequestUrlWithParams } from 'utils/common';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
-import { EditWidgetInstancePayloadType } from '@/types/api/pagesApi.types';
 
 const Widgets = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -52,6 +58,22 @@ const Widgets = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES, APITags.GET_WIDGET_DATA]),
     }),
+    deleteWidget: builder.mutation<void, string>({
+      query: (widgetId) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DELETE, { widgetId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
+    createWidget: builder.mutation<CreateWidgetResponseType, CreateWidgetPayloadType>({
+      query: (body) => ({
+        url: API_ENDPOINTS.WIDGET_INSTANCE_POST,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      transformResponse: ({ data }) => data,
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
+    }),
   }),
 });
 
@@ -60,4 +82,6 @@ export const {
   useGetWidgetDataQuery,
   useGetTransformedWidgetDataQuery,
   useUpdateWidgetMutation,
+  useDeleteWidgetMutation,
+  useCreateWidgetMutation,
 } = Widgets;

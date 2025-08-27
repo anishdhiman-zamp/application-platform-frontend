@@ -1,5 +1,8 @@
 import { Button } from '@zamp-platform/ui';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { SHEET_EMPTY_STATE } from '@/constants/icons';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -8,12 +11,17 @@ interface EmptySheetProps {
 }
 
 const EmptySheet = ({ onAddWidget }: EmptySheetProps) => {
+  const params = useParams();
+  const pageId = params?.pageId as string;
+
   return (
     <div className='flex h-[calc(100vh-120px)] flex-col items-center justify-center'>
       <Image src={SHEET_EMPTY_STATE} alt='Empty sheet' width={264} height={266} />
-      <Button size='large' variant='secondary' onClick={onAddWidget}>
-        Add a widget
-      </Button>
+      <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+        <Button size='large' variant='secondary' onClick={onAddWidget}>
+          Add a widget
+        </Button>
+      </PermissionGuard>
     </div>
   );
 };
