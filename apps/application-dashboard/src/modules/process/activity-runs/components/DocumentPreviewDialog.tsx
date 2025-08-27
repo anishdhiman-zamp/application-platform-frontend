@@ -3,6 +3,7 @@ import { Dialog, DialogClose, DialogContent, DialogHeader, DialogHeaderTitle } f
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from '@zamp-platform/ui/utils';
+import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import type { DocumentItemType } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { SIDE_OPTIONS } from 'types/commonTypes';
@@ -12,6 +13,7 @@ import { formatPlural } from '@/utils/common';
 
 const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components/pdf-dataset-artifact/PdfArtifact'), {
   ssr: false,
+  loading: () => <ArtifactLoader />,
 });
 
 interface DocumentPreviewDialogProps {
@@ -88,14 +90,14 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
           <div className='flex flex-shrink-0 items-center gap-x-1'>
             <SvgSpriteLoader
               id='chevron-left'
-              size={16}
+              size={12}
               color={COLORS.GRAY_1000}
               className={cn('cursor-pointer', currentFileIndex === 0 && 'pointer-events-none opacity-50')}
               onClick={handlePreviousFile}
             />
             <SvgSpriteLoader
               id='chevron-right'
-              size={16}
+              size={12}
               color={COLORS.GRAY_1000}
               className={cn(
                 'cursor-pointer',
@@ -103,7 +105,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
               )}
               onClick={handleNextFile}
             />
-            <p className='f-13-500 text-GRAY_1000 transition-colors select-none'>
+            <p className='f-11-400 text-GRAY_1000 transition-colors select-none'>
               {currentFileIndex + 1}/{formatPlural(availableFiles.length, 'file', 'files')}
             </p>
           </div>
@@ -121,7 +123,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
             <TooltipV2 tooltipBody='Delete' side={SIDE_OPTIONS.BOTTOM}>
               <SvgSpriteLoader
                 id='trash-03'
-                size={14}
+                size={16}
                 color={COLORS.GRAY_900}
                 className='cursor-not-allowed opacity-50'
               />
@@ -139,6 +141,7 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
                 fileId={currentFile?.artifacts_details?.file_id}
                 isArtifactLoading={false}
                 className='h-full'
+                toolBarClassName='bottom-5'
               />
             )}
           </div>
