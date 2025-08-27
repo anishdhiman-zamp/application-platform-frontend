@@ -1,3 +1,4 @@
+import type { FC } from 'react';
 import type { TUsePDFSlickStore } from '@pdfslick/react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
@@ -8,7 +9,7 @@ interface ToolBarPropsType {
   className?: string;
 }
 
-const ToolBar = ({ usePDFSlickStore, className }: ToolBarPropsType) => {
+const ToolBar: FC<ToolBarPropsType> = ({ usePDFSlickStore, className }) => {
   const { pageNumber, numPages, scale, pdfSlick } = usePDFSlickStore();
 
   return (
