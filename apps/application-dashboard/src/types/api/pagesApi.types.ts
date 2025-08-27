@@ -162,6 +162,10 @@ export interface UpdateSheetByPageIdPayloadType {
   };
 }
 
+export interface DeleteSheetByPageIdPayloadType {
+  pageId: string;
+  sheetId: string;
+}
 export interface Field {
   column: string;
   aggregation?: string;

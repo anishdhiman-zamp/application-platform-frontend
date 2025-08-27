@@ -8,7 +8,11 @@ const FieldWrapper = ({ children }: { children: React.ReactNode }) => {
   const isDatasetSelected = useMemo(() => !!formData.datasetId, [formData.datasetId]);
 
   return (
-    <TooltipV2 tooltipBody='Please select a dataset first' disabled={isDatasetSelected} className='w-full text-left'>
+    <TooltipV2
+      tooltipBody='Please select a dataset first'
+      isDisabledBody={isDatasetSelected}
+      className='w-full text-left'
+    >
       <div className={cn({ 'pointer-events-none': !isDatasetSelected })}>{children}</div>
     </TooltipV2>
   );

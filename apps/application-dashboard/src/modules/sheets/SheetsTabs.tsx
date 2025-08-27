@@ -30,10 +30,9 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 interface SheetsTabsProps {
   tabs: MenuItem[];
   currentSheetId: string;
-  isPageLoading: boolean;
 }
 
-const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
+const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
   const router = useRouter();
   const params = useParams();
   const [tabOrder, setTabOrder] = useState<string[]>(tabs.map((tab) => tab.value as string));
@@ -132,7 +131,6 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
     >
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isPageLoading}
         loader={<div className='bg-GRAY_50 block h-8 w-25 animate-pulse rounded-md' />}
         className='w-fit'
       >
@@ -155,6 +153,8 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
                     tab={tab}
                     currentSheetId={currentSheetId}
                     handleTabSelect={handleTabSelect}
+                    allSheets={tabs}
+                    onCreateSheet={handleCreateSheet}
                   />
                 );
               })}
@@ -167,6 +167,8 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
                   tab={tabs.find((t) => t.value === activeId) ?? { value: '', label: '' }}
                   currentSheetId={currentSheetId}
                   handleTabSelect={handleTabSelect}
+                  allSheets={tabs}
+                  onCreateSheet={handleCreateSheet}
                 />
               </div>
             ) : null}

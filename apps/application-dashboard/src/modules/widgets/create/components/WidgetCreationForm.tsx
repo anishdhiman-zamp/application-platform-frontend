@@ -173,7 +173,7 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
         <TooltipV2
           tooltipBody='Please configure the widget'
           side={SIDE_OPTIONS.TOP}
-          disabled={!!formData.datasetId && !isDatasetFilterConfigFetching}
+          isDisabledBody={!!formData.datasetId && !isDatasetFilterConfigFetching}
         >
           <Button
             size='medium'
