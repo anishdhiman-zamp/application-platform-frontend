@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AnnotationType, ChatMessage, ChatMessageType, ResourceType, SenderType, useChat } from '@zamp-platform/chat';
 import { useAppSelector } from 'hooks/toolkit';
 import { RootState } from 'store';
+import { useSSEContext } from '@/contexts/SSEContext';
 
 interface ChatComponentProps {
   type: AnnotationType;
@@ -15,6 +16,7 @@ interface ChatComponentProps {
 export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = '', resourceId, resourceType }) => {
   const [inputValue, setInputValue] = useState('');
   const user = useAppSelector((state: RootState) => state.user.user);
+  const sseContext = useSSEContext();
 
   const chat = useChat({
     onNewMessage: (message: ChatMessage) => {
@@ -109,11 +111,11 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
           onKeyDown={handleKeyPress}
           placeholder='Type a message...'
           className='flex-1 rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none'
-          // disabled={!chat.state.isConnected}
+          disabled={!sseContext?.state?.isConnected}
         />
         <button
           onClick={handleSendMessage}
-          // disabled={!inputValue.trim() || !chat.state.isConnected}
+          disabled={!inputValue.trim() || !sseContext?.state?.isConnected}
           className='rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300'
         >
           Send
@@ -122,14 +124,14 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
 
       <div className='status-bar mt-2 text-xs text-gray-500'>
         Status:{' '}
-        {/* {chat.state.isConnected ? (
+        {sseContext?.state?.isConnected ? (
           <span className='text-green-600'>Connected</span>
-        ) : chat.state.isConnecting ? (
+        ) : sseContext?.state?.isConnecting ? (
           <span className='text-yellow-600'>Connecting...</span>
         ) : (
           <span className='text-red-600'>Disconnected</span>
-        )} */}
-        {/* {chat.state.error && <span className='ml-2 text-red-600'>Error: {chat.state.error}</span>} */}
+        )}
+        {sseContext?.state?.error && <span className='ml-2 text-red-600'>Error: {sseContext?.state?.error}</span>}
       </div>
     </div>
   );

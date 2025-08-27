@@ -11,6 +11,7 @@ import { ShimmerText, toast } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import KnowledgeBasedTopbar from 'modules/knowledge-based/KnowledgeBasedTopbar';
 import { useParams } from 'next/navigation';
+import { useSSEContext } from '@/contexts/SSEContext';
 import ChatCard from '@/modules/knowledge-based/chatbot/ChatCard';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import type { defaultFnType } from '@/types/commonTypes';
@@ -24,6 +25,7 @@ interface KbChatbotProps {
 const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
   const params = useParams();
   const processId = params?.processId as string;
+  const sseContext = useSSEContext();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState('');
@@ -46,7 +48,6 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
 
   const handleClose = () => {
     onClose?.();
-    // chat.disconnect();
     chat.clearMessages();
   };
 
@@ -66,14 +67,11 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
       if (!conversationId) {
         throw new Error('Failed to create conversation');
       }
-      // chat.connect();
     };
 
     if (userMessage) {
       init();
     }
-
-    // return () => chat.disconnect();
   }, [userMessage]);
 
   const handleSendMessage = async (inputValue: string) => {
@@ -121,7 +119,7 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
                 senderType={message?.sender_type}
               />
             ))}
-            {/* {chat?.state?.error && <div className='text-red-500'>{chat?.state?.error}</div>} */}
+            {sseContext?.state?.error && <div className='text-red-500'>{sseContext?.state?.error}</div>}
             {isLoading && (
               <div className='flex h-full w-full items-center gap-1.5 text-gray-700'>
                 <PaceIcon height={12} width={12} />
