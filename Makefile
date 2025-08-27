@@ -25,7 +25,7 @@ NODE := npm
 # Create necessary directories
 $(shell mkdir -p $(PID_DIR) $(LOG_DIR))
 
-.PHONY: help install install-dev install-prod sync-secrets dev dev-hot dev-stop dev-clean dev-restart dev-status dev-logs dev-tail dev-tail-stop health debug check-port check-ports check-all-ports kill-all-node check-stray clean-tail force-kill-port
+.PHONY: help install install-dev install-prod sync-secrets sync-from-main dev dev-hot dev-stop dev-clean dev-restart dev-status dev-logs dev-tail dev-tail-stop health debug check-port check-ports check-all-ports kill-all-node check-stray clean-tail force-kill-port
 
 help: ## Show this help message
 	@echo "Application Platform Frontend Development Orchestration"
@@ -82,6 +82,38 @@ sync-secrets: ## Sync secrets and update environment files
 	@echo -e "\033[34mSyncing secrets for Application Platform Frontend...\033[0m"
 	@./sync-secrets.sh
 	@echo -e "\033[32m✅ Secrets sync complete\033[0m"
+
+sync-from-main: ## Sync service to main branch and update secrets/dependencies
+	@echo -e "\033[34m🔄 Syncing Application Platform Frontend to main branch...\033[0m"
+	@echo -e "\033[36m📂 Working directory: $(CURRENT_DIR)\033[0m"
+	@echo ""
+	@echo -e "\033[34m1. 💾 Stashing local changes...\033[0m"
+	@if git diff --quiet && git diff --cached --quiet; then \
+		echo -e "\033[32m✅ No local changes to stash\033[0m"; \
+	else \
+		echo -e "\033[33m📦 Stashing local changes...\033[0m"; \
+		git stash push -m "Auto-stash before sync to main - $(shell date)"; \
+	fi
+	@echo ""
+	@echo -e "\033[34m2. 🌟 Switching to main branch...\033[0m"
+	@git checkout main
+	@echo ""
+	@echo -e "\033[34m3. ⬇️  Pulling latest changes...\033[0m"
+	@git pull origin main
+	@echo ""
+	@echo -e "\033[34m4. 🔐 Syncing secrets...\033[0m"
+	@$(MAKE) sync-secrets
+	@echo ""
+	@echo -e "\033[34m5. 📦 Updating Node.js dependencies...\033[0m"
+	@if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then \
+		echo -e "\033[33m⚠️  Dependencies need installation...\033[0m"; \
+		$(MAKE) install; \
+	else \
+		echo -e "\033[34m🔄 Updating dependencies...\033[0m"; \
+		$(NODE) install; \
+	fi
+	@echo ""
+	@echo -e "\033[32m✅ Application Platform Frontend sync to main complete!\033[0m"
 
 # =============================================================================
 # MAIN DEVELOPMENT COMMANDS
