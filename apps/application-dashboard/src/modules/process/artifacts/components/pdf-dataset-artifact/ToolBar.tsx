@@ -3,12 +3,12 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 
-type ToolBarProps = {
+interface ToolBarPropsType {
   usePDFSlickStore: TUsePDFSlickStore;
   className?: string;
-};
+}
 
-const ToolBar = ({ usePDFSlickStore, className }: ToolBarProps) => {
+const ToolBar = ({ usePDFSlickStore, className }: ToolBarPropsType) => {
   const { pageNumber, numPages, scale, pdfSlick } = usePDFSlickStore();
 
   return (
