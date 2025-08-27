@@ -62,7 +62,7 @@ const PdfArtifact = ({
   );
 
   const { viewerRef, usePDFSlickStore, PDFSlickViewer, isDocumentLoaded, error } = usePDFSlick(
-    'https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf',
+    signedUrl?.signed_url || '',
     { scaleValue: 'page-fit' },
   );
 
