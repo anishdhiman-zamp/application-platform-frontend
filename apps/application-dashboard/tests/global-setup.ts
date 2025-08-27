@@ -1,26 +1,15 @@
-import { chromium, FullConfig, Locator } from '@playwright/test';
+import { chromium, FullConfig } from '@playwright/test';
 import fs from 'fs';
 import { TOTP } from 'totp-generator';
 import { PLAYWRIGHT_ENV_CREDENTIALS } from '../playwright.config';
 import { getOrCreateCDPConnection } from '../tests/session_management/selenium-session-manager';
+import { waitForVisible } from '../tests/utils';
 
 // Generate TOTP token using totp-generator package
 function generateTOTP(secret: string): string {
   const { otp } = TOTP.generate(secret);
 
   return otp;
-}
-
-// Wait for visible
-async function waitForVisible(locator: Locator, timeout = 5000, pollInterval = 250): Promise<boolean> {
-  const start = Date.now();
-
-  while (Date.now() - start < timeout) {
-    if (await locator.isVisible().catch(() => false)) return true;
-    await locator.page().waitForTimeout(pollInterval);
-  }
-
-  return false;
 }
 
 async function globalSetup(config: FullConfig) {

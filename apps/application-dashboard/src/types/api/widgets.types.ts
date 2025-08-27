@@ -153,6 +153,7 @@ export type BarLineChartWidgetMapping = {
   fields: FieldsMappingType;
   default_filters?: Partial<DefaultFilterType>;
   drilldown_config?: DrillDownConfigType;
+  is_stacked?: boolean;
 };
 
 export type PieDonutChartFieldsMappingType = {
@@ -173,7 +174,7 @@ export interface AxisMappingType {
   field_type: FIELD_TYPES;
   alias?: string;
   aggregation?: AGGREGATION_TYPES;
-  drilldown_filter_type?: string;
+  drilldown_filter_type?: FILTER_TYPES;
   drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
 }
 
@@ -248,3 +249,10 @@ export type MappingDatasetType = {
     [measure: string]: string[];
   };
 };
+
+export type WidgetInstanceTypeWrapper = Extract<
+  WidgetInstanceType,
+  {
+    widget_type: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART | WIDGET_TYPES.PIE_CHART | WIDGET_TYPES.DONUT_CHART;
+  }
+>;

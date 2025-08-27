@@ -1,7 +1,10 @@
+import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { WidgetDataRequestType, WidgetDataResponseType, WidgetInstanceResponseType } from 'types/api/widgets.types';
 import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
+import { EditWidgetInstancePayloadType } from '@/types/api/pagesApi.types';
 
 const Widgets = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -16,6 +19,7 @@ const Widgets = baseApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DATA_GET, { widgetId }),
         params: payload,
       }),
+      providesTags: [APITags.GET_WIDGET_DATA],
     }),
     getTransformedWidgetData: builder.query<any, WidgetDataRequestType>({
       queryFn: async ({ widgetId, payload }) => {
@@ -40,7 +44,20 @@ const Widgets = baseApi.injectEndpoints({
         }
       },
     }),
+    updateWidget: builder.mutation<void, EditWidgetInstancePayloadType>({
+      query: (body) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.WIDGET_INSTANCE_UPDATE_PUT, { widgetId: body.widget_instance_id }),
+        method: REQUEST_TYPES.PUT,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES, APITags.GET_WIDGET_DATA]),
+    }),
   }),
 });
 
-export const { useGetWidgetInstanceQuery, useGetWidgetDataQuery, useGetTransformedWidgetDataQuery } = Widgets;
+export const {
+  useGetWidgetInstanceQuery,
+  useGetWidgetDataQuery,
+  useGetTransformedWidgetDataQuery,
+  useUpdateWidgetMutation,
+} = Widgets;

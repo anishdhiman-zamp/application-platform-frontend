@@ -30,6 +30,7 @@ export const CONNECT_ACCOUNT = IMAGE_PREFIX + '/images/connect-account.svg';
 export const DATASET_TABLE = IMAGE_PREFIX + '/icons/dataset-table.svg';
 export const ALIGN_CENTER = IMAGE_PREFIX + '/icons/align-center.svg';
 export const KNOWLEDGE_BASED = IMAGE_PREFIX + '/icons/knowledge-based.svg';
+export const DONUT_CHART_ICON = IMAGE_PREFIX + '/icons/donut.svg';
 
 // Bank Icons
 export const ADCB_SVG = IMAGE_PREFIX + '/icons/bank-icons/adcb.svg';
@@ -130,6 +131,8 @@ export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.png';
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.png';
 export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.png';
+
+export const SHEET_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/sheet.png';
 
 // Video Artifact
 export const PAUSED_OVERLAY = IMAGE_PREFIX + '/icons/agents/video-artifact/paused-overlay.svg';

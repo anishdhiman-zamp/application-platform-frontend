@@ -11,11 +11,18 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { toast } from '@zamp-platform/ui';
+import { Button, toast } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
-import { useUpdatePageIndexesMutation } from '@/apis/pages';
+import { useRouter } from 'next/navigation';
+import { useCreatePageMutation, useUpdatePageIndexesMutation } from '@/apis/pages';
+import TooltipV2 from '@/components/common/TooltipV2';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { DEFAULT_PAGE_DESCRIPTION, DEFAULT_PAGE_NAME, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { getPageRouteById } from '@/constants/routeConfig';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { PageResponseType } from '@/types/api/pagesApi.types';
 import { ProcessesResponseType } from '@/types/api/processApi.types';
 import DraggablePageNavTab from 'components/layouts/dashboard-layout/components/DraggablePageNavTab';
@@ -35,6 +42,12 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
   const [overId, setOverId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [updatePageIndexes] = useUpdatePageIndexesMutation();
+  const [createPage, { isLoading: isCreatingPage }] = useCreatePageMutation();
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
+
+  const router = useRouter();
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -72,6 +85,21 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
     }
   };
 
+  const handleCreatePage = () => {
+    createPage({
+      page_name: DEFAULT_PAGE_NAME,
+      page_description: DEFAULT_PAGE_DESCRIPTION,
+      sheet_name: DEFAULT_SHEET_NAME,
+    })
+      .unwrap()
+      .then((res) => {
+        router.push(getPageRouteById(res?.page?.page_id));
+      })
+      .catch(() => {
+        toast.error('Failed to create page');
+      });
+  };
+
   // Calculate drop indicator index (where the black line should appear)
   const dropIndicatorIndex = useMemo(() => {
     if (activeId && overId && activeId !== overId) {
@@ -85,11 +113,38 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
     if (pages) setPageOrder(pages.map((p) => p.page_id));
   }, [pages]);
 
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
   return (
     <>
-      {!!pages?.length && (
+      {(!!pages?.length || isSelfServePagesEnabled) && (
         <div className={cn('px-2', processes?.length === 0 ? 'py-2.5' : 'py-0')}>
-          <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
+          <div className='flex items-center justify-between'>
+            <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Pages</div>
+            {isSelfServePagesEnabled && (
+              <TooltipV2 tooltipBody='Add page' asChildTrigger>
+                <Button
+                  size='xxsmall'
+                  variant='ghost'
+                  onClick={handleCreatePage}
+                  className='[&_svg]:size-3.5'
+                  isLoading={isCreatingPage}
+                >
+                  <SvgSpriteLoader id='plus' className='text-gray-700' />
+                </Button>
+              </TooltipV2>
+            )}
+          </div>
           <CommonWrapper
             isLoading={isLoading}
             skeletonType={SkeletonTypes.CUSTOM}
@@ -104,7 +159,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
             >
               <SortableContext items={pageOrder} strategy={verticalListSortingStrategy}>
                 {pageOrder.map((pageId, idx) => {
-                  const page = pages.find((p) => p.page_id === pageId);
+                  const page = pages?.find((p) => p.page_id === pageId);
 
                   if (!page) return null;
 
@@ -115,6 +170,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                         pageId={page.page_id}
                         label={page.name}
                         isSelected={params?.pageId === page.page_id}
+                        page={page}
                       />
                       {dropIndicatorIndex === idx && (
                         <div className='absolute right-0 bottom-0 left-0 z-10 h-0.5 rounded-full bg-black' />
@@ -128,9 +184,10 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                   <div className='-rotate-2 rounded-md border shadow-lg'>
                     <PageNavTab
                       key={activeId}
-                      label={pages.find((p) => p.page_id === activeId)?.name || ''}
+                      label={pages?.find((p) => p.page_id === activeId)?.name || ''}
                       pageId={activeId}
                       isSelected={false}
+                      page={pages?.find((p) => p.page_id === activeId) || pages?.[0]}
                     />
                   </div>
                 ) : null}

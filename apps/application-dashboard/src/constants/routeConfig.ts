@@ -26,6 +26,7 @@ export const ROUTES_PATH = {
   TEAM: '/team',
   SETTINGS: '/settings',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
+  WIDGET_CREATE: '/widgets/create',
 };
 
 export const getPageRouteById = (pageId: string) => {

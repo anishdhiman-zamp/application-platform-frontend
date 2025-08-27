@@ -282,7 +282,7 @@ export function formatNumber(
     }
   }
 
-  return value.toString();
+  return value.toFixed(precision).toString();
 }
 
 /**

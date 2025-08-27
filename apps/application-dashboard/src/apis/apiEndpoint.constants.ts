@@ -62,6 +62,8 @@ export const API_ENDPOINTS = {
   DATASET_RULE_DELETE: `datasets/rules/{{ruleId}}`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
+  WIDGET_INSTANCE_POST: `widgets/instance`,
+  WIDGET_INSTANCE_UPDATE_PUT: `widgets/{{widgetId}}`,
 
   PAGES_GET: `pages/get-pages`,
   PAGES_SHEETS_GET: `pages/{{pageId}}`,
@@ -74,7 +76,12 @@ export const API_ENDPOINTS = {
   UPDATE_PAGE_INDEXES: `pages/update-indexes`,
   UPDATE_SHEET_INDEXES: `pages/{{pageId}}/sheets/update-indexes`,
   UPDATE_PAGE: `pages/{{pageId}}`,
+  DELETE_PAGE: `pages/{{pageId}}`,
   UPDATE_SHEET_BY_PAGE_ID: `pages/{{pageId}}/sheets/{{sheetId}}`,
+  DELETE_SHEET_BY_PAGE_ID: `pages/{{pageId}}/sheets/{{sheetId}}`,
+  UPDATE_SHEET_LAYOUT_PUT: `pages/{{pageId}}/sheets/{{sheetId}}/update-layout`,
+  SHEET_CREATE_POST: `pages/{{pageId}}/sheets/`,
+  PAGES_CREATE_POST: `pages/`,
 
   PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,

@@ -78,7 +78,6 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
       container.scrollTop + elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
 
     container.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-    setTimeout(() => textareaRef.current?.focus(), 100);
   }, [selectedKey]);
 
   // Memoize the sorted entries of `rowData` based on the specified `columnOrdering`
