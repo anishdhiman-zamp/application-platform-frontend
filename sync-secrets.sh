@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration variables
-PORT=8000  # Hardcoded port
+PORT=8080  # Hardcoded port
 
 # Get CODER_WORKSPACE_NAME from environment
 if [ -z "$CODER_WORKSPACE_NAME" ]; then
@@ -10,7 +10,7 @@ if [ -z "$CODER_WORKSPACE_NAME" ]; then
 fi
 
 # Construct the API URL
-NEXT_PUBLIC_DEV_API_URL="https://${PORT}--main--${CODER_WORKSPACE_NAME}.coder-live.zamp.dev/"
+NEXT_PUBLIC_DEV_API_URL="https://${PORT}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
 
 update_env_file() {
     local env_file=$1
