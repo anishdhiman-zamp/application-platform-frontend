@@ -19,7 +19,7 @@ const ToolBar: FC<ToolBarPropsType> = ({ usePDFSlickStore, className }) => {
         className,
       )}
     >
-      {/* Download */}
+      {/* Download Button */}
       <SvgSpriteLoader
         id='download-02'
         color={COLORS.WHITE}
