@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AnnotationType, ChatMessage, ChatMessageType, ResourceType, SenderType, useChat } from '@zamp-platform/chat';
 import { useAppSelector } from 'hooks/toolkit';
 import { RootState } from 'store';
-import { useSSEContext } from '@/contexts/SSEContext';
+import { useSSEContext } from '@/app/_providers/sse-provider';
 
 interface ChatComponentProps {
   type: AnnotationType;

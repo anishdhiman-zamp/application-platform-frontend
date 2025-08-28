@@ -11,7 +11,7 @@ import { ShimmerText, toast } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import KnowledgeBasedTopbar from 'modules/knowledge-based/KnowledgeBasedTopbar';
 import { useParams } from 'next/navigation';
-import { useSSEContext } from '@/contexts/SSEContext';
+import { useSSEContext } from '@/app/_providers/sse-provider';
 import ChatCard from '@/modules/knowledge-based/chatbot/ChatCard';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import type { defaultFnType } from '@/types/commonTypes';

@@ -3,9 +3,9 @@
 import React, { Suspense } from 'react';
 import { Provider } from 'react-redux';
 import { RegionProvider } from 'app/_providers/region-provider';
+import { SSEProvider } from 'app/_providers/sse-provider';
 import { AuthGuard } from '@/components/hoc/AuthGuard';
 import { RouteGuard } from '@/components/hoc/RouteGuard';
-import { SSEProvider } from '@/contexts/SSEContext';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
 import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
 import { store } from '@/store';
