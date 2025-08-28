@@ -7,9 +7,11 @@ import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useAppSelector } from 'hooks/toolkit';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import EmptySheet from 'modules/sheets/EmptySheet';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
 import { computeSheetLayout, getLastWidgetLayout } from 'modules/sheets/sheets.utils';
+import useUpdateSheetLayout from 'modules/sheets/useUpdateSheetLauot';
 import useWidgetResize from 'modules/sheets/useWidgetResize';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
@@ -18,9 +20,11 @@ import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/w
 import { useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import TooltipV2 from '@/components/common/TooltipV2';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -57,6 +61,10 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
 
   const { evaluate, ldClient } = useFeatureFlags();
+
+  const { handleDragStart, handleDragStop } = useUpdateSheetLayout({ setSheetLayout, pageId, sheetId });
+
+  const isEditingSheetNameAllowed = useIsEditingBreadcrumbAllowed();
 
   const updateInputWidth = useCallback(() => {
     if (spanRef.current && sheetDetails?.name) {
@@ -230,34 +238,40 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
           }
         >
           <div className='z-100 flex items-center justify-between px-5'>
-            {isEditingSheetName ? (
-              <div className='relative inline-block'>
-                <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
-                  {sheetName}
-                </span>
-                <input
-                  value={sheetName}
-                  onChange={(e) => setSheetName(e.target.value)}
-                  onBlur={handleInputBlur}
-                  autoFocus
-                  style={{ width: `${inputWidth}px` }}
-                  className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
-                    'bg-white': sheetName?.length === 0,
-                  })}
-                  placeholder='Add sheet title'
-                  onKeyDown={handleEditKeyDown}
-                />
-              </div>
+            {isEditingSheetNameAllowed ? (
+              <>
+                {isEditingSheetName ? (
+                  <div className='relative inline-block'>
+                    <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
+                      {sheetName}
+                    </span>
+                    <input
+                      value={sheetName}
+                      onChange={(e) => setSheetName(e.target.value)}
+                      onBlur={handleInputBlur}
+                      autoFocus
+                      style={{ width: `${inputWidth}px` }}
+                      className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
+                        'bg-white': sheetName?.length === 0,
+                      })}
+                      placeholder='Add sheet title'
+                      onKeyDown={handleEditKeyDown}
+                    />
+                  </div>
+                ) : (
+                  <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+                    <Button
+                      variant='ghost'
+                      className='text-GRAY_950 rounded-lg px-2.5 py-1'
+                      onClick={() => setIsEditingSheetName(true)}
+                    >
+                      <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
+                    </Button>
+                  </TooltipV2>
+                )}
+              </>
             ) : (
-              <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-                <Button
-                  variant='ghost'
-                  className='text-GRAY_950 rounded-lg px-2.5 py-1'
-                  onClick={() => setIsEditingSheetName(true)}
-                >
-                  <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
-                </Button>
-              </TooltipV2>
+              <span className='f-24-450'>{sheetDetails?.name}</span>
             )}
             <div className='flex items-center gap-2'>
               <FiltersWrapper
@@ -302,49 +316,59 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                 width={1200} // Adjust grid width as per container
                 margin={WIDGETS_LAYOUT_MARGIN}
                 isResizable={false}
-                isDraggable={false}
+                isDraggable
+                draggableHandle='.widget-options-handle'
                 useCSSTransforms={false}
+                onDragStart={handleDragStart}
+                onDragStop={handleDragStop}
               >
-                {sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => (
-                  <div
-                    key={`widget-${widgetConfig?.default_widget}`}
-                    data-grid={sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)}
-                    className='bg-white'
-                  >
-                    <div key={widgetConfig?.default_widget} className='h-full w-full'>
-                      <WidgetSwitcher
-                        widgetConfig={widgetConfig}
-                        currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
-                        defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
-                        widgetInstances={sheetDetails?.widget_instances ?? []}
-                        handleWidgetHeightChange={handleWidgetHeightChange}
-                        sheetId={sheetId}
-                        isBff={isBff}
-                        resizeProps={{
-                          size:
-                            sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)?.w === 8
-                              ? 'half'
-                              : 'full',
-                          onSizeChange: (size) => handleWidgetResizeWrapper(widgetConfig?.default_widget, size),
-                        }}
-                      />
+                {sheetDetails?.sheet_config?.sheet_layout?.map((widgetConfig) => {
+                  const currentWidgetLayout = sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget);
+
+                  return (
+                    <div key={widgetConfig?.default_widget} data-grid={currentWidgetLayout} className='bg-white'>
+                      <div key={widgetConfig?.default_widget} className='h-full w-full'>
+                        <WidgetSwitcher
+                          widgetConfig={widgetConfig}
+                          currency={sheetDetails?.sheet_config?.currency?.hide_currency_filter ? [] : currency}
+                          defaultCurrency={sheetDetails?.sheet_config?.currency?.default_currency}
+                          widgetInstances={sheetDetails?.widget_instances ?? []}
+                          handleWidgetHeightChange={handleWidgetHeightChange}
+                          sheetId={sheetId}
+                          isBff={isBff}
+                          resizeProps={{
+                            size:
+                              sheetLayout?.find((layout) => layout.i === widgetConfig?.default_widget)?.w === 8
+                                ? 'half'
+                                : 'full',
+                            onSizeChange: (size) => handleWidgetResizeWrapper(widgetConfig?.default_widget, size),
+                          }}
+                          currentWidgetLayout={currentWidgetLayout}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </ResponsiveGridLayout>
             )}
           </CommonWrapper>
         </CommonWrapper>
         {!!sheetLayout?.length && isSelfServePagesEnabled && (
-          <div
-            className={cn('fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all', {
-              'left-7/12 -translate-x-7/12': isSidebarOpen,
-            })}
+          <PermissionGuard
+            resourceType={ResourceType.PAGE}
+            resourceId={pageId}
+            privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
           >
-            <Button size='medium' variant='secondary' className='bg-white shadow' onClick={handleAddWidget}>
-              Add a widget
-            </Button>
-          </div>
+            <div
+              className={cn('fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all', {
+                'left-7/12 -translate-x-7/12': isSidebarOpen,
+              })}
+            >
+              <Button size='medium' variant='secondary' className='bg-white shadow' onClick={handleAddWidget}>
+                Add a widget
+              </Button>
+            </div>
+          </PermissionGuard>
         )}
       </div>
     </InitializeSheetsFilters>

@@ -1,6 +1,7 @@
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { cn } from '@zamp-platform/ui/utils';
 import { useOnClickOutside } from 'hooks';
 import { POSITION_TYPES } from 'types/common/components';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -28,6 +29,7 @@ const FiltersMenuV2: FC<FiltersMenuV2Props> = ({ onAddFilter, currentPageFilters
   }, [controlRef]);
 
   const toggleMenu = () => {
+    if (!filtersConfig?.length) return;
     setIsOpen((prev) => !prev);
   };
 
@@ -37,6 +39,14 @@ const FiltersMenuV2: FC<FiltersMenuV2Props> = ({ onAddFilter, currentPageFilters
     onAddFilter(filterKey);
     toggleMenu();
   };
+
+  const menuClassName = useMemo(() => {
+    if (!menuRef.current) return '';
+    const { top } = menuRef.current.getBoundingClientRect();
+    const isMenuCutoff = top + 300 > window.innerHeight;
+
+    return isMenuCutoff ? 'bottom-full' : '';
+  }, [isOpen]);
 
   return (
     <div className='relative'>
@@ -61,7 +71,7 @@ const FiltersMenuV2: FC<FiltersMenuV2Props> = ({ onAddFilter, currentPageFilters
         filtersConfig={filtersConfig ?? []}
         onAddFilter={onAddfilter}
         currentPageFilters={currentPageFilters ?? []}
-        className='right-0 bottom-full'
+        className={cn('right-0', menuClassName)}
         openClassName='max-h-[300px]'
       />
     </div>

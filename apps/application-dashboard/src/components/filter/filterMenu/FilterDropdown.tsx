@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useRef, useState } from 'react';
+import React, { FC, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useOnClickOutside } from 'hooks';
 import { MapAny } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -42,6 +42,7 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
   isDisabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions);
+  const [isMenuCutoffVertical, setIsMenuCutoffVertical] = useState<boolean>(false);
   const controlRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +72,14 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
     onFilterChange?.(value);
   };
 
+  useLayoutEffect(() => {
+    if (menuRef.current) {
+      const { top } = menuRef.current.getBoundingClientRect();
+
+      setIsMenuCutoffVertical(top + 600 > window.innerHeight);
+    }
+  }, [menuRef, isOpen]);
+
   return (
     <div key={index} className='relative w-fit'>
       <div ref={controlRef}>
@@ -89,10 +98,11 @@ const FilterDropdown: FC<FilterDropdownProps> = ({
       <div
         ref={menuRef}
         className={cn(
-          `shadow-dropdown absolute top-full z-50 mt-1.5 w-fit min-w-[218px] transition-all duration-500`,
+          `shadow-dropdown absolute z-50 w-fit min-w-[218px] transition-all duration-500`,
           controlClassName,
           isRightAligned ? 'right-0' : getMenuPlacement ? 'right-0' : 'left-0',
           isOpen ? '' : 'max-h-0 overflow-hidden border-0',
+          isMenuCutoffVertical ? 'bottom-full mb-1.5' : 'top-full mt-1.5',
         )}
       >
         <FilterDropdownMenu

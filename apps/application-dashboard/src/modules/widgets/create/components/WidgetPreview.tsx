@@ -5,7 +5,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import AGChartsWidgets from 'modules/widgets/AgChartWidgets';
 import { useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
-import { WIDGET_TYPES } from 'types/api/widgets.types';
+import { WIDGET_TYPES, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
 import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import useMockData from '@/modules/widgets/create/hooks/useMockData';
 import usePreviewData from '@/modules/widgets/create/hooks/usePreviewData';
@@ -38,7 +38,7 @@ const WidgetPreview = () => {
       case WIDGET_TYPES.DONUT_CHART:
         return (
           <AGChartsWidgets
-            widgetDetails={mockWidgetDetails}
+            widgetDetails={mockWidgetDetails as WidgetInstanceTypeWrapper}
             currentPageFilters='[]'
             isFilterInitialized={true}
             onNodeClick={() => {}}
@@ -81,8 +81,8 @@ const WidgetPreview = () => {
       isLoading={isFetching}
       skeletonType={SkeletonTypes.CUSTOM}
       className={cn('h-100 overflow-hidden rounded-xl border border-gray-200', {
-        'bg-white': !isKpiWidget,
-        'flex items-center justify-center border-none': isKpiWidget,
+        'bg-white': !(isKpiWidget && formData?.datasetId),
+        'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
       })}
       loader={<ZampLogoLoader className='bg-transparent' />}
     >

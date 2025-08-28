@@ -4,11 +4,11 @@ import { useWidgetCreationContext } from 'modules/widgets/create/context/WidgetC
 import { getWidgetLayout } from 'modules/widgets/create/utils';
 import { WidgetSize } from 'modules/widgets/widget.types';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useCreateWidgetMutation, useGetPagesQuery, useUpdateSheetLayoutMutation } from '@/apis/pages';
-import { useUpdateWidgetMutation } from '@/apis/widgets';
+import { useGetPagesQuery, useUpdateSheetLayoutMutation } from '@/apis/pages';
+import { useCreateWidgetMutation, useUpdateWidgetMutation } from '@/apis/widgets';
 import useWidgetResize from '@/modules/sheets/useWidgetResize';
-import { CreateWidgetDataMappingsType, CreateWidgetPayloadType, LayoutType } from '@/types/api/pagesApi.types';
-import { WIDGET_TYPES } from '@/types/api/widgets.types';
+import { LayoutType } from '@/types/api/pagesApi.types';
+import { CreateWidgetDataMappingsType, CreateWidgetPayloadType, WIDGET_TYPES } from '@/types/api/widgets.types';
 import { defaultFnType } from '@/types/commonTypes';
 
 const useSubmitWidgetForm = (handleClose: defaultFnType) => {
@@ -40,6 +40,7 @@ const useSubmitWidgetForm = (handleClose: defaultFnType) => {
   };
 
   const handleSubmit = () => {
+    if (!formData.datasetId) return;
     const payload: CreateWidgetPayloadType = {
       sheet_id: sheetId,
       title: formData.title || 'New Widget',

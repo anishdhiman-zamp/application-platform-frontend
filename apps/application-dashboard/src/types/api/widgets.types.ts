@@ -1,5 +1,6 @@
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { MapAny } from 'types/commonTypes';
+import { FilterModelType } from 'types/components/table.type';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
@@ -256,3 +257,50 @@ export type WidgetInstanceTypeWrapper = Extract<
     widget_type: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART | WIDGET_TYPES.PIE_CHART | WIDGET_TYPES.DONUT_CHART;
   }
 >;
+
+export interface EditWidgetInstancePayloadType {
+  widget_instance_id: string;
+  sheet_id: string;
+  title: string;
+  widget_type: WIDGET_TYPES;
+  data_mappings: string;
+}
+
+export interface CreateWidgetPayloadType {
+  sheet_id: string;
+  title: string;
+  widget_type: WIDGET_TYPES;
+  data_mappings: CreateWidgetDataMappingsType;
+}
+
+export interface Field {
+  column: string;
+  aggregation?: string;
+  type: string;
+  field_type: string;
+  drilldown_filter_type?: FILTER_TYPES;
+  drilldown_filter_operator?: CONDITION_OPERATOR_TYPE;
+}
+
+export interface CreateWidgetDataMappingFields {
+  dataset_id: string;
+  fields: {
+    x_axis?: Field[];
+    y_axis?: Field[];
+    group_by?: Field[];
+    values?: Field[];
+    slices?: Field[];
+    primary_value?: Field[];
+  };
+  default_filters?: FilterModelType | null;
+  is_stacked?: boolean;
+}
+
+export interface CreateWidgetDataMappingsType {
+  version: string;
+  mappings: CreateWidgetDataMappingFields[];
+}
+
+export interface CreateWidgetResponseType {
+  widget_instance_id: string;
+}

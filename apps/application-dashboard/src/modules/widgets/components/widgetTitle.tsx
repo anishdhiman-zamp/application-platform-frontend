@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { SelectButton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useOnClickOutside } from 'hooks';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import { WidgetOptionDropdown } from 'modules/widgets/components/WidgetOptionDropdown';
 import { SIZE_OPTIONS_TITLE } from 'modules/widgets/create/constants';
 import { ResizeProps, WidgetSize } from 'modules/widgets/widget.types';
@@ -12,6 +13,7 @@ import { WIDGET_TYPES } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
@@ -53,6 +55,7 @@ const WidgetTitle = ({
   const params = useParams();
   const pathname = usePathname() || '';
   const id = params?.id as string | undefined;
+  const pageId = params?.pageId as string;
 
   const currentSheetId = useMemo(() => getSheetIdFromPath(pathname ?? '', id ?? ''), [pathname, id]) ?? sheetId;
 
@@ -127,13 +130,19 @@ const WidgetTitle = ({
             )}
           </div>
           {resizeProps && isSelfServePagesEnabled && (
-            <SelectButton
-              options={SIZE_OPTIONS_TITLE}
-              value={resizeProps.size}
-              onValueChange={(value) => resizeProps.onSizeChange(value as WidgetSize)}
-              buttonClassName='h-6 w-6'
-              className='mb-1.5 p-0 opacity-0 group-hover:opacity-100'
-            />
+            <PermissionGuard
+              resourceType={ResourceType.PAGE}
+              resourceId={pageId}
+              privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
+            >
+              <SelectButton
+                options={SIZE_OPTIONS_TITLE}
+                value={resizeProps.size}
+                onValueChange={(value) => resizeProps.onSizeChange(value as WidgetSize)}
+                buttonClassName='h-6 w-6'
+                className='mb-1.5 p-0 opacity-0 group-hover:opacity-100'
+              />
+            </PermissionGuard>
           )}
         </div>
 

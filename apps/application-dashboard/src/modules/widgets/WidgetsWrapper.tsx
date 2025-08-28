@@ -21,7 +21,7 @@ import {
   WIDGET_TYPES,
   WidgetInstanceType,
 } from 'types/api/widgets.types';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { MapAny, OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import AGChartsWidgetsBff from '@/modules/widgets/AGChartsWidgetsBff';
 import AGChartsWidgets from '@/modules/widgets/AgChartWidgets';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -38,6 +38,7 @@ interface WidgetsWrapperProps {
   sheetId: string;
   setActiveWidget?: (widgetId: string) => void;
   isBff?: boolean;
+  currentWidgetLayout?: ResponsiveGridLayoutType;
   resizeProps?: ResizeProps;
 }
 
@@ -52,6 +53,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   handleWidgetHeightChange,
   sheetId,
   isBff,
+  currentWidgetLayout,
   resizeProps,
 }) => {
   const router = useRouter();
@@ -312,6 +314,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           isFilterLoading={isFilterLoading}
           currency={currency?.[0] ?? undefined}
           defaultCurrency={defaultCurrency}
+          currentWidgetLayout={currentWidgetLayout}
           resizeProps={resizeProps}
         />
       );
@@ -326,6 +329,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
           defaultCurrency={defaultCurrency}
+          currentWidgetLayout={currentWidgetLayout}
         />
       );
     }

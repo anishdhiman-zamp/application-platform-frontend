@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
   DATASET_RULE_DELETE: `datasets/rules/{{ruleId}}`,
   WIDGET_INSTANCE_GET: `widgets/{{widgetId}}/instance`,
   WIDGET_DATA_GET: `widgets/{{widgetId}}/data`,
+  WIDGET_DELETE: `widgets/{{widgetId}}`,
   WIDGET_INSTANCE_POST: `widgets/instance`,
   WIDGET_INSTANCE_UPDATE_PUT: `widgets/{{widgetId}}`,
 

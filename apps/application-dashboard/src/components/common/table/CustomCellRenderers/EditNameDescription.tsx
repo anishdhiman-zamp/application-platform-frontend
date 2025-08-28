@@ -30,6 +30,8 @@ const EditNameDescription = (props: ICellRendererParams) => {
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: data?.id as string,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const isCurrentUserAdmin = useMemo(() => {
