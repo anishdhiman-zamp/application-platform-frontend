@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, ReactNode, useContext } from 'react';
+import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
 import { eventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -30,21 +31,25 @@ interface SSEProviderProps {
 }
 
 export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
+  const handleSSEEvent = (event: MessageEvent) => {
+    try {
+      const data = JSON.parse(event.data);
+
+      if (data?.type) {
+        eventBus.publish(data.type, event);
+      }
+    } catch (error) {
+      captureException(error);
+    }
+  };
+
   const sseHook = useSSE({
     reconnectIntervalMs: 30000,
     maxReconnectAttempts: 5,
     url: `${API_DOMAIN}/${API_ENDPOINTS.UNIFIED_SSE}`,
     eventListeners: {
-      update: (event) => {
-        const data = JSON.parse(event.data);
-
-        eventBus.publish(data.type, event);
-      },
-      message: (event) => {
-        const data = JSON.parse(event.data);
-
-        eventBus.publish(data.type, event);
-      },
+      update: handleSSEEvent,
+      message: handleSSEEvent,
     },
   });
 

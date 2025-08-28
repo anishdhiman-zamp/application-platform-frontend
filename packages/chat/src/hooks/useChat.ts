@@ -2,7 +2,10 @@
 
 import { captureException } from '@sentry/browser';
 import { eventBus, UseSSEOptions } from '@zamp-platform/utils';
+import { EVENT_TYPES } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
+
+import type { MapAny } from '@/types/commonTypes';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
 import {
@@ -50,10 +53,8 @@ export const useChat = (config: ChatConfig) => {
   }, []);
 
   const handleMessage = useCallback(
-    (event: MessageEvent) => {
+    (data: MapAny) => {
       try {
-        const data = JSON.parse(event.data);
-
         switch (data.payload.type) {
           case SSEEventType.MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
@@ -69,13 +70,13 @@ export const useChat = (config: ChatConfig) => {
   );
 
   useEffect(() => {
-    const sub = eventBus.subscribe('conversation', (event: MessageEvent) => {
+    const sub = eventBus.subscribe(EVENT_TYPES.CONVERSATION, (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       if (data.source_id === _conversationId) {
-        handleMessage(event);
+        handleMessage(data);
       }
     });
-    return sub.unsubscribe;
+    return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(
