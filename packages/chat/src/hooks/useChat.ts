@@ -68,22 +68,9 @@ export const useChat = (config: ChatConfig) => {
     [config],
   );
 
-  // const sseConfig: UseSSEOptions = useMemo(
-  //   () => ({
-  //     ...config,
-  //     url: config.eventUrl,
-  //     onMessage: handleMessage,
-  //     autoConnect: false,
-  //   }),
-  //   [config, handleMessage],
-  // );
-
-  // const connection = useSSE(sseConfig);
-
   useEffect(() => {
     const sub = eventBus.subscribe('conversation', (event: MessageEvent) => {
       const data = JSON.parse(event.data);
-      console.log('conversation data', data.source_id, _conversationId);
       if (data.source_id === _conversationId) {
         handleMessage(event);
       }
@@ -115,7 +102,6 @@ export const useChat = (config: ChatConfig) => {
   );
 
   return {
-    // ...connection,
     messages,
     sendMessage,
     clearMessages,

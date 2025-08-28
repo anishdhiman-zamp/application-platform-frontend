@@ -39,12 +39,9 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
       if (!conversationId) {
         throw new Error('Failed to create conversation');
       }
-      // chat.connect();
     };
 
     init();
-
-    // return () => chat.disconnect();
   }, []);
 
   if (!user?.user_id) {
