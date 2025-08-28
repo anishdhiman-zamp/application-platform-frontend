@@ -148,5 +148,5 @@ export const API_ENDPOINTS = {
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
-  UNFIED_SSE: `events`,
+  UNIFIED_SSE: `events`,
 };

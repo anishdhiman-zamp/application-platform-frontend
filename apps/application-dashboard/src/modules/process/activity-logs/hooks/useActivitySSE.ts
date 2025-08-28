@@ -39,7 +39,7 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
     });
 
     return sub.unsubscribe;
-  }, [activityId]);
+  }, [activityId, handleUpdate]);
 
   return {};
 }

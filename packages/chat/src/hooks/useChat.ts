@@ -76,7 +76,7 @@ export const useChat = (config: ChatConfig) => {
       }
     });
     return sub.unsubscribe;
-  }, [handleMessage]);
+  }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage) => {

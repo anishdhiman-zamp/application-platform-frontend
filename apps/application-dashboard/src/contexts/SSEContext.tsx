@@ -33,7 +33,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   const sseHook = useSSE({
     reconnectIntervalMs: 30000,
     maxReconnectAttempts: 5,
-    url: `${API_DOMAIN}/${API_ENDPOINTS.UNFIED_SSE}`,
+    url: `${API_DOMAIN}/${API_ENDPOINTS.UNIFIED_SSE}`,
     eventListeners: {
       update: (event) => {
         const data = JSON.parse(event.data);

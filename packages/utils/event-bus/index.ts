@@ -26,7 +26,7 @@ class EventBus implements EventBusInterface {
       this.topics.set(topic, new Set());
     }
 
-    this.topics.get(topic)!.add(callback as EventCallback);
+    this.topics.get(topic)?.add(callback as EventCallback);
 
     return {
       unsubscribe: () => this.unsubscribe(topic, callback as EventCallback),
