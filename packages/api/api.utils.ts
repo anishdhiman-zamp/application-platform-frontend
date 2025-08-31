@@ -70,7 +70,7 @@ export const getApiDomainAndRegions = async (email = '') => {
   return { domain: getApiDomain(ENVIRONMENT, region), regions: allRegions };
 };
 
-export const getApiDomain = (environment = '', region = '') => {
+export const getApiDomain = (environment = '', region = REGIONS_MAP.us.suffix) => {
   switch (environment) {
     case 'production':
       return `https://api${region}.zamp.ai`;

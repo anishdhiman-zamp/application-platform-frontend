@@ -122,7 +122,7 @@ export const LoginForm = () => {
     }
     const { domain: apiDomain, regions } = await getApiDomainAndRegions(email);
 
-    if (regions.length >= 1 && allRegions.length === 0) {
+    if (regions.length > 1 && allRegions.length === 0) {
       setAllRegions(regions);
 
       setLoading(false);
