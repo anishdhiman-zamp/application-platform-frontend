@@ -71,9 +71,10 @@ export const getApiDomainAndRegions = async (email = '') => {
 };
 
 export const getApiDomain = (environment = '', region = REGIONS_MAP.us.suffix) => {
+  console.log('environment', environment, region);
   switch (environment) {
     case 'production':
-      return `https://api${region}.zamp.ai`;
+      return `https://api${region.length > 0 ? region : REGIONS_MAP.us.suffix}.zamp.ai`;
     case 'staging':
       return `https://api-stg-aws-us.zamp.ai`;
     case 'development': {
