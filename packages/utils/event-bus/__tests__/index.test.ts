@@ -400,6 +400,8 @@ describe('EventBus', () => {
 
       // Set up multiple topics
       const userSub = eventBus.subscribe('user-events', userCallback);
+      eventBus.subscribe('log-events', logCallback);
+      eventBus.subscribe('analytics-events', analyticsCallback);
 
       // Add multiple subscribers to same topic
       const additionalLogCallback = jest.fn();
