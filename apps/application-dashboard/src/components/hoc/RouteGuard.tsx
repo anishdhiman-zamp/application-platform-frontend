@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, ReactNode, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 import { useGetDatasetListingQuery } from 'apis/dataset';
 import { useGetPagesQuery } from 'apis/pages';
 import { ENVIRONMENT, ENVIRONMENT_TYPES } from 'constants/common.constants';
@@ -12,6 +12,7 @@ import ScreenSupport from 'modules/cards/ScreenSupport';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { checkScreenBreakpoint, getLeadingPathFromURL } from 'utils/common';
 import DashboardDowntime from '@/modules/cards/DashboardDowntime';
+import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 type AuthGuardPropsType = {
@@ -23,8 +24,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const id = searchParams?.get('id');
-
-  const [isDashboardDowntime, setIsDashboardDowntime] = useState(false);
+  const isGodMode = localStorage.getItem(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE);
 
   const currentPathName = getLeadingPathFromURL(pathname);
   const PAGES = getLeadingPathFromURL(ROUTES_PATH.PAGES);
@@ -74,20 +74,13 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
         }
       });
     }
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.DASHBOARD_DOWNTIME).then((isDashboardDowntime) => {
-        if (isDashboardDowntime) {
-          setIsDashboardDowntime(true);
-        }
-      });
-    }
   }, [isAdminRoute, evaluate, ldClient, router, props.children]);
 
   const breakpoint = checkScreenBreakpoint(width, height);
 
   if (breakpoint && ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION) return <ScreenSupport />;
 
-  if (isDashboardDowntime) {
+  if (!isGodMode) {
     return <DashboardDowntime />;
   }
 
