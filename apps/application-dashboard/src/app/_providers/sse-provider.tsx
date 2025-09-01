@@ -37,6 +37,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
       if (data?.type) {
         eventBus.publish(data.type, event);
+      } else {
+        captureException(new Error('SSE event received without required type field'));
       }
     } catch (error) {
       captureException(error);

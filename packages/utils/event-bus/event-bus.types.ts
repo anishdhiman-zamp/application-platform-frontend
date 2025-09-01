@@ -1,3 +1,5 @@
+import type { MapAny } from '@/types/commonTypes';
+
 /**
  * Base interface for all event payloads in the generic event bus system.
  * This serves as the foundation for all event types including SSE, webhooks, and component events.
@@ -6,7 +8,7 @@ export interface BaseEventPayload {
   type: string;
   source_id?: string;
   timestamp?: string;
-  payload?: Record<string, unknown>;
+  payload?: string | MapAny;
 }
 
 /**
@@ -40,7 +42,7 @@ export interface EventBusInterface {
  * Predefined event types for common use cases.
  * These constants ensure consistency across the application.
  */
-export enum EVENT_TYPES {
+export const enum EventType {
   ACTIVITY_LOG = 'activity_log',
   CONVERSATION = 'conversation',
   WEBHOOK = 'webhook',

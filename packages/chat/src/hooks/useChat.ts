@@ -2,7 +2,7 @@
 
 import { captureException } from '@sentry/browser';
 import { eventBus, UseSSEOptions } from '@zamp-platform/utils';
-import { EVENT_TYPES } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { MapAny } from '@/types/commonTypes';
@@ -63,16 +63,15 @@ export const useChat = (config: ChatConfig) => {
             break;
         }
       } catch (error) {
-        console.error('Failed to parse SSE message:', error);
+        captureException(error);
       }
     },
     [config],
   );
 
   useEffect(() => {
-    const sub = eventBus.subscribe(EVENT_TYPES.CONVERSATION, (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      if (data.source_id === _conversationId) {
+    const sub = eventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+      if (data?.source_id === _conversationId) {
         handleMessage(data);
       }
     });
@@ -94,7 +93,6 @@ export const useChat = (config: ChatConfig) => {
 
         return response;
       } catch (error) {
-        console.error('Failed to send message:', error);
         captureException(error);
         throw error;
       }
