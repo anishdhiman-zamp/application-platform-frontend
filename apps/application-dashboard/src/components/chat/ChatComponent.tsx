@@ -42,7 +42,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
     };
 
     init();
-  }, []);
+  }, [resourceId, resourceType, type, chat]);
 
   if (!user?.user_id) {
     return (
