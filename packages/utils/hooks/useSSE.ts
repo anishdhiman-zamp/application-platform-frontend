@@ -90,6 +90,7 @@ export const useSSE = ({
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
+        console.log('[useSSE] SSE connection opened', { url: _url });
         setState((prev) => ({
           ...prev,
           isConnected: true,
@@ -102,6 +103,7 @@ export const useSSE = ({
       };
 
       eventSource.onerror = (event) => {
+        console.error('[useSSE] SSE connection error', { url: _url, event });
         setState((prev) => ({ ...prev, isConnected: false, isConnecting: false }));
         onError?.(event);
       };
@@ -112,6 +114,7 @@ export const useSSE = ({
       };
 
       Object.entries(eventListeners).forEach(([type, handler]) => {
+        console.log(`[useSSE] Registering event listener for type "${type}"`);
         eventSource.addEventListener(type, (event: MessageEvent) => {
           lastMessageTimestamp.current = Date.now();
           handler(event);
@@ -124,6 +127,11 @@ export const useSSE = ({
       if (reconnectAttemptsRef.current < maxReconnectAttempts && isActive) {
         reconnectAttemptsRef.current += 1;
         setState((prev) => ({ ...prev, reconnectAttempts: reconnectAttemptsRef.current }));
+
+        console.log(
+          `[useSSE] Attempting reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${reconnectIntervalMs}ms`,
+          { url: _url },
+        );
 
         reconnectTimeoutRef.current = window.setTimeout(() => {
           initializeEventSource();

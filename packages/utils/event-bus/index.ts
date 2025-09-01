@@ -28,6 +28,8 @@ class EventBus implements EventBusInterface {
 
     this.topics.get(topic)?.add(callback as EventCallback);
 
+    console.log(`[EventBus] Subscribed to topic "${topic}". Subscribers: ${this.getSubscriberCount(topic)}`);
+
     return {
       unsubscribe: () => this.unsubscribe(topic, callback as EventCallback),
     };
@@ -42,8 +44,10 @@ class EventBus implements EventBusInterface {
     const callbacks = this.topics.get(topic);
     if (callbacks) {
       callbacks.delete(callback);
+      console.log(`[EventBus] Unsubscribed from topic "${topic}". Remaining subscribers: ${callbacks.size}`);
       if (callbacks.size === 0) {
         this.topics.delete(topic);
+        console.log(`[EventBus] Removed empty topic "${topic}"`);
       }
     }
   }
@@ -56,7 +60,10 @@ class EventBus implements EventBusInterface {
   publish<T = BaseEventPayload>(topic: string, event: T): void {
     const callbacks = this.topics.get(topic);
     if (callbacks) {
+      console.log(`[EventBus] Publishing to topic "${topic}" with ${callbacks.size} subscribers`, { event });
       callbacks.forEach((callback) => callback(event as BaseEventPayload));
+    } else {
+      console.log(`[EventBus] No subscribers for topic "${topic}"`, { event });
     }
   }
 

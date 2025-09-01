@@ -21,6 +21,9 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
     (data: BaseEventPayload) => {
       if (!data) return;
 
+      console.log('[useActivitySSE] Handling activity update', { data, processId, activityId });
+      console.log('[useActivitySSE] Refreshing activity data (logs, artifacts, summary)');
+
       getActivityLogs({ processId, activityRunId: activityId });
       getArtifacts({ processId, activityRunId: activityId });
       getActivitySummary({ processId, activityRunId: activityId });
@@ -29,13 +32,24 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
   );
 
   useEffect(() => {
+    console.log(`[useActivitySSE] Subscribing to activity log events for activityId: ${activityId}`);
     const sub = eventBus.subscribe(EventType.ACTIVITY_LOG, (data: BaseEventPayload) => {
+      console.log('[useActivitySSE] Received activity log event', { data, activityId });
       if (data?.source_id === activityId) {
+        console.log('[useActivitySSE] Processing activity log event (source_id matches)', { data });
         handleUpdate(data);
+      } else {
+        console.log('[useActivitySSE] Ignoring activity log event (source_id mismatch)', {
+          eventSourceId: data?.source_id,
+          expectedActivityId: activityId,
+        });
       }
     });
 
-    return sub.unsubscribe;
+    return () => {
+      console.log(`[useActivitySSE] Unsubscribing from activity log events for activityId: ${activityId}`);
+      sub.unsubscribe();
+    };
   }, [activityId, handleUpdate]);
 
   return {};
