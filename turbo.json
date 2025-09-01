@@ -21,7 +21,8 @@
       "persistent": true
     },
     "start-coder": {
-      "persistent": true
+      "persistent": true,
+      "cache": false
     },
     "build": {
       "dependsOn": ["^build"],
