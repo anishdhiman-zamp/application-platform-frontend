@@ -146,7 +146,7 @@ jobs:
 
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend/"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
         run: |
           echo "Building application with environment variables:"
@@ -163,7 +163,7 @@ jobs:
       - id: build
         name: Build and Push Image
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend/"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
         run: |
           # Debug: Show all environment variables first
           echo "=== Environment Variables Debug ==="
@@ -210,12 +210,25 @@ jobs:
       - id: upload-assets
         name: Upload Static Files to S3
         run: |
-          # Upload Next.js static files directly from the built application
-          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
-          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public"
+          # Clear existing assets and upload new ones to ensure complete replacement
+          echo "Clearing existing assets from S3..."
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --recursive --quiet
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --recursive --quiet
           
-          echo "Static assets uploaded to S3 successfully!"
+          echo "Uploading new Next.js static files..."
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --delete
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --delete
+          
+          echo "Static assets completely replaced in S3 successfully!"
           echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          
+          echo "Invalidating CloudFront cache to serve new assets..."
+          aws cloudfront create-invalidation \
+            --distribution-id E26VPPG9784DHO \
+            --paths "/*"
+          
+          echo "CloudFront invalidation initiated successfully!"
+          echo "New assets will be available shortly at: https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
 
   deploy-to-eks:
     name: Deploy to EKS
