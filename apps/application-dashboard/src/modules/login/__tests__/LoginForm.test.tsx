@@ -27,6 +27,18 @@ jest.mock('@zamp-platform/api', () => ({
   REQUEST_TYPES: {
     POST: 'POST',
   },
+  REGIONS_MAP: {
+    us: {
+      label: 'United States',
+      suffix: '-us',
+      shortHand: 'USA',
+    },
+    me: {
+      label: 'Middle East',
+      suffix: '-me',
+      shortHand: 'ME',
+    },
+  },
 }));
 
 jest.mock('@zamp-platform/utils', () => ({
@@ -35,8 +47,8 @@ jest.mock('@zamp-platform/utils', () => ({
   removeFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
-    ORG_REGION: 'ORG_REGION',
-    ALL_REGIONS: 'ALL_REGIONS',
+    ORG_REGION: 'ORG_REGION_V4',
+    ALL_REGIONS: 'ALL_REGIONS_V3',
   },
 }));
 
@@ -93,12 +105,25 @@ jest.mock('components/common/input', () => ({
 
 global.fetch = jest.fn();
 
+const mockLocation = {
+  href: '',
+  search: '',
+  pathname: '',
+  hash: '',
+  host: '',
+  hostname: '',
+  port: '',
+  protocol: '',
+  origin: '',
+  assign: jest.fn(),
+  reload: jest.fn(),
+  replace: jest.fn(),
+};
+
 Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-    search: '',
-  },
+  value: mockLocation,
   writable: true,
+  configurable: true,
 });
 
 describe('LoginForm', () => {
@@ -554,7 +579,7 @@ describe('LoginForm', () => {
 
     render(createElement(LoginForm));
 
-    expect(mockSetToLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION, '');
+    expect(mockSetToLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION, '-us');
   });
 
   it('should handle JSON parsing errors for regions', () => {
