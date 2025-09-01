@@ -54,23 +54,16 @@ export const useChat = (config: ChatConfig) => {
 
   const handleMessage = useCallback(
     (data: MapAny) => {
-      console.log('[useChat] Handling message data', { type: data.payload?.type, source_id: data.source_id });
       try {
         switch (data.payload.type) {
           case SSEEventType.MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
-            console.log('[useChat] Processing new chat message', { messageType: newMessage.message_type });
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
             config.onNewMessage?.(newMessage);
             break;
           default:
-            console.log('[useChat] Unknown message type', { type: data.payload.type });
         }
       } catch (error) {
-        console.error('[useChat] Error handling message', {
-          source_id: data.source_id,
-          error: error instanceof Error ? error.message : String(error),
-        });
         captureException(error);
       }
     },
@@ -80,18 +73,8 @@ export const useChat = (config: ChatConfig) => {
   useEffect(() => {
     console.log(`[useChat] Subscribing to conversation events for conversationId: ${_conversationId}`);
     const sub = eventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
-      console.log('[useChat] Received conversation event', {
-        source_id: data?.source_id,
-        conversationId: _conversationId,
-      });
       if (data?.source_id === _conversationId) {
-        console.log('[useChat] Processing conversation event (source_id matches)', { source_id: data.source_id });
         handleMessage(data);
-      } else {
-        console.log('[useChat] Ignoring conversation event (source_id mismatch)', {
-          eventSourceId: data?.source_id,
-          expectedConversationId: _conversationId,
-        });
       }
     });
     return () => {

@@ -35,7 +35,6 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
         },
       });
 
-      console.log('Conversation ID:', conversationId);
       if (!conversationId) {
         throw new Error('Failed to create conversation');
       }
