@@ -11,11 +11,11 @@ import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
 export default function Page() {
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
-  const { data: processes } = useGetProcessesQuery(undefined, {
+  const { data: processes, isSuccess: isSuccessProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
-  const { data: pages } = useGetPagesQuery(undefined, {
+  const { data: pages, isSuccess: isSuccessPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
@@ -26,12 +26,14 @@ export default function Page() {
 
   useEffect(() => {
     if (isOrgSwitchIsInProgress) window.location.reload();
-    if (processes && processes?.length > 0) {
-      pushToMostRelevantProcess();
-    } else if (pages && pages?.length > 0) {
-      pushToMostRelevantPage();
+    if (isSuccessProcesses && isSuccessPages) {
+      if (processes && processes?.length > 0) {
+        pushToMostRelevantProcess();
+      } else if (pages && pages?.length > 0) {
+        pushToMostRelevantPage();
+      }
     }
-  }, [processes, pages, isOrgSwitchIsInProgress]);
+  }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
 
   return (
     <CommonWrapper

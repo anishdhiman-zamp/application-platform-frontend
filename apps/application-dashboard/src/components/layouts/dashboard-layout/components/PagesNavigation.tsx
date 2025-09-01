@@ -37,6 +37,8 @@ type PagesNavigationProps = {
 };
 
 const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading, params }) => {
+  const router = useRouter();
+
   const [pageOrder, setPageOrder] = useState<string[]>(pages?.map((p) => p.page_id) || []);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -46,8 +48,6 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
   const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
 
   const { evaluate, ldClient } = useFeatureFlags();
-
-  const router = useRouter();
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -93,7 +93,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
     })
       .unwrap()
       .then((res) => {
-        router.push(getPageRouteById(res?.page?.page_id));
+        router.push(getPageRouteById(res?.page?.page_id, res?.sheet?.sheet_id));
       })
       .catch(() => {
         toast.error('Failed to create page');
@@ -171,6 +171,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                         label={page.name}
                         isSelected={params?.pageId === page.page_id}
                         page={page}
+                        defaultSheetId={page?.sheets?.[0]?.sheet_id}
                       />
                       {dropIndicatorIndex === idx && (
                         <div className='absolute right-0 bottom-0 left-0 z-10 h-0.5 rounded-full bg-black' />

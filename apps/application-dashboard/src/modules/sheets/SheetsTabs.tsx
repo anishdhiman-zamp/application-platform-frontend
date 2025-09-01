@@ -24,6 +24,7 @@ import { useCreateSheetMutation, useUpdateSheetIndexesByPageIdMutation } from '@
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { DEFAULT_SHEET_DESCRIPTION, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { getPageRouteById } from '@/constants/routeConfig';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
@@ -51,7 +52,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
 
   const handleTabSelect = (selected?: MenuItem) => {
     if (!selected?.value) return;
-    router.push(`?sheetId=${selected?.value}`);
+    router.push(getPageRouteById(pageId, selected?.value as string));
 
     const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) || '{}');
 
@@ -99,7 +100,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
     })
       .unwrap()
       .then((res) => {
-        router.push(`?sheetId=${res?.sheet?.sheet_id}`);
+        router.push(getPageRouteById(pageId, res?.sheet?.sheet_id));
         toast.success('Sheet created successfully');
       })
       .catch(() => {

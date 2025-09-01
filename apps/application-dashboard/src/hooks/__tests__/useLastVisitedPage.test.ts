@@ -107,7 +107,16 @@ describe('usePersistedPageNavigation', () => {
 
       (usePathname as jest.Mock).mockReturnValue(pathname);
 
-      (getFromLocalStorage as jest.Mock).mockReturnValue(lastVisitedPageId);
+      (getFromLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key === 'LAST_VISITED_PAGE_ID') {
+          return lastVisitedPageId;
+        }
+        if (key === 'LAST_VISITED_SHEET_ID') {
+          return '{}';
+        }
+
+        return null;
+      });
 
       const { result } = renderHook(() => usePersistedPageNavigation({ pagesList: pages }));
 

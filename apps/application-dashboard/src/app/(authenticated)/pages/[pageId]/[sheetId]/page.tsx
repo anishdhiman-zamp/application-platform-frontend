@@ -1,14 +1,16 @@
 'use client';
 import { useEffect } from 'react';
 import { useGetPagesQuery } from 'apis/pages';
-import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
+import { persistLastVisitedPage, persistLastVisitedSheet } from 'hooks/useLastVisitedPage';
+import Sheets from 'modules/sheets';
 import { useParams, useRouter } from 'next/navigation';
-import { getPageRouteById, ROUTES_PATH } from '@/constants/routeConfig';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
 
 const Page = () => {
   const params = useParams();
   const router = useRouter();
+  const currentSheetId = params?.sheetId;
 
   const pageId = params?.pageId;
 
@@ -21,12 +23,6 @@ const Page = () => {
     refetchOnMountOrArgChange: false,
   });
 
-  useEffect(() => {
-    if (pageId) {
-      persistLastVisitedPage(pageId as string);
-    }
-  }, [pageId]);
-
   const checkIsPageValid = () => {
     if (!pages) return;
 
@@ -34,23 +30,26 @@ const Page = () => {
 
     if (!currentPage) {
       router.push(ROUTES_PATH.HOME);
-    } else {
-      router.replace(getPageRouteById(pageId as string, currentPage?.sheets?.[0]?.sheet_id));
+
+      return;
     }
+
+    persistLastVisitedPage(pageId?.toString() || '');
+    persistLastVisitedSheet(pageId?.toString() || '', currentSheetId?.toString() || '');
   };
 
   useEffect(() => {
     if (isFetching) return;
 
-    persistLastVisitedPage(pageId as string);
-
-    //on org switch/ invalid page, redirect to valid page
+    //on invalid page, redirect to valid page
     checkIsPageValid();
   }, [pageId, pages, isFetching]);
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
-      <div className='relative h-full w-full rounded-tl-md'></div>
+      <div className='relative h-full w-full rounded-tl-md'>
+        <Sheets key={`${pageId}-${currentSheetId}`} pageId={pageId as string} sheetId={currentSheetId} />
+      </div>
     </CommonWrapper>
   );
 };

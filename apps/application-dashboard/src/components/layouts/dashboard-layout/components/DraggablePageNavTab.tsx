@@ -5,6 +5,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { getPageRouteById } from 'constants/routeConfig';
 import Link from 'next/link';
 import { PageResponseType } from 'types/api/pagesApi.types';
+import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import PageNavTab from 'components/layouts/dashboard-layout/components/PageNavTab';
 
 interface DraggablePageNavTabProps {
@@ -12,6 +13,7 @@ interface DraggablePageNavTabProps {
   label: string;
   isSelected: boolean;
   page: PageResponseType;
+  defaultSheetId: string;
 }
 
 const selectors = [
@@ -21,7 +23,7 @@ const selectors = [
   '#delete-page-dialog',
 ];
 
-const DraggablePageNavTab: FC<DraggablePageNavTabProps> = ({ pageId, label, isSelected, page }) => {
+const DraggablePageNavTab: FC<DraggablePageNavTabProps> = ({ pageId, label, isSelected, page, defaultSheetId }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: pageId,
   });
@@ -29,6 +31,9 @@ const DraggablePageNavTab: FC<DraggablePageNavTabProps> = ({ pageId, label, isSe
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const lastVisitedSheetId =
+    JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_SHEET_ID) || '{}')[pageId] || defaultSheetId;
 
   return (
     <div
@@ -39,7 +44,7 @@ const DraggablePageNavTab: FC<DraggablePageNavTabProps> = ({ pageId, label, isSe
       className={cn('select-none', { invisible: isDragging })}
     >
       <Link
-        href={getPageRouteById(pageId)}
+        href={getPageRouteById(pageId, lastVisitedSheetId)}
         className='cursor-pointer'
         prefetch
         onClick={(e) => {
