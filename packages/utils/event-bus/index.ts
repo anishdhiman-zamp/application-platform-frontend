@@ -60,10 +60,16 @@ class EventBus implements EventBusInterface {
   publish<T = BaseEventPayload>(topic: string, event: T): void {
     const callbacks = this.topics.get(topic);
     if (callbacks) {
-      console.log(`[EventBus] Publishing to topic "${topic}" with ${callbacks.size} subscribers`, { event });
+      const eventInfo = (event as BaseEventPayload)?.source_id
+        ? { source_id: (event as BaseEventPayload).source_id }
+        : {};
+      console.log(`[EventBus] Publishing to topic "${topic}" with ${callbacks.size} subscribers`, eventInfo);
       callbacks.forEach((callback) => callback(event as BaseEventPayload));
     } else {
-      console.log(`[EventBus] No subscribers for topic "${topic}"`, { event });
+      const eventInfo = (event as BaseEventPayload)?.source_id
+        ? { source_id: (event as BaseEventPayload).source_id }
+        : {};
+      console.log(`[EventBus] No subscribers for topic "${topic}"`, eventInfo);
     }
   }
 

@@ -90,7 +90,7 @@ export const useSSE = ({
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('[useSSE] SSE connection opened', { url: _url });
+        console.log('[useSSE] SSE connection opened');
         setState((prev) => ({
           ...prev,
           isConnected: true,
@@ -103,7 +103,7 @@ export const useSSE = ({
       };
 
       eventSource.onerror = (event) => {
-        console.error('[useSSE] SSE connection error', { url: _url, event });
+        console.error('[useSSE] SSE connection error', { readyState: eventSource.readyState });
         setState((prev) => ({ ...prev, isConnected: false, isConnecting: false }));
         onError?.(event);
       };
@@ -130,7 +130,6 @@ export const useSSE = ({
 
         console.log(
           `[useSSE] Attempting reconnection ${reconnectAttemptsRef.current}/${maxReconnectAttempts} in ${reconnectIntervalMs}ms`,
-          { url: _url },
         );
 
         reconnectTimeoutRef.current = window.setTimeout(() => {

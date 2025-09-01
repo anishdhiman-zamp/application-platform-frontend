@@ -32,22 +32,24 @@ interface SSEProviderProps {
 
 export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   const handleSSEEvent = (event: MessageEvent) => {
-    console.log('[SSE Provider] Received SSE event', { data: event.data, type: event.type });
+    console.log('[SSE Provider] Received SSE event');
 
     try {
       const data = JSON.parse(event.data);
 
-      console.log('[SSE Provider] Parsed SSE event data', { parsedData: data });
+      console.log('[SSE Provider] Parsed SSE event data', { type: data?.type, source_id: data?.source_id });
 
       if (data?.type) {
         console.log(`[SSE Provider] Publishing event to topic "${data.type}"`, { source_id: data.source_id });
         eventBus.publish(data.type, event);
       } else {
-        console.error('[SSE Provider] SSE event missing required type field', { data });
+        console.error('[SSE Provider] SSE event missing required type field', { hasData: !!data });
         captureException(new Error('SSE event received without required type field'));
       }
     } catch (error) {
-      console.error('[SSE Provider] Failed to parse SSE event data', { rawData: event.data, error });
+      console.error('[SSE Provider] Failed to parse SSE event data', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       captureException(error);
     }
   };
