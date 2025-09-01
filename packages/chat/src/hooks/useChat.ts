@@ -61,6 +61,7 @@ export const useChat = (config: ChatConfig) => {
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
             config.onNewMessage?.(newMessage);
             break;
+          default:
         }
       } catch (error) {
         captureException(error);
@@ -70,12 +71,16 @@ export const useChat = (config: ChatConfig) => {
   );
 
   useEffect(() => {
+    console.log(`[useChat] Subscribing to conversation events for conversationId: ${_conversationId}`);
     const sub = eventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) {
         handleMessage(data);
       }
     });
-    return () => sub.unsubscribe();
+    return () => {
+      console.log(`[useChat] Unsubscribing from conversation events for conversationId: ${_conversationId}`);
+      sub.unsubscribe();
+    };
   }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(
