@@ -65,7 +65,7 @@ const WidgetOptions: FC<WidgetOptionsProps> = ({ setIsDeleteDialogOpen, widgetDe
   const handleEditClick = () => {
     setIsOpen(false);
     router.push(
-      `?sheetId=${widgetDetails?.sheet_id}&isWidget=true&data=${btoa(JSON.stringify(widgetDetails))}&size=${
+      `?isWidget=true&data=${btoa(JSON.stringify(widgetDetails))}&size=${
         currentWidgetLayout?.w === 8 ? 'half' : 'full'
       }`,
     );

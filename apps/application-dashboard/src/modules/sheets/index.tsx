@@ -33,7 +33,6 @@ import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 import 'react-grid-layout/css/styles.css'; // Include default styles
 import 'react-resizable/css/styles.css'; // Include resizable styles
-
 interface SheetsProps {
   pageId: string;
   sheetId: string;
@@ -154,7 +153,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const handleAddWidget = () => {
     const lastWidgetLayout = getLastWidgetLayout(sheetLayout);
 
-    router.push(`?sheetId=${sheetId}&isWidget=true&layout=${JSON.stringify(lastWidgetLayout)}`);
+    router.push(`?isWidget=true&layout=${JSON.stringify(lastWidgetLayout)}`);
   };
 
   const handleWidgetResizeWrapper = (widgetId: string, size: WidgetSize) => {

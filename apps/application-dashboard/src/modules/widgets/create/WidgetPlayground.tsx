@@ -5,18 +5,16 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import WidgetCreationForm from 'modules/widgets/create/components/WidgetCreationForm';
 import WidgetPreview from 'modules/widgets/create/components/WidgetPreview';
 import { useWidgetCreationContext, WidgetCreationProvider } from 'modules/widgets/create/context/WidgetCreationContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { withFiltersContext } from '@/components/filter/filters.context';
 
 const WidgetPlaygroundContent = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const sheetId = searchParams?.get('sheetId') ?? '';
   const { clearLocalStorage } = useWidgetCreationContext();
 
   const handleClose = () => {
     clearLocalStorage();
-    router.push(`?sheetId=${sheetId}&isWidget=false`);
+    router.push(`?isWidget=false`);
   };
 
   return (

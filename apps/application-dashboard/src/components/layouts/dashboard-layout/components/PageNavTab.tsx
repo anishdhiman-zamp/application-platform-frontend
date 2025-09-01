@@ -90,7 +90,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
       const remainingPages = pages?.filter((p) => p.page_id !== pageId);
 
       if (remainingPages && remainingPages.length > 0) {
-        router.push(getPageRouteById(remainingPages[0]?.page_id));
+        router.push(getPageRouteById(remainingPages[0]?.page_id, remainingPages[0]?.sheets[0]?.sheet_id));
       } else if (processes && processes.length > 0) {
         router.push(getProcessRouteById(processes[0]?.id));
       } else {

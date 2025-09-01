@@ -10,6 +10,7 @@ export const ROUTES_PATH = {
   PROCESSES: '/processes',
   PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
+  PAGE_SHEET: '/pages/:pageId/:sheetId',
   NO_ACCESS: '/no-access',
   ADMIN: '/admin',
   PAYMENTS: '/payments',
@@ -29,8 +30,8 @@ export const ROUTES_PATH = {
   WIDGET_CREATE: '/widgets/create',
 };
 
-export const getPageRouteById = (pageId: string) => {
-  return `${ROUTES_PATH.PAGES}/${pageId}`;
+export const getPageRouteById = (pageId: string, sheetId?: string) => {
+  return `${ROUTES_PATH.PAGES}/${pageId}${sheetId ? `/${sheetId}` : ''}`;
 };
 
 export const getDatasetRouteById = (datasetId: string) => {

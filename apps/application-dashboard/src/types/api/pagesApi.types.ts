@@ -187,6 +187,9 @@ export interface CreatePageResponseType {
   page: {
     page_id: string;
   };
+  sheet: {
+    sheet_id: string;
+  };
 }
 
 export interface CreateSheetPayloadType {
