@@ -47,8 +47,8 @@ jest.mock('@zamp-platform/utils', () => ({
   removeFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
-    ORG_REGION: 'ORG_REGION_V3',
-    ALL_REGIONS: 'ALL_REGIONS_V2',
+    ORG_REGION: 'ORG_REGION_V4',
+    ALL_REGIONS: 'ALL_REGIONS_V3',
   },
 }));
 

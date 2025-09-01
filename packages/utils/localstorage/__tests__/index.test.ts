@@ -56,15 +56,15 @@ describe('LocalStorage Utilities', () => {
       expect(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID).toBe('LAST_VISITED_PAGE_ID');
       expect(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY).toBe('COLUMN_ORDERING_VISIBILITY');
       expect(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID).toBe('X-Zamp-Organization-Id');
-      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V3');
-      expect(LOCAL_STORAGE_KEYS.ALL_REGIONS).toBe('ALL_REGIONS_V2');
+      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V4');
+      expect(LOCAL_STORAGE_KEYS.ALL_REGIONS).toBe('ALL_REGIONS_V3');
     });
 
     it('should maintain backward compatibility with existing key values', () => {
       // These tests ensure that existing key values don't change
       expect(LOCAL_STORAGE_KEYS.XZAMP_USER).toBe('TMS_XZAMP_USER');
       expect(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID).toBe('X-Zamp-Organization-Id');
-      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V3');
+      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V4');
     });
   });
 

@@ -196,8 +196,6 @@ export const LoginForm = () => {
         const regionValue = REGIONS_MAP[region as keyof typeof REGIONS_MAP].suffix || REGIONS_MAP.us.suffix;
 
         setRegionFromUrlParams(regionValue);
-      } else {
-        setRegionFromUrlParams(REGIONS_MAP.us.suffix);
       }
 
       setAllRegions(regions);
