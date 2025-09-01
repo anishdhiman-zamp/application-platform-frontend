@@ -91,4 +91,4 @@ class EventBus implements EventBusInterface {
   }
 }
 
-export const eventBus = new EventBus();
+export { EventBus };

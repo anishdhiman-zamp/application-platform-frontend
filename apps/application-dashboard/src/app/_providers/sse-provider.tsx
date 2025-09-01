@@ -3,7 +3,8 @@
 import React, { createContext, ReactNode, useContext } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { API_DOMAIN } from '@zamp-platform/api';
-import { eventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
+import { EventBus, SSEConnectionState, useSSE } from '@zamp-platform/utils';
+import type { EventBusInterface } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 
 interface SSEContextType {
@@ -12,6 +13,7 @@ interface SSEContextType {
   disconnect: () => void;
   close: () => void;
   eventSource: EventSource | null;
+  sseEventBus: EventBusInterface;
 }
 
 const SSEContext = createContext<SSEContextType | undefined>(undefined);
@@ -28,15 +30,16 @@ export const useSSEContext = () => {
 
 interface SSEProviderProps {
   children: ReactNode;
+  sseEventBus: EventBusInterface;
 }
 
-export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
+export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus = new EventBus() }) => {
   const handleSSEEvent = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
 
       if (data?.type) {
-        eventBus.publish(data.type, event);
+        sseEventBus.publish(data.type, event);
       } else {
         captureException(new Error('SSE event received without required type field'));
       }
@@ -61,7 +64,18 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
     disconnect: sseHook.disconnect,
     close: sseHook.close,
     eventSource: sseHook.eventSource,
+    sseEventBus,
   };
 
   return <SSEContext.Provider value={value}>{children}</SSEContext.Provider>;
+};
+
+export const useEventBus = (): SSEContextType => {
+  const context = useContext(SSEContext);
+
+  if (!context) {
+    throw new Error('useEventBus must be used within an SSEProvider');
+  }
+
+  return context;
 };

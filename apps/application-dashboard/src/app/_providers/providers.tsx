@@ -2,6 +2,7 @@
 
 import React, { Suspense } from 'react';
 import { Provider } from 'react-redux';
+import { EventBus } from '@zamp-platform/utils';
 import { RegionProvider } from 'app/_providers/region-provider';
 import { SSEProvider } from 'app/_providers/sse-provider';
 import { AuthGuard } from '@/components/hoc/AuthGuard';
@@ -12,6 +13,7 @@ import { store } from '@/store';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   useServiceWorker();
+  const sseEventBus = new EventBus();
 
   return (
     <Suspense fallback={null}>
@@ -19,7 +21,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         <Provider store={store}>
           <AuthGuard loginRoute='/login'>
             <FeatureFlagsProvider>
-              <SSEProvider>
+              <SSEProvider sseEventBus={sseEventBus}>
                 <RouteGuard>{children}</RouteGuard>
               </SSEProvider>
             </FeatureFlagsProvider>

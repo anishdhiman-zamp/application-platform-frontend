@@ -1,5 +1,5 @@
 import type { BaseEventPayload, EventCallback } from '../event-bus.types';
-import { eventBus } from '../index';
+import { EventBus } from '../index';
 
 // Custom event payload interface for testing
 interface TestEventPayload extends BaseEventPayload {
@@ -19,6 +19,9 @@ interface CustomEventPayload {
 }
 
 describe('EventBus', () => {
+  let eventBus: EventBus;
+  eventBus = new EventBus();
+
   beforeEach(() => {
     // Clear the event bus before each test to ensure clean state
     eventBus.clear();
@@ -47,6 +50,7 @@ describe('EventBus', () => {
       const callback2 = jest.fn();
       const callback3 = jest.fn();
 
+      eventBus = new EventBus();
       eventBus.subscribe('multi-topic', callback1);
       eventBus.subscribe('multi-topic', callback2);
       eventBus.subscribe('multi-topic', callback3);

@@ -1,10 +1,11 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
-import { eventBus, UseSSEOptions } from '@zamp-platform/utils';
+import { UseSSEOptions } from '@zamp-platform/utils';
 import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
 
+import { useEventBus } from '@/app/_providers/sse-provider';
 import type { MapAny } from '@/types/commonTypes';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
@@ -31,7 +32,7 @@ export const useChat = (config: ChatConfig) => {
   const [_conversationId, setConversationId] = useState<string | null>(config.conversationId || null);
   const [createConversationMutation, { isLoading: isCreatingConversation, error: createConversationError }] =
     useCreateConversationMutation();
-
+  const { sseEventBus } = useEventBus();
   const createConversation = async (conversationPayload: CreateConversationPayloadType) => {
     setMessages([
       {
@@ -72,7 +73,7 @@ export const useChat = (config: ChatConfig) => {
 
   useEffect(() => {
     console.log(`[useChat] Subscribing to conversation events for conversationId: ${_conversationId}`);
-    const sub = eventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) {
         handleMessage(data);
       }
