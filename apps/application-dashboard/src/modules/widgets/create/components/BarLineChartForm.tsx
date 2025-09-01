@@ -145,7 +145,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
               value={fields?.yAxis?.aggregation || ''}
               onValueChange={(value) =>
                 handleChartFieldChange(chartType, 'yAxis', {
-                  ...fields.yAxis,
+                  ...fields?.yAxis,
                   aggregation: value,
                 })
               }
