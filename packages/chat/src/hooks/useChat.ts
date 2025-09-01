@@ -72,16 +72,10 @@ export const useChat = (config: ChatConfig) => {
   );
 
   useEffect(() => {
-    console.log(`[useChat] Subscribing to conversation events for conversationId: ${_conversationId}`);
     const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
-      if (data?.source_id === _conversationId) {
-        handleMessage(data);
-      }
+      if (data?.source_id === _conversationId) handleMessage(data);
     });
-    return () => {
-      console.log(`[useChat] Unsubscribing from conversation events for conversationId: ${_conversationId}`);
-      sub.unsubscribe();
-    };
+    return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(

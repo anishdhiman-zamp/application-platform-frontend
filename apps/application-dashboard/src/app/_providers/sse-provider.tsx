@@ -39,7 +39,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       const data = JSON.parse(event.data);
 
       if (data?.type) {
-        sseEventBus.publish(data.type, event);
+        sseEventBus.publish(data.type, data);
       } else {
         captureException(new Error('SSE event received without required type field'));
       }

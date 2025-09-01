@@ -30,17 +30,11 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
   );
 
   useEffect(() => {
-    console.log(`[useActivitySSE] Subscribing to activity log events for activityId: ${activityId}`);
     const sub = sseEventBus.subscribe(EventType.ACTIVITY_LOG, (data: BaseEventPayload) => {
-      if (data?.source_id === activityId) {
-        handleUpdate(data);
-      }
+      if (data?.source_id === activityId) handleUpdate(data);
     });
 
-    return () => {
-      console.log(`[useActivitySSE] Unsubscribing from activity log events for activityId: ${activityId}`);
-      sub.unsubscribe();
-    };
+    return () => sub.unsubscribe();
   }, [activityId, handleUpdate]);
 
   return {};
