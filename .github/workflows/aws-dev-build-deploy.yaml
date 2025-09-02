@@ -162,8 +162,6 @@ jobs:
 
       - id: build
         name: Build and Push Image
-        env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
         run: |
           # Debug: Show all environment variables first
           echo "=== Environment Variables Debug ==="
@@ -197,7 +195,7 @@ jobs:
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
-            --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
             --push .

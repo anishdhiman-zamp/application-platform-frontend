@@ -4,6 +4,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
   experimental: {
     serverActions: {},
   },
