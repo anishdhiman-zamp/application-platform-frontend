@@ -1,8 +1,12 @@
 'use client';
 
 import { captureException } from '@sentry/browser';
-import { useSSE, UseSSEOptions } from '@zamp-platform/utils';
-import { useCallback, useMemo, useState } from 'react';
+import { UseSSEOptions } from '@zamp-platform/utils';
+import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { useCallback, useEffect, useState } from 'react';
+
+import { useEventBus } from '@/app/_providers/sse-provider';
+import type { MapAny } from '@/types/commonTypes';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
 import {
@@ -28,7 +32,7 @@ export const useChat = (config: ChatConfig) => {
   const [_conversationId, setConversationId] = useState<string | null>(config.conversationId || null);
   const [createConversationMutation, { isLoading: isCreatingConversation, error: createConversationError }] =
     useCreateConversationMutation();
-
+  const { sseEventBus } = useEventBus();
   const createConversation = async (conversationPayload: CreateConversationPayloadType) => {
     setMessages([
       {
@@ -50,35 +54,29 @@ export const useChat = (config: ChatConfig) => {
   }, []);
 
   const handleMessage = useCallback(
-    (event: MessageEvent) => {
+    (data: MapAny) => {
       try {
-        const data = JSON.parse(event.data);
-
-        switch (data.type) {
+        switch (data.payload.type) {
           case SSEEventType.MESSAGE:
-            const newMessage: ChatMessage = data.message;
+            const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
             config.onNewMessage?.(newMessage);
             break;
+          default:
         }
       } catch (error) {
-        console.error('Failed to parse SSE message:', error);
+        captureException(error);
       }
     },
     [config],
   );
 
-  const sseConfig: UseSSEOptions = useMemo(
-    () => ({
-      ...config,
-      url: config.eventUrl,
-      onMessage: handleMessage,
-      autoConnect: false,
-    }),
-    [config, handleMessage],
-  );
-
-  const connection = useSSE(sseConfig);
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+      if (data?.source_id === _conversationId) handleMessage(data);
+    });
+    return () => sub.unsubscribe();
+  }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage) => {
@@ -95,7 +93,6 @@ export const useChat = (config: ChatConfig) => {
 
         return response;
       } catch (error) {
-        console.error('Failed to send message:', error);
         captureException(error);
         throw error;
       }
@@ -104,7 +101,6 @@ export const useChat = (config: ChatConfig) => {
   );
 
   return {
-    ...connection,
     messages,
     sendMessage,
     clearMessages,

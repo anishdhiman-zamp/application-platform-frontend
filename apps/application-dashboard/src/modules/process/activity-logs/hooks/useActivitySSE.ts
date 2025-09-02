@@ -1,13 +1,11 @@
 import { useCallback, useEffect } from 'react';
-import { API_DOMAIN } from '@zamp-platform/api';
-import { useSSE } from '@zamp-platform/utils';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import {
   useLazyGetActivityArtifactsQuery,
   useLazyGetActivityLogsQuery,
   useLazyGetActivitySummaryQuery,
 } from '@/apis/processes';
-import { formRequestUrlWithParams } from '@/utils/common';
+import { useEventBus } from '@/app/_providers/sse-provider';
 
 interface UseActivitySSEProps {
   activityId: string;
@@ -15,14 +13,13 @@ interface UseActivitySSEProps {
 }
 
 export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
+  const { sseEventBus } = useEventBus();
   const [getActivityLogs] = useLazyGetActivityLogsQuery();
   const [getArtifacts] = useLazyGetActivityArtifactsQuery();
   const [getActivitySummary] = useLazyGetActivitySummaryQuery();
 
   const handleUpdate = useCallback(
-    (event: MessageEvent) => {
-      const data = event?.data;
-
+    (data: BaseEventPayload) => {
       if (!data) return;
 
       getActivityLogs({ processId, activityRunId: activityId });
@@ -32,18 +29,13 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
     [getActivityLogs, getArtifacts, getActivitySummary, processId, activityId],
   );
 
-  const { close: closeSSE } = useSSE({
-    url: `${API_DOMAIN}/${formRequestUrlWithParams(API_ENDPOINTS.PROCESSES_EVENTS_GET, { activityId })}`,
-    eventListeners: {
-      update: handleUpdate,
-    },
-  });
-
   useEffect(() => {
-    return () => {
-      closeSSE();
-    };
-  }, []);
+    const sub = sseEventBus.subscribe(EventType.ACTIVITY_LOG, (data: BaseEventPayload) => {
+      if (data?.source_id === activityId) handleUpdate(data);
+    });
 
-  return { closeSSE };
+    return () => sub.unsubscribe();
+  }, [activityId, handleUpdate]);
+
+  return {};
 }
