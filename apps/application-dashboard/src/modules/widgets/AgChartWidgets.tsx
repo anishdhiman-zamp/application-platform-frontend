@@ -137,7 +137,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   }, [evaluate, ldClient]);
 
   return (
-    <div className='group relative'>
+    <div className='group relative h-full'>
       {!isPlayground && isSelfServePagesEnabled && (
         <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
           <WidgetOptions
@@ -161,6 +161,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           activeWidget={activeWidget}
           className='z-1000!'
           resizeProps={resizeProps}
+          isLoading={isLoading || isFilterLoading}
         />
         <CommonWrapper
           isLoading={isLoading || isFilterLoading}
@@ -171,7 +172,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           isError={isError}
           refetchFunction={refetch}
           loader={
-            <div className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'>
+            <div className='flex h-full w-full items-center justify-center'>
               <DynamicLottiePlayer
                 src={WIDGET_LOADER}
                 className='lottie-player h-[150px]'

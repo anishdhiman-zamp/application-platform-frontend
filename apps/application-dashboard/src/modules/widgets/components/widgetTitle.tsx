@@ -28,6 +28,7 @@ interface WidgetTitleProps {
   isPortalNeeded?: boolean;
   sheetId?: string;
   resizeProps?: ResizeProps;
+  isLoading?: boolean;
 }
 
 const WidgetTitle = ({
@@ -40,6 +41,7 @@ const WidgetTitle = ({
   isPortalNeeded = false,
   sheetId,
   resizeProps,
+  isLoading,
 }: WidgetTitleProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -111,6 +113,7 @@ const WidgetTitle = ({
           isPivotTable && isGroupWidgetOptions && 'mb-0 items-start justify-center gap-y-2 px-0',
           isPivotTable && !isGroupWidgetOptions && 'mb-0 cursor-default justify-center px-0',
           resizeProps && 'pr-2.5 pb-1',
+          isLoading && 'mb-0',
         )}
         onClick={handleToggle}
       >
