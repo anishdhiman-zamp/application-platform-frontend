@@ -114,13 +114,14 @@ jobs:
     - name: Generate markdown report
       if: always()
       run: |
-        cat > gitleaks-reports/gitleaks-report.md << 'EOF'
+        SCAN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        cat > gitleaks-reports/gitleaks-report.md << EOF
         # GitLeaks Security Scan Report
         
         **Repository:** ${{ github.repository }}
         **Branch:** ${{ github.ref_name }}
         **Commit:** ${{ github.sha }}
-        **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        **Scan Date:** $SCAN_DATE
         **Triggered by:** ${{ github.event_name }}
         **Scan type:** ${{ github.event_name == 'pull_request' && 'Shallow (PR changes only)' || (github.event.inputs.scan_depth == 'full' && 'Full repository history' || 'Shallow (latest commit)') }}
         
