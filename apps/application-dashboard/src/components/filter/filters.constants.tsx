@@ -1,6 +1,7 @@
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import AmountRangeFilterMenuItem from 'components/filter/filterMenu/AmountRangeFilterMenuItem';
 import DateRangeFilterMenuItem from 'components/filter/filterMenu/DateRangeFilterMenuItem';
+import DocumentSearchFilterMenuItem from 'components/filter/filterMenu/DocumentSearchFilterMenuItem';
 import MultiSearchFilterMenuItem from 'components/filter/filterMenu/MultiSearchFilterMenuItem';
 import MultiSelectFilterMenuItem from 'components/filter/filterMenu/MultiSelectFilterMenuItem';
 import SearchFilterMenuItem from 'components/filter/filterMenu/SearchFilterMenuItem';
@@ -29,6 +30,25 @@ export enum CONDITION_OPERATOR_TYPE {
   ENDS_WITH = 'endswith',
   IN_BETWEEN = 'inbetween',
 }
+
+export const CONDITION_OPERATOR_TYPE_LABEL_MAP = {
+  [CONDITION_OPERATOR_TYPE.CONTAINS]: 'contains',
+  [CONDITION_OPERATOR_TYPE.NOT_CONTAINS]: 'does not contain',
+  [CONDITION_OPERATOR_TYPE.IS_NULL]: 'is blank',
+  [CONDITION_OPERATOR_TYPE.EQUAL]: 'is equal to',
+  [CONDITION_OPERATOR_TYPE.NOT_EQUAL]: 'does not equal to',
+  [CONDITION_OPERATOR_TYPE.GREATER_THAN]: 'is greater than',
+  [CONDITION_OPERATOR_TYPE.LESS_THAN]: 'is less than',
+  [CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL]: 'is greater than or equal to',
+  [CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL]: 'is less than or equal to',
+  [CONDITION_OPERATOR_TYPE.IN_BETWEEN]: 'is between',
+  [CONDITION_OPERATOR_TYPE.STARTS_WITH]: 'begins with',
+  [CONDITION_OPERATOR_TYPE.ENDS_WITH]: 'ends with',
+  [CONDITION_OPERATOR_TYPE.ONE_OF]: 'is one of',
+  [CONDITION_OPERATOR_TYPE.DEBIT]: 'is debit',
+  [CONDITION_OPERATOR_TYPE.CREDIT]: 'is credit',
+  [CONDITION_OPERATOR_TYPE.ANY]: 'is any',
+};
 
 export enum FILTER_PERIODICITIES {
   YEARLY = 'yearly',
@@ -60,6 +80,7 @@ export const AG_GRID_FILTER_TYPES = {
   [FILTER_TYPES.SINGLE_SELECT]: SingleSelectFilterMenuItem,
   [FILTER_TYPES.MULTI_SELECT]: MultiSelectFilterMenuItem,
   [FILTER_TYPES.TAGS]: TagsSelectFilterMenuItem,
+  [FILTER_TYPES.DOCUMENT]: DocumentSearchFilterMenuItem,
 };
 
 export const AG_GRID_FILTER_OPERATORS = {
@@ -102,6 +123,17 @@ export const SEARCH_FILTER_OPTIONS = [
   { label: 'ends with', value: CONDITION_OPERATOR_TYPE.ENDS_WITH },
 ];
 
+export const DOCUMENT_SEARCH_FILTER_OPTIONS = [
+  {
+    label: CONDITION_OPERATOR_TYPE_LABEL_MAP[CONDITION_OPERATOR_TYPE.CONTAINS],
+    value: CONDITION_OPERATOR_TYPE.CONTAINS,
+  },
+  {
+    label: CONDITION_OPERATOR_TYPE_LABEL_MAP[CONDITION_OPERATOR_TYPE.NOT_CONTAINS],
+    value: CONDITION_OPERATOR_TYPE.NOT_CONTAINS,
+  },
+];
+
 export const MULTI_SELECT_FILTER_OPTIONS = [
   { label: 'contains', value: CONDITION_OPERATOR_TYPE.IN },
   { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_IN },
@@ -112,25 +144,6 @@ export const TAGS_SELECT_FILTER_OPTIONS = [
   { label: 'contains', value: CONDITION_OPERATOR_TYPE.CONTAINS },
   { label: 'Untagged', value: CONDITION_OPERATOR_TYPE.IS_NULL },
 ];
-
-export const CONDITION_OPERATOR_TYPE_LABEL_MAP = {
-  [CONDITION_OPERATOR_TYPE.CONTAINS]: 'contains',
-  [CONDITION_OPERATOR_TYPE.NOT_CONTAINS]: 'does not contain',
-  [CONDITION_OPERATOR_TYPE.IS_NULL]: 'is blank',
-  [CONDITION_OPERATOR_TYPE.EQUAL]: 'is equal to',
-  [CONDITION_OPERATOR_TYPE.NOT_EQUAL]: 'does not equal to',
-  [CONDITION_OPERATOR_TYPE.GREATER_THAN]: 'is greater than',
-  [CONDITION_OPERATOR_TYPE.LESS_THAN]: 'is less than',
-  [CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL]: 'is greater than or equal to',
-  [CONDITION_OPERATOR_TYPE.LESS_THAN_EQUAL]: 'is less than or equal to',
-  [CONDITION_OPERATOR_TYPE.IN_BETWEEN]: 'is between',
-  [CONDITION_OPERATOR_TYPE.STARTS_WITH]: 'begins with',
-  [CONDITION_OPERATOR_TYPE.ENDS_WITH]: 'ends with',
-  [CONDITION_OPERATOR_TYPE.ONE_OF]: 'is one of',
-  [CONDITION_OPERATOR_TYPE.DEBIT]: 'is debit',
-  [CONDITION_OPERATOR_TYPE.CREDIT]: 'is credit',
-  [CONDITION_OPERATOR_TYPE.ANY]: 'is any',
-};
 
 export const OPERATOR = {
   InOperator: { label: 'equals', value: CONDITION_OPERATOR_TYPE.IN },
@@ -153,7 +166,7 @@ export const OPERATOR = {
   ArrayIn: { label: 'is in', value: CONDITION_OPERATOR_TYPE.ARRAY_IN },
 };
 
-export const DESCRIPTION_OPERATORS = [OPERATOR.ArrayContains, OPERATOR.ArrayIn];
+export const DESCRIPTION_OPERATORS = [OPERATOR.ArrayIn, OPERATOR.ArrayContains];
 
 export const FILTER_OPERATOR_TYPE_MAP = {
   [CONDITION_OPERATOR_TYPE.IN]: FILTER_TYPES.MULTI_SELECT,

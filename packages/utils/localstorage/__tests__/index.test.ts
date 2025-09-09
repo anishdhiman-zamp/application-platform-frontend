@@ -56,15 +56,15 @@ describe('LocalStorage Utilities', () => {
       expect(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID).toBe('LAST_VISITED_PAGE_ID');
       expect(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY).toBe('COLUMN_ORDERING_VISIBILITY');
       expect(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID).toBe('X-Zamp-Organization-Id');
-      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V2');
-      expect(LOCAL_STORAGE_KEYS.ALL_REGIONS).toBe('ALL_REGIONS');
+      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V4');
+      expect(LOCAL_STORAGE_KEYS.ALL_REGIONS).toBe('ALL_REGIONS_V3');
     });
 
     it('should maintain backward compatibility with existing key values', () => {
       // These tests ensure that existing key values don't change
       expect(LOCAL_STORAGE_KEYS.XZAMP_USER).toBe('TMS_XZAMP_USER');
       expect(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID).toBe('X-Zamp-Organization-Id');
-      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V2');
+      expect(LOCAL_STORAGE_KEYS.ORG_REGION).toBe('ORG_REGION_V4');
     });
   });
 
@@ -79,13 +79,13 @@ describe('LocalStorage Utilities', () => {
       expect(result).toBe(testValue);
     });
 
-    it('should return null when key does not exist', () => {
+    it('should return empty string when key does not exist', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
 
       const result = getFromLocalStorage('non-existent-key');
 
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith('non-existent-key');
-      expect(result).toBe(null);
+      expect(result).toBe('');
     });
 
     it('should return empty string when window is undefined (SSR)', () => {
@@ -247,7 +247,7 @@ describe('LocalStorage Utilities', () => {
 
       // Verify removal
       const removedValue = getFromLocalStorage(testKey);
-      expect(removedValue).toBe(null);
+      expect(removedValue).toBe('');
     });
 
     it('should handle concurrent operations', () => {

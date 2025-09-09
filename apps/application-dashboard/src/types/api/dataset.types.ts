@@ -330,3 +330,8 @@ export type DownloadFileResponseType = {
   file_name: string;
   file_upload_id: string;
 };
+
+export interface GetDatasetFilterConfigResponseType {
+  config: { is_file_import_enabled: boolean; is_fx_enabled: boolean };
+  data: DatasetFilterConfigResponseType[];
+}

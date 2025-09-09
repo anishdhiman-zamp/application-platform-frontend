@@ -1,83 +1,56 @@
 'use client';
-import { useEffect, useMemo } from 'react';
-import { useGetPageDetailsQuery, useGetPagesQuery } from 'apis/pages';
-import { useHash } from 'hooks/useHash';
+import { useEffect } from 'react';
+import { useGetPagesQuery } from 'apis/pages';
 import { persistLastVisitedPage } from 'hooks/useLastVisitedPage';
-import Sheets from 'modules/sheets';
-import SheetsTabs from 'modules/sheets/SheetsTabs';
-import { getSheetIdFromPath } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getPageRouteById, ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
-import 'ag-charts-enterprise';
 
 const Page = () => {
   const params = useParams();
-  const pathname = useHash();
   const router = useRouter();
 
   const pageId = params?.pageId;
+
   const {
-    data: pageDetails,
-    isLoading,
-    isError,
+    data: pages,
+    isFetching,
     refetch,
-  } = useGetPageDetailsQuery(pageId as string, { refetchOnMountOrArgChange: false, skip: !pageId });
-  const { data: pages } = useGetPagesQuery(undefined, {
+    isError,
+  } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
-  const currentSheetId = useMemo(
-    () => getSheetIdFromPath(pathname, pageId as string) ?? pageDetails?.sheets?.[0]?.sheet_id,
-    [pageDetails, pathname, pageId],
-  );
-
   useEffect(() => {
-    if (pageDetails) {
-      persistLastVisitedPage(pageDetails.page_id);
+    if (pageId) {
+      persistLastVisitedPage(pageId as string);
     }
-  }, [pageDetails]);
-
-  const tabs = useMemo(
-    () =>
-      pageDetails?.sheets
-        ?.map((sheet) => ({
-          value: sheet?.sheet_id,
-          label: sheet?.name,
-          fractionalIndex: sheet?.fractional_index,
-        }))
-        .sort((sheet1, sheet2) => sheet1?.fractionalIndex - sheet2?.fractionalIndex) ?? [],
-    [pageDetails],
-  );
+  }, [pageId]);
 
   const checkIsPageValid = () => {
     if (!pages) return;
 
-    const isValidPageId = pages?.some((page) => page.page_id === pageId);
+    const currentPage = pages?.find((page) => page.page_id === pageId);
 
-    if (!isValidPageId) {
+    if (!currentPage) {
       router.push(ROUTES_PATH.HOME);
+    } else {
+      router.replace(getPageRouteById(pageId as string, currentPage?.sheets?.[0]?.sheet_id));
     }
   };
 
   useEffect(() => {
+    if (isFetching) return;
+
     persistLastVisitedPage(pageId as string);
 
     //on org switch/ invalid page, redirect to valid page
     checkIsPageValid();
-  }, [pageId, pages]);
+  }, [pageId, pages, isFetching]);
 
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
-      <div className='relative h-full w-full rounded-tl-md'>
-        <Sheets
-          key={currentSheetId}
-          pageId={pageId as string}
-          sheetId={currentSheetId as string}
-          isPageLoading={isLoading}
-        />
-        <SheetsTabs tabs={tabs} currentSheetId={currentSheetId as string} isPageLoading={isLoading} />
-      </div>
+      <div className='relative h-full w-full rounded-tl-md'></div>
     </CommonWrapper>
   );
 };

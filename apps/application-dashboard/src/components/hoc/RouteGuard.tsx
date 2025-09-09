@@ -71,7 +71,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
         }
       });
     }
-  }, [isAdminRoute, evaluate, ldClient, router]);
+  }, [isAdminRoute, evaluate, ldClient, router, props.children]);
 
   const breakpoint = checkScreenBreakpoint(width, height);
 

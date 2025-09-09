@@ -5,6 +5,7 @@ import KpiTag from 'modules/widgets/KpiTag';
 import PivotTableWidgetWrapper from 'modules/widgets/Pivot/components/PivotWidgetWrapper';
 import { DRILLDOWN_VERSION_V2 } from 'modules/widgets/Pivot/pivot.constants';
 import type { ParentFilters } from 'modules/widgets/Pivot/pivot.types';
+import { ResizeProps, WidgetNodeClickParams } from 'modules/widgets/widget.types';
 import {
   getCurrentPageFilters,
   getDateRangeWithPeriodicity,
@@ -15,13 +16,12 @@ import {
 } from 'modules/widgets/widgets.utils';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  type DrillDownConfigType,
   FieldsMappingType,
   PieDonutChartFieldsMappingType,
   WIDGET_TYPES,
   WidgetInstanceType,
 } from 'types/api/widgets.types';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { MapAny, OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import AGChartsWidgetsBff from '@/modules/widgets/AGChartsWidgetsBff';
 import AGChartsWidgets from '@/modules/widgets/AgChartWidgets';
 import { FILTER_TYPES } from 'components/filter/filter.types';
@@ -38,6 +38,8 @@ interface WidgetsWrapperProps {
   sheetId: string;
   setActiveWidget?: (widgetId: string) => void;
   isBff?: boolean;
+  currentWidgetLayout?: ResponsiveGridLayoutType;
+  resizeProps?: ResizeProps;
 }
 
 const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
@@ -51,6 +53,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
   handleWidgetHeightChange,
   sheetId,
   isBff,
+  currentWidgetLayout,
+  resizeProps,
 }) => {
   const router = useRouter();
   const params = useParams();
@@ -63,11 +67,20 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
 
   // to be remove
 
-  const { filterType, filterOperator } = useMemo(() => {
+  const {
+    filterType,
+    filterOperator,
+    groupByFilterType,
+    groupByFilterOperator,
+    groupByColumnName = '',
+  } = useMemo(() => {
     if (widget_type === WIDGET_TYPES.BAR_CHART || widget_type === WIDGET_TYPES.LINE_CHART) {
       return {
         filterType: (fields as FieldsMappingType)?.x_axis?.[0]?.drilldown_filter_type,
         filterOperator: (fields as FieldsMappingType)?.x_axis?.[0]?.drilldown_filter_operator,
+        groupByFilterType: (fields as FieldsMappingType)?.group_by?.[0]?.drilldown_filter_type,
+        groupByFilterOperator: (fields as FieldsMappingType)?.group_by?.[0]?.drilldown_filter_operator,
+        groupByColumnName: (fields as FieldsMappingType)?.group_by?.[0]?.column,
       };
     }
 
@@ -138,14 +151,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     }
   };
 
-  const onNodeClickV2 = (
-    clickedNode: MapAny,
-    xAxis: string,
-    datasetId: string,
-    datasetDefaultFilters: string,
-    drilldown_config?: DrillDownConfigType,
-    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
-  ) => {
+  const onNodeClickV2 = (nodeParams: WidgetNodeClickParams) => {
+    const { clickedNode, xAxis, datasetDefaultFilters, drilldown_config, fields } = nodeParams;
     const xAxisColumnName =
       (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
       (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
@@ -216,10 +223,12 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
     navigateToDatasetV2(datasets, clickFilter);
   };
 
-  const onNodeClick = (clickedNode: MapAny, xAxis: string, datasetId: string, datasetDefaultFilters: string) => {
+  const onNodeClick = (nodeParams: WidgetNodeClickParams) => {
+    const { clickedNode, xAxis, datasetId, datasetDefaultFilters, yAxis = '' } = nodeParams;
+
     const xAxisColumnName =
       (fields as FieldsMappingType)?.x_axis?.[0]?.column ??
-      (fields as PieDonutChartFieldsMappingType).values?.[0]?.column;
+      (fields as PieDonutChartFieldsMappingType).slices?.[0]?.column;
 
     const clickFilter: MapAny = {};
 
@@ -247,6 +256,13 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
         filterType: FILTER_TYPES.MULTI_SELECT,
         type: filterOperator,
         values: [clickedNode[xAxis]],
+      };
+    }
+    if (groupByFilterType === FILTER_TYPES.MULTI_SELECT) {
+      clickFilter[groupByColumnName] = {
+        filterType: FILTER_TYPES.MULTI_SELECT,
+        type: groupByFilterOperator,
+        values: [yAxis],
       };
     }
 
@@ -298,6 +314,8 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           isFilterLoading={isFilterLoading}
           currency={currency?.[0] ?? undefined}
           defaultCurrency={defaultCurrency}
+          currentWidgetLayout={currentWidgetLayout}
+          resizeProps={resizeProps}
         />
       );
     case WIDGET_TYPES.KPI: {
@@ -311,6 +329,7 @@ const WidgetsWrapper: FC<WidgetsWrapperProps> = ({
           isFilterLoading={isFilterLoading}
           currency={currency?.[0]}
           defaultCurrency={defaultCurrency}
+          currentWidgetLayout={currentWidgetLayout}
         />
       );
     }

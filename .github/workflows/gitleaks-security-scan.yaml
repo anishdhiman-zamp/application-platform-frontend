@@ -1,0 +1,258 @@
+name: GitLeaks Security Scan
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      scan_depth:
+        description: 'Scan depth (shallow or full history)'
+        required: false
+        default: 'shallow'
+        type: choice
+        options:
+        - shallow
+        - full
+  
+  # Run on every PR
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main, master, develop ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  gitleaks-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # For PR events, get full history for better detection
+        fetch-depth: ${{ github.event_name == 'pull_request' && '0' || (github.event.inputs.scan_depth == 'full' && '0' || '1') }}
+
+    - name: Get base commit for PR scan
+      if: github.event_name == 'pull_request'
+      id: get_base_commit
+      run: |
+        BASE_COMMIT=$(git merge-base HEAD origin/${{ github.base_ref }})
+        echo "base_commit=$BASE_COMMIT" >> $GITHUB_OUTPUT
+        echo "Base commit for PR scan: $BASE_COMMIT"
+        echo "Will scan commit range: $BASE_COMMIT..HEAD"
+
+    - name: Create output directory
+      run: mkdir -p gitleaks-reports
+
+    - name: Run GitLeaks scan
+      id: gitleaks
+      continue-on-error: true
+      shell: bash {0}
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        SCAN_DEPTH: ${{ github.event.inputs.scan_depth }}
+        BASE_COMMIT: ${{ steps.get_base_commit.outputs.base_commit }}
+      run: |
+        # Download latest GitLeaks
+        echo "Downloading GitLeaks..."
+        curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_8.28.0_linux_x64.tar.gz -o gitleaks.tar.gz
+        echo "Extracting GitLeaks..."
+        tar -xzf gitleaks.tar.gz
+        chmod +x gitleaks
+        echo "GitLeaks version:"
+        ./gitleaks version
+        
+        if [[ "$EVENT_NAME" == "pull_request" ]]; then
+          echo "Running shallow PR scan (changed files only)..."
+          SCAN_ARGS="--log-opts=$BASE_COMMIT..HEAD"
+        elif [[ "$SCAN_DEPTH" == "full" ]]; then
+          echo "Running full repository scan..."
+          SCAN_ARGS=""
+        else
+          echo "Running shallow scan (latest commit only)..."
+          SCAN_ARGS=""
+        fi
+        
+        # Run scan with JSON output (capture exit code properly)
+        echo "Running GitLeaks scan with args: $SCAN_ARGS"
+        set +e  # Disable exit on error temporarily
+        ./gitleaks detect --report-format json --report-path gitleaks-reports/gitleaks-report.json --verbose --log-level debug $SCAN_ARGS
+        GITLEAKS_EXIT_CODE=$?
+        set -e  # Re-enable exit on error
+        
+        echo "GitLeaks exit code: $GITLEAKS_EXIT_CODE"
+        
+        if [[ $GITLEAKS_EXIT_CODE -eq 0 ]]; then
+          echo "scan_result=success" >> $GITHUB_OUTPUT
+          echo "secrets_found=false" >> $GITHUB_OUTPUT
+          echo "false" > gitleaks-reports/secrets_found.txt
+          echo "No secrets detected"
+        elif [[ $GITLEAKS_EXIT_CODE -eq 1 ]] || [[ $GITLEAKS_EXIT_CODE -eq 8 ]]; then
+          echo "scan_result=secrets_detected" >> $GITHUB_OUTPUT
+          echo "secrets_found=true" >> $GITHUB_OUTPUT
+          echo "true" > gitleaks-reports/secrets_found.txt
+          echo "Potential secrets detected (exit code: $GITLEAKS_EXIT_CODE)"
+        else
+          echo "scan_result=error" >> $GITHUB_OUTPUT  
+          echo "secrets_found=false" >> $GITHUB_OUTPUT
+          echo "false" > gitleaks-reports/secrets_found.txt
+          echo "GitLeaks encountered an error (exit code: $GITLEAKS_EXIT_CODE)"
+          exit 1
+        fi
+        
+        echo "JSON report file exists: $(test -f gitleaks-reports/gitleaks-report.json && echo 'YES' || echo 'NO')"
+        if [[ -f gitleaks-reports/gitleaks-report.json ]]; then
+          echo "JSON report size: $(wc -c < gitleaks-reports/gitleaks-report.json) bytes"
+          echo "JSON report preview (first 500 chars):"
+          head -c 500 gitleaks-reports/gitleaks-report.json || echo "Could not read JSON file"
+        fi
+        
+        exit 0
+
+    - name: Generate markdown report
+      if: always()
+      run: |
+        SCAN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        cat > gitleaks-reports/gitleaks-report.md << EOF
+        # GitLeaks Security Scan Report
+        
+        **Repository:** ${{ github.repository }}
+        **Branch:** ${{ github.ref_name }}
+        **Commit:** ${{ github.sha }}
+        **Scan Date:** $SCAN_DATE
+        **Triggered by:** ${{ github.event_name }}
+        **Scan type:** ${{ github.event_name == 'pull_request' && 'Shallow (PR changes only)' || (github.event.inputs.scan_depth == 'full' && 'Full repository history' || 'Shallow (latest commit)') }}
+        
+        ---
+        
+        EOF
+        
+        echo "**Debug Info:**" >> gitleaks-reports/gitleaks-report.md
+        SECRETS_FOUND_FLAG=$(cat gitleaks-reports/secrets_found.txt 2>/dev/null || echo "unknown")
+        echo "- Secrets found flag: \`$SECRETS_FOUND_FLAG\`" >> gitleaks-reports/gitleaks-report.md
+        echo "- JSON file exists: \`$(test -f gitleaks-reports/gitleaks-report.json && echo 'YES' || echo 'NO')\`" >> gitleaks-reports/gitleaks-report.md
+        echo "" >> gitleaks-reports/gitleaks-report.md
+        
+        if [[ "$SECRETS_FOUND_FLAG" == "true" ]]; then
+          echo "## Secrets Detected!" >> gitleaks-reports/gitleaks-report.md
+          echo "" >> gitleaks-reports/gitleaks-report.md
+          echo "The following potential secrets were found:" >> gitleaks-reports/gitleaks-report.md
+          echo "" >> gitleaks-reports/gitleaks-report.md
+          
+          # Parse JSON and create markdown table
+          if [[ -f gitleaks-reports/gitleaks-report.json ]]; then
+            if [[ -s gitleaks-reports/gitleaks-report.json ]]; then
+              echo "| File | Line | Rule | Description |" >> gitleaks-reports/gitleaks-report.md
+              echo "|------|------|------|-------------|" >> gitleaks-reports/gitleaks-report.md
+              
+              # Use jq to parse JSON and format as markdown table - with error handling
+              if jq -e '. | length > 0' gitleaks-reports/gitleaks-report.json >/dev/null 2>&1; then
+                jq -r '.[] | "| `\(.File):\(.StartLine // "?")` | \(.StartLine // "?") | \(.RuleID // "unknown") | \(.Description // "Secret detected") |"' gitleaks-reports/gitleaks-report.json >> gitleaks-reports/gitleaks-report.md 2>/dev/null || echo "| Error | - | - | Could not parse JSON findings |" >> gitleaks-reports/gitleaks-report.md
+              else
+                echo "| No details | - | - | JSON file exists but is empty or invalid |" >> gitleaks-reports/gitleaks-report.md
+              fi
+            else
+              echo "**JSON report file is empty**" >> gitleaks-reports/gitleaks-report.md
+            fi
+            
+            echo "" >> gitleaks-reports/gitleaks-report.md
+            echo "### Remediation Steps:" >> gitleaks-reports/gitleaks-report.md
+            echo "1. Remove or replace hardcoded secrets with environment variables" >> gitleaks-reports/gitleaks-report.md
+            echo "2. Use secret management tools (GitHub Secrets, HashiCorp Vault, etc.)" >> gitleaks-reports/gitleaks-report.md
+            echo "3. Rotate any exposed credentials immediately" >> gitleaks-reports/gitleaks-report.md
+            echo "4. Add \`.gitleaksignore\` file for legitimate false positives" >> gitleaks-reports/gitleaks-report.md
+          else
+            echo "**No JSON report file generated**" >> gitleaks-reports/gitleaks-report.md
+          fi
+        else
+          echo "## No Secrets Detected" >> gitleaks-reports/gitleaks-report.md
+          echo "" >> gitleaks-reports/gitleaks-report.md
+          echo "Great! No hardcoded secrets were found in this scan." >> gitleaks-reports/gitleaks-report.md
+        fi
+        
+        echo "" >> gitleaks-reports/gitleaks-report.md
+        echo "---" >> gitleaks-reports/gitleaks-report.md
+        echo "*Scan performed by [GitLeaks](https://github.com/gitleaks/gitleaks)*" >> gitleaks-reports/gitleaks-report.md
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read the markdown report
+          let reportContent = '';
+          try {
+            reportContent = fs.readFileSync('gitleaks-reports/gitleaks-report.md', 'utf8');
+          } catch (error) {
+            reportContent = '## GitLeaks Scan\n\nError: Could not generate report.';
+          }
+          
+          const secretsFound = fs.readFileSync('gitleaks-reports/secrets_found.txt', 'utf8').trim() === 'true';
+          
+          // Prepare comment
+          const commentHeader = '## GitLeaks Security Scan Results\n\n';
+          const comment = commentHeader + reportContent;
+          
+          // Find existing comment to update
+          const comments = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+          
+          const botComment = comments.data.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('GitLeaks Security Scan Results')
+          );
+          
+          if (botComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: comment
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+          }
+          
+          // Set step output for downstream actions
+          core.setOutput('comment-posted', 'true');
+
+    - name: Upload scan artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gitleaks-scan-results-${{ github.run_number }}
+        path: gitleaks-reports/
+        retention-days: 30
+
+    - name: Fail job if secrets found
+      if: always()
+      run: |
+        SECRETS_FOUND=$(cat gitleaks-reports/secrets_found.txt 2>/dev/null || echo "false")
+        if [[ "$SECRETS_FOUND" == "true" ]]; then
+          echo "::error title=Secrets Detected::GitLeaks found potential secrets in the codebase. Check the reports for details."
+          exit 1
+        fi
+
+    - name: Summary
+      if: always()
+      run: |
+        SECRETS_FOUND=$(cat gitleaks-reports/secrets_found.txt 2>/dev/null || echo "false")
+        if [[ "$SECRETS_FOUND" == "true" ]]; then
+          echo "::notice title=GitLeaks Results::Secrets detected! Check PR comment and download artifacts for details."
+        else
+          echo "::notice title=GitLeaks Results::No secrets detected. Repository is clean!"
+        fi

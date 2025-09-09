@@ -1,7 +1,9 @@
 import { FC, useMemo, useState } from 'react';
+import { ResizeProps } from 'modules/widgets/widget.types';
 import WidgetsWrapper from 'modules/widgets/WidgetsWrapper';
 import { WidgetType } from 'types/api/pagesApi.types';
 import { WidgetInstanceType } from 'types/api/widgets.types';
+import { ResponsiveGridLayoutType } from '@/types/commonTypes';
 
 interface WidgetSwitcherProps {
   widgetConfig: WidgetType;
@@ -11,6 +13,8 @@ interface WidgetSwitcherProps {
   handleWidgetHeightChange: (height: number, isSingleHeader: boolean) => void;
   sheetId: string;
   isBff?: boolean;
+  currentWidgetLayout?: ResponsiveGridLayoutType;
+  resizeProps?: ResizeProps;
 }
 
 const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
@@ -21,6 +25,8 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
   handleWidgetHeightChange,
   sheetId,
   isBff,
+  currentWidgetLayout,
+  resizeProps,
 }) => {
   const [activeWidget, setActiveWidget] = useState<string>(widgetConfig?.default_widget);
 
@@ -51,6 +57,8 @@ const WidgetSwitcher: FC<WidgetSwitcherProps> = ({
       handleWidgetHeightChange={handleWidgetHeightChange}
       sheetId={sheetId}
       isBff={isBff}
+      currentWidgetLayout={currentWidgetLayout}
+      resizeProps={resizeProps}
     />
   ) : (
     <div>No widget found</div>

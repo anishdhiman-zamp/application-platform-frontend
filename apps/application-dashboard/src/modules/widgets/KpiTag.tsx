@@ -3,8 +3,16 @@ import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
+import DeleteWidgetDialog from 'modules/widgets/components/DeleteWidgetDialog';
+import WidgetOptions from 'modules/widgets/WidgetOptions';
+import { useParams } from 'next/navigation';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { ResponsiveGridLayoutType } from '@/types/commonTypes';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -19,6 +27,7 @@ interface KpiTagProps {
   isFilterLoading?: boolean;
   currency?: string;
   defaultCurrency: string;
+  currentWidgetLayout?: ResponsiveGridLayoutType;
 }
 
 const KpiTag: FC<KpiTagProps> = ({
@@ -30,11 +39,18 @@ const KpiTag: FC<KpiTagProps> = ({
   isFilterLoading,
   currency,
   defaultCurrency,
+  currentWidgetLayout,
 }) => {
+  const params = useParams();
+  const pageId = params?.pageId as string;
   const valueContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const windowWidth = useWindowDimensions().width;
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
 
   const {
     data: widgetData,
@@ -92,32 +108,61 @@ const KpiTag: FC<KpiTagProps> = ({
     };
   }, [containerRef, valueContainerRef, widgetData, isFetching, windowWidth]);
 
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
   return (
-    <div
-      className={cn('border-GRAY_400 z-9999 h-full rounded-xl border bg-white px-6 pt-4.5 pb-5', {
-        'animate-pulse opacity-85': isFetching,
-      })}
-      ref={containerRef}
-    >
-      <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
-      <CommonWrapper
-        skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isLoading || isFilterLoading}
-        loader={<SkeletonElement className='max-w-[250px]' />}
+    <div className='group relative'>
+      {isSelfServePagesEnabled && (
+        <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+          <WidgetOptions
+            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+            widgetDetails={widgetDetails}
+            currentWidgetLayout={currentWidgetLayout}
+          />
+        </PermissionGuard>
+      )}
+      <div
+        className={cn('border-GRAY_400 z-9999 h-full rounded-xl border bg-white px-6 pt-4.5 pb-5', {
+          'animate-pulse opacity-85': isFetching,
+        })}
+        ref={containerRef}
       >
-        <Tooltip
-          tooltipBody={value}
-          disabled={isFetching || !showTooltip}
-          tooltipBodyClassName='absolute -left-2 top-0 f-12-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
-          position={TooltipPositions.BOTTOM_LEFT}
-          className='cursor-text!'
+        <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
+        <CommonWrapper
+          skeletonType={SkeletonTypes.CUSTOM}
+          isLoading={isLoading || isFilterLoading}
+          loader={<SkeletonElement className='max-w-[250px]' />}
         >
-          <div className='f-24-450 text-GRAY_950 sensitive truncate' ref={valueContainerRef}>
-            {value}
-            {widgetDetails.display_config?.show_percentages && '%'}
-          </div>
-        </Tooltip>
-      </CommonWrapper>
+          <Tooltip
+            tooltipBody={value}
+            disabled={isFetching || !showTooltip}
+            tooltipBodyClassName='absolute -left-2 top-0 f-12-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+            position={TooltipPositions.BOTTOM_LEFT}
+            className='cursor-text!'
+          >
+            <div className='f-24-450 text-GRAY_950 sensitive truncate' ref={valueContainerRef}>
+              {value}
+              {widgetDetails.display_config?.show_percentages && '%'}
+            </div>
+          </Tooltip>
+        </CommonWrapper>
+      </div>
+      <DeleteWidgetDialog
+        widgetId={widgetDetails.widget_instance_id}
+        widgetTitle={widgetDetails?.title}
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   );
 };

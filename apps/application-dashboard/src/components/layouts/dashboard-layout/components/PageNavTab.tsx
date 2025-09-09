@@ -1,34 +1,186 @@
 'use client';
 
-import React from 'react';
-import { cn } from 'utils/common';
-import { COLORS } from '@/constants/colors';
+import React, { KeyboardEvent, useEffect, useOptimistic, useState } from 'react';
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { useGetPagesQuery, useGetProcessesQuery, useUpdatePageMutation } from 'apis/pages';
+import { COLORS } from 'constants/colors';
+import { getPageRouteById, getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
+import { KEYBOARD_KEYS } from 'constants/shortcuts';
+import { useRouter } from 'next/navigation';
+import { PageResponseType } from 'types/api/pagesApi.types';
+import { cn, preventAutoFocus } from 'utils/common';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
+import PageIcon from '@/components/icons/PageIcon';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
+import DeletePageDialog from 'components/layouts/dashboard-layout/components/DeletePageDialog';
 
 export interface PageNavTabProps {
   label: string;
   pageId: string;
   isSelected?: boolean;
+  page?: PageResponseType;
 }
 
-const PageNavTab = ({ label, isSelected }: PageNavTabProps) => {
-  return (
-    <div
-      className={cn(
-        'text-GRAY_900 f-13-500 hover:bg-GRAY_20 flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
-        isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
-      )}
-    >
-      <svg width='14' height='14' viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
-        <path
-          d='M10.8685 1.3815C13.4883 4.00127 13.4883 8.24875 10.8685 10.8685C8.35969 13.3773 4.35809 13.4836 1.72283 11.1873C1.60791 11.0871 1.55045 11.037 1.52451 10.9686C1.50268 10.911 1.50024 10.8398 1.51806 10.7808C1.53925 10.7108 1.59666 10.6534 1.71147 10.5385L3.0037 9.24631M10.5 6.12501C10.5 8.54125 8.54125 10.5 6.125 10.5C3.70875 10.5 1.75 8.54125 1.75 6.12501C1.75 3.70876 3.70875 1.75001 6.125 1.75001C8.54125 1.75001 10.5 3.70876 10.5 6.12501Z'
-          stroke={isSelected ? COLORS.GRAY_1000 : COLORS.GRAY_900}
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        />
-      </svg>
+const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [pageName, setPageName] = useState<string>();
+  const [finalName, setFinalName] = useState<string>();
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
 
-      <div>{label}</div>
-    </div>
+  const { evaluate, ldClient } = useFeatureFlags();
+
+  const router = useRouter();
+
+  const [updatePage] = useUpdatePageMutation();
+  const { data: pages } = useGetPagesQuery(undefined, { refetchOnMountOrArgChange: false });
+  const { data: processes } = useGetProcessesQuery(undefined, { refetchOnMountOrArgChange: false });
+
+  const [optimisticName, updateOptimisticName] = useOptimistic(finalName || label, (state, newName: string) => newName);
+
+  const handleInputBlur = () => {
+    const trimmedName = pageName?.trim();
+
+    if (trimmedName === label || !trimmedName) {
+      return;
+    }
+
+    setFinalName(trimmedName);
+    updateOptimisticName(trimmedName);
+
+    updatePage({
+      pageId: pageId,
+      body: {
+        name: trimmedName,
+      },
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Page name updated successfully');
+      })
+      .catch(() => {
+        toast.error('Failed to update page name');
+        setPageName(label);
+        setFinalName(label);
+        updateOptimisticName(label);
+      });
+  };
+
+  const handleMenuOpen = (open: boolean) => {
+    setIsMenuOpen(open);
+    if (open) {
+      setPageName(optimisticName);
+    }
+  };
+
+  const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === KEYBOARD_KEYS.ENTER) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleMenuOpen(false);
+      handleInputBlur();
+    }
+  };
+
+  const handleDeleteSuccess = () => {
+    if (isSelected) {
+      const remainingPages = pages?.filter((p) => p.page_id !== pageId);
+
+      if (remainingPages && remainingPages.length > 0) {
+        router.push(getPageRouteById(remainingPages[0]?.page_id, remainingPages[0]?.sheets[0]?.sheet_id));
+      } else if (processes && processes.length > 0) {
+        router.push(getProcessRouteById(processes[0]?.id));
+      } else {
+        router.push(ROUTES_PATH.DATA);
+      }
+    }
+  };
+
+  const handleDeletePage = () => {
+    setIsMenuOpen(false);
+    setIsDeleteDialogOpen(true);
+  };
+
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
+  return (
+    <>
+      <div
+        className={cn(
+          'text-GRAY_900 f-13-500 hover:bg-GRAY_20 group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
+          isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
+        )}
+      >
+        <PageIcon isSelected={isSelected} />
+
+        <div className='flex-1'>{optimisticName}</div>
+
+        {isSelfServePagesEnabled && (
+          <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
+            <PopoverTrigger
+              className={cn('cursor-pointer opacity-0 group-hover:opacity-100')}
+              id='page-nav-tab-popover-trigger'
+            >
+              <PermissionGuard
+                resourceType={ResourceType.PAGE}
+                resourceId={pageId}
+                privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
+              >
+                <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? COLORS.GRAY_800 : COLORS.GRAY_500} />
+              </PermissionGuard>
+            </PopoverTrigger>
+            <PopoverContent
+              align='end'
+              sideOffset={16}
+              className='space-y-2'
+              onCloseAutoFocus={preventAutoFocus}
+              id='page-nav-tab-popover-content'
+            >
+              <Input
+                size='small'
+                placeholder='Page name'
+                value={pageName}
+                onChange={(e) => setPageName(e.target.value)}
+                icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+                autoFocus
+                onBlur={handleInputBlur}
+                onKeyDown={handleEditKeyDown}
+              />
+              <Button
+                variant='ghost'
+                size='medium'
+                className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
+                onClick={handleDeletePage}
+                id='page-nav-tab-delete-page-button'
+              >
+                <SvgSpriteLoader id='trash-04' size={12} />
+                <span>Delete page</span>
+              </Button>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+
+      <DeletePageDialog
+        page={page}
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
+    </>
   );
 };
 

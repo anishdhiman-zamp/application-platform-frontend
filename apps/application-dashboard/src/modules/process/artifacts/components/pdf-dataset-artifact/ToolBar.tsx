@@ -1,18 +1,25 @@
+import type { FC } from 'react';
 import type { TUsePDFSlickStore } from '@pdfslick/react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { COLORS } from '@/constants/colors';
 
-type ToolBarProps = {
+interface ToolBarPropsType {
   usePDFSlickStore: TUsePDFSlickStore;
-};
+  className?: string;
+}
 
-const ToolBar = ({ usePDFSlickStore }: ToolBarProps) => {
+const ToolBar: FC<ToolBarPropsType> = ({ usePDFSlickStore, className }) => {
   const { pageNumber, numPages, scale, pdfSlick } = usePDFSlickStore();
 
   return (
-    <div className='absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap'>
-      {/* Download */}
+    <div
+      className={cn(
+        'absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap',
+        className,
+      )}
+    >
+      {/* Download Button */}
       <SvgSpriteLoader
         id='download-02'
         color={COLORS.WHITE}

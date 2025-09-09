@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
-import { getApiDomainAndRegions, REQUEST_TYPES } from '@zamp-platform/api';
+import { getApiDomainAndRegions, REGIONS_MAP, REQUEST_TYPES } from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -50,8 +50,6 @@ export const LoginForm = () => {
       const urlObj = new URL(redirectUrl);
 
       urlObj.searchParams.set('hd', emailDomain);
-
-      console.log('urlObj', urlObj.toString(), urlObj, respJson);
 
       setHasError(false);
       window.location.href = urlObj.toString();
@@ -124,7 +122,7 @@ export const LoginForm = () => {
     }
     const { domain: apiDomain, regions } = await getApiDomainAndRegions(email);
 
-    if (regions.length >= 1 && allRegions.length === 0) {
+    if (regions.length > 1 && allRegions.length === 0) {
       setAllRegions(regions);
 
       setLoading(false);
@@ -194,7 +192,11 @@ export const LoginForm = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const region = urlParams.get('region');
 
-      if (region) setRegionFromUrlParams(!region?.length || region === 'us' ? '' : `-${region?.toLowerCase()}`);
+      if (region) {
+        const regionValue = REGIONS_MAP[region as keyof typeof REGIONS_MAP].suffix || REGIONS_MAP.us.suffix;
+
+        setRegionFromUrlParams(regionValue);
+      }
 
       setAllRegions(regions);
     } catch (error) {

@@ -28,7 +28,7 @@ export const enum REQUEST_TYPES {
 export const REGIONS_MAP = {
   us: {
     label: 'United States',
-    suffix: '',
+    suffix: '-us',
     shortHand: 'USA',
   },
   me: {
@@ -52,5 +52,23 @@ export const ERROR_TOKENS = {
   CSV_PARSING_ERROR: 'CSV_PARSING_ERROR',
   CLIENT_SIDE_EXCEPTION: 'CLIENT_SIDE_EXCEPTION',
 };
+
+export const STATUS_CODE = {
+  OK: 200,
+  CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
+
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+
+  INTERNAL_SERVER_ERROR: 500,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+} as const;
 
 export const SESSION_EXPIRY_TOKENS = [ERROR_TOKENS.INVALID_TOKEN, ERROR_TOKENS.MISSING_TOKEN];

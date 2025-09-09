@@ -8,6 +8,7 @@ import FilterControlButton from 'components/filter/FilterControlButton';
 import ClearFiltersConfirmationPopup from 'components/filter/filterMenu/ClearFiltersConfirmationPopup';
 import FilterDropdown from 'components/filter/filterMenu/FilterDropdown';
 import FiltersMenu from 'components/filter/filterMenu/FiltersMenu';
+import FiltersMenuV2 from 'components/filter/filterMenu/FiltersMenuV2';
 import { FILTER_KEYS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
@@ -27,6 +28,7 @@ interface FiltersContainerProps {
   isPeriodicityEnabled?: boolean;
   isRightAligned?: boolean;
   titleClassName?: string;
+  isPlayground?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
@@ -42,6 +44,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   isPeriodicityEnabled = false,
   isRightAligned = false,
   titleClassName = '',
+  isPlayground = false,
 }) => {
   const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
   const {
@@ -129,55 +132,60 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   }, [confirmationPopupControlRef]);
 
   return (
-    <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
-      {filtersList.map((filter, index) => (
-        <FilterDropdown
-          key={index}
-          index={index}
-          filter={filter}
-          onRemoveFilter={allowActions || allowClear ? onRemoveFilter : null}
-          allowActions={allowActions}
-          isFilterSelected={selectedFilters[filter?.key]}
-          controlClassName={controlClassName}
-          allowClear={allowClear}
-          isPeriodicityEnabled={isPeriodicityEnabled}
-          isRightAligned={isRightAligned}
-          titleClassName={titleClassName}
-        />
-      ))}
-
-      {allowActions && !filtersList?.length && <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} />}
-
-      {allowActions && filtersList?.length > 0 ? (
-        <>
-          <FiltersMenu
-            tooltipText='Add Filters'
-            currentPageFilters={currentPageFilters}
-            onAddFilter={onAddEmptyFilter}
+    <div>
+      {isPlayground && <FiltersMenuV2 onAddFilter={onAddEmptyFilter} currentPageFilters={currentPageFilters} />}
+      <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
+        {filtersList.map((filter, index) => (
+          <FilterDropdown
+            key={index}
+            index={index}
+            filter={filter}
+            onRemoveFilter={allowActions || allowClear ? onRemoveFilter : null}
+            allowActions={allowActions}
+            isFilterSelected={selectedFilters[filter?.key]}
+            controlClassName={controlClassName}
+            allowClear={allowClear}
+            isPeriodicityEnabled={isPeriodicityEnabled}
+            isRightAligned={isRightAligned}
+            titleClassName={titleClassName}
           />
+        ))}
 
-          <div className='relative'>
-            <FilterControlButton
-              tooltipText='Remove all filters'
-              tooltipPosition={SIDE_OPTIONS.TOP}
-              onClick={() => setShouldShowConfirmationPopup(!shouldShowConfirmationPopup)}
-              buttonRef={confirmationPopupControlRef}
-              icon='x-close'
-              iconCategory={ICON_SPRITE_TYPES.GENERAL}
-              id='clear-all-filters'
-            >
-              {shouldShowConfirmationPopup ? (
-                <ClearFiltersConfirmationPopup
-                  containerRef={confirmationPopupRef}
-                  onClick={handleResetFilters}
-                  onCancel={() => setShouldShowConfirmationPopup(false)}
-                  className='absolute left-0 z-9999'
-                />
-              ) : null}
-            </FilterControlButton>
-          </div>
-        </>
-      ) : null}
+        {!isPlayground && allowActions && !filtersList?.length && (
+          <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} />
+        )}
+
+        {!isPlayground && allowActions && filtersList?.length > 0 ? (
+          <>
+            <FiltersMenu
+              tooltipText='Add Filters'
+              currentPageFilters={currentPageFilters}
+              onAddFilter={onAddEmptyFilter}
+            />
+
+            <div className='relative'>
+              <FilterControlButton
+                tooltipText='Remove all filters'
+                tooltipPosition={SIDE_OPTIONS.TOP}
+                onClick={() => setShouldShowConfirmationPopup(!shouldShowConfirmationPopup)}
+                buttonRef={confirmationPopupControlRef}
+                icon='x-close'
+                iconCategory={ICON_SPRITE_TYPES.GENERAL}
+                id='clear-all-filters'
+              >
+                {shouldShowConfirmationPopup ? (
+                  <ClearFiltersConfirmationPopup
+                    containerRef={confirmationPopupRef}
+                    onClick={handleResetFilters}
+                    onCancel={() => setShouldShowConfirmationPopup(false)}
+                    className='absolute left-0 z-9999'
+                  />
+                ) : null}
+              </FilterControlButton>
+            </div>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 };

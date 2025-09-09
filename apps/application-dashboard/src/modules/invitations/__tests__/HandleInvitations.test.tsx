@@ -3,7 +3,7 @@ import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { HandleInvitations } from 'modules/invitations/HandleInvitations';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 // Mock the required modules
 jest.mock('next/font/google', () => ({
@@ -17,6 +17,20 @@ jest.mock('next/font/google', () => ({
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+
+// Mock the session storage utility
+jest.mock('@/utils/sessionstorage', () => ({
+  SESSION_STORAGE_KEYS: { PATHNAME_PRE_LOGOUT: 'PATHNAME_PRE_LOGOUT' },
+  setToSessionStorage: jest.fn(),
+  getFromSessionStorage: jest.fn(),
+  removeFromSessionStorage: jest.fn(),
+}));
+
+// Mock the postHog utility
+jest.mock('utils/postHog', () => ({
+  resetPostHog: jest.fn(),
 }));
 
 jest.mock('apis/people', () => ({
@@ -56,6 +70,8 @@ describe('HandleInvitations', () => {
     push: jest.fn(),
   };
 
+  const mockSearchParams = new URLSearchParams('?region=us');
+
   const mockInvitations = {
     invitations: [
       { organization_invitation_id: 'inv1', email: 'test1@example.com' },
@@ -70,6 +86,7 @@ describe('HandleInvitations', () => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
     (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
     (useGetMyInvitationsQuery as jest.Mock).mockReturnValue({
       data: null,
       isLoading: true,

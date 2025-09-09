@@ -12,6 +12,7 @@ import { toast } from '@/components/common/toast/Toast';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useEmailEditorState } from '@/modules/process/hooks/useEmailEditorState';
 import { ARTIFACT_TYPE, CTA_COMPONENT_TYPE, EMAIL_DATA_SECTION } from '@/modules/process/process.types';
+import { base64Encode } from '@/modules/process/process.utils';
 import type { EmailAttachmentType } from '@/types/api/processApi.types';
 import { debounce } from '@/utils/common';
 
@@ -39,7 +40,7 @@ const EmailEditorArtifact = ({
         artifact_data: {
           is_email_body_encoded: true,
           heading: data.header.heading,
-          body_html: btoa(data.content),
+          body_html: base64Encode(data.content),
           to_mail_ids: data.header.to_mail_ids,
           cc_mail_ids: data.header.cc_mail_ids,
           bcc_mail_ids: data.header.bcc_mail_ids,
@@ -121,7 +122,7 @@ const EmailEditorArtifact = ({
   }, [emailData, debouncedUpdateArtifact]);
 
   return (
-    <div className='bg-BG_GRAY_2 h-full overflow-y-auto p-5'>
+    <div className='bg-BG_GRAY_2 h-[calc(100vh-110px)] overflow-y-auto p-5'>
       <div className='border-GRAY_500 flex h-full flex-col rounded-xl border-[0.5px] bg-white'>
         <Header value={emailData.header} onHeaderChange={handleHeaderChange} />
         <BodyAndFooter

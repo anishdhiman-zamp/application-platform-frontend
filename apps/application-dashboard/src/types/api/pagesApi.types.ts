@@ -153,11 +153,53 @@ export interface UpdatePagePayloadType {
     name: string;
   };
 }
-
 export interface UpdateSheetByPageIdPayloadType {
   pageId: string;
   sheetId: string;
   body: {
     name: string;
+  };
+}
+
+export interface DeleteSheetByPageIdPayloadType {
+  pageId: string;
+  sheetId: string;
+}
+
+interface LayoutUpdateItem {
+  layout: LayoutType;
+  widget_id: string;
+}
+
+export interface UpdateSheetLayoutPayloadType {
+  pageId: string;
+  sheetId: string;
+  body: LayoutUpdateItem[];
+}
+
+export interface CreatePagePayloadType {
+  page_name: string;
+  page_description: string;
+  sheet_name: string;
+}
+
+export interface CreatePageResponseType {
+  page: {
+    page_id: string;
+  };
+  sheet: {
+    sheet_id: string;
+  };
+}
+
+export interface CreateSheetPayloadType {
+  name: string;
+  description: string;
+  page_id: string;
+}
+
+export interface CreateSheetResponseType {
+  sheet: {
+    sheet_id: string;
   };
 }

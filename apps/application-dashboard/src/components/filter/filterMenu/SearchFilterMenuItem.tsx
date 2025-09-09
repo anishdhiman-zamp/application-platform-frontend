@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { MapAny } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import SearchFilter from 'components/filter/filterMenu/components/SearchFilter';
@@ -6,12 +6,12 @@ import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
 interface SearchFilterMenuItemProps {
-  column: { colId: string };
-  values: string[];
+  column: {
+    colId: string;
+  };
   className?: string;
   isOpen?: boolean;
   label?: string;
-  showColumnLabel?: boolean;
   isDisabled?: boolean;
 }
 
