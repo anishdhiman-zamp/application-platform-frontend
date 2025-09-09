@@ -392,7 +392,7 @@ const Table: FC<TableProps> = ({
   );
 
   const getRowId = useCallback((params: GetRowIdParams) => {
-    return params.data?.id ?? params.data?._zamp_id ?? Object.values(params.data)[0];
+    return params.data?.id ?? params.data?._zamp_id ?? Object.values(params?.data)[0];
   }, []);
 
   return (
