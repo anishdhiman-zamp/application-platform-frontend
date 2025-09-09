@@ -146,7 +146,7 @@ jobs:
 
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
         run: |
