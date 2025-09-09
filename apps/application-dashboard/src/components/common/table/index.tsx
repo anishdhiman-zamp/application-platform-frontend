@@ -217,8 +217,6 @@ const Table: FC<TableProps> = ({
     [missingFields],
   );
 
-  console.log('useGetRowId', useGetRowId);
-
   const checkIsFieldCompleted = useCallback(
     (rowId: string, columnId: string) => {
       return completedFields?.some((field) => field?.rowId === rowId && field?.columnId === columnId);
