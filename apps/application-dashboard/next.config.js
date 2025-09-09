@@ -1,5 +1,4 @@
 const { withSentryConfig } = require('@sentry/nextjs');
-const AssetPrefixPlugin = require('./plugins/asset-prefix-plugin');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -17,15 +16,6 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
-
-    // Add asset prefix plugin for CSS background images
-    if (process.env.NEXT_PUBLIC_ASSET_PREFIX) {
-      config.plugins.push(
-        new AssetPrefixPlugin({
-          assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX,
-        }),
-      );
-    }
 
     return config;
   },
