@@ -217,6 +217,8 @@ const Table: FC<TableProps> = ({
     [missingFields],
   );
 
+  console.log('useGetRowId', useGetRowId);
+
   const checkIsFieldCompleted = useCallback(
     (rowId: string, columnId: string) => {
       return completedFields?.some((field) => field?.rowId === rowId && field?.columnId === columnId);
@@ -389,12 +391,9 @@ const Table: FC<TableProps> = ({
     [onDrilldownClick, onRowPropertiesClick, menuTitle],
   );
 
-  const getRowId = useCallback(
-    (params: GetRowIdParams) => {
-      return params.data?.id ?? params.data?._zamp_id;
-    },
-    [useGetRowId],
-  );
+  const getRowId = useCallback((params: GetRowIdParams) => {
+    return params.data?.id ?? params.data?._zamp_id ?? Object.values(params.data)[0];
+  }, []);
 
   return (
     <div style={containerStyle}>
