@@ -17,6 +17,9 @@ import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 export const HandleInvitations: FC = () => {
   const router = useRouter();
+  const isMultiRegion = useMemo(() => {
+    return JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) || '[]').length > 1;
+  }, []);
 
   const [regionDetails, setRegionDetails] = useState({
     currentRegion: '',
@@ -63,16 +66,17 @@ export const HandleInvitations: FC = () => {
 
   useEffect(() => {
     if (loadingInvitations === false) {
-      const region = getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION) ?? 'us';
-      // get region from url params
-      const urlParams = new URLSearchParams(window.location.search) ?? 'us';
-      const regionFromUrlParams = urlParams.get('region')?.toLowerCase() ?? 'us';
-      const formattedRegion = region.length ? region.replace('-', '') : 'us';
+      //current signed in region
+      const region = getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION);
+      const formattedRegion = region?.length ? region.replace('-', '') : 'us';
+      // get region from url params, set signed in region if not present
+      const urlParams = new URLSearchParams(window.location.search);
+      const regionFromUrlParams = urlParams.get('region')?.toLowerCase() || formattedRegion;
 
-      if (formattedRegion !== regionFromUrlParams) {
+      if (formattedRegion !== regionFromUrlParams && isMultiRegion) {
         setRegionDetails({
           currentRegion: formattedRegion,
-          invitationRegion: regionFromUrlParams?.replace('-', '') ?? 'us',
+          invitationRegion: regionFromUrlParams?.replace('-', ''),
         });
 
         return;
@@ -93,7 +97,7 @@ export const HandleInvitations: FC = () => {
     }
   }, [invitationsData, loadingInvitations]);
 
-  if (regionDetails.currentRegion !== regionDetails.invitationRegion) {
+  if (regionDetails.currentRegion !== regionDetails.invitationRegion && isMultiRegion) {
     return (
       <div className='fixed inset-0 z-1000 flex h-screen w-screen bg-white'>
         <MembershipRequested

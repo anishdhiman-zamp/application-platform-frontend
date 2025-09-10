@@ -1,6 +1,7 @@
 import { type FC, memo, type RefObject, useEffect, useRef, useState } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, RevealElement } from '@zamp-platform/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import ConditionalRevealAnimation from 'modules/process/activity-logs/components/ConditionalRevealAnimationWrapper';
 import { LOG_STATUS } from 'modules/process/process.types';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -83,7 +84,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
       value={openValue}
       onValueChange={setOpenValue}
     >
-      <RevealElement className='w-full'>
+      <ConditionalRevealAnimation className='w-full' isLastLog={isLastLog}>
         <AccordionItem value={ACCORDION_ITEM} className='w-full border-0'>
           <div className='relative'>
             {!(status === LOG_STATUS.LOADING && isLastLog) && (
@@ -129,7 +130,7 @@ const ReasoningAccordion = ({ thoughtSteps, logGroupId, isLastLog, status }: Rea
             </motion.div>
           </div>
         </AccordionItem>
-      </RevealElement>
+      </ConditionalRevealAnimation>
     </Accordion>
   );
 };

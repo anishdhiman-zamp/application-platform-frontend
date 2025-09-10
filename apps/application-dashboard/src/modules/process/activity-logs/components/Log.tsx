@@ -1,6 +1,7 @@
 import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
+import ActionComment from 'modules/process/activity-logs/components/ActionComment';
 import LogCta from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
@@ -33,7 +34,7 @@ const Log: FC<LogProps> = ({
   activityId,
 }) => {
   const {
-    content: { message, thought_steps, ctas, sender_type, sender_details },
+    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment },
     status,
     content_type,
     updated_at,
@@ -191,13 +192,22 @@ const Log: FC<LogProps> = ({
               status={statusIndicatorColor.status}
             />
           )}
-          {ctas && (
+          {!!ctas?.length && (
             <LogCta
               ctas={ctas}
               logGroupId={log_group_id}
               processId={processId}
               activityId={activityId}
               handleShowArtifacts={handleShowArtifacts}
+              isLastLog={isLastLog}
+            />
+          )}
+          {action_comment?.comment && (
+            <ActionComment
+              action_comment={action_comment}
+              isLastLog={isLastLog}
+              staggerCompleteRef={staggerCompleteRef}
+              ctasLength={ctas?.length ?? 0}
             />
           )}
           <motion.div

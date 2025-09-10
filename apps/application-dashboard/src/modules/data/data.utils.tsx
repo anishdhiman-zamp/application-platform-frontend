@@ -181,7 +181,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       handleSuccessfulUpdate,
       tableRef,
       handleRulesListingSideDrawerOpen,
-      filterType: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+      filterType:
+        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG
+          ? FILTER_TYPES.TAGS
+          : column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.DOCUMENT
+            ? FILTER_TYPES.DOCUMENT
+            : column?.type,
       headerBackgroundNeeded: false,
       className: isProcess && 'py-2 px-4 hover:bg-transparent',
       hideFloatingFilter:
@@ -454,6 +459,8 @@ export const getValueFormatter = (
 export const getFormattedDate = (valueFormat: ValueFormatType, value: string | number) => {
   const dateFormat = valueFormat?.value as string;
   const validDateFormat = VALID_DATE_FORMATS.includes(dateFormat) ? dateFormat : DATE_FORMATS.ddMMMyyyy;
+
+  if (typeof value === 'number' && value === 0) return '';
 
   // expect value to be in microseconds when it is a number
   const date = typeof value === 'number' ? new Date(value / 1000) : new Date(createDateObjectFromUTCString(value));

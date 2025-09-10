@@ -534,7 +534,6 @@ If migrating from a custom SSE implementation:
 If migrating from WebSocket:
 
 1. **Connection pattern**:
-
    - WebSocket: Bidirectional, single connection
    - SSE + HTTP: Unidirectional SSE + HTTP for sending
 

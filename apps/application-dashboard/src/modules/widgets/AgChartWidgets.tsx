@@ -1,44 +1,34 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
 import { WIDGET_LOADER } from 'constants/lottie/widget-loader';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
+import DeleteWidgetDialog from 'modules/widgets/components/DeleteWidgetDialog';
 import NoWidgetData from 'modules/widgets/components/NoWidgetData';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
+import { ResizeProps, WidgetNodeClickParams } from 'modules/widgets/widget.types';
+import WidgetOptions from 'modules/widgets/WidgetOptions';
 import { AG_CHART_LEGEND_CONFIG, DEFAULT_TRANSFORMED_DATA } from 'modules/widgets/widgets.constant';
-import { getChartOptions, getTransformedData } from 'modules/widgets/widgets.utils';
-import {
-  type DrillDownConfigType,
-  type FieldsMappingType,
-  type PieDonutChartFieldsMappingType,
-  WIDGET_TYPES,
-  WidgetInstanceType,
-} from 'types/api/widgets.types';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { getChartOptions, getTimeColumns, getTransformedData } from 'modules/widgets/widgets.utils';
+import { useParams } from 'next/navigation';
+import { WidgetDataType, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
+import { OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 interface WidgetsWrapperProps {
-  widgetDetails: Extract<
-    WidgetInstanceType,
-    {
-      widget_type: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART | WIDGET_TYPES.PIE_CHART | WIDGET_TYPES.DONUT_CHART;
-    }
-  >;
+  widgetDetails: WidgetInstanceTypeWrapper;
   currentPageFilters: string;
   isFilterInitialized?: boolean;
-  onNodeClick: (
-    clickedNode: MapAny,
-    xAxis: string,
-    datasetId: string,
-    datasetDefaultFilters: string,
-    drilldown_config?: DrillDownConfigType,
-    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
-  ) => void;
+  onNodeClick: (params: WidgetNodeClickParams) => void;
   periodicity: string;
   timeColumns: string;
   groupWidgetsOptions: OptionsType[];
@@ -47,6 +37,10 @@ interface WidgetsWrapperProps {
   currency: string;
   defaultCurrency: string;
   activeWidget: string;
+  previewData?: WidgetDataType[];
+  isPlayground?: boolean;
+  resizeProps?: ResizeProps;
+  currentWidgetLayout?: ResponsiveGridLayoutType;
 }
 
 const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
@@ -62,7 +56,18 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
   currency,
   activeWidget,
   defaultCurrency,
+  previewData,
+  isPlayground,
+  resizeProps,
+  currentWidgetLayout,
 }) => {
+  const params = useParams();
+  const pageId = params?.pageId as string;
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
+
   const widgetType = widgetDetails?.widget_type;
 
   const {
@@ -76,19 +81,21 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       widgetId: widgetDetails.widget_instance_id,
       payload: {
         filters: currentPageFilters,
-        time_columns: timeColumns,
+        time_columns: timeColumns || getTimeColumns(widgetDetails),
         periodicity: (periodicity as PERIODICITY_TYPES) ?? PERIODICITY_TYPES.DAILY,
         currency: currency,
       },
     },
-    { refetchOnMountOrArgChange: false, skip: !isFilterInitialized },
+    { refetchOnMountOrArgChange: false, skip: !isFilterInitialized || isPlayground },
   );
 
   const { transformedData, stackedValues, yAxisTitle, donutOthersData, maxValueLength, showCurrency } = useMemo(() => {
-    return widgetData?.result
-      ? getTransformedData(widgetData?.result, widgetDetails, defaultCurrency ?? widgetData?.currency)
+    const chartData = isPlayground ? previewData : widgetData?.result;
+
+    return chartData
+      ? getTransformedData(chartData, widgetDetails, defaultCurrency ?? widgetData?.currency)
       : DEFAULT_TRANSFORMED_DATA;
-  }, [widgetData]);
+  }, [widgetData, isPlayground, previewData, defaultCurrency]);
 
   const chartOptions = useMemo(() => {
     const baseOptions = {
@@ -104,7 +111,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
       baseOptions,
       showCurrency ? currency : '',
       stackedValues,
-      transformedData?.length,
+      transformedData?.length ?? 0,
       donutOthersData,
       periodicity as PERIODICITY_TYPES,
     );
@@ -117,49 +124,87 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
     transformedData?.length > 0,
   );
 
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
+
   return (
-    <div
-      className={cn('border-GRAY_400 h-full overflow-hidden rounded-xl border bg-white py-4.5', {
-        'animate-pulse opacity-85': isFetching,
-      })}
-    >
-      <WidgetTitle
-        title={widgetDetails?.title}
-        groupWidgetsOptions={groupWidgetsOptions}
-        onWidgetChange={onWidgetChange}
-        widgetType={widgetType}
-        activeWidget={activeWidget}
-        className='z-1000!'
-      />
-      <CommonWrapper
-        isLoading={isLoading || isFilterLoading}
-        skeletonType={SkeletonTypes.CUSTOM}
-        isNoData={!transformedData?.length}
-        className='h-full'
-        noDataBanner={<NoWidgetData className={cn({ 'animate-pulse opacity-100': isFetching })} />}
-        isError={isError}
-        refetchFunction={refetch}
-        loader={
-          <div className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'>
-            <DynamicLottiePlayer src={WIDGET_LOADER} className='lottie-player h-[150px]' autoplay loop keepLastFrame />
-          </div>
-        }
+    <div className='group relative h-full'>
+      {!isPlayground && isSelfServePagesEnabled && (
+        <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+          <WidgetOptions
+            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+            widgetDetails={widgetDetails}
+            currentWidgetLayout={currentWidgetLayout}
+          />
+        </PermissionGuard>
+      )}
+      <div
+        className={cn('border-GRAY_400 h-full overflow-hidden bg-white py-4.5', {
+          'animate-pulse opacity-85': isFetching,
+          'rounded-xl border pt-2.5': !isPlayground,
+        })}
       >
-        {chartOptions && (
-          <div className='relative h-full w-full'>
-            {!widgetDetails?.display_config?.hide_y_axis_title && yAxisTitle && (
-              <div className='text-GRAY_700 f-12-450 absolute -top-10 right-5 z-10'>
-                {snakeCaseToSentenceCase(yAxisTitle)}
-                <div
-                  className='bg-GRAY_200 mt-2 ml-auto h-4.5 w-px'
-                  style={{ marginRight: `${maxValueLength * 5.5}px` }}
-                ></div>
-              </div>
-            )}
-            <AgCharts options={chartOptions as AgChartOptions} />
-          </div>
-        )}
-      </CommonWrapper>
+        <WidgetTitle
+          title={widgetDetails?.title}
+          groupWidgetsOptions={groupWidgetsOptions}
+          onWidgetChange={onWidgetChange}
+          widgetType={widgetType}
+          activeWidget={activeWidget}
+          className='z-1000!'
+          resizeProps={resizeProps}
+          isLoading={isLoading || isFilterLoading}
+        />
+        <CommonWrapper
+          isLoading={isLoading || isFilterLoading}
+          skeletonType={SkeletonTypes.CUSTOM}
+          isNoData={!transformedData?.length}
+          className='h-full'
+          noDataBanner={<NoWidgetData className={cn({ 'animate-pulse opacity-100': isFetching }, 'h-60')} />}
+          isError={isError}
+          refetchFunction={refetch}
+          loader={
+            <div className='flex h-full w-full items-center justify-center'>
+              <DynamicLottiePlayer
+                src={WIDGET_LOADER}
+                className='lottie-player h-[150px]'
+                autoplay
+                loop
+                keepLastFrame
+              />
+            </div>
+          }
+        >
+          {chartOptions && (
+            <div className='relative h-full w-full'>
+              {!widgetDetails?.display_config?.hide_y_axis_title && yAxisTitle && (
+                <div className='text-GRAY_700 f-12-450 absolute -top-10 right-5 z-10'>
+                  {snakeCaseToSentenceCase(yAxisTitle)}
+                  <div
+                    className='bg-GRAY_200 mt-2 ml-auto h-4.5 w-px'
+                    style={{ marginRight: `${maxValueLength * 5.5}px` }}
+                  ></div>
+                </div>
+              )}
+              <AgCharts options={chartOptions as AgChartOptions} />
+            </div>
+          )}
+        </CommonWrapper>
+      </div>
+      <DeleteWidgetDialog
+        widgetId={widgetDetails.widget_instance_id}
+        widgetTitle={widgetDetails?.title}
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   );
 };

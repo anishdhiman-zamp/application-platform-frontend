@@ -9,9 +9,10 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { toast } from '@zamp-platform/ui';
+import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useAppSelector } from 'hooks/toolkit';
+import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import DraggableSheetTab from 'modules/sheets/DraggableSheetTab';
 import SheetTab from 'modules/sheets/SheetTab';
 import { useParams, useRouter } from 'next/navigation';
@@ -19,7 +20,12 @@ import { RootState } from 'store';
 import { MenuItem } from 'types/common/components';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
-import { useUpdateSheetIndexesByPageIdMutation } from '@/apis/pages';
+import { useCreateSheetMutation, useUpdateSheetIndexesByPageIdMutation } from '@/apis/pages';
+import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { DEFAULT_SHEET_DESCRIPTION, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { getPageRouteById } from '@/constants/routeConfig';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -27,10 +33,9 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 interface SheetsTabsProps {
   tabs: MenuItem[];
   currentSheetId: string;
-  isPageLoading: boolean;
 }
 
-const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }) => {
+const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
   const router = useRouter();
   const params = useParams();
   const [tabOrder, setTabOrder] = useState<string[]>(tabs.map((tab) => tab.value as string));
@@ -38,12 +43,16 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
   const pageId = params?.pageId as string;
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const [updateSheetIndexesByPageId] = useUpdateSheetIndexesByPageIdMutation();
+  const [createSheet, { isLoading: isCreatingSheet }] = useCreateSheetMutation();
+  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleTabSelect = (selected?: MenuItem) => {
     if (!selected?.value) return;
-    router.push(`#${selected?.value}`);
+    router.push(getPageRouteById(pageId, selected?.value as string));
 
     const storedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.DATA_SHEET_ID) || '{}');
 
@@ -83,10 +92,38 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
     }
   };
 
+  const handleCreateSheet = () => {
+    createSheet({
+      name: DEFAULT_SHEET_NAME,
+      page_id: pageId,
+      description: DEFAULT_SHEET_DESCRIPTION,
+    })
+      .unwrap()
+      .then((res) => {
+        router.push(getPageRouteById(pageId, res?.sheet?.sheet_id));
+        toast.success('Sheet created successfully');
+      })
+      .catch(() => {
+        toast.error('Failed to create sheet');
+      });
+  };
+
   // Sync tabOrder with tabs whenever tabs changes
   useEffect(() => {
     setTabOrder(tabs.map((tab) => tab.value as string));
   }, [tabs]);
+
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
+        .then((res) => {
+          setIsSelfServePagesEnabled(res);
+        })
+        .catch(() => {
+          setIsSelfServePagesEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient]);
 
   return (
     <div
@@ -97,7 +134,6 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
     >
       <CommonWrapper
         skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isPageLoading}
         loader={<div className='bg-GRAY_50 block h-8 w-25 animate-pulse rounded-md' />}
         className='w-fit'
       >
@@ -120,6 +156,8 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
                     tab={tab}
                     currentSheetId={currentSheetId}
                     handleTabSelect={handleTabSelect}
+                    allSheets={tabs}
+                    onCreateSheet={handleCreateSheet}
                   />
                 );
               })}
@@ -132,25 +170,41 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId, isPageLoading }
                   tab={tabs.find((t) => t.value === activeId) ?? { value: '', label: '' }}
                   currentSheetId={currentSheetId}
                   handleTabSelect={handleTabSelect}
+                  allSheets={tabs}
+                  onCreateSheet={handleCreateSheet}
                 />
               </div>
             ) : null}
           </DragOverlay>
         </DndContext>
       </CommonWrapper>
-
-      <Tooltip
-        tooltipBody='Coming soon'
-        color='{TMS_COLORS.GRAY_200}'
-        tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
-        className='z-1'
-        position={TooltipPositions.TOP}
-      >
-        <div className='f-12-450 text-GRAY_700 flex cursor-not-allowed items-center gap-1 select-none'>
-          <SvgSpriteLoader id='plus' width={16} height={16} />
-          <div className='whitespace-nowrap'>New sheet</div>
-        </div>
-      </Tooltip>
+      {isSelfServePagesEnabled ? (
+        <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+          <Button
+            size='medium'
+            variant='secondary'
+            onClick={handleCreateSheet}
+            className='h-[34px] min-w-25 gap-1 [&_svg]:size-3.5'
+            isLoading={isCreatingSheet}
+          >
+            <SvgSpriteLoader id='plus' className='text-gray-500' />
+            <div className='whitespace-nowrap'>Add sheet</div>
+          </Button>
+        </PermissionGuard>
+      ) : (
+        <Tooltip
+          tooltipBody='Coming soon'
+          color='{TMS_COLORS.GRAY_200}'
+          tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
+          className='z-1'
+          position={TooltipPositions.TOP}
+        >
+          <div className='f-12-450 text-GRAY_700 flex cursor-not-allowed items-center gap-1 select-none'>
+            <SvgSpriteLoader id='plus' width={16} height={16} />
+            <div className='whitespace-nowrap'>New sheet</div>
+          </div>
+        </Tooltip>
+      )}
     </div>
   );
 };

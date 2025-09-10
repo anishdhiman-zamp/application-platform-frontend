@@ -33,7 +33,7 @@ const MultiSearchFilter: FC<MultiSearchFilterProps> = ({
   className = '',
   label,
   placeholder = 'type here....',
-  initialOperator = OPERATOR.ArrayContains,
+  initialOperator = OPERATOR.ArrayIn,
   initialSearchTags = [],
   initialInputValue = '',
   onChange,

@@ -50,12 +50,11 @@ const KnowledgeBaseNavigation: FC<KnowledgeBaseNavigationProps> = ({
             <AccordionItem key={item.id} value={item.id} className='mb-1.5 !border-none'>
               <AccordionTrigger
                 className={cn(
-                  'f-13-500 !justify-start gap-4 rounded px-2 py-1 text-left text-gray-900 hover:cursor-pointer [&>svg:last-child]:hidden',
+                  'f-14-500 !justify-start gap-4 rounded px-2 py-1 text-left text-gray-900 hover:cursor-pointer [&>svg:last-child]:hidden',
                   {
                     '!-ml-2 !px-0': level !== 0,
                   },
                 )}
-                onClick={() => handleClick(item.id)}
               >
                 <ChevronRight
                   className={cn(
@@ -83,7 +82,7 @@ const KnowledgeBaseNavigation: FC<KnowledgeBaseNavigationProps> = ({
             <div className={cn({ 'px-4': level === 0, 'mb-1.5': index === items.length - 1 })}>
               <div
                 className={cn('border-gray-200 px-2', {
-                  '!border-gray-1000 !text-gray-1000 f-13-500 border-l-2':
+                  '!border-gray-1000 !text-gray-1000 f-14-500 border-l-2':
                     currentSelectedHeader === item.id && level !== 0,
                   'border-l px-8': level !== 0,
                   'mb-1 pl-4.5': level === 0,
@@ -97,7 +96,7 @@ const KnowledgeBaseNavigation: FC<KnowledgeBaseNavigationProps> = ({
                     handleClick(item.id);
                   }}
                   className={cn(
-                    'f-13-500 block h-auto w-full cursor-pointer rounded bg-white px-2 py-1.5 text-left whitespace-break-spaces text-gray-900 hover:bg-gray-100',
+                    'f-14-500 block h-auto w-full cursor-pointer rounded bg-white px-2 py-1.5 text-left whitespace-break-spaces text-gray-900 hover:bg-gray-100',
                     {
                       '!text-gray-1000': currentSelectedHeader === item.id,
                     },

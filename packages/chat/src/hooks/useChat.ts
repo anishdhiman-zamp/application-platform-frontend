@@ -1,10 +1,21 @@
 'use client';
 
-import { useSSE, UseSSEOptions } from '@zamp-platform/utils';
-import { useCallback, useMemo, useState } from 'react';
+import { captureException } from '@sentry/browser';
+import { UseSSEOptions } from '@zamp-platform/utils';
+import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { useCallback, useEffect, useState } from 'react';
+
+import { useEventBus } from '@/app/_providers/sse-provider';
+import type { MapAny } from '@/types/commonTypes';
 
 import { useCreateConversationMutation, useSendMessageMutation } from '../api';
-import { ChatMessage, CreateConversationPayloadType, SSEEventType } from '../types/chat.types';
+import {
+  ChatMessage,
+  ChatMessageType,
+  type CreateConversationPayloadType,
+  SenderType,
+  SSEEventType,
+} from '../types/chat.types';
 
 export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'autoConnect'> {
   conversationId?: string;
@@ -21,43 +32,51 @@ export const useChat = (config: ChatConfig) => {
   const [_conversationId, setConversationId] = useState<string | null>(config.conversationId || null);
   const [createConversationMutation, { isLoading: isCreatingConversation, error: createConversationError }] =
     useCreateConversationMutation();
-
+  const { sseEventBus } = useEventBus();
   const createConversation = async (conversationPayload: CreateConversationPayloadType) => {
+    setMessages([
+      {
+        ...conversationPayload,
+        message_type: ChatMessageType.TEXT,
+        sender_type: SenderType.USER,
+        message_content: conversationPayload.message_content || { message: '' },
+        metadata: {},
+        timestamp: new Date().toISOString(),
+      },
+    ]);
     const response = await createConversationMutation(conversationPayload).unwrap();
     setConversationId(response.conversation_id);
     return response.conversation_id;
   };
 
-  const handleMessage = useCallback(
-    (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
 
-        switch (data.type) {
+  const handleMessage = useCallback(
+    (data: MapAny) => {
+      try {
+        switch (data.payload.type) {
           case SSEEventType.MESSAGE:
-            const newMessage: ChatMessage = data.message;
+            const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
             config.onNewMessage?.(newMessage);
             break;
+          default:
         }
       } catch (error) {
-        console.error('Failed to parse SSE message:', error);
+        captureException(error);
       }
     },
     [config],
   );
 
-  const sseConfig: UseSSEOptions = useMemo(
-    () => ({
-      ...config,
-      url: config.eventUrl,
-      onMessage: handleMessage,
-      autoConnect: false,
-    }),
-    [config, handleMessage],
-  );
-
-  const connection = useSSE(sseConfig);
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+      if (data?.source_id === _conversationId) handleMessage(data);
+    });
+    return () => sub.unsubscribe();
+  }, [handleMessage, _conversationId]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage) => {
@@ -66,15 +85,15 @@ export const useChat = (config: ChatConfig) => {
       }
 
       try {
+        setMessages((prev) => [...prev, messagePayload]);
         const response = await sendMessageMutation({
           conversationId: _conversationId,
           body: messagePayload,
         }).unwrap();
 
-        setMessages((prev) => [...prev, messagePayload]);
         return response;
       } catch (error) {
-        console.error('Failed to send message:', error);
+        captureException(error);
         throw error;
       }
     },
@@ -82,9 +101,9 @@ export const useChat = (config: ChatConfig) => {
   );
 
   return {
-    ...connection,
     messages,
     sendMessage,
+    clearMessages,
     isSendingMessage,
     sendMessageError,
     createConversation,

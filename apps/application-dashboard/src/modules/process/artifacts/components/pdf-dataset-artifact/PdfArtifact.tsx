@@ -9,15 +9,16 @@ import ToolBar from 'modules/process/artifacts/components/pdf-dataset-artifact/T
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import type { PdfArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
 
-type PDFViewerAppProps = {
+interface PDFViewerAppProps {
   processId: string;
   artifactId: string;
-  pdfArtifact: PdfDatasetArtifactsResponseType | PdfArtifactsResponseType;
   isArtifactLoading: boolean;
+  fileId: string;
   className?: string;
-};
+  isSearchBarEnabled?: boolean;
+  toolBarClassName?: string;
+}
 
 const LoadingIndicator = () => (
   <div className='flex h-full w-full items-center justify-center p-4'>
@@ -33,7 +34,15 @@ const ErrorFallback = ({ message }: { message: string }) => (
   </div>
 );
 
-const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, className }: PDFViewerAppProps) => {
+const PdfArtifact = ({
+  processId,
+  artifactId,
+  fileId,
+  isArtifactLoading,
+  className,
+  isSearchBarEnabled = false,
+  toolBarClassName,
+}: PDFViewerAppProps) => {
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
@@ -44,10 +53,10 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
     {
       processId,
       artifactId,
-      fileId: pdfArtifact?.pdf_file?.file_id,
+      fileId,
     },
     {
-      skip: !processId || !artifactId || !pdfArtifact?.pdf_file?.file_id,
+      skip: !processId || !artifactId || !fileId,
       refetchOnMountOrArgChange: false,
     },
   );
@@ -74,6 +83,7 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
     <CommonWrapper
       isLoading={isCommonLoading}
       isError={isSignedUrlError}
+      errorCardStyle='mx-auto'
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}
@@ -82,13 +92,13 @@ const PdfArtifact = ({ processId, artifactId, pdfArtifact, isArtifactLoading, cl
       {error && <ErrorFallback message={error?.message} />}
       {!error && !isDocumentLoaded && <LoadingIndicator />}
 
-      {isDocumentLoaded && !error && <SearchBar {...{ usePDFSlickStore }} />}
+      {isDocumentLoaded && !error && isSearchBarEnabled && <SearchBar {...{ usePDFSlickStore }} />}
       {!error && (
         <div className='relative h-full flex-1'>
-          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-26' />
+          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-48' />
         </div>
       )}
-      {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} />}
+      {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} className={toolBarClassName} />}
     </CommonWrapper>
   );
 };

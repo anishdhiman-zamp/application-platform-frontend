@@ -8,6 +8,9 @@ const config: Config = {
     ...baseConfig.moduleNameMapper,
     '^@zamp-platform/ui/(.*)$': '<rootDir>/../../packages/ui/src/$1',
   },
+  testPathIgnorePatterns: [...(baseConfig.testPathIgnorePatterns || []), '/tests/', '/node_modules/'],
+  // Explicitly include only test files that should be run with Jest
+  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '!**/tests/**/*.[jt]s?(x)'],
 };
 
 export default config;

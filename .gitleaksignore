@@ -1,0 +1,25 @@
+# .gitleaksignore
+# Common false positives - remove/modify as needed for your project
+
+# Test files and mock data
+**/*test*/**
+**/*spec*/**
+**/*mock*/**
+**/tests/**
+**/__tests__/**
+**/fixtures/**
+**/test_data/**
+
+# Documentation and examples
+**/docs/**
+**/examples/**
+README.md
+*.md:example
+
+# Common false positive patterns
+**/.git/**
+**/node_modules/**
+**/vendor/**
+
+# Add your specific false positives below as you discover them:
+# gcp_dbx/Noon Final/Noon Final/Dump.py:64

@@ -9,8 +9,8 @@ describe('StaggerText Component', () => {
     const letters = screen.getAllByTestId('stagger-letter');
 
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass('inline-flex');
-    expect(container).toHaveClass('flex-wrap');
+    expect(container).toHaveClass('break-words');
+    expect(container).toHaveClass('text-GRAY_1000');
     expect(letters).toHaveLength(4); // 'T', 'e', 's', 't'
   });
 
@@ -36,16 +36,23 @@ describe('StaggerText Component', () => {
   // Test text content
   it('displays the correct text', () => {
     render(<StaggerText text='Hello World' />);
-    const letters = screen.getAllByTestId('stagger-letter');
-    const textContent = letters.map((letter) => (letter.innerHTML === '&nbsp;' ? ' ' : letter.textContent)).join('');
-    expect(textContent).toBe('Hello World');
+    const container = screen.getByTestId('stagger-text-container');
+    // The component uses &nbsp; which becomes \u00A0 in textContent
+    expect(container.textContent).toBe('Hello\u00A0World');
   });
 
-  // Test with spaces
+  // Test with spaces - spaces are not stagger-letter elements in current implementation
   it('handles spaces correctly', () => {
     render(<StaggerText text='a b' />);
     const letters = screen.getAllByTestId('stagger-letter');
-    expect(letters[1].innerHTML).toBe('&nbsp;');
+    // Only 'a' and 'b' should be stagger-letter elements, space is separate
+    expect(letters).toHaveLength(2);
+    expect(letters[0].textContent).toBe('a');
+    expect(letters[1].textContent).toBe('b');
+
+    // Verify the full text content includes the space (as non-breaking space)
+    const container = screen.getByTestId('stagger-text-container');
+    expect(container.textContent).toBe('a\u00A0b');
   });
 
   // Test animation variants when showAnimation is false

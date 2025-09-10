@@ -16,6 +16,7 @@ import {
 } from 'date-fns';
 import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { type ColumnFilterConfig, ParentFilters } from 'modules/widgets/Pivot/pivot.types';
+import { WidgetNodeClickParams } from 'modules/widgets/widget.types';
 import {
   AG_CHART_TYPES,
   CHART_NUMBER_AXES,
@@ -28,10 +29,8 @@ import {
 import {
   AGGREGATION_TYPES,
   BarLineChartWidgetMapping,
-  type DrillDownConfigType,
   FieldsMappingType,
   KPITagWidgetMapping,
-  type PieDonutChartFieldsMappingType,
   PieDonutChartWidgetMapping,
   PivotTableWidgetMapping,
   WIDGET_TYPES,
@@ -52,10 +51,9 @@ export function groupTransactionsByDate(
 ): { data: MapAny[]; groupValues: string[] } {
   if (!data?.length) return { data: [], groupValues: [] };
 
-  const mappingVariable = fields?.group_by?.[0]?.alias ?? fields?.group_by?.[0]?.column;
-  const groupBy = mappingVariable ?? '';
-  const xAxis = mappingVariable ?? '';
-  const yAxis = mappingVariable ?? '';
+  const groupBy = fields?.group_by?.[0]?.alias ?? fields?.group_by?.[0]?.column ?? '';
+  const xAxis = fields?.x_axis?.[0]?.alias ?? fields?.x_axis?.[0]?.column ?? '';
+  const yAxis = fields?.y_axis?.[0]?.alias ?? fields?.y_axis?.[0]?.column ?? '';
 
   const grouped: MapAny = {};
   const groupValues = new Set<string>();
@@ -88,7 +86,7 @@ export function groupTransactionsByDate(
  * @returns The formatted data array.
  */
 export function getDataWithDataType(responses: WidgetDataType[]) {
-  return responses.map((response) => {
+  return responses?.map((response) => {
     const { columns, data } = response;
 
     return data.map((row) => {
@@ -192,20 +190,14 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
 
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
-  onNodeClick: (
-    clickedNode: MapAny,
-    xAxis: string,
-    datasetId: string,
-    datasetDefaultFilters: string,
-    drilldown_config?: DrillDownConfigType,
-    fields?: FieldsMappingType | PieDonutChartFieldsMappingType,
-  ) => void,
+  onNodeClick: (params: WidgetNodeClickParams) => void,
   baseOptions: AgChartOptions,
   currency = '',
   stackedValues?: MapAny[],
   dataLength?: number,
   donutOthersData?: MapAny[],
   periodicity: PERIODICITY_TYPES = PERIODICITY_TYPES.DAILY,
+  stacked?: boolean,
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
   const categoryAxis = getCategoryAxis(periodicity);
@@ -247,6 +239,66 @@ export const getChartOptions = (
     case WIDGET_TYPES.BAR_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
       const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? (mappings?.[0]?.fields?.x_axis?.[0]?.column || '');
+      const datasetId = mappings?.[0]?.dataset_id;
+      const drilldown_config = mappings?.[0]?.drilldown_config;
+      const default_filters = mappings?.[0]?.default_filters;
+      const fields = mappings?.[0]?.fields;
+      const isStacked = mappings?.[0]?.is_stacked;
+
+      const baseMapping = {
+        type: chartType,
+        xKey: xAxis,
+        cornerRadius: 2,
+        stacked: isStacked,
+        listeners: {
+          nodeClick: (event: any) =>
+            onNodeClick({
+              clickedNode: event.datum,
+              xAxis,
+              datasetId,
+              datasetDefaultFilters: JSON.stringify(default_filters),
+              drilldown_config,
+              fields,
+              yAxis: event?.yKey,
+            }),
+        },
+        tooltip: {
+          showArrow: false,
+          renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
+            data: [
+              {
+                label: snakeCaseToSentenceCase(yName ?? ''),
+                value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
+              },
+            ],
+          }),
+        },
+        label,
+      };
+
+      const series = stackedValues?.length
+        ? stackedValues?.map((value) => ({
+            ...baseMapping,
+            yKey: value?.column,
+            yName: value?.column,
+          }))
+        : mappings.map((mapping) => ({
+            ...baseMapping,
+            yKey: mapping?.fields?.y_axis?.[0]?.alias ?? mapping?.fields?.y_axis?.[0]?.column,
+            yName: mapping?.fields?.y_axis?.[0]?.alias ?? mapping?.fields?.y_axis?.[0]?.column,
+            listeners: {
+              nodeClick: (event: any) =>
+                onNodeClick({
+                  clickedNode: event.datum,
+                  xAxis,
+                  datasetId: mapping?.dataset_id,
+                  datasetDefaultFilters: JSON.stringify(mapping?.default_filters),
+                  drilldown_config: mapping?.drilldown_config,
+                  fields: mapping?.fields,
+                  yAxis: event?.yKey,
+                }),
+            },
+          }));
 
       return {
         ...navigatorConfig,
@@ -255,81 +307,80 @@ export const getChartOptions = (
           CHART_NUMBER_AXES,
           { ...categoryAxis, paddingInner: 0.5, paddingOuter: dataLength && dataLength > 1 ? 1 : 0.4 },
         ],
-        series: mappings.map((axis) => ({
-          type: chartType,
-          xKey: xAxis,
-          cornerRadius: 2,
-          yKey: `${axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column}`,
-          yName: (axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column) || '',
-          stacked: true,
-          listeners: {
-            nodeClick: (event: any) =>
-              onNodeClick(
-                event.datum,
-                xAxis,
-                axis?.dataset_id,
-                JSON.stringify(axis?.default_filters),
-                axis?.drilldown_config,
-                axis?.fields,
-              ),
-          },
-          tooltip: {
-            showArrow: false,
-            renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
-              data: [
-                {
-                  label: snakeCaseToSentenceCase(yName ?? ''),
-                  value: `${currencySymbol} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
-                },
-              ],
-            }),
-          },
-          label,
-        })),
+        series,
       };
     }
     case WIDGET_TYPES.LINE_CHART: {
       const mappings = widgetDetails?.data_mappings?.mappings;
       const xAxis = mappings?.[0]?.fields?.x_axis?.[0]?.alias ?? mappings?.[0]?.fields?.x_axis?.[0]?.column;
+      const datasetId = mappings?.[0]?.dataset_id;
+      const drilldown_config = mappings?.[0]?.drilldown_config;
+      const default_filters = mappings?.[0]?.default_filters;
+      const fields = mappings?.[0]?.fields;
+
+      const baseMapping = {
+        type: chartType,
+        xKey: xAxis,
+        stacked,
+        nodeClickRange: 'nearest',
+        marker: {
+          enabled: false,
+        },
+        listeners: {
+          nodeClick: (event: any) =>
+            onNodeClick({
+              clickedNode: event.datum,
+              xAxis,
+              datasetId,
+              datasetDefaultFilters: JSON.stringify(default_filters),
+              drilldown_config,
+              fields,
+              yAxis: event?.yKey,
+            }),
+        },
+        tooltip: {
+          showArrow: false,
+          renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
+            data: [
+              {
+                label: snakeCaseToSentenceCase(yName ?? ''),
+                value: `${currencySymbol ?? ''} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
+              },
+            ],
+          }),
+        },
+        label,
+      };
+
+      const series = stackedValues?.length
+        ? stackedValues?.map((value) => ({
+            ...baseMapping,
+            yKey: value?.column,
+            yName: value?.column,
+          }))
+        : mappings.map((mapping) => ({
+            ...baseMapping,
+            yKey: mapping?.fields?.y_axis[0]?.alias ?? mapping?.fields?.y_axis[0]?.column,
+            yName: mapping?.fields?.y_axis[0]?.alias ?? mapping?.fields?.y_axis[0]?.column,
+            listeners: {
+              nodeClick: (event: any) =>
+                onNodeClick({
+                  clickedNode: event.datum,
+                  xAxis,
+                  datasetId: mapping?.dataset_id,
+                  datasetDefaultFilters: JSON.stringify(mapping?.default_filters),
+                  drilldown_config: mapping?.drilldown_config,
+                  fields: mapping?.fields,
+                  yAxis: event?.yKey,
+                }),
+            },
+          }));
 
       return {
         ...navigatorConfig,
         ...baseOptions,
         axes: [CHART_NUMBER_AXES, { ...categoryAxis }],
-        series: mappings.map((axis) => ({
-          type: chartType,
-          xKey: xAxis,
-          yKey: `${axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column}`,
-          yName: (axis?.fields?.y_axis[0]?.alias ?? axis?.fields?.y_axis[0]?.column) || '',
-          stacked: true,
-          nodeClickRange: 'nearest',
-          marker: {
-            enabled: false,
-          },
-          listeners: {
-            nodeClick: (event: any) =>
-              onNodeClick(
-                event.datum,
-                xAxis,
-                axis?.dataset_id,
-                JSON.stringify(axis?.default_filters),
-                axis?.drilldown_config,
-                axis?.fields,
-              ),
-          },
-          tooltip: {
-            showArrow: false,
-            renderer: ({ datum, yKey, yName }: AgCartesianSeriesTooltipRendererParams) => ({
-              data: [
-                {
-                  label: snakeCaseToSentenceCase(yName ?? ''),
-                  value: `${currencySymbol ?? ''} ${getCommaSeparatedNumber(datum[yKey], currencyDecimalPlaces)}`,
-                },
-              ],
-            }),
-          },
-          label,
-        })),
+        series,
       };
     }
     case WIDGET_TYPES.DONUT_CHART:
@@ -381,14 +432,14 @@ export const getChartOptions = (
             },
             listeners: {
               nodeClick: (event: any) =>
-                onNodeClick(
-                  event.datum,
-                  mappings?.[0]?.fields?.slices?.[0]?.column ?? '',
-                  mappings?.[0]?.dataset_id ?? '',
-                  JSON.stringify(mappings?.[0]?.default_filters),
-                  mappings?.[0]?.drilldown_config,
-                  mappings?.[0]?.fields,
-                ),
+                onNodeClick({
+                  clickedNode: event.datum,
+                  xAxis: mappings?.[0]?.fields?.slices?.[0]?.column ?? '',
+                  datasetId: mappings?.[0]?.dataset_id ?? '',
+                  datasetDefaultFilters: JSON.stringify(mappings?.[0]?.default_filters),
+                  drilldown_config: mappings?.[0]?.drilldown_config,
+                  fields: mappings?.[0]?.fields,
+                }),
             },
             calloutLabel: {
               formatter: (params: MapAny) => {
@@ -664,4 +715,20 @@ export const transformFilterKeys = (
   });
 
   return transformedClickFilter;
+};
+
+export const getTimeColumns = (widgetDetails: WidgetInstanceType) => {
+  const widgetType = widgetDetails?.widget_type;
+
+  if (widgetType !== WIDGET_TYPES.LINE_CHART && widgetType !== WIDGET_TYPES.BAR_CHART) {
+    return '';
+  }
+
+  const { data_mappings } = widgetDetails;
+  const { mappings } = data_mappings;
+  const timeColumns = mappings?.map((mapping) =>
+    mapping?.fields?.x_axis?.map((axis) => ({ dataset_id: mapping?.dataset_id, column: axis?.column })),
+  );
+
+  return JSON.stringify(timeColumns.flat());
 };

@@ -1,15 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Tabs } from '@zamp-platform/ui';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
-import { withArtifactContext } from 'modules/process/artifacts/context/artifact.context';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
   type HandleShowArtifactsProps,
-  PDF_DATASET_TAB,
 } from 'modules/process/process.types';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
@@ -17,12 +14,12 @@ import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
+import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
 import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
   EmailArtifactsResponseType,
-  PdfArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
@@ -43,10 +40,6 @@ interface ArtifactsProps {
   onClose: () => void;
   onExpand: () => void;
   isExpanded: boolean;
-  activeTab: PDF_DATASET_TAB;
-  setActiveTab: (tab: PDF_DATASET_TAB) => void;
-  artifactType: ARTIFACT_TYPE;
-  artifactId: string;
   filters: MapAny;
   onArtifactClick: (props: HandleShowArtifactsProps) => void;
   missingFields: MapAny;
@@ -57,10 +50,6 @@ const Artifacts = ({
   onClose,
   onExpand,
   isExpanded,
-  activeTab,
-  setActiveTab,
-  artifactType,
-  artifactId,
   onArtifactClick,
   filters,
   missingFields,
@@ -71,6 +60,9 @@ const Artifacts = ({
   const activityId = params?.activityId;
 
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
+  const {
+    state: { artifactType, artifactId },
+  } = useArtifactContextStore();
 
   const {
     data: artifacts,
@@ -85,7 +77,7 @@ const Artifacts = ({
     },
     {
       refetchOnMountOrArgChange: artifactType === ARTIFACT_TYPE.EMAIL,
-      skip: !artifactId,
+      skip: !artifactId || !artifactType,
     },
   );
 
@@ -130,10 +122,11 @@ const Artifacts = ({
 
             <PdfArtifact
               key={id}
-              pdfArtifact={artifactData as PdfDatasetArtifactsResponseType}
-              artifactId={id}
+              artifactId={artifactId}
+              fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
               processId={processId}
               isArtifactLoading={isFetching}
+              isSearchBarEnabled
               className='w-1/2'
             />
           </div>
@@ -142,13 +135,13 @@ const Artifacts = ({
       case ARTIFACT_TYPE.EMAIL:
         return (
           <EmailArtifactWrapper
+            key={id}
+            artifactId={artifactId}
             artifactData={artifactData as EmailArtifactsResponseType}
-            artifactId={id}
             processId={processId}
             activityId={activityId as string}
             emitHITLActionPayload={emitHITLActionPayload}
             onClose={onClose}
-            key={id}
           />
         );
 
@@ -171,9 +164,10 @@ const Artifacts = ({
         return (
           <PdfArtifact
             processId={processId}
-            artifactId={id}
-            pdfArtifact={artifactData as PdfArtifactsResponseType}
+            artifactId={artifactId}
+            fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
             isArtifactLoading={isFetching}
+            isSearchBarEnabled
             key={id}
           />
         );
@@ -182,7 +176,7 @@ const Artifacts = ({
         return (
           <BrowserArtifact
             browserArtifact={artifactData as BrowserArtifactsResponseType}
-            artifactId={id}
+            artifactId={artifactId}
             processId={processId}
             key={id}
           />
@@ -194,43 +188,37 @@ const Artifacts = ({
   }, [artifactType, artifactData, id, filters]);
 
   const showArtifactLoader = useMemo(() => {
-    return isFetching && artifactType !== ARTIFACT_TYPE.PDF && activeTab !== PDF_DATASET_TAB.PDF;
-  }, [isFetching, artifactType, activeTab]);
+    return isFetching && artifactType !== ARTIFACT_TYPE.PDF;
+  }, [isFetching, artifactType]);
 
   return (
     <div className='animate-fade-in relative h-full w-full'>
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as PDF_DATASET_TAB)}
-        className='flex h-full max-w-full flex-col'
+      <ArtifactTopbar
+        onClose={onClose}
+        onExpand={onExpand}
+        isExpanded={isExpanded}
+        title={title}
+        onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
+      />
+      <CommonWrapper
+        isLoading={showArtifactLoader}
+        loader={<ArtifactLoader />}
+        skeletonType={SkeletonTypes.CUSTOM}
+        isError={isError}
+        refetchFunction={refetch}
+        className='h-full w-full'
       >
-        <ArtifactTopbar
-          onClose={onClose}
-          onExpand={onExpand}
-          isExpanded={isExpanded}
-          title={title}
-          onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}
-        />
-        <CommonWrapper
-          isLoading={showArtifactLoader}
-          loader={<ArtifactLoader />}
-          skeletonType={SkeletonTypes.CUSTOM}
-          isError={isError}
-          refetchFunction={refetch}
-          className='h-full w-full'
-        >
-          {artifactComponent}
-        </CommonWrapper>
+        {artifactComponent}
+      </CommonWrapper>
 
-        {allArtifactsSideDrawerOpen && (
-          <AllArtifactsSideDrawer
-            onClose={() => setAllArtifactsSideDrawerOpen(false)}
-            onArtifactClick={onArtifactClick}
-          />
-        )}
-      </Tabs>
+      {allArtifactsSideDrawerOpen && (
+        <AllArtifactsSideDrawer
+          onClose={() => setAllArtifactsSideDrawerOpen(false)}
+          onArtifactClick={onArtifactClick}
+        />
+      )}
     </div>
   );
 };
 
-export default withArtifactContext(Artifacts);
+export default Artifacts;

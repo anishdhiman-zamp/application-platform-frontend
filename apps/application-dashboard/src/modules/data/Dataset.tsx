@@ -58,13 +58,11 @@ import {
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
-import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
-import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import DisplayOptions from 'components/common/table/DisplayOptions';
-import { getEncodedRequest } from 'components/common/table/table.utils';
+import { getColumnType, getEncodedRequest } from 'components/common/table/table.utils';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -416,7 +414,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
             key: column.column,
             label: column.alias ?? snakeCaseToSentenceCase(column?.column),
             values: column.options,
-            type: column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.TAG ? FILTER_TYPES.TAGS : column?.type,
+            type: getColumnType(column),
           }));
 
         dispatch({

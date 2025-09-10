@@ -18,6 +18,7 @@ import {
   UpdateMissingFieldsMessages,
 } from '@/components/common/toast/toast.constants';
 import ActivityCurrentStatus from '@/modules/process/activity-runs/components/ActivityCurrentStatus';
+import ActivityDocument from '@/modules/process/activity-runs/components/ActivityDocument';
 import ActivityStatus from '@/modules/process/activity-runs/components/ActivityStatus';
 import DocumentPill from '@/modules/process/activity-runs/components/DocumentPill';
 import CustomTagRenderer from 'components/common/table/CustomCellRenderers/CustomTagRenderer';
@@ -70,14 +71,13 @@ export const CustomColumnsMapping: Record<CUSTOM_COLUMNS_TYPE, (props: ICellRend
   [CUSTOM_COLUMNS_TYPE.TAG]: CustomTagRenderer,
   [CUSTOM_COLUMNS_TYPE.CHIP]: CustomChipRenderer,
   [CUSTOM_COLUMNS_TYPE.STATUS_BADGE]: StatusBadgeCell,
-  [CUSTOM_COLUMNS_TYPE.USER_AVATAR]: (props: ICellRendererParams) => <RecipientNameCell value={props.value} />,
-  [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: (props: ICellRendererParams) => <DocumentPill value={props.value} />,
-  [CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS]: (props: ICellRendererParams) => (
-    <ActivityCurrentStatus value={props.value} data={props.data} />
-  ),
-  [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: (props: ICellRendererParams) => <ActivityStatus value={props.value} />,
+  [CUSTOM_COLUMNS_TYPE.USER_AVATAR]: RecipientNameCell,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: ActivityDocument,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS]: ActivityCurrentStatus,
+  [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: ActivityStatus,
   [CUSTOM_COLUMNS_TYPE.BANK_NAME]: BankNameCell,
   [CUSTOM_COLUMNS_TYPE.PAYMENTS_ACCOUNT_STATUS]: PaymentsAccountStatusCell,
+  [CUSTOM_COLUMNS_TYPE.DOCUMENT]: DocumentPill,
 };
 
 export enum TEAM_OPTIONS {
