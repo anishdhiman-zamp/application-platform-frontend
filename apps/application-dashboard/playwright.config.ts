@@ -1,7 +1,7 @@
 import { defineConfig, ReporterDescription } from '@playwright/test';
 
 const isCI = !!process.env.GITHUB_ACTIONS; // check if running in CI
-const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // Use local Selenium browser in development, but remote grid in CI
+const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // make this "!==" to run remote selenium-gird locally
 const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // browser session data
 
 export const PLAYWRIGHT_ENV_CREDENTIALS = {
