@@ -16,7 +16,7 @@ on:
   # Run on every PR
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [ main, master, develop ]
+    branches: [ main, master, development, staging ]
 
 permissions:
   contents: read
