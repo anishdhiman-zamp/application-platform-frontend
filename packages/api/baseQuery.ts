@@ -74,7 +74,7 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
       let loginUrl = LOGIN_PATH;
       let query = '';
 
-      if (window.location.pathname && window.location.pathname !== '/') {
+      if (window.location.pathname && window.location.pathname !== '/login') {
         const queryParams = new URLSearchParams(window.location.search);
         loginUrl += '?redirect_to=' + window.location.pathname;
         queryParams.forEach((value, key) => {
