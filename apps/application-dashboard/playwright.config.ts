@@ -47,7 +47,7 @@ export default defineConfig({
     storageState: isCI ? undefined : STORAGE_STATE,
     screenshot: 'only-on-failure' as const,
     video: {
-      mode: 'on' as const, // Record videos for all tests
+      mode: 'on' as const, // Record videos for all test
       size: { width: 1280, height: 720 },
     },
     ignoreHTTPSErrors: true,
