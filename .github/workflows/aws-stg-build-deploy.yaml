@@ -326,18 +326,183 @@ jobs:
           echo "✅ Staging deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
           echo "🎯 Environment: https://app-stg-aws.zamp.ai" >> $GITHUB_STEP_SUMMARY
           echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "🎭 E2E tests will be triggered via direct workflow call" >> $GITHUB_STEP_SUMMARY
 
-  trigger-e2e-tests:
-    name: Trigger E2E Tests
+  run-e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs:
       - create-tag
       - prepare-env
       - deploy-to-eks
-    uses: ./.github/workflows/playwright.yml
-    with:
-      staging_url: 'https://app-stg-aws.zamp.ai'
-      tag: ${{ needs.create-tag.outputs.NEW_TAG }}
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: 'https://app-stg-aws.zamp.ai'
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      NODE_ENV: test
+    steps:
+      - name: Test Setup Info
+        run: |
+          echo "🎭 Running Playwright E2E tests directly in staging workflow"
+          echo "Testing URL: $PLAYWRIGHT_TEST_BASE_URL"
+          echo "Tag: $NEW_TAG"
+          echo "Repository: ${{ github.repository }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Create test directories
+        run: |
+          cd apps/application-dashboard
+          mkdir -p tests/session-secrets
+          touch tests/session-secrets/.gitkeep
+          mkdir -p tests/test-results/videos
+          chmod -R 777 tests/test-results tests/session-secrets
+
+      - name: Wait for staging to be ready
+        run: |
+          echo "⏳ Waiting for staging deployment to be fully ready..."
+          sleep 30
+          for i in {1..10}; do
+            if curl -f -s "$PLAYWRIGHT_TEST_BASE_URL" > /dev/null; then
+              echo "✅ Staging environment is ready!"
+              break
+            fi
+            echo "⏳ Waiting for staging environment... (attempt $i/10)"
+            sleep 30
+          done
+
+      - name: Run Playwright tests
+        id: playwright-tests
+        continue-on-error: true
+        run: |
+          cd apps/application-dashboard
+          npx playwright test tests/specs --config=playwright.config.ts
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: tests/test-results/junit.xml
+          USE_LOCAL_SELENIUM: false
+          PLAYWRIGHT_VIDEO_DIR: tests/test-results/videos
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: 'apps/application-dashboard/tests/test-results/junit.xml'
+          check_name: E2E Test Results - Tag ${{ env.NEW_TAG }}
+          fail_on_failure: false
+          require_tests: false
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ env.NEW_TAG }}
+          path: apps/application-dashboard/tests/playwright-report/
+          retention-days: 30
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-${{ env.NEW_TAG }}
+          path: apps/application-dashboard/tests/test-results/
+          retention-days: 30
+
+      - name: Prepare test summary
+        id: test-summary
+        if: always()
+        run: |
+          cd apps/application-dashboard
+          # Check if result file exists
+          if [[ -f tests/test-results/test-results.json ]]; then
+            TEST_RESULTS=$(cat tests/test-results/test-results.json)
+          else
+            echo "No test result file found."
+            TEST_RESULTS='{}'
+          fi
+          ACTOR="${{ github.actor }}"
+          echo "$TEST_RESULTS" | node tests/scripts/playwright-pr-comment.js ${{ github.run_id }} ${{ github.repository }} "$ACTOR" > comment.md
+          echo "comment<<EOF" >> $GITHUB_OUTPUT
+          cat comment.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Add PR comment with test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = `${{ steps.test-summary.outputs.comment }}`;
+            // Get PR number from context (PR) or via commit association (push)
+            let prNumber = context.payload.pull_request?.number;
+            if (!prNumber) {
+              const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                mediaType: { previews: ['groot'] },
+              });
+              prNumber = prs.data?.[0]?.number;
+            }
+            if (!prNumber) {
+              console.log('No PR associated with this run; writing to job summary instead.');
+              await core.summary.addRaw(comment).write();
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('## 🎭 Playwright Test Results')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: comment,
+              });
+            }
+
+      - name: Test Results Summary
+        if: always()
+        run: |
+          if [[ "${{ steps.playwright-tests.outcome }}" == "success" ]]; then
+            echo "✅ E2E Tests PASSED for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+            echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
+            echo "🎭 All tests completed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ E2E Tests FAILED for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+            echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
+            echo "📋 Check test artifacts for details" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️  Deployment succeeded but tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
 
   slack-notification:
     name: Slack Notification
@@ -348,7 +513,7 @@ jobs:
       - prepare-env
       - build-push-image
       - deploy-to-eks
-      - trigger-e2e-tests
+      - run-e2e-tests
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
@@ -358,9 +523,16 @@ jobs:
       - name: Update slack message body
         id: body
         run: |
+          # Get test results
+          TEST_RESULT="${{ needs.run-e2e-tests.result }}"
+          
           if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
           then
-            echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: 🎭 Running..." >> $GITHUB_OUTPUT
+            if [ "$TEST_RESULT" == 'success' ]; then
+              echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ PASSED" >> $GITHUB_OUTPUT
+            else
+              echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ FAILED" >> $GITHUB_OUTPUT
+            fi
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
             echo "SLACK_MESSAGE=Main Branch Staging Failed :x: Tag: $NEW_TAG" >> $GITHUB_OUTPUT
