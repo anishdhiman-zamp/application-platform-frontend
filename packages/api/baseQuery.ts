@@ -80,10 +80,11 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
         queryParams.forEach((value, key) => {
           query += `&${key}=${value}`;
         });
+        console.log('loginUrl', loginUrl);
         setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, path + query.replace('&', '?'));
       }
 
-      window.location.href = `${loginUrl}${query}`;
+      // window.location.href = `${loginUrl}${query}`;
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

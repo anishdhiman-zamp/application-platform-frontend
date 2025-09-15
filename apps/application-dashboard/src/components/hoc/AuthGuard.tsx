@@ -6,12 +6,11 @@ import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { RootState } from 'store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from 'store/slices/user';
 import { UserRoleIdType } from 'types/api/auth.types';
 import { identifyPostHogUser } from 'utils/postHog';
-import { getFromSessionStorage, SESSION_STORAGE_KEYS } from '@/utils/sessionstorage';
 import NotAuthorized from 'components/NotAuthorized';
 
 type Props = {
@@ -22,10 +21,9 @@ type Props = {
 export const AuthGuard: FC<Props> = (props) => {
   const router = useRouter();
   const pathname = usePathname() || '';
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-  const { data: session, isLoading, isError, isSuccess } = useWhoAmIQuery();
+  const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
   useEffect(() => {
@@ -41,23 +39,23 @@ export const AuthGuard: FC<Props> = (props) => {
     }
   }, [session, isSuccess, dispatch, router]);
 
-  useEffect(() => {
-    if (isError && pathname !== props.loginRoute) {
-      router.push(`${props.loginRoute}`);
-    }
-  }, [isError, pathname, props.loginRoute, router, searchParams]);
+  // useEffect(() => {
+  //   if (isError && pathname !== props.loginRoute) {
+  //     router.push(`${props.loginRoute}`);
+  //   }
+  // }, [isError, pathname, props.loginRoute, router, searchParams]);
 
-  useEffect(() => {
-    if (isSuccess && session?.user_id && pathname === props.loginRoute) {
-      const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
+  // useEffect(() => {
+  //   if (isSuccess && session?.user_id && pathname === props.loginRoute) {
+  //     const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
 
-      if (preLogoutPath) {
-        router.push(preLogoutPath);
-      } else {
-        router.push(ROUTES_PATH.HOME);
-      }
-    }
-  }, [isSuccess, session?.user_id, pathname, props.loginRoute, router, searchParams]);
+  //     if (preLogoutPath) {
+  //       router.push(preLogoutPath);
+  //     } else {
+  //       router.push(ROUTES_PATH.HOME);
+  //     }
+  //   }
+  // }, [isSuccess, session?.user_id, pathname, props.loginRoute, router, searchParams]);
 
   useEffect(() => {
     if (isLoading || (session?.user_id && workspace === null)) {
