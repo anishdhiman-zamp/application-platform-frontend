@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const PREV_ROUTE_COOKIE = 'zamp_prev_route';
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
 const PUBLIC_ROUTES = [
   '/api/health-check',
   '/_next',
@@ -7,11 +10,30 @@ const PUBLIC_ROUTES = [
   '/public',
   '/icons',
   '/auth',
+  '/login',
   '/mp4/zamp-login-bg.mp4',
 ];
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+}
+
+function setPrevRouteCookie(response: NextResponse, route: string): void {
+  response.cookies.set(PREV_ROUTE_COOKIE, route, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  });
+}
+
+function getPrevRouteCookie(request: NextRequest): string | undefined {
+  return request.cookies.get(PREV_ROUTE_COOKIE)?.value;
+}
+
+function clearPrevRouteCookie(response: NextResponse): void {
+  response.cookies.delete(PREV_ROUTE_COOKIE);
 }
 
 async function validateSession(request: NextRequest): Promise<boolean> {
@@ -46,19 +68,10 @@ async function validateSession(request: NextRequest): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest) {
-  // console.log('🚀 MIDDLEWARE STARTED - This should appear for every request!');
-
   const { pathname, searchParams } = request.nextUrl;
-
-  // get redirect_to from searchParams
   const redirectTo = searchParams.get('redirect_to');
 
-  console.log('🔍 Middleware running for pathname:', pathname);
-  console.log('🔍 Middleware running for searchParams:', redirectTo);
-
   if (isPublicRoute(pathname)) {
-    // console.log('✅ Public route, allowing access:', pathname);
-
     return NextResponse.next();
   }
 
@@ -68,29 +81,42 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // console.log('🔐 Protected route, validating session:', pathname, isAuthenticated);
+  if (isAuthenticated && pathname === '/') {
+    const prevRoute = getPrevRouteCookie(request);
+
+    if (prevRoute && prevRoute !== '/' && prevRoute !== '/login') {
+      const response = NextResponse.redirect(new URL(prevRoute, request.url));
+
+      clearPrevRouteCookie(response);
+
+      return response;
+    }
+
+    if (prevRoute) {
+      const response = NextResponse.next();
+
+      clearPrevRouteCookie(response);
+
+      return response;
+    }
+  }
 
   if (!isAuthenticated) {
-    // console.log('❌ Authentication failed for:', pathname);
-
     if (pathname.startsWith('/api/')) {
-      // console.log('🚫 API route - returning 401');
-
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const loginUrl = new URL('/login', request.url);
+    const response = NextResponse.redirect(loginUrl);
 
-    if (pathname !== '/') {
-      loginUrl.searchParams.set('redirect_to', pathname);
+    if (redirectTo && redirectTo !== '/' && redirectTo !== '/login') {
+      setPrevRouteCookie(response, redirectTo);
+    } else if (pathname !== '/' && pathname !== '/login') {
+      setPrevRouteCookie(response, pathname);
     }
 
-    // console.log('🔄 Redirecting to login:', loginUrl.toString());
-
-    return NextResponse.redirect(loginUrl);
+    return response;
   }
-
-  // console.log('✅ Authentication successful for:', pathname);
 
   return NextResponse.next();
 }
