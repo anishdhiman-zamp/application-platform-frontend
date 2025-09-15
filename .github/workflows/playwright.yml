@@ -8,16 +8,29 @@ on:
         description: 'Staging URL to test'
         required: false
         default: 'https://app-stg-aws.zamp.ai'
+  workflow_call:
+    inputs:
+      staging_url:
+        description: 'Staging URL to test'
+        required: false
+        default: 'https://app-stg-aws.zamp.ai'
+        type: string
+      tag:
+        description: 'Git tag being tested'
+        required: false
+        default: 'unknown'
+        type: string
 
 env:
   NODE_ENV: test
-  PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.inputs.staging_url || 'https://app-stg-aws.zamp.ai' }}
+  PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.inputs.staging_url || inputs.staging_url || 'https://app-stg-aws.zamp.ai' }}
 
 jobs:
   test:
-    # Run after successful staging deployment OR manual trigger
+    # Run after successful staging deployment OR manual trigger OR workflow call
     if: >
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'workflow_call' ||
       (github.event.deployment_status.state == 'success' &&
        github.event.deployment.environment == 'staging')
     runs-on: ubuntu-latest
@@ -27,12 +40,24 @@ jobs:
     - run: |
         echo "🎭 Playwright tests triggered!"
         echo "Event: ${{ github.event_name }}"
+        echo "Debug - Full event context:"
+        echo "Deployment status state: ${{ github.event.deployment_status.state }}"
+        echo "Deployment environment: ${{ github.event.deployment.environment }}"
+        echo "Deployment URL: ${{ github.event.deployment_status.environment_url }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "---"
         if [ "${{ github.event_name }}" == "deployment_status" ]; then
+          echo "✅ Triggered by deployment_status event"
           echo "Environment: ${{ github.event.deployment.environment }}"
+          echo "State: ${{ github.event.deployment_status.state }}"
           echo "Deployment URL: ${{ github.event.deployment_status.environment_url }}"
           echo "SHA: ${{ github.event.deployment.sha }}"
+        elif [ "${{ github.event_name }}" == "workflow_call" ]; then
+          echo "✅ Triggered by workflow_call from AWS deployment"
+          echo "Testing URL: ${{ env.PLAYWRIGHT_TEST_BASE_URL }}"
+          echo "Tag: ${{ inputs.tag || 'unknown' }}"
         else
-          echo "Manual trigger - Testing URL: ${{ env.PLAYWRIGHT_TEST_BASE_URL }}"
+          echo "✅ Manual trigger - Testing URL: ${{ env.PLAYWRIGHT_TEST_BASE_URL }}"
         fi
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
