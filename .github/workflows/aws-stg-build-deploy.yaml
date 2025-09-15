@@ -252,6 +252,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      deployments: write
     needs:
       - create-tag
       - prepare-env
@@ -385,4 +386,4 @@ jobs:
           ZAMP_ENV: ${{ env.ENVIRONMENT }}
           SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
           SLACK_USERNAME: Zamp-Devops
-          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}      
+          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}        
