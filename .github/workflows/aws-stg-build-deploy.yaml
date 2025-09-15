@@ -342,11 +342,28 @@ jobs:
               repo: context.repo.repo,
               deployment_id: deployment.data.id,
               state: 'success',
-              environment_url: 'https://app-stg.zamp.ai',
+              environment_url: 'https://app-stg-aws.zamp.ai',
               description: 'Staging deployment successful for tag ${{ env.NEW_TAG }}'
             });
             
             console.log('Created deployment status event for playwright tests');
+
+  trigger-e2e-tests:
+    name: Trigger E2E Tests
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+      - prepare-env
+      - deploy-to-eks
+    env:
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+    steps:
+      - name: Test trigger summary
+        run: |
+          echo "🎭 E2E Tests will be triggered automatically via deployment_status event" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Staging URL: https://app-stg-aws.zamp.ai" >> $GITHUB_STEP_SUMMARY
+          echo "📋 Check the '🎭 Playwright E2E Tests' workflow for test results" >> $GITHUB_STEP_SUMMARY
 
   slack-notification:
     name: Slack Notification
@@ -357,6 +374,7 @@ jobs:
       - prepare-env
       - build-push-image
       - deploy-to-eks
+      - trigger-e2e-tests
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
@@ -368,7 +386,7 @@ jobs:
         run: |
           if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
           then
-            echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: 🎭 Running..." >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
             echo "SLACK_MESSAGE=Main Branch Staging Failed :x: Tag: $NEW_TAG" >> $GITHUB_OUTPUT

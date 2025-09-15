@@ -14,7 +14,7 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
   },
   // Prefer env-provided CDP endpoint when launching local Selenium/Chrome with --remote-debugging-port
   localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
-  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
+  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg-aws.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
   isSeleniumLocalBrowser: USE_LOCAL_SELENIUM_BROWSER,
   storageState: STORAGE_STATE,
 };

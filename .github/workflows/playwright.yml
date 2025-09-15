@@ -2,26 +2,38 @@ name: 🎭 Playwright E2E Tests
 
 on:
   deployment_status:
+  workflow_dispatch:
+    inputs:
+      staging_url:
+        description: 'Staging URL to test'
+        required: false
+        default: 'https://app-stg-aws.zamp.ai'
 
 env:
   NODE_ENV: test
-  PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.environment_url }}
+  PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.inputs.staging_url || 'https://app-stg-aws.zamp.ai' }}
 
 jobs:
   test:
-    # Only run after a successful deployment to Preview environment (development branch)
+    # Run after successful staging deployment OR manual trigger
     if: >
-      github.event.deployment_status.state == 'success' &&
-      github.event.deployment.environment == 'staging'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'staging')
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
     - run: |
-        echo "🎭 Playwright tests triggered by successful deployment!"
-        echo "Environment: ${{ github.event.deployment.environment }}"
-        echo "Deployment URL: ${{ github.event.deployment_status.environment_url }}"
-        echo "SHA: ${{ github.event.deployment.sha }}"
+        echo "🎭 Playwright tests triggered!"
+        echo "Event: ${{ github.event_name }}"
+        if [ "${{ github.event_name }}" == "deployment_status" ]; then
+          echo "Environment: ${{ github.event.deployment.environment }}"
+          echo "Deployment URL: ${{ github.event.deployment_status.environment_url }}"
+          echo "SHA: ${{ github.event.deployment.sha }}"
+        else
+          echo "Manual trigger - Testing URL: ${{ env.PLAYWRIGHT_TEST_BASE_URL }}"
+        fi
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
