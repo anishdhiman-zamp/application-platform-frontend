@@ -14,7 +14,7 @@ type Props = {
 export const FeatureFlagsProvider = ({ children }: Props) => {
   const user = useSelector((state: RootState) => state.user.user);
 
-  if (ENVIRONMENT === 'local') return children;
+  if (ENVIRONMENT === 'local' || !user) return children;
 
   return (
     <LDProvider
