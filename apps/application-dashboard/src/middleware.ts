@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
           return response;
         }
 
-        return NextResponse.next();
+        return NextResponse.redirect(new URL('/processes', request.url));
       }
     }
   }
@@ -105,7 +105,9 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.redirect(loginUrl);
 
     if (!['/', '/login', '/sw.js'].includes(pathname)) {
-      setPrevRouteCookie(response, pathname);
+      const fullRoute = pathname + (request.nextUrl.search || '');
+
+      setPrevRouteCookie(response, fullRoute);
     }
 
     return response;
