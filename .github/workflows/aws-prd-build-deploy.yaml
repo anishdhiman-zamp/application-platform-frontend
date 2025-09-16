@@ -8,6 +8,15 @@ on:
         required: false
         default: "main"
         type: string
+      staging_tag:
+        description: 'Staging tag that passed tests and should be deployed to production'
+        required: false
+        type: string
+      staging_tests_passed:
+        description: 'Whether staging tests passed'
+        required: false
+        type: string
+        default: 'false'
   workflow_call:
     inputs:
       staging_tag:
@@ -41,8 +50,8 @@ jobs:
           echo "Staging tag: ${{ inputs.staging_tag || 'manual-trigger' }}"
           echo "Tests passed: ${{ inputs.staging_tests_passed || 'manual-trigger' }}"
           
-          # For workflow_call, ensure tests passed
-          if [ "${{ github.event_name }}" == "workflow_call" ]; then
+          # Check if staging test information is provided (workflow_call or workflow_dispatch with staging data)
+          if [ "${{ github.event_name }}" == "workflow_call" ] || [ "${{ inputs.staging_tag }}" != "" ]; then
             if [ "${{ inputs.staging_tests_passed }}" != "true" ]; then
               echo "❌ DEPLOYMENT BLOCKED: Staging tests did not pass!"
               echo "🚫 Production deployment requires all staging tests to pass"
@@ -52,7 +61,7 @@ jobs:
             echo "STAGING_TAG=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
             echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
           else
-            echo "⚠️  Manual trigger - proceeding without staging test validation"
+            echo "⚠️  Manual trigger without staging validation - proceeding"
             echo "STAGING_TAG=manual-$(date +%s)" >> $GITHUB_OUTPUT
             echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
           fi

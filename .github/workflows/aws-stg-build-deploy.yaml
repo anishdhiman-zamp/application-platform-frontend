@@ -674,26 +674,28 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Trigger ME production deployment
+            // Trigger ME production deployment with staging test validation
             const resultME = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'aws-prd-build-deploy.yaml',
               ref: 'main',
               inputs: {
+                BRANCH: 'main',
                 staging_tag: '${{ env.NEW_TAG }}',
                 staging_tests_passed: 'true'
               }
             });
             console.log('✅ Triggered ME production deployment:', resultME.status);
             
-            // Trigger US production deployment
+            // Trigger US production deployment with staging test validation
             const resultUS = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'aws-prd-us-build-deploy.yaml',
               ref: 'main',
               inputs: {
+                BRANCH: 'main',
                 staging_tag: '${{ env.NEW_TAG }}',
                 staging_tests_passed: 'true'
               }
@@ -703,6 +705,7 @@ jobs:
             console.log('🏷️ Tag: ${{ env.NEW_TAG }}');
             console.log('✅ Tests: Passed');
             console.log('🌍 Both ME and US production deployments triggered');
+            console.log('📊 Production workflows will validate staging test results');
 
   production-deployment-blocked:
     name: Production Deployments Blocked (ME & US)
