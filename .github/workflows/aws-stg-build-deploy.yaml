@@ -610,66 +610,57 @@ jobs:
           
           echo "🔍 Test Results Summary completed."
 
-  debug-test-outputs:
-    name: Debug Test Outputs
-    runs-on: ubuntu-latest
-    needs:
-      - run-e2e-tests
-    if: always()
-    steps:
-      - name: Debug outputs
-        run: |
-          echo "=== DEBUGGING TEST OUTPUTS ==="
-          echo "FAILED_TESTS: '${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}'"
-          echo "TOTAL_TESTS: '${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}'"
-          echo "PASSED_TESTS: '${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}'"
-          echo "SKIPPED_TESTS: '${{ needs.run-e2e-tests.outputs.SKIPPED_TESTS }}'"
-          echo "=== CONDITIONS ==="
-          echo "FAILED_TESTS == '0': ${{ needs.run-e2e-tests.outputs.FAILED_TESTS == '0' }}"
-          echo "TOTAL_TESTS != '0': ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS != '0' }}"
-          echo "Combined condition: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS == '0' && needs.run-e2e-tests.outputs.TOTAL_TESTS != '0' }}"
-
-  trigger-production-deployment:
-    name: Trigger Production Deployments (ME & US)
+  production-deployment-gate:
+    name: Production Deployment Gate (ME & US)
     runs-on: ubuntu-latest
     needs:
       - create-tag
       - prepare-env
       - deploy-to-eks
       - run-e2e-tests
-    # Only trigger production if NO tests failed (failed_tests == 0)
-    if: needs.run-e2e-tests.outputs.FAILED_TESTS == '0' && needs.run-e2e-tests.outputs.TOTAL_TESTS != '0'
+    if: always()  # Always run to handle both success and failure cases
     env:
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
       TOTAL_TESTS: ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}
       PASSED_TESTS: ${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}
       FAILED_TESTS: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}
     steps:
-      - name: Validate no tests failed
+      - name: Evaluate deployment decision
+        id: evaluate
         run: |
-          echo "🎯 Validating test results for production deployment..."
-          echo "Tag: $NEW_TAG"
-          echo "Total Tests: $TOTAL_TESTS"
-          echo "Passed Tests: $PASSED_TESTS"
-          echo "Failed Tests: $FAILED_TESTS"
+          echo "🎯 Evaluating production deployment decision..."
+          echo "🏷️ Tag: $NEW_TAG"
+          echo "📊 Test Results:"
+          echo "  Total: $TOTAL_TESTS"
+          echo "  Passed: $PASSED_TESTS"
+          echo "  Failed: $FAILED_TESTS"
           
-          # Double-check that no tests failed
-          if [ "$FAILED_TESTS" != "0" ]; then
-            echo "❌ Cannot trigger production: $FAILED_TESTS tests failed"
-            exit 1
+          # Determine if deployment should proceed
+          if [ "$FAILED_TESTS" == "0" ] && [ "$TOTAL_TESTS" != "0" ]; then
+            echo "✅ Production deployment approved!"
+            echo "SHOULD_DEPLOY=true" >> $GITHUB_OUTPUT
+            echo "✅ All $TOTAL_TESTS tests passed - production deployment approved" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Test Results: $PASSED_TESTS/$TOTAL_TESTS passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚫 Production deployment blocked!"
+            echo "SHOULD_DEPLOY=false" >> $GITHUB_OUTPUT
+            echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Failed tests: $FAILED_TESTS/$TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$FAILED_TESTS" != "0" ]; then
+              echo "❌ Reason: $FAILED_TESTS test(s) failed"
+              echo "🔧 Fix the failing tests in staging before production deployments"
+              echo "🔧 Fix failing tests before production deployment" >> $GITHUB_STEP_SUMMARY
+            elif [ "$TOTAL_TESTS" == "0" ]; then
+              echo "❌ Reason: No tests were executed"
+              echo "🔧 Ensure tests run successfully in staging before production deployments"
+              echo "🔧 Ensure tests run successfully before production deployment" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
-          
-          if [ "$TOTAL_TESTS" == "0" ]; then
-            echo "❌ Cannot trigger production: No tests were executed"
-            exit 1
-          fi
-          
-          echo "✅ All $TOTAL_TESTS tests passed - triggering production deployments" >> $GITHUB_STEP_SUMMARY
-          echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Test Results: $PASSED_TESTS/$TOTAL_TESTS passed" >> $GITHUB_STEP_SUMMARY
-          echo "🌍 Will trigger both ME and US production deployments" >> $GITHUB_STEP_SUMMARY
 
       - name: Trigger Production Workflows (ME & US)
+        if: steps.evaluate.outputs.SHOULD_DEPLOY == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -704,47 +695,6 @@ jobs:
             
             console.log('🏷️ Tag: ${{ env.NEW_TAG }}');
             console.log('✅ Tests: Passed');
-            console.log('🌍 Both ME and US production deployments triggered');
-            console.log('📊 Production workflows will validate staging test results');
-
-  production-deployment-blocked:
-    name: Production Deployments Blocked (ME & US)
-    runs-on: ubuntu-latest
-    needs:
-      - create-tag
-      - prepare-env
-      - deploy-to-eks
-      - run-e2e-tests
-    # Only run if tests failed (failed_tests > 0) OR no tests executed (total_tests = 0)
-    if: |
-      (needs.run-e2e-tests.outputs.FAILED_TESTS != '0') || 
-      (needs.run-e2e-tests.outputs.TOTAL_TESTS == '0')
-    env:
-      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
-      TOTAL_TESTS: ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}
-      FAILED_TESTS: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}
-      PASSED_TESTS: ${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}
-    steps:
-      - name: Block production deployment
-        run: |
-          echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!"
-          echo "🏷️ Tag: $NEW_TAG"
-          echo "📊 Test Results:"
-          echo "  Total: $TOTAL_TESTS"
-          echo "  Passed: $PASSED_TESTS"
-          echo "  Failed: $FAILED_TESTS"
-          
-          if [ "$FAILED_TESTS" != "0" ]; then
-            echo "❌ Reason: $FAILED_TESTS test(s) failed"
-            echo "🔧 Fix the failing tests in staging before production deployments"
-          elif [ "$TOTAL_TESTS" == "0" ]; then
-            echo "❌ Reason: No tests were executed"
-            echo "🔧 Ensure tests run successfully in staging before production deployments"
-          fi
-          
-          echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!" >> $GITHUB_STEP_SUMMARY
-          echo "❌ Failed tests: $FAILED_TESTS/$TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
-          echo "🔧 Fix staging issues before production deployments" >> $GITHUB_STEP_SUMMARY
 
   slack-notification:
     name: Slack Notification
@@ -756,9 +706,7 @@ jobs:
       - build-push-image
       - deploy-to-eks
       - run-e2e-tests
-      - debug-test-outputs
-      - trigger-production-deployment
-      - production-deployment-blocked
+      - production-deployment-gate
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
