@@ -394,18 +394,37 @@ jobs:
         run: |
           cd apps/application-dashboard
           
-          # Run tests with JSON reporter to capture detailed results
-          npx playwright test tests/specs --config=playwright.config.ts --reporter=json > tests/test-results/test-results.json || true
+          # Run tests using the existing config (which already outputs JSON)
+          echo "🎭 Starting Playwright tests..."
+          npx playwright test tests/specs --config=playwright.config.ts || TEST_EXIT_CODE=$?
+          
+          echo "🔍 Checking for test results..."
+          ls -la tests/test-results/ || echo "No test-results directory found"
           
           # Parse test results to get counts (same format as PR comment script expects)
           if [ -f tests/test-results/test-results.json ]; then
+            echo "✅ Found test results file"
+            
+            # Debug: Show first few lines of the JSON file
+            echo "📋 Test results file content (first 10 lines):"
+            head -10 tests/test-results/test-results.json || echo "Could not read file"
+            
             # Extract test counts using the same logic as PR comment script
             PASSED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.expected // 0')
             FAILED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.unexpected // 0')
             SKIPPED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.skipped // 0')
             TOTAL_TESTS=$((PASSED_TESTS + FAILED_TESTS + SKIPPED_TESTS))
+            
+            echo "📊 Parsed results:"
+            echo "  Expected (passed): $PASSED_TESTS"
+            echo "  Unexpected (failed): $FAILED_TESTS"
+            echo "  Skipped: $SKIPPED_TESTS"
+            echo "  Total: $TOTAL_TESTS"
           else
-            echo "❌ No test results file found"
+            echo "❌ No test results file found at tests/test-results/test-results.json"
+            echo "📁 Available files in test-results:"
+            ls -la tests/test-results/ || echo "Directory does not exist"
+            
             TOTAL_TESTS=0
             FAILED_TESTS=1  # Assume failure if no results
             PASSED_TESTS=0
@@ -559,7 +578,7 @@ jobs:
           fi
 
   trigger-production-deployment:
-    name: Trigger Production Deployment
+    name: Trigger Production Deployments (ME & US)
     runs-on: ubuntu-latest
     needs:
       - create-tag
@@ -593,16 +612,18 @@ jobs:
             exit 1
           fi
           
-          echo "✅ All $TOTAL_TESTS tests passed - triggering production deployment" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All $TOTAL_TESTS tests passed - triggering production deployments" >> $GITHUB_STEP_SUMMARY
           echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
           echo "📊 Test Results: $PASSED_TESTS/$TOTAL_TESTS passed" >> $GITHUB_STEP_SUMMARY
+          echo "🌍 Will trigger both ME and US production deployments" >> $GITHUB_STEP_SUMMARY
 
-      - name: Trigger Production Workflow
+      - name: Trigger Production Workflows (ME & US)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const result = await github.rest.actions.createWorkflowDispatch({
+            // Trigger ME production deployment
+            const resultME = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'aws-prd-build-deploy.yaml',
@@ -612,12 +633,27 @@ jobs:
                 staging_tests_passed: 'true'
               }
             });
-            console.log('✅ Triggered production deployment:', result.status);
+            console.log('✅ Triggered ME production deployment:', resultME.status);
+            
+            // Trigger US production deployment
+            const resultUS = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'aws-prd-us-build-deploy.yaml',
+              ref: 'main',
+              inputs: {
+                staging_tag: '${{ env.NEW_TAG }}',
+                staging_tests_passed: 'true'
+              }
+            });
+            console.log('✅ Triggered US production deployment:', resultUS.status);
+            
             console.log('🏷️ Tag: ${{ env.NEW_TAG }}');
             console.log('✅ Tests: Passed');
+            console.log('🌍 Both ME and US production deployments triggered');
 
   production-deployment-blocked:
-    name: Production Deployment Blocked
+    name: Production Deployments Blocked (ME & US)
     runs-on: ubuntu-latest
     needs:
       - create-tag
@@ -636,7 +672,7 @@ jobs:
     steps:
       - name: Block production deployment
         run: |
-          echo "🚫 PRODUCTION DEPLOYMENT BLOCKED!"
+          echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!"
           echo "🏷️ Tag: $NEW_TAG"
           echo "📊 Test Results:"
           echo "  Total: $TOTAL_TESTS"
@@ -645,15 +681,15 @@ jobs:
           
           if [ "$FAILED_TESTS" != "0" ]; then
             echo "❌ Reason: $FAILED_TESTS test(s) failed"
-            echo "🔧 Fix the failing tests in staging before production deployment"
+            echo "🔧 Fix the failing tests in staging before production deployments"
           elif [ "$TOTAL_TESTS" == "0" ]; then
             echo "❌ Reason: No tests were executed"
-            echo "🔧 Ensure tests run successfully in staging before production deployment"
+            echo "🔧 Ensure tests run successfully in staging before production deployments"
           fi
           
-          echo "🚫 PRODUCTION DEPLOYMENT BLOCKED!" >> $GITHUB_STEP_SUMMARY
+          echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!" >> $GITHUB_STEP_SUMMARY
           echo "❌ Failed tests: $FAILED_TESTS/$TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
-          echo "🔧 Fix staging issues before production deployment" >> $GITHUB_STEP_SUMMARY
+          echo "🔧 Fix staging issues before production deployments" >> $GITHUB_STEP_SUMMARY
 
   slack-notification:
     name: Slack Notification
@@ -688,19 +724,19 @@ jobs:
             # Check if any tests failed (the key decision point)
             if [ "$FAILED_TESTS" -eq 0 ] && [ "$TOTAL_TESTS" -gt 0 ]; then
               if [ "$PROD_TRIGGER_RESULT" == 'success' ]; then
-                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: 🚀 TRIGGERED" >> $GITHUB_OUTPUT
+                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: 🚀 ME & US TRIGGERED" >> $GITHUB_OUTPUT
               else
                 echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: ⏳ PENDING" >> $GITHUB_OUTPUT
               fi
             else
-              echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ $FAILED_TESTS/$TOTAL_TESTS FAILED | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
+              echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ $FAILED_TESTS/$TOTAL_TESTS FAILED | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
             fi
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
-            echo "SLACK_MESSAGE=Staging Failed :x: Tag: $NEW_TAG | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Failed :x: Tag: $NEW_TAG | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
           then
-            echo "SLACK_MESSAGE=Staging Cancelled :grey_exclamation: Tag: $NEW_TAG | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Cancelled :grey_exclamation: Tag: $NEW_TAG | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main

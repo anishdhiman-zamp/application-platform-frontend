@@ -2,6 +2,12 @@ name: AWS Prd-ME Application Platform Frontend - Build and Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: "Branch to deploy"
+        required: false
+        default: "main"
+        type: string
   workflow_call:
     inputs:
       staging_tag:
@@ -101,8 +107,8 @@ jobs:
       - name: Output deployment info
         run: |
           echo "🏷️ Staging Tag: ${{ needs.validate-deployment.outputs.STAGING_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "🚀 Environment: production" >> $GITHUB_STEP_SUMMARY
-          echo "📦 Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Environment: production (ME)" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Branch: ${{ github.event.inputs.BRANCH || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "✅ Tests: Validated in staging" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
@@ -129,8 +135,11 @@ jobs:
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
 
     steps:
-      - name: "Checkout repository on : ${{ github.REF }}"
+      - name: "Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.BRANCH || github.ref }}
 
       - name: "Debug Environment Variables"
         run: |
@@ -288,8 +297,11 @@ jobs:
       STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
 
     steps:
-      - name: "Checkout repository on : ${{ github.REF }}"
+      - name: "Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.BRANCH || github.ref }}
 
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1

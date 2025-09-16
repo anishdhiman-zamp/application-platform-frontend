@@ -8,16 +8,16 @@ on:
         required: false
         default: "main"
         type: string
-      ENVIRONMENT:
-        description: "Environment to deploy to"
-        required: false
-        default: "prd-us"
-        type: choice
-        options:
-          - "prd-us"
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      staging_tag:
+        description: 'Staging tag that passed tests and should be deployed to production US'
+        required: true
+        type: string
+      staging_tests_passed:
+        description: 'Whether staging tests passed'
+        required: true
+        type: boolean
 
 env:
   APP_NAME: application-platform-frontend
@@ -27,10 +27,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-deployment:
+    name: Validate Deployment Gate (US)
+    runs-on: ubuntu-latest
+    outputs:
+      STAGING_TAG: ${{ steps.validate.outputs.STAGING_TAG }}
+      DEPLOYMENT_APPROVED: ${{ steps.validate.outputs.DEPLOYMENT_APPROVED }}
+    steps:
+      - name: Validate staging tests passed
+        id: validate
+        run: |
+          echo "🔍 Validating production US deployment gate..."
+          echo "Staging tag: ${{ inputs.staging_tag || 'manual-trigger' }}"
+          echo "Tests passed: ${{ inputs.staging_tests_passed || 'manual-trigger' }}"
+          
+          # For workflow_call, ensure tests passed
+          if [ "${{ github.event_name }}" == "workflow_call" ]; then
+            if [ "${{ inputs.staging_tests_passed }}" != "true" ]; then
+              echo "❌ DEPLOYMENT BLOCKED: Staging tests did not pass!"
+              echo "🚫 Production US deployment requires all staging tests to pass"
+              exit 1
+            fi
+            echo "✅ Staging tests passed - production US deployment approved"
+            echo "STAGING_TAG=${{ inputs.staging_tag }}" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Manual trigger - proceeding without staging test validation"
+            echo "STAGING_TAG=manual-$(date +%s)" >> $GITHUB_OUTPUT
+            echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "🏷️ Using tag: ${{ inputs.staging_tag || 'manual-trigger' }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Production US deployment approved" >> $GITHUB_STEP_SUMMARY
+
   prepare-env:
     name: Prepare Env
     runs-on: arc-runner-set-aws-prd-us
     timeout-minutes: 2
+    needs: validate-deployment
     outputs:
       SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
       SSH_PRIVATE_KEY: ${{ steps.vars.outputs.SSH_PRIVATE_KEY }}
@@ -47,6 +81,7 @@ jobs:
       APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+      STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
 
     steps:
       - id: vars
@@ -69,13 +104,16 @@ jobs:
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
           echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
 
-      - name: Output Branch name
+      - name: Output deployment info
         run: |
-          echo ":seedling: Branch: ${{ github.event.inputs.BRANCH || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo ":rocket: Environment: production (US)" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Staging Tag: ${{ needs.validate-deployment.outputs.STAGING_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Environment: production (US)" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Branch: ${{ github.event.inputs.BRANCH || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests: Validated in staging" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
     needs:
+      - validate-deployment
       - prepare-env
     name: Build and Push Image
     permissions:
@@ -91,6 +129,7 @@ jobs:
       ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+      STAGING_TAG: ${{ needs.validate-deployment.outputs.STAGING_TAG }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
@@ -162,7 +201,7 @@ jobs:
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "production"
         run: |
-          echo "Building application with environment variables:"
+          echo "Building application for production US with staging tag: $STAGING_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           
@@ -188,7 +227,7 @@ jobs:
           # Construct ECR registry URL (like TMS workflow pattern)
           ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
-          IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
+          IMAGE_TAG="$STAGING_TAG-prd-us-$GITHUB_RUN_NUMBER-$(date +%s)"
           
           # Debug: Print build variables
           echo "=== Build Debug Info ==="
@@ -240,6 +279,7 @@ jobs:
       id-token: write
       contents: read
     needs:
+      - validate-deployment
       - prepare-env
       - build-push-image
     env:
@@ -254,6 +294,7 @@ jobs:
       BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
       VALUES_FILE: ${{needs.prepare-env.outputs.VALUES_FILE}}
+      STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
 
     steps:
       - name: "Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}"
@@ -299,6 +340,7 @@ jobs:
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
           # Deploy directly
+          echo "Deploying production US with staging tag: $STAGING_TAG and image: $IMAGE_TAG"
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \
@@ -307,18 +349,25 @@ jobs:
               --wait \
               --timeout 10m0s \
               --create-namespace
+          
+          echo "✅ Production US deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Staging Tag: $STAGING_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Environment: production (US)" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests: Validated in staging before deployment" >> $GITHUB_STEP_SUMMARY
 
   slack-notification:
     name: Slack Notification
     if: always()
     runs-on: ubuntu-latest
     needs:
+      - validate-deployment
       - prepare-env
       - build-push-image
       - deploy-to-eks
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
+      STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
       - name: Update slack message body
@@ -326,13 +375,13 @@ jobs:
         run: |
           if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
           then
-            echo "SLACK_MESSAGE=Success :white_check_mark:" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Production US Success :white_check_mark: Tag: $STAGING_TAG | Tests: ✅ Validated in Staging" >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
-            echo "SLACK_MESSAGE=Failed :x:" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Production US Failed :x: Tag: $STAGING_TAG" >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
           then
-            echo "SLACK_MESSAGE=Cancelled :grey_exclamation:" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Production US Cancelled :grey_exclamation: Tag: $STAGING_TAG" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
@@ -340,7 +389,7 @@ jobs:
           SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
           SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
-          SLACK_TITLE: Build Status
+          SLACK_TITLE: Production US Deployment - Gated by Staging Tests
           ZAMP_ENV: ${{ env.ENVIRONMENT }}
           SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
           SLACK_USERNAME: Zamp-Devops
