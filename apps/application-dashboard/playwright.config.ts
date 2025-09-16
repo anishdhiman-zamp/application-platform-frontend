@@ -1,7 +1,7 @@
 import { defineConfig, ReporterDescription } from '@playwright/test';
 
 const isCI = !!process.env.GITHUB_ACTIONS; // check if running in CI
-const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // Use local Selenium browser in development, but remote grid in CI
+const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // make this "!==" to run remote selenium-gird locally
 const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // browser session data
 
 export const PLAYWRIGHT_ENV_CREDENTIALS = {
@@ -14,7 +14,7 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
   },
   // Prefer env-provided CDP endpoint when launching local Selenium/Chrome with --remote-debugging-port
   localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
-  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
+  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg-aws.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
   isSeleniumLocalBrowser: USE_LOCAL_SELENIUM_BROWSER,
   storageState: STORAGE_STATE,
 };
