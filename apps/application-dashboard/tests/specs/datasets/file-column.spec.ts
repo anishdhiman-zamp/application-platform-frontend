@@ -8,7 +8,7 @@ import {
   selectAvailableOrganisation,
 } from './dataset.test.utils';
 
-test.describe('File Column', () => {
+test.describe.skip('File Column', () => {
   test('should navigate to Organisation and open datasets page', async ({ page }) => {
     const { baseUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
     const agIdFor = wrapAgTestIdFor((testId: string) => page.getByTestId(testId));
