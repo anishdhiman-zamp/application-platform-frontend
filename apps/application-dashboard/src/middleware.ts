@@ -62,7 +62,7 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   const loginUrl = new URL('/login', request.url);
   const response = NextResponse.redirect(loginUrl);
 
-  if (!['/', '/login', '/sw.js'].includes(pathname)) {
+  if (!['/', '/login'].includes(pathname)) {
     const fullRoute = pathname + (request.nextUrl.search || '');
 
     setPrevRouteCookie(response, fullRoute);
