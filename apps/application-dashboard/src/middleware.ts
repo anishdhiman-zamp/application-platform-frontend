@@ -68,8 +68,7 @@ async function validateSession(request: NextRequest): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
-  const redirectTo = searchParams.get('redirect_to');
+  const { pathname } = request.nextUrl;
 
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
@@ -77,27 +76,23 @@ export async function middleware(request: NextRequest) {
 
   const isAuthenticated = await validateSession(request);
 
-  if (isAuthenticated && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  if (isAuthenticated) {
+    switch (pathname) {
+      case '/login':
+        return NextResponse.redirect(new URL('/', request.url));
+      case '/': {
+        const prevRoute = getPrevRouteCookie(request);
 
-  if (isAuthenticated && pathname === '/') {
-    const prevRoute = getPrevRouteCookie(request);
+        if (prevRoute) {
+          const response = NextResponse.redirect(new URL(prevRoute, request.url));
 
-    if (prevRoute && prevRoute !== '/' && prevRoute !== '/login') {
-      const response = NextResponse.redirect(new URL(prevRoute, request.url));
+          clearPrevRouteCookie(response);
 
-      clearPrevRouteCookie(response);
+          return response;
+        }
 
-      return response;
-    }
-
-    if (prevRoute) {
-      const response = NextResponse.next();
-
-      clearPrevRouteCookie(response);
-
-      return response;
+        return NextResponse.redirect(new URL('/', request.url));
+      }
     }
   }
 
@@ -109,9 +104,7 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     const response = NextResponse.redirect(loginUrl);
 
-    if (redirectTo && redirectTo !== '/' && redirectTo !== '/login') {
-      setPrevRouteCookie(response, redirectTo);
-    } else if (pathname !== '/' && pathname !== '/login') {
+    if (!['/', '/login', '/sw.js'].includes(pathname)) {
       setPrevRouteCookie(response, pathname);
     }
 
