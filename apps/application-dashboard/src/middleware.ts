@@ -10,7 +10,6 @@ const PUBLIC_ROUTES = [
   '/public',
   '/icons',
   '/auth',
-  '/login',
   '/mp4/zamp-login-bg.mp4',
 ];
 
@@ -38,34 +37,62 @@ function clearPrevRouteCookie(response: NextResponse): void {
 
 async function validateSession(request: NextRequest): Promise<boolean> {
   try {
-    // const apiBaseUrl = process.env.NEXT_PUBLIC_DEV_API_URL || 'https://api-dev-aws-us.zamp.ai';
-
-    // const cookieHeader = Array.from(request.cookies.getAll())
-    //   .map((cookie) => `${cookie.name}=${cookie.value}`)
-    //   .join('; ');
-
     const oryKratosSession = request.cookies.get('ory_kratos_session')?.value;
 
     return !!oryKratosSession;
-
-    // const response = await fetch(`${apiBaseUrl}/auth/whoami`, {
-    //   method: 'GET',
-    //   headers: {
-    //     Accept: 'application/json',
-    //     Cookie: cookieHeader,
-    //   },
-    //   credentials: 'include',
-    // });
-
-    // console.log('responseeee', request.cookies.getAll());
-
-    // return response.ok;
   } catch (error) {
     console.error('Session validation error:', error);
 
     return false;
   }
 }
+
+const handleUnauthenticatedRoutes = (request: NextRequest) => {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (pathname === '/login') {
+    return NextResponse.next();
+  }
+
+  const loginUrl = new URL('/login', request.url);
+  const response = NextResponse.redirect(loginUrl);
+
+  if (!['/', '/login', '/sw.js'].includes(pathname)) {
+    const fullRoute = pathname + (request.nextUrl.search || '');
+
+    setPrevRouteCookie(response, fullRoute);
+  }
+
+  return response;
+};
+
+const handleAuthenticatedRoutes = (request: NextRequest) => {
+  const { pathname } = request.nextUrl;
+
+  switch (pathname) {
+    case '/login':
+      return NextResponse.redirect(new URL('/', request.url));
+    case '/': {
+      const prevRoute = getPrevRouteCookie(request);
+
+      if (prevRoute) {
+        const response = NextResponse.redirect(new URL(prevRoute, request.url));
+
+        clearPrevRouteCookie(response);
+
+        return response;
+      }
+
+      return NextResponse.redirect(new URL('/processes', request.url));
+    }
+    default:
+      return NextResponse.next();
+  }
+};
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -76,44 +103,11 @@ export async function middleware(request: NextRequest) {
 
   const isAuthenticated = await validateSession(request);
 
-  if (isAuthenticated) {
-    switch (pathname) {
-      case '/login':
-        return NextResponse.redirect(new URL('/', request.url));
-      case '/': {
-        const prevRoute = getPrevRouteCookie(request);
-
-        if (prevRoute) {
-          const response = NextResponse.redirect(new URL(prevRoute, request.url));
-
-          clearPrevRouteCookie(response);
-
-          return response;
-        }
-
-        return NextResponse.redirect(new URL('/processes', request.url));
-      }
-    }
-  }
-
   if (!isAuthenticated) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const loginUrl = new URL('/login', request.url);
-    const response = NextResponse.redirect(loginUrl);
-
-    if (!['/', '/login', '/sw.js'].includes(pathname)) {
-      const fullRoute = pathname + (request.nextUrl.search || '');
-
-      setPrevRouteCookie(response, fullRoute);
-    }
-
-    return response;
+    return handleUnauthenticatedRoutes(request);
   }
 
-  return NextResponse.next();
+  return handleAuthenticatedRoutes(request);
 }
 
 export const config = {
