@@ -393,7 +393,45 @@ jobs:
         continue-on-error: true
         run: |
           cd apps/application-dashboard
-          npx playwright test tests/specs --config=playwright.config.ts
+          
+          # Run tests with JSON reporter to capture detailed results
+          npx playwright test tests/specs --config=playwright.config.ts --reporter=json > tests/test-results/test-results.json || true
+          
+          # Parse test results to get counts (same format as PR comment script expects)
+          if [ -f tests/test-results/test-results.json ]; then
+            # Extract test counts using the same logic as PR comment script
+            PASSED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.expected // 0')
+            FAILED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.unexpected // 0')
+            SKIPPED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.skipped // 0')
+            TOTAL_TESTS=$((PASSED_TESTS + FAILED_TESTS + SKIPPED_TESTS))
+          else
+            echo "❌ No test results file found"
+            TOTAL_TESTS=0
+            FAILED_TESTS=1  # Assume failure if no results
+            PASSED_TESTS=0
+            SKIPPED_TESTS=0
+          fi
+          
+          # Output test counts for other jobs to use
+          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
+          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "SKIPPED_TESTS=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+          
+          echo "📊 Test Results Summary:"
+          echo "  Total: $TOTAL_TESTS"
+          echo "  Passed: $PASSED_TESTS" 
+          echo "  Failed: $FAILED_TESTS"
+          echo "  Skipped: $SKIPPED_TESTS"
+          
+          # Key decision: Block production if ANY tests failed
+          if [ "$FAILED_TESTS" -gt 0 ]; then
+            echo "🚫 PRODUCTION GATE: BLOCKED - $FAILED_TESTS test(s) failed"
+          elif [ "$TOTAL_TESTS" -eq 0 ]; then
+            echo "🚫 PRODUCTION GATE: BLOCKED - No tests executed"
+          else
+            echo "✅ PRODUCTION GATE: APPROVED - All tests passed"
+          fi
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: tests/test-results/junit.xml
           USE_LOCAL_SELENIUM: false
@@ -429,7 +467,7 @@ jobs:
         if: always()
         run: |
           cd apps/application-dashboard
-          # Check if result file exists
+          # Check if result file exists (using same file as we just created)
           if [[ -f tests/test-results/test-results.json ]]; then
             TEST_RESULTS=$(cat tests/test-results/test-results.json)
           else
@@ -493,16 +531,129 @@ jobs:
       - name: Test Results Summary
         if: always()
         run: |
-          if [[ "${{ steps.playwright-tests.outcome }}" == "success" ]]; then
-            echo "✅ E2E Tests PASSED for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
-            echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
-            echo "🎭 All tests completed successfully!" >> $GITHUB_STEP_SUMMARY
+          TOTAL_TESTS="${{ steps.playwright-tests.outputs.TOTAL_TESTS }}"
+          PASSED_TESTS="${{ steps.playwright-tests.outputs.PASSED_TESTS }}"
+          FAILED_TESTS="${{ steps.playwright-tests.outputs.FAILED_TESTS }}"
+          SKIPPED_TESTS="${{ steps.playwright-tests.outputs.SKIPPED_TESTS }}"
+          
+          echo "📊 E2E Test Results for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
+          echo "📈 Total Tests: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed: $PASSED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "❌ Failed: $FAILED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ Skipped: $SKIPPED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Production gate decision based on failed tests count
+          if [[ "$FAILED_TESTS" -eq 0 && "$TOTAL_TESTS" -gt 0 ]]; then
+            echo "🎭 All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **PRODUCTION GATE: APPROVED**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$FAILED_TESTS" -gt 0 ]]; then
+            echo "⚠️ $FAILED_TESTS test(s) failed - production deployment BLOCKED" >> $GITHUB_STEP_SUMMARY
+            echo "🔧 Fix failing tests before production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ E2E Tests FAILED for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
-            echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
-            echo "📋 Check test artifacts for details" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️  Deployment succeeded but tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ No tests found or test execution failed" >> $GITHUB_STEP_SUMMARY
+            echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
           fi
+
+  trigger-production-deployment:
+    name: Trigger Production Deployment
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+      - prepare-env
+      - deploy-to-eks
+      - run-e2e-tests
+    # Only trigger production if NO tests failed (failed_tests == 0)
+    if: needs.run-e2e-tests.outputs.FAILED_TESTS == '0' && needs.run-e2e-tests.outputs.TOTAL_TESTS != '0'
+    env:
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      TOTAL_TESTS: ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}
+      PASSED_TESTS: ${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}
+      FAILED_TESTS: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}
+    steps:
+      - name: Validate no tests failed
+        run: |
+          echo "🎯 Validating test results for production deployment..."
+          echo "Tag: $NEW_TAG"
+          echo "Total Tests: $TOTAL_TESTS"
+          echo "Passed Tests: $PASSED_TESTS"
+          echo "Failed Tests: $FAILED_TESTS"
+          
+          # Double-check that no tests failed
+          if [ "$FAILED_TESTS" != "0" ]; then
+            echo "❌ Cannot trigger production: $FAILED_TESTS tests failed"
+            exit 1
+          fi
+          
+          if [ "$TOTAL_TESTS" == "0" ]; then
+            echo "❌ Cannot trigger production: No tests were executed"
+            exit 1
+          fi
+          
+          echo "✅ All $TOTAL_TESTS tests passed - triggering production deployment" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Test Results: $PASSED_TESTS/$TOTAL_TESTS passed" >> $GITHUB_STEP_SUMMARY
+
+      - name: Trigger Production Workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'aws-prd-build-deploy.yaml',
+              ref: 'main',
+              inputs: {
+                staging_tag: '${{ env.NEW_TAG }}',
+                staging_tests_passed: 'true'
+              }
+            });
+            console.log('✅ Triggered production deployment:', result.status);
+            console.log('🏷️ Tag: ${{ env.NEW_TAG }}');
+            console.log('✅ Tests: Passed');
+
+  production-deployment-blocked:
+    name: Production Deployment Blocked
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+      - prepare-env
+      - deploy-to-eks
+      - run-e2e-tests
+    # Only run if tests failed (failed_tests > 0) OR no tests executed (total_tests = 0)
+    if: |
+      (needs.run-e2e-tests.outputs.FAILED_TESTS != '0') || 
+      (needs.run-e2e-tests.outputs.TOTAL_TESTS == '0')
+    env:
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      TOTAL_TESTS: ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}
+      FAILED_TESTS: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}
+      PASSED_TESTS: ${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}
+    steps:
+      - name: Block production deployment
+        run: |
+          echo "🚫 PRODUCTION DEPLOYMENT BLOCKED!"
+          echo "🏷️ Tag: $NEW_TAG"
+          echo "📊 Test Results:"
+          echo "  Total: $TOTAL_TESTS"
+          echo "  Passed: $PASSED_TESTS"
+          echo "  Failed: $FAILED_TESTS"
+          
+          if [ "$FAILED_TESTS" != "0" ]; then
+            echo "❌ Reason: $FAILED_TESTS test(s) failed"
+            echo "🔧 Fix the failing tests in staging before production deployment"
+          elif [ "$TOTAL_TESTS" == "0" ]; then
+            echo "❌ Reason: No tests were executed"
+            echo "🔧 Ensure tests run successfully in staging before production deployment"
+          fi
+          
+          echo "🚫 PRODUCTION DEPLOYMENT BLOCKED!" >> $GITHUB_STEP_SUMMARY
+          echo "❌ Failed tests: $FAILED_TESTS/$TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "🔧 Fix staging issues before production deployment" >> $GITHUB_STEP_SUMMARY
 
   slack-notification:
     name: Slack Notification
@@ -514,6 +665,8 @@ jobs:
       - build-push-image
       - deploy-to-eks
       - run-e2e-tests
+      - trigger-production-deployment
+      - production-deployment-blocked
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
@@ -523,22 +676,31 @@ jobs:
       - name: Update slack message body
         id: body
         run: |
-          # Get test results
-          TEST_RESULT="${{ needs.run-e2e-tests.result }}"
+          # Get actual test results and production trigger status
+          FAILED_TESTS="${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}"
+          PASSED_TESTS="${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}"
+          TOTAL_TESTS="${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}"
+          PROD_TRIGGER_RESULT="${{ needs.trigger-production-deployment.result }}"
+          PROD_BLOCKED_RESULT="${{ needs.production-deployment-blocked.result }}"
           
           if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
           then
-            if [ "$TEST_RESULT" == 'success' ]; then
-              echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ PASSED" >> $GITHUB_OUTPUT
+            # Check if any tests failed (the key decision point)
+            if [ "$FAILED_TESTS" -eq 0 ] && [ "$TOTAL_TESTS" -gt 0 ]; then
+              if [ "$PROD_TRIGGER_RESULT" == 'success' ]; then
+                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: 🚀 TRIGGERED" >> $GITHUB_OUTPUT
+              else
+                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: ⏳ PENDING" >> $GITHUB_OUTPUT
+              fi
             else
-              echo "SLACK_MESSAGE=Main Branch Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ FAILED" >> $GITHUB_OUTPUT
+              echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ $FAILED_TESTS/$TOTAL_TESTS FAILED | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
             fi
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
-            echo "SLACK_MESSAGE=Main Branch Staging Failed :x: Tag: $NEW_TAG" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Failed :x: Tag: $NEW_TAG | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
           then
-            echo "SLACK_MESSAGE=Main Branch Staging Cancelled :grey_exclamation: Tag: $NEW_TAG" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Cancelled :grey_exclamation: Tag: $NEW_TAG | Production: 🚫 BLOCKED" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
@@ -546,7 +708,7 @@ jobs:
           SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
           SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
-          SLACK_TITLE: Main Branch Staging Deployment
+          SLACK_TITLE: Staging Deployment with Production Gate
           ZAMP_ENV: ${{ env.ENVIRONMENT }}
           SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
           SLACK_USERNAME: Zamp-Devops
