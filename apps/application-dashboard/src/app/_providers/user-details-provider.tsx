@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useWhoAmIQuery } from '@/apis/auth';
+import NotAuthorized from '@/components/NotAuthorized';
+import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from '@/constants/common.constants';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import OrgMembershipPending from '@/modules/login/OrgMembershipPending';
 import { RootState } from '@/store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from '@/store/slices/user';
 import { UserRoleIdType } from '@/types/api/auth.types';
@@ -10,6 +15,7 @@ const UserDetailsProvider = () => {
   const dispatch = useAppDispatch();
 
   const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
+  const pathname = usePathname();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
   useEffect(() => {
@@ -30,6 +36,18 @@ const UserDetailsProvider = () => {
       dispatch(setDashboardLoader(true));
     }
   }, [isLoading, session?.user_id, workspace, dispatch]);
+
+  if (session?.orgs?.length === 0 && !pathname?.includes(ROUTES_PATH.INVITATIONS)) {
+    return <OrgMembershipPending />;
+  }
+
+  if (
+    session &&
+    ENVIRONMENT === 'staging' &&
+    ALLOWED_EMAIL_DOMAINS.every((eachDomain: string) => !session?.user_email?.endsWith(eachDomain))
+  ) {
+    return <NotAuthorized />;
+  }
 
   return null;
 };
