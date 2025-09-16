@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   '/icons',
   '/auth',
   '/mp4/zamp-login-bg.mp4',
+  '/sw.js',
 ];
 
 function isPublicRoute(pathname: string): boolean {
@@ -75,7 +76,7 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
 
   switch (pathname) {
     case '/login':
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/processes', request.url));
     case '/': {
       const prevRoute = getPrevRouteCookie(request);
 

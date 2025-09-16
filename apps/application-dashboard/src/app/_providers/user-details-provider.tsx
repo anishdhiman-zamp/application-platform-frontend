@@ -22,7 +22,7 @@ const UserDetailsProvider = () => {
     if (session && isSuccess) {
       dispatch(setUser(session));
       const defaultWorkspace = session?.organization_id;
-      const user_role = session?.orgs[0]?.resource_audience_policies[0]?.privilege;
+      const user_role = session?.orgs?.[0]?.resource_audience_policies?.[0]?.privilege;
 
       identifyPostHogUser(session.user_id, session?.user_email?.split('@')?.[1]);
 
