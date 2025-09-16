@@ -550,10 +550,31 @@ jobs:
       - name: Test Results Summary
         if: always()
         run: |
+          echo "🔍 Starting Test Results Summary..."
+          
+          # Get outputs with debugging
           TOTAL_TESTS="${{ steps.playwright-tests.outputs.TOTAL_TESTS }}"
           PASSED_TESTS="${{ steps.playwright-tests.outputs.PASSED_TESTS }}"
           FAILED_TESTS="${{ steps.playwright-tests.outputs.FAILED_TESTS }}"
           SKIPPED_TESTS="${{ steps.playwright-tests.outputs.SKIPPED_TESTS }}"
+          
+          echo "🔍 Raw outputs received:"
+          echo "  TOTAL_TESTS='$TOTAL_TESTS'"
+          echo "  PASSED_TESTS='$PASSED_TESTS'"
+          echo "  FAILED_TESTS='$FAILED_TESTS'"
+          echo "  SKIPPED_TESTS='$SKIPPED_TESTS'"
+          
+          # Ensure we have valid numbers (default to safe values if empty)
+          TOTAL_TESTS=${TOTAL_TESTS:-0}
+          PASSED_TESTS=${PASSED_TESTS:-0}
+          FAILED_TESTS=${FAILED_TESTS:-1}  # Default to 1 failed if no data
+          SKIPPED_TESTS=${SKIPPED_TESTS:-0}
+          
+          echo "🔍 Processed values:"
+          echo "  TOTAL_TESTS='$TOTAL_TESTS'"
+          echo "  PASSED_TESTS='$PASSED_TESTS'"
+          echo "  FAILED_TESTS='$FAILED_TESTS'"
+          echo "  SKIPPED_TESTS='$SKIPPED_TESTS'"
           
           echo "📊 E2E Test Results for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
           echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
@@ -564,18 +585,44 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Production gate decision based on failed tests count
+          echo "🔍 Evaluating gate condition: FAILED_TESTS=$FAILED_TESTS, TOTAL_TESTS=$TOTAL_TESTS"
+          
           if [[ "$FAILED_TESTS" -eq 0 && "$TOTAL_TESTS" -gt 0 ]]; then
+            echo "✅ Gate condition met: $FAILED_TESTS failed tests, $TOTAL_TESTS total tests"
             echo "🎭 All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
             echo "🚀 Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
             echo "✅ **PRODUCTION GATE: APPROVED**" >> $GITHUB_STEP_SUMMARY
           elif [[ "$FAILED_TESTS" -gt 0 ]]; then
+            echo "❌ Gate condition failed: $FAILED_TESTS tests failed"
             echo "⚠️ $FAILED_TESTS test(s) failed - production deployment BLOCKED" >> $GITHUB_STEP_SUMMARY
             echo "🔧 Fix failing tests before production deployment" >> $GITHUB_STEP_SUMMARY
             echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
           else
+            echo "❌ Gate condition failed: No valid tests ($TOTAL_TESTS total)"
             echo "⚠️ No tests found or test execution failed" >> $GITHUB_STEP_SUMMARY
             echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
           fi
+          
+          echo "🔍 Test Results Summary completed."
+
+  debug-test-outputs:
+    name: Debug Test Outputs
+    runs-on: ubuntu-latest
+    needs:
+      - run-e2e-tests
+    if: always()
+    steps:
+      - name: Debug outputs
+        run: |
+          echo "=== DEBUGGING TEST OUTPUTS ==="
+          echo "FAILED_TESTS: '${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}'"
+          echo "TOTAL_TESTS: '${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}'"
+          echo "PASSED_TESTS: '${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}'"
+          echo "SKIPPED_TESTS: '${{ needs.run-e2e-tests.outputs.SKIPPED_TESTS }}'"
+          echo "=== CONDITIONS ==="
+          echo "FAILED_TESTS == '0': ${{ needs.run-e2e-tests.outputs.FAILED_TESTS == '0' }}"
+          echo "TOTAL_TESTS != '0': ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS != '0' }}"
+          echo "Combined condition: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS == '0' && needs.run-e2e-tests.outputs.TOTAL_TESTS != '0' }}"
 
   trigger-production-deployment:
     name: Trigger Production Deployments (ME & US)
@@ -701,6 +748,7 @@ jobs:
       - build-push-image
       - deploy-to-eks
       - run-e2e-tests
+      - debug-test-outputs
       - trigger-production-deployment
       - production-deployment-blocked
     env:
