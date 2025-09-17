@@ -20,9 +20,9 @@ export default function DatasetPage() {
 
   useEffect(() => {
     if (datasetId && !isDatasetListingLoading) {
-      const pageExists = datasetListingData?.datasets?.some((dataset) => dataset?.id === datasetId);
+      const datasetExists = datasetListingData?.datasets?.some((dataset) => dataset?.id === datasetId);
 
-      if (!pageExists) {
+      if (!datasetExists) {
         router.replace(ROUTES_PATH.DATA);
       }
     }

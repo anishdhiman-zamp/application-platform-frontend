@@ -20,8 +20,7 @@ function isPublicRoute(pathname: string): boolean {
 
 function setPrevRouteCookie(response: NextResponse, route: string): void {
   response.cookies.set(PREV_ROUTE_COOKIE, route, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    httpOnly: false,
     sameSite: 'lax',
     maxAge: COOKIE_MAX_AGE,
     path: '/',

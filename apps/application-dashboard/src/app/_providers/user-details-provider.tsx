@@ -18,14 +18,14 @@ import { identifyPostHogUser } from '@/utils/postHog';
 
 const UserDetailsProvider = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { width, height } = useWindowDimensions();
+  const { evaluate, ldClient } = useFeatureFlags();
+  const workspace = useAppSelector((state: RootState) => state.user.workspace);
+  const breakpoint = checkScreenBreakpoint(width, height);
 
   const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
-  const pathname = usePathname();
-  const workspace = useAppSelector((state: RootState) => state.user.workspace);
-  const router = useRouter();
-  const { evaluate, ldClient } = useFeatureFlags();
-  const { width, height } = useWindowDimensions();
-  const breakpoint = checkScreenBreakpoint(width, height);
 
   const isAdminRoute = useMemo(() => pathname?.startsWith(ROUTES_PATH.ADMIN), [pathname]);
 
