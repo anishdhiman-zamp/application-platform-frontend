@@ -25,7 +25,7 @@ export const useLogout = () => {
 
   const handleLogout = useCallback(async () => {
     if (fullPath && fullPath !== '/') {
-      document.cookie = `zamp_prev_route=${encodeURIComponent(fullPath)}; path=/; max-age=${60 * 60 * 24}; ${process.env.NODE_ENV === 'production' ? 'secure; ' : ''}samesite=lax`;
+      document.cookie = `zamp_prev_route=${encodeURIComponent(fullPath)}; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
     }
 
     logOut(logoutFlow?.logout_url ?? '')
