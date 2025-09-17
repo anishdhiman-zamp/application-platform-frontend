@@ -257,6 +257,7 @@ const config = {
         'menu-list': '1px 2px 20px 0px #0000001A',
         'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
         'menu-shadow': 'var(--menu-shadow)',
+        'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',
       },
       fontSize: {
         '8': [
