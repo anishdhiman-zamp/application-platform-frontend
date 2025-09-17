@@ -1,6 +1,22 @@
 export const ASSET_PREFIX = process.env.NEXT_PUBLIC_ASSET_PREFIX ?? '';
 const IMAGE_PREFIX = ASSET_PREFIX ? `${ASSET_PREFIX}/public` : '';
 
+// Utility function for CSS background images
+export const getBackgroundImageUrl = (path: string): string => {
+  // Automatically prepend /public if not already present
+  const publicPath = path.startsWith('/public') ? path : `/public${path}`;
+
+  return `url(${ASSET_PREFIX}${publicPath})`;
+};
+
+// Utility function for getting asset URLs (for src attributes, etc.)
+export const getAssetUrl = (path: string): string => {
+  // Automatically prepend /public if not already present
+  const publicPath = path.startsWith('/public') ? path : `/public${path}`;
+
+  return `${ASSET_PREFIX}${publicPath}`;
+};
+
 export const ZAMP_ICON = IMAGE_PREFIX + '/icons/zamp-icon.svg';
 export const FAVICON = IMAGE_PREFIX + '/icons/favicon.png';
 export const NOTEBOOK_ICON = IMAGE_PREFIX + '/icons/notebook.svg';

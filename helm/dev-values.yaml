@@ -18,7 +18,7 @@ default:
     limit:
       cpu: 1000m
       memory: 1000Mi
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: "913524915637.dkr.ecr.us-east-1.amazonaws.com/zamp-dev-us-application-platform-frontend-ecr"
     tag: "latest"
