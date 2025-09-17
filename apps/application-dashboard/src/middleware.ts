@@ -4,13 +4,14 @@ const PREV_ROUTE_COOKIE = 'zamp_prev_route';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
 const PUBLIC_ROUTES = [
-  '/api/health-check',
   '/_next',
-  '/favicon.ico',
-  '/public',
-  '/icons',
+  '/_vercel',
+  '/api/health-check',
   '/auth',
+  '/favicon.ico',
+  '/icons',
   '/mp4/zamp-login-bg.mp4',
+  '/public',
   '/sw.js',
 ];
 
