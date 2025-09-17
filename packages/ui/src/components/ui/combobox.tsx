@@ -1,15 +1,16 @@
 import { cn } from '@zamp-platform/ui/utils';
 import * as React from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
-import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from './popover';
+import { Popover, PopoverAnchor, PopoverContent, PopoverPortal, PopoverTrigger } from './popover';
 import { SelectOption } from './select';
 import { Skeleton } from './skeleton';
+import { Checkbox } from './checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
-type ComboboxOption = Omit<SelectOption, 'icon'> & { icon?: React.ReactNode };
+export type ComboboxOption = Omit<SelectOption, 'icon'> & { icon?: React.ReactNode };
 
-type ComboboxProps = {
+interface BaseComboboxProps {
   options: Array<ComboboxOption>;
-  onSelect: (option: ComboboxOption) => void; // eslint-disable-line no-unused-vars
   open: boolean; // eslint-disable-line no-unused-vars
   onOpenChange: (open: boolean) => void; // eslint-disable-line no-unused-vars
   placeholder?: string;
@@ -26,11 +27,35 @@ type ComboboxProps = {
   isPortalNeeded?: boolean;
   listClassName?: string;
   labelClassName?: string;
-};
+  align?: 'start' | 'center' | 'end';
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  sideOffset?: number;
+  isAnchorPointNeeded?: boolean;
+  disableSelectedOptions?: boolean;
+  selectedValues?: Array<ComboboxOption['value']>;
+  tooltipBody?: string;
+}
+
+interface SingleSelectComboboxProps extends BaseComboboxProps {
+  isMultiSelect?: false;
+  onSelect: (option: ComboboxOption) => void; // eslint-disable-line no-unused-vars
+  onMultiSelect?: never;
+}
+
+interface MultiSelectComboboxProps extends BaseComboboxProps {
+  isMultiSelect: true;
+  onMultiSelect: (selectedOptions: Array<ComboboxOption>) => void; // eslint-disable-line no-unused-vars
+  onSelect?: never;
+}
+
+type ComboboxProps = SingleSelectComboboxProps | MultiSelectComboboxProps;
 
 export function Combobox({
   options,
   onSelect,
+  isMultiSelect = false,
+  selectedValues = [],
+  onMultiSelect,
   open,
   onOpenChange,
   triggerClassName,
@@ -46,23 +71,72 @@ export function Combobox({
   listClassName,
   groupClassName,
   labelClassName,
+  align = 'start',
+  side = 'bottom',
+  sideOffset = 5,
+  isAnchorPointNeeded = false,
+  disableSelectedOptions = false,
+  tooltipBody,
 }: ComboboxProps) {
+  const isValueEqual = React.useCallback((a: ComboboxOption['value'], b: ComboboxOption['value']): boolean => {
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
+      return a === b;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  }, []);
+
+  const isValueSelected = React.useCallback(
+    (value: ComboboxOption['value']): boolean => {
+      return selectedValues.some((selectedValue) => isValueEqual(selectedValue, value));
+    },
+    [selectedValues, isValueEqual],
+  );
+
+  const handleToggleSelection = React.useCallback(
+    (option: ComboboxOption) => {
+      if (!isMultiSelect || !onMultiSelect) return;
+
+      const isSelected = isValueSelected(option.value);
+      let newSelectedValues: Array<ComboboxOption['value']>;
+
+      if (isSelected) {
+        newSelectedValues = selectedValues.filter((value) => !isValueEqual(value, option.value));
+      } else {
+        newSelectedValues = [...selectedValues, option.value];
+      }
+
+      const selectedOptions = options.filter((opt) =>
+        newSelectedValues.some((selectedValue) => isValueEqual(selectedValue, opt.value)),
+      );
+      onMultiSelect(selectedOptions);
+    },
+    [selectedValues, options, onMultiSelect, isMultiSelect, isValueSelected, isValueEqual],
+  );
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild className={triggerClassName}>
+      <TooltipAnchorOrTrigger
+        tooltipBody={tooltipBody}
+        isAnchorPointNeeded={isAnchorPointNeeded}
+        triggerClassName={triggerClassName}
+      >
         {children}
-      </PopoverTrigger>
+      </TooltipAnchorOrTrigger>
       <Portal isNeeded={isPortalNeeded}>
         <PopoverContent
-          align='start'
-          sideOffset={5}
+          align={align}
+          side={side}
+          sideOffset={sideOffset}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
           }}
           autoFocus={false}
           onWheel={(e) => e.stopPropagation()}
           className={cn('pointer-events-auto z-1003 min-w-(--radix-popover-trigger-width) p-0', contentClassName)}
-          id='combobox-content'
+          id={isMultiSelect ? 'multi-select-combobox-content' : 'combobox-content'}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+          }}
         >
           <Command shouldFilter={true}>
             <CommandInput placeholder={searchPlaceholder} className={cn('h-9', inputClassName)} autoFocus />
@@ -82,17 +156,43 @@ export function Combobox({
                   </div>
                 )}
                 {!optionsLoading &&
-                  options?.map((option) => (
-                    <CommandItem
-                      key={option?.id ?? option?.value?.toString()}
-                      value={option?.label}
-                      onSelect={() => onSelect(option)}
-                      className={cn('flex items-center', itemClassName)}
-                    >
-                      {option?.icon && option?.icon}
-                      <span className={labelClassName}>{option?.label}</span>
-                    </CommandItem>
-                  ))}
+                  options?.map((option) => {
+                    const isSelected = isValueSelected(option.value);
+
+                    return (
+                      <CommandItem
+                        key={option?.id ?? option?.value?.toString()}
+                        value={option?.label}
+                        onSelect={() => {
+                          if (isMultiSelect) {
+                            handleToggleSelection(option);
+                          } else {
+                            onSelect?.(option);
+                            // Close popover for single-select
+                            onOpenChange(false);
+                          }
+                        }}
+                        className={cn(
+                          'flex items-center',
+                          isMultiSelect ? 'justify-between gap-2 [&_svg]:size-2.5' : '',
+                          itemClassName,
+                        )}
+                        disabled={disableSelectedOptions && isSelected}
+                      >
+                        <div className='flex items-center gap-2'>
+                          {option?.icon && option?.icon}
+                          <span className={labelClassName}>{option?.label}</span>
+                        </div>
+                        {isMultiSelect && (
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => handleToggleSelection(option)}
+                            className='pointer-events-none' // Let the CommandItem handle clicks
+                          />
+                        )}
+                      </CommandItem>
+                    );
+                  })}
               </CommandGroup>
             </CommandList>
           </Command>
@@ -108,4 +208,53 @@ const Portal = ({ isNeeded, children }: { isNeeded: boolean; children: React.Rea
     return children;
   }
   return <PopoverPortal>{children}</PopoverPortal>;
+};
+
+const AnchorOrTrigger = ({
+  isNeeded,
+  className,
+  children,
+}: {
+  isNeeded?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  if (!isNeeded) {
+    return (
+      <PopoverTrigger asChild className={className}>
+        {children}
+      </PopoverTrigger>
+    );
+  }
+  return <PopoverAnchor>{children}</PopoverAnchor>;
+};
+
+const TooltipAnchorOrTrigger = ({
+  tooltipBody,
+  children,
+  triggerClassName,
+  isAnchorPointNeeded,
+}: {
+  tooltipBody?: string;
+  children: React.ReactNode;
+  triggerClassName?: string;
+  isAnchorPointNeeded?: boolean;
+}) => {
+  if (!tooltipBody)
+    return (
+      <AnchorOrTrigger className={triggerClassName} isNeeded={isAnchorPointNeeded}>
+        {children}
+      </AnchorOrTrigger>
+    );
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={100}>
+        <AnchorOrTrigger className={triggerClassName} isNeeded={isAnchorPointNeeded}>
+          <TooltipTrigger asChild>{children}</TooltipTrigger>
+        </AnchorOrTrigger>
+        <TooltipContent side='bottom'>{tooltipBody}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 };
