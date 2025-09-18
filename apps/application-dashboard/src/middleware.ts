@@ -2,22 +2,6 @@ import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse } from 'next/server';
 import { COOKIE_MAX_AGE, PREV_ROUTE_COOKIE } from 'utils/cookie';
 
-const PUBLIC_ROUTES = [
-  '/_next',
-  '/_vercel',
-  '/api/health-check',
-  '/auth',
-  '/favicon.ico',
-  '/icons',
-  '/mp4/zamp-login-bg.mp4',
-  '/public',
-  '/sw.js',
-];
-
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
-}
-
 function setPrevRouteCookie(response: NextResponse, route: string): void {
   response.cookies.set(PREV_ROUTE_COOKIE, route, {
     httpOnly: false,
@@ -95,12 +79,6 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
 };
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  if (isPublicRoute(pathname)) {
-    return NextResponse.next();
-  }
-
   const isAuthenticated = await validateSession(request);
 
   if (!isAuthenticated) {
@@ -114,12 +92,17 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
+     * - _vercel (Vercel internal routes)
+     * - api/health-check (health check endpoint)
+     * - auth (authentication routes)
      * - favicon.ico (favicon file)
+     * - icons (icon files)
+     * - mp4 (video files)
      * - public (public files)
+     * - sw.js (service worker)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js).*)',
   ],
 };
