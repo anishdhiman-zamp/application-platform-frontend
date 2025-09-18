@@ -10,10 +10,10 @@ interface SeleniumGridConfigType {
  */
 export function getDefaultSeleniumConfig(): SeleniumGridConfigType {
   return {
-    hubUrl: 'https://zamp-dev-us-seleniumgrid.zamp.ai/wd/hub',
+    hubUrl: 'https://zamp-stg-us-seleniumgrid.zamp.ai/wd/hub',
     authorization: 'Basic YWRtaW46MFFkZ1Zia2gyczdNM1Bn',
     browserName: 'chrome',
-    cdpHost: 'zamp-dev-us-seleniumgrid.zamp.ai',
+    cdpHost: 'zamp-stg-us-seleniumgrid.zamp.ai',
   };
 }
 

@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - staging # FIXME: Update to your staging branch name
+      - main
+    paths-ignore:
+      - "helm/prd-values.yaml"
+      - "helm/stg-values.yaml" 
+      - "helm/dev-values.yaml"
 
 env:
   APP_NAME: application-platform-frontend
@@ -14,9 +18,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  create-tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    outputs:
+      NEW_TAG: ${{ steps.tag.outputs.NEW_TAG }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create a new tag version
+        id: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG=$(echo "v$(($(git tag -l 'v*' --sort=-v:refname | head -n 1 | cut -c 2- || echo '0')+1))")
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "🏷️ Created new tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+
   prepare-env:
     name: Prepare Env
     runs-on: arc-runner-set-aws-stg # FIXME: Update to your staging runner
+    needs: create-tag
     timeout-minutes: 2
     outputs:
       SLACK_WEBHOOK_URL: ${{ steps.vars.outputs.SLACK_WEBHOOK_URL }}
@@ -34,6 +61,7 @@ jobs:
       APP_NAME: ${{ steps.vars.outputs.APP_NAME }}
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
 
     steps:
       - id: vars
@@ -56,19 +84,21 @@ jobs:
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
           echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
 
-      - name: Output Branch name
+      - name: Output deployment info
         run: |
-          echo ":seedling: Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
-          echo ":rocket: Environment: staging" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Tag: ${{ needs.create-tag.outputs.NEW_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Environment: staging" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Branch: ${GITHUB_REF#refs/heads/}" >> $GITHUB_STEP_SUMMARY
 
   build-push-image:
     needs:
+      - create-tag
       - prepare-env
     name: Build and Push Image
     permissions:
       id-token: write
       contents: read
-    runs-on: arc-runner-set-aws-stg # FIXME: Update to your staging runner
+    runs-on: arc-runner-set-aws-stg
     env:
       AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
@@ -78,6 +108,7 @@ jobs:
       ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
@@ -104,9 +135,11 @@ jobs:
       - name: 'Set up AWS credentials using OIDC'
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in staging account
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
+
+
 
       - name: "Install AWS CLI"
         run: |
@@ -124,12 +157,14 @@ jobs:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
   
+
       - uses: actions/cache@v4
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -142,11 +177,11 @@ jobs:
 
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
         run: |
-          echo "Building application with environment variables:"
+          echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           
@@ -159,8 +194,6 @@ jobs:
 
       - id: build
         name: Build and Push Image
-        env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
           # Debug: Show all environment variables first
           echo "=== Environment Variables Debug ==="
@@ -172,7 +205,7 @@ jobs:
           # Construct ECR registry URL (like TMS workflow pattern)
           ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
-          IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
+          IMAGE_TAG="$NEW_TAG-$GITHUB_RUN_NUMBER-$(date +%s)"
           
           # Debug: Print build variables
           echo "=== Build Debug Info ==="
@@ -194,24 +227,37 @@ jobs:
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
-            --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo ":whale2:App Image Tag: ${IMAGE_TAG} " >> $GITHUB_STEP_SUMMARY
+          echo "🐳 Tagged Image: ${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
 
       - id: upload-assets
         name: Upload Static Files to S3
         run: |
-          # Upload Next.js static files directly from the built application
-          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
-          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          # Clear existing assets and upload new ones to ensure complete replacement
+          echo "Clearing existing assets from S3..."
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --recursive --quiet
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --recursive --quiet
           
-          echo "Static assets uploaded to S3 successfully!"
-          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+          echo "Uploading new Next.js static files..."
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --delete
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --delete
+          
+          echo "Static assets completely replaced in S3 successfully!"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          
+          echo "Invalidating CloudFront cache to serve new assets..."
+          aws cloudfront create-invalidation \
+            --distribution-id E17C704YJ9Y0NG \
+            --paths "/*"
+          
+          echo "CloudFront invalidation initiated successfully!"
+          echo "New assets will be available shortly at: https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
 
   deploy-to-eks:
     name: Deploy to EKS
@@ -220,7 +266,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      deployments: write
     needs:
+      - create-tag
       - prepare-env
       - build-push-image
     env:
@@ -235,6 +283,7 @@ jobs:
       BUILD_ENV: ${{needs.prepare-env.outputs.BUILD_ENV}}
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
       VALUES_FILE: ${{needs.prepare-env.outputs.VALUES_FILE}}
+      NEW_TAG: ${{needs.create-tag.outputs.NEW_TAG}}
 
     steps:
       - name: "Checkout repository on : ${{ github.REF }}"
@@ -277,6 +326,7 @@ jobs:
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
 
           # Deploy directly
+          echo "Deploying tagged version $NEW_TAG with image $IMAGE_TAG"
           helm upgrade --install ${APP_NAME} ./${HELM_CHART_NAME} \
               --namespace ${NAMESPACE} \
               --set default.image.repository="${ECR_REPO_URI}" \
@@ -286,31 +336,426 @@ jobs:
               --timeout 10m0s \
               --create-namespace
 
+      - name: Deployment Summary
+        run: |
+          echo "✅ Staging deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Environment: https://app-stg-aws.zamp.ai" >> $GITHUB_STEP_SUMMARY
+          echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+
+  run-e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - create-tag
+      - prepare-env
+      - deploy-to-eks
+    outputs:
+      TOTAL_TESTS: ${{ steps.playwright-tests.outputs.TOTAL_TESTS }}
+      PASSED_TESTS: ${{ steps.playwright-tests.outputs.PASSED_TESTS }}
+      FAILED_TESTS: ${{ steps.playwright-tests.outputs.FAILED_TESTS }}
+      SKIPPED_TESTS: ${{ steps.playwright-tests.outputs.SKIPPED_TESTS }}
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: 'https://app-stg-aws.zamp.ai'
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      NODE_ENV: test
+    steps:
+      - name: Test Setup Info
+        run: |
+          echo "🎭 Running Playwright E2E tests directly in staging workflow"
+          echo "Testing URL: $PLAYWRIGHT_TEST_BASE_URL"
+          echo "Tag: $NEW_TAG"
+          echo "Repository: ${{ github.repository }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Create test directories
+        run: |
+          cd apps/application-dashboard
+          mkdir -p tests/session-secrets
+          touch tests/session-secrets/.gitkeep
+          mkdir -p tests/test-results/videos
+          chmod -R 777 tests/test-results tests/session-secrets
+
+      - name: Wait for staging to be ready
+        run: |
+          echo "⏳ Waiting for staging deployment to be fully ready..."
+          sleep 30
+          for i in {1..10}; do
+            if curl -f -s "$PLAYWRIGHT_TEST_BASE_URL" > /dev/null; then
+              echo "✅ Staging environment is ready!"
+              break
+            fi
+            echo "⏳ Waiting for staging environment... (attempt $i/10)"
+            sleep 30
+          done
+
+      - name: Run Playwright tests
+        id: playwright-tests
+        continue-on-error: true
+        run: |
+          cd apps/application-dashboard
+          
+          # Run tests using the existing config (which already outputs JSON)
+          echo "🎭 Starting Playwright tests..."
+          npx playwright test tests/specs --config=playwright.config.ts || TEST_EXIT_CODE=$?
+          
+          echo "🔍 Checking for test results..."
+          ls -la tests/test-results/ || echo "No test-results directory found"
+          
+          # Parse test results to get counts (same format as PR comment script expects)
+          if [ -f tests/test-results/test-results.json ]; then
+            echo "✅ Found test results file"
+            
+            # Debug: Show first few lines of the JSON file
+            echo "📋 Test results file content (first 10 lines):"
+            head -10 tests/test-results/test-results.json || echo "Could not read file"
+            
+            # Extract test counts using the same logic as PR comment script
+            PASSED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.expected // 0')
+            FAILED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.unexpected // 0')
+            SKIPPED_TESTS=$(cat tests/test-results/test-results.json | jq -r '.stats.skipped // 0')
+            TOTAL_TESTS=$((PASSED_TESTS + FAILED_TESTS + SKIPPED_TESTS))
+            
+            echo "📊 Parsed results:"
+            echo "  Expected (passed): $PASSED_TESTS"
+            echo "  Unexpected (failed): $FAILED_TESTS"
+            echo "  Skipped: $SKIPPED_TESTS"
+            echo "  Total: $TOTAL_TESTS"
+          else
+            echo "❌ No test results file found at tests/test-results/test-results.json"
+            echo "📁 Available files in test-results:"
+            ls -la tests/test-results/ || echo "Directory does not exist"
+            
+            TOTAL_TESTS=0
+            FAILED_TESTS=1  # Assume failure if no results
+            PASSED_TESTS=0
+            SKIPPED_TESTS=0
+          fi
+          
+          # Output test counts for other jobs to use
+          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
+          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "SKIPPED_TESTS=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
+          
+          echo "📊 Test Results Summary:"
+          echo "  Total: $TOTAL_TESTS"
+          echo "  Passed: $PASSED_TESTS" 
+          echo "  Failed: $FAILED_TESTS"
+          echo "  Skipped: $SKIPPED_TESTS"
+          
+          # Key decision: Block production if ANY tests failed
+          if [ "$FAILED_TESTS" -gt 0 ]; then
+            echo "🚫 PRODUCTION GATE: BLOCKED - $FAILED_TESTS test(s) failed"
+          elif [ "$TOTAL_TESTS" -eq 0 ]; then
+            echo "🚫 PRODUCTION GATE: BLOCKED - No tests executed"
+          else
+            echo "✅ PRODUCTION GATE: APPROVED - All tests passed"
+          fi
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: tests/test-results/junit.xml
+          USE_LOCAL_SELENIUM: false
+          PLAYWRIGHT_VIDEO_DIR: tests/test-results/videos
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: 'apps/application-dashboard/tests/test-results/junit.xml'
+          check_name: E2E Test Results - Tag ${{ env.NEW_TAG }}
+          fail_on_failure: false
+          require_tests: false
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ env.NEW_TAG }}
+          path: apps/application-dashboard/tests/playwright-report/
+          retention-days: 30
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-${{ env.NEW_TAG }}
+          path: apps/application-dashboard/tests/test-results/
+          retention-days: 30
+
+      - name: Prepare test summary
+        id: test-summary
+        if: always()
+        run: |
+          cd apps/application-dashboard
+          # Check if result file exists (using same file as we just created)
+          if [[ -f tests/test-results/test-results.json ]]; then
+            TEST_RESULTS=$(cat tests/test-results/test-results.json)
+          else
+            echo "No test result file found."
+            TEST_RESULTS='{}'
+          fi
+          ACTOR="${{ github.actor }}"
+          echo "$TEST_RESULTS" | node tests/scripts/playwright-pr-comment.js ${{ github.run_id }} ${{ github.repository }} "$ACTOR" > comment.md
+          echo "comment<<EOF" >> $GITHUB_OUTPUT
+          cat comment.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Add PR comment with test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comment = `${{ steps.test-summary.outputs.comment }}`;
+            // Get PR number from context (PR) or via commit association (push)
+            let prNumber = context.payload.pull_request?.number;
+            if (!prNumber) {
+              const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                mediaType: { previews: ['groot'] },
+              });
+              prNumber = prs.data?.[0]?.number;
+            }
+            if (!prNumber) {
+              console.log('No PR associated with this run; writing to job summary instead.');
+              await core.summary.addRaw(comment).write();
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('## 🎭 Playwright Test Results')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: comment,
+              });
+            }
+
+      - name: Test Results Summary
+        if: always()
+        run: |
+          echo "🔍 Starting Test Results Summary..."
+          
+          # Get outputs with debugging
+          TOTAL_TESTS="${{ steps.playwright-tests.outputs.TOTAL_TESTS }}"
+          PASSED_TESTS="${{ steps.playwright-tests.outputs.PASSED_TESTS }}"
+          FAILED_TESTS="${{ steps.playwright-tests.outputs.FAILED_TESTS }}"
+          SKIPPED_TESTS="${{ steps.playwright-tests.outputs.SKIPPED_TESTS }}"
+          
+          echo "🔍 Raw outputs received:"
+          echo "  TOTAL_TESTS='$TOTAL_TESTS'"
+          echo "  PASSED_TESTS='$PASSED_TESTS'"
+          echo "  FAILED_TESTS='$FAILED_TESTS'"
+          echo "  SKIPPED_TESTS='$SKIPPED_TESTS'"
+          
+          # Ensure we have valid numbers (default to safe values if empty)
+          TOTAL_TESTS=${TOTAL_TESTS:-0}
+          PASSED_TESTS=${PASSED_TESTS:-0}
+          FAILED_TESTS=${FAILED_TESTS:-1}  # Default to 1 failed if no data
+          SKIPPED_TESTS=${SKIPPED_TESTS:-0}
+          
+          echo "🔍 Processed values:"
+          echo "  TOTAL_TESTS='$TOTAL_TESTS'"
+          echo "  PASSED_TESTS='$PASSED_TESTS'"
+          echo "  FAILED_TESTS='$FAILED_TESTS'"
+          echo "  SKIPPED_TESTS='$SKIPPED_TESTS'"
+          
+          echo "📊 E2E Test Results for tag $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Staging environment: $PLAYWRIGHT_TEST_BASE_URL" >> $GITHUB_STEP_SUMMARY
+          echo "📈 Total Tests: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed: $PASSED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "❌ Failed: $FAILED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ Skipped: $SKIPPED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Production gate decision based on failed tests count
+          echo "🔍 Evaluating gate condition: FAILED_TESTS=$FAILED_TESTS, TOTAL_TESTS=$TOTAL_TESTS"
+          
+          if [[ "$FAILED_TESTS" -eq 0 && "$TOTAL_TESTS" -gt 0 ]]; then
+            echo "✅ Gate condition met: $FAILED_TESTS failed tests, $TOTAL_TESTS total tests"
+            echo "🎭 All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 Production deployment will be triggered" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **PRODUCTION GATE: APPROVED**" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$FAILED_TESTS" -gt 0 ]]; then
+            echo "❌ Gate condition failed: $FAILED_TESTS tests failed"
+            echo "⚠️ $FAILED_TESTS test(s) failed - production deployment BLOCKED" >> $GITHUB_STEP_SUMMARY
+            echo "🔧 Fix failing tests before production deployment" >> $GITHUB_STEP_SUMMARY
+            echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Gate condition failed: No valid tests ($TOTAL_TESTS total)"
+            echo "⚠️ No tests found or test execution failed" >> $GITHUB_STEP_SUMMARY
+            echo "🚫 **PRODUCTION GATE: BLOCKED**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "🔍 Test Results Summary completed."
+
+  production-deployment-gate:
+    name: Production Deployment Gate (ME & US)
+    runs-on: ubuntu-latest
+    needs:
+      - create-tag
+      - prepare-env
+      - deploy-to-eks
+      - run-e2e-tests
+    if: always()  # Always run to handle both success and failure cases
+    env:
+      NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      TOTAL_TESTS: ${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}
+      PASSED_TESTS: ${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}
+      FAILED_TESTS: ${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}
+    steps:
+      - name: Evaluate deployment decision
+        id: evaluate
+        run: |
+          echo "🎯 Evaluating production deployment decision..."
+          echo "🏷️ Tag: $NEW_TAG"
+          echo "📊 Test Results:"
+          echo "  Total: $TOTAL_TESTS"
+          echo "  Passed: $PASSED_TESTS"
+          echo "  Failed: $FAILED_TESTS"
+          
+          # Determine if deployment should proceed
+          if [ "$FAILED_TESTS" == "0" ] && [ "$TOTAL_TESTS" != "0" ]; then
+            echo "✅ Production deployment approved!"
+            echo "SHOULD_DEPLOY=true" >> $GITHUB_OUTPUT
+            echo "✅ All $TOTAL_TESTS tests passed - production deployment approved" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Test Results: $PASSED_TESTS/$TOTAL_TESTS passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🚫 Production deployment blocked!"
+            echo "SHOULD_DEPLOY=false" >> $GITHUB_OUTPUT
+            echo "🚫 PRODUCTION DEPLOYMENTS BLOCKED (ME & US)!" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Failed tests: $FAILED_TESTS/$TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$FAILED_TESTS" != "0" ]; then
+              echo "❌ Reason: $FAILED_TESTS test(s) failed"
+              echo "🔧 Fix the failing tests in staging before production deployments"
+              echo "🔧 Fix failing tests before production deployment" >> $GITHUB_STEP_SUMMARY
+            elif [ "$TOTAL_TESTS" == "0" ]; then
+              echo "❌ Reason: No tests were executed"
+              echo "🔧 Ensure tests run successfully in staging before production deployments"
+              echo "🔧 Ensure tests run successfully before production deployment" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Trigger Production Workflows (ME & US)
+        if: steps.evaluate.outputs.SHOULD_DEPLOY == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Trigger ME production deployment with staging test validation
+            const resultME = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'aws-prd-build-deploy.yaml',
+              ref: 'main',
+              inputs: {
+                BRANCH: 'main',
+                staging_tag: '${{ env.NEW_TAG }}',
+                staging_tests_passed: 'true'
+              }
+            });
+            console.log('✅ Triggered ME production deployment:', resultME.status);
+            
+            // Trigger US production deployment with staging test validation
+            const resultUS = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'aws-prd-us-build-deploy.yaml',
+              ref: 'main',
+              inputs: {
+                BRANCH: 'main',
+                staging_tag: '${{ env.NEW_TAG }}',
+                staging_tests_passed: 'true'
+              }
+            });
+            console.log('✅ Triggered US production deployment:', resultUS.status);
+            
+            console.log('🏷️ Tag: ${{ env.NEW_TAG }}');
+            console.log('✅ Tests: Passed');
+
   slack-notification:
     name: Slack Notification
     if: always()
     runs-on: ubuntu-latest
     needs:
+      - create-tag
       - prepare-env
       - build-push-image
       - deploy-to-eks
+      - run-e2e-tests
+      - production-deployment-gate
     env:
       SLACK_WEBHOOK_URL: ${{needs.prepare-env.outputs.SLACK_WEBHOOK_URL}}
       ENVIRONMENT: ${{needs.prepare-env.outputs.ENVIRONMENT}}
+      NEW_TAG: ${{needs.create-tag.outputs.NEW_TAG}}
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
       - name: Update slack message body
         id: body
         run: |
+          # Get actual test results and production trigger status
+          FAILED_TESTS="${{ needs.run-e2e-tests.outputs.FAILED_TESTS }}"
+          PASSED_TESTS="${{ needs.run-e2e-tests.outputs.PASSED_TESTS }}"
+          TOTAL_TESTS="${{ needs.run-e2e-tests.outputs.TOTAL_TESTS }}"
+          PROD_TRIGGER_RESULT="${{ needs.trigger-production-deployment.result }}"
+          PROD_BLOCKED_RESULT="${{ needs.production-deployment-blocked.result }}"
+          
           if [ '${{ env.WORKFLOW_CONCLUSION }}' == 'success' ]
           then
-            echo "SLACK_MESSAGE=Success :white_check_mark:" >> $GITHUB_OUTPUT
+            # Check if any tests failed (the key decision point)
+            if [ "$FAILED_TESTS" -eq 0 ] && [ "$TOTAL_TESTS" -gt 0 ]; then
+              if [ "$PROD_TRIGGER_RESULT" == 'success' ]; then
+                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: 🚀 ME & US TRIGGERED" >> $GITHUB_OUTPUT
+              else
+                echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ✅ $PASSED_TESTS/$TOTAL_TESTS PASSED | Production: ⏳ PENDING" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "SLACK_MESSAGE=Staging Success :white_check_mark: Tag: $NEW_TAG | Tests: ❌ $FAILED_TESTS/$TOTAL_TESTS FAILED | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
+            fi
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'failure' ]
           then
-            echo "SLACK_MESSAGE=Failed :x:" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Failed :x: Tag: $NEW_TAG | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
           elif [ '${{ env.WORKFLOW_CONCLUSION }}'  == 'cancelled' ]
           then
-            echo "SLACK_MESSAGE=Cancelled :grey_exclamation:" >> $GITHUB_OUTPUT
+            echo "SLACK_MESSAGE=Staging Cancelled :grey_exclamation: Tag: $NEW_TAG | Production: 🚫 ME & US BLOCKED" >> $GITHUB_OUTPUT
           fi
       - name: Slack Notification
         uses: Zampfi/town_crier@main
@@ -318,8 +763,8 @@ jobs:
           SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
           SLACK_ICON: https://media-exp1.licdn.com/dms/image/C4D0BAQEsXCky1jDBjw/company-logo_200_200/0/1650191766210?e=2147483647&v=beta&t=skUuL49MkcdxJZmEEN2wy5E7Xqy176Ar7EPsKoSMUEE
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
-          SLACK_TITLE: Build Status
+          SLACK_TITLE: Staging Deployment with Production Gate
           ZAMP_ENV: ${{ env.ENVIRONMENT }}
           SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
           SLACK_USERNAME: Zamp-Devops
-          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }} 
+          SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}        
