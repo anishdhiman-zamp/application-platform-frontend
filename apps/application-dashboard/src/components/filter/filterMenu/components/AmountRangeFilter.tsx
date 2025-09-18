@@ -3,11 +3,12 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { debounce, useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
-import { OptionsType } from 'types/commonTypes';
+import { defaultFnType, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import Input from 'components/common/input';
 import { Tooltip } from 'components/common/tooltip';
 import { AmountRangeFilterValue, FILTER_TYPES } from 'components/filter/filter.types';
+import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 interface AmountRangeFilterProps {
@@ -19,6 +20,7 @@ interface AmountRangeFilterProps {
   initialEndValue?: string;
   onChange: (value: Record<string, AmountRangeFilterValue | object>) => void;
   filterKey: string;
+  onConfigureFilter?: defaultFnType;
 }
 
 const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
@@ -30,6 +32,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
   initialStartValue,
   initialEndValue,
   onChange,
+  onConfigureFilter,
 }) => {
   const ref = useRef(null);
 
@@ -140,7 +143,8 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
             </div>
           )}
         </div>
-        <div className='text-GRAY_700 flex cursor-pointer justify-end'>
+        <div className='text-GRAY_700 flex cursor-pointer items-center justify-end gap-3'>
+          <ConfigureFilterButton onConfigureFilter={onConfigureFilter} />
           <SvgSpriteLoader
             id='refresh-ccw-01'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}

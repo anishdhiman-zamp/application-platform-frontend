@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { DATE_FILTER_CATEGORIES, DATE_RANGE_TYPES, dateFilterValueType, PERIODICITY_TYPES } from '@zamp-platform/utils';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import DateRangePicker from 'components/common/dateRangePicker';
 
 export type DateFilterValueType = {
@@ -23,6 +23,7 @@ const DateRangeFilter: FC<{
   customTabValues?: DATE_RANGE_TYPES[];
   disableFutureDate?: boolean;
   isPeriodicityEnabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }> = ({
   value,
   disabled = false,
@@ -34,6 +35,7 @@ const DateRangeFilter: FC<{
   customTabValues,
   disableFutureDate,
   isPeriodicityEnabled,
+  onConfigureFilter,
 }) => {
   const handleChange = (category: string, value: dateFilterValueType) => {
     const customCondition = category === DATE_FILTER_CATEGORIES.CUSTOM_DATE_RANGE && value?.start && value?.end;
@@ -79,6 +81,7 @@ const DateRangeFilter: FC<{
         customTabValues={customTabValues}
         disableFutureDate={disableFutureDate}
         isPeriodicityEnabled={isPeriodicityEnabled}
+        onConfigureFilter={onConfigureFilter}
         {...dateRangeProps}
       />
     </>

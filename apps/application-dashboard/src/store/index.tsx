@@ -2,6 +2,7 @@ import { Action, combineReducers, configureStore, ThunkAction } from '@reduxjs/t
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { chatApi } from '@zamp-platform/chat';
 import layoutConfigsSliceReducer from 'store/slices/layout-configs';
+import sheetFiltersSliceReducer from 'store/slices/sheet-filters';
 import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
 
@@ -10,6 +11,7 @@ const reducer = combineReducers({
   [chatApi.reducerPath]: chatApi.reducer,
   user: userSliceReducer,
   layoutConfig: layoutConfigsSliceReducer,
+  sheetFilters: sheetFiltersSliceReducer,
 });
 
 export const store = configureStore({

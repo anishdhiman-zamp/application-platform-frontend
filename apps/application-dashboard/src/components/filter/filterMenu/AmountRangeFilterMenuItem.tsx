@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { camelCaseToNormalText } from 'utils/common';
+import { defaultFnType } from '@/types/commonTypes';
 import { AmountRangeFilterValue } from 'components/filter/filter.types';
 import AmountRangeFilter from 'components/filter/filterMenu/components/AmountRangeFilter';
 import { AMOUNT_RANGE_FILTER_OPTIONS } from 'components/filter/filters.constants';
@@ -10,6 +11,7 @@ interface AmountRangeFilterMenuItemProps {
   className?: string;
   label?: string;
   isDisabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
 const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({
@@ -17,6 +19,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({
   className,
   label,
   isDisabled = false,
+  onConfigureFilter,
 }) => {
   const columnId = column?.colId;
   const {
@@ -43,6 +46,7 @@ const AmountRangeFilterMenuItem: FC<AmountRangeFilterMenuItemProps> = ({
       initialOperator={AMOUNT_RANGE_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)}
       filterKey={columnId}
       isDisabled={isDisabled}
+      onConfigureFilter={onConfigureFilter}
     />
   );
 };
