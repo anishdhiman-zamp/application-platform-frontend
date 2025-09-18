@@ -1,7 +1,6 @@
+import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse } from 'next/server';
-
-const PREV_ROUTE_COOKIE = 'zamp_prev_route';
-const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+import { COOKIE_MAX_AGE, PREV_ROUTE_COOKIE } from 'utils/cookie';
 
 const PUBLIC_ROUTES = [
   '/_next',
@@ -55,14 +54,14 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (pathname === '/login') {
+  if (pathname === ROUTES_PATH.LOGIN) {
     return NextResponse.next();
   }
 
-  const loginUrl = new URL('/login', request.url);
+  const loginUrl = new URL(ROUTES_PATH.LOGIN, request.url);
   const response = NextResponse.redirect(loginUrl);
 
-  if (!['/', '/login'].includes(pathname)) {
+  if (![ROUTES_PATH.HOME, ROUTES_PATH.LOGIN].includes(pathname)) {
     const fullRoute = pathname + (request.nextUrl.search || '');
 
     setPrevRouteCookie(response, fullRoute);
@@ -75,9 +74,9 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
 
   switch (pathname) {
-    case '/login':
-      return NextResponse.redirect(new URL('/processes', request.url));
-    case '/': {
+    case ROUTES_PATH.LOGIN:
+      return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+    case ROUTES_PATH.HOME: {
       const prevRoute = getPrevRouteCookie(request);
 
       if (prevRoute) {
@@ -88,7 +87,7 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
         return response;
       }
 
-      return NextResponse.redirect(new URL('/processes', request.url));
+      return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
     }
     default:
       return NextResponse.next();

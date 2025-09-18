@@ -5,6 +5,7 @@ import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } fr
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { resetPostHog } from 'utils/postHog';
+import { PREV_ROUTE_COOKIE, setCookie } from '@/utils/cookie';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -25,7 +26,7 @@ export const useLogout = () => {
 
   const handleLogout = useCallback(async () => {
     if (fullPath && fullPath !== '/') {
-      document.cookie = `zamp_prev_route=${encodeURIComponent(fullPath)}; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
+      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath));
     }
 
     logOut(logoutFlow?.logout_url ?? '')
