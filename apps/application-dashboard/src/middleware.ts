@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, userAgent } from 'next/server';
 import { COOKIE_MAX_AGE, PREV_ROUTE_COOKIE } from 'utils/cookie';
 
 function setPrevRouteCookie(response: NextResponse, route: string): void {
@@ -56,6 +56,11 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
 
 const handleAuthenticatedRoutes = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
+  const { device } = userAgent(request);
+
+  if (pathname !== ROUTES_PATH.INVALID_SCREEN_SIZE && (device.type === 'mobile' || device.type === 'tablet')) {
+    return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
+  }
 
   switch (pathname) {
     case ROUTES_PATH.LOGIN:
