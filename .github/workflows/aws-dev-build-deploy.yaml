@@ -140,10 +140,12 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "development"
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
           
           # Build the application
           npm run build
