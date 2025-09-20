@@ -59,3 +59,8 @@ export const DEFAULT_SHEET_NAME = 'Untitled Sheet';
 export const DEFAULT_SHEET_DESCRIPTION = 'Untitled description';
 export const DEFAULT_PAGE_NAME = 'New page';
 export const DEFAULT_PAGE_DESCRIPTION = 'New page description';
+
+export enum DEVICE_TYPES {
+  MOBILE = 'mobile',
+  TABLET = 'tablet',
+}

@@ -1,3 +1,4 @@
+import { DEVICE_TYPES } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse, userAgent } from 'next/server';
 import { COOKIE_MAX_AGE, PREV_ROUTE_COOKIE } from 'utils/cookie';
@@ -58,7 +59,10 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   const { device } = userAgent(request);
 
-  if (pathname !== ROUTES_PATH.INVALID_SCREEN_SIZE && (device.type === 'mobile' || device.type === 'tablet')) {
+  if (
+    pathname !== ROUTES_PATH.INVALID_SCREEN_SIZE &&
+    (device.type === DEVICE_TYPES.MOBILE || device.type === DEVICE_TYPES.TABLET)
+  ) {
     return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
   }
 
