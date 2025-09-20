@@ -16,7 +16,7 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
 import { RootState, store } from 'store';
-import { openSidebar } from 'store/slices/layout-configs';
+import { toggleSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
@@ -67,7 +67,7 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
     setIsFadingOutEffect(true);
     setTimeout(() => {
       dispatch(setDashboardLoader(false));
-      dispatch(openSidebar());
+      dispatch(toggleSidebar());
     }, fadeOutOffsetTimeDifference);
   }, [dispatch]);
 

@@ -4,6 +4,8 @@ import { captureException } from '@sentry/browser';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
 
+import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
+
 import { API_DOMAIN } from './api.utils';
 import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
 
@@ -69,9 +71,19 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     const data = (error as { data?: { error?: { code?: string } } }).data;
 
     if (status === 401 && !isLoginRoute) {
-      const loginUrl = LOGIN_PATH;
+      let loginUrl = LOGIN_PATH;
+      let query = '';
 
-      window.location.href = loginUrl;
+      if (window.location.pathname && window.location.pathname !== '/') {
+        const queryParams = new URLSearchParams(window.location.search);
+        loginUrl += '?redirect_to=' + window.location.pathname;
+        queryParams.forEach((value, key) => {
+          query += `&${key}=${value}`;
+        });
+        setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, path + query.replace('&', '?'));
+      }
+
+      window.location.href = `${loginUrl}${query}`;
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
