@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { MapAny } from 'types/commonTypes';
+import { defaultFnType, MapAny } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import SearchFilter from 'components/filter/filterMenu/components/SearchFilter';
 import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
@@ -13,6 +13,7 @@ interface SearchFilterMenuItemProps {
   isOpen?: boolean;
   label?: string;
   isDisabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
 const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
@@ -21,6 +22,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
   isOpen = false,
   label,
   isDisabled = false,
+  onConfigureFilter,
 }) => {
   const columnId = column?.colId;
   const {
@@ -47,6 +49,7 @@ const SearchFilterMenuItem: FC<SearchFilterMenuItemProps> = ({
       initialSearchValue={selectedFilters[columnId]?.filter}
       initialOperator={SEARCH_FILTER_OPTIONS.find((option) => option.value === selectedFilters[columnId]?.type)}
       onChange={setFilter}
+      onConfigureFilter={onConfigureFilter}
     />
   );
 };

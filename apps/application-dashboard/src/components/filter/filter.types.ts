@@ -38,8 +38,8 @@ export interface FilterConfigType {
   values: string[];
   type: string;
   datatype: string;
-  widgetsInScope: string[];
-  targets: {
+  widgetsInScope?: string[];
+  targets?: {
     dataset_id: string;
     column: string;
   }[];

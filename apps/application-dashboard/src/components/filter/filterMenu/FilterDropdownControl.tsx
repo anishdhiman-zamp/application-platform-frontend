@@ -15,6 +15,7 @@ interface FilterDropdownControlProps {
   allowClear?: boolean;
   isOpen?: boolean;
   titleClassName?: string;
+  isHighlighted?: boolean;
 }
 
 const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
@@ -27,6 +28,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   allowClear,
   isOpen,
   titleClassName = '',
+  isHighlighted = false,
 }) => {
   const handleRemoveFilter = (e: MouseEvent) => {
     if (allowClear) {
@@ -38,7 +40,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
   return (
     <div
       data-testid={`filter-control-${filterConfig?.key}`}
-      className={`relative cursor-pointer ${className}`}
+      className={cn('relative cursor-pointer', className)}
       onClick={onClick}
     >
       <div
@@ -46,6 +48,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
           'hover:border-DIVIDER_SAIL_4 border-DIVIDER_SAIL_3 flex h-[26px] w-fit items-center gap-1.5 rounded border bg-white px-1.5 py-1.5 select-none',
           isMenuDropdownOpen ? 'border-DIVIDER_SAIL_4' : '',
           controlClassName,
+          { 'shadow-chart-highlight': isHighlighted },
         )}
       >
         <div className='f-12-400 text-GRAY_900 max-w-[200px] truncate whitespace-nowrap' title={filterConfig?.label}>

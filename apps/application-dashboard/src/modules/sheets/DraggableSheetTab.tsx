@@ -15,7 +15,7 @@ const DraggableSheetTab = ({
 }: {
   tab: MenuItem;
   currentSheetId: string;
-  handleTabSelect: (tab: MenuItem) => void;
+  handleTabSelect: (tab: MenuItem, isFromOverflow?: boolean) => void;
   allSheets?: MenuItem[];
   onCreateSheet: defaultFnType;
 }) => {

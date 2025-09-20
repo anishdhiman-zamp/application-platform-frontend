@@ -1,5 +1,5 @@
+import FilterDropdownV2 from '@/components/filter/filterMenu/FilterDropdownV2';
 import { FILTER_TYPES } from 'components/filter/filter.types';
-import FilterDropdown from 'components/filter/filterMenu/FilterDropdown';
 
 interface SingleSelectFilterProps {
   value: string[];
@@ -19,7 +19,7 @@ const SingleSelectFilter = ({
   showColumnLabel = true,
 }: SingleSelectFilterProps) => {
   return (
-    <FilterDropdown
+    <FilterDropdownV2
       index={0}
       onFilterChange={onFilterChange}
       closeOnSelect={true}

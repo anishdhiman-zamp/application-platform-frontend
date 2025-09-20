@@ -493,7 +493,7 @@ export const getCurrentPageFilters = (filtersConfig: FilterConfigType[], selecte
 
   filtersConfig?.forEach((filter) => {
     if (selectedFilters[filter?.key]) {
-      filter.targets.forEach((target) => {
+      filter?.targets?.forEach((target) => {
         const conditionValues = getConditionValues({ ...selectedFilters[filter?.key], colId: target.column });
 
         datasetFilters[target.dataset_id] = datasetFilters[target.dataset_id]
