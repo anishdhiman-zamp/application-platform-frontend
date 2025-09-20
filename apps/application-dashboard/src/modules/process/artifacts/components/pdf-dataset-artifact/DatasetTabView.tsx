@@ -6,6 +6,7 @@ import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-ar
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 import { useAppSelector } from '@/hooks/toolkit';
 import {
@@ -14,7 +15,7 @@ import {
 } from '@/modules/process/artifacts/context/completedFields.context';
 import { useFieldCounts } from '@/modules/process/hooks/useFieldsCounts';
 import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import { type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
@@ -159,18 +160,20 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
 
             return (
               <TabsTrigger
-                key={tab.dataset_id}
                 value={tab.dataset_id}
+                key={tab.dataset_id}
                 className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 max-w-[120px] items-center rounded! border-none px-2! py-1!'
               >
                 <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
-                <span
-                  className={cn('f-12-500 ml-1.5 truncate', {
-                    'text-GRAY_1000': activeTab === tab.dataset_id,
-                  })}
-                >
-                  {tab.dataset_name}
-                </span>
+                <TooltipV2 tooltipBody={tab.dataset_name} side={SIDE_OPTIONS.TOP} showOnlyWhenTruncated asChildTrigger>
+                  <p
+                    className={cn('f-12-500 ml-1.5 truncate', {
+                      'text-GRAY_1000': activeTab === tab.dataset_id,
+                    })}
+                  >
+                    {tab.dataset_name}
+                  </p>
+                </TooltipV2>
                 {hasMissingFields && (
                   <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
                     {requiredCount}
