@@ -178,8 +178,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [checkUserPrivilege]);
 
   const currentDatasetCompletedFields = useMemo(() => {
-    return completedFields[id]?.filter((field) => field.isRequired) ?? [];
-  }, [completedFields, id]);
+    return completedFields[activityId as string]?.[id]?.filter((field) => field.isRequired) ?? [];
+  }, [completedFields, id, activityId]);
 
   const [gridReady, setGridReady] = useState<boolean>(false);
   const [columns, setColumns] = useState<ColDef[]>([]);
@@ -297,6 +297,61 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       });
   };
 
+  // Add this function after line 299, before handleUpdateCompletedFields
+  const checkAndUpdatePreFilledFields = useCallback(
+    (rows: MapAny[]) => {
+      if (!rows || !missingFields || !activityId) return;
+
+      const fieldsToAdd: Array<{
+        rowId: string;
+        columnId: string;
+        isRequired: boolean;
+      }> = [];
+
+      // Check each row for pre-filled values
+      rows.forEach((row) => {
+        const rowId = row?.id ?? row?._zamp_id;
+
+        if (!rowId) return;
+
+        // Check each required missing field for this row
+        missingFields.forEach((missingField) => {
+          if (missingField.id === rowId) {
+            const columnValue = row[missingField.column];
+
+            // Check if the value is not empty and not already completed
+            if (!isValueEmpty(columnValue)) {
+              const isAlreadyCompleted = currentDatasetCompletedFields.some(
+                (field) => field.rowId === rowId && field.columnId === missingField.column,
+              );
+
+              if (!isAlreadyCompleted) {
+                fieldsToAdd.push({
+                  rowId,
+                  columnId: missingField.column,
+                  isRequired: missingField.is_required ?? false,
+                });
+              }
+            }
+          }
+        });
+      });
+
+      // Add all pre-filled fields to completed fields
+      fieldsToAdd.forEach((field) => {
+        completedFieldsDispatch({
+          type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
+          payload: {
+            datasetId: id as string,
+            activityId: activityId as string,
+            field,
+          },
+        });
+      });
+    },
+    [missingFields, activityId, id, currentDatasetCompletedFields, completedFieldsDispatch],
+  );
+
   const handleUpdateCompletedFields = (rowId: string | string[], columnId: string) => {
     toast.success(DatasetActionMessages[DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD].SUCCESS);
     setIsServerSideDataLoading(true);
@@ -312,6 +367,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
           payload: {
             datasetId: id as string,
+            activityId: activityId as string,
             field: {
               rowId: id,
               columnId,
@@ -327,6 +383,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
         payload: {
           datasetId: id as string,
+          activityId: activityId as string,
           field: {
             rowId: rowId as string,
             columnId,
@@ -695,6 +752,15 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }
   }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, activeTab, selectedRowIndex]);
 
+  // Add this useEffect to check for pre-filled fields when data is loaded
+  useEffect(() => {
+    if (isInitialDataLoaded && datasetArtifacts?.data?.rows) {
+      checkAndUpdatePreFilledFields(datasetArtifacts.data.rows);
+    }
+  }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, checkAndUpdatePreFilledFields]);
+
+  console.log('completedFields', completedFields);
+
   return (
     <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DATASET_VIEW_TYPE)}>
       <CommonWrapper
@@ -845,6 +911,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               totalRows={totalRows}
               rowData={rowData}
               datasetId={id as string}
+              activityId={activityId as string}
               selectedRowIndex={selectedRowIndex}
               navigateRow={navigateRow}
               gridApi={gridApi}

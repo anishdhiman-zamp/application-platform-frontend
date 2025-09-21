@@ -17,6 +17,7 @@ import type { MapAny } from '@/types/commonTypes';
 
 interface DatasetRowViewProps {
   datasetId: string;
+  activityId: string;
   totalRows: number;
   rowData: MapAny | null;
   selectedRowIndex: number | null;
@@ -37,6 +38,7 @@ interface DatasetRowViewProps {
 
 const DatasetRowView: FC<DatasetRowViewProps> = ({
   datasetId,
+  activityId,
   totalRows,
   rowData,
   selectedRowIndex,
@@ -153,6 +155,7 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
                 clickedField={clickedField}
                 setClickedField={setClickedField}
                 datasetId={datasetId}
+                activityId={activityId}
                 showPdfSearch={showPdfSearch}
                 filterConfig={filterConfig}
                 rowData={rowData}

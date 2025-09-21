@@ -50,7 +50,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     completedOptionalFieldsCount,
     missingRequiredFieldsCount,
     missingOptionalFieldsCount,
-  } = useFieldCounts(completedFields, missingFields);
+  } = useFieldCounts(completedFields, missingFields, activityId);
 
   const filterKeys = useMemo(
     () => Object.keys(filters?.dataset_to_filter_map ?? missingFields ?? {}),
@@ -112,37 +112,47 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       className={cn('border-GRAY_400 h-full w-full border-r', className)}
     >
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
-        {missingRequiredFieldsCount > 0 && (
+        {(missingRequiredFieldsCount > 0 || missingOptionalFieldsCount > 0) && (
           <div className='bg-GRAY_100 flex items-center justify-between px-4 py-1.5'>
             <div className='flex items-center gap-x-1.5'>
               <SvgSpriteLoader id='alert-triangle' size={14} />
               <span className='f-11-500 text-GRAY_1000'>Please add all required fields to continue</span>
             </div>
             <div className='flex items-center gap-x-4'>
-              <span className='f-11-500 text-GRAY_700'>
-                {completedOptionalFieldsCount}/{missingOptionalFieldsCount} Optional
-              </span>
-              <div className='flex items-center gap-x-1.5'>
-                <ProgressBar
-                  trackColor={COLORS.GRAY_500}
-                  indicatorColor={COLORS.GREEN_300}
-                  indicatorWidth={2}
-                  trackWidth={2}
-                  size={16}
-                  progress={progress}
-                  animate={false}
-                />
-                <span className='f-11-500 text-GRAY_1000'>
-                  {completedRequiredFieldsCount}/{missingRequiredFieldsCount} Required
+              {missingOptionalFieldsCount > 0 && (
+                <span className='f-11-500 text-GRAY_700'>
+                  {completedOptionalFieldsCount}/{missingOptionalFieldsCount} Optional
                 </span>
-              </div>
+              )}
+              {missingRequiredFieldsCount > 0 && (
+                <div className='flex items-center gap-x-1.5'>
+                  <ProgressBar
+                    trackColor={COLORS.GRAY_500}
+                    indicatorColor={COLORS.GREEN_300}
+                    indicatorWidth={2}
+                    trackWidth={2}
+                    size={16}
+                    progress={progress}
+                    animate={false}
+                  />
+                  <span className='f-11-500 text-GRAY_1000'>
+                    {completedRequiredFieldsCount}/{missingRequiredFieldsCount} Required
+                  </span>
+                </div>
+              )}
+
               <Button
                 size='xsmall'
                 isLoading={isLoading}
-                disabled={missingRequiredFieldsCount !== completedRequiredFieldsCount}
+                disabled={
+                  missingRequiredFieldsCount !== completedRequiredFieldsCount ||
+                  missingOptionalFieldsCount !== completedOptionalFieldsCount
+                }
                 onClick={handleSubmitAndContinue}
                 className={cn('f-11-500', {
-                  'bg-GRAY_300 text-GRAY_700': missingRequiredFieldsCount !== completedRequiredFieldsCount,
+                  'bg-GRAY_300 text-GRAY_700':
+                    missingRequiredFieldsCount !== completedRequiredFieldsCount ||
+                    missingOptionalFieldsCount !== completedOptionalFieldsCount,
                 })}
               >
                 Continue
