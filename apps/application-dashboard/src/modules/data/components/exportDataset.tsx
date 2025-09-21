@@ -90,7 +90,7 @@ const ExportDataset = ({ query, datasetId, hasFilters, tableRef }: ExportDataset
       <TooltipV2
         tooltipBody={hasFilters ? 'Export filtered' : 'Export all'}
         className='z-1 h-full w-full'
-        side={SIDE_OPTIONS.BOTTOM}
+        side={SIDE_OPTIONS.TOP}
         disabled={isPolling}
       >
         <div className='hover:bg-GRAY_100 flex h-full w-full cursor-pointer items-center justify-center rounded'>

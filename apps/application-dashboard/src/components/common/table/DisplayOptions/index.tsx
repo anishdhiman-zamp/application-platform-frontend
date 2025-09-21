@@ -4,7 +4,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
 import { COLORS } from '@/constants/colors';
-import type { MapAny } from '@/types/commonTypes';
+import { type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
 import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing';
 import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
@@ -17,8 +17,8 @@ type DisplayOptionsProps = {
   isGroupByDisabled?: boolean;
   isSelfServe?: boolean;
   disabled?: boolean;
-  displayOptionPosition?: 'left' | 'right';
-  columnListingPosition?: 'left' | 'right';
+  displayOptionPosition?: SIDE_OPTIONS.LEFT | SIDE_OPTIONS.RIGHT;
+  columnListingPosition?: SIDE_OPTIONS.LEFT | SIDE_OPTIONS.RIGHT;
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({
@@ -27,8 +27,8 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   isGroupByDisabled = false,
   isSelfServe = false,
   disabled = false,
-  displayOptionPosition = 'left',
-  columnListingPosition = 'left',
+  displayOptionPosition = SIDE_OPTIONS.LEFT,
+  columnListingPosition = SIDE_OPTIONS.LEFT,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);

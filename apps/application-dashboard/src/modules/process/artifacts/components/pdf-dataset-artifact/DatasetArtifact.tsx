@@ -23,14 +23,8 @@ import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
-import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
 import { DatasetActionMessages } from 'modules/data/data.constants';
-import {
-  DATASET_ACTION_STATUS,
-  DATASET_ACTION_TYPE,
-  LOADER_STATUS,
-  RuleColumnDetailsType,
-} from 'modules/data/data.types';
+import { DATASET_ACTION_STATUS, DATASET_ACTION_TYPE, RuleColumnDetailsType } from 'modules/data/data.types';
 import {
   formatColumns,
   formatDrilldownFilters,
@@ -41,7 +35,6 @@ import {
   removeCellFocus,
   syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
-import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
@@ -49,9 +42,10 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import DatasetRowView from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DatasetRowView';
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
+import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { DatasetActionStatusResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
-import { type defaultFnType, MapAny } from 'types/commonTypes';
+import { type defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
@@ -59,6 +53,7 @@ import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
+import Notification from '@/modules/data/Notification';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import {
   type CompletedField,
@@ -84,7 +79,6 @@ type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
   pageSize?: number;
-  isReadOnly?: boolean;
   containerStyle?: MapAny;
   updateFiltersInParent?: (filters: MapAny) => void;
   updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
@@ -107,7 +101,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   id,
   drilldownFilters,
   pageSize,
-  isReadOnly = false,
   containerStyle,
   updateFiltersInParent,
   updateFilterConfigInParent,
@@ -207,17 +200,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const [deleteRuleId, setDeleteRuleId] = useState<string>();
   const [pollingMessage, setPollingMessage] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
-  const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
-    open: boolean;
-    status: string;
-    title: string;
-    description: string;
-  }>({
-    open: false,
-    status: LOADER_STATUS.LOADING,
-    title: '',
-    description: '',
-  });
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<DATASET_VIEW_TYPE>(DATASET_VIEW_TYPE.ROWS);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -645,8 +627,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         if (
           isNoRowsOverlayVisible ||
           datasetArtifacts?.data?.total_count === 0 ||
-          drilldownFilters?.conditions === null ||
-          isReadOnly
+          drilldownFilters?.conditions === null
         )
           return;
       }
@@ -742,45 +723,54 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           </div>
 
           <div className='relative flex items-center gap-2.5'>
-            {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}
-            {!isReadOnly && (
-              <TableSchemaAlignmentStatus
-                showAiTransformationStatus={showAiTransformationStatus}
-                setShowAiTransformationStatus={setShowAiTransformationStatus}
-              />
-            )}
-            {!isReadOnly && (
-              <ExportDataset
-                query={exportsDatasetQuery}
-                datasetId={id as string}
-                hasFilters={!!Object.keys(selectedFilters)?.length}
-                tableRef={tableRef}
-              />
-            )}
-            {!isReadOnly && (
-              <>
-                <DisplayOptions
-                  tableRef={tableRef}
-                  datasetId={id as string}
-                  disabled={activeTab === DATASET_VIEW_TYPE.ROWS}
-                  displayOptionPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? 'right' : 'left'}
-                  columnListingPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? 'right' : 'left'}
+            <Notification isPolling={isPolling} message={pollingMessage} />
+            <ExportDataset
+              query={exportsDatasetQuery}
+              datasetId={id as string}
+              hasFilters={!!Object.keys(selectedFilters)?.length}
+              tableRef={tableRef}
+            />
+            <DisplayOptions
+              tableRef={tableRef}
+              datasetId={id as string}
+              disabled={activeTab === DATASET_VIEW_TYPE.ROWS}
+              displayOptionPosition={
+                artifactType === ARTIFACT_TYPE.PDF_DATASET ? SIDE_OPTIONS.LEFT : SIDE_OPTIONS.RIGHT
+              }
+              columnListingPosition={
+                artifactType === ARTIFACT_TYPE.PDF_DATASET ? SIDE_OPTIONS.RIGHT : SIDE_OPTIONS.LEFT
+              }
+            />
+            {filterConfigData?.config?.is_fx_enabled && (
+              <div className='flex items-center gap-2'>
+                <div className='border-GRAY_400 h-7 border-r'></div>
+                <SingleSelectFilter
+                  onFilterChange={(value) => setFxCurrency(value)}
+                  value={fxCurrency}
+                  filterKey='fx_currency'
+                  label='Currency'
+                  showColumnLabel={false}
+                  options={PAGE_CURRENCY_OPTIONS}
                 />
-                {filterConfigData?.config?.is_fx_enabled && (
-                  <div className='flex items-center gap-2'>
-                    <div className='border-GRAY_400 h-7 border-r'></div>
-                    <SingleSelectFilter
-                      onFilterChange={(value) => setFxCurrency(value)}
-                      value={fxCurrency}
-                      filterKey='fx_currency'
-                      label='Currency'
-                      showColumnLabel={false}
-                      options={PAGE_CURRENCY_OPTIONS}
-                    />
-                  </div>
-                )}
-              </>
+              </div>
             )}
+
+            <Link href={`/datasets/${id}`} target='_blank'>
+              <TooltipV2
+                side={SIDE_OPTIONS.TOP}
+                tooltipBody='Open Full Dataset'
+                className='hover:bg-GRAY_100 flex h-full w-full rounded p-0.5'
+              >
+                <SvgSpriteLoader
+                  id='arrow-narrow-up-right'
+                  size={16}
+                  color={COLORS.GRAY_1000}
+                  className='cursor-pointer'
+                  key='arrow-up-right'
+                />
+              </TooltipV2>
+            </Link>
+
             <TabsList className='gap-x-1'>
               <TabsTrigger
                 value={DATASET_VIEW_TYPE.ROWS}
