@@ -824,7 +824,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             <Link href={`/datasets/${id}`} target='_blank'>
               <TooltipV2
                 side={SIDE_OPTIONS.TOP}
-                tooltipBody='Open Full Dataset'
+                tooltipBody='Open Dataset'
                 className='hover:bg-GRAY_100 flex h-full w-full rounded p-0.5'
               >
                 <SvgSpriteLoader
