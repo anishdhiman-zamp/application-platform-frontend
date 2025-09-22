@@ -18,17 +18,17 @@ const API_DOMAIN = () => {
   }
 };
 
-export interface DataSourceResult<T = any> {
+export interface DataSourceResult<T = unknown> {
   data: T[];
   error: string | null;
 }
 
 export interface DataSourceOptions {
-  fieldValues: Record<string, any>;
+  fieldValues: Record<string, unknown>;
   onLoadingChange?: (loading: boolean) => void;
 }
 
-export const fetchDataSource = async <T = any>(
+export const fetchDataSource = async <T = unknown>(
   dataSource: DataSource,
   options: DataSourceOptions,
 ): Promise<DataSourceResult<T>> => {
@@ -41,7 +41,7 @@ export const fetchDataSource = async <T = any>(
 
     const processedParams = Object.entries(params || {}).reduce(
       (acc, [key, value]) => {
-        acc[key] = processTemplateVariables(value, fieldValues);
+        acc[key] = processTemplateVariables(value, fieldValues) as string;
         return acc;
       },
       {} as Record<string, string>,
@@ -66,8 +66,16 @@ export const fetchDataSource = async <T = any>(
       return { data: [], error: 'Failed to fetch data' };
     }
 
-    const res = await response.json();
-    return { data: res?.data || res, error: null };
+    const json: unknown = await response.json();
+
+    let data: T[] = [];
+    if (Array.isArray(json)) {
+      data = json as T[];
+    } else if (typeof json === 'object' && json !== null && Array.isArray((json as { data?: unknown }).data)) {
+      data = (json as { data: unknown[] }).data as T[];
+    }
+
+    return { data, error: null };
   } catch (err) {
     throw err;
   } finally {
@@ -84,7 +92,7 @@ export const transformDataSourceToOptions = <T extends { value?: string; id?: st
   }));
 };
 
-export const shouldFetchDataSource = (field: FormField, fieldValues: Record<string, any>): boolean => {
+export const shouldFetchDataSource = (field: FormField, fieldValues: Record<string, unknown>): boolean => {
   if (!field.data_source?.triggers) return true;
 
   const dependentFields = field.data_source.triggers.map((trigger) => trigger.field);
