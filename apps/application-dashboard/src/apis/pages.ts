@@ -5,10 +5,13 @@ import {
   AudiencesByPageIdResponse,
   CreatePagePayloadType,
   CreatePageResponseType,
+  CreateSheetFilterConfigPayloadType,
+  CreateSheetFilterConfigResponseType,
   CreateSheetPayloadType,
   CreateSheetResponseType,
   DeleteAudienceFromPageAccessType,
   DeleteSheetByPageIdPayloadType,
+  DeleteSheetFilterConfigPayloadType,
   PageResponseType,
   PatchChangeAudienceRoleInPageType,
   PostPagesToAudiencesByPageIdType,
@@ -18,6 +21,7 @@ import {
   UpdatePageIndexesPayloadType,
   UpdatePagePayloadType,
   UpdateSheetByPageIdPayloadType,
+  UpdateSheetFilterConfigPayloadType,
   UpdateSheetIndexesByPageIdPayloadType,
   UpdateSheetLayoutPayloadType,
 } from 'types/api/pagesApi.types';
@@ -41,6 +45,7 @@ const Pages = baseApi.injectEndpoints({
       query: ({ pageId, sheetId }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_FILTER_CONFIG_GET, { pageId, sheetId }),
       }),
+      providesTags: [APITags.GET_SHEET_FILTER_CONFIG],
     }),
     getAudiencesByPageId: builder.query<AudiencesByPageIdResponse[], AudiencesByPageIdRequest>({
       query: ({ pageId }) => ({ url: formRequestUrlWithParams(API_ENDPOINTS.AUDIENCES_BY_PAGE_ID_GET, { pageId }) }),
@@ -139,6 +144,36 @@ const Pages = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, error) => (error ? [] : [APITags.GET_PAGES]),
     }),
+    createSheetFilterConfig: builder.mutation<CreateSheetFilterConfigResponseType, CreateSheetFilterConfigPayloadType>({
+      query: ({ pageId, sheetId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_FILTER_CONFIG_POST, {
+          pageId,
+          sheetId,
+        }),
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_SHEET_FILTER_CONFIG]),
+    }),
+    updateSheetFilterConfig: builder.mutation<void, UpdateSheetFilterConfigPayloadType>({
+      query: ({ pageId, sheetId, filterId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_FILTER_CONFIG_PATCH, {
+          pageId,
+          sheetId,
+          filterId,
+        }),
+        method: REQUEST_TYPES.PATCH,
+        body,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_SHEET_FILTER_CONFIG]),
+    }),
+    deleteSheetFilterConfig: builder.mutation<void, DeleteSheetFilterConfigPayloadType>({
+      query: ({ pageId, sheetId, filterId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.PAGES_SHEETS_FILTER_CONFIG_DELETE, { pageId, sheetId, filterId }),
+        method: REQUEST_TYPES.DELETE,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_SHEET_FILTER_CONFIG]),
+    }),
   }),
 });
 
@@ -161,4 +196,7 @@ export const {
   useUpdateSheetLayoutMutation,
   useCreateSheetMutation,
   useCreatePageMutation,
+  useCreateSheetFilterConfigMutation,
+  useUpdateSheetFilterConfigMutation,
+  useDeleteSheetFilterConfigMutation,
 } = Pages;

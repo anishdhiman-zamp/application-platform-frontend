@@ -2,13 +2,14 @@ import { ChangeEvent, FC, ReactNode, useCallback, useEffect, useMemo, useRef, us
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { SIZE_TYPES } from 'types/common/components';
-import { MapAny, OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
 import { camelCaseToNormalText, cn, debounce } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { CheckBox } from 'components/common/Checkbox';
 import Input from 'components/common/input';
 import { FILTER_TYPES, MultiSelectFilterValue } from 'components/filter/filter.types';
 import { getDisplayString, getValueString } from 'components/filter/filter.utils';
+import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { CONDITION_OPERATOR_TYPE, MULTI_SELECT_FILTER_OPTIONS } from 'components/filter/filters.constants';
 
 export interface MultiSelectFilterProps {
@@ -24,6 +25,7 @@ export interface MultiSelectFilterProps {
   initialSelectedValues?: string[];
   initialOperator?: OptionsType;
   onChange: (value: MapAny) => void;
+  onConfigureFilter?: defaultFnType;
 }
 
 const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
@@ -39,6 +41,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
   initialSelectedValues = [],
   initialOperator,
   onChange,
+  onConfigureFilter,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -195,7 +198,8 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
             </div>
           )}
         </div>
-        <div className='text-GRAY_700 flex cursor-pointer justify-end'>
+        <div className='text-GRAY_700 flex cursor-pointer items-center justify-end gap-3'>
+          <ConfigureFilterButton onConfigureFilter={onConfigureFilter} />
           <SvgSpriteLoader
             id='refresh-ccw-01'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}

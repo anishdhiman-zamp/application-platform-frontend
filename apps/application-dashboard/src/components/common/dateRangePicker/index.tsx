@@ -10,7 +10,7 @@ import {
   RangeType,
 } from '@zamp-platform/utils';
 import { EventCallbackType } from 'types/common/components';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import DateRangeMenu from 'components/common/dateRangePicker/DateRangeMenu';
 import { MenuWrapper } from 'components/common/MenuWrapper';
@@ -29,6 +29,7 @@ interface DateFilterProps {
   customTabValues?: DATE_RANGE_TYPES[];
   disableFutureDate?: boolean;
   isPeriodicityEnabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
 export interface DateRangeComponentProps {
@@ -58,6 +59,7 @@ const DateRangePicker: FC<DateFilterProps> = ({
   customTabValues,
   disableFutureDate,
   isPeriodicityEnabled,
+  onConfigureFilter,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<DATE_FILTER_CATEGORIES>(
     defaultValue?.category ? (defaultValue?.category as DATE_FILTER_CATEGORIES) : DATE_FILTER_CATEGORIES.ALL_TIME,
@@ -200,6 +202,7 @@ const DateRangePicker: FC<DateFilterProps> = ({
         isPeriodicityEnabled={isPeriodicityEnabled}
         selectedPeriodicity={selectedPeriodicity}
         onPeriodicityChange={handlePeriodicityChange}
+        onConfigureFilter={onConfigureFilter}
       />
     </MenuWrapper>
   );

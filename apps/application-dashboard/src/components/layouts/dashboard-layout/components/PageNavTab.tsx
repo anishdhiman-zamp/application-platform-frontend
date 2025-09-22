@@ -1,6 +1,6 @@
 'use client';
 
-import React, { KeyboardEvent, useEffect, useOptimistic, useState } from 'react';
+import React, { KeyboardEvent, useOptimistic, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery, useUpdatePageMutation } from 'apis/pages';
@@ -12,8 +12,6 @@ import { PageResponseType } from 'types/api/pagesApi.types';
 import { cn, preventAutoFocus } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import PageIcon from '@/components/icons/PageIcon';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import DeletePageDialog from 'components/layouts/dashboard-layout/components/DeletePageDialog';
 
@@ -29,9 +27,6 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageName, setPageName] = useState<string>();
   const [finalName, setFinalName] = useState<string>();
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
-
-  const { evaluate, ldClient } = useFeatureFlags();
 
   const router = useRouter();
 
@@ -104,18 +99,6 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
     setIsDeleteDialogOpen(true);
   };
 
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
-
   return (
     <>
       <div
@@ -128,50 +111,48 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
 
         <div className='flex-1'>{optimisticName}</div>
 
-        {isSelfServePagesEnabled && (
-          <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
-            <PopoverTrigger
-              className={cn('cursor-pointer opacity-0 group-hover:opacity-100')}
-              id='page-nav-tab-popover-trigger'
+        <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
+          <PopoverTrigger
+            className={cn('cursor-pointer opacity-0 group-hover:opacity-100')}
+            id='page-nav-tab-popover-trigger'
+          >
+            <PermissionGuard
+              resourceType={ResourceType.PAGE}
+              resourceId={pageId}
+              privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
             >
-              <PermissionGuard
-                resourceType={ResourceType.PAGE}
-                resourceId={pageId}
-                privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
-              >
-                <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? COLORS.GRAY_800 : COLORS.GRAY_500} />
-              </PermissionGuard>
-            </PopoverTrigger>
-            <PopoverContent
-              align='end'
-              sideOffset={16}
-              className='space-y-2'
-              onCloseAutoFocus={preventAutoFocus}
-              id='page-nav-tab-popover-content'
+              <SvgSpriteLoader id='dots-vertical' size={14} color={isMenuOpen ? COLORS.GRAY_800 : COLORS.GRAY_500} />
+            </PermissionGuard>
+          </PopoverTrigger>
+          <PopoverContent
+            align='end'
+            sideOffset={16}
+            className='space-y-2'
+            onCloseAutoFocus={preventAutoFocus}
+            id='page-nav-tab-popover-content'
+          >
+            <Input
+              size='small'
+              placeholder='Page name'
+              value={pageName}
+              onChange={(e) => setPageName(e.target.value)}
+              icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
+              autoFocus
+              onBlur={handleInputBlur}
+              onKeyDown={handleEditKeyDown}
+            />
+            <Button
+              variant='ghost'
+              size='medium'
+              className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
+              onClick={handleDeletePage}
+              id='page-nav-tab-delete-page-button'
             >
-              <Input
-                size='small'
-                placeholder='Page name'
-                value={pageName}
-                onChange={(e) => setPageName(e.target.value)}
-                icon={<SvgSpriteLoader id='edit-03' size={16} color={COLORS.GRAY_500} />}
-                autoFocus
-                onBlur={handleInputBlur}
-                onKeyDown={handleEditKeyDown}
-              />
-              <Button
-                variant='ghost'
-                size='medium'
-                className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
-                onClick={handleDeletePage}
-                id='page-nav-tab-delete-page-button'
-              >
-                <SvgSpriteLoader id='trash-04' size={12} />
-                <span>Delete page</span>
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
+              <SvgSpriteLoader id='trash-04' size={12} />
+              <span>Delete page</span>
+            </Button>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <DeletePageDialog

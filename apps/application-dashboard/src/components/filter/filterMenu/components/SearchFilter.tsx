@@ -3,10 +3,11 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText, debounce } from 'utils/common';
 import Input from 'components/common/input';
 import { FILTER_TYPES } from 'components/filter/filter.types';
+import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { SEARCH_FILTER_OPTIONS } from 'components/filter/filters.constants';
 
 export interface SearchFilterProps {
@@ -19,6 +20,7 @@ export interface SearchFilterProps {
   initialOperator?: OptionsType;
   onChange: (value: MapAny) => void;
   operatorOptions?: OptionsType[];
+  onConfigureFilter?: defaultFnType;
 }
 
 const SearchFilter: FC<SearchFilterProps> = ({
@@ -31,6 +33,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
   initialOperator,
   onChange,
   operatorOptions = SEARCH_FILTER_OPTIONS,
+  onConfigureFilter,
 }) => {
   const ref = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -129,7 +132,8 @@ const SearchFilter: FC<SearchFilterProps> = ({
             </div>
           )}
         </div>
-        <div className='text-GRAY_700 flex cursor-pointer justify-end'>
+        <div className='text-GRAY_700 flex cursor-pointer items-center justify-end gap-3'>
+          <ConfigureFilterButton onConfigureFilter={onConfigureFilter} />
           <SvgSpriteLoader
             id='refresh-ccw-01'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}

@@ -36,11 +36,7 @@ const SheetTabsDefault = () => {
     [currentPage],
   );
 
-  return (
-    <div>
-      <SheetsTabs key={pageId?.toString()} tabs={tabs} currentSheetId={currentSheetId?.toString() || ''} />
-    </div>
-  );
+  return <SheetsTabs key={pageId?.toString()} tabs={tabs} currentSheetId={currentSheetId?.toString() || ''} />;
 };
 
 export default SheetTabsDefault;

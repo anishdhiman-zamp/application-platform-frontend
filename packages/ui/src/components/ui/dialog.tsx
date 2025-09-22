@@ -48,6 +48,7 @@ const DialogContent = ({
   description,
   size,
   dialogueOverlayClassName,
+  closeButtonClassName,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
@@ -55,6 +56,7 @@ const DialogContent = ({
   description?: string;
   size?: 'large' | 'medium' | 'medium_small' | 'small';
   dialogueOverlayClassName?: string;
+  closeButtonClassName?: string;
 }) => (
   <DialogPortal>
     <DialogOverlay onClick={(e) => e.stopPropagation()} className={dialogueOverlayClassName} />
@@ -79,7 +81,12 @@ const DialogContent = ({
       <DialogPrimitive.Description className='sr-only'>{description || 'Dialog content'}</DialogPrimitive.Description>
       {children}
       {showCloseButton && (
-        <DialogClose className='ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
+        <DialogClose
+          className={cn(
+            'ring-offset-background focus:ring-ring absolute top-4 right-4 z-1002 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none',
+            closeButtonClassName,
+          )}
+        >
           <X className='h-4 w-4' />
           <span className='sr-only'>Close</span>
         </DialogClose>
