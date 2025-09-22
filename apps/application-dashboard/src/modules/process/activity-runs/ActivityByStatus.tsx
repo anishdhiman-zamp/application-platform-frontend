@@ -1,28 +1,34 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { ColDef, type ColumnMovedEvent, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
-import { formatColumns, getColumnOrderingVisibilityForCurrentDataset } from 'modules/data/data.utils';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ColumnDef,
+  ColumnOrderState,
+  SortDirection,
+  Table,
+  TanStackClientSideDatasourceProps,
+  TanStackClientSideRequestProps,
+  TanStackTable,
+  VisibilityState,
+} from '@zamp-platform/tanstack-table';
+import { formatTanStackColumns } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
-import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
+import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
 import { useRouter } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
 import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetActivityRunsQuery } from '@/apis/processes';
+import DisplayOptions from '@/components/common/table/DisplayOptions';
 import { myThemeWithProcess } from '@/components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
+import { getEncodedRequest } from '@/components/common/tanstackTable/table.utils';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@/utils/localstorage';
-import CustomHeader from 'components/common/table/CustomHeader';
-import DatasetTable from 'components/common/table/DatasetTable';
-import DisplayOptions from 'components/common/table/DisplayOptions';
-import { getEncodedRequest } from 'components/common/table/table.utils';
+import { useDisplayOptionContext } from '@/modules/process/activity-runs/contextWrapper/DisplayOptionContext';
 import CommonWrapper from 'components/commonWrapper';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
-type ActivityByStatusProps = {
+interface ActivityByStatusProps {
   processId: string;
   status: string;
   filterConfigData?: MapAny;
@@ -30,7 +36,8 @@ type ActivityByStatusProps = {
   isFilterConfigError: boolean;
   isFilterConfigUninitialized: boolean;
   refetchFilterConfig: () => void;
-};
+  totalCount: number;
+}
 
 const ActivityByStatus: FC<ActivityByStatusProps> = ({
   processId,
@@ -40,31 +47,39 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   isFilterConfigError,
   isFilterConfigUninitialized,
   refetchFilterConfig,
+  totalCount,
 }) => {
-  const tableRef = useRef<AgGridReact>(null);
-  const datasetTableRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
   const {
     dispatch,
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
-
-  const [columns, setColumns] = useState<ColDef[]>([]);
-  const [totalRows, setTotalRows] = useState<number>(0);
-
-  const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
-  const [hasServerSideDataLoaded, setHasServerSideDataLoaded] = useState<boolean>(false);
-  const [isGridReady, setIsGridReady] = useState<boolean>(false);
-
+  const { columnVisibility, columnOrder, setColumnVisibility, setColumnOrder } = useDisplayOptionContext(); // Use shared display-option context
   const [getActivityRuns, { data: activityRunsData, isError: lazyloadActivityRunsError }] =
     useLazyGetActivityRunsQuery();
+  const router = useRouter();
+  const tableRef = useRef<Table<MapAny>>(null);
+  const datasetTableRef = useRef<HTMLDivElement>(null);
+  const [totalRows, setTotalRows] = useState<number>(0);
+  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
+  const [table, setTable] = useState<Table<MapAny> | null>(null);
+  const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
+  const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
+  const shouldShowEmptyState = totalCount === 0 && checkIsObjectEmpty(selectedFilters);
 
-  const serverSideDatasource: IServerSideDatasource = useMemo(() => {
+  // ClientSideDatasource - used to fetch data from server
+  const clientSideDatasource: TanStackClientSideDatasourceProps = useMemo(() => {
     return {
-      getRows: (parameters: IServerSideGetRowsParams): void => {
-        const filterModel = parameters?.request?.filterModel;
+      getRows: (params: {
+        startRow: number;
+        endRow: number;
+        sortModel: Array<{ colId: string; sort: SortDirection }>;
+        filterModel: any;
+        request: TanStackClientSideRequestProps;
+        success: (result: { rowData: any[]; rowCount: number }) => void;
+        fail: () => void;
+        api?: any;
+      }): void => {
+        const filterModel = params?.request?.filterModel;
 
         const activityStatusFilter = {
           filterType: FILTER_TYPES.MULTI_SELECT,
@@ -72,17 +87,18 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
           values: [status],
         };
 
-        const mergedRequest = {
-          ...parameters.request,
+        const mergedRequest: TanStackClientSideRequestProps = {
+          ...params.request,
           filterModel: {
             ...filterModel,
             ...(status ? { status: activityStatusFilter } : {}),
           },
         };
 
-        const queryConfig = getEncodedRequest(mergedRequest);
+        const queryConfig = getEncodedRequest({
+          request: mergedRequest,
+        });
 
-        removeCellFocus();
         setExportsDatasetQuery(queryConfig);
 
         getActivityRuns({
@@ -93,7 +109,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
           .then((response) => {
             const totalCount = response?.total_count;
 
-            if (parameters.request.startRow === 0) {
+            if (params.request.startRow === 0) {
               setTotalRows(totalCount);
               setIsNoRowsOverlayVisible(totalCount === 0);
               dispatch({
@@ -108,90 +124,65 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
               });
             }
 
-            parameters.success({
+            params.success({
               rowData: response?.rows,
-              ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
+              rowCount: params.request.startRow === 0 ? totalCount : 0,
             });
-            setHasServerSideDataLoaded(true);
           })
           .catch(() => {
-            parameters.fail();
+            params.fail();
           });
       },
     };
   }, [processId, status]);
 
-  const handleColumnMoved = (event: ColumnMovedEvent) => {
-    const columnOrderingFromLocalStorage = getColumnOrderingVisibilityForCurrentDataset(processId as string);
-    const latestColumns = event?.api?.getColumns() ?? [];
-    const { column, toIndex = 0 } = event;
+  // Direct context functions - single source of truth
+  const handleColumnVisibilityDisplayOption = useCallback(
+    (visibility: VisibilityState) => {
+      setColumnVisibility(visibility);
+    },
+    [setColumnVisibility],
+  );
 
-    if (!column) return;
+  const handleColumnOrderDisplayOption = useCallback(
+    (order: ColumnOrderState) => {
+      setColumnOrder(order);
+    },
+    [setColumnOrder],
+  );
 
-    // If the moved column is non-movable, prevent the move
-    if (column?.getColDef()?.suppressMovable) {
-      const fromIndex = latestColumns.findIndex((col) => col.getColId() === column.getColId());
+  // handle moving columns in the table
+  const handleColumnMoved = useCallback(
+    (columnId: string, fromIndex: number, toIndex: number) => {
+      const currentOrder = [...columnOrder];
 
-      event.api?.moveColumns([column], fromIndex);
+      // validate that columnId matches the expected position
+      if (currentOrder[fromIndex] !== columnId) {
+        return;
+      }
 
-      return;
-    }
+      // Remove the column from its old position and insert it at the new position
+      const [movedColumn] = currentOrder.splice(fromIndex, 1);
 
-    // Check if the target position is valid (not in a non-movable column's position)
-    const targetColumn = latestColumns[toIndex];
+      currentOrder.splice(toIndex, 0, movedColumn);
 
-    if (targetColumn?.getColDef()?.suppressMovable) {
-      const fromIndex = latestColumns.findIndex((col) => col.getColId() === column.getColId());
+      setColumnOrder(currentOrder);
+    },
+    [columnOrder, setColumnOrder],
+  );
 
-      event.api?.moveColumns([column], fromIndex);
+  // Handle column visibility changes - direct context update
+  const handleColumnVisible = useCallback(
+    (columnId: string, visible: boolean) => {
+      // Update context state directly
+      const newVisibility = { ...columnVisibility, [columnId]: visible };
 
-      return;
-    }
+      setColumnVisibility(newVisibility);
+    },
+    [columnVisibility, setColumnVisibility],
+  );
 
-    const columnOrderingVisibility: { colId: string; isVisible: boolean }[] = columnOrderingFromLocalStorage?.length
-      ? columnOrderingFromLocalStorage
-      : latestColumns.map((column) => ({
-          colId: column?.getColId(),
-          isVisible: column?.isVisible(),
-        }));
-
-    const movedColumn = columnOrderingVisibility?.find((item) => item?.colId === column?.getColId()) ?? {};
-    const fromIndex = columnOrderingVisibility?.findIndex((item) => item?.colId === column?.getColId());
-
-    if (fromIndex === toIndex) return;
-    let finalList: { colId?: string; isVisible?: boolean }[] = [];
-
-    if (fromIndex < toIndex) {
-      const zeroToOldIndex = columnOrderingVisibility?.slice(0, fromIndex) ?? [];
-      const oldIndexToNewIndex = columnOrderingVisibility?.slice(fromIndex + 1, toIndex + 1) ?? [];
-      const newIndexToEnd = columnOrderingVisibility?.slice(toIndex + 1) ?? [];
-
-      finalList = [...zeroToOldIndex, ...oldIndexToNewIndex, movedColumn, ...newIndexToEnd];
-    } else {
-      const endToOldIndex = columnOrderingVisibility?.slice(fromIndex + 1) ?? [];
-      const oldIndexToNewIndex = columnOrderingVisibility?.slice(toIndex, fromIndex) ?? [];
-      const newIndexToStart = columnOrderingVisibility?.slice(0, toIndex) ?? [];
-
-      finalList = [...newIndexToStart, movedColumn, ...oldIndexToNewIndex, ...endToOldIndex];
-    }
-
-    const currentColumnOrderingVisibility = JSON.parse(
-      getFromLocalStorage(LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY) ?? '{}',
-    );
-
-    setToLocalStorage(
-      LOCAL_STORAGE_KEYS.COLUMN_ORDERING_VISIBILITY,
-      JSON.stringify({ ...currentColumnOrderingVisibility, [processId as string]: finalList }),
-    );
-  };
-
-  const removeCellFocus = () => {
-    if (isGridReady) {
-      tableRef.current?.api?.clearCellSelection();
-      tableRef.current?.api?.clearFocusedCell();
-    }
-  };
-
+  // refetch the ClientSideDatasource
   const handleRefetch = () => {
     getActivityRuns({
       processId: processId as string,
@@ -199,62 +190,77 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     });
   };
 
-  const handleGridReady = () => {
-    setIsGridReady(true);
+  // handle row-clicked
+  const handleRowClicked = (rowData: ActivityRunRowData, rowIndex?: number) => {
+    // Navigate to activity logs for the clicked activity run
+    if (rowData?.id) {
+      router.push(
+        getProcessActivityLogsRouteById(
+          processId,
+          rowData.id,
+          status,
+          encodeURIComponent(JSON.stringify(selectedFilters)),
+          rowIndex ?? -1,
+          totalRows,
+        ),
+      );
+    }
   };
 
-  useEffect(() => {
-    if (filterConfigData?.data?.length && !isFilterConfigLoading && !isFilterConfigUninitialized) {
-      const columns = formatColumns({
-        filterConfig: filterConfigData?.data,
-        datasetId: processId,
-        tableRef,
-        isProcess: true,
-        wrapLink: true,
+  // Setup columns and filters configuration based on filter-config
+  const setupColumnsAndFilters = () => {
+    if (!filterConfigData?.data?.length || isFilterConfigLoading || isFilterConfigUninitialized) {
+      return;
+    }
+
+    const columns = formatTanStackColumns({
+      filterConfig: filterConfigData?.data,
+      datasetId: processId,
+      tableRef: null as any,
+      isProcess: true,
+      wrapLink: true,
+    });
+
+    if (columns?.length > 0) {
+      setColumns(columns);
+      dispatch({
+        type: filtersContextActions.SET_FILTERS_CONFIG,
+        payload: {
+          filtersConfig: filterConfigData?.data
+            ?.filter(
+              (item: MapAny) =>
+                !item?.metadata?.is_hidden &&
+                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS &&
+                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS,
+            )
+            ?.map((column: MapAny) => ({
+              key: column?.column,
+              label: snakeCaseToSentenceCase(column?.column),
+              values: column?.options,
+              type: column?.type,
+            })),
+        },
       });
 
-      if (columns?.length > 0) {
-        setColumns(columns);
-        dispatch({
-          type: filtersContextActions.SET_FILTERS_CONFIG,
-          payload: {
-            filtersConfig: filterConfigData?.data
-              ?.filter(
-                (item: MapAny) =>
-                  !item?.metadata?.is_hidden &&
-                  item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS &&
-                  item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS,
-              )
-              ?.map((column: MapAny) => ({
-                key: column?.column,
-                label: snakeCaseToSentenceCase(column?.column),
-                values: column?.options,
-                type: column?.type,
-              })),
-          },
-        });
-
-        if (isNoRowsOverlayVisible || activityRunsData?.total_count === 0) return;
-      }
+      if (isNoRowsOverlayVisible || activityRunsData?.total_count === 0) return;
     }
+  };
+
+  // setup columns and filters
+  useEffect(() => {
+    setupColumnsAndFilters();
   }, [filterConfigData?.data, processId]);
 
-  useEffect(() => {
-    if (isGridReady && selectedFilters) {
-      tableRef.current?.api?.setFilterModel(selectedFilters);
-      setHasServerSideDataLoaded(false);
-    }
-  }, [selectedFilters, isGridReady]);
+  // Create a callback to update state when table is set
+  const handleTableReady = useCallback(
+    (tableInstance: Table<MapAny>) => {
+      tableRef.current = tableInstance;
+      setTable(tableInstance);
+    },
+    [status, processId],
+  );
 
-  useEffect(() => {
-    if (isGridReady && isNoRowsOverlayVisible) {
-      tableRef.current?.api?.showNoRowsOverlay();
-    } else if (isGridReady) {
-      tableRef.current?.api?.hideOverlay();
-    }
-  }, [isNoRowsOverlayVisible, isGridReady]);
-
-  if (isNoRowsOverlayVisible && checkIsObjectEmpty(selectedFilters) && hasServerSideDataLoaded) {
+  if (shouldShowEmptyState) {
     return (
       <div className='h-full w-full'>
         <ActivityRunsEmptyState status={status as ACTIVITY_RUN_STATUS} />
@@ -264,13 +270,25 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
   return (
     <>
-      <CommonWrapper className={'h-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div className='z-1000 flex items-center justify-between pr-4'>
+      <CommonWrapper className={'h-fit w-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
+        <div data-testid='activity-by-status-table-header' className='z-1000 flex items-center justify-between pr-4'>
           <div className='flex items-center py-3'>
             <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
           </div>
-          <div className='relative flex items-center gap-2.5'>
-            <DisplayOptions isGroupByDisabled tableRef={tableRef} datasetId={processId as string} />
+          <div className='relative items-center gap-2.5'>
+            {table && (
+              <DisplayOptions
+                tableRef={null as any}
+                isTanStackTable
+                isGroupByDisabled
+                table={table}
+                columnOrder={columnOrder}
+                datasetId={processId ?? ''}
+                columnVisibility={columnVisibility}
+                setColumnOrder={handleColumnOrderDisplayOption}
+                setColumnVisibility={handleColumnVisibilityDisplayOption}
+              />
+            )}
           </div>
         </div>
       </CommonWrapper>
@@ -281,24 +299,25 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='sensitive z-10 h-full w-full' ref={datasetTableRef} id='activity-by-status-table'>
-          <DatasetTable
+        <div className='z-10 h-full w-full' ref={datasetTableRef} id='activity-by-status-table'>
+          <TanStackTable
             tableRef={tableRef}
             columns={columns}
-            serverSideDatasource={serverSideDatasource}
-            columnConfig={{ enableRowGroup: true, enableValue: true, headerComponent: CustomHeader }}
             totalRows={totalRows}
-            customTheme={myThemeWithProcess}
-            headerClass='f-12-450 text-GRAY_700'
-            cellClass='text-[13px]! font-[450]! px-0! py-0!'
-            suppressCellFocus
+            emptyStateStatus={status}
+            filterModel={selectedFilters}
+            clientSideDatasource={clientSideDatasource}
+            queryKeyParts={[processId, status]}
+            customTheme={myThemeWithProcess as any}
+            headerClass='f-12-450 text-GRAY_700 px-4!'
             gridStyle={{ height: 'calc(100vh - 150px)' }}
-            enableCellSelection={false}
-            onGridReady={handleGridReady}
+            cellClass='text-[13px]! font-[450]! flex items-center justify-start truncate'
+            onTableReady={handleTableReady}
+            onRowClicked={handleRowClicked}
             onColumnMoved={handleColumnMoved}
-            menuTitle='Activity properties'
-            showStatusBar={false}
-            shouldShowNA
+            onColumnVisible={handleColumnVisible}
+            initialColumnOrder={columnOrder}
+            initialColumnVisibility={columnVisibility}
           />
         </div>
       </CommonWrapper>

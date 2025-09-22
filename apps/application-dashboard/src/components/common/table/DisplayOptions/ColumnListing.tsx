@@ -12,6 +12,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { useGetDatasetDisplayConfigQuery } from '@/apis/admin';
+import { POSITION } from '@/constants/common.constants';
 import useDisplayConfigUpdate from '@/hooks/useDisplayConfigUpdate';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import { DATASET_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
@@ -29,7 +30,7 @@ type ColumnListingProps = {
   onClose: defaultFnType;
   datasetId: string;
   isSelfServe?: boolean;
-  position?: 'left' | 'right';
+  position?: POSITION.LEFT | POSITION.RIGHT;
 };
 
 const ColumnListing: FC<ColumnListingProps> = ({
@@ -37,7 +38,7 @@ const ColumnListing: FC<ColumnListingProps> = ({
   onClose,
   datasetId,
   isSelfServe = false,
-  position = 'left',
+  position = POSITION.LEFT,
 }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [searchTerm, setSearchTerm] = useState('');

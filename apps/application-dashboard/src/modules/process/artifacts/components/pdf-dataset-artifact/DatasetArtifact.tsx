@@ -52,6 +52,7 @@ import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
+import { POSITION } from '@/constants/common.constants';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import Notification from '@/modules/data/Notification';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
@@ -800,12 +801,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               tableRef={tableRef}
               datasetId={id as string}
               disabled={activeTab === DATASET_VIEW_TYPE.ROWS}
-              displayOptionPosition={
-                artifactType === ARTIFACT_TYPE.PDF_DATASET ? SIDE_OPTIONS.LEFT : SIDE_OPTIONS.RIGHT
-              }
-              columnListingPosition={
-                artifactType === ARTIFACT_TYPE.PDF_DATASET ? SIDE_OPTIONS.RIGHT : SIDE_OPTIONS.LEFT
-              }
+              displayOptionPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? POSITION.LEFT : POSITION.RIGHT}
+              columnListingPosition={artifactType === ARTIFACT_TYPE.PDF_DATASET ? POSITION.RIGHT : POSITION.LEFT}
             />
             {filterConfigData?.config?.is_fx_enabled && (
               <div className='flex items-center gap-2'>

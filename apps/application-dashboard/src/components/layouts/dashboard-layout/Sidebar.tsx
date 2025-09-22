@@ -55,45 +55,48 @@ const Sidebar = () => {
   const isLoading = isLoadingProcesses || isLoadingPages;
 
   return (
-    <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'w-0')}>
-      <div className='w-60'>
-        <div className='h-full'>
-          <div className='border-GRAY_400 border-b px-2 pb-4'>
-            {SIDEBAR_ITEMS.map((item) => (
-              <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
-                <SidebarTab
-                  key={item?.label}
-                  name={item?.label}
-                  iconId={item?.iconId}
-                  isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
-                />
-              </Link>
-            ))}
-          </div>
-          {processes && processes?.length > 0 && (
-            <div className='px-2 py-2.5'>
-              <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
-              <CommonWrapper
-                isLoading={isLoading}
-                skeletonType={SkeletonTypes.CUSTOM}
-                loader={<SkeletonLoaderSidebarPages />}
-              >
-                {processes?.map((process) => (
-                  <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
-                    <ProcessNavTab
-                      label={process?.display_name}
-                      processId={process?.id}
-                      isSelected={params?.processId === process?.id}
-                    />
-                  </Link>
-                ))}
-              </CommonWrapper>
+    <div className='bg-BACKGROUND_GRAY_1 relative z-20 flex transition-all'>
+      <div className={cn('relative transition-all', isSidebarOpen ? 'w-60' : 'invisible w-0 opacity-0')}>
+        <div className='w-60'>
+          <div className='h-full'>
+            <div className='border-GRAY_400 border-b px-2 pb-4'>
+              {SIDEBAR_ITEMS.map((item) => (
+                <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
+                  <SidebarTab
+                    key={item?.label}
+                    name={item?.label}
+                    iconId={item?.iconId}
+                    isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
+                  />
+                </Link>
+              ))}
             </div>
-          )}
-          <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
+            {processes && processes?.length > 0 && (
+              <div className='px-2 py-2.5'>
+                <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
+                <CommonWrapper
+                  isLoading={isLoading}
+                  skeletonType={SkeletonTypes.CUSTOM}
+                  loader={<SkeletonLoaderSidebarPages />}
+                >
+                  {processes?.map((process) => (
+                    <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
+                      <ProcessNavTab
+                        label={process?.display_name}
+                        processId={process?.id}
+                        isSelected={params?.processId === process?.id}
+                      />
+                    </Link>
+                  ))}
+                </CommonWrapper>
+              </div>
+            )}
+            <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
+          </div>
+          <OrgSwitcher isSidebarOpen={isSidebarOpen} />
         </div>
-        <OrgSwitcher isSidebarOpen={isSidebarOpen} />
       </div>
+      <div className='bg-GRAY_400 absolute right-0 h-[calc(100vh-64px)] w-[1px] translate-x-[1px] translate-y-4' />
     </div>
   );
 };

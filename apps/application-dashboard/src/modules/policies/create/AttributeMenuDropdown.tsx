@@ -38,7 +38,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
   const hasDataSource = 'data_source' in attribute;
   const { data: hookData, loading: hookLoading } = useCustomHook(hasDataSource ? attribute.data_source : undefined);
 
-  const loadOptions = async () => {
+  const loadOptions = async (): Promise<{ options: SelectOption[] }> => {
     if (!attribute || !hasDataSource) return { options: [] };
 
     try {
@@ -46,7 +46,7 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
       const { data, error: fetchError } = await fetchDataSource(attribute.data_source, { fieldValues: {} });
 
       if (fetchError) {
-        return { options: [] };
+        return { options: [] as SelectOption[] };
       }
 
       let options = data;
@@ -57,11 +57,11 @@ const AttributeMenuDropdown = ({ attribute, name, error, isMultiSelect }: Attrib
         options = formatter(data);
       }
 
-      return { options };
+      return { options: options as SelectOption[] };
     } catch (err) {
       captureException(err);
 
-      return { options: [] };
+      return { options: [] as SelectOption[] };
     } finally {
       setLoading(false);
     }

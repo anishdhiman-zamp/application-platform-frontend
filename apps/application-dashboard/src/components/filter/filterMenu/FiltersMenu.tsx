@@ -56,6 +56,7 @@ const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, cu
           tooltipPosition={SIDE_OPTIONS.TOP}
           tooltipText={tooltipText}
           id='add-filters'
+          data-testid='filter-control-button-add-filters'
         >
           {label}
         </FilterControlButton>

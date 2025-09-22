@@ -157,3 +157,12 @@ export interface DocumentItemType {
     process_id: string;
   };
 }
+
+export interface ActivityRunRowData {
+  id: string;
+  status: ACTIVITY_RUN_STATUS;
+  activity_updated_at?: string;
+  updated_at?: string;
+  created_at?: string;
+  [key: string]: unknown; // Allow for additional dynamic fields from the API
+}
