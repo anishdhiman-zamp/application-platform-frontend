@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from '@/utils/common';
 import { MultiSelectFilterValue } from 'components/filter/filter.types';
 import MultiSelectFilter from 'components/filter/filterMenu/components/MultiSelectFilter';
@@ -16,6 +16,7 @@ interface MultiSelectFilterMenuItemProps {
   showSelectAll?: boolean;
   label?: string;
   isDisabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
 const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
@@ -28,6 +29,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
   showSelectAll = false,
   label,
   isDisabled = false,
+  onConfigureFilter,
 }) => {
   const columnId = column?.colId;
   const {
@@ -61,6 +63,7 @@ const MultiSelectFilterMenuItem: FC<MultiSelectFilterMenuItemProps> = ({
       initialSelectedValues={selectedFilters[columnId]?.values || []}
       initialOperator={currentOperator}
       onChange={setFilter}
+      onConfigureFilter={onConfigureFilter}
     />
   );
 };

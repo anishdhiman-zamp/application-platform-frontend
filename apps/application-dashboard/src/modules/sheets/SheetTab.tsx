@@ -8,9 +8,7 @@ import { MenuItem } from 'types/common/components';
 import { useUpdateSheetByPageIdMutation } from '@/apis/pages';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { COLORS } from '@/constants/colors';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { preventAutoFocus } from '@/utils/common';
@@ -18,7 +16,7 @@ import { preventAutoFocus } from '@/utils/common';
 interface SheetTabProps {
   tab: MenuItem;
   currentSheetId: string;
-  handleTabSelect: (tab: MenuItem) => void;
+  handleTabSelect: (tab: MenuItem, isFromOverflow?: boolean) => void;
   isDragging?: boolean;
   allSheets?: MenuItem[];
   onCreateSheet: defaultFnType;
@@ -37,7 +35,6 @@ const SheetTab: FC<SheetTabProps> = ({
   const hasMovedRef = useRef(false);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
   const params = useParams();
-  const { evaluate, ldClient } = useFeatureFlags();
   const [updateSheetByPageId] = useUpdateSheetByPageIdMutation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,7 +43,6 @@ const SheetTab: FC<SheetTabProps> = ({
   const [finalName, setFinalName] = useState<string>();
   const [containerWidth, setContainerWidth] = useState(0);
   const [isLongPressing, setIsLongPressing] = useState(false);
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
 
   const handleDeleteSheet = () => {
     setIsDeleteDialogOpen(true);
@@ -177,18 +173,6 @@ const SheetTab: FC<SheetTabProps> = ({
     }
   }, [tab?.label]);
 
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
-
   return (
     <div
       ref={containerRef}
@@ -243,17 +227,16 @@ const SheetTab: FC<SheetTabProps> = ({
             onBlur={handleInputBlur}
             onKeyDown={handleEditKeyDown}
           />
-          {isSelfServePagesEnabled && (
-            <Button
-              variant='ghost'
-              size='medium'
-              className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
-              onClick={handleDeleteSheet}
-            >
-              <SvgSpriteLoader id='trash-04' size={12} />
-              <span>Delete sheet</span>
-            </Button>
-          )}
+
+          <Button
+            variant='ghost'
+            size='medium'
+            className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
+            onClick={handleDeleteSheet}
+          >
+            <SvgSpriteLoader id='trash-04' size={12} />
+            <span>Delete sheet</span>
+          </Button>
         </PopoverContent>
       </Popover>
       <DeleteSheetDialog

@@ -36,6 +36,8 @@ export enum WidgetDataValueType {
   TIME = 'TIME',
   LONG = 'LONG',
   DATETIME = 'DATETIME',
+  INTEGER = 'INTEGER',
+  TIMESTAMP_NTZ = 'TIMESTAMP_NTZ',
 }
 
 export const AG_CHART_TYPES = {

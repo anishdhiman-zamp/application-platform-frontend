@@ -23,6 +23,7 @@ enum filtersContextActions {
   SET_TOTAL_ROWS = 'SET_TOTAL_ROWS',
   SET_FILTER_LOADING = 'SET_FILTER_LOADING',
   SET_STATUS_BAR = 'SET_STATUS_BAR',
+  SET_DATASET_ID_AND_WIDGETS_MAPPING = 'SET_DATASET_ID_AND_WIDGETS_MAPPING',
 }
 
 interface InitialStateType {
@@ -39,6 +40,8 @@ interface InitialStateType {
   periodicity?: FILTER_PERIODICITIES;
   currentPageFilters: string[];
   totalRows: number;
+  allSelectedFilters: MapAny;
+  datasetIdAndWidgetsMapping?: Record<string, string[]>;
 }
 
 export interface ActionType {
@@ -58,6 +61,8 @@ const initialState: InitialStateType = {
   selectedFiltersInUI: {},
   currentPageFilters: [],
   totalRows: 0,
+  allSelectedFilters: {},
+  datasetIdAndWidgetsMapping: {},
 };
 
 const context = createContext<{
@@ -99,10 +104,14 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case filtersContextActions.INITIALIZE_DEFAULT_FILTERS:
         return {
           ...state,
-          selectedFilters: { ...state?.selectedFilters, ...action?.payload?.selectedFilters },
-          selectedFiltersInUI: { ...state?.selectedFiltersInUI, ...action?.payload?.selectedFilters },
-          currentPageFilters: Object.keys(action?.payload?.selectedFilters),
+          selectedFilters: action?.payload?.selectedFilters ?? {},
+          selectedFiltersInUI: action?.payload?.selectedFilters ?? {},
+          currentPageFilters: Object.keys(action?.payload?.selectedFilters ?? {}),
           isFilterInitialized: true,
+          allSelectedFilters: {
+            ...(action?.payload?.selectedFilters ?? {}),
+            ...(action?.payload?.allSelectedFilters ?? {}),
+          },
         };
       case filtersContextActions.GET_FILTERS_FROM_LOCAL_STORAGE: {
         const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId);
@@ -136,6 +145,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           selectedFilters,
           selectedFiltersInUI,
           currentPageFilters: Object.keys(selectedFilters),
+          allSelectedFilters: { ...state?.allSelectedFilters, ...selectedFilters },
         };
       }
 
@@ -236,6 +246,10 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
 
       case filtersContextActions.SET_FILTER_LOADING: {
         return { ...state, isFilterLoading: action?.payload?.isFilterLoading };
+      }
+
+      case filtersContextActions.SET_DATASET_ID_AND_WIDGETS_MAPPING: {
+        return { ...state, datasetIdAndWidgetsMapping: action?.payload?.datasetIdAndWidgetsMapping };
       }
 
       default:

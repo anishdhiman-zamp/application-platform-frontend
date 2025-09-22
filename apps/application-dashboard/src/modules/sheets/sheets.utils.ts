@@ -8,14 +8,14 @@ import {
   SheetFilterType,
 } from 'types/api/pagesApi.types';
 import { MapAny, ResponsiveGridLayoutType } from 'types/commonTypes';
-import { getPastDateByNumberOfDays } from 'utils/common';
+import { checkIsObjectEmpty, getPastDateByNumberOfDays } from 'utils/common';
 import { WIDGET_TYPES } from '@/types/api/widgets.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 export const getFormattedSheetsFiltersConfig = (filter: SheetFilterType) => {
   return {
-    key: filter?.targets?.[0]?.column,
+    key: filter?.id,
     label: filter?.name,
     values: filter?.options,
     datatype: filter?.data_type,
@@ -36,7 +36,7 @@ const getFilterOperator = (operator: CONDITION_OPERATOR_TYPE) => {
   }
 };
 
-const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTER_TYPES) => {
+export const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTER_TYPES) => {
   switch (filterType) {
     case FILTER_TYPES.SEARCH:
       return {
@@ -60,6 +60,7 @@ const getFilterDefaultValue = (filter: FilterDefaultValueType, filterType: FILTE
         type: filter?.operator,
       };
     case FILTER_TYPES.MULTI_SELECT:
+    case FILTER_TYPES.TAGS:
       return {
         filterType: filterType,
         type: getFilterOperator(filter?.operator),
@@ -78,10 +79,10 @@ export const getDefaultFilterValues = (filters: SheetFilterType[]) => {
   const defaultFilters: MapAny = {};
 
   filters.forEach((filter) => {
-    if (filter?.default_value) {
-      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(filter?.default_value, filter?.filter_type);
-    } else if (filter?.filter_type === FILTER_TYPES.DATE_RANGE) {
-      defaultFilters[filter?.targets?.[0]?.column] = getFilterDefaultValue(
+    if (filter?.default_value && !checkIsObjectEmpty(filter?.default_value) && filter?.id) {
+      defaultFilters[filter.id] = getFilterDefaultValue(filter?.default_value, filter?.filter_type);
+    } else if (filter?.filter_type === FILTER_TYPES.DATE_RANGE && filter?.id) {
+      defaultFilters[filter.id] = getFilterDefaultValue(
         { value: [], operator: CONDITION_OPERATOR_TYPE.IN_BETWEEN },
         filter?.filter_type,
       );
@@ -213,4 +214,30 @@ export const computeSheetLayout = (
       };
     }) ?? []
   );
+};
+
+export const getDatasetIdAndWidgetsMapping = (sheetDetails?: SheetDetailsResponseType) => {
+  const mapping: Record<string, string[]> = {};
+
+  if (!sheetDetails) {
+    return mapping;
+  }
+
+  const sheetWidgetIds = sheetDetails?.sheet_config?.sheet_layout?.map((widget) => widget.default_widget);
+
+  if (!sheetWidgetIds?.length) {
+    return mapping;
+  }
+
+  sheetDetails?.widget_instances?.forEach((widget) => {
+    if (sheetWidgetIds?.includes(widget?.widget_instance_id)) {
+      const datasetId = widget?.data_mappings?.mappings?.[0]?.dataset_id;
+
+      if (datasetId) {
+        mapping[datasetId] = [...(mapping[datasetId] || []), widget?.widget_instance_id];
+      }
+    }
+  });
+
+  return mapping;
 };

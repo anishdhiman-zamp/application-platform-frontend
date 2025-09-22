@@ -15,8 +15,9 @@ import {
 } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { EventCallbackType, MenuItem, TAB_TYPES } from 'types/common/components';
-import { MapAny, OptionsType } from 'types/commonTypes';
+import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import ConfigureFilterButton from '@/components/filter/filterMenu/ConfigureFilterButton';
 import { searchDateRange } from 'components/common/dateRangePicker/dateRangePicker.utils';
 import { DateUnitTabDisplay } from 'components/common/dateRangePicker/DateUnitTabDisplay';
 import { DisplayDates } from 'components/common/dateRangePicker/DisplayDates';
@@ -44,6 +45,7 @@ interface DateRangeMenuProps {
   isPeriodicityEnabled?: boolean;
   selectedPeriodicity?: OptionsType;
   onPeriodicityChange?: (value: OptionsType) => void;
+  onConfigureFilter?: defaultFnType;
 }
 
 const DateRangeMenu: FC<DateRangeMenuProps> = ({
@@ -62,6 +64,7 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
   isPeriodicityEnabled = false,
   selectedPeriodicity,
   onPeriodicityChange,
+  onConfigureFilter,
 }) => {
   const [currentValueStart, setCurrentValueStart] = useState<DateRangeValue | null>(null);
   const [currentValueEnd, setCurrentValueEnd] = useState<DateRangeValue | null>(null);
@@ -350,7 +353,8 @@ const DateRangeMenu: FC<DateRangeMenuProps> = ({
                   type={TAB_TYPES.UNDERLINE}
                 />
               </div>
-              <div className='cursor-pointer' onClick={onResetFilter} data-testid='reset-date-range'>
+              <ConfigureFilterButton onConfigureFilter={onConfigureFilter} />
+              <div className='cursor-pointer text-gray-700' onClick={onResetFilter} data-testid='reset-date-range'>
                 <SvgSpriteLoader id='refresh-ccw-01' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={14} height={14} />
               </div>
             </div>
