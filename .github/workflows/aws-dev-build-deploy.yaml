@@ -125,15 +125,6 @@ jobs:
         with:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
-  
-
-      - uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -149,10 +140,12 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "development"
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
           
           # Build the application
           npm run build
