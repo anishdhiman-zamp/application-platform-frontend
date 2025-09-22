@@ -28,7 +28,6 @@ import {
   DisplayTypeOptions,
 } from 'components/common/table/CustomHeader/customHeader.constants';
 import { CustomHeaderMenuOptionTypes } from 'components/common/table/CustomHeader/customHeader.types';
-import { TABLE_COPIES } from 'components/common/table/table.constants';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { FILTER_TYPES } from 'components/filter/filter.types';
 import FilterDropdownMenu from 'components/filter/filterMenu/FilterDropdownMenu';
@@ -311,14 +310,14 @@ const CustomHeader: FC<CustomHeaderProps> = ({
         <div className='flex flex-auto items-center gap-1 self-stretch truncate'>
           <span className='truncate'>{colDef?.headerName ?? colId}</span>
           {!!sortState && (
-            <>
-              {sortState === OrderType.ASC && (
-                <SvgSpriteLoader id='arrow-narrow-up' width={12} height={12} color={COLORS.BLUE_700} />
-              )}
-              {sortState === OrderType.DESC && (
-                <SvgSpriteLoader id='arrow-narrow-down' width={12} height={12} color={COLORS.BLUE_700} />
-              )}
-            </>
+            <span>
+              <SvgSpriteLoader
+                id={sortState === OrderType.ASC ? 'arrow-narrow-up' : 'arrow-narrow-down'}
+                width={12}
+                height={12}
+                color={COLORS.BLUE_700}
+              />
+            </span>
           )}
           {isFilterActive && (
             <span>
@@ -364,7 +363,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               </div>
               <div className='flex items-center gap-1'>
                 <span className='f-11-450 text-gray-700'>
-                  {DateFormatOptions.find((item) => item.value === dateFormat)?.label ?? DateFormatOptions[0].label}
+                  {DateFormatOptions.find((item) => item.value === dateFormat)?.label ?? 'Full Date'}
                 </span>
                 <SvgSpriteLoader
                   id='arrow-narrow-right'
@@ -389,8 +388,7 @@ const CustomHeader: FC<CustomHeaderProps> = ({
               </div>
               <div className='flex items-center gap-1'>
                 <span className='f-11-450 text-gray-700'>
-                  {DisplayTypeOptions.find((item) => item.value === metadata?.custom_type)?.label ??
-                    TABLE_COPIES.DEFAULT}
+                  {DisplayTypeOptions.find((item) => item.value === metadata?.custom_type)?.label ?? 'Default'}
                 </span>
                 <SvgSpriteLoader
                   id='arrow-narrow-right'

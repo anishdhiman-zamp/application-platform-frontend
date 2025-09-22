@@ -178,7 +178,3 @@ export const DisplayOptionsList: DisplayOptionItemProps[] = [
   //   iconId: 'coins-swap-02',
   // },
 ];
-
-export const enum TABLE_COPIES {
-  DEFAULT = 'Default',
-}

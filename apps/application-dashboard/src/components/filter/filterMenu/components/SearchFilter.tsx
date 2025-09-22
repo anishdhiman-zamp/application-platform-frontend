@@ -122,7 +122,7 @@ const SearchFilter: FC<SearchFilterProps> = ({
             >
               {operatorOptions.map((option) => (
                 <div
-                  className='hover:bg-GRAY_100 f-12-500 flex rounded-md px-2.5 py-2 text-left!'
+                  className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2'
                   key={option.value}
                   onClick={() => onOperatorChange(option)}
                 >

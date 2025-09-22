@@ -1,4 +1,4 @@
-import { Label, Select, SelectOption } from '@zamp-platform/ui';
+import { Label, Select } from '@zamp-platform/ui';
 import React, { useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -30,10 +30,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
     }
   }, [watchedValues]);
 
-  const loadOptions = async (
-    currentFieldValues: Record<string, unknown>,
-    page: number,
-  ): Promise<{ options: SelectOption[]; hasMore: boolean }> => {
+  const loadOptions = async (currentFieldValues: Record<string, any>, page: number) => {
     if (!field.data_source) return { options: [], hasMore: false };
 
     try {
@@ -52,7 +49,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       });
 
       if (fetchError) {
-        return { options: [] as SelectOption[], hasMore: false };
+        return { options: [], hasMore: false };
       }
 
       // If we got less items than the page size, we know there are no more items
@@ -65,10 +62,10 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
       //   setOptions((prev) => [...prev, ...transformedOptions]);
       // }
 
-      return { options: data as SelectOption[], hasMore };
+      return { options: data, hasMore };
     } catch (err) {
       console.log('Failed to load options. Please try again later.', err);
-      return { options: [] as SelectOption[], hasMore: false };
+      return { options: [], hasMore: false };
     }
   };
 
@@ -78,7 +75,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
         acc[fieldName] = watchedValues[index];
         return acc;
       },
-      {} as Record<string, unknown>,
+      {} as Record<string, any>,
     );
     return loadOptions(currentFieldValues, page);
   };
@@ -120,7 +117,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({ field, name, className
           </div>
           {fieldError?.message ? (
             <span
-              className='f-11-400 transition-all duration-200 ease-in-out'
+              className='transition-all duration-200 f-11-400 ease-in-out'
               style={{ marginBottom: '12px', color: 'var(--RED_700)' }}
             >
               {fieldError.message}

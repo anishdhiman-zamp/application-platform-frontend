@@ -5,7 +5,7 @@ export const useFormFieldValue = (fieldName: string) => {
   return watch(fieldName);
 };
 
-export const processTemplateVariables = (template: string, fieldValues: Record<string, unknown>) => {
+export const processTemplateVariables = (template: string, fieldValues: Record<string, any>) => {
   if (!template.startsWith('${') || !template.endsWith('}')) {
     return template;
   }

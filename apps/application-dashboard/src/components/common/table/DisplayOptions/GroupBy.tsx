@@ -7,14 +7,13 @@ import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { POSITION } from '@/constants/common.constants';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 
 type GroupByProps = {
   onClose: defaultFnType;
   tableRef: RefObject<AgGridReact | null>;
-  position?: POSITION.LEFT | POSITION.RIGHT;
+  position?: 'left' | 'right';
 };
 
 const GroupBy: FC<GroupByProps> = ({ tableRef, onClose, position = 'left' }) => {
@@ -116,7 +115,7 @@ const GroupBy: FC<GroupByProps> = ({ tableRef, onClose, position = 'left' }) => 
       id='group-by'
       className={cn(
         '!absolute z-10 mt-1 h-fit min-h-[344px] min-w-[376px]',
-        position === POSITION.LEFT ? 'right-0' : 'left-0',
+        position === 'left' ? 'right-0' : 'left-0',
       )}
       childrenWrapperClassName='overflow-visible! min-h-[344px]! h-fit max-h-fit!'
     >

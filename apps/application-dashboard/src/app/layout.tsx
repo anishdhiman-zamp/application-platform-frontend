@@ -8,7 +8,6 @@ import NetworkStatus from '@/components/NetWorkStatus';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import 'styles/ag-styles.css';
-import 'styles/tanstack-styles.css';
 import 'styles/kb-styles.css';
 import 'styles/common.css';
 import 'styles/react-datepicker.css';

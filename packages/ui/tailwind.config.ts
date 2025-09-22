@@ -9,7 +9,6 @@ const config = {
     './src/modules/**/*.{js,ts,jsx,tsx}',
     './node_modules/destiny/dist/components/**/*.{js,ts}',
     '../../packages/ui/src/**/*.{ts,tsx}',
-    '../../packages/tanstack-table/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -158,7 +157,6 @@ const config = {
           '300': 'var(--GRAY_300)',
           '400': 'var(--GRAY_400)',
           '500': 'var(--GRAY_500)',
-          '550': 'var(--GRAY_550)',
           '600': 'var(--GRAY_600)',
           '700': 'var(--GRAY_700)',
           '800': 'var(--GRAY_800)',

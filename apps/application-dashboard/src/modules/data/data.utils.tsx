@@ -1,6 +1,5 @@
-import { type RefObject } from 'react';
+import type { RefObject } from 'react';
 import { captureException } from '@sentry/browser';
-import { ColumnDef, CUSTOM_HEADER_NAME } from '@zamp-platform/tanstack-table';
 import { DATE_FORMATS, formatRelativeWithCustomLocale, VALID_DATE_FORMATS } from '@zamp-platform/utils';
 import {
   ColDef,
@@ -39,7 +38,6 @@ import {
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/ActivityLinkWrapper';
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
-import CustomHeaderTk from '@/components/common/tanstackTable/customHeader';
 import { toast } from '@/components/common/toast/Toast';
 import { getDatasetDrilldownRoute, getPageDatasetDrilldownRoute } from '@/constants/routeConfig';
 import { DisplayConfigType } from '@/types/api/admin.types';
@@ -106,7 +104,7 @@ const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType
 
   const rowId = params.data?.id;
 
-  return missingFields.some((field) => field.id === rowId && field.column === params.column.id);
+  return missingFields.some((field) => field.id === rowId && field.column === params.column.getColId());
 };
 
 export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
@@ -194,8 +192,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
       hideFloatingFilter:
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS ||
         column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS ||
-        column?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT,
-      isMenuDisabled,
+        isMenuDisabled,
       dateFormat: valueFormat?.find((item) => item?.type === VALUE_FORMAT_TYPE.DATE_TIME)?.value,
       isSelfServe,
     };
@@ -263,139 +260,6 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   }
 
   return orderedColumns?.length ? orderedColumns : columns;
-};
-
-export const formatTanStackColumns = (params: FormatColumnsParamsType): ColumnDef<any>[] => {
-  const columns = formatColumns(params);
-  const { wrapLink } = params;
-
-  return columns.map((tanColumn, index): ColumnDef<any> => {
-    // Ensure we always have a valid column ID for TanStack Table
-    const columnId = tanColumn?.field || tanColumn?.colId || tanColumn?.headerName || `column_${index}`;
-
-    // Validate that the column ID is not empty or just whitespace
-    const validColumnId = columnId && columnId.trim() ? columnId.trim() : `column_${index}`;
-
-    const tanStackColumn: ColumnDef<any> = {
-      id: validColumnId,
-      accessorKey: validColumnId,
-      header: tanColumn?.headerName || tanColumn?.field || tanColumn?.colId || '',
-      size: tanColumn.width || tanColumn.initialWidth || 150,
-      minSize: tanColumn?.minWidth || 50,
-      maxSize: tanColumn?.maxWidth || undefined,
-      enableSorting: !(tanColumn as any)?.suppressSorting,
-      enableResizing: !(tanColumn as any).suppressResize,
-      enableHiding: !(tanColumn as any).suppressColumnsToolPanel,
-      enablePinning: true,
-      meta: {
-        customType: tanColumn.cellRendererParams?.custom_type,
-        metadata: tanColumn.cellRendererParams,
-        suppressMovable: tanColumn.suppressMovable,
-      },
-    };
-
-    // Handle cell rendering and value formatting with proper precedence
-    if (tanColumn.cellRenderer) {
-      tanStackColumn.cell = (cellContext: any) => {
-        const { getValue, row, column } = cellContext;
-        const CellRenderer = tanColumn?.cellRenderer;
-
-        // Check if this is the wrapped ActivityLinkWrapper
-        const isActivityLinkWrapper = CellRenderer?.displayName === 'WrappedRenderer' && wrapLink;
-
-        if (typeof CellRenderer === 'function') {
-          const aliasKey = tanColumn?.headerComponentParams?.alias ?? tanColumn?.cellRendererParams?.alias;
-          const fallbackValue =
-            getValue() ??
-            row.original?.[column.id] ??
-            (tanColumn?.field && row.original?.[tanColumn.field]) ??
-            (aliasKey && row.original?.[aliasKey]);
-
-          // Use absolute row index for ActivityLinkWrapper
-          const rowIndex = isActivityLinkWrapper ? cellContext.absoluteRowIndex : row.index;
-
-          const agGridParams = {
-            ...tanColumn?.cellRendererParams,
-            value: fallbackValue,
-            data: row?.original,
-            node: { data: row?.original, rowIndex },
-            column: {
-              id: column.id,
-              getColId: () => column.id, // Maintain backward compatibility for cell renderers
-            },
-            valueFormatted: fallbackValue,
-          };
-
-          return <CellRenderer {...agGridParams} />;
-        }
-
-        return getValue();
-      };
-    } else if (tanColumn.valueFormatter && typeof tanColumn.valueFormatter === 'function') {
-      tanStackColumn.cell = ({ getValue, row, column }: any) => {
-        const formatter = tanColumn?.valueFormatter as (params: ValueFormatterParams) => string;
-        // Create AG-Grid compatible params for backward compatibility
-        const compatibleParams = {
-          value: getValue(),
-          data: row?.original,
-          node: { data: row?.original },
-          column: {
-            id: column.id,
-            getColId: () => column.id, // Maintain backward compatibility
-          },
-          // Add required AG-Grid properties with safe defaults
-          colDef: tanColumn,
-          api: null as any,
-          context: null as any,
-        };
-
-        return formatter(compatibleParams as unknown as ValueFormatterParams);
-      };
-    } else {
-      // Default cell rendering - ensure we have a fallback for columns without custom renderers
-      tanStackColumn.cell = ({ getValue, row, column }: any) => {
-        const value = getValue();
-        // Handle cases where getValue() might not work due to accessor issues
-        const fallbackValue = value ?? row.original?.[column.id] ?? row.original?.[tanColumn?.field || ''];
-
-        return fallbackValue != null ? String(fallbackValue) : '';
-      };
-    }
-
-    // handle header name rendering
-    tanStackColumn.header = (ctx: any) => {
-      const col = ctx?.column;
-      const colId = col?.id;
-      const headerLabel =
-        tanColumn?.cellRendererParams?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS
-          ? ''
-          : tanColumn?.cellRendererParams?.custom_type === CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS
-            ? snakeCaseToSentenceCase(CUSTOM_HEADER_NAME.CURRENT_STATUS)
-            : snakeCaseToSentenceCase(
-                tanColumn?.headerName || (typeof tanColumn?.field === 'string' ? tanColumn?.field : colId),
-              );
-
-      const headerProps = {
-        columnId: colId,
-        headerLabel,
-        // Sorting controls
-        onSortAsc: () => col?.toggleSorting(false),
-        onSortDesc: () => col.toggleSorting(true),
-        onClearSort: () => (col?.clearSorting ? col?.clearSorting() : col?.toggleSorting(false)),
-        getIsSorted: () => col?.getIsSorted?.() ?? false,
-        // Visibility control
-        onHideColumn: () => col.toggleVisibility(false),
-        // Pass through any metadata the header uses
-        ...(tanColumn.headerComponentParams as any),
-      };
-
-      const HeaderComponent = (tanColumn.headerComponent as any) || CustomHeaderTk;
-
-      return <HeaderComponent {...headerProps} />;
-    };
-
-    return tanStackColumn;
-  });
 };
 
 export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => {
