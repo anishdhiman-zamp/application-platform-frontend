@@ -1,5 +1,5 @@
 import { type FC, useEffect, useMemo, useState } from 'react';
-import { REGIONS_MAP, reinitializeApiDomain } from '@zamp-platform/api';
+import { reinitializeApiDomain } from '@zamp-platform/api';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
@@ -7,7 +7,7 @@ import type { MenuItem } from '@/types/common/components';
 import type { MapAny } from '@/types/commonTypes';
 
 interface RegionsSelectDropdownProps {
-  regions: string[];
+  regions: { region: string; url: string }[];
   defaultRegion: string;
 }
 
@@ -17,24 +17,22 @@ const RegionsSelectDropdown: FC<RegionsSelectDropdownProps> = ({ regions, defaul
 
   const handleRegionChange = (region: MenuItem) => {
     setSelectedRegion(region);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region?.value as string);
-    reinitializeApiDomain();
+    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, JSON.stringify({ region: region?.label, url: region?.value }));
+    reinitializeApiDomain(region?.value as string);
   };
 
   const regionsList = useMemo(() => {
     return regions.map((region) => {
-      const formattedRegion = region.length ? region.replace('-', '') : 'us';
-
       return {
-        label: REGIONS_MAP[formattedRegion as keyof typeof REGIONS_MAP]?.shortHand,
-        value: region,
+        label: region.region,
+        value: region.url,
       };
     });
   }, [regions]);
 
   useEffect(() => {
     const selectedRegion = regionsList.find(
-      (region) => region?.value === getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION),
+      (region) => region?.value === JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION)).region,
     );
 
     if (selectedRegion) {

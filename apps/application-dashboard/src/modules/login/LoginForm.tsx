@@ -30,7 +30,7 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
-  const [allRegions, setAllRegions] = useState<string[]>([]);
+  const [allRegions, setAllRegions] = useState<{ region: string; url: string }[]>([]);
   const [defaultRegion, setDefaultRegion] = useState<string>('');
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -120,10 +120,10 @@ export const LoginForm = () => {
 
       return;
     }
-    const { domain: apiDomain, regions } = await getApiDomainAndRegions(email);
+    const allRegionsResponse = await getApiDomainAndRegions(email);
 
-    if (regions.length > 1 && allRegions.length === 0) {
-      setAllRegions(regions);
+    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
+      setAllRegions(allRegionsResponse);
 
       setLoading(false);
 
@@ -131,7 +131,7 @@ export const LoginForm = () => {
     }
 
     try {
-      const apiUrl = `${apiDomain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const apiUrl = `${allRegionsResponse[0].url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
       const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,

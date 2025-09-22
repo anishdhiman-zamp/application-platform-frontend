@@ -180,11 +180,12 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
+          NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
         run: |
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
-          
+          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
           # Build the application
           npm run build
           
@@ -230,6 +231,7 @@ jobs:
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
+            --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-stg-aws-us.zamp.ai \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
