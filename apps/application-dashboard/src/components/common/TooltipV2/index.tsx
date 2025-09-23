@@ -52,7 +52,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
     }
 
     return children;
-  }, [showOnlyWhenTruncated]);
+  }, [showOnlyWhenTruncated, children]);
 
   const checkOverflow = useCallback(() => {
     const element = triggerRef.current;

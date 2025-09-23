@@ -286,7 +286,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       });
   };
 
-  // Add this function after line 299, before handleUpdateCompletedFields
+  // Function to check and update pre-filled fields
   const checkAndUpdatePreFilledFields = useCallback(
     (rows: MapAny[]) => {
       if (!rows || !missingFields || !activityId) return;
