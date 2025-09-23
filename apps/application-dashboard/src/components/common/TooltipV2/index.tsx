@@ -5,7 +5,9 @@ import {
   type ReactElement,
   ReactNode,
   type RefAttributes,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -40,12 +42,28 @@ const TooltipV2: FC<TooltipV2Props> = ({
   const triggerRef = useRef<HTMLElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  const shouldShowTooltip = !disabled && !isDisabledBody && tooltipBody && isOverflowing;
+  const shouldShowTooltip = useMemo(() => {
+    return !disabled && !isDisabledBody && tooltipBody && isOverflowing;
+  }, [disabled, isDisabledBody, tooltipBody, isOverflowing]);
 
-  const enhancedChildren =
-    showOnlyWhenTruncated && isValidElement(children)
-      ? cloneElement(children as ReactElement<RefAttributes<HTMLElement>>, { ref: triggerRef })
-      : children;
+  const enhancedChildren = useMemo(() => {
+    if (showOnlyWhenTruncated && isValidElement(children)) {
+      return cloneElement(children as ReactElement<RefAttributes<HTMLElement>>, { ref: triggerRef });
+    }
+
+    return children;
+  }, [children, showOnlyWhenTruncated]);
+
+  const checkOverflow = useCallback(() => {
+    const element = triggerRef.current;
+
+    if (element) {
+      const hasHorizontalOverflow = element.scrollWidth > element.clientWidth;
+      const hasVerticalOverflow = element.scrollHeight > element.clientHeight;
+
+      setIsOverflowing(hasHorizontalOverflow || hasVerticalOverflow);
+    }
+  }, []);
 
   useEffect(() => {
     if (!showOnlyWhenTruncated) {
@@ -53,19 +71,6 @@ const TooltipV2: FC<TooltipV2Props> = ({
 
       return;
     }
-
-    const checkOverflow = () => {
-      const element = triggerRef.current;
-
-      if (element) {
-        const hasHorizontalOverflow = element.scrollWidth > element.clientWidth;
-        const hasVerticalOverflow = element.scrollHeight > element.clientHeight;
-
-        setIsOverflowing(hasHorizontalOverflow || hasVerticalOverflow);
-      }
-    };
-
-    checkOverflow();
 
     const resizeObserver = new ResizeObserver(checkOverflow);
 
@@ -79,7 +84,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
       resizeObserver.disconnect();
       window.removeEventListener('resize', checkOverflow);
     };
-  }, [showOnlyWhenTruncated]);
+  }, [showOnlyWhenTruncated, checkOverflow]);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (scrollableBody) {

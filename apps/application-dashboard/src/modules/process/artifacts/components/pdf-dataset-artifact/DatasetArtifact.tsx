@@ -79,14 +79,9 @@ import { filtersContextActions, useFiltersContextStore, withFiltersContext } fro
 type DatasetByIdProps = {
   id: string;
   drilldownFilters?: FilterModelType;
-  pageSize?: number;
-  containerStyle?: MapAny;
-  updateFiltersInParent?: (filters: MapAny) => void;
-  updateFilterConfigInParent?: (filterConfig: MapAny[]) => void;
-  parentSelectedFilters?: MapAny;
   missingFields?: MissingFieldItemType[];
-  hasMissingFields?: boolean;
   showPdfSearch?: boolean;
+  isMissingFieldsBarVisible?: boolean;
 };
 
 type MissingFieldControlProps = {
@@ -101,13 +96,8 @@ type MissingFieldControlProps = {
 const DatasetArtifact: FC<DatasetByIdProps> = ({
   id,
   drilldownFilters,
-  pageSize,
-  containerStyle,
-  updateFiltersInParent,
-  updateFilterConfigInParent,
-  parentSelectedFilters,
   missingFields,
-  hasMissingFields,
+  isMissingFieldsBarVisible = false,
 }) => {
   const searchParams = useSearchParams();
   const params = useParams();
@@ -221,7 +211,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           false,
           hiddenColumnFilters,
           undefined,
-          pageSize,
+          undefined,
         );
 
         removeCellFocus(tableRef);
@@ -248,9 +238,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             }
             parameters.success({
               rowData: response?.data?.rows,
-              ...(parameters.request.startRow === 0
-                ? { rowCount: pageSize ? (totalCount < pageSize ? totalCount : pageSize) : totalCount }
-                : {}),
+              ...(parameters.request.startRow === 0 ? { rowCount: totalCount } : {}),
             });
           })
           .catch(() => {
@@ -259,7 +247,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           });
       },
     };
-  }, [id, fxCurrency, getDatasetArtifacts, processId, activityId, pageSize]);
+  }, [id, fxCurrency, getDatasetArtifacts, processId, activityId]);
 
   const handleSuccessfulUpdate = (
     data: DatasetUpdateResponseType,
@@ -653,18 +641,12 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             filtersConfig,
           },
         });
-        updateFilterConfigInParent?.(filtersConfig);
+
         if (filters) {
           firstLoadDone.current = false;
           dispatch({
             type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
             payload: { selectedFilters: getFilters(filters, filterConfigData.data) ?? {} },
-          });
-        }
-        if (parentSelectedFilters) {
-          dispatch({
-            type: filtersContextActions.INITIALIZE_DEFAULT_FILTERS,
-            payload: { selectedFilters: parentSelectedFilters },
           });
         }
 
@@ -724,7 +706,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   useEffect(() => {
     if (gridReady && selectedFilters) {
       tableRef.current?.api?.setFilterModel(selectedFilters);
-      updateFiltersInParent?.(selectedFilters);
     }
   }, [selectedFilters, fxCurrency, gridReady]);
 
@@ -737,13 +718,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [isNoRowsOverlayVisible]);
 
   useEffect(() => {
-    if (gridReady && isInitialDataLoaded && hasMissingFields && currentIndex === -1) {
+    if (gridReady && isInitialDataLoaded && requiredMissingFields?.length > 0 && currentIndex === -1) {
       requestAnimationFrame(() => {
         setCurrentIndex(0);
         scrollToMissingField(0);
       });
     }
-  }, [gridReady, isInitialDataLoaded, hasMissingFields, requiredMissingFields, currentIndex, id]);
+  }, [gridReady, isInitialDataLoaded, requiredMissingFields?.length, currentIndex, id]);
 
   useEffect(() => {
     if (isInitialDataLoaded) {
@@ -881,10 +862,11 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 setGridApi(params?.api);
                 setGridReady(true);
               }}
-              containerStyle={containerStyle}
               missingFields={requiredMissingFields}
               completedFields={currentDatasetCompletedFields}
-              gridStyle={hasMissingFields ? { height: 'calc(100vh - 245px)' } : { height: 'calc(100vh - 210px)' }}
+              gridStyle={
+                isMissingFieldsBarVisible ? { height: 'calc(100vh - 245px)' } : { height: 'calc(100vh - 210px)' }
+              }
               {...(datasetArtifacts?.data?.config?.is_drilldown_enabled
                 ? {
                     onDrilldownClick: (data) =>
@@ -911,7 +893,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
               navigateRow={navigateRow}
               gridApi={gridApi}
               columns={columns}
-              hasMissingFields={hasMissingFields ?? false}
+              isMissingFieldsBarVisible={isMissingFieldsBarVisible}
               isDatasetFetching={
                 (isFetchingDatasetArtifacts || isUninitializedDatasetArtifacts) && !isServerSideDataLoading
               }
@@ -925,7 +907,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             />
           </div>
         </CommonWrapper>
-        {gridReady && hasMissingFields && (
+        {gridReady && !!requiredMissingFields?.length && (
           <MissingFieldControl
             totalMissingFields={requiredMissingFields?.length ?? 0}
             currentIndex={currentIndex}

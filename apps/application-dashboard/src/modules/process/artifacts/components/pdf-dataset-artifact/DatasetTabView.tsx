@@ -52,6 +52,9 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     missingOptionalFieldsCount,
   } = useFieldCounts(completedFields, missingFields, activityId);
 
+  const [activeTab, setActiveTab] = useState<string>('');
+  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+
   const filterKeys = useMemo(
     () => Object.keys(filters?.dataset_to_filter_map ?? missingFields ?? {}),
     [filters, missingFields],
@@ -63,17 +66,26 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     );
   }, [datasetArtifact?.datasets, filterKeys]);
 
-  const [activeTab, setActiveTab] = useState<string>('');
-  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
-
-  const currentDatasetHasMissingFields = useMemo(
-    () => (missingFields?.[activeTab]?.cells?.filter((cell) => cell.is_required) ?? []).length > 0,
-    [missingFields, activeTab],
-  );
-
   const progress = useMemo(() => {
     return (completedRequiredFieldsCount / missingRequiredFieldsCount) * 100;
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
+
+  const isContinueButtonDisabled = useMemo(
+    () =>
+      missingRequiredFieldsCount !== completedRequiredFieldsCount ||
+      missingOptionalFieldsCount !== completedOptionalFieldsCount,
+    [
+      missingRequiredFieldsCount,
+      completedRequiredFieldsCount,
+      missingOptionalFieldsCount,
+      completedOptionalFieldsCount,
+    ],
+  );
+
+  const showMissingFieldsBar = useMemo(
+    () => missingRequiredFieldsCount > 0 || missingOptionalFieldsCount > 0,
+    [missingRequiredFieldsCount, missingOptionalFieldsCount],
+  );
 
   const handleSubmitAndContinue = async () => {
     const { logGroupId, hitlRequestId, ctaActionId, ctaValue } = emitHITLActionPayload;
@@ -112,7 +124,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       className={cn('border-GRAY_400 h-full w-full border-r', className)}
     >
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
-        {(missingRequiredFieldsCount > 0 || missingOptionalFieldsCount > 0) && (
+        {showMissingFieldsBar && (
           <div className='bg-GRAY_100 flex items-center justify-between px-4 py-1.5'>
             <div className='flex items-center gap-x-1.5'>
               <SvgSpriteLoader id='alert-triangle' size={14} />
@@ -144,15 +156,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
               <Button
                 size='xsmall'
                 isLoading={isLoading}
-                disabled={
-                  missingRequiredFieldsCount !== completedRequiredFieldsCount ||
-                  missingOptionalFieldsCount !== completedOptionalFieldsCount
-                }
+                disabled={isContinueButtonDisabled}
                 onClick={handleSubmitAndContinue}
                 className={cn('f-11-500', {
-                  'bg-GRAY_300 text-GRAY_700':
-                    missingRequiredFieldsCount !== completedRequiredFieldsCount ||
-                    missingOptionalFieldsCount !== completedOptionalFieldsCount,
+                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled,
                 })}
               >
                 Continue
@@ -205,8 +212,8 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
             filters?.dataset_to_filter_map?.[activeTab]?.filters ?? missingFields?.[activeTab]?.filters ?? {}
           }
           missingFields={missingFields?.[activeTab]?.cells ?? []}
-          hasMissingFields={currentDatasetHasMissingFields}
           showPdfSearch={showPdfSearch}
+          isMissingFieldsBarVisible={showMissingFieldsBar}
         />
       </TabsContent>
     </Tabs>

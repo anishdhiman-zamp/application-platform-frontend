@@ -24,7 +24,7 @@ interface DatasetRowViewProps {
   navigateRow: (direction: 1 | -1) => void;
   gridApi: GridApi | null;
   columns: ColumnDef[];
-  hasMissingFields: boolean;
+  isMissingFieldsBarVisible: boolean;
   isDatasetFetching: boolean;
   selectedKey: string;
   onChange?: (key: string, value: string, rowId: string) => void;
@@ -48,7 +48,7 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
   isDatasetFetching,
   selectedKey,
   onChange,
-  hasMissingFields,
+  isMissingFieldsBarVisible,
   requiredMissingFields,
   missingFields,
   currentUserHasEditAccess,
@@ -120,7 +120,7 @@ const DatasetRowView: FC<DatasetRowViewProps> = ({
       isNoData={totalRows === 0}
       noDataBanner={<CustomNoRowsOverlay />}
       className={cn('absolute inset-0 z-20 flex h-[calc(100vh-210px)] w-full flex-col', {
-        'pb-10': hasMissingFields,
+        'pb-10': isMissingFieldsBarVisible,
       })}
     >
       {totalRows > 1 && (
