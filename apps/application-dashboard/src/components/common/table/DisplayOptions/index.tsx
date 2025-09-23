@@ -1,14 +1,17 @@
 import { FC, RefObject, useRef, useState } from 'react';
+import { ColumnOrderState, Table, VisibilityState } from '@zamp-platform/tanstack-table';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
 import { COLORS } from '@/constants/colors';
+import { POSITION } from '@/constants/common.constants';
 import type { MapAny } from '@/types/commonTypes';
 import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing';
 import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
 import { DISPLAY_OPTIONS } from 'components/common/table/table.types';
+import ColumnListingTk from 'components/common/tanstackTable/displayOptions';
 import TooltipV2 from 'components/common/TooltipV2';
 
 type DisplayOptionsProps = {
@@ -17,8 +20,16 @@ type DisplayOptionsProps = {
   isGroupByDisabled?: boolean;
   isSelfServe?: boolean;
   disabled?: boolean;
-  displayOptionPosition?: 'left' | 'right';
-  columnListingPosition?: 'left' | 'right';
+  displayOptionPosition?: POSITION.LEFT | POSITION.RIGHT;
+  columnListingPosition?: POSITION.LEFT | POSITION.RIGHT;
+
+  // TanStackTable
+  isTanStackTable?: boolean;
+  table?: Table<MapAny> | null;
+  columnVisibility?: VisibilityState;
+  setColumnVisibility?: (visibility: VisibilityState) => void;
+  columnOrder?: ColumnOrderState;
+  setColumnOrder?: (order: ColumnOrderState) => void;
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({
@@ -27,8 +38,16 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
   isGroupByDisabled = false,
   isSelfServe = false,
   disabled = false,
-  displayOptionPosition = 'left',
-  columnListingPosition = 'left',
+  displayOptionPosition = POSITION.LEFT,
+  columnListingPosition = POSITION.LEFT,
+  isTanStackTable = false,
+
+  // TanStackTable
+  table,
+  columnVisibility,
+  setColumnVisibility,
+  columnOrder,
+  setColumnOrder,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -72,25 +91,40 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
     setIsOpen(true);
   };
 
+  const handleDropdownOpenChange = (open: boolean) => {
+    // If trying to open but any sub-menu is already open, close everything instead
+    if (open && (isColumnListingOpen || isGroupByOpen)) {
+      setIsColumnListingOpen(false);
+      setIsGroupByOpen(false);
+      setIsOpen(false);
+
+      return;
+    }
+    setIsOpen(open);
+  };
+
   return (
     <div className='relative z-40' ref={menuRef}>
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenu open={isOpen} onOpenChange={handleDropdownOpenChange}>
         <TooltipV2 tooltipBody='Display options' className='cursor-pointer' asChildTrigger>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className='flex h-5.5 w-5.5 items-center justify-center p-1 ring-0 select-none focus-visible:ring-0 focus-visible:ring-offset-0'
-              size='small'
-              variant='ghost'
-              disabled={disabled}
-            >
-              <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
-            </Button>
-          </DropdownMenuTrigger>
+          <div data-testid='display-options-icon'>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className='flex h-5.5 w-5.5 items-center justify-center p-1 ring-0 select-none focus-visible:ring-0 focus-visible:ring-offset-0'
+                size='small'
+                variant='ghost'
+                disabled={disabled}
+              >
+                <SvgSpriteLoader id='settings-04' color={COLORS.GRAY_900} size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+          </div>
         </TooltipV2>
         <DropdownMenuContent align='end' className='max-h-[300px] !min-w-[180px] overflow-y-auto' sideOffset={5}>
           {DisplayOptionsList.filter((option) => !isGroupByDisabled || option.id !== DISPLAY_OPTIONS.GROUP_BY).map(
             (option: MapAny) => (
               <DropdownMenuItem
+                data-testid={`display-options-item-${option?.label}`}
                 key={option?.id}
                 onClick={() => handleClick(option?.id)}
                 className='hover:!bg-GRAY_50 text-GRAY_1000 f-12-500 cursor-default rounded px-2.5 py-2'
@@ -103,15 +137,28 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
             ),
           )}
         </DropdownMenuContent>
-        {isColumnListingOpen && (
-          <ColumnListing
-            tableRef={tableRef}
-            onClose={handleCloseColumnListing}
-            datasetId={datasetId}
-            isSelfServe={isSelfServe}
-            position={columnListingPosition}
-          />
-        )}
+        {isColumnListingOpen &&
+          (isTanStackTable ? (
+            <ColumnListingTk
+              table={table!}
+              columnVisibility={columnVisibility!}
+              setColumnVisibility={setColumnVisibility!}
+              columnOrder={columnOrder!}
+              setColumnOrder={setColumnOrder!}
+              onClose={handleCloseColumnListing}
+              datasetId={datasetId}
+              isSelfServe={isSelfServe}
+              position={columnListingPosition}
+            />
+          ) : (
+            <ColumnListing
+              tableRef={tableRef}
+              onClose={handleCloseColumnListing}
+              datasetId={datasetId}
+              isSelfServe={isSelfServe}
+              position={columnListingPosition}
+            />
+          ))}
         {isGroupByOpen && <GroupBy onClose={handleCloseGroupBy} tableRef={tableRef} position={displayOptionPosition} />}
       </DropdownMenu>
     </div>

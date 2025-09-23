@@ -31,6 +31,7 @@ interface FiltersContainerProps {
   titleClassName?: string;
   isPlayground?: boolean;
   isSheetFilters?: boolean;
+  isProcessContext?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
@@ -48,6 +49,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   titleClassName = '',
   isPlayground = false,
   isSheetFilters = false,
+  isProcessContext = false,
 }) => {
   const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
   const {
@@ -152,6 +154,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
             isRightAligned={isRightAligned}
             titleClassName={titleClassName}
             isSheetFilters={isSheetFilters}
+            isProcessContext={isProcessContext}
           />
         ))}
 
