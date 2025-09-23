@@ -760,8 +760,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }
   }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, checkAndUpdatePreFilledFields]);
 
-  console.log('completedFields', completedFields);
-
   return (
     <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DATASET_VIEW_TYPE)}>
       <CommonWrapper
