@@ -21,7 +21,7 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
   const { baseUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
   const { timeout } = activityRunsTableConfig;
 
-  test('should be able to switch org', async ({ page }) => {
+  test('should be able test filter and display options', async ({ page }) => {
     test.setTimeout(timeout);
 
     // Navigate to processes page

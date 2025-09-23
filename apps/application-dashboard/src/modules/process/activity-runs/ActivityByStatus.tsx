@@ -60,7 +60,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   const tableRef = useRef<Table<MapAny>>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
   const [totalRows, setTotalRows] = useState<number>(0);
-  const [columns, setColumns] = useState<ColumnDef<any>[]>([]);
+  const [columns, setColumns] = useState<ColumnDef<ActivityRunRowData>[]>([]);
   const [table, setTable] = useState<Table<MapAny> | null>(null);
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
@@ -73,11 +73,11 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
         startRow: number;
         endRow: number;
         sortModel: Array<{ colId: string; sort: SortDirection }>;
-        filterModel: any;
+        filterModel: unknown;
         request: TanStackClientSideRequestProps;
-        success: (result: { rowData: any[]; rowCount: number }) => void;
+        success: (result: { rowData: unknown[]; rowCount: number }) => void;
         fail: () => void;
-        api?: any;
+        api?: unknown;
       }): void => {
         const filterModel = params?.request?.filterModel;
 
@@ -222,7 +222,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
     });
 
     if (columns?.length > 0) {
-      setColumns(columns);
+      setColumns(columns as ColumnDef<ActivityRunRowData>[]);
       dispatch({
         type: filtersContextActions.SET_FILTERS_CONFIG,
         payload: {
@@ -273,7 +273,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
       <CommonWrapper className={'h-fit w-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
         <div data-testid='activity-by-status-table-header' className='z-1000 flex items-center justify-between pr-4'>
           <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' />
+            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
           </div>
           <div className='relative items-center gap-2.5'>
             {table && (

@@ -20,3 +20,21 @@ export const isNonMovableColumn = (columnId: string): boolean => {
     columnId === NON_MOVABLE_COLUMN_IDS.CURRENT_STATUS
   );
 };
+
+/**
+ * Query key constants for React Query caching
+ */
+export const enum QUERY_KEYS {
+  ACTIVITY_RUNS_TABLE = 'activity-runs-table',
+}
+
+/**
+ * Default virtualization configuration constants
+ */
+export const VIRTUALIZATION_DEFAULTS = {
+  PAGE_SIZE: 100,
+  OVERSCAN: 4, // number of items to render outside viewport
+  ESTIMATE_SIZE: 41, // estimated row height (px)
+  FETCH_MORE_SKELETON_COUNT: 10, // number of skeleton rows to show when fetching more
+  SCROLL_THRESHOLD: 500, // pixels from bottom to trigger infinite scroll
+};

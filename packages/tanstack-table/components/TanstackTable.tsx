@@ -8,7 +8,7 @@ import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
 import { ActivityRunRowData } from '@/modules/process/process.types';
 import { MapAny } from '@/types/commonTypes';
 
-import { isNonMovableColumn } from '../constants';
+import { isNonMovableColumn, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
@@ -43,8 +43,8 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   virtualizationOptions = {},
 }) => {
   const {
-    overscan = 4, // number of items to render outside viewport
-    estimateSize = 41, // estimated row height (px)
+    overscan = VIRTUALIZATION_DEFAULTS.OVERSCAN, // number of items to render outside viewport
+    estimateSize = VIRTUALIZATION_DEFAULTS.ESTIMATE_SIZE, // estimated row height (px)
     measureElement = true, // whether to measure actual element sizes
   }: VirtualizationOptions = virtualizationOptions;
 
@@ -106,10 +106,10 @@ export const TanStackTable: FC<TanStackTableProps> = ({
       },
       sorting,
       filterModel: internalFilterModel,
-      queryKey: ['activity-runs-table', ...queryKeyParts],
+      queryKey: [QUERY_KEYS.ACTIVITY_RUNS_TABLE, ...queryKeyParts],
       rows,
       totalRows,
-      pageSize: 100,
+      pageSize: VIRTUALIZATION_DEFAULTS.PAGE_SIZE,
     });
 
   // Use skeleton states hook
@@ -118,7 +118,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     isFetchingNextPage,
     totalFetched,
     totalRowCount,
-    fetchMoreSkeletonCount: 10,
+    fetchMoreSkeletonCount: VIRTUALIZATION_DEFAULTS.FETCH_MORE_SKELETON_COUNT,
   });
 
   // Use infinite scroll hook
@@ -128,7 +128,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     totalFetched,
     totalRowCount,
     hasDataSource: !!clientSideDatasource,
-    threshold: 500,
+    threshold: VIRTUALIZATION_DEFAULTS.SCROLL_THRESHOLD,
   });
 
   // Use scroll sync hook
@@ -171,7 +171,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     estimateSize: () => estimateSize, // Configurable row height estimation
     getScrollElement: () => tableContainerRef.current,
     measureElement:
-      measureElement && typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+      measureElement && typeof window !== 'undefined'
         ? (element) => element?.getBoundingClientRect().height
         : undefined,
     overscan,
