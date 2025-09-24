@@ -39,6 +39,7 @@ const Admin = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: body,
       }),
+      invalidatesTags: [APITags.GET_DATASET_FILTER_CONFIG],
     }),
     getDatasetDag: builder.query<GetDatasetDagResponseType, void>({
       query: () => ({

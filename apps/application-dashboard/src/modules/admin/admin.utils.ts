@@ -1,7 +1,8 @@
 import Dagre from '@dagrejs/dagre';
 import { type Edge, type Node } from '@xyflow/react';
 import { S3_INGESTION_EDGE_LABEL } from 'modules/admin/admin.constants';
-import { AdminDatasetListingResponseType, GetDatasetDagResponseType } from 'types/api/admin.types';
+import { AdminDatasetListingResponseType, DisplayConfigType, GetDatasetDagResponseType } from 'types/api/admin.types';
+import { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 
 export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -77,4 +78,19 @@ export const createNodeAndEdgeList = (
   });
 
   return { nodes, edges };
+};
+
+export const transformDatasetFilterConfigResponseTypeToDisplayConfigType = (
+  data: DatasetFilterConfigResponseType[],
+): DisplayConfigType[] => {
+  return (
+    data.map((item) => ({
+      column: item.column,
+      alias: item.alias,
+      is_hidden: item.metadata?.is_hidden ?? false,
+      is_editable: item.metadata?.is_editable ?? false,
+      type: item.metadata?.custom_type,
+      config: item.metadata?.config,
+    })) ?? []
+  );
 };
