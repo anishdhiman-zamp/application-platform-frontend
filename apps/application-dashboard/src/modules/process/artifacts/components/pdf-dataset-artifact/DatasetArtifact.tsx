@@ -808,7 +808,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                   size={16}
                   color={COLORS.GRAY_1000}
                   className='cursor-pointer'
-                  key='arrow-up-right'
                 />
               </TooltipV2>
             </Link>
