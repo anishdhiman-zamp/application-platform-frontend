@@ -39,6 +39,7 @@ interface RowProps {
   clickedField: string;
   setClickedField: (field: string) => void;
   datasetId: string;
+  activityId: string;
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
   rowData: MapAny;
@@ -49,6 +50,7 @@ const Row: FC<RowProps> = ({
   keyValue: [key, value],
   rowId,
   selectedKey,
+  activityId,
   columns,
   onChange,
   missingFields = [],
@@ -81,8 +83,8 @@ const Row: FC<RowProps> = ({
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
   const currentDatasetCompletedFields = useMemo(
-    () => completedFields[datasetId]?.filter((field) => field.isRequired) ?? [],
-    [completedFields, datasetId],
+    () => completedFields[activityId]?.[datasetId]?.filter((field) => field.isRequired) ?? [],
+    [completedFields, datasetId, activityId],
   );
 
   const isColumnVisible =

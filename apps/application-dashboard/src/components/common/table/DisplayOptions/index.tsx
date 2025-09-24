@@ -6,7 +6,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { useOnClickOutside } from 'hooks';
 import { COLORS } from '@/constants/colors';
 import { POSITION } from '@/constants/common.constants';
-import type { MapAny } from '@/types/commonTypes';
+import { type MapAny } from '@/types/commonTypes';
 import ColumnListing from 'components/common/table/DisplayOptions/ColumnListing';
 import GroupBy from 'components/common/table/DisplayOptions/GroupBy';
 import { DisplayOptionsList } from 'components/common/table/table.constants';
