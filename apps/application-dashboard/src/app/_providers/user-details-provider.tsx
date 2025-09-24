@@ -6,11 +6,12 @@ import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from '@/constants/common.constants
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
+import { useCookieInvalidation } from '@/hooks/useCookieInvalidation';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import OrgMembershipPending from '@/modules/login/OrgMembershipPending';
 import { RootState } from '@/store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from '@/store/slices/user';
 import { UserRoleIdType } from '@/types/api/auth.types';
+import { ORY_KRATOS_SESSION_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 import { identifyPostHogUser } from '@/utils/postHog';
 
 const UserDetailsProvider = () => {
@@ -20,7 +21,9 @@ const UserDetailsProvider = () => {
   const { evaluate, ldClient } = useFeatureFlags();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
-  const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
+  const { data: session, isLoading, isSuccess, isError } = useWhoAmIQuery();
+
+  useCookieInvalidation(USER_SESSION_COOKIE);
 
   const isAdminRoute = useMemo(() => pathname?.startsWith(ROUTES_PATH.ADMIN), [pathname]);
 
@@ -38,6 +41,13 @@ const UserDetailsProvider = () => {
   }, [session, isSuccess, dispatch]);
 
   useEffect(() => {
+    if (isError) {
+      setCookie(ORY_KRATOS_SESSION_COOKIE, '', -1);
+      router.push(ROUTES_PATH.NO_ACCESS);
+    }
+  }, [isError, router]);
+
+  useEffect(() => {
     if (isLoading || (session?.user_id && workspace === null)) {
       dispatch(setDashboardLoader(true));
     }
@@ -52,10 +62,6 @@ const UserDetailsProvider = () => {
       });
     }
   }, [isAdminRoute, evaluate, ldClient, router]);
-
-  if (session?.orgs?.length === 0 && !pathname?.includes(ROUTES_PATH.INVITATIONS)) {
-    return <OrgMembershipPending />;
-  }
 
   if (
     session &&

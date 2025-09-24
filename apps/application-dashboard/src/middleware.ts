@@ -1,36 +1,21 @@
 import { DEVICE_TYPES } from 'constants/common.constants';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { NextRequest, NextResponse, userAgent } from 'next/server';
-import { COOKIE_MAX_AGE, PREV_ROUTE_COOKIE } from 'utils/cookie';
-
-function setPrevRouteCookie(response: NextResponse, route: string): void {
-  response.cookies.set(PREV_ROUTE_COOKIE, route, {
-    httpOnly: false,
-    sameSite: 'lax',
-    maxAge: COOKIE_MAX_AGE,
-    path: '/',
-  });
-}
-
-function getPrevRouteCookie(request: NextRequest): string | undefined {
-  return request.cookies.get(PREV_ROUTE_COOKIE)?.value;
-}
-
-function clearPrevRouteCookie(response: NextResponse): void {
-  response.cookies.delete(PREV_ROUTE_COOKIE);
-}
-
-async function validateSession(request: NextRequest): Promise<boolean> {
-  try {
-    const oryKratosSession = request.cookies.get('ory_kratos_session')?.value;
-
-    return !!oryKratosSession;
-  } catch (error) {
-    console.error('Session validation error:', error);
-
-    return false;
-  }
-}
+import {
+  COOKIE_MAX_AGE,
+  ORY_KRATOS_SESSION_COOKIE,
+  PREV_ROUTE_COOKIE,
+  SESSION_CACHE_MAX_AGE,
+  USER_SESSION_COOKIE,
+} from 'utils/cookie';
+import {
+  checkOrgMembership,
+  clearCookie,
+  getCookie,
+  getUserSession,
+  setUserCookie,
+  validateSession,
+} from '@/utils/middlware.util';
 
 const handleUnauthenticatedRoutes = (request: NextRequest) => {
   const { pathname } = request.nextUrl;
@@ -49,13 +34,13 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   if (![ROUTES_PATH.HOME, ROUTES_PATH.LOGIN].includes(pathname)) {
     const fullRoute = pathname + (request.nextUrl.search || '');
 
-    setPrevRouteCookie(response, fullRoute);
+    setUserCookie(response, PREV_ROUTE_COOKIE, fullRoute, COOKIE_MAX_AGE);
   }
 
   return response;
 };
 
-const handleAuthenticatedRoutes = (request: NextRequest) => {
+const handleAuthenticatedRoutes = async (request: NextRequest) => {
   const { pathname } = request.nextUrl;
   const { device } = userAgent(request);
 
@@ -66,16 +51,51 @@ const handleAuthenticatedRoutes = (request: NextRequest) => {
     return NextResponse.redirect(new URL(ROUTES_PATH.INVALID_SCREEN_SIZE, request.url));
   }
 
+  if (pathname !== ROUTES_PATH.MEMBERSHIP_PENDING && pathname !== ROUTES_PATH.LOGIN) {
+    const { session, cached } = await getUserSession(request);
+
+    if (checkOrgMembership(session, pathname)) {
+      return NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
+    }
+
+    if (session && !cached) {
+      const response = NextResponse.next();
+
+      setUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(session), SESSION_CACHE_MAX_AGE);
+
+      return response;
+    }
+  }
+
   switch (pathname) {
-    case ROUTES_PATH.LOGIN:
-      return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+    case ROUTES_PATH.LOGIN: {
+      const { session } = await getUserSession(request, false);
+      const response = NextResponse.next();
+
+      if (session) {
+        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+      }
+
+      clearCookie(response, ORY_KRATOS_SESSION_COOKIE);
+      clearCookie(response, USER_SESSION_COOKIE);
+
+      return response;
+    }
+    case ROUTES_PATH.MEMBERSHIP_PENDING: {
+      const { session } = await getUserSession(request);
+
+      if (!checkOrgMembership(session, pathname)) {
+        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+      }
+      break;
+    }
     case ROUTES_PATH.HOME: {
-      const prevRoute = getPrevRouteCookie(request);
+      const prevRoute = getCookie(request, PREV_ROUTE_COOKIE);
 
       if (prevRoute) {
         const response = NextResponse.redirect(new URL(prevRoute, request.url));
 
-        clearPrevRouteCookie(response);
+        clearCookie(response, PREV_ROUTE_COOKIE);
 
         return response;
       }
@@ -94,7 +114,7 @@ export async function middleware(request: NextRequest) {
     return handleUnauthenticatedRoutes(request);
   }
 
-  return handleAuthenticatedRoutes(request);
+  return await handleAuthenticatedRoutes(request);
 }
 
 export const config = {
@@ -111,6 +131,7 @@ export const config = {
      * - mp4 (video files)
      * - public (public files)
      * - sw.js (service worker)
+     * - membership-pending (membership pending page)
      */
     '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js).*)',
   ],
