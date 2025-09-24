@@ -25,14 +25,12 @@ export const getApiDomainAndRegions = async (email = '') => {
         body: JSON.stringify({
           email: email ? email : getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL),
         }),
-      }).then((res) => res.json() as Promise<{ api_base_urls: { [region: string]: string } }>);
+      }).then((res) => res.json() as Promise<{ api_base_urls: { region: string; url: string }[] }>);
       const allRegionsResponse = apiBaseUrlsResponse.api_base_urls;
-      console.log('apiBaseUrlsResponse', allRegionsResponse);
-      const allRegionsResult = Object.entries(allRegionsResponse).map(([region, url]) => ({ region, url }));
-      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, JSON.stringify(allRegionsResult[0]));
-      setToLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS, JSON.stringify(allRegionsResult));
-      allRegions = allRegionsResult;
-      reinitializeApiDomain(allRegionsResult[0].url);
+      setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, JSON.stringify(allRegionsResponse[0]));
+      setToLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS, JSON.stringify(allRegionsResponse));
+      allRegions = allRegionsResponse;
+      reinitializeApiDomain(allRegionsResponse[0].url);
     } catch (error) {
       captureException(error);
       // Return default regions when API call fails
