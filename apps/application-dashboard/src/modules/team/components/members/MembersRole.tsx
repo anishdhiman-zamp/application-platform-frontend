@@ -1,35 +1,26 @@
-import { FC, useMemo, useRef, useState } from 'react';
-import {
-  useDeleteAudienceFromOrganizationAccessMutation,
-  useGetAudiencesByOrganisationIdQuery,
-  usePatchChangeAudienceRoleInOrganizationMutation,
-} from 'apis/people';
+import { FC, useRef, useState } from 'react';
+import { useGetAudiencesByOrganisationIdQuery, usePatchChangeAudienceRoleInOrganizationMutation } from 'apis/people';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
-import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { MembersRolePropsType, TeamMemberAccessPrivilegesType } from 'modules/team/people.types';
 import { RootState } from 'store';
 import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
-import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeoplePolicy }) => {
-  const { user_id, privilege, userEmail } = value;
+  const { user_id, privilege } = value;
   const role = TEAM_MEMBERS_PRIVILEGES_LIST.find((role) => role?.value === privilege);
-  const userName = useMemo(() => convertEmailUsernameToName(getUserNameFromEmail(userEmail ?? '')), [userEmail]);
-  const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const [isHoveredDropdown, setIsHoveredDropdown] = useState<boolean>(false);
   const [openChangeRoleDropdown, setOpenChangeRoleDropdown] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<TeamMemberAccessPrivilegesType>(
     role as TeamMemberAccessPrivilegesType,
   );
   const [changeRole] = usePatchChangeAudienceRoleInOrganizationMutation();
-  const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromOrganizationAccessMutation();
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
@@ -73,39 +64,6 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
     }
   };
 
-  const handleOpenRemoveFromTeamPopup = () => {
-    setIsOpenRemoveFromTeamPopup(true);
-  };
-
-  const handleCloseRemoveFromTeamPopup = () => {
-    setIsOpenRemoveFromTeamPopup(false);
-  };
-
-  const handleDeleteAudience = () => {
-    if (!checkPermission) {
-      toast.error(PERMISSION_MESSAGES[PERMISSION_TYPES.DELETE]);
-
-      return;
-    } else {
-      deleteAudience({
-        organizationId: organizationId,
-        body: {
-          user_id: user_id,
-        },
-      })
-        .unwrap()
-        .then((res) => {
-          handleCloseRemoveFromTeamPopup();
-          refetchAudiencesByOrganizationId();
-          toast.success(res?.message || `Removed ${userName} successfully`);
-        })
-        .catch((err) => {
-          handleCloseRemoveFromTeamPopup();
-          toast.error(err?.data?.error || TOAST_MESSAGES.FAILED_AUDIENCE_DELETED);
-        });
-    }
-  };
-
   useOnClickOutside(dropdownRef, handleCloseChangeRoleDropdown);
 
   return (
@@ -116,12 +74,10 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
             onOpen={handleOpenChangeRoleDropdown}
             onClose={handleCloseChangeRoleDropdown}
             isOpen={openChangeRoleDropdown}
-            onDelete={handleOpenRemoveFromTeamPopup}
             onChange={(role) => handleRoleChange(role as TeamMemberAccessPrivilegesType)}
             options={TEAM_MEMBERS_PRIVILEGES_LIST}
             selectedValue={selectedRole}
             defaultValue={role as TeamMemberAccessPrivilegesType}
-            showDelete
             showSelectedIcon
             isHoveredDropdown={isHoveredDropdown}
             setIsHoveredDropdown={setIsHoveredDropdown}
@@ -133,14 +89,6 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
       ) : (
         <span className='f-12-400 text-GRAY_1000 flex items-start justify-between py-3 pr-2 pl-2'>{role?.label}</span>
       )}
-      <RemoveFromTeamPopup
-        isOpen={isOpenRemoveFromTeamPopup}
-        onClose={handleCloseRemoveFromTeamPopup}
-        isLoading={isLoadingDeleteAudience}
-        onDelete={handleDeleteAudience}
-        feature='remove-access-from-dataset'
-        warningDescription={`${userName} will be immediately removed from the organization and lose all access`}
-      />
     </div>
   );
 };

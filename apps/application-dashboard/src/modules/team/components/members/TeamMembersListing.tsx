@@ -6,10 +6,7 @@ import {
 } from 'apis/people';
 import { useAppSelector } from 'hooks/toolkit';
 import EmptyStateListing from 'modules/team/components/EmptyStateListing';
-import MembersEmail from 'modules/team/components/members/MembersEmail';
-import MembersName from 'modules/team/components/members/MembersName';
-import MembersRole from 'modules/team/components/members/MembersRole';
-import MembersTeamV2 from 'modules/team/components/members/MembersTeamV2';
+import TeamMemberCard from 'modules/team/components/members/TeamMemberCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { TeamMembersListingPropsType } from 'modules/team/people.types';
@@ -87,24 +84,16 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
       >
         <div className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'>
           {allAudiencesAndTeamsData?.map((row, index) => (
-            <div key={index} className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
-              <MembersName name={row?.name || row?.email} value={row?.email} member />
-              <MembersEmail value={row?.email} />
-              <MembersRole
-                value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
-                member
-                hasPeoplePolicy={hasPeoplePolicy}
-              />
-              <MembersTeamV2
-                userInfo={{ user_id: row?.user_id, name: row?.name, email: row?.email }}
-                organizationId={organizationId}
-                teamsData={teamsData ?? []}
-                userId={row?.user_id}
-                userMappedTeams={row?.teams}
-                hasPeoplePolicy={hasPeoplePolicy}
-                teamsRandomColorRef={teamsRandomColorRef}
-              />
-            </div>
+            <TeamMemberCard
+              key={`${row?.user_id}-${index}`}
+              member
+              row={row}
+              teamsData={teamsData ?? []}
+              organizationId={organizationId}
+              hasPeoplePolicy={hasPeoplePolicy}
+              teamsRandomColorRef={teamsRandomColorRef}
+              value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
+            />
           ))}
         </div>
       </CommonWrapper>
