@@ -3,6 +3,7 @@ import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { snakeCaseToSentenceCase } from 'utils/common';
 import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { getFormattedDate } from '@/modules/data/data.utils';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import type { MapAny } from '@/types/commonTypes';
@@ -27,7 +28,9 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
           strokeColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
         />
         <span className='bg-GRAY_400 h-px w-2 rounded-full' />
-        <p className='f-13-500 text-GRAY_950 max-w-[400px] truncate'>{snakeCaseToSentenceCase(message)}</p>
+        <TooltipV2 tooltipBody={message} asChildTrigger tooltipClassName='max-w-[400px]' showOnlyWhenTruncated>
+          <p className='f-13-500 text-GRAY_950 max-w-[400px] truncate'>{snakeCaseToSentenceCase(message)}</p>
+        </TooltipV2>
       </div>
       <div className='flex items-center gap-2'>
         <p className='f-13-450 text-GRAY_900'>

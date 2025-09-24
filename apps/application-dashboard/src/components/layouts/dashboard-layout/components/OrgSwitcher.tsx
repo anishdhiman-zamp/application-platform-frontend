@@ -111,7 +111,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
           className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
           sideOffset={5}
         >
-          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
+          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}

@@ -11,11 +11,11 @@ export type GetDatasetDisplayConfigRequestType = {
 export type DisplayConfigType = {
   column: string;
   alias?: string;
-  is_hidden: string;
-  is_editable: string;
-  type: CUSTOM_COLUMNS_TYPE;
-  config: {
-    value_format: ValueFormatType[];
+  is_hidden: boolean;
+  is_editable: boolean;
+  type?: CUSTOM_COLUMNS_TYPE;
+  config?: {
+    value_format?: ValueFormatType[];
   };
 };
 

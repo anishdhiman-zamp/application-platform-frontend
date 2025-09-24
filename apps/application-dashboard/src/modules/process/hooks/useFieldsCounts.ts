@@ -3,14 +3,20 @@ import type { CompletedField } from 'modules/process/artifacts/context/completed
 import type { MissingFieldsConfigType } from '@/modules/process/process.types';
 
 export const useFieldCounts = (
-  completedFields: Record<string, CompletedField[]>,
+  completedFields: Record<string, Record<string, CompletedField[]>>,
   missingFields: MissingFieldsConfigType,
+  activityId?: string,
 ) => {
   const { required: completedRequiredFieldsCount, optional: completedOptionalFieldsCount } = useMemo(() => {
     let required = 0;
     let optional = 0;
 
-    Object.values(completedFields).forEach((fields) => {
+    // If activityId is provided, only count fields for that activity
+    const fieldsToProcess = activityId
+      ? Object.values(completedFields[activityId] || {})
+      : Object.values(completedFields).flatMap((activityFields) => Object.values(activityFields));
+
+    fieldsToProcess.forEach((fields) => {
       for (const field of fields) {
         if (field.isRequired) required += 1;
         else optional += 1;
@@ -18,7 +24,7 @@ export const useFieldCounts = (
     });
 
     return { required, optional };
-  }, [completedFields]);
+  }, [completedFields, activityId]);
 
   const { required: missingRequiredFieldsCount, optional: missingOptionalFieldsCount } = useMemo(() => {
     let required = 0;

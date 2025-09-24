@@ -14,7 +14,7 @@ export interface CompletedField {
 }
 
 interface CompletedFieldsState {
-  completedFields: Record<string, CompletedField[]>;
+  completedFields: Record<string, Record<string, CompletedField[]>>;
 }
 
 export enum CompletedFieldsActions {
@@ -27,7 +27,8 @@ interface CompletedFieldsAction {
   type: CompletedFieldsActions;
   payload?: {
     datasetId?: string;
-    completedFields?: Record<string, CompletedField[]>;
+    activityId?: string;
+    completedFields?: Record<string, Record<string, CompletedField[]>>;
     field?: CompletedField;
   };
 }
@@ -39,11 +40,15 @@ const initialState: CompletedFieldsState = {
 const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFieldsAction): CompletedFieldsState => {
   switch (action.type) {
     case CompletedFieldsActions.ADD_COMPLETED_FIELD: {
-      if (!action.payload?.datasetId || !action.payload?.field) return state;
+      if (!action.payload?.datasetId || !action.payload?.activityId || !action.payload?.field) return state;
 
       const datasetId = action.payload.datasetId;
+      const activityId = action.payload.activityId;
       const field = action.payload.field;
-      const existingFields = state.completedFields[datasetId] || [];
+
+      // Get existing fields for this activity and dataset
+      const existingActivityFields = state.completedFields[activityId] || {};
+      const existingFields = existingActivityFields[datasetId] || [];
 
       // Check if field already exists
       const fieldExists = existingFields.some(
@@ -56,7 +61,10 @@ const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFi
         ...state,
         completedFields: {
           ...state.completedFields,
-          [datasetId]: [...existingFields, field],
+          [activityId]: {
+            ...existingActivityFields,
+            [datasetId]: [...existingFields, field],
+          },
         },
       };
     }

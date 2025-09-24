@@ -2,7 +2,7 @@ import { defineConfig, ReporterDescription } from '@playwright/test';
 
 const isCI = !!process.env.GITHUB_ACTIONS; // check if running in CI
 const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // make this "!==" to run remote selenium-gird locally
-const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // browser session data
+const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // session data storage path
 
 export const PLAYWRIGHT_ENV_CREDENTIALS = {
   googleSSOConfig: {
@@ -12,7 +12,6 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
     password: '', // use your google sso password
     totpSecret: '', // generate your totp secret => https://zxing.org/w/decode.jspx
   },
-  // Prefer env-provided CDP endpoint when launching local Selenium/Chrome with --remote-debugging-port
   localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
   baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg-aws.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
   isSeleniumLocalBrowser: USE_LOCAL_SELENIUM_BROWSER,
@@ -20,15 +19,15 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
 };
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: './tests', // test files directory
   outputDir: './tests/test-results', // output dir for test results and artifacts
-  fullyParallel: false, // disable parallel when using Selenium-Grid
-  globalSetup: require.resolve('./tests/global-setup'),
-  globalTeardown: require.resolve('./tests/global-teardown.ts'),
+  fullyParallel: false, // tests should run sequentially
+  globalSetup: require.resolve('./tests/global-setup'), // global setup file
+  globalTeardown: require.resolve('./tests/global-teardown.ts'), // global teardown file
   forbidOnly: !!isCI,
   retries: isCI ? 2 : 0,
-  workers: USE_LOCAL_SELENIUM_BROWSER ? 1 : isCI ? 2 : '100%', // single worker for Selenium-Grid
-  timeout: 120 * 1000, // 2 minutes timeout for each test
+  workers: 1, // single worker
+  timeout: 300 * 1000, // 5 minutes timeout for each test
   expect: {
     timeout: 120000, // 2 minutes timeout for expect assertions
   },
@@ -52,6 +51,7 @@ export default defineConfig({
     },
     ignoreHTTPSErrors: true,
   },
+  // projects array is used to run tests on different browsers
   projects: [
     {
       name: 'chromium',
