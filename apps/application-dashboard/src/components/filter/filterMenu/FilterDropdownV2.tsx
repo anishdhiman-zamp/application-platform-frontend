@@ -28,6 +28,7 @@ interface FilterDropdownProps {
   titleClassName?: string;
   isDisabled?: boolean;
   isSheetFilters?: boolean;
+  isProcessContext?: boolean;
 }
 
 const FilterDropdownV2: FC<FilterDropdownProps> = ({
@@ -45,6 +46,7 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
   titleClassName = '',
   isDisabled = false,
   isSheetFilters = false,
+  isProcessContext = false,
 }) => {
   const {
     dispatch,
@@ -56,6 +58,7 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(!isFilterSelected && allowActions && !isSheetFilters);
   const [isHighlighted, setIsHighlighted] = useState<boolean>(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const initialFilterRender = useRef<boolean>(isProcessContext); // Only true for process context
 
   const router = useRouter();
   const newFilterId = useAppSelector((state) => state.sheetFilters.newFilterId);
@@ -76,6 +79,18 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
       setIsHighlighted(false);
     }
   });
+
+  const handlePopOverOpenChange = (open: boolean) => {
+    if (isProcessContext) {
+      if (initialFilterRender.current) {
+        return;
+      } else {
+        setIsOpen(open);
+      }
+    } else {
+      setIsOpen(open);
+    }
+  };
 
   const onClick = () => {
     setIsOpen((prev) => !prev);
@@ -127,9 +142,22 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
     }
   }, [newFilterId, filter.key, updateDatasetIds, filterDatasetIds, appDispatch]);
 
+  useEffect(() => {
+    // Only set timeout for process context
+    if (isProcessContext) {
+      const timeout = setTimeout(() => {
+        initialFilterRender.current = false;
+      }, 0);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [isProcessContext]);
+
   return (
     <div ref={popoverRef}>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={handlePopOverOpenChange}>
         <PopoverTrigger>
           <FilterControl
             filterConfig={filter}

@@ -33,9 +33,9 @@ const DocumentItemPill = ({ item, onClick, maxWidth = '100%' }: DocumentItemPill
       color={COLORS.GRAY_1000}
       className='flex-shrink-0'
     />
-    <p className='f-11-400 text-GRAY_1000 truncate' title={item.name}>
-      {item.name}
-    </p>
+    <TooltipV2 tooltipBody={item.name} asChildTrigger showOnlyWhenTruncated>
+      <p className='f-11-400 text-GRAY_1000 truncate'>{item.name}</p>
+    </TooltipV2>
   </div>
 );
 
