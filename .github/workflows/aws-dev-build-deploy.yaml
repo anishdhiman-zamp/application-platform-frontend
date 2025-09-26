@@ -140,13 +140,14 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "development"
+          NEXT_PUBLIC_BASE_API_URL: "https://api-dev-aws-us.zamp.ai"
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           echo "NODE_OPTIONS: $NODE_OPTIONS"
-          
+          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
           # Build the application
           npm run build
           
@@ -192,6 +193,7 @@ jobs:
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=development \
+            --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-dev-aws-us.zamp.ai \
             --push .
           
           

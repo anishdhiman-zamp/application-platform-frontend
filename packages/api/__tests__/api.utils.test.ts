@@ -1,12 +1,7 @@
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 
-import {
-  API_DOMAIN,
-  getApiDomain,
-  getApiDomainAndRegions,
-  getCurrentRegion,
-  reinitializeApiDomain,
-} from '../api.utils';
+import { API_DOMAIN, getApiDomain, getApiDomainAndRegions, reinitializeApiDomain } from '../api.utils';
+import { BASE_API_URL } from '../constants';
 
 jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
@@ -19,14 +14,8 @@ jest.mock('@zamp-platform/utils', () => ({
 }));
 
 jest.mock('../constants', () => ({
-  DEV_API_URL: 'http://localhost:3001',
-  ENVIRONMENT: 'test',
-  MULTI_REGION_ENABLED: false,
-  REGION_LIST: ['', '-me'],
-  REGIONS_MAP: {
-    us: { suffix: '' },
-    me: { suffix: '-me' },
-  },
+  BASE_API_URL: 'http://localhost:3001',
+  ENVIRONMENT: 'development',
 }));
 
 global.fetch = jest.fn();
@@ -38,216 +27,159 @@ const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 describe('api.utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetFromLocalStorage.mockReturnValue('');
-  });
-
-  describe('getCurrentRegion', () => {
-    it('should return user region from localStorage when available', () => {
-      const userRegion = '-me';
-      mockGetFromLocalStorage.mockReturnValue(userRegion);
-
-      const result = getCurrentRegion();
-
-      expect(result).toBe(userRegion);
-      expect(mockGetFromLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION);
-    });
-
-    it('should return empty string when no user region in localStorage', () => {
-      mockGetFromLocalStorage.mockReturnValue(null);
-
-      const result = getCurrentRegion();
-
-      expect(result).toBe('');
-    });
-
-    it('should return empty string when localStorage returns undefined', () => {
-      mockGetFromLocalStorage.mockReturnValue(null);
-
-      const result = getCurrentRegion();
-
-      expect(result).toBe('');
-    });
+    mockGetFromLocalStorage.mockReturnValue('[]');
   });
 
   describe('getApiDomainAndRegions', () => {
     it('should return cached regions when available in localStorage', async () => {
-      const cachedRegions = ['us', 'me'];
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce(JSON.stringify(cachedRegions)); // ALL_REGIONS call
+      const cachedRegions = [
+        { region: 'us', url: 'https://api-us.zamp.ai' },
+        { region: 'me', url: 'https://api-me.zamp.ai' },
+      ];
+      mockGetFromLocalStorage.mockReturnValue(JSON.stringify(cachedRegions));
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      expect(result).toEqual({
-        domain: expect.any(String),
-        regions: cachedRegions,
-      });
-    });
-
-    it('should fetch regions in production with multi-region enabled when no cached regions', async () => {
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
-
-      const result = await getApiDomainAndRegions('test@example.com');
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(result).toHaveProperty('domain');
-      expect(result).toHaveProperty('regions');
-      expect(result.regions).toEqual([]);
-    });
-
-    it('should handle successful region verification', async () => {
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
-
-      await getApiDomainAndRegions('test@example.com');
-
-      expect(mockSetToLocalStorage).not.toHaveBeenCalled();
-    });
-
-    it('should handle failed region verification', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
-      process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED = 'true';
-
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
-
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: jest.fn().mockResolvedValue({}),
-      } as unknown as Response);
-
-      const result = await getApiDomainAndRegions('test@example.com');
-
-      expect(result.regions).toEqual([]);
-    });
-
-    it('should use email from parameter when provided', async () => {
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
-
-      await getApiDomainAndRegions('test@example.com');
-
+      expect(result).toEqual(cachedRegions);
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should use email from localStorage when parameter is empty', async () => {
-      const savedEmail = 'saved@example.com';
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]') // ALL_REGIONS call (empty array)
-        .mockReturnValue(savedEmail); // LAST_LOGGED_IN_OIDC_EMAIL call
-
-      await getApiDomainAndRegions('');
-
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
-
-    it('should handle Promise.allSettled rejections', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
-      process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED = 'true';
-
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
-
+    it('should return default region when no cached regions and API call fails', async () => {
+      mockGetFromLocalStorage.mockReturnValue('[]');
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      expect(result.regions).toEqual([]);
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
+      expect(mockFetch).toHaveBeenCalled();
     });
 
-    it('should set default region to US when no successful regions', async () => {
+    it('should fetch regions from API when no cached regions', async () => {
+      const mockApiResponse = {
+        api_base_urls: {
+          us: 'https://api-us.zamp.ai',
+          me: 'https://api-me.zamp.ai',
+        },
+      };
+
+      mockGetFromLocalStorage.mockReturnValue('[]');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockApiResponse),
+      } as unknown as Response);
+
+      const result = await getApiDomainAndRegions('test@example.com');
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${BASE_API_URL}/auth/api-base-url`,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ email: 'test@example.com' }),
+        }),
+      );
+      // The function now properly returns the fetched regions
+      expect(result).toEqual([
+        { region: 'us', url: 'https://api-us.zamp.ai' },
+        { region: 'me', url: 'https://api-me.zamp.ai' },
+      ]);
+      // And it saves the data to localStorage
+      expect(mockSetToLocalStorage).toHaveBeenCalledWith(
+        LOCAL_STORAGE_KEYS.ORG_REGION,
+        JSON.stringify({ region: 'us', url: 'https://api-us.zamp.ai' }),
+      );
+      expect(mockSetToLocalStorage).toHaveBeenCalledWith(
+        LOCAL_STORAGE_KEYS.ALL_REGIONS,
+        JSON.stringify([
+          { region: 'us', url: 'https://api-us.zamp.ai' },
+          { region: 'me', url: 'https://api-me.zamp.ai' },
+        ]),
+      );
+    });
+
+    it('should use email from localStorage when parameter is empty', async () => {
+      const savedEmail = 'saved@example.com';
+      const mockApiResponse = {
+        api_base_urls: {
+          us: 'https://api-us.zamp.ai',
+        },
+      };
+
       mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call (empty array)
+        .mockReturnValueOnce('[]') // ALL_REGIONS call
+        .mockReturnValue(savedEmail); // LAST_LOGGED_IN_OIDC_EMAIL call
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockApiResponse),
+      } as unknown as Response);
 
-      await getApiDomainAndRegions('test@example.com');
+      await getApiDomainAndRegions('');
 
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${BASE_API_URL}/auth/api-base-url`,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ email: savedEmail }),
+        }),
+      );
+    });
+
+    it('should handle API fetch errors gracefully', async () => {
+      mockGetFromLocalStorage.mockReturnValue('[]');
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      const result = await getApiDomainAndRegions('test@example.com');
+
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
       expect(mockSetToLocalStorage).not.toHaveBeenCalled();
     });
 
-    it('should not fetch regions when not in production environment', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'development';
-
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call
+    it('should handle malformed JSON in localStorage', async () => {
+      mockGetFromLocalStorage.mockReturnValue('invalid-json');
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(result.regions).toEqual([]);
-    });
-
-    it('should not fetch regions when multi-region is disabled', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
-      process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED = 'false';
-
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call
-
-      const result = await getApiDomainAndRegions('test@example.com');
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(result.regions).toEqual([]);
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
     });
   });
 
   describe('getApiDomain', () => {
-    it('should return production domain for production environment', () => {
-      const result = getApiDomain('production', '');
-      expect(result).toBe('https://api.zamp.ai');
+    it('should return BASE_API_URL for production environment', () => {
+      const result = getApiDomain('production');
+      expect(result).toBe(BASE_API_URL);
     });
 
-    it('should return production domain with region suffix', () => {
-      const result = getApiDomain('production', '-me');
-      expect(result).toBe('https://api-me.zamp.ai');
+    it('should return BASE_API_URL for staging environment', () => {
+      const result = getApiDomain('staging');
+      expect(result).toBe(BASE_API_URL);
     });
 
-    it('should return staging domain for staging environment', () => {
-      const result = getApiDomain('staging', '');
-      expect(result).toBe('https://api-stg-aws-us.zamp.ai');
-    });
-
-    it('should return development domain for development environment', () => {
-      const result = getApiDomain('development', '');
-      expect(result).toBe('http://localhost:3001');
+    it('should return BASE_API_URL for development environment', () => {
+      const result = getApiDomain('development');
+      expect(result).toBe(BASE_API_URL);
     });
 
     it('should return localhost for unknown environment', () => {
-      const result = getApiDomain('unknown', '');
+      const result = getApiDomain('unknown');
       expect(result).toBe('http://localhost:8080');
     });
 
     it('should handle empty environment parameter', () => {
-      const result = getApiDomain('', '');
+      const result = getApiDomain('');
       expect(result).toBe('http://localhost:8080');
     });
   });
 
   describe('reinitializeApiDomain', () => {
     it('should update API_DOMAIN when called', () => {
-      mockGetFromLocalStorage.mockReturnValue('-me');
+      reinitializeApiDomain('https://api-me.zamp.ai');
 
-      reinitializeApiDomain();
-
-      expect(mockGetFromLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION);
+      expect(API_DOMAIN).toBe('https://api-me.zamp.ai');
     });
 
-    it('should handle empty region when reinitializing', () => {
-      mockGetFromLocalStorage.mockReturnValue('');
+    it('should handle API_DOMAIN region when reinitializing', () => {
+      reinitializeApiDomain('https://api-us.zamp.ai');
 
-      reinitializeApiDomain();
-
-      expect(mockGetFromLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION);
+      expect(API_DOMAIN).toBe('https://api-us.zamp.ai');
     });
   });
 
@@ -259,62 +191,40 @@ describe('api.utils', () => {
 
   describe('edge cases', () => {
     it('should handle null values from localStorage gracefully', async () => {
-      mockGetFromLocalStorage.mockReturnValue(null);
-
-      const result = await getApiDomainAndRegions('test@example.com');
-
-      expect(result).toHaveProperty('domain');
-      expect(result).toHaveProperty('regions');
-    });
-
-    it('should handle malformed JSON in localStorage', async () => {
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('invalid-json'); // ALL_REGIONS call
-
-      const result = await getApiDomainAndRegions('test@example.com');
-
-      expect(result.regions).toEqual([]);
-    });
-
-    it('should handle fetch network errors', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
-      process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED = 'true';
-
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call
-
+      mockGetFromLocalStorage.mockReturnValue('');
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      expect(result.regions).toEqual([]);
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
     });
 
-    it('should handle partial region success', async () => {
-      process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
-      process.env.NEXT_PUBLIC_MULTI_REGION_ENABLED = 'true';
+    it('should handle API response with empty regions', async () => {
+      const mockApiResponse = {
+        api_base_urls: {},
+      };
 
-      mockGetFromLocalStorage
-        .mockReturnValueOnce('') // getCurrentRegion call
-        .mockReturnValueOnce('[]'); // ALL_REGIONS call
-
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: jest.fn().mockResolvedValue({}),
-        } as unknown as Response)
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 404,
-          json: jest.fn().mockResolvedValue({}),
-        } as unknown as Response);
+      mockGetFromLocalStorage.mockReturnValue('[]');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockApiResponse),
+      } as unknown as Response);
 
       const result = await getApiDomainAndRegions('test@example.com');
 
-      expect(result.regions.length).toBeGreaterThanOrEqual(0);
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
+    });
+
+    it('should handle API response with invalid structure', async () => {
+      mockGetFromLocalStorage.mockReturnValue('[]');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({ invalid: 'structure' }),
+      } as unknown as Response);
+
+      const result = await getApiDomainAndRegions('test@example.com');
+
+      expect(result).toEqual([{ region: 'us', url: BASE_API_URL }]);
     });
   });
 });
