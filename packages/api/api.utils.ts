@@ -15,7 +15,7 @@ export const getApiDomainAndRegions = async (email = '') => {
       hasCachedRegions = true;
     }
   } catch {
-    console.error('Error parsing all regions from localstorage');
+    console.warn('Error parsing all regions from localstorage');
   }
 
   if (!hasCachedRegions) {

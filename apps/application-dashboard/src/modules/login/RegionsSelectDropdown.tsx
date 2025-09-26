@@ -31,12 +31,15 @@ const RegionsSelectDropdown: FC<RegionsSelectDropdownProps> = ({ regions, defaul
   }, [regions]);
 
   useEffect(() => {
-    const selectedRegion = regionsList.find(
-      (region) => region?.value === JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION)).region,
-    );
+    try {
+      const storedCurrentRegion = getFromLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION);
+      const selectedRegion = regionsList.find((region) => region?.value === JSON.parse(storedCurrentRegion).url);
 
-    if (selectedRegion) {
-      setSelectedRegion(selectedRegion);
+      if (selectedRegion) {
+        setSelectedRegion(selectedRegion);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }, [regionsList, defaultRegion]);
 
