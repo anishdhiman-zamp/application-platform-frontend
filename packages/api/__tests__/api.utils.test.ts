@@ -105,9 +105,16 @@ describe('api.utils', () => {
     it('should use email from localStorage when parameter is empty', async () => {
       const savedEmail = 'saved@example.com';
       const mockApiResponse = {
-        api_base_urls: {
-          us: 'https://api-us.zamp.ai',
-        },
+        api_base_urls: [
+          {
+            region: 'us',
+            url: 'https://api-us.zamp.ai',
+          },
+          {
+            region: 'me',
+            url: 'https://api-me.zamp.ai',
+          },
+        ],
       };
 
       mockGetFromLocalStorage

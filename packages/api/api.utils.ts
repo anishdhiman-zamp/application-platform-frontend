@@ -44,7 +44,6 @@ export const getApiDomainAndRegions = async (email = '') => {
 };
 
 export const getApiDomain = (environment = '') => {
-  console.log('environment', environment);
   switch (environment) {
     case 'production':
     case 'staging':
