@@ -56,10 +56,16 @@ describe('api.utils', () => {
 
     it('should fetch regions from API when no cached regions', async () => {
       const mockApiResponse = {
-        api_base_urls: {
-          us: 'https://api-us.zamp.ai',
-          me: 'https://api-me.zamp.ai',
-        },
+        api_base_urls: [
+          {
+            region: 'us',
+            url: 'https://api-us.zamp.ai',
+          },
+          {
+            region: 'me',
+            url: 'https://api-me.zamp.ai',
+          },
+        ],
       };
 
       mockGetFromLocalStorage.mockReturnValue('[]');
