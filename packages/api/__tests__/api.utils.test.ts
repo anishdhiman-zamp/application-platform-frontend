@@ -214,7 +214,7 @@ describe('api.utils', () => {
 
     it('should handle API response with empty regions', async () => {
       const mockApiResponse = {
-        api_base_urls: {},
+        api_base_urls: [],
       };
 
       mockGetFromLocalStorage.mockReturnValue('[]');
