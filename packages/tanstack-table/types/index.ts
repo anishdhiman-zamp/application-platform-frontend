@@ -91,4 +91,8 @@ export interface TanStackTableProps {
   isTabChange?: boolean; // Track if this is a tab change vs filter change
   emptyStateStatus?: string; // Status for empty state component
   virtualizationOptions?: VirtualizationOptions;
+  preserveScrollPosition?: {
+    key: string;
+    enabled: boolean;
+  };
 }

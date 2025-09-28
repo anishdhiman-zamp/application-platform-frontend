@@ -318,6 +318,10 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             onColumnVisible={handleColumnVisible}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
+            preserveScrollPosition={{
+              key: `${processId}-${status}`,
+              enabled: true,
+            }}
           />
         </div>
       </CommonWrapper>

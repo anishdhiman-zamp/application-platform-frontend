@@ -1,7 +1,7 @@
 import { flexRender, getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
@@ -12,6 +12,7 @@ import { isNonMovableColumn, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../cons
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
+import { useScrollPositionPreservation } from '../hooks/useScrollPositionPreservation';
 import { useScrollSync } from '../hooks/useScrollSync';
 import { useSkeletonStates } from '../hooks/useSkeletonStates';
 import { useTableEffects } from '../hooks/useTableEffects';
@@ -41,6 +42,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   initialColumnOrder = [],
   emptyStateStatus,
   virtualizationOptions = {},
+  preserveScrollPosition,
 }) => {
   const {
     overscan = VIRTUALIZATION_DEFAULTS.OVERSCAN, // number of items to render outside viewport
@@ -135,6 +137,24 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   const { headerContainerRef, tableContainerRef, handleHeaderScroll, handleBodyScroll } = useScrollSync({
     onBodyScroll: (e) => fetchMoreOnBottomReached(e.currentTarget),
   });
+
+  // Use scroll position preservation hook
+  const { saveScrollPosition } = useScrollPositionPreservation({
+    key: preserveScrollPosition?.key || '',
+    tableContainerRef,
+    isDataLoaded: !isFetching && flatRowData.length > 0,
+    totalRowCount,
+  });
+
+  const enhancedHandleBodyScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      handleBodyScroll(e);
+      if (preserveScrollPosition?.enabled) {
+        saveScrollPosition();
+      }
+    },
+    [handleBodyScroll, saveScrollPosition, preserveScrollPosition?.enabled],
+  );
 
   // table
   const table = useReactTable({
@@ -260,7 +280,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
 
       {/* Scrollable Body Container */}
       <div
-        onScroll={handleBodyScroll}
+        onScroll={preserveScrollPosition?.enabled ? enhancedHandleBodyScroll : handleBodyScroll}
         ref={tableContainerRef}
         className='tan-scroll relative w-full'
         style={{
