@@ -144,13 +144,13 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   const { saveScrollPosition } = useScrollPositionPreservation({
     key: preserveScrollPosition?.key || '',
     tableContainerRef,
-    isDataLoaded: !isFetching && flatRowData.length > 0,
+    isDataLoaded: flatRowData.length > 0,
     totalRowCount,
   });
 
   const { highlightedRowIndex, setHighlightedRowIndex } = useRowHighlighting({
     key: rowHighlighting?.key || '',
-    isDataLoaded: !isFetching && flatRowData.length > 0,
+    isDataLoaded: flatRowData.length > 0,
   });
 
   const enhancedHandleBodyScroll = useCallback(

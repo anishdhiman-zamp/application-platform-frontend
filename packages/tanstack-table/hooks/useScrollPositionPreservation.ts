@@ -51,12 +51,8 @@ export const useScrollPositionPreservation = ({
           const allPositions = JSON.parse(storedData);
           const position: ScrollPosition = allPositions[key];
           if (position) {
-            requestAnimationFrame(() => {
-              if (tableContainerRef.current) {
-                tableContainerRef.current.scrollTop = position.scrollTop;
-                tableContainerRef.current.scrollLeft = position.scrollLeft;
-              }
-            });
+            tableContainerRef.current.scrollTop = position.scrollTop;
+            tableContainerRef.current.scrollLeft = position.scrollLeft;
           }
         }
       } catch (error) {
@@ -67,7 +63,7 @@ export const useScrollPositionPreservation = ({
 
   useEffect(() => {
     if (isDataLoaded && totalRowCount > 0) {
-      const timeoutId = setTimeout(restoreScrollPosition, 150);
+      const timeoutId = setTimeout(restoreScrollPosition, 50);
       return () => clearTimeout(timeoutId);
     }
   }, [isDataLoaded, totalRowCount, restoreScrollPosition]);
