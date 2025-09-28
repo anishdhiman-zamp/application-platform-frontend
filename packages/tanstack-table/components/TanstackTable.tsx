@@ -140,17 +140,34 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     onBodyScroll: (e) => fetchMoreOnBottomReached(e.currentTarget),
   });
 
+  // row virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: flatRowData?.length + skeletonRowCount,
+    estimateSize: () => estimateSize,
+    getScrollElement: () => tableContainerRef.current,
+    measureElement:
+      measureElement && typeof window !== 'undefined'
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+    overscan,
+  });
+
+  const isVirtualizationReady = rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getTotalSize() > 0;
+
   // Use scroll position preservation hook
   const { saveScrollPosition } = useScrollPositionPreservation({
     key: preserveScrollPosition?.key || '',
     tableContainerRef,
     isDataLoaded: flatRowData.length > 0,
     totalRowCount,
+    isVirtualizationReady,
   });
 
   const { highlightedRowIndex, setHighlightedRowIndex } = useRowHighlighting({
     key: rowHighlighting?.key || '',
     isDataLoaded: flatRowData.length > 0,
+    isVirtualizationReady,
+    rowVirtualizer,
   });
 
   const enhancedHandleBodyScroll = useCallback(
@@ -202,18 +219,6 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     columnOrder,
     onColumnMoved,
     setColumnOrder,
-  });
-
-  // row virtualizer
-  const rowVirtualizer = useVirtualizer({
-    count: flatRowData?.length + skeletonRowCount,
-    estimateSize: () => estimateSize, // Configurable row height estimation
-    getScrollElement: () => tableContainerRef.current,
-    measureElement:
-      measureElement && typeof window !== 'undefined'
-        ? (element) => element?.getBoundingClientRect().height
-        : undefined,
-    overscan,
   });
 
   // Use table sync hook for external state synchronization

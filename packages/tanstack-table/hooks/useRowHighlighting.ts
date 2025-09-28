@@ -5,6 +5,10 @@ import { useCallback, useEffect, useState } from 'react';
 interface UseRowHighlightingProps {
   key: string;
   isDataLoaded: boolean;
+  isVirtualizationReady: boolean;
+  rowVirtualizer?: {
+    scrollToIndex: (index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto' }) => void;
+  };
 }
 
 interface UseRowHighlightingReturn {
@@ -13,7 +17,12 @@ interface UseRowHighlightingReturn {
   clearHighlightedRow: () => void;
 }
 
-export const useRowHighlighting = ({ key, isDataLoaded }: UseRowHighlightingProps): UseRowHighlightingReturn => {
+export const useRowHighlighting = ({
+  key,
+  isDataLoaded,
+  isVirtualizationReady,
+  rowVirtualizer,
+}: UseRowHighlightingProps): UseRowHighlightingReturn => {
   const searchParams = useSearchParams();
   const [highlightedRowIndex, setHighlightedRowIndexState] = useState<number | null>(null);
 
@@ -52,13 +61,19 @@ export const useRowHighlighting = ({ key, isDataLoaded }: UseRowHighlightingProp
   }, [setHighlightedRowIndex]);
 
   useEffect(() => {
-    if (isDataLoaded) {
+    if (isDataLoaded && isVirtualizationReady) {
       const currentIndexFromUrl = searchParams?.get('currentIndex');
 
       if (currentIndexFromUrl && currentIndexFromUrl !== '-1') {
         const rowIndex = parseInt(currentIndexFromUrl, 10);
         if (!isNaN(rowIndex)) {
           setHighlightedRowIndex(rowIndex);
+
+          if (rowVirtualizer) {
+            requestAnimationFrame(() => {
+              rowVirtualizer.scrollToIndex(rowIndex, { align: 'center' });
+            });
+          }
           return;
         }
       }
@@ -70,13 +85,19 @@ export const useRowHighlighting = ({ key, isDataLoaded }: UseRowHighlightingProp
           const storedIndex = allHighlightedRows[key];
           if (typeof storedIndex === 'number') {
             setHighlightedRowIndexState(storedIndex);
+
+            if (rowVirtualizer) {
+              requestAnimationFrame(() => {
+                rowVirtualizer.scrollToIndex(storedIndex, { align: 'center' });
+              });
+            }
           }
         }
       } catch (error) {
         console.warn('Failed to restore highlighted row index:', error);
       }
     }
-  }, [isDataLoaded, key, searchParams, setHighlightedRowIndex]);
+  }, [isDataLoaded, isVirtualizationReady, key, searchParams, setHighlightedRowIndex, rowVirtualizer]);
 
   return {
     highlightedRowIndex,
