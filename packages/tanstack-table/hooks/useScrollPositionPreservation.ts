@@ -1,10 +1,5 @@
+import { getFromSessionStorage, SESSION_STORAGE_KEYS, setToSessionStorage } from '@zamp-platform/utils';
 import { useCallback, useEffect } from 'react';
-
-import {
-  getFromSessionStorage,
-  SESSION_STORAGE_KEYS,
-  setToSessionStorage,
-} from '../../../apps/application-dashboard/src/utils/sessionstorage';
 
 interface ScrollPosition {
   scrollTop: number;
