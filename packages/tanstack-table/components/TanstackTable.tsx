@@ -12,6 +12,7 @@ import { isNonMovableColumn, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../cons
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
+import { useRowHighlighting } from '../hooks/useRowHighlighting';
 import { useScrollPositionPreservation } from '../hooks/useScrollPositionPreservation';
 import { useScrollSync } from '../hooks/useScrollSync';
 import { useSkeletonStates } from '../hooks/useSkeletonStates';
@@ -43,6 +44,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   emptyStateStatus,
   virtualizationOptions = {},
   preserveScrollPosition,
+  rowHighlighting,
 }) => {
   const {
     overscan = VIRTUALIZATION_DEFAULTS.OVERSCAN, // number of items to render outside viewport
@@ -146,6 +148,11 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     totalRowCount,
   });
 
+  const { highlightedRowIndex, setHighlightedRowIndex } = useRowHighlighting({
+    key: rowHighlighting?.key || '',
+    isDataLoaded: !isFetching && flatRowData.length > 0,
+  });
+
   const enhancedHandleBodyScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       handleBodyScroll(e);
@@ -154,6 +161,18 @@ export const TanStackTable: FC<TanStackTableProps> = ({
       }
     },
     [handleBodyScroll, saveScrollPosition, preserveScrollPosition?.enabled],
+  );
+
+  const enhancedHandleRowClick = useCallback(
+    (rowData: ActivityRunRowData, rowIndex?: number) => {
+      if (rowHighlighting?.enabled && typeof rowIndex === 'number') {
+        setHighlightedRowIndex(rowIndex);
+      }
+      if (onRowClicked) {
+        onRowClicked(rowData, rowIndex);
+      }
+    },
+    [onRowClicked, rowHighlighting?.enabled, setHighlightedRowIndex],
   );
 
   // table
@@ -376,17 +395,23 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                   const row = tableRows[virtualRow.index] as Row<unknown>;
 
                   // ---- actual rows with data ----
+                  const isHighlighted = rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index;
+
                   return (
                     <tr
                       data-index={virtualRow.index}
                       ref={(node) => rowVirtualizer.measureElement(node)}
                       key={row?.id}
-                      className='group absolute flex cursor-pointer'
+                      className={cn('group absolute flex cursor-pointer', isHighlighted && 'bg-BACKGROUND_GRAY_2')}
                       style={{
                         transform: `translateY(${virtualRow.start}px)`,
                         width: '100%',
                       }}
-                      onClick={() => onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)}
+                      onClick={() =>
+                        rowHighlighting?.enabled
+                          ? enhancedHandleRowClick(row?.original as ActivityRunRowData, virtualRow.index)
+                          : onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)
+                      }
                     >
                       {row.getVisibleCells().map((cell) => {
                         const raw = cell.getValue();
@@ -398,7 +423,11 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                           <td
                             key={cell.id}
                             data-testid={`table-cell-${colId}`}
-                            className={cn('group-hover:bg-BACKGROUND_GRAY_2', cellClass)}
+                            className={cn(
+                              'group-hover:bg-BACKGROUND_GRAY_2',
+                              isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                              cellClass,
+                            )}
                             style={{
                               width: `${cell.column.getSize()}px`,
                               minWidth: `${cell.column.getSize()}px`,
@@ -413,7 +442,11 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                           >
                             {showCustomCell ? (
                               <span
-                                className={cn('group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!', cellClass)}
+                                className={cn(
+                                  'group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                  cellClass,
+                                )}
                                 style={{
                                   width: `${cell.column.getSize()}px`,
                                   minWidth: `${cell.column.getSize()}px`,
@@ -429,11 +462,21 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                                 {flexRender(cell.column.columnDef.cell, ctx)}
                               </span>
                             ) : raw == null || (typeof raw === 'string' && raw.trim() === '') ? (
-                              <span className='text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!'>
+                              <span
+                                className={cn(
+                                  'text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                )}
+                              >
                                 N/A
                               </span>
                             ) : (
-                              <span className='group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!'>
+                              <span
+                                className={cn(
+                                  'group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                )}
+                              >
                                 {String(raw)}
                               </span>
                             )}

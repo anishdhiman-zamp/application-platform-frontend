@@ -95,4 +95,8 @@ export interface TanStackTableProps {
     key: string;
     enabled: boolean;
   };
+  rowHighlighting?: {
+    key: string;
+    enabled: boolean;
+  };
 }

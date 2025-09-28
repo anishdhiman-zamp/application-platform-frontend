@@ -322,6 +322,10 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
               key: `${processId}-${status}`,
               enabled: true,
             }}
+            rowHighlighting={{
+              key: `${processId}-${status}`,
+              enabled: true,
+            }}
           />
         </div>
       </CommonWrapper>
