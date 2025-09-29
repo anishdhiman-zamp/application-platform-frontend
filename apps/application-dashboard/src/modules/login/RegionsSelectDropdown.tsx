@@ -42,7 +42,7 @@ const RegionsSelectDropdown: FC<RegionsSelectDropdownProps> = ({ regions, defaul
         }
       }
     } catch (error) {
-      console.error(error);
+      console.warn(error);
     }
   }, [regionsList, defaultRegion]);
 
