@@ -7,8 +7,8 @@ jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
   setToLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
-    ALL_REGIONS: 'ALL_REGIONS_V3',
-    ORG_REGION: 'ORG_REGION',
+    ALL_REGIONS: 'ALL_REGIONS_V4',
+    ORG_REGION: 'ORG_REGION_V5',
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
   },
 }));
