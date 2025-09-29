@@ -30,7 +30,7 @@ const CreateEditFilter: FC = () => {
   return (
     <div className='shadow-side-drawer relative h-full border-l'>
       {isFilterOpen && (
-        <div className='absolute top-4 right-5'>
+        <div className='absolute top-4 right-5' data-testid='create-edit-filter-discard-dialog'>
           <DiscardDialog onClose={handleClose} />
         </div>
       )}
@@ -66,6 +66,7 @@ const CreateEditFilter: FC = () => {
               className={cn('flex w-21 items-center gap-1', { 'cursor-not-allowed opacity-50': isSubmitDisabled })}
               onClick={handleCreateFilter}
               isLoading={isLoading}
+              data-testid='create-edit-filter-submit-btn'
             >
               <SvgSpriteLoader id='check-circle' size={14} />
               <span>{formData.id ? 'Done' : 'Create'}</span>

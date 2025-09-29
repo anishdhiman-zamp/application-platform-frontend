@@ -19,6 +19,7 @@ import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RootState } from 'store';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
@@ -133,10 +134,10 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     })
       .unwrap()
       .then(() => {
-        toast.success('Sheet name updated successfully');
+        toast.success(TOAST_MESSAGES.SUCCESS_SHEET_NAME_UPDATED);
       })
       .catch(() => {
-        toast.error('Failed to update sheet name');
+        toast.error(TOAST_MESSAGES.ERROR_SHEET_NAME_UPDATE);
         setSheetName(sheetDetails?.name ?? '');
       });
   };
@@ -250,6 +251,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                         })}
                         placeholder='Add sheet title'
                         onKeyDown={handleEditKeyDown}
+                        data-testid={`${sheetId}-sheet-name-input`}
                       />
                     </div>
                   ) : (
@@ -258,6 +260,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                         variant='ghost'
                         className='text-GRAY_950 rounded-lg px-2.5 py-1'
                         onClick={() => setIsEditingSheetName(true)}
+                        data-testid={`${sheetId}-sheet-name-edit-btn`}
                       >
                         <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
                       </Button>
@@ -291,6 +294,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                 isPeriodicityEnabled
                 isRightAligned
                 isSheetFilters
+                persistId={sheetId}
               />
             )}
           </div>
@@ -364,7 +368,13 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                     : '',
               )}
             >
-              <Button size='medium' variant='secondary' className='bg-white shadow' onClick={handleAddWidget}>
+              <Button
+                size='medium'
+                variant='secondary'
+                className='bg-white shadow'
+                onClick={handleAddWidget}
+                data-testid={`${sheetId}-add-widget-btn`}
+              >
                 Add a widget
               </Button>
             </div>

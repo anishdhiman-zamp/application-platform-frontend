@@ -79,6 +79,7 @@ const SelectButton = React.forwardRef<HTMLDivElement, SelectButtonProps>(
         <div
           className='pointer-events-none absolute top-0 left-0 rounded-md border border-gray-400 bg-white opacity-0 shadow-sm transition-all duration-300 ease-in-out'
           style={sliderStyle}
+          data-testid='select-button-slider'
         />
         <TooltipProvider>
           {options.map((option, index) => {
@@ -98,6 +99,7 @@ const SelectButton = React.forwardRef<HTMLDivElement, SelectButtonProps>(
                       buttonClassName,
                     )}
                     onClick={() => handleSelect(option.value)}
+                    data-testid={`${option.value}-select-button`}
                   >
                     <div className='flex items-center gap-2'>
                       {option.icon && (

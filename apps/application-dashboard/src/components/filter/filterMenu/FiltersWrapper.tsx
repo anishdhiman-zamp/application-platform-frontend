@@ -139,7 +139,11 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   return (
     <div>
       {isPlayground && <FiltersMenuV2 onAddFilter={onAddEmptyFilter} currentPageFilters={currentPageFilters} />}
-      <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
+      <div
+        id={`${persistId}_FILTERS_CONTAINER`}
+        className={`z-50 flex flex-wrap items-center gap-2 ${className}`}
+        data-testid={`${persistId}_FILTERS_CONTAINER`}
+      >
         {filtersList.map((filter, index) => (
           <FilterDropdownV2
             key={index}

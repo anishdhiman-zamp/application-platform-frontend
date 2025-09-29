@@ -66,7 +66,13 @@ const ColumnSelector: FC<ColumnSelectorProps> = ({ config }) => {
               <SvgSpriteLoader id='plus' size={12} />
             </Button>
           ) : (
-            <Button size='xsmall' variant='ghost' className='bg-gray-100' onClick={handleOpenChange}>
+            <Button
+              size='xsmall'
+              variant='ghost'
+              className='bg-gray-100'
+              onClick={handleOpenChange}
+              data-testid='select-columns-btn'
+            >
               <div className='flex items-center gap-1'>
                 <SvgSpriteLoader id='plus' size={12} />
                 <span>Select columns</span>

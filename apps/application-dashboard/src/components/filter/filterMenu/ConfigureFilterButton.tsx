@@ -13,7 +13,13 @@ const ConfigureFilterButton: FC<ConfigureFilterButtonProps> = ({ onConfigureFilt
 
   return (
     <TooltipV2 tooltipBody='Configure' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-      <Button size='xxsmall' variant='ghost' className='text-gray-700 [&_svg]:size-3.5' onClick={onConfigureFilter}>
+      <Button
+        size='xxsmall'
+        variant='ghost'
+        className='text-gray-700 [&_svg]:size-3.5'
+        onClick={onConfigureFilter}
+        data-testid='configure-filter-button'
+      >
         <SvgSpriteLoader id='settings-04' size={14} />
       </Button>
     </TooltipV2>
