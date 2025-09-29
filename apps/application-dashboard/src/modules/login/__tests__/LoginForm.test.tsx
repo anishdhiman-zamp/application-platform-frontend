@@ -45,10 +45,10 @@ jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
   setToLocalStorage: jest.fn(),
   removeFromLocalStorage: jest.fn(),
-  LOCAL_STORAGE_KEYS: {
+  co: {
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
-    ORG_REGION: 'ORG_REGION_V4',
-    ALL_REGIONS: 'ALL_REGIONS_V3',
+    ORG_REGION: 'ORG_REGION_V5',
+    ALL_REGIONS: 'ALL_REGIONS_V4',
   },
 }));
 
@@ -86,7 +86,9 @@ jest.mock('modules/login/RegionsSelectDropdown', () => ({
     createElement(
       'select',
       { 'data-testid': 'regions-dropdown' },
-      regions.map((region: string) => createElement('option', { key: region, value: region }, region)),
+      regions.map((regionObj: any) =>
+        createElement('option', { key: regionObj.region, value: regionObj.region }, regionObj.region),
+      ),
     ),
 }));
 
@@ -138,10 +140,7 @@ describe('LoginForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetFromLocalStorage.mockReturnValue('');
-    mockGetApiDomainAndRegions.mockResolvedValue({
-      domain: 'https://api.zamp.ai',
-      regions: [],
-    });
+    mockGetApiDomainAndRegions.mockResolvedValue([{ region: 'us', url: 'https://api.zamp.ai' }]);
     mockIsValidEmail.mockReturnValue(true);
     mockGetDomainFromEmail.mockReturnValue('example.com');
     mockFetch.mockResolvedValue({
@@ -206,10 +205,10 @@ describe('LoginForm', () => {
   });
 
   it('should show regions dropdown when multiple regions are available', async () => {
-    mockGetApiDomainAndRegions.mockResolvedValue({
-      domain: 'https://api.zamp.ai',
-      regions: ['us', 'me'],
-    });
+    mockGetApiDomainAndRegions.mockResolvedValue([
+      { region: 'us', url: 'https://api-us.zamp.ai' },
+      { region: 'me', url: 'https://api-me.zamp.ai' },
+    ]);
 
     render(createElement(LoginForm));
 
@@ -371,7 +370,7 @@ describe('LoginForm', () => {
     const originalLocation = window.location;
 
     delete (window as any).location;
-    window.location = { ...originalLocation, href: '' };
+    (window as any).location = { ...originalLocation, href: '' };
 
     render(createElement(LoginForm));
 
@@ -389,7 +388,7 @@ describe('LoginForm', () => {
       expect(mockGetDomainFromEmail).toHaveBeenCalledWith('test@example.com');
     });
 
-    window.location = originalLocation;
+    (window as any).location = originalLocation;
   });
 
   it('should handle API errors during login flow', async () => {
