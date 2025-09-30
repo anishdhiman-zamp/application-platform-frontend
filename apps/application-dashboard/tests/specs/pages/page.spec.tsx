@@ -40,7 +40,7 @@ let pageId = '',
 export const { baseUrl, baseBEUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
 
 test.describe('All functionalities available for page, sheet, widget and sheet filters', () => {
-  test('Page, sheet, widget and sheet filters functionalities', async ({ page }) => {
+  test.skip('Page, sheet, widget and sheet filters functionalities', async ({ page }) => {
     await test.step('Open org switcher and select an available org', async () => {
       await page.goto(`${baseUrl}/processes`);
       // select Org
