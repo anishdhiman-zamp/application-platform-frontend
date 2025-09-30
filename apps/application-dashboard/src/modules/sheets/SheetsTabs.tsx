@@ -23,6 +23,7 @@ import { MenuItem } from 'types/common/components';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import { useCreateSheetMutation, useUpdateSheetIndexesByPageIdMutation } from '@/apis/pages';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { DEFAULT_SHEET_DESCRIPTION, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { getPageRouteById } from '@/constants/routeConfig';
@@ -155,10 +156,10 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
       .unwrap()
       .then((res) => {
         router.push(getPageRouteById(pageId, res?.sheet?.sheet_id));
-        toast.success('Sheet created successfully');
+        toast.success(TOAST_MESSAGES.SUCCESS_SHEET_CREATED);
       })
       .catch(() => {
-        toast.error('Failed to create sheet');
+        toast.error(TOAST_MESSAGES.ERROR_SHEET_CREATION_FAILED);
       });
   };
 
@@ -244,6 +245,7 @@ const SheetsTabs: FC<SheetsTabsProps> = ({ tabs, currentSheetId }) => {
           onClick={handleCreateSheet}
           className='h-[34px] min-w-25 shrink-0 gap-1 [&_svg]:size-3.5'
           isLoading={isCreatingSheet}
+          data-testid={`${pageId}-add-sheet-btn`}
         >
           <SvgSpriteLoader id='plus' className='text-gray-500' />
           <div className='whitespace-nowrap'>Add sheet</div>

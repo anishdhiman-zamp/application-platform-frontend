@@ -76,6 +76,15 @@ export enum TOAST_MESSAGES {
 
   SUCCESS_TEAM_NAME_UPDATED = 'Team name updated successfully',
   ERROR_TEAM_NAME_UPDATE = 'Failed to update team name',
+
+  SUCCESS_PAGE_NAME_UPDATED = 'Page title updated successfully',
+  ERROR_PAGE_NAME_UPDATE = 'Failed to update page title',
+
+  SUCCESS_SHEET_NAME_UPDATED = 'Sheet name updated successfully',
+  ERROR_SHEET_NAME_UPDATE = 'Failed to update sheet name',
+
+  SUCCESS_SHEET_CREATED = 'Sheet created successfully',
+  ERROR_SHEET_CREATION_FAILED = 'Failed to create sheet',
 }
 
 export const TaggingMessages = {

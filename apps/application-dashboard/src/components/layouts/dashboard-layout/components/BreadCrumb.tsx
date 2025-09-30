@@ -257,10 +257,17 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
                   onBlur={handleEditBlur}
                   autoFocus
                   onKeyDown={handleEditKeyDown}
+                  data-testid='breadcrumb-edit-input'
                 />
               ) : (
                 <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-                  <Button variant='ghost' size='xsmall' className='h-6 p-1' onClick={handleLastBreadCrumbClick}>
+                  <Button
+                    variant='ghost'
+                    size='xsmall'
+                    className='h-6 p-1'
+                    onClick={handleLastBreadCrumbClick}
+                    data-testid='breadcrumb-edit-btn'
+                  >
                     <span className='f-13-500 text-gray-1000'>{editedName}</span>
                   </Button>
                 </TooltipV2>

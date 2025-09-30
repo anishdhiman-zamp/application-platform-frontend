@@ -10,6 +10,7 @@ import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { cn, preventAutoFocus } from 'utils/common';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import PageIcon from '@/components/icons/PageIcon';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
@@ -54,10 +55,10 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
     })
       .unwrap()
       .then(() => {
-        toast.success('Page name updated successfully');
+        toast.success(TOAST_MESSAGES.SUCCESS_PAGE_NAME_UPDATED);
       })
       .catch(() => {
-        toast.error('Failed to update page name');
+        toast.error(TOAST_MESSAGES.ERROR_PAGE_NAME_UPDATE);
         setPageName(label);
         setFinalName(label);
         updateOptimisticName(label);
@@ -106,6 +107,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
           'text-GRAY_900 f-13-500 hover:bg-GRAY_20 group flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 select-none',
           isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
         )}
+        data-testid={`${pageId}-page-nav-tab`}
       >
         <PageIcon isSelected={isSelected} />
 
@@ -114,6 +116,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
         <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
           <PopoverTrigger
             className={cn('cursor-pointer opacity-0 group-hover:opacity-100')}
+            data-testid={`${pageId}-page-nav-tab-popover-trigger`}
             id='page-nav-tab-popover-trigger'
           >
             <PermissionGuard
@@ -140,12 +143,14 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
               autoFocus
               onBlur={handleInputBlur}
               onKeyDown={handleEditKeyDown}
+              data-testid={`${pageId}-page-nav-tab-input`}
             />
             <Button
               variant='ghost'
               size='medium'
               className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
               onClick={handleDeletePage}
+              data-testid={`${pageId}-page-nav-tab-delete-page-btn`}
               id='page-nav-tab-delete-page-button'
             >
               <SvgSpriteLoader id='trash-04' size={12} />
