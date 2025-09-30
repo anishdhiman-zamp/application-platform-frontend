@@ -2,6 +2,7 @@ import { toast } from '@zamp-platform/ui';
 import { useParams, usePathname } from 'next/navigation';
 import { useUpdateDatasetMutation } from '@/apis/admin';
 import { useUpdatePageMutation } from '@/apis/pages';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { APITags } from '@/constants/api.constants';
 import { MODULE_TYPE } from '@/types/commonTypes';
 
@@ -52,10 +53,10 @@ const useUpdateBreadcrumb = ({ setIsEditing, setEditedName, lastBreadCrumbTitle 
         })
           .unwrap()
           .then(() => {
-            toast.success('Page title updated successfully');
+            toast.success(TOAST_MESSAGES.SUCCESS_PAGE_NAME_UPDATED);
           })
           .catch(() => {
-            toast.error('Failed to update page title');
+            toast.error(TOAST_MESSAGES.ERROR_PAGE_NAME_UPDATE);
             handleError();
           });
         break;
