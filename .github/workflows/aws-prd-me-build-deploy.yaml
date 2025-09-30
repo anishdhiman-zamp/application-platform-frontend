@@ -210,6 +210,7 @@ jobs:
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "production"
           NEXT_PUBLIC_BASE_API_URL: "https://api-me.zamp.ai"
+          NEXT_PUBLIC_DEFAULT_REGION: "me"
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application with environment variables:"
@@ -217,6 +218,7 @@ jobs:
           echo "TIMESTAMP: $TIMESTAMP"
           echo "NODE_OPTIONS: $NODE_OPTIONS"
           echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
+          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
           # Build the application
           npm run build
           
@@ -263,6 +265,7 @@ jobs:
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=production \
             --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-me.zamp.ai \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION=me \
             --push .
           
           

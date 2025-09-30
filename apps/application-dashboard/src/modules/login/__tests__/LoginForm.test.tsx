@@ -24,9 +24,12 @@ jest.mock('next/image', () => ({
 
 jest.mock('@zamp-platform/api', () => ({
   getApiDomainAndRegions: jest.fn(),
+  reinitializeApiDomain: jest.fn(),
   REQUEST_TYPES: {
     POST: 'POST',
   },
+  BASE_API_URL: 'https://api.zamp.ai',
+  DEFAULT_REGION: 'us',
   REGIONS_MAP: {
     us: {
       label: 'United States',
@@ -47,8 +50,6 @@ jest.mock('@zamp-platform/utils', () => ({
   removeFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
     LAST_LOGGED_IN_OIDC_EMAIL: 'LAST_LOGGED_IN_OIDC_EMAIL',
-    ORG_REGION: 'ORG_REGION_V5',
-    ALL_REGIONS: 'ALL_REGIONS_V4',
   },
 }));
 
@@ -563,30 +564,13 @@ describe('LoginForm', () => {
     });
   });
 
-  it('should set region from URL parameters on mount', () => {
-    window.location.search = '?region=me';
-    mockGetFromLocalStorage.mockReturnValue('[]');
-
-    render(createElement(LoginForm));
-
-    expect(mockSetToLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION, '-me');
-  });
-
-  it('should handle US region parameter correctly', () => {
-    window.location.search = '?region=us';
-    mockGetFromLocalStorage.mockReturnValue('[]');
-
-    render(createElement(LoginForm));
-
-    expect(mockSetToLocalStorage).toHaveBeenCalledWith(LOCAL_STORAGE_KEYS.ORG_REGION, '-us');
-  });
-
   it('should handle JSON parsing errors for regions', () => {
     mockGetFromLocalStorage.mockReturnValue('invalid-json');
 
     render(createElement(LoginForm));
 
-    expect(require('@sentry/nextjs').captureException).toHaveBeenCalled();
+    // The component should handle invalid JSON gracefully without throwing
+    expect(screen.getByTestId('email-input')).toBeInTheDocument();
   });
 
   it('should render LocaldevEmailPasswordLogin for multiple login methods', async () => {
