@@ -19,5 +19,4 @@ export enum FEATURE_FLAGS {
   FGAC = 'fgac',
   ENABLE_KNOWLEDGE_BASE = 'enable-knowledge-base',
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
-  SELF_SERVE_PAGES = 'self-serve-pages',
 }
