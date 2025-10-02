@@ -26,6 +26,7 @@ interface FilterDropdownMenuProps {
   updateContextOnChange?: boolean;
   showColumnLabel?: boolean;
   isDisabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
 const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
@@ -39,6 +40,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
   updateContextOnChange = false,
   showColumnLabel = true,
   isDisabled = false,
+  onConfigureFilter,
 }) => {
   const {
     state: { filtersConfig },
@@ -61,6 +63,7 @@ const FilterDropdownMenu: FC<FilterDropdownMenuProps> = ({
       updateContextOnChange={updateContextOnChange}
       showColumnLabel={showColumnLabel}
       isDisabled={isDisabled}
+      onConfigureFilter={onConfigureFilter}
       {...filterComponentProps}
     />
   ) : null;

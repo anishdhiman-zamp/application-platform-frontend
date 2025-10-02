@@ -212,6 +212,10 @@ export type LogsContentType = {
   message: string;
   thought_steps: string[];
   ctas: CtasType[];
+  action_comment?: {
+    action_type: CTA_COMPONENT_TYPE;
+    comment: string;
+  };
 };
 
 export type EmitActivityLogsRequestType = {

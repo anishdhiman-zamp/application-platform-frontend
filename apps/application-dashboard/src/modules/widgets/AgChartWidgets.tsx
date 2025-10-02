@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
@@ -18,12 +18,12 @@ import { WidgetDataType, WidgetInstanceTypeWrapper } from 'types/api/widgets.typ
 import { OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { useAppSelector } from '@/hooks/toolkit';
 import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
+
 interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceTypeWrapper;
   currentPageFilters: string;
@@ -63,10 +63,8 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
 }) => {
   const params = useParams();
   const pageId = params?.pageId as string;
+  const selectedDatasetIds = useAppSelector((state) => state.sheetFilters.selectedDatasetIds);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
-
-  const { evaluate, ldClient } = useFeatureFlags();
 
   const widgetType = widgetDetails?.widget_type;
 
@@ -117,6 +115,11 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
     );
   }, [widgetDetails, transformedData, stackedValues]);
 
+  const isDatasetSelected = useMemo(
+    () => selectedDatasetIds?.includes(widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id),
+    [selectedDatasetIds, widgetDetails],
+  );
+
   useWidgetLoadTime(
     `${widgetDetails.widget_instance_id}-${currentPageFilters}-${periodicity}`,
     isFetching,
@@ -124,21 +127,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
     transformedData?.length > 0,
   );
 
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
-
   return (
-    <div className='group relative'>
-      {!isPlayground && isSelfServePagesEnabled && (
+    <div className='group relative h-full'>
+      {!isPlayground && (
         <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
           <WidgetOptions
             setIsDeleteDialogOpen={setIsDeleteDialogOpen}
@@ -151,7 +142,9 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
         className={cn('border-GRAY_400 h-full overflow-hidden bg-white py-4.5', {
           'animate-pulse opacity-85': isFetching,
           'rounded-xl border pt-2.5': !isPlayground,
+          'shadow-chart-highlight': isDatasetSelected,
         })}
+        data-testid={`${widgetDetails.widget_instance_id}-ag-charts-widgets`}
       >
         <WidgetTitle
           title={widgetDetails?.title}
@@ -161,6 +154,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           activeWidget={activeWidget}
           className='z-1000!'
           resizeProps={resizeProps}
+          isLoading={isLoading || isFilterLoading}
         />
         <CommonWrapper
           isLoading={isLoading || isFilterLoading}
@@ -171,7 +165,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           isError={isError}
           refetchFunction={refetch}
           loader={
-            <div className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'>
+            <div className='flex h-full w-full items-center justify-center'>
               <DynamicLottiePlayer
                 src={WIDGET_LOADER}
                 className='lottie-player h-[150px]'

@@ -1,0 +1,25 @@
+name: Staging Branch Sync
+
+on:
+  schedule:
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-stg:
+    name: Sync staging branch with main
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: "Checkout repository on : ${{ github.REF }}"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: sync
+        name: Sync staging branch with main
+        run: |
+          git checkout main
+          git pull origin main
+          git checkout staging
+          git reset main --hard
+          git push origin staging -f

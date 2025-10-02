@@ -83,6 +83,9 @@ export const API_ENDPOINTS = {
   UPDATE_SHEET_LAYOUT_PUT: `pages/{{pageId}}/sheets/{{sheetId}}/update-layout`,
   SHEET_CREATE_POST: `pages/{{pageId}}/sheets/`,
   PAGES_CREATE_POST: `pages/`,
+  PAGES_SHEETS_FILTER_CONFIG_POST: `pages/{{pageId}}/sheets/{{sheetId}}/filters`,
+  PAGES_SHEETS_FILTER_CONFIG_PATCH: `pages/{{pageId}}/sheets/{{sheetId}}/filters/{{filterId}}`,
+  PAGES_SHEETS_FILTER_CONFIG_DELETE: `pages/{{pageId}}/sheets/{{sheetId}}/filters/{{filterId}}`,
 
   PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,
@@ -148,4 +151,5 @@ export const API_ENDPOINTS = {
   DATASET_ARTIFACTS_GET: `processes/{{processId}}/activity-runs/{{activityRunId}}/datasets/{{datasetId}}/data`,
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
+  UNIFIED_SSE: `events`,
 };

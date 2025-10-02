@@ -60,6 +60,7 @@ const DeletePageDialog: FC<DeletePageDialogProps> = ({ page, isOpen, onOpenChang
             onClick={handleDeletePage}
             isLoading={isDeletingPage}
             className='w-14'
+            data-testid={`${page.page_id}-delete-page-dialog-delete-btn`}
           >
             Delete
           </Button>

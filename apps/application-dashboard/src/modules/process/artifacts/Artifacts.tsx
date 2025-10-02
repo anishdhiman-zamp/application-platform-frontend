@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
@@ -13,9 +13,11 @@ import { useParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useAppDispatch } from '@/hooks/toolkit';
 import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
+import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
@@ -58,7 +60,7 @@ const Artifacts = ({
   const params = useParams();
   const processId = params?.processId as string;
   const activityId = params?.activityId;
-
+  const dispatch = useAppDispatch();
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
   const {
     state: { artifactType, artifactId },
@@ -190,6 +192,14 @@ const Artifacts = ({
   const showArtifactLoader = useMemo(() => {
     return isFetching && artifactType !== ARTIFACT_TYPE.PDF;
   }, [isFetching, artifactType]);
+
+  useEffect(() => {
+    dispatch(closeSidebar());
+
+    return () => {
+      dispatch(openSidebar());
+    };
+  }, [dispatch]);
 
   return (
     <div className='animate-fade-in relative h-full w-full'>

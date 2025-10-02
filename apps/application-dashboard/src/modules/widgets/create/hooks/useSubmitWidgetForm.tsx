@@ -15,7 +15,7 @@ const useSubmitWidgetForm = (handleClose: defaultFnType) => {
   const params = useParams();
   const searchParams = useSearchParams();
   const pageId = params?.pageId as string;
-  const sheetId = searchParams?.get('sheetId') ?? '';
+  const sheetId = params?.sheetId as string;
   const layout = JSON.parse(searchParams?.get('layout') ?? '{}') as LayoutType;
   const size = searchParams?.get('size') as WidgetSize;
 

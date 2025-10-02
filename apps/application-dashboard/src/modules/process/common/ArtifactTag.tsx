@@ -6,6 +6,7 @@ import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
 import Image from 'next/image';
 import { cn } from 'utils/common';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { DATASET, LINK, REDIRECT } from '@/constants/icons';
 import type { defaultFnType } from '@/types/commonTypes';
 
@@ -47,9 +48,9 @@ const ArtifactTag: FC<ArtifactTagProps> = ({
         height={12}
         priority
       />
-      <p className={cn('f-12-450 text-GRAY_1000 truncate', displayClassName)} title={displayName}>
-        {displayName}
-      </p>
+      <TooltipV2 tooltipBody={displayName} showOnlyWhenTruncated asChildTrigger>
+        <p className={cn('f-12-450 text-GRAY_1000 truncate', displayClassName)}>{displayName}</p>
+      </TooltipV2>
       {artifactType === ARTIFACT_TYPE.EXTERNAL_LINK && (
         <Image src={REDIRECT} alt='redirect' width={11} height={11} priority className='-mt-[1px] shrink-0' />
       )}

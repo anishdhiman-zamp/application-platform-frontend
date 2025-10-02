@@ -48,13 +48,10 @@ export const AuthGuard: FC<Props> = (props) => {
   }, [isError, pathname, props.loginRoute, router, searchParams]);
 
   useEffect(() => {
-    console.log('isSuccess', isSuccess, session?.user_id, pathname, pathname === props.loginRoute);
     if (isSuccess && session?.user_id && pathname === props.loginRoute) {
       const preLogoutPath = getFromSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT);
 
-      console.log('preLogoutPath', preLogoutPath);
       if (preLogoutPath) {
-        console.log('preLogoutPath LL', preLogoutPath);
         router.push(preLogoutPath);
       } else {
         router.push(ROUTES_PATH.HOME);

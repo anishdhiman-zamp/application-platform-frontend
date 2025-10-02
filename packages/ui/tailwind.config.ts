@@ -9,6 +9,7 @@ const config = {
     './src/modules/**/*.{js,ts,jsx,tsx}',
     './node_modules/destiny/dist/components/**/*.{js,ts}',
     '../../packages/ui/src/**/*.{ts,tsx}',
+    '../../packages/tanstack-table/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -157,6 +158,7 @@ const config = {
           '300': 'var(--GRAY_300)',
           '400': 'var(--GRAY_400)',
           '500': 'var(--GRAY_500)',
+          '550': 'var(--GRAY_550)',
           '600': 'var(--GRAY_600)',
           '700': 'var(--GRAY_700)',
           '800': 'var(--GRAY_800)',
@@ -257,6 +259,7 @@ const config = {
         'menu-list': '1px 2px 20px 0px #0000001A',
         'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
         'menu-shadow': 'var(--menu-shadow)',
+        'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',
       },
       fontSize: {
         '8': [

@@ -28,7 +28,7 @@ export const enum REQUEST_TYPES {
 export const REGIONS_MAP = {
   us: {
     label: 'United States',
-    suffix: '',
+    suffix: '-us',
     shortHand: 'USA',
   },
   me: {

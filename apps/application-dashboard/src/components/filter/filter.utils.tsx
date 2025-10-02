@@ -10,14 +10,19 @@ import {
   CONDITION_OPERATOR_TYPE,
   CONDITION_OPERATOR_TYPE_LABEL_MAP,
   DOCUMENT_SEARCH_FILTER_OPTIONS,
-  FILTER_KEYS,
   MULTI_SELECT_FILTER_OPTIONS,
   SEARCH_FILTER_OPTIONS,
   TAGS_SELECT_FILTER_OPTIONS,
 } from 'components/filter/filters.constants';
 
-export const getFilterValueForKey = (key: FILTER_KEYS, filterConfig: FilterConfigType[], selectedFilters: MapAny) => {
-  const config = filterConfig.find((filter) => filter.key === key);
+export const getFilterValueForKey = (
+  key: string,
+  filterConfig: FilterConfigType[],
+  selectedFilters: MapAny,
+): FilterConfigType | undefined => {
+  const config = filterConfig?.find((filter) => filter?.key === key);
+
+  if (!config) return undefined;
 
   switch (config?.type) {
     case FILTER_TYPES.AMOUNT_RANGE: {

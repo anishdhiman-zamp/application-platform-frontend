@@ -75,6 +75,7 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
       return null;
     }
     case FILTER_TYPES.MULTI_SELECT:
+    case FILTER_TYPES.TAGS:
       if (condition?.values?.length) {
         return {
           column: condition.colId,

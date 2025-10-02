@@ -1,11 +1,12 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { CellEditRequestEvent, RowDragEndEvent } from 'ag-grid-community';
-import { useGetDatasetDisplayConfigQuery } from 'apis/admin';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { DisplayConfigHeadersListV2 } from 'modules/admin/admin.constants';
 import { AdminDatasetByIdPropsType } from 'modules/admin/admin.types';
+import { transformDatasetFilterConfigResponseTypeToDisplayConfigType } from 'modules/admin/admin.utils';
 import AdminHeader from 'modules/admin/AdminHeader';
 import { cn } from 'utils/common';
+import { useGetDatasetFilterConfigQuery } from '@/apis/dataset';
 import DatasetTable from '@/components/common/table/DatasetTable';
 import { DisplayConfigType } from '@/types/api/admin.types';
 import CommonWrapper from 'components/commonWrapper';
@@ -13,9 +14,22 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const AdminDatasetByIdV2: FC<AdminDatasetByIdPropsType> = ({ id }) => {
-  const { data, isLoading, isError } = useGetDatasetDisplayConfigQuery({ datasetId: id }, { skip: !id });
-  const displayConfigData = data?.display_config;
+  const { isFetching, data, isError } = useGetDatasetFilterConfigQuery(
+    {
+      datasetId: id,
+    },
+    {
+      skip: !id,
+      refetchOnMountOrArgChange: true,
+    },
+  );
+
   const [displayConfigUpdatedData, setDisplayConfigUpdatedData] = useState<DisplayConfigType[]>();
+
+  const displayConfigData = useMemo(
+    () => transformDatasetFilterConfigResponseTypeToDisplayConfigType(data?.data ?? []),
+    [data?.data],
+  );
 
   const handleCellEditRequest = (event: CellEditRequestEvent) => {
     const { colDef, newValue, node } = event;
@@ -61,9 +75,9 @@ const AdminDatasetByIdV2: FC<AdminDatasetByIdPropsType> = ({ id }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isLoading,
+        'flex flex-col items-center justify-center': isFetching,
       })}
-      isLoading={isLoading}
+      isLoading={isFetching}
       isError={isError}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={

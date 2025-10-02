@@ -39,6 +39,10 @@ export interface SelectProps {
   clearOptions?: boolean;
   setShouldClearOptions?: (_shouldClearOptions: boolean) => void; // eslint-disable-line no-unused-vars
   controlClassName?: string;
+  labelClassName?: string;
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  sideOffset?: number;
+  id?: string;
 }
 
 const selectVariants = cva(
@@ -87,6 +91,10 @@ const Select = ({
   setShouldClearOptions,
   controlClassName,
   variant,
+  labelClassName,
+  side,
+  sideOffset,
+  id,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -139,7 +147,7 @@ const Select = ({
 
   return (
     <div className={cn('relative w-full', className)}>
-      {label && <label className='mb-1 block text-sm font-medium'>{label}</label>}
+      {label && <label className={cn('mb-1 block text-sm font-medium', labelClassName)}>{label}</label>}
       <Combobox
         optionsLoading={loading}
         options={comboboxOptions}
@@ -157,10 +165,12 @@ const Select = ({
         onOpenChange={setIsOpen}
         emptyText='No options'
         itemClassName='flex items-center px-2 py-1.5'
+        side={side}
+        sideOffset={sideOffset}
       >
         <div
           className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
-          data-testid='select-trigger'
+          data-testid={id ? `${id}-select-trigger` : 'select-trigger'}
         >
           <span className='flex-1 truncate'>
             {selectedOption?.display_value || selectedOption?.label || placeholder}

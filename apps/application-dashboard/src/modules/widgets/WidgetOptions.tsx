@@ -65,7 +65,7 @@ const WidgetOptions: FC<WidgetOptionsProps> = ({ setIsDeleteDialogOpen, widgetDe
   const handleEditClick = () => {
     setIsOpen(false);
     router.push(
-      `?sheetId=${widgetDetails?.sheet_id}&isWidget=true&data=${btoa(JSON.stringify(widgetDetails))}&size=${
+      `?isWidget=true&data=${btoa(JSON.stringify(widgetDetails))}&size=${
         currentWidgetLayout?.w === 8 ? 'half' : 'full'
       }`,
     );
@@ -79,7 +79,10 @@ const WidgetOptions: FC<WidgetOptionsProps> = ({ setIsDeleteDialogOpen, widgetDe
   return (
     <div className='absolute top-4.5 -left-[11px] z-1000'>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger className={cn('cursor-pointer')}>
+        <PopoverTrigger
+          className={cn('cursor-pointer')}
+          data-testid={`${widgetDetails.widget_instance_id}-widget-options-handle`}
+        >
           <TooltipV2
             tooltipBody={
               <div>
@@ -117,6 +120,7 @@ const WidgetOptions: FC<WidgetOptionsProps> = ({ setIsDeleteDialogOpen, widgetDe
               onClick={handleEditClick}
               size='medium'
               className='flex w-full items-center justify-start gap-1.5'
+              data-testid={`${widgetDetails.widget_instance_id}-widget-options-edit-btn`}
             >
               <SvgSpriteLoader id='settings-04' size={12} />
               <span>Edit</span>
@@ -126,6 +130,7 @@ const WidgetOptions: FC<WidgetOptionsProps> = ({ setIsDeleteDialogOpen, widgetDe
               onClick={handleDeleteClick}
               size='medium'
               className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
+              data-testid={`${widgetDetails.widget_instance_id}-widget-options-delete-btn`}
             >
               <SvgSpriteLoader id='trash-04' size={12} />
               <span>Delete</span>

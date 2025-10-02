@@ -4,8 +4,12 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
   experimental: {
     serverActions: {},
+  },
+  env: {
+    NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
   },
   webpack: (config) => {
     config.resolve.fallback = {
@@ -22,6 +26,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'd2zmqfd18ltqnx.cloudfront.net',
         pathname: '/**',
       },
     ],

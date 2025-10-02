@@ -19,6 +19,23 @@ export const persistLastVisitedPage = (pageId: string) => {
   setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PAGE_ID, pageId);
 };
 
+export const getLastVisitedSheet = (pageId: string): string => {
+  const lastVisitedSheetId = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_SHEET_ID) || '{}');
+
+  return lastVisitedSheetId[pageId] || '';
+};
+
+export const persistLastVisitedSheet = (pageId: string, sheetId: string) => {
+  const previousSheetId = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_SHEET_ID) || '{}');
+
+  const newSheetId = {
+    ...previousSheetId,
+    [pageId]: sheetId,
+  };
+
+  setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_SHEET_ID, JSON.stringify(newSheetId));
+};
+
 export const persistLastVisitedProcess = (processID: string) => {
   setToLocalStorage(LOCAL_STORAGE_KEYS.LAST_VISITED_PROCESS_ID, processID);
 };
@@ -45,10 +62,11 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
       // if the user has a last visited page, check if it exists in the pages list and navigate to it
       // if it doesn't exist, clear the last visited page
       const lastVisitedPageId = getLastVisitedPage();
+      const lastVisitedSheetId = getLastVisitedSheet(lastVisitedPageId) || pagesList?.[0]?.sheets?.[0]?.sheet_id;
 
       if (lastVisitedPageId) {
         if (pagesList?.find((page) => page.page_id === lastVisitedPageId)) {
-          router.push(getPageRouteById(lastVisitedPageId));
+          router.push(getPageRouteById(lastVisitedPageId, lastVisitedSheetId));
 
           return;
         } else {
@@ -58,7 +76,7 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
 
       // if the user has no last visited page, navigate to the first page in the list if it exists
       if (pagesList && pagesList?.length > 0) {
-        router.push(getPageRouteById(pagesList[0].page_id));
+        router.push(getPageRouteById(pagesList[0]?.page_id, pagesList[0]?.sheets[0]?.sheet_id));
       }
     }
   };

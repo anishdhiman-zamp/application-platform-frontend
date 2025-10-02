@@ -7,6 +7,7 @@ import { kbChatVariants, kbContentVariants } from 'modules/knowledge-based/knowl
 import { motion } from 'motion/react';
 import { useParams } from 'next/navigation';
 import { useGetProcessesQuery } from '@/apis/pages';
+import { getBackgroundImageUrl } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import KBIcon from '@/modules/knowledge-based/icons/KBIcon';
@@ -85,7 +86,10 @@ const KnowledgeBaseHome = () => {
       {/* Sticky top section */}
       <div className='sticky top-0 z-10 h-[calc(100vh-48px)] w-full'>
         <motion.div
-          className='flex h-full w-full items-center justify-center bg-[url("/images/knowledge-base/kb-background.svg")] bg-cover bg-center'
+          className='flex h-full w-full items-center justify-center bg-cover bg-center'
+          style={{
+            backgroundImage: getBackgroundImageUrl('/images/knowledge-base/kb-background.svg'),
+          }}
           variants={kbChatVariants}
           animate={showKbContent ? 'hidden' : 'visible'}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
@@ -136,7 +140,12 @@ const KnowledgeBaseHome = () => {
           transition={{ duration: 0.6, ease: 'easeInOut' }}
           style={{ pointerEvents: showKbContent ? 'auto' : 'none' }}
         >
-          <div className='flex h-[260px] w-full items-center bg-[url("/images/knowledge-base/kb-content-background.svg")] bg-cover bg-center'>
+          <div
+            className='flex h-[260px] w-full items-center bg-cover bg-center'
+            style={{
+              backgroundImage: getBackgroundImageUrl('/images/knowledge-base/kb-content-background.svg'),
+            }}
+          >
             <div className='f-36-500 mx-auto max-w-[800px] flex-grow'>{processName}</div>
             <div className='h-[260px] w-[320px]' />
           </div>

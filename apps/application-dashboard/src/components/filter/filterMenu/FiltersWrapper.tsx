@@ -2,11 +2,12 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useOnClickOutside } from 'hooks';
 import { defaultFn, defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
+import FiltersMenuV3 from '@/components/filter/filterMenu/FiltersMenuV3';
 import { FilterConfigType } from 'components/filter/filter.types';
 import { getFilterValueForKey } from 'components/filter/filter.utils';
 import FilterControlButton from 'components/filter/FilterControlButton';
 import ClearFiltersConfirmationPopup from 'components/filter/filterMenu/ClearFiltersConfirmationPopup';
-import FilterDropdown from 'components/filter/filterMenu/FilterDropdown';
+import FilterDropdownV2 from 'components/filter/filterMenu/FilterDropdownV2';
 import FiltersMenu from 'components/filter/filterMenu/FiltersMenu';
 import FiltersMenuV2 from 'components/filter/filterMenu/FiltersMenuV2';
 import { FILTER_KEYS } from 'components/filter/filters.constants';
@@ -29,6 +30,8 @@ interface FiltersContainerProps {
   isRightAligned?: boolean;
   titleClassName?: string;
   isPlayground?: boolean;
+  isSheetFilters?: boolean;
+  isProcessContext?: boolean;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
@@ -45,6 +48,8 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   isRightAligned = false,
   titleClassName = '',
   isPlayground = false,
+  isSheetFilters = false,
+  isProcessContext = false,
 }) => {
   const [shouldShowConfirmationPopup, setShouldShowConfirmationPopup] = useState(false);
   const {
@@ -134,9 +139,13 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
   return (
     <div>
       {isPlayground && <FiltersMenuV2 onAddFilter={onAddEmptyFilter} currentPageFilters={currentPageFilters} />}
-      <div id={`${persistId}_FILTERS_CONTAINER`} className={`z-50 flex flex-wrap items-center gap-2 ${className}`}>
+      <div
+        id={`${persistId}_FILTERS_CONTAINER`}
+        className={`z-50 flex flex-wrap items-center gap-2 ${className}`}
+        data-testid={`${persistId}_FILTERS_CONTAINER`}
+      >
         {filtersList.map((filter, index) => (
-          <FilterDropdown
+          <FilterDropdownV2
             key={index}
             index={index}
             filter={filter}
@@ -148,14 +157,16 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
             isPeriodicityEnabled={isPeriodicityEnabled}
             isRightAligned={isRightAligned}
             titleClassName={titleClassName}
+            isSheetFilters={isSheetFilters}
+            isProcessContext={isProcessContext}
           />
         ))}
 
-        {!isPlayground && allowActions && !filtersList?.length && (
+        {!isSheetFilters && !isPlayground && allowActions && !filtersList?.length && (
           <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} />
         )}
 
-        {!isPlayground && allowActions && filtersList?.length > 0 ? (
+        {!isSheetFilters && !isPlayground && allowActions && filtersList?.length > 0 ? (
           <>
             <FiltersMenu
               tooltipText='Add Filters'
@@ -185,6 +196,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
             </div>
           </>
         ) : null}
+        {isSheetFilters && <FiltersMenuV3 />}
       </div>
     </div>
   );

@@ -77,6 +77,7 @@ export type SheetFilterConfigResponseType = {
 };
 
 export type SheetFilterType = {
+  id?: string;
   name: string; // Name of the filter
   filter_type: FILTER_TYPES; // Type of filter
   data_type?: WidgetDataValueType; // Data type of the filter
@@ -187,6 +188,9 @@ export interface CreatePageResponseType {
   page: {
     page_id: string;
   };
+  sheet: {
+    sheet_id: string;
+  };
 }
 
 export interface CreateSheetPayloadType {
@@ -199,4 +203,24 @@ export interface CreateSheetResponseType {
   sheet: {
     sheet_id: string;
   };
+}
+
+export interface CreateSheetFilterConfigPayloadType {
+  pageId: string;
+  sheetId: string;
+  body: SheetFilterType;
+}
+
+export interface UpdateSheetFilterConfigPayloadType extends CreateSheetFilterConfigPayloadType {
+  filterId: string;
+}
+
+export interface DeleteSheetFilterConfigPayloadType {
+  pageId: string;
+  sheetId: string;
+  filterId: string;
+}
+
+export interface CreateSheetFilterConfigResponseType {
+  data: { id: string };
 }

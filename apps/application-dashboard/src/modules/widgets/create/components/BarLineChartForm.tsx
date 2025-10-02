@@ -123,6 +123,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
             value={fields?.xAxis?.column || ''}
             onValueChange={(value) => handleColumnChange('xAxis', value)}
             variant='small'
+            id='bar-line-chart-form-x-axis'
           />
         </FieldWrapper>
       </div>
@@ -137,6 +138,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
               onValueChange={(value) => handleYAxisChange(value as string)}
               controlClassName='rounded-r-none'
               variant='small'
+              id='bar-line-chart-form-y-axis'
             />
           </FieldWrapper>
           <FieldWrapper>
@@ -171,6 +173,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
                   });
                 }}
                 size='small'
+                data-testid='bar-line-chart-form-stacking-switch'
               />
             </div>
           )}
@@ -182,6 +185,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
               value={fields?.groupBy?.column || ''}
               onValueChange={(value) => handleColumnChange('groupBy', value)}
               variant='small'
+              id='bar-line-chart-form-group-by'
             />
           </FieldWrapper>
         </div>

@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SelectButton } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
@@ -14,8 +14,6 @@ import { OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
 import { LOCAL_STORAGE_KEYS } from 'utils/localstorage';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 
 interface WidgetTitleProps {
   title: string;
@@ -28,6 +26,7 @@ interface WidgetTitleProps {
   isPortalNeeded?: boolean;
   sheetId?: string;
   resizeProps?: ResizeProps;
+  isLoading?: boolean;
 }
 
 const WidgetTitle = ({
@@ -40,13 +39,11 @@ const WidgetTitle = ({
   isPortalNeeded = false,
   sheetId,
   resizeProps,
+  isLoading,
 }: WidgetTitleProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const [isGroupWidgetOptionsOpen, setIsGroupWidgetOptionsOpen] = useState(false);
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
-
-  const { evaluate, ldClient } = useFeatureFlags();
 
   const isGroupWidgetOptions = groupWidgetsOptions?.length > 1;
   const isPivotTable = widgetType === WIDGET_TYPES.PIVOT_TABLE;
@@ -89,18 +86,6 @@ const WidgetTitle = ({
     handleAddWidgetInstanceToLocalStorage(widgetId);
   };
 
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
-
   return (
     <div className={className}>
       <div
@@ -111,6 +96,7 @@ const WidgetTitle = ({
           isPivotTable && isGroupWidgetOptions && 'mb-0 items-start justify-center gap-y-2 px-0',
           isPivotTable && !isGroupWidgetOptions && 'mb-0 cursor-default justify-center px-0',
           resizeProps && 'pr-2.5 pb-1',
+          isLoading && 'mb-0',
         )}
         onClick={handleToggle}
       >
@@ -129,7 +115,7 @@ const WidgetTitle = ({
               />
             )}
           </div>
-          {resizeProps && isSelfServePagesEnabled && (
+          {resizeProps && (
             <PermissionGuard
               resourceType={ResourceType.PAGE}
               resourceId={pageId}

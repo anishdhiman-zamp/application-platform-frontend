@@ -1,7 +1,8 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Provider } from 'react-redux';
+import { QueryClient, QueryClientProvider } from '@zamp-platform/tanstack-table';
 import { RegionProvider } from 'app/_providers/region-provider';
 import { AuthGuard } from '@/components/hoc/AuthGuard';
 import { RouteGuard } from '@/components/hoc/RouteGuard';
@@ -10,17 +11,21 @@ import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
 import { store } from '@/store';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
+  const [queryClient] = useState(() => new QueryClient());
+
   useServiceWorker();
 
   return (
     <Suspense fallback={null}>
       <RegionProvider>
         <Provider store={store}>
-          <AuthGuard loginRoute='/login'>
-            <FeatureFlagsProvider>
-              <RouteGuard>{children}</RouteGuard>
-            </FeatureFlagsProvider>
-          </AuthGuard>
+          <QueryClientProvider client={queryClient}>
+            <AuthGuard loginRoute='/login'>
+              <FeatureFlagsProvider>
+                <RouteGuard>{children}</RouteGuard>
+              </FeatureFlagsProvider>
+            </AuthGuard>
+          </QueryClientProvider>
         </Provider>
       </RegionProvider>
     </Suspense>
