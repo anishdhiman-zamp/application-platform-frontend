@@ -15,7 +15,11 @@ const FilterNameOperatorOptions = () => {
         isDisabledBody={!isDisabled || !isFilterOpen}
         asChildTrigger
       >
-        <PopoverTrigger className='w-64 cursor-pointer' disabled={isDisabled}>
+        <PopoverTrigger
+          className='w-64 cursor-pointer'
+          disabled={isDisabled}
+          data-testid='filter-name-operator-options-trigger'
+        >
           <div className='f-13-450 flex items-center gap-1.5 rounded border border-dashed border-blue-300 px-2 py-1.5'>
             <span
               className={cn('truncate whitespace-nowrap text-gray-900', { 'max-w-18': !!filterTitle })}

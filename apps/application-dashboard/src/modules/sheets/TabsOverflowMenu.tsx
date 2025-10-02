@@ -23,7 +23,7 @@ const TabsOverflowMenu: FC<TabsOverflowMenuProps> = ({ overflowTabs, handleTabSe
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button size='medium' variant='ghost'>
+        <Button size='medium' variant='ghost' data-testid='tabs-overflow-menu-trigger'>
           <span className='f-13-400 text-gray-500'>+{overflowTabs.length} more</span>
         </Button>
       </DropdownMenuTrigger>
@@ -33,6 +33,7 @@ const TabsOverflowMenu: FC<TabsOverflowMenuProps> = ({ overflowTabs, handleTabSe
             key={tab.value}
             onClick={() => handleItemClick(tab)}
             className='hover:bg-accent hover:text-accent-foreground rounded'
+            data-testid={`${tab.value}-tabs-overflow-menu-item`}
           >
             <span className='truncate'>{tab.label}</span>
           </DropdownMenuItem>

@@ -57,6 +57,7 @@ const DeleteWidgetDialog: FC<DeleteWidgetDialogProps> = ({ widgetId, widgetTitle
             onClick={handleDeleteWidget}
             isLoading={isDeletingWidget}
             className='w-14'
+            data-testid={`${widgetId}-delete-widget-dialog-delete-btn`}
           >
             Delete
           </Button>
