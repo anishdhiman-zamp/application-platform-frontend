@@ -11,6 +11,8 @@ import { useWindowDimensions } from 'hooks/useWindowDimensions';
 import ScreenSupport from 'modules/cards/ScreenSupport';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { checkScreenBreakpoint, getLeadingPathFromURL } from 'utils/common';
+import DashboardDowntime from '@/modules/cards/DashboardDowntime';
+import { LOCAL_STORAGE_KEYS } from '@/utils/localstorage';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
 type AuthGuardPropsType = {
@@ -22,6 +24,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const id = searchParams?.get('id');
+  const isGodMode = localStorage.getItem(LOCAL_STORAGE_KEYS.XZAMP_GOD_MODE);
 
   const currentPathName = getLeadingPathFromURL(pathname);
   const PAGES = getLeadingPathFromURL(ROUTES_PATH.PAGES);
@@ -76,6 +79,10 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const breakpoint = checkScreenBreakpoint(width, height);
 
   if (breakpoint && ENVIRONMENT === ENVIRONMENT_TYPES.PRODUCTION) return <ScreenSupport />;
+
+  if (!isGodMode) {
+    return <DashboardDowntime />;
+  }
 
   return props.children;
 };
