@@ -6,6 +6,7 @@ interface UseRowHighlightingProps {
   key: string;
   isDataLoaded: boolean;
   isVirtualizationReady: boolean;
+  hasScrollPositionToRestore: boolean;
   rowVirtualizer?: {
     scrollToIndex: (index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto' }) => void;
   };
@@ -21,6 +22,7 @@ export const useRowHighlighting = ({
   key,
   isDataLoaded,
   isVirtualizationReady,
+  hasScrollPositionToRestore,
   rowVirtualizer,
 }: UseRowHighlightingProps): UseRowHighlightingReturn => {
   const searchParams = useSearchParams();
@@ -69,7 +71,7 @@ export const useRowHighlighting = ({
         if (!isNaN(rowIndex)) {
           setHighlightedRowIndex(rowIndex);
 
-          if (rowVirtualizer) {
+          if (rowVirtualizer && !hasScrollPositionToRestore) {
             requestAnimationFrame(() => {
               rowVirtualizer.scrollToIndex(rowIndex, { align: 'center' });
             });
@@ -86,7 +88,7 @@ export const useRowHighlighting = ({
           if (typeof storedIndex === 'number') {
             setHighlightedRowIndexState(storedIndex);
 
-            if (rowVirtualizer) {
+            if (rowVirtualizer && !hasScrollPositionToRestore) {
               requestAnimationFrame(() => {
                 rowVirtualizer.scrollToIndex(storedIndex, { align: 'center' });
               });

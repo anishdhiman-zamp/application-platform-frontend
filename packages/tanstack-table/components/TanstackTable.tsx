@@ -155,7 +155,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   const isVirtualizationReady = rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getTotalSize() > 0;
 
   // Use scroll position preservation hook
-  const { saveScrollPosition } = useScrollPositionPreservation({
+  const { saveScrollPosition, hasScrollPositionToRestore } = useScrollPositionPreservation({
     key: preserveScrollPosition?.key || '',
     tableContainerRef,
     isDataLoaded: flatRowData.length > 0,
@@ -167,6 +167,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     key: rowHighlighting?.key || '',
     isDataLoaded: flatRowData.length > 0,
     isVirtualizationReady,
+    hasScrollPositionToRestore,
     rowVirtualizer,
   });
 

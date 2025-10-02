@@ -1,5 +1,5 @@
 import { getFromSessionStorage, SESSION_STORAGE_KEYS, setToSessionStorage } from '@zamp-platform/utils';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 interface ScrollPosition {
   scrollTop: number;
@@ -17,6 +17,7 @@ interface UseScrollPositionPreservationProps {
 interface UseScrollPositionPreservationReturn {
   saveScrollPosition: () => void;
   restoreScrollPosition: () => void;
+  hasScrollPositionToRestore: boolean;
 }
 
 export const useScrollPositionPreservation = ({
@@ -44,6 +45,20 @@ export const useScrollPositionPreservation = ({
       }
     }
   }, [key, tableContainerRef]);
+
+  const hasScrollPositionToRestore = useMemo(() => {
+    try {
+      const storedData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_SCROLL_POSITION);
+      if (storedData) {
+        const allPositions = JSON.parse(storedData);
+        const position: ScrollPosition = allPositions[key];
+        return !!position;
+      }
+    } catch (error) {
+      console.warn('Failed to check scroll position:', error);
+    }
+    return false;
+  }, [key]);
 
   const restoreScrollPosition = useCallback(() => {
     if (tableContainerRef.current && isDataLoaded && totalRowCount > 0 && isVirtualizationReady) {
@@ -77,5 +92,6 @@ export const useScrollPositionPreservation = ({
   return {
     saveScrollPosition,
     restoreScrollPosition,
+    hasScrollPositionToRestore,
   };
 };
