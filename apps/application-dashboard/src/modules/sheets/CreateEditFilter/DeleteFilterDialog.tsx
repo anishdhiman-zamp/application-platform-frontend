@@ -26,7 +26,12 @@ const DeleteFilterDialog: FC<DeleteFilterDialogProps> = ({ onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant='destructive-outline' size='small' className='flex w-21 items-center gap-1'>
+        <Button
+          variant='destructive-outline'
+          size='small'
+          className='flex w-21 items-center gap-1'
+          data-testid={`${formData?.id}-delete-filter-btn`}
+        >
           <SvgSpriteLoader id='trash-04' size={14} />
           <span>Delete</span>
         </Button>
@@ -53,6 +58,7 @@ const DeleteFilterDialog: FC<DeleteFilterDialogProps> = ({ onClose }) => {
             onClick={handleDeleteFilter}
             className='w-14'
             isLoading={isLoading}
+            data-testid={`${formData?.id}-delete-filter-dialog-delete-btn`}
           >
             Delete
           </Button>

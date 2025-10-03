@@ -38,6 +38,7 @@ const FilterName = () => {
                 })}
                 placeholder='Add filter title'
                 onKeyDown={handleEditKeyDown}
+                data-testid='filter-name-input'
               />
             </div>
           ) : (
@@ -47,6 +48,7 @@ const FilterName = () => {
                 className='text-GRAY_950 rounded-lg px-2.5 py-1'
                 onClick={() => setIsEditingFilterName(true)}
                 size='medium'
+                data-testid='filter-name-button'
               >
                 <span className='f-18-500'>{formData.name}</span>
               </Button>

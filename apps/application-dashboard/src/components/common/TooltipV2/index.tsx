@@ -101,7 +101,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
         <TooltipTrigger
           className={className}
           asChild={asChildTrigger}
-          disabled={disabled || !shouldShowTooltip}
+          disabled={disabled}
           ref={!asChildTrigger && showOnlyWhenTruncated ? (triggerRef as React.Ref<HTMLButtonElement>) : undefined}
         >
           {enhancedChildren}

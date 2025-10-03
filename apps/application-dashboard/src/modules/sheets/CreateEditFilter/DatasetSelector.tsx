@@ -34,6 +34,7 @@ const DatasetSelector: FC<DatasetSelectorProps> = ({ className }) => {
             'bg-gray-300 hover:bg-gray-300': isDatasetSelectorOpen,
           })}
           variant='ghost'
+          data-testid='dataset-selector-btn'
         >
           <SvgSpriteLoader id='plus' size={12} />
         </Button>

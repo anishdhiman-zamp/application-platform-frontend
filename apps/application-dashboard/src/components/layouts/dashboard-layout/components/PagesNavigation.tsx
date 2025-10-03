@@ -121,6 +121,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
                 onClick={handleCreatePage}
                 className='[&_svg]:size-3.5'
                 isLoading={isCreatingPage}
+                data-testid='add-page-btn'
               >
                 <SvgSpriteLoader id='plus' className='text-gray-700' />
               </Button>
