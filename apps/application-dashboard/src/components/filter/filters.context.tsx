@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
+import { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { PERSISTENT_FILTER_ID, usePersistFilters } from 'hooks/usePersistFilters';
 import { MapAny } from 'types/commonTypes';
 import { FilterConfigType, FilterEntityMenuType } from 'components/filter/filter.types';
@@ -11,7 +11,7 @@ enum filtersContextActions {
   RESET_ALL_FILTERS = 'RESET_ALL_FILTERS',
   ADD_EMPTY_STATE_FILTER = 'ADD_EMPTY_STATE_FILTER',
   REMOVE_FILTER = 'REMOVE_FILTER',
-  GET_FILTERS_FROM_LOCAL_STORAGE = 'GET_FILTERS_FROM_LOCAL_STORAGE',
+  GET_FILTERS_FROM_STORAGE = 'GET_FILTERS_FROM_STORAGE',
   SET_PERSIST_ID = 'SET_PERSIST_ID',
   SET_INITIALISED = 'SET_INITIALISED',
   RESET_INITIALISED = 'RESET_INITIALISED',
@@ -113,7 +113,7 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
             ...(action?.payload?.allSelectedFilters ?? {}),
           },
         };
-      case filtersContextActions.GET_FILTERS_FROM_LOCAL_STORAGE: {
+      case filtersContextActions.GET_FILTERS_FROM_STORAGE: {
         const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId);
 
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
@@ -138,6 +138,11 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           ...action?.payload?.selectedFilters,
         };
 
+        // Save filters to localStorage if persistId is set
+        if (state?.persistId) {
+          onSetFiltersToStorage(state?.persistId, selectedFilters);
+        }
+
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
 
         return {
@@ -151,6 +156,11 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
 
       case filtersContextActions.REPLACE_FILTERS: {
         const selectedFilters = { ...action?.payload?.selectedFilters };
+
+        // Save filters to localStorage if persistId is set
+        if (state?.persistId) {
+          onSetFiltersToStorage(state?.persistId, selectedFilters);
+        }
 
         return {
           ...state,

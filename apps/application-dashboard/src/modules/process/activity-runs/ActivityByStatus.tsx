@@ -23,6 +23,7 @@ import { getEncodedRequest } from '@/components/common/tanstackTable/table.utils
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import { PERSISTENT_FILTER_ID } from '@/hooks/usePersistFilters';
 import { useDisplayOptionContext } from '@/modules/process/activity-runs/contextWrapper/DisplayOptionContext';
 import CommonWrapper from 'components/commonWrapper';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
@@ -51,7 +52,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 }) => {
   const {
     dispatch,
-    state: { selectedFilters, filtersConfig },
+    state: { selectedFilters, filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
   const { columnVisibility, columnOrder, setColumnVisibility, setColumnOrder } = useDisplayOptionContext(); // Use shared display-option context
   const [getActivityRuns, { data: activityRunsData, isError: lazyloadActivityRunsError }] =
@@ -245,6 +246,23 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
       if (isNoRowsOverlayVisible || activityRunsData?.total_count === 0) return;
     }
   };
+
+  // Initialize filters on component mount
+  useEffect(() => {
+    if (!isFilterInitialized && processId) {
+      // Set persist ID for this process
+      dispatch({
+        type: filtersContextActions.SET_PERSIST_ID,
+        payload: { persistId: `${PERSISTENT_FILTER_ID.PROCESS}_${processId}` },
+      });
+
+      // Load filters from localStorage
+      dispatch({
+        type: filtersContextActions.GET_FILTERS_FROM_STORAGE,
+        payload: { persistId: `${PERSISTENT_FILTER_ID.PROCESS}_${processId}` },
+      });
+    }
+  }, [processId, isFilterInitialized, dispatch]);
 
   // setup columns and filters
   useEffect(() => {
