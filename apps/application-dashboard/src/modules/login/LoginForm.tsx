@@ -1,6 +1,11 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { captureException } from '@sentry/nextjs';
-import { getApiDomainAndRegions, REGIONS_MAP, REQUEST_TYPES } from '@zamp-platform/api';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import {
+  BASE_API_URL,
+  DEFAULT_REGION,
+  getApiDomainAndRegions,
+  reinitializeApiDomain,
+  REQUEST_TYPES,
+} from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -30,8 +35,11 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
-  const [allRegions, setAllRegions] = useState<string[]>([]);
-  const [defaultRegion, setDefaultRegion] = useState<string>('');
+  const [allRegions, setAllRegions] = useState<{ region: string; url: string }[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<{ region: string; url: string }>({
+    region: DEFAULT_REGION,
+    url: BASE_API_URL,
+  });
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -120,18 +128,18 @@ export const LoginForm = () => {
 
       return;
     }
-    const { domain: apiDomain, regions } = await getApiDomainAndRegions(email);
+    const allRegionsResponse = await getApiDomainAndRegions(email);
 
-    if (regions.length > 1 && allRegions.length === 0) {
-      setAllRegions(regions);
-
+    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
+      setAllRegions(allRegionsResponse);
       setLoading(false);
 
       return;
     }
 
+    reinitializeApiDomain(selectedRegion.url);
     try {
-      const apiUrl = `${apiDomain}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const apiUrl = `${selectedRegion.url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
       const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,
@@ -181,30 +189,6 @@ export const LoginForm = () => {
     }
   };
 
-  const setRegionFromUrlParams = (region: string) => {
-    setDefaultRegion(region);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region);
-  };
-
-  useEffect(() => {
-    try {
-      const regions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) ?? '[]');
-      const urlParams = new URLSearchParams(window.location.search);
-      const region = urlParams.get('region');
-
-      if (region) {
-        const regionValue = REGIONS_MAP[region as keyof typeof REGIONS_MAP].suffix || REGIONS_MAP.us.suffix;
-
-        setRegionFromUrlParams(regionValue);
-      }
-
-      setAllRegions(regions);
-    } catch (error) {
-      captureException(error);
-      setAllRegions([]);
-    }
-  }, []);
-
   const inputDisabled = loading;
 
   if (!hasError && loginFlow && loginFlow?.ui?.nodes?.length > 1) {
@@ -234,7 +218,13 @@ export const LoginForm = () => {
               disabled={inputDisabled}
               size={SIZE_TYPES.LARGE}
             />
-            <RegionsSelectDropdown defaultRegion={defaultRegion} regions={allRegions} />
+            {allRegions.length > 1 && (
+              <RegionsSelectDropdown
+                selectedRegion={selectedRegion}
+                setSelectedRegion={setSelectedRegion}
+                regions={allRegions}
+              />
+            )}
           </div>
           <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
         </form>
