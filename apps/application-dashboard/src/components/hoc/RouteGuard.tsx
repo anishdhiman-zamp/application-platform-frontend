@@ -28,6 +28,7 @@ export const RouteGuard: FC<AuthGuardPropsType> = (props) => {
   const DATASETS = getLeadingPathFromURL(ROUTES_PATH.DATASET);
   const isAdminRoute = pathname.startsWith(ROUTES_PATH.ADMIN);
 
+  // feature flags
   const { evaluate, ldClient } = useFeatureFlags();
   const { width, height } = useWindowDimensions();
 
