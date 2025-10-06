@@ -2,10 +2,10 @@
 import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Button, toast } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { useAppSelector } from 'hooks/toolkit';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import EmptySheet from 'modules/sheets/EmptySheet';
@@ -17,8 +17,7 @@ import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { RootState } from 'store';
+import { useRouter } from 'next/navigation';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
@@ -32,6 +31,7 @@ import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 import 'react-grid-layout/css/styles.css'; // Include default styles
 import 'react-resizable/css/styles.css'; // Include resizable styles
+
 interface SheetsProps {
   pageId: string;
   sheetId: string;
@@ -43,9 +43,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isFilterOpen = searchParams?.get('isFilterOpen') === 'true';
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   const {
     dispatch,
@@ -112,6 +109,15 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const computedSheetLayout = useMemo(() => {
     return computeSheetLayout(sheetDetails, widgetDetails, getHfromWidgetHeight);
   }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId, getHfromWidgetHeight]);
+
+  const showCurrencyFilter = useMemo(() => {
+    return (
+      isFilterInitialized &&
+      !sheetDetails?.sheet_config?.currency?.hide_currency_filter &&
+      currency &&
+      !!sheetLayout?.length
+    );
+  }, [isFilterInitialized, sheetDetails?.sheet_config?.currency?.hide_currency_filter, currency, sheetLayout]);
 
   const handleInputBlur = () => {
     setIsEditingSheetName(false);
@@ -270,10 +276,8 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
               ) : (
                 <span className='f-24-450'>{sheetDetails?.name}</span>
               )}
-              {isFilterInitialized &&
-                !sheetDetails?.sheet_config?.currency?.hide_currency_filter &&
-                currency &&
-                !!sheetLayout?.length && (
+              <div className='flex items-center gap-2'>
+                {showCurrencyFilter && (
                   <SingleSelectFilter
                     filterKey='currency'
                     options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
@@ -283,6 +287,25 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
                     label='Currency'
                   />
                 )}
+                {!!sheetLayout?.length && (
+                  <PermissionGuard
+                    resourceType={ResourceType.PAGE}
+                    resourceId={pageId}
+                    privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
+                  >
+                    <Button
+                      size='xsmall'
+                      variant='secondary'
+                      onClick={handleAddWidget}
+                      data-testid={`${sheetId}-add-widget-btn`}
+                      className='gap-1 [&_svg]:size-3.5'
+                    >
+                      <SvgSpriteLoader id='plus' size={14} />
+                      Add a widget
+                    </Button>
+                  </PermissionGuard>
+                )}
+              </div>
             </div>
             {!!sheetLayout?.length && (
               <FiltersWrapper
@@ -350,36 +373,6 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
             )}
           </CommonWrapper>
         </CommonWrapper>
-        {!!sheetLayout?.length && (
-          <PermissionGuard
-            resourceType={ResourceType.PAGE}
-            resourceId={pageId}
-            privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
-          >
-            <div
-              className={cn(
-                'fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all',
-                isFilterOpen
-                  ? isSidebarOpen
-                    ? 'left-[48%] -translate-x-[48%]'
-                    : 'left-[39%] -translate-x-[39%]'
-                  : isSidebarOpen
-                    ? 'left-[59%] -translate-x-[59%]'
-                    : '',
-              )}
-            >
-              <Button
-                size='medium'
-                variant='secondary'
-                className='bg-white shadow'
-                onClick={handleAddWidget}
-                data-testid={`${sheetId}-add-widget-btn`}
-              >
-                Add a widget
-              </Button>
-            </div>
-          </PermissionGuard>
-        )}
       </div>
     </InitializeSheetsFilters>
   );
