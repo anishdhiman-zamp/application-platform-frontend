@@ -266,6 +266,7 @@ jobs:
             --build-arg NEXT_PUBLIC_ENVIRONMENT=production \
             --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-me.zamp.ai \
             --build-arg NEXT_PUBLIC_DEFAULT_REGION=me \
+            --build-arg NEXT_PUBLIC_MULTI_REGION_ENABLED=false \
             --push .
           
           
