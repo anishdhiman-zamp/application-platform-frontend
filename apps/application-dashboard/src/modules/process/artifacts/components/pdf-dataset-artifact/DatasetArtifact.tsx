@@ -433,7 +433,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     const { colDef, newValue, data, source, node } = event;
     const { field } = colDef;
     const oldValue = data?.[field as string];
-    const value = isValueEmpty(newValue) ? (typeof oldValue === 'number' ? 0 : '-') : newValue;
+    const value = isValueEmpty(newValue) ? (typeof oldValue === 'number' ? null : '-') : newValue;
     const updatedRow = { ...event.data, [field as string]: value };
 
     // Optimistic update
@@ -578,7 +578,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }, 0);
   };
 
-  const handleTextareaChange = (key: string, value: string, rowId: string) => {
+  const handleTextareaChange = (key: string, value: string, rowId: string, dataType?: string) => {
+    console.log('dataType', dataType);
     if (!rowData) return;
 
     // Optimistic update of local state
@@ -897,7 +898,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
                 (isFetchingDatasetArtifacts || isUninitializedDatasetArtifacts) && !isServerSideDataLoading
               }
               selectedKey={selectedKey}
-              onChange={(key, value, rowId) => handleTextareaChange(key, value, rowId)}
+              onChange={(key, value, rowId, dataType) => handleTextareaChange(key, value, rowId, dataType)}
               requiredMissingFields={requiredMissingFields}
               missingFields={missingFields}
               currentUserHasEditAccess={currentUserHasEditAccess}

@@ -27,7 +27,7 @@ interface DatasetRowViewProps {
   isMissingFieldsBarVisible: boolean;
   isDatasetFetching: boolean;
   selectedKey: string;
-  onChange?: (key: string, value: string, rowId: string) => void;
+  onChange?: (key: string, value: string, rowId: string, dataType?: string) => void;
   requiredMissingFields?: MissingFieldItemType[];
   missingFields?: MissingFieldItemType[];
   currentUserHasEditAccess: boolean;
