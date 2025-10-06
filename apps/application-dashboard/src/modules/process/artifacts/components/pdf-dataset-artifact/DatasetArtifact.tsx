@@ -62,6 +62,7 @@ import {
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
 import { ARTIFACT_TYPE, DATASET_VIEW_TYPE } from '@/modules/process/process.types';
+import { DataType } from '@/modules/sheets/CreateEditFilter/types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -394,7 +395,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }: {
       rowId: string | string[];
       field: string;
-      newValue: string;
+      newValue: string | number;
       operator?: CONDITION_OPERATOR_TYPE;
     }) => {
       updateDatasetData({
@@ -579,11 +580,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   };
 
   const handleTextareaChange = (key: string, value: string, rowId: string, dataType?: string) => {
-    console.log('dataType', dataType);
     if (!rowData) return;
 
     // Optimistic update of local state
-    const updatedRowData = { ...rowData, [key]: value };
+    const newValue = isValueEmpty(value) ? (dataType === DataType.NUMBER ? 0 : '') : value;
+
+    console.log('newValue', newValue);
+    const updatedRowData = { ...rowData, [key]: newValue };
 
     setRowData(updatedRowData);
 
@@ -592,7 +595,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       const rowNode = gridApi.getDisplayedRowAtIndex(selectedRowIndex);
 
       if (rowNode?.data) {
-        const updatedGridData = { ...rowNode.data, [key]: value };
+        const updatedGridData = { ...rowNode.data, [key]: newValue };
 
         rowNode.setData(updatedGridData);
       }
@@ -602,7 +605,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     updateApi({
       rowId: rowId,
       field: key,
-      newValue: value,
+      newValue: newValue,
     });
   };
 
