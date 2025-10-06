@@ -68,6 +68,7 @@ const DeleteSheetDialog: FC<DeleteSheetDialogProps> = ({
             onClick={handleDeleteSheet}
             isLoading={isDeletingSheet}
             className='w-14'
+            data-testid={`${sheetId}-delete-sheet-dialog-delete-btn`}
           >
             Delete
           </Button>

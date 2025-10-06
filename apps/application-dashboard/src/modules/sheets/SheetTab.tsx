@@ -195,12 +195,14 @@ const SheetTab: FC<SheetTabProps> = ({
         variant='secondary'
         className={cn('overflow-hidden border-none px-4 py-2 text-ellipsis whitespace-nowrap')}
         onClick={handleTabClick}
+        data-testid={`${tab?.value}-sheet-tab`}
       >
         {finalName || tab?.label}
       </Button>
       <Popover open={isMenuOpen} onOpenChange={handleMenuOpen}>
         <PopoverTrigger
           className={cn('cursor-pointer pr-1.5', (isLongPressing || isDragging) && 'pointer-events-none')}
+          data-testid={`${tab?.value}-sheet-tab-popover-trigger`}
         >
           <PermissionGuard
             resourceType={ResourceType.PAGE}
@@ -226,6 +228,7 @@ const SheetTab: FC<SheetTabProps> = ({
             autoFocus
             onBlur={handleInputBlur}
             onKeyDown={handleEditKeyDown}
+            data-testid={`${tab?.value}-sheet-tab-input`}
           />
 
           <Button
@@ -233,6 +236,7 @@ const SheetTab: FC<SheetTabProps> = ({
             size='medium'
             className='flex w-full items-center justify-start gap-1.5 text-red-700 hover:text-red-700'
             onClick={handleDeleteSheet}
+            data-testid={`${tab?.value}-sheet-tab-delete-sheet-btn`}
           >
             <SvgSpriteLoader id='trash-04' size={12} />
             <span>Delete sheet</span>

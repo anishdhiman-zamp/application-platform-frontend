@@ -180,11 +180,13 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
-          
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
+                    
           # Build the application
           npm run build
           
