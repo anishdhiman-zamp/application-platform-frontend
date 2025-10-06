@@ -206,14 +206,19 @@ jobs:
 
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
+          NEXT_PUBLIC_ASSET_PREFIX: "https://d1spwmgn2nexj7.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "production"
+          NEXT_PUBLIC_BASE_API_URL: "https://api-us.zamp.ai"
+          NEXT_PUBLIC_DEFAULT_REGION: "us"
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
-          echo "Building application for production US with staging tag: $STAGING_TAG"
+          echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
-          
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
+          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
+          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
           # Build the application
           npm run build
           
@@ -223,8 +228,6 @@ jobs:
 
       - id: build
         name: Build and Push Image
-        env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://s3.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ASSETS_S3_BUCKET }}/application-platform-frontend/${{ env.ENVIRONMENT }}"
         run: |
           # Debug: Show all environment variables first
           echo "=== Environment Variables Debug ==="
@@ -236,7 +239,7 @@ jobs:
           # Construct ECR registry URL (like TMS workflow pattern)
           ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
-          IMAGE_TAG="$STAGING_TAG-prd-us-$GITHUB_RUN_NUMBER-$(date +%s)"
+          IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
           
           # Debug: Print build variables
           echo "=== Build Debug Info ==="
@@ -258,13 +261,13 @@ jobs:
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
-            --build-arg NEXT_PUBLIC_ASSET_PREFIX=${NEXT_PUBLIC_ASSET_PREFIX} \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d1spwmgn2nexj7.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=production \
-            --build-arg PORT=3000 \
-            --build-arg SKIP_INSTALL=true \
-            --build-arg SKIP_BUILD=true \
+            --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-us.zamp.ai \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION=us \
             --push .
+          
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
@@ -273,13 +276,27 @@ jobs:
       - id: upload-assets
         name: Upload Static Files to S3
         run: |
-          # Upload Next.js static files directly from the built application
-          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
-          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/public"
+          # Clear existing assets and upload new ones to ensure complete replacement
+          echo "Clearing existing assets from S3..."
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --recursive --quiet
+          aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --recursive --quiet
           
-          echo "Static assets uploaded to S3 successfully!"
-          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/${ENVIRONMENT}/${TIMESTAMP}/_next/static"
+          echo "Uploading new Next.js static files..."
+          aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --delete
+          aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --delete
+          
+          echo "Static assets completely replaced in S3 successfully!"
+          echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
+          
+          echo "Invalidating CloudFront cache to serve new assets..."
+          aws cloudfront create-invalidation \
+            --distribution-id E3DUGZEALXY15G \
+            --paths "/*"
+          
+          echo "CloudFront invalidation initiated successfully!"
+          echo "New assets will be available shortly at: https://d1spwmgn2nexj7.cloudfront.net/application-platform-frontend"
 
+ 
   deploy-to-eks:
     name: Deploy to EKS
     runs-on: arc-runner-set-aws-prd-us

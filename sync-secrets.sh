@@ -10,7 +10,7 @@ if [ -z "$CODER_WORKSPACE_NAME" ]; then
 fi
 
 # Construct the API URL
-NEXT_PUBLIC_DEV_API_URL="https://${PORT}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
+NEXT_PUBLIC_BASE_API_URL="https://${PORT}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
 
 update_env_file() {
     local env_file=$1
@@ -24,19 +24,19 @@ update_env_file() {
     # Create or update the .env.local file
     if [ -f "$env_file" ]; then
         # Update existing file
-        if grep -q "^NEXT_PUBLIC_DEV_API_URL=" "$env_file"; then
+        if grep -q "^NEXT_PUBLIC_BASE_API_URL=" "$env_file"; then
             # Replace existing line
-            sed -i "s|^NEXT_PUBLIC_DEV_API_URL=.*|NEXT_PUBLIC_DEV_API_URL=$NEXT_PUBLIC_DEV_API_URL|" "$env_file"
-            echo "🔄 Updated existing NEXT_PUBLIC_DEV_API_URL in $env_file"
+            sed -i "s|^NEXT_PUBLIC_BASE_API_URL=.*|NEXT_PUBLIC_BASE_API_URL=$NEXT_PUBLIC_BASE_API_URL|" "$env_file"
+            echo "🔄 Updated existing NEXT_PUBLIC_BASE_API_URL in $env_file"
         else
             # Add new line
-            echo "NEXT_PUBLIC_DEV_API_URL=$NEXT_PUBLIC_DEV_API_URL" >> "$env_file"
-            echo "➕ Added NEXT_PUBLIC_DEV_API_URL to $env_file"
+            echo "NEXT_PUBLIC_BASE_API_URL=$NEXT_PUBLIC_BASE_API_URL" >> "$env_file"
+            echo "➕ Added NEXT_PUBLIC_BASE_API_URL to $env_file"
         fi
     else
         # Create new file
-        echo "NEXT_PUBLIC_DEV_API_URL=$NEXT_PUBLIC_DEV_API_URL" > "$env_file"
-        echo "📝 Created new $env_file with NEXT_PUBLIC_DEV_API_URL"
+        echo "NEXT_PUBLIC_BASE_API_URL=$NEXT_PUBLIC_BASE_API_URL" > "$env_file"
+        echo "📝 Created new $env_file with NEXT_PUBLIC_BASE_API_URL"
     fi
     
     # Set appropriate permissions
@@ -51,7 +51,7 @@ main() {
     echo "📋 Configuration:"
     echo "  • PORT: $PORT"
     echo "  • CODER_WORKSPACE_NAME: $CODER_WORKSPACE_NAME"
-    echo "  • NEXT_PUBLIC_DEV_API_URL: $NEXT_PUBLIC_DEV_API_URL"
+    echo "  • NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
     echo ""
     
     # Get current directory (should be application-platform-frontend service directory)

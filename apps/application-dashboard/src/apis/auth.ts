@@ -23,6 +23,13 @@ const Teams = baseApi.injectEndpoints({
     whoAmI: builder.query<Session, void>({
       query: () => ({ url: API_ENDPOINTS.USER_WHOAMI_GET }),
     }),
+    getBaseUrl: builder.query<{ api_base_urls: { region: string; url: string }[] }, { email: string }>({
+      query: (body) => ({
+        method: REQUEST_TYPES.POST,
+        body,
+        url: API_ENDPOINTS.AUTH_BASE_URL_GET,
+      }),
+    }),
   }),
 });
 
@@ -34,4 +41,5 @@ export const {
   useGetErrorDetailsQuery,
   useWhoAmIQuery,
   useLazyWhoAmIQuery,
+  useGetBaseUrlQuery,
 } = Teams;
