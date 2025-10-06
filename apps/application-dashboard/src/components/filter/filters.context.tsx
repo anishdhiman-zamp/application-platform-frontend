@@ -119,7 +119,13 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
         // removeAccountsFilterObject(selectedFilters);
 
-        return { ...state, selectedFilters, selectedFiltersInUI: { ...selectedFilters }, isFilterInitialized: true };
+        return {
+          ...state,
+          selectedFilters,
+          selectedFiltersInUI: { ...selectedFilters },
+          currentPageFilters: Object.keys(selectedFilters),
+          isFilterInitialized: true,
+        };
       }
       case filtersContextActions.SET_FILTERS:
         return { ...state, filters: { ...state?.filters, ...action?.payload?.filters } };
