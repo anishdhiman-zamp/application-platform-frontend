@@ -107,7 +107,7 @@ jobs:
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=916079538338" >> $GITHUB_OUTPUT
           echo "VALUES_FILE=prd-us-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-prd-us-application-platform-bucket" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-prd-us-application-platform-assets" >> $GITHUB_OUTPUT
           echo "BUILD_ENV=awsprd" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
