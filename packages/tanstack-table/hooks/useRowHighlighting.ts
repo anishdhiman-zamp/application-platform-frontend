@@ -1,4 +1,3 @@
-import { getFromSessionStorage, SESSION_STORAGE_KEYS, setToSessionStorage } from '@zamp-platform/utils';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -10,6 +9,9 @@ interface UseRowHighlightingProps {
   rowVirtualizer?: {
     scrollToIndex: (index: number, options?: { align?: 'start' | 'center' | 'end' | 'auto' }) => void;
   };
+  setHighlightedRowIndex?: (key: string, rowIndex: number) => void;
+  getHighlightedRowIndex?: (key: string) => number | null;
+  clearHighlightedRowIndex?: (key: string) => void;
 }
 
 interface UseRowHighlightingReturn {
@@ -24,6 +26,9 @@ export const useRowHighlighting = ({
   isVirtualizationReady,
   hasScrollPositionToRestore,
   rowVirtualizer,
+  setHighlightedRowIndex: setHighlightedRowIndexProp,
+  getHighlightedRowIndex: getHighlightedRowIndexProp,
+  clearHighlightedRowIndex: clearHighlightedRowIndexProp,
 }: UseRowHighlightingProps): UseRowHighlightingReturn => {
   const searchParams = useSearchParams();
   const [highlightedRowIndex, setHighlightedRowIndexState] = useState<number | null>(null);
@@ -32,30 +37,13 @@ export const useRowHighlighting = ({
     (index: number | null) => {
       setHighlightedRowIndexState(index);
 
-      if (index !== null) {
-        try {
-          const existingData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_HIGHLIGHTED_ROW);
-          const allHighlightedRows = existingData ? JSON.parse(existingData) : {};
-          allHighlightedRows[key] = index;
-
-          setToSessionStorage(SESSION_STORAGE_KEYS.TABLE_HIGHLIGHTED_ROW, JSON.stringify(allHighlightedRows));
-        } catch (error) {
-          console.warn('Failed to save highlighted row index:', error);
-        }
-      } else {
-        try {
-          const existingData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_HIGHLIGHTED_ROW);
-          if (existingData) {
-            const allHighlightedRows = JSON.parse(existingData);
-            delete allHighlightedRows[key];
-            setToSessionStorage(SESSION_STORAGE_KEYS.TABLE_HIGHLIGHTED_ROW, JSON.stringify(allHighlightedRows));
-          }
-        } catch (error) {
-          console.warn('Failed to clear highlighted row index:', error);
-        }
+      if (index !== null && setHighlightedRowIndexProp) {
+        setHighlightedRowIndexProp(key, index);
+      } else if (index === null && clearHighlightedRowIndexProp) {
+        clearHighlightedRowIndexProp(key);
       }
     },
-    [key],
+    [key, setHighlightedRowIndexProp, clearHighlightedRowIndexProp],
   );
 
   const clearHighlightedRow = useCallback(() => {
@@ -80,26 +68,29 @@ export const useRowHighlighting = ({
         }
       }
 
-      try {
-        const storedData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_HIGHLIGHTED_ROW);
-        if (storedData) {
-          const allHighlightedRows = JSON.parse(storedData);
-          const storedIndex = allHighlightedRows[key];
-          if (typeof storedIndex === 'number') {
-            setHighlightedRowIndexState(storedIndex);
+      if (getHighlightedRowIndexProp) {
+        const storedIndex = getHighlightedRowIndexProp(key);
+        if (typeof storedIndex === 'number') {
+          setHighlightedRowIndexState(storedIndex);
 
-            if (rowVirtualizer && !hasScrollPositionToRestore) {
-              requestAnimationFrame(() => {
-                rowVirtualizer.scrollToIndex(storedIndex, { align: 'center' });
-              });
-            }
+          if (rowVirtualizer && !hasScrollPositionToRestore) {
+            requestAnimationFrame(() => {
+              rowVirtualizer.scrollToIndex(storedIndex, { align: 'center' });
+            });
           }
         }
-      } catch (error) {
-        console.warn('Failed to restore highlighted row index:', error);
       }
     }
-  }, [isDataLoaded, isVirtualizationReady, key, searchParams, setHighlightedRowIndex, rowVirtualizer]);
+  }, [
+    isDataLoaded,
+    isVirtualizationReady,
+    key,
+    searchParams,
+    setHighlightedRowIndex,
+    rowVirtualizer,
+    getHighlightedRowIndexProp,
+    hasScrollPositionToRestore,
+  ]);
 
   return {
     highlightedRowIndex,

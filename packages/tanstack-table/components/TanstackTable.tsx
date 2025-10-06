@@ -161,6 +161,9 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     isDataLoaded: flatRowData.length > 0,
     totalRowCount,
     isVirtualizationReady,
+    saveScrollPosition: preserveScrollPosition?.saveScrollPosition,
+    getScrollPosition: preserveScrollPosition?.getScrollPosition,
+    hasScrollPositionToRestore: preserveScrollPosition?.hasScrollPositionToRestore,
   });
 
   const { highlightedRowIndex, setHighlightedRowIndex } = useRowHighlighting({
@@ -169,6 +172,9 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     isVirtualizationReady,
     hasScrollPositionToRestore,
     rowVirtualizer,
+    setHighlightedRowIndex: rowHighlighting?.setHighlightedRowIndex,
+    getHighlightedRowIndex: rowHighlighting?.getHighlightedRowIndex,
+    clearHighlightedRowIndex: rowHighlighting?.clearHighlightedRowIndex,
   });
 
   const enhancedHandleBodyScroll = useCallback(

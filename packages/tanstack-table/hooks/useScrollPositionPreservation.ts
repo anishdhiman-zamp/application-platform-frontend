@@ -1,4 +1,3 @@
-import { getFromSessionStorage, SESSION_STORAGE_KEYS, setToSessionStorage } from '@zamp-platform/utils';
 import { useCallback, useEffect, useMemo } from 'react';
 
 interface ScrollPosition {
@@ -12,6 +11,9 @@ interface UseScrollPositionPreservationProps {
   isDataLoaded: boolean;
   totalRowCount: number;
   isVirtualizationReady: boolean;
+  saveScrollPosition?: (key: string, position: ScrollPosition) => void;
+  getScrollPosition?: (key: string) => ScrollPosition | null;
+  hasScrollPositionToRestore?: (key: string) => boolean;
 }
 
 interface UseScrollPositionPreservationReturn {
@@ -26,60 +28,42 @@ export const useScrollPositionPreservation = ({
   isDataLoaded,
   totalRowCount,
   isVirtualizationReady,
+  saveScrollPosition: saveScrollPositionProp,
+  getScrollPosition: getScrollPositionProp,
+  hasScrollPositionToRestore: hasScrollPositionToRestoreProp,
 }: UseScrollPositionPreservationProps): UseScrollPositionPreservationReturn => {
   const saveScrollPosition = useCallback(() => {
-    if (tableContainerRef.current) {
+    if (tableContainerRef.current && saveScrollPositionProp) {
       const scrollPosition: ScrollPosition = {
         scrollTop: tableContainerRef.current.scrollTop,
         scrollLeft: tableContainerRef.current.scrollLeft,
       };
-
-      try {
-        const existingData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_SCROLL_POSITION);
-        const allPositions = existingData ? JSON.parse(existingData) : {};
-        allPositions[key] = scrollPosition;
-
-        setToSessionStorage(SESSION_STORAGE_KEYS.TABLE_SCROLL_POSITION, JSON.stringify(allPositions));
-      } catch (error) {
-        console.warn('Failed to save scroll position:', error);
-      }
+      saveScrollPositionProp(key, scrollPosition);
     }
-  }, [key, tableContainerRef]);
+  }, [key, tableContainerRef, saveScrollPositionProp]);
 
   const hasScrollPositionToRestore = useMemo(() => {
-    try {
-      const storedData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_SCROLL_POSITION);
-      if (storedData) {
-        const allPositions = JSON.parse(storedData);
-        const position: ScrollPosition = allPositions[key];
-        return !!position;
-      }
-    } catch (error) {
-      console.warn('Failed to check scroll position:', error);
-    }
-    return false;
-  }, [key]);
+    return hasScrollPositionToRestoreProp ? hasScrollPositionToRestoreProp(key) : false;
+  }, [key, hasScrollPositionToRestoreProp]);
 
   const restoreScrollPosition = useCallback(() => {
-    if (tableContainerRef.current && isDataLoaded && totalRowCount > 0 && isVirtualizationReady) {
-      try {
-        const storedData = getFromSessionStorage(SESSION_STORAGE_KEYS.TABLE_SCROLL_POSITION);
-        if (storedData) {
-          const allPositions = JSON.parse(storedData);
-          const position: ScrollPosition = allPositions[key];
-          if (position) {
-            tableContainerRef.current.scrollTo({
-              top: position.scrollTop,
-              left: position.scrollLeft,
-              behavior: 'instant',
-            });
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to restore scroll position:', error);
+    if (
+      tableContainerRef.current &&
+      isDataLoaded &&
+      totalRowCount > 0 &&
+      isVirtualizationReady &&
+      getScrollPositionProp
+    ) {
+      const position = getScrollPositionProp(key);
+      if (position) {
+        tableContainerRef.current.scrollTo({
+          top: position.scrollTop,
+          left: position.scrollLeft,
+          behavior: 'instant',
+        });
       }
     }
-  }, [key, tableContainerRef, isDataLoaded, totalRowCount, isVirtualizationReady]);
+  }, [key, tableContainerRef, isDataLoaded, totalRowCount, isVirtualizationReady, getScrollPositionProp]);
 
   useEffect(() => {
     if (isDataLoaded && totalRowCount > 0 && isVirtualizationReady) {

@@ -94,9 +94,15 @@ export interface TanStackTableProps {
   preserveScrollPosition?: {
     key: string;
     enabled: boolean;
+    saveScrollPosition?: (key: string, position: { scrollTop: number; scrollLeft: number }) => void;
+    getScrollPosition?: (key: string) => { scrollTop: number; scrollLeft: number } | null;
+    hasScrollPositionToRestore?: (key: string) => boolean;
   };
   rowHighlighting?: {
     key: string;
     enabled: boolean;
+    setHighlightedRowIndex?: (key: string, rowIndex: number) => void;
+    getHighlightedRowIndex?: (key: string) => number | null;
+    clearHighlightedRowIndex?: (key: string) => void;
   };
 }
