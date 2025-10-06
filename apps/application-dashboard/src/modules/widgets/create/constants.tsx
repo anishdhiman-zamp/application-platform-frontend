@@ -85,3 +85,4 @@ export const defaultGroupStats: GroupStats = {
 };
 
 export const NUMBER_COLUMN_TYPES = new Set(['integer', 'float', 'double', 'decimal']);
+export const WIDGET_INFO_TEXT = 'This chart is illustrative and may not represent the full dataset from the column';

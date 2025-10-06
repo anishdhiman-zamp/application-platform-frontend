@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { DEFAULT_PAGE_NAME, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { WIDGET_INFO_TEXT } from '@/modules/widgets/create/constants';
 import {
   CreatePageResponseType,
   CreateSheetFilterConfigResponseType,
@@ -206,6 +207,8 @@ export const createWidget = async (page: any, config: WidgetConfig): Promise<str
     await configureKpiWidget(page, config.title, config.dataset);
   }
 
+  await expect(page.getByTestId(TEST_IDS.WIDGET_INFO)).toBeVisible({ timeout: STANDARD_TIMEOUT });
+  await expect(page.getByTestId(TEST_IDS.WIDGET_INFO)).toHaveText(WIDGET_INFO_TEXT, { timeout: STANDARD_TIMEOUT });
   await expect(page.getByTestId(TEST_IDS.WIDGET_DONE_BTN)).toBeEnabled({ timeout: STANDARD_TIMEOUT });
   const responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.WIDGETS_INSTANCE);
 
