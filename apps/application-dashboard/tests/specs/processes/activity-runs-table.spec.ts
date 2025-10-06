@@ -48,6 +48,10 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
     });
 
     await test.step('Filter - test column filter', async () => {
+      // Navigate to processes page
+      console.log('Navigating to processes page...');
+      await page.goto(`${baseUrl}/processes`);
+
       // Go to "DONE" tab
       await switchToTab(page, 'DONE');
 
@@ -84,8 +88,8 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         throw new Error(`Expected input value to be "EUR" but got "${inputValue}"`);
       }
 
-      // Apply the filter by pressing Enter
-      await filterInput.press('Enter');
+      // Apply the filter by clicking on the specific filter menu item
+      await page.getByTestId(`filter-menu-item-${testColumnData[0].value}`).nth(3).click();
 
       // Wait for data to load using skeleton detection
       await waitForDataLoad(page, 3);

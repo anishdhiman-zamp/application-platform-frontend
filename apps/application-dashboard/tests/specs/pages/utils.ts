@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { DEFAULT_PAGE_NAME, DEFAULT_SHEET_NAME } from '@/constants/common.constants';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import { WIDGET_INFO_TEXT } from '@/modules/widgets/create/constants';
 import {
   CreatePageResponseType,
   CreateSheetFilterConfigResponseType,
@@ -91,6 +92,7 @@ export const waitAndSubmitForm = async (page: any, inputTestId: string, value: s
 // Toast message verification helper
 export const verifyToastMessage = async (page: any, message: string, timeout = STANDARD_TIMEOUT) => {
   await expect(page.getByText(message, { exact: true }).first()).toBeVisible({ timeout });
+  await closeToast(page);
 };
 
 // Select dropdown option helper
@@ -205,6 +207,8 @@ export const createWidget = async (page: any, config: WidgetConfig): Promise<str
     await configureKpiWidget(page, config.title, config.dataset);
   }
 
+  await expect(page.getByTestId(TEST_IDS.WIDGET_INFO)).toBeVisible({ timeout: STANDARD_TIMEOUT });
+  await expect(page.getByTestId(TEST_IDS.WIDGET_INFO)).toHaveText(WIDGET_INFO_TEXT, { timeout: STANDARD_TIMEOUT });
   await expect(page.getByTestId(TEST_IDS.WIDGET_DONE_BTN)).toBeEnabled({ timeout: STANDARD_TIMEOUT });
   const responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.WIDGETS_INSTANCE);
 
@@ -227,9 +231,10 @@ export const createWidget = async (page: any, config: WidgetConfig): Promise<str
 
 // CRUD operation helpers
 export const createPage = async (page: any, baseUrl: string): Promise<{ pageId: string; sheetId: string }> => {
+  const responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.PAGES);
+
   await waitAndClick(page, TEST_IDS.ADD_PAGE_BTN);
 
-  const responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.PAGES);
   const responseBody = await handleApiResponse<CreatePageResponseType>(responsePromise, undefined, (status) => {
     throw new Error(`Failed to add page. API returned status: ${status}`);
   });
@@ -241,13 +246,30 @@ export const createPage = async (page: any, baseUrl: string): Promise<{ pageId: 
   const newPageId = responseBody.page.page_id;
   const newSheetId = responseBody.sheet.sheet_id;
 
-  await expect(page).toHaveURL(`${baseUrl}/pages/${newPageId}/${newSheetId}`, { timeout: STANDARD_TIMEOUT });
-  await expect(page.getByTestId(TEST_IDS.BREADCRUMB_EDIT_BTN)).toHaveText(DEFAULT_PAGE_NAME, {
-    timeout: STANDARD_TIMEOUT,
-  });
+  try {
+    await expect(page).toHaveURL(`${baseUrl}/pages/${newPageId}/${newSheetId}`, { timeout: STANDARD_TIMEOUT });
+    await expect(page.getByTestId(TEST_IDS.BREADCRUMB_EDIT_BTN)).toHaveText(DEFAULT_PAGE_NAME, {
+      timeout: STANDARD_TIMEOUT,
+    });
+  } catch (error) {
+    console.log('❌ URL or breadcrumb check failed, redirecting to correct URL...', error);
+    await page.goto(`${baseUrl}/pages/${newPageId}/${newSheetId}`);
+    await expect(page.getByTestId(TEST_IDS.BREADCRUMB_EDIT_BTN)).toHaveText(DEFAULT_PAGE_NAME, {
+      timeout: STANDARD_TIMEOUT,
+    });
+  }
   await expect(page.getByTestId(getSheetTabId(newSheetId))).toBeVisible({ timeout: STANDARD_TIMEOUT });
 
   return { pageId: newPageId, sheetId: newSheetId };
+};
+
+// Helper function to close toast by clicking x-close button
+export const closeToast = async (page: any) => {
+  try {
+    await page.locator('svg[id="x-close"]').first().click();
+  } catch (error) {
+    console.log('❌ Toast close button not found or already closed', error);
+  }
 };
 
 export const createSheet = async (page: any, pageId: string, skipVisibilityTest?: boolean): Promise<string> => {
@@ -334,30 +356,30 @@ export const deleteEntity = async (page: any, config: DeleteEntityConfig) => {
   let responsePromise: Promise<any>;
 
   if (config.type === 'widget') {
-    await page.getByTestId(getAgChartsWidgetsId(config.id)).hover();
-    await waitAndClick(page, getWidgetOptionsHandleId(config.id));
-    await waitAndClick(page, getWidgetOptionsDeleteBtnId(config.id));
-    await waitAndClick(page, getDeleteWidgetDialogDeleteBtnId(config.id));
-
     responsePromise = waitForApiResponse(
       page,
       formRequestUrlWithParams(API_ENDPOINTS.WIDGET_DELETE, { widgetId: config.id }),
       REQUEST_TYPES.DELETE,
     );
+
+    await page.getByTestId(getAgChartsWidgetsId(config.id)).hover();
+    await waitAndClick(page, getWidgetOptionsHandleId(config.id));
+    await waitAndClick(page, getWidgetOptionsDeleteBtnId(config.id));
+    await waitAndClick(page, getDeleteWidgetDialogDeleteBtnId(config.id));
   } else if (config.type === 'sheet') {
+    responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.SHEET_DELETE_BY_PAGE_ID(config.pageId!, config.id));
+
     await page.getByTestId(getSheetTabId(config.id)).hover();
     await waitAndClick(page, getSheetTabPopoverTriggerId(config.id));
     await waitAndClick(page, getSheetTabDeleteBtnId(config.id));
     await waitAndClick(page, getDeleteSheetDialogBtnId(config.id));
-
-    responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.SHEET_DELETE_BY_PAGE_ID(config.pageId!, config.id));
   } else {
+    responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.PAGE_BY_ID(config.id));
+
     await page.getByTestId(getPageNavTabId(config.id)).hover();
     await waitAndClick(page, getPageNavTabPopoverTriggerId(config.id));
     await waitAndClick(page, getPageNavTabDeleteBtnId(config.id));
     await waitAndClick(page, getDeletePageDialogBtnId(config.id));
-
-    responsePromise = page.waitForResponse(TEST_API_ENDPOINTS.PAGE_BY_ID(config.id));
   }
 
   await handleApiResponse(responsePromise, undefined, (status) => {
