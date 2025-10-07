@@ -203,8 +203,8 @@ const Activity = () => {
           <Summary handleShowArtifacts={handleShowArtifacts} isExpanded={isExpanded} onExpand={toggleExpand} />
         ) : (
           <Artifacts
-            onClose={closeArtifacts}
-            onExpand={toggleExpand}
+            closeArtifacts={closeArtifacts}
+            expandArtifacts={toggleExpand}
             isExpanded={isExpanded}
             filters={filters}
             onArtifactClick={handleShowArtifacts}

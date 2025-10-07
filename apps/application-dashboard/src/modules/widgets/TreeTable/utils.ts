@@ -300,5 +300,5 @@ export const getFilterContext = (
  * @returns {boolean} True if the value is empty.
  */
 export const isValueEmpty = (value: string | null | undefined | number) => {
-  return value === '' || value === null || value === undefined || value === 0;
+  return value === '' || value === null || value === undefined;
 };

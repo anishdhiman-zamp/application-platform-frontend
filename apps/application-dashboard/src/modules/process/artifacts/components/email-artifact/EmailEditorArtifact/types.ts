@@ -51,5 +51,5 @@ export type EmailEditorArtifactProps = {
   processId: string;
   activityId: string;
   emitHITLActionPayload: EmitHITLActionPayload;
-  onClose: defaultFnType;
+  closeArtifacts: defaultFnType;
 };

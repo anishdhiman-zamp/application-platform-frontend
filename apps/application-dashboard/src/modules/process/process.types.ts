@@ -94,7 +94,7 @@ export type EmailArtifactWrapperProps = {
   artifactId: string;
   activityId: string;
   emitHITLActionPayload: EmitHITLActionPayload;
-  onClose: defaultFnType;
+  closeArtifacts: defaultFnType;
 };
 
 export interface HandleShowArtifactsProps extends EmitHITLActionPayload {

@@ -18,7 +18,7 @@ const EmailArtifactWrapper = ({
   artifactId,
   activityId,
   emitHITLActionPayload,
-  onClose,
+  closeArtifacts,
 }: EmailArtifactWrapperProps) => {
   switch (artifactData?.status) {
     case EMAIL_STATUS.DRAFT:
@@ -30,7 +30,7 @@ const EmailArtifactWrapper = ({
           processId={processId}
           activityId={activityId}
           emitHITLActionPayload={emitHITLActionPayload}
-          onClose={onClose}
+          closeArtifacts={closeArtifacts}
         />
       );
     default:

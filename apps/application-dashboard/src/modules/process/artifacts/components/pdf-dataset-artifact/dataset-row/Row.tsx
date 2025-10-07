@@ -128,7 +128,7 @@ const Row: FC<RowProps> = ({
     [currentDatasetCompletedFields, key, rowId, value, missingFields],
   );
 
-  const shouldShowInputDirectly = isEditable && isValueEmpty(value);
+  const shouldShowInputDirectly = useMemo(() => isEditable && isValueEmpty(value), [isEditable, value]);
 
   useEffect(() => {
     setEditingValue(formattedValue);

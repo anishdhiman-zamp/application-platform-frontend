@@ -15,7 +15,7 @@ import {
 } from '@/modules/process/artifacts/context/completedFields.context';
 import { useFieldCounts } from '@/modules/process/hooks/useFieldsCounts';
 import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
-import { type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
+import { defaultFnType, type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
@@ -24,6 +24,7 @@ interface DatasetArtifactProps {
   emitHITLActionPayload: EmitHITLActionPayload;
   processId: string;
   activityId: string;
+  closeArtifacts: defaultFnType;
   className?: string;
   showPdfSearch?: boolean;
 }
@@ -35,6 +36,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   emitHITLActionPayload,
   processId,
   activityId,
+  closeArtifacts,
   className,
   showPdfSearch = false,
 }) => {
@@ -108,6 +110,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     try {
       await emitHITLAction({ processId, activityRunId: activityId, payload }).unwrap();
       completedFieldsDispatch({ type: CompletedFieldsActions.RESET_COMPLETED_FIELDS });
+      closeArtifacts();
     } catch (err: any) {
       toast.error(err?.data?.message ?? 'Something went wrong');
     }

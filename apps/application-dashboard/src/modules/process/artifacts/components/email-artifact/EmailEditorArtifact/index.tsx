@@ -22,7 +22,7 @@ const EmailEditorArtifact = ({
   processId,
   activityId,
   emitHITLActionPayload,
-  onClose,
+  closeArtifacts,
 }: EmailEditorArtifactProps) => {
   const userId = useAppSelector((state) => state.user?.user?.user_id);
   const isFirstRender = useRef(true);
@@ -100,7 +100,7 @@ const EmailEditorArtifact = ({
       .unwrap()
       .then(() => {
         toast.success('Email sent successfully');
-        onClose();
+        closeArtifacts();
       })
       .catch((error) => {
         toast.error(error?.data?.message ?? 'Something went wrong');
