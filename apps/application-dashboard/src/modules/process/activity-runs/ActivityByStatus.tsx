@@ -198,23 +198,25 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
   };
 
   // handle row-clicked
-  const handleRowClicked = (rowData: ActivityRunRowData, rowIndex?: number) => {
-    // Navigate to activity logs for the clicked activity run
-    console.log('actitvityRunsData', activityRunsData?.total_count);
+  const handleRowClicked = useCallback(
+    (rowData: ActivityRunRowData, rowIndex?: number) => {
+      // Navigate to activity logs for the clicked activity run
 
-    if (rowData?.id) {
-      router.push(
-        getProcessActivityLogsRouteById(
-          processId,
-          rowData.id,
-          status,
-          encodeURIComponent(JSON.stringify(selectedFilters)),
-          rowIndex ?? -1,
-          activityRunsData?.total_count,
-        ),
-      );
-    }
-  };
+      if (rowData?.id) {
+        router.push(
+          getProcessActivityLogsRouteById(
+            processId,
+            rowData.id,
+            status,
+            encodeURIComponent(JSON.stringify(selectedFilters)),
+            rowIndex ?? -1,
+            totalCount,
+          ),
+        );
+      }
+    },
+    [processId, status, selectedFilters, totalCount],
+  );
 
   // Setup columns and filters configuration based on filter-config
   const setupColumnsAndFilters = () => {
