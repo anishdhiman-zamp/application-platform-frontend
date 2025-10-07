@@ -7,6 +7,7 @@ import { FILTER_KEYS } from 'components/filter/filters.constants';
 export enum PERSISTENT_FILTER_ID {
   TRANSACTIONS = 'transactions',
   CREATE_RULES = 'createRules',
+  PROCESS = 'process',
 }
 
 export const usePersistFilters = (storageType: STORAGE_TYPES = STORAGE_TYPES.SESSION) => {

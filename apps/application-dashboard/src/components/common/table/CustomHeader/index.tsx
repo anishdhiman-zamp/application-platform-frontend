@@ -96,6 +96,8 @@ const CustomHeader: FC<CustomHeaderProps> = ({
   const { checkUserPrivilege } = useResourceAccess({
     resourceType: ResourceType.DATASET,
     resourceId: datasetId,
+    skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const isCurrentUserAdmin = useMemo(() => {

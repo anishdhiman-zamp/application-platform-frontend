@@ -242,6 +242,7 @@ const MultiSelectFilter: FC<MultiSelectFilterProps> = ({
         {!!filteredValues?.length &&
           filteredValues.map((item) => (
             <div
+              data-testid={`filter-menu-item-${getValueString(item)}`}
               key={getValueString(item)}
               onClick={() => !isDisabled && onValueChange(item)}
               className='hover:bg-GRAY_100 flex cursor-pointer items-center justify-between gap-2 rounded px-2.5 py-2 select-none'
