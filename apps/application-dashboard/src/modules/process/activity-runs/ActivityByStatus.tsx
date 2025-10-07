@@ -200,7 +200,8 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
   // handle row-clicked
   const handleRowClicked = (rowData: ActivityRunRowData, rowIndex?: number) => {
     // Navigate to activity logs for the clicked activity run
-    console.log('totalRows', totalRows);
+    console.log('actitvityRunsData', activityRunsData?.total_count);
+
     if (rowData?.id) {
       router.push(
         getProcessActivityLogsRouteById(
@@ -209,7 +210,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
           status,
           encodeURIComponent(JSON.stringify(selectedFilters)),
           rowIndex ?? -1,
-          totalRows,
+          activityRunsData?.total_count,
         ),
       );
     }
