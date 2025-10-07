@@ -118,28 +118,11 @@ export const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e?.preventDefault();
-    setError(null);
-    setLoading(true);
-    if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
-      setLoading(false);
+  const doLogin = async (url: string) => {
+    reinitializeApiDomain(url);
 
-      return;
-    }
-    const allRegionsResponse = await getApiDomainAndRegions(email);
-
-    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
-      setAllRegions(allRegionsResponse);
-      setLoading(false);
-
-      return;
-    }
-
-    reinitializeApiDomain(selectedRegion.url);
     try {
-      const apiUrl = `${selectedRegion.url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const apiUrl = `${url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
       const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,
@@ -186,6 +169,29 @@ export const LoginForm = () => {
     } catch {
       setHasError(true);
       setLoading(false);
+    }
+  };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    setError(null);
+    setLoading(true);
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+
+      return;
+    }
+    const allRegionsResponse = await getApiDomainAndRegions(email);
+
+    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
+      setAllRegions(allRegionsResponse);
+      setLoading(false);
+
+      return;
+    } else if (allRegionsResponse.length === 1) {
+      doLogin(allRegionsResponse[0].url);
+    } else {
+      doLogin(selectedRegion.url);
     }
   };
 
