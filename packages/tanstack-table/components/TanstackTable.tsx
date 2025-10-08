@@ -1,6 +1,7 @@
 import { flexRender, getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@zamp-platform/ui/utils';
+import { useThrottle } from '@zamp-platform/utils';
 import React, { FC, useCallback } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
@@ -177,19 +178,24 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     clearHighlightedRowIndex: rowHighlighting?.clearHighlightedRowIndex,
   });
 
+  const throttleHandleBodyScroll = useThrottle(saveScrollPosition, 100);
+
   const enhancedHandleBodyScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       handleBodyScroll(e);
       if (preserveScrollPosition?.enabled) {
-        saveScrollPosition();
+        throttleHandleBodyScroll();
       }
     },
     [handleBodyScroll, saveScrollPosition, preserveScrollPosition?.enabled],
   );
 
+  console.log('highlightedRowIndex', highlightedRowIndex);
+
   const enhancedHandleRowClick = useCallback(
     (rowData: ActivityRunRowData, rowIndex?: number) => {
       if (rowHighlighting?.enabled && typeof rowIndex === 'number') {
+        console.log('rowIndex', rowIndex);
         setHighlightedRowIndex(rowIndex);
       }
       if (onRowClicked) {
