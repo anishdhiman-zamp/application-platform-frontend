@@ -57,7 +57,6 @@ import { useResourceAccess } from '@/hooks/useResourceAccess';
 import Notification from '@/modules/data/Notification';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import {
-  type CompletedField,
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
@@ -87,7 +86,7 @@ type DatasetByIdProps = {
 type MissingFieldControlProps = {
   totalMissingFields: number;
   currentIndex: number;
-  completedFields: CompletedField[];
+  completedFields: FieldRequirementType[];
   goPrevious: defaultFnType;
   goNext: defaultFnType;
   className?: string;
