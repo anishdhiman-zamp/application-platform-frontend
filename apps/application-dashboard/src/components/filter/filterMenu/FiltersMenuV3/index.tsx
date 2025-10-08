@@ -27,6 +27,7 @@ const FiltersMenuV3: FC = () => {
           size='xxsmall'
           className='h-6 gap-1 p-1.5 [&_svg]:size-3'
           onClick={handleOpenFilter}
+          data-testid='create-filter-btn'
         >
           <SvgSpriteLoader id='filter-lines' size={12} />
           <span>Create Filter</span>
@@ -34,7 +35,12 @@ const FiltersMenuV3: FC = () => {
       ) : (
         <Popover open={openFiltersMenu} onOpenChange={setOpenFiltersMenu}>
           <PopoverTrigger asChild>
-            <Button variant='secondary' size='xxsmall' className='h-6 gap-1 p-1.5 [&_svg]:size-3'>
+            <Button
+              variant='secondary'
+              size='xxsmall'
+              className='h-6 gap-1 p-1.5 [&_svg]:size-3'
+              data-testid='filters-menu-v3-btn'
+            >
               <SvgSpriteLoader id='filter-lines' size={12} />
               {hasNoSelectedFilters && <span>Filter</span>}
             </Button>
@@ -68,6 +74,7 @@ const FiltersMenuV3: FC = () => {
                   onClick={() => handleAddFilter(filter.key)}
                   key={filter.key}
                   className='flex items-center justify-between gap-2'
+                  data-testid={`${filter.key}-add-filter-btn`}
                 >
                   <div className='flex items-center gap-1.5'>
                     <span className='f-12-400 text-gray-900'>{filter.value?.label}</span>
@@ -80,6 +87,7 @@ const FiltersMenuV3: FC = () => {
                       variant='ghost'
                       className='text-gray-700 [&_svg]:size-3'
                       onClick={(e) => handleConfigureFilter(e, filter.key)}
+                      data-testid={`${filter.key}-filters-menu-v3-configure-btn`}
                     >
                       <SvgSpriteLoader id='settings-04' size={12} />
                     </Button>

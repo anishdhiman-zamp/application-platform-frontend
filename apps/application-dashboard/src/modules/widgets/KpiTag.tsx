@@ -126,6 +126,7 @@ const KpiTag: FC<KpiTagProps> = ({
           'shadow-chart-highlight': isDatasetSelected,
         })}
         ref={containerRef}
+        data-testid={`${widgetDetails.widget_instance_id}-kpi-tag`}
       >
         <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
         <CommonWrapper

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
+  AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
   USER_TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/team-members`,

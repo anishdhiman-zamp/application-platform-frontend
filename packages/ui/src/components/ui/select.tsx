@@ -42,6 +42,7 @@ export interface SelectProps {
   labelClassName?: string;
   side?: 'top' | 'right' | 'bottom' | 'left';
   sideOffset?: number;
+  id?: string;
 }
 
 const selectVariants = cva(
@@ -93,6 +94,7 @@ const Select = ({
   labelClassName,
   side,
   sideOffset,
+  id,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -168,7 +170,7 @@ const Select = ({
       >
         <div
           className={cn(value ? 'text-primary' : 'text-gray-700', selectVariants({ variant }), controlClassName)}
-          data-testid='select-trigger'
+          data-testid={id ? `${id}-select-trigger` : 'select-trigger'}
         >
           <span className='flex-1 truncate'>
             {selectedOption?.display_value || selectedOption?.label || placeholder}

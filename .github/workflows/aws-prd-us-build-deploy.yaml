@@ -107,7 +107,7 @@ jobs:
           echo "AWS_REGION=us-east-1" >> $GITHUB_OUTPUT
           echo "AWS_ACCOUNT_ID=916079538338" >> $GITHUB_OUTPUT
           echo "VALUES_FILE=prd-us-values.yaml" >> $GITHUB_OUTPUT
-          echo "ASSETS_S3_BUCKET=zamp-prd-us-application-platform-bucket" >> $GITHUB_OUTPUT
+          echo "ASSETS_S3_BUCKET=zamp-prd-us-application-platform-assets" >> $GITHUB_OUTPUT
           echo "BUILD_ENV=awsprd" >> $GITHUB_OUTPUT
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
@@ -210,13 +210,17 @@ jobs:
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "production"
           NEXT_PUBLIC_BASE_API_URL: "https://api-us.zamp.ai"
+          NEXT_PUBLIC_DEFAULT_REGION: "us"
           NODE_OPTIONS: "--max-old-space-size=8192"
+          NEXT_PUBLIC_MULTI_REGION_ENABLED: "false"
         run: |
           echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           echo "NODE_OPTIONS: $NODE_OPTIONS"
           echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
+          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
+          echo "NEXT_PUBLIC_MULTI_REGION_ENABLED: $NEXT_PUBLIC_MULTI_REGION_ENABLED"
           # Build the application
           npm run build
           
@@ -263,6 +267,8 @@ jobs:
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=production \
             --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-us.zamp.ai \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION=us \
+            --build-arg NEXT_PUBLIC_MULTI_REGION_ENABLED=false \
             --push .
           
           

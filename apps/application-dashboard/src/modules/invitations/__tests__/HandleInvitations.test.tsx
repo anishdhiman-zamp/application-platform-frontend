@@ -51,7 +51,8 @@ jest.mock('@sentry/browser', () => ({
 jest.mock('@zamp-platform/utils', () => ({
   getFromLocalStorage: jest.fn(),
   LOCAL_STORAGE_KEYS: {
-    ORG_REGION: 'ORG_REGION',
+    ORG_REGION: 'ORG_REGION_V5',
+    ALL_REGIONS: 'ALL_REGIONS_V4',
   },
 }));
 

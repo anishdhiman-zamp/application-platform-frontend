@@ -50,6 +50,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
           controlClassName,
           { 'shadow-chart-highlight': isHighlighted },
         )}
+        data-testid={`${filterConfig?.key}-filter-control-container`}
       >
         <div className='f-12-400 text-GRAY_900 max-w-[200px] truncate whitespace-nowrap' title={filterConfig?.label}>
           {formatToNormalText(filterConfig?.label)}
@@ -60,7 +61,7 @@ const FilterDropdownControl: FC<FilterDropdownControlProps> = ({
         >
           {filterConfig?.title}
         </div>
-        <div onClick={handleRemoveFilter}>
+        <div onClick={handleRemoveFilter} data-testid={`${filterConfig?.key}-filter-control-remove-btn`}>
           {allowClear ? (
             <SvgSpriteLoader
               id='x-close'

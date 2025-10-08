@@ -144,6 +144,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           'rounded-xl border pt-2.5': !isPlayground,
           'shadow-chart-highlight': isDatasetSelected,
         })}
+        data-testid={`${widgetDetails.widget_instance_id}-ag-charts-widgets`}
       >
         <WidgetTitle
           title={widgetDetails?.title}

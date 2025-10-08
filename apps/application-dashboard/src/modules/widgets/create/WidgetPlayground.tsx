@@ -18,7 +18,7 @@ const WidgetPlaygroundContent = () => {
   };
 
   return (
-    <div className='h-full overflow-y-auto p-12 [&::-webkit-scrollbar]:hidden'>
+    <div className='h-full overflow-y-auto p-12 [&::-webkit-scrollbar]:hidden' data-testid='widget-playground'>
       <Button className='absolute top-6 right-6 cursor-pointer' variant='ghost' size='xxsmall' onClick={handleClose}>
         <SvgSpriteLoader id='x-close' size={16} className='text-gray-700' />
       </Button>

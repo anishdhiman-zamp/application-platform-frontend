@@ -1,6 +1,11 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { captureException } from '@sentry/nextjs';
-import { getApiDomainAndRegions, REGIONS_MAP, REQUEST_TYPES } from '@zamp-platform/api';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import {
+  BASE_API_URL,
+  DEFAULT_REGION,
+  getApiDomainAndRegions,
+  reinitializeApiDomain,
+  REQUEST_TYPES,
+} from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -31,7 +36,10 @@ export const LoginForm = () => {
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
   const [allRegions, setAllRegions] = useState<{ region: string; url: string }[]>([]);
-  const [defaultRegion, setDefaultRegion] = useState<string>('');
+  const [selectedRegion, setSelectedRegion] = useState<{ region: string; url: string }>({
+    region: DEFAULT_REGION,
+    url: BASE_API_URL,
+  });
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -110,28 +118,11 @@ export const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e?.preventDefault();
-    setError(null);
-    setLoading(true);
-    if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
-      setLoading(false);
-
-      return;
-    }
-    const allRegionsResponse = await getApiDomainAndRegions(email);
-
-    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
-      setAllRegions(allRegionsResponse);
-
-      setLoading(false);
-
-      return;
-    }
+  const doLogin = async (url: string) => {
+    reinitializeApiDomain(url);
 
     try {
-      const apiUrl = `${allRegionsResponse[0].url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
+      const apiUrl = `${url}/${API_ENDPOINTS.AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST}`;
 
       const response = await fetch(apiUrl, {
         method: REQUEST_TYPES.POST,
@@ -180,30 +171,29 @@ export const LoginForm = () => {
       setLoading(false);
     }
   };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    setError(null);
+    setLoading(true);
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
 
-  const setRegionFromUrlParams = (region: string) => {
-    setDefaultRegion(region);
-    setToLocalStorage(LOCAL_STORAGE_KEYS.ORG_REGION, region);
-  };
-
-  useEffect(() => {
-    try {
-      const regions = JSON.parse(getFromLocalStorage(LOCAL_STORAGE_KEYS.ALL_REGIONS) ?? '[]');
-      const urlParams = new URLSearchParams(window.location.search);
-      const region = urlParams.get('region');
-
-      if (region) {
-        const regionValue = REGIONS_MAP[region as keyof typeof REGIONS_MAP].suffix || REGIONS_MAP.us.suffix;
-
-        setRegionFromUrlParams(regionValue);
-      }
-
-      setAllRegions(regions);
-    } catch (error) {
-      captureException(error);
-      setAllRegions([]);
+      return;
     }
-  }, []);
+    const allRegionsResponse = await getApiDomainAndRegions(email);
+
+    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
+      setAllRegions(allRegionsResponse);
+      setLoading(false);
+
+      return;
+    } else if (allRegionsResponse.length === 1) {
+      doLogin(allRegionsResponse[0].url);
+    } else {
+      doLogin(selectedRegion.url);
+    }
+  };
 
   const inputDisabled = loading;
 
@@ -234,7 +224,13 @@ export const LoginForm = () => {
               disabled={inputDisabled}
               size={SIZE_TYPES.LARGE}
             />
-            <RegionsSelectDropdown defaultRegion={defaultRegion} regions={allRegions} />
+            {allRegions.length > 1 && (
+              <RegionsSelectDropdown
+                selectedRegion={selectedRegion}
+                setSelectedRegion={setSelectedRegion}
+                regions={allRegions}
+              />
+            )}
           </div>
           <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
         </form>
