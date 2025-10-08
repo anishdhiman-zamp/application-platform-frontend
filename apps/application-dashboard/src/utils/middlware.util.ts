@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { ORY_KRATOS_SESSION_COOKIE, USER_SESSION_COOKIE } from '@/utils/cookie';
 
-export function setUserCookie(response: NextResponse, cookieId: string, value: string, maxAge: number): void {
+export function setServerSideUserCookie(response: NextResponse, cookieId: string, value: string, maxAge: number): void {
   response.cookies.set(cookieId, value, {
     httpOnly: false,
     sameSite: 'lax',
@@ -13,7 +13,7 @@ export function setUserCookie(response: NextResponse, cookieId: string, value: s
   });
 }
 
-export function getCookie(request: NextRequest, cookieName: string, parseJson = false): string | null {
+export function getServerSideCookie(request: NextRequest, cookieName: string, parseJson = false): string | null {
   try {
     const cookieValue = request.cookies.get(cookieName)?.value;
 
@@ -25,7 +25,7 @@ export function getCookie(request: NextRequest, cookieName: string, parseJson = 
   }
 }
 
-export function clearCookie(response: NextResponse, cookieId: string): void {
+export function clearServerSideCookie(response: NextResponse, cookieId: string): void {
   response.cookies.delete(cookieId);
 }
 
@@ -33,20 +33,20 @@ export async function getUserSession(
   request: NextRequest,
   checkCache = true,
 ): Promise<{ session: Session | null; cached: boolean }> {
-  const cachedSession = getCookie(request, USER_SESSION_COOKIE, true) as Session | null;
+  const cachedSession = getServerSideCookie(request, USER_SESSION_COOKIE, true) as Session | null;
 
   if (cachedSession && checkCache) {
     return { session: cachedSession, cached: true };
   }
 
   try {
-    const oryKratosSession = getCookie(request, ORY_KRATOS_SESSION_COOKIE);
+    const oryKratosSession = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE);
 
     if (!oryKratosSession) {
       return { session: null, cached: true };
     }
 
-    const baseUrl = 'https://api-dev-aws-us.zamp.ai';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');
@@ -81,7 +81,7 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
 
 export async function validateSession(request: NextRequest): Promise<boolean> {
   try {
-    const oryKratosSession = getCookie(request, ORY_KRATOS_SESSION_COOKIE);
+    const oryKratosSession = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE);
 
     return !!oryKratosSession;
   } catch {

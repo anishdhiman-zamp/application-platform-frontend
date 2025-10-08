@@ -11,7 +11,7 @@ import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from '@/store/slices/user';
 import { UserRoleIdType } from '@/types/api/auth.types';
-import { ORY_KRATOS_SESSION_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { USER_SESSION_COOKIE } from '@/utils/cookie';
 import { identifyPostHogUser } from '@/utils/postHog';
 
 const UserDetailsProvider = () => {
@@ -21,7 +21,7 @@ const UserDetailsProvider = () => {
   const { evaluate, ldClient } = useFeatureFlags();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
-  const { data: session, isLoading, isSuccess, isError } = useWhoAmIQuery();
+  const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
 
   useCookieInvalidation(USER_SESSION_COOKIE);
 
@@ -39,13 +39,6 @@ const UserDetailsProvider = () => {
       dispatch(setWorkspace(defaultWorkspace));
     }
   }, [session, isSuccess, dispatch]);
-
-  useEffect(() => {
-    if (isError) {
-      setCookie(ORY_KRATOS_SESSION_COOKIE, '', -1);
-      router.push(ROUTES_PATH.NO_ACCESS);
-    }
-  }, [isError, router]);
 
   useEffect(() => {
     if (isLoading || (session?.user_id && workspace === null)) {

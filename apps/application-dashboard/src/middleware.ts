@@ -10,10 +10,10 @@ import {
 } from 'utils/cookie';
 import {
   checkOrgMembership,
-  clearCookie,
-  getCookie,
+  clearServerSideCookie,
+  getServerSideCookie,
   getUserSession,
-  setUserCookie,
+  setServerSideUserCookie,
   validateSession,
 } from '@/utils/middlware.util';
 
@@ -34,7 +34,7 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   if (![ROUTES_PATH.HOME, ROUTES_PATH.LOGIN].includes(pathname)) {
     const fullRoute = pathname + (request.nextUrl.search || '');
 
-    setUserCookie(response, PREV_ROUTE_COOKIE, fullRoute, COOKIE_MAX_AGE);
+    setServerSideUserCookie(response, PREV_ROUTE_COOKIE, fullRoute, COOKIE_MAX_AGE);
   }
 
   return response;
@@ -61,7 +61,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     if (session && !cached) {
       const response = NextResponse.next();
 
-      setUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(session), SESSION_CACHE_MAX_AGE);
+      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(session), SESSION_CACHE_MAX_AGE);
 
       return response;
     }
@@ -76,8 +76,8 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
 
-      clearCookie(response, ORY_KRATOS_SESSION_COOKIE);
-      clearCookie(response, USER_SESSION_COOKIE);
+      clearServerSideCookie(response, ORY_KRATOS_SESSION_COOKIE);
+      clearServerSideCookie(response, USER_SESSION_COOKIE);
 
       return response;
     }
@@ -90,12 +90,12 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       break;
     }
     case ROUTES_PATH.HOME: {
-      const prevRoute = getCookie(request, PREV_ROUTE_COOKIE);
+      const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
 
       if (prevRoute) {
         const response = NextResponse.redirect(new URL(prevRoute, request.url));
 
-        clearCookie(response, PREV_ROUTE_COOKIE);
+        clearServerSideCookie(response, PREV_ROUTE_COOKIE);
 
         return response;
       }
@@ -109,6 +109,8 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 
 export async function middleware(request: NextRequest) {
   const isAuthenticated = await validateSession(request);
+
+  console.log('isAuthenticated', isAuthenticated);
 
   if (!isAuthenticated) {
     return handleUnauthenticatedRoutes(request);
