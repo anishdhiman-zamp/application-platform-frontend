@@ -51,11 +51,11 @@ const Activity = () => {
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
 
-  const toggleExpand = () => {
+  const onToggleExpand = () => {
     setIsExpanded((prev) => !prev);
   };
 
-  const closeArtifacts = () => {
+  const onCloseArtifacts = () => {
     setShowSummary(true);
     setIsExpanded(false);
     panelRef.current?.resize(70);
@@ -186,7 +186,7 @@ const Activity = () => {
           'bg-black border-black': isDragging,
           'opacity-0 group-hover:opacity-100': showSummary && !isDragging,
         })}
-        onDoubleClick={() => toggleExpand()}
+        onDoubleClick={() => onToggleExpand()}
       />
 
       <ResizablePanel
@@ -200,11 +200,11 @@ const Activity = () => {
         })}
       >
         {showSummary ? (
-          <Summary handleShowArtifacts={handleShowArtifacts} isExpanded={isExpanded} onExpand={toggleExpand} />
+          <Summary handleShowArtifacts={handleShowArtifacts} isExpanded={isExpanded} onExpand={onToggleExpand} />
         ) : (
           <Artifacts
-            closeArtifacts={closeArtifacts}
-            expandArtifacts={toggleExpand}
+            onCloseArtifacts={onCloseArtifacts}
+            onExpandArtifacts={onToggleExpand}
             isExpanded={isExpanded}
             filters={filters}
             onArtifactClick={handleShowArtifacts}

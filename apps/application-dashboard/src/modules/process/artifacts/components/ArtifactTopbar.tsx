@@ -5,16 +5,16 @@ import { COLORS } from '@/constants/colors';
 import { type defaultFnType, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface ArtifactTopbarProps {
-  closeArtifacts: defaultFnType;
-  expandArtifacts: defaultFnType;
+  onCloseArtifacts: defaultFnType;
+  onExpandArtifacts: defaultFnType;
   isExpanded: boolean;
   title?: string;
   onOpenAllArtifacts: defaultFnType;
 }
 
 const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
-  closeArtifacts,
-  expandArtifacts,
+  onCloseArtifacts,
+  onExpandArtifacts,
   isExpanded,
   title,
   onOpenAllArtifacts,
@@ -41,7 +41,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
             id={isExpanded ? 'minimize-01' : 'expand-01'}
             size={12}
             color={COLORS.GRAY_1000}
-            onClick={expandArtifacts}
+            onClick={onExpandArtifacts}
             className='animate-opacity cursor-pointer transition-all duration-300'
             key={isExpanded ? 'minimize-01' : 'expand-01'}
           />
@@ -52,7 +52,7 @@ const ArtifactTopbar: FC<ArtifactTopbarProps> = ({
             id='x-close'
             size={16}
             color={COLORS.GRAY_1000}
-            onClick={closeArtifacts}
+            onClick={onCloseArtifacts}
             className='cursor-pointer'
           />
         </TooltipV2>

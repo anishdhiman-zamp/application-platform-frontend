@@ -24,7 +24,7 @@ interface DatasetArtifactProps {
   emitHITLActionPayload: EmitHITLActionPayload;
   processId: string;
   activityId: string;
-  closeArtifacts: defaultFnType;
+  onCloseArtifacts: defaultFnType;
   className?: string;
   showPdfSearch?: boolean;
 }
@@ -36,7 +36,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   emitHITLActionPayload,
   processId,
   activityId,
-  closeArtifacts,
+  onCloseArtifacts,
   className,
   showPdfSearch = false,
 }) => {
@@ -110,7 +110,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     try {
       await emitHITLAction({ processId, activityRunId: activityId, payload }).unwrap();
       completedFieldsDispatch({ type: CompletedFieldsActions.RESET_COMPLETED_FIELDS });
-      closeArtifacts();
+      onCloseArtifacts();
     } catch (err: any) {
       toast.error(err?.data?.message ?? 'Something went wrong');
     }

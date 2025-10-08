@@ -61,7 +61,7 @@ import {
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
-import { ARTIFACT_TYPE, DATASET_VIEW_TYPE } from '@/modules/process/process.types';
+import { ARTIFACT_TYPE, DATASET_VIEW_TYPE, type FieldRequirementType } from '@/modules/process/process.types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -291,17 +291,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     (rows: MapAny[]) => {
       if (!rows || !missingFields || !activityId) return;
 
-      const fieldsToAdd: Array<{
-        rowId: string;
-        columnId: string;
-        isRequired: boolean;
-      }> = [];
+      const fieldsToAdd: FieldRequirementType[] = [];
 
-      const fieldsToRemove: Array<{
-        rowId: string;
-        columnId: string;
-        isRequired: boolean;
-      }> = [];
+      const fieldsToRemove: FieldRequirementType[] = [];
 
       // Check each row for pre-filled values
       rows.forEach((row) => {

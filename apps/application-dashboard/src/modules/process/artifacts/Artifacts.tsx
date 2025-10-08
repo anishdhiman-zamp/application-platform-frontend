@@ -39,8 +39,8 @@ const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components
 });
 
 interface ArtifactsProps {
-  closeArtifacts: defaultFnType;
-  expandArtifacts: defaultFnType;
+  onCloseArtifacts: defaultFnType;
+  onExpandArtifacts: defaultFnType;
   isExpanded: boolean;
   filters: MapAny;
   onArtifactClick: (props: HandleShowArtifactsProps) => void;
@@ -50,8 +50,8 @@ interface ArtifactsProps {
 
 const Artifacts = ({
   isExpanded,
-  closeArtifacts,
-  expandArtifacts,
+  onCloseArtifacts,
+  onExpandArtifacts,
   onArtifactClick,
   filters,
   missingFields,
@@ -117,7 +117,7 @@ const Artifacts = ({
                 emitHITLActionPayload={emitHITLActionPayload}
                 processId={processId}
                 activityId={activityId as string}
-                closeArtifacts={closeArtifacts}
+                onCloseArtifacts={onCloseArtifacts}
                 showPdfSearch
                 className='w-1/2'
               />
@@ -144,7 +144,7 @@ const Artifacts = ({
             processId={processId}
             activityId={activityId as string}
             emitHITLActionPayload={emitHITLActionPayload}
-            closeArtifacts={closeArtifacts}
+            onCloseArtifacts={onCloseArtifacts}
           />
         );
 
@@ -158,7 +158,7 @@ const Artifacts = ({
               emitHITLActionPayload={emitHITLActionPayload}
               processId={processId}
               activityId={activityId as string}
-              closeArtifacts={closeArtifacts}
+              onCloseArtifacts={onCloseArtifacts}
               key={id}
             />
           </CompletedFieldsProvider>
@@ -206,8 +206,8 @@ const Artifacts = ({
   return (
     <div className='animate-fade-in relative h-full w-full'>
       <ArtifactTopbar
-        closeArtifacts={closeArtifacts}
-        expandArtifacts={expandArtifacts}
+        onCloseArtifacts={onCloseArtifacts}
+        onExpandArtifacts={onExpandArtifacts}
         isExpanded={isExpanded}
         title={title}
         onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}

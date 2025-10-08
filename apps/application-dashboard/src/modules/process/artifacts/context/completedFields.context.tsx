@@ -1,5 +1,6 @@
 import { createContext, Dispatch, FC, ReactElement, useContext, useEffect, useReducer } from 'react';
 import { captureException } from '@sentry/browser';
+import { FieldRequirementType } from 'modules/process/process.types';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -7,14 +8,8 @@ import {
   setToLocalStorage,
 } from '@/utils/localstorage';
 
-export interface CompletedField {
-  rowId: string;
-  columnId: string;
-  isRequired: boolean;
-}
-
 interface CompletedFieldsState {
-  completedFields: Record<string, Record<string, CompletedField[]>>;
+  completedFields: Record<string, Record<string, FieldRequirementType[]>>;
 }
 
 export enum CompletedFieldsActions {
@@ -29,8 +24,8 @@ interface CompletedFieldsAction {
   payload?: {
     datasetId?: string;
     activityId?: string;
-    completedFields?: Record<string, Record<string, CompletedField[]>>;
-    field?: CompletedField;
+    completedFields?: Record<string, Record<string, FieldRequirementType[]>>;
+    field?: FieldRequirementType;
   };
 }
 
