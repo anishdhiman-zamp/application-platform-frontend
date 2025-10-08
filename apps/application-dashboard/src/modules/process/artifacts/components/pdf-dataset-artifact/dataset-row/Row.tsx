@@ -29,7 +29,7 @@ interface RowProps {
   rowId: string;
   selectedKey: string;
   columns: ColumnDef[];
-  onChange?: (key: string, value: string, rowId: string, dataType?: string) => void;
+  onChange?: (key: string, value: string, rowId: string) => void;
   missingFields?: MissingFieldItemType[];
   requiredMissingFields?: MissingFieldItemType[];
   currentUserHasEditAccess: boolean;
@@ -82,7 +82,6 @@ const Row: FC<RowProps> = ({
 
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
-  const columnDataType = useMemo(() => columnConfig?.datatype, [columnConfig]);
   const currentDatasetCompletedFields = useMemo(
     () => completedFields[activityId]?.[datasetId]?.filter((field) => field.isRequired) ?? [],
     [completedFields, datasetId, activityId],
@@ -161,7 +160,7 @@ const Row: FC<RowProps> = ({
 
   const handleEditSave = () => {
     if (editingValue !== value) {
-      onChange?.(key, editingValue, rowId, columnDataType);
+      onChange?.(key, editingValue, rowId);
     }
     setIsEditing(false);
   };

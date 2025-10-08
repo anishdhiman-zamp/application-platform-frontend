@@ -108,7 +108,7 @@ export type DatasetUpdateRequestType = {
     filters: FilterModelType | null;
     update: {
       column: string;
-      value: string | number;
+      value: string;
     };
     save_as_rule?: boolean;
     rule_title?: string;

@@ -81,7 +81,9 @@ const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFi
       const existingFields = existingActivityFields[datasetId] || [];
 
       // Filter out the field to remove
-      const updatedFields = existingFields.filter((f) => !(f.rowId === field.rowId && f.columnId === field.columnId));
+      const updatedFields = existingFields.filter(
+        (f) => !(f.rowId === field.rowId && f.columnId === field.columnId && f.isRequired === field.isRequired),
+      );
 
       return {
         ...state,

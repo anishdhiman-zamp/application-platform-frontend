@@ -419,7 +419,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }: {
       rowId: string | string[];
       field: string;
-      newValue: string | number;
+      newValue: string;
       operator?: CONDITION_OPERATOR_TYPE;
     }) => {
       updateDatasetData({
