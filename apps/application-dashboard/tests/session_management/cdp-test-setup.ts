@@ -34,12 +34,6 @@ export const test = baseTest.extend({
       ignoreHTTPSErrors: true,
     });
 
-    // Set default localStorage values
-    await context.addInitScript(() => {
-      localStorage.setItem('ORG_REGION_V4', '');
-      localStorage.setItem('ALL_REGIONS_V3', '["-us","-sg","-me"]');
-    });
-
     await use(context);
   },
 

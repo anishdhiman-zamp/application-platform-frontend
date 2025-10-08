@@ -3,7 +3,6 @@
 import React, { Suspense, useState } from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@zamp-platform/tanstack-table';
-import { RegionProvider } from 'app/_providers/region-provider';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
 import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
 import { store } from '@/store';
@@ -15,13 +14,11 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Suspense fallback={null}>
-      <RegionProvider>
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <FeatureFlagsProvider>{children}</FeatureFlagsProvider>
-          </QueryClientProvider>
-        </Provider>
-      </RegionProvider>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <FeatureFlagsProvider>{children}</FeatureFlagsProvider>
+        </QueryClientProvider>
+      </Provider>
     </Suspense>
   );
 };
