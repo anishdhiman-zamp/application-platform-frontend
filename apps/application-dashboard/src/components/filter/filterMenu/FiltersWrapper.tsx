@@ -98,11 +98,11 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
     onSetTotalSelectedFilters?.(list?.length);
 
     setFiltersList(list);
-  }, [selectedFiltersInUI, selectedFilters]);
+  }, [selectedFiltersInUI, selectedFilters, filterConfig]);
 
   useEffect(() => {
     onSetFiltersList();
-  }, [selectedFiltersInUI]);
+  }, [selectedFiltersInUI, filterConfig, selectedFilters]);
 
   const handleResetFilters = () => {
     setShouldShowConfirmationPopup(false);
