@@ -187,15 +187,12 @@ export const TanStackTable: FC<TanStackTableProps> = ({
         throttleHandleBodyScroll();
       }
     },
-    [handleBodyScroll, saveScrollPosition, preserveScrollPosition?.enabled],
+    [handleBodyScroll, throttleHandleBodyScroll, preserveScrollPosition?.enabled],
   );
-
-  console.log('highlightedRowIndex', highlightedRowIndex);
 
   const enhancedHandleRowClick = useCallback(
     (rowData: ActivityRunRowData, rowIndex?: number) => {
       if (rowHighlighting?.enabled && typeof rowIndex === 'number') {
-        console.log('rowIndex', rowIndex);
         setHighlightedRowIndex(rowIndex);
       }
       if (onRowClicked) {
