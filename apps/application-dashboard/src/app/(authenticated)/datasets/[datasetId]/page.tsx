@@ -28,5 +28,9 @@ export default function DatasetPage() {
     }
   }, [datasetId, isDatasetListingLoading, datasetListingData, router]);
 
+  if (!datasetListingData?.datasets?.length) {
+    return null;
+  }
+
   return <DatasetById id={datasetId} />;
 }
