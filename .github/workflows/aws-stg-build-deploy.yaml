@@ -62,6 +62,7 @@ jobs:
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ steps.vars.outputs.AWS_SECRET_NAME }}
 
     steps:
       - id: vars
@@ -110,6 +111,7 @@ jobs:
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ needs.prepare-env.outputs.AWS_SECRET_NAME }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
