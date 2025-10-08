@@ -696,7 +696,7 @@ jobs:
             const resultME = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'aws-prd-build-deploy.yaml',
+              workflow_id: 'aws-prd-me-build-deploy.yaml',
               ref: 'main',
               inputs: {
                 BRANCH: 'main',
