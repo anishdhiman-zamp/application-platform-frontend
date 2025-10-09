@@ -9,6 +9,7 @@ import {
   TanStackTable,
   VisibilityState,
 } from '@zamp-platform/tanstack-table';
+import { useTableStateRedux } from 'hooks/useTableStateRedux';
 import { formatTanStackColumns } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
@@ -59,6 +60,15 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
   );
 
   const router = useRouter();
+
+  const {
+    saveScrollPosition,
+    getScrollPosition,
+    hasScrollPositionToRestore,
+    setHighlightedRowIndex,
+    getHighlightedRowIndex,
+    clearHighlightedRowIndex,
+  } = useTableStateRedux();
   const tableRef = useRef<Table<MapAny>>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
 
@@ -311,6 +321,20 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
             onColumnVisible={handleColumnVisible}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
+            preserveScrollPosition={{
+              key: `${processId}-${status}`,
+              enabled: true,
+              saveScrollPosition,
+              getScrollPosition,
+              hasScrollPositionToRestore,
+            }}
+            rowHighlighting={{
+              key: `${processId}-${status}`,
+              enabled: true,
+              setHighlightedRowIndex,
+              getHighlightedRowIndex,
+              clearHighlightedRowIndex,
+            }}
           />
         </div>
       </CommonWrapper>

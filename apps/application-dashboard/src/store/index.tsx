@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { chatApi } from '@zamp-platform/chat';
 import layoutConfigsSliceReducer from 'store/slices/layout-configs';
 import sheetFiltersSliceReducer from 'store/slices/sheet-filters';
+import tableStateSliceReducer from 'store/slices/table-state';
 import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
 
@@ -12,6 +13,7 @@ const reducer = combineReducers({
   user: userSliceReducer,
   layoutConfig: layoutConfigsSliceReducer,
   sheetFilters: sheetFiltersSliceReducer,
+  tableState: tableStateSliceReducer,
 });
 
 export const store = configureStore({
