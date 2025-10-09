@@ -81,7 +81,14 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
 
 export async function validateSession(request: NextRequest): Promise<boolean> {
   try {
-    const oryKratosSession = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE);
+    const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
+
+    console.log('regionnn', `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`);
+
+    const oryKratosSession = getServerSideCookie(
+      request,
+      `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`,
+    );
 
     return !!oryKratosSession;
   } catch {
