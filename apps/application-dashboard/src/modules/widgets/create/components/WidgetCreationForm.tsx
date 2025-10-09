@@ -133,6 +133,7 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
             onChange={(e) => handleInputChange('title', e.target.value)}
             size='small'
             placeholder='New Widget'
+            data-testid='widget-creation-form-title-input'
           />
         </div>
 
@@ -143,6 +144,7 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
             value={formData.datasetId}
             onValueChange={(value) => handleDatasetChange(value as string)}
             variant='small'
+            id='widget-creation-form-dataset'
           />
         </div>
 
@@ -183,6 +185,7 @@ const WidgetCreationForm: FC<WidgetCreationFormProps> = ({ handleClose }) => {
             onClick={handleSubmit}
             isLoading={isSubmitting}
             className={cn({ 'cursor-not-allowed opacity-50': !formData.datasetId || isDatasetFilterConfigFetching })}
+            data-testid='widget-creation-form-done-btn'
           >
             Done
           </Button>

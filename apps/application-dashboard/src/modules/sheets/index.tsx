@@ -2,15 +2,15 @@
 import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Button, toast } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
-import { useAppSelector } from 'hooks/toolkit';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import EmptySheet from 'modules/sheets/EmptySheet';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
-import { computeSheetLayout, getLastWidgetLayout } from 'modules/sheets/sheets.utils';
+import { computeSheetLayout, getDatasetIdAndWidgetsMapping, getLastWidgetLayout } from 'modules/sheets/sheets.utils';
 import useUpdateSheetLayout from 'modules/sheets/useUpdateSheetLauot';
 import useWidgetResize from 'modules/sheets/useWidgetResize';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
@@ -18,21 +18,20 @@ import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import { useRouter } from 'next/navigation';
-import { RootState } from 'store';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
-import { useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 import 'react-grid-layout/css/styles.css'; // Include default styles
 import 'react-resizable/css/styles.css'; // Include resizable styles
+
 interface SheetsProps {
   pageId: string;
   sheetId: string;
@@ -44,11 +43,12 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const router = useRouter();
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
 
   const {
+    dispatch,
     state: { filtersConfig, isFilterInitialized },
   } = useFiltersContextStore();
+
   const [currency, setCurrency] = useState<string[]>(['USD']);
   const [isEditingSheetName, setIsEditingSheetName] = useState(false);
   const [sheetName, setSheetName] = useState('');
@@ -57,9 +57,6 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   const spanRef = useRef<HTMLSpanElement>(null);
   const [updateSheetByPageId] = useUpdateSheetByPageIdMutation();
   const [sheetLayout, setSheetLayout] = useState<ResponsiveGridLayoutType[]>([]);
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
-
-  const { evaluate, ldClient } = useFeatureFlags();
 
   const { handleDragStart, handleDragStop } = useUpdateSheetLayout({ setSheetLayout, pageId, sheetId });
 
@@ -113,6 +110,15 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     return computeSheetLayout(sheetDetails, widgetDetails, getHfromWidgetHeight);
   }, [sheetDetails?.sheet_config?.sheet_layout, widgetDetails, pageId, sheetId, getHfromWidgetHeight]);
 
+  const showCurrencyFilter = useMemo(() => {
+    return (
+      isFilterInitialized &&
+      !sheetDetails?.sheet_config?.currency?.hide_currency_filter &&
+      currency &&
+      !!sheetLayout?.length
+    );
+  }, [isFilterInitialized, sheetDetails?.sheet_config?.currency?.hide_currency_filter, currency, sheetLayout]);
+
   const handleInputBlur = () => {
     setIsEditingSheetName(false);
     const trimmedName = sheetName?.trim();
@@ -134,10 +140,10 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     })
       .unwrap()
       .then(() => {
-        toast.success('Sheet name updated successfully');
+        toast.success(TOAST_MESSAGES.SUCCESS_SHEET_NAME_UPDATED);
       })
       .catch(() => {
-        toast.error('Failed to update sheet name');
+        toast.error(TOAST_MESSAGES.ERROR_SHEET_NAME_UPDATE);
         setSheetName(sheetDetails?.name ?? '');
       });
   };
@@ -204,20 +210,15 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   }, [sheetName]);
 
   useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
+    dispatch({
+      type: filtersContextActions.SET_DATASET_ID_AND_WIDGETS_MAPPING,
+      payload: { datasetIdAndWidgetsMapping: getDatasetIdAndWidgetsMapping(sheetDetails) },
+    });
+  }, [dispatch, sheetDetails]);
 
   return (
     <InitializeSheetsFilters pageId={pageId} sheetId={sheetId}>
-      <div className='relative h-[calc(100vh-94px)] overflow-x-hidden overflow-y-scroll py-6 pr-0 pl-3'>
+      <div className='relative py-6'>
         <CommonWrapper
           isLoading={isSheetLoading || isPageLoading}
           skeletonType={SkeletonTypes.CUSTOM}
@@ -236,74 +237,94 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
             </div>
           }
         >
-          <div className='z-100 flex items-center justify-between px-5'>
-            {isEditingSheetNameAllowed ? (
-              <>
-                {isEditingSheetName ? (
-                  <div className='relative inline-block'>
-                    <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
-                      {sheetName}
-                    </span>
-                    <input
-                      value={sheetName}
-                      onChange={(e) => setSheetName(e.target.value)}
-                      onBlur={handleInputBlur}
-                      autoFocus
-                      style={{ width: `${inputWidth}px` }}
-                      className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
-                        'bg-white': sheetName?.length === 0,
-                      })}
-                      placeholder='Add sheet title'
-                      onKeyDown={handleEditKeyDown}
-                    />
-                  </div>
-                ) : (
-                  <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-                    <Button
-                      variant='ghost'
-                      className='text-GRAY_950 rounded-lg px-2.5 py-1'
-                      onClick={() => setIsEditingSheetName(true)}
-                    >
-                      <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
-                    </Button>
-                  </TooltipV2>
+          <div className='z-100 space-y-4 border-b px-8 pb-4'>
+            <div className='flex items-center justify-between'>
+              {isEditingSheetNameAllowed ? (
+                <>
+                  {isEditingSheetName ? (
+                    <div className='relative inline-block'>
+                      <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
+                        {sheetName}
+                      </span>
+                      <input
+                        value={sheetName}
+                        onChange={(e) => setSheetName(e.target.value)}
+                        onBlur={handleInputBlur}
+                        autoFocus
+                        style={{ width: `${inputWidth}px` }}
+                        className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
+                          'bg-white': sheetName?.length === 0,
+                        })}
+                        placeholder='Add sheet title'
+                        onKeyDown={handleEditKeyDown}
+                        data-testid={`${sheetId}-sheet-name-input`}
+                      />
+                    </div>
+                  ) : (
+                    <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+                      <Button
+                        variant='ghost'
+                        className='text-GRAY_950 rounded-lg px-2.5 py-1'
+                        onClick={() => setIsEditingSheetName(true)}
+                        data-testid={`${sheetId}-sheet-name-edit-btn`}
+                      >
+                        <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
+                      </Button>
+                    </TooltipV2>
+                  )}
+                </>
+              ) : (
+                <span className='f-24-450'>{sheetDetails?.name}</span>
+              )}
+              <div className='flex items-center gap-2'>
+                {showCurrencyFilter && (
+                  <SingleSelectFilter
+                    filterKey='currency'
+                    options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
+                    onFilterChange={(value) => setCurrency(value)}
+                    value={currency}
+                    showColumnLabel={false}
+                    label='Currency'
+                  />
                 )}
-              </>
-            ) : (
-              <span className='f-24-450'>{sheetDetails?.name}</span>
-            )}
-            <div className='flex items-center gap-2'>
+                {!!sheetLayout?.length && (
+                  <PermissionGuard
+                    resourceType={ResourceType.PAGE}
+                    resourceId={pageId}
+                    privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
+                  >
+                    <Button
+                      size='xsmall'
+                      variant='secondary'
+                      onClick={handleAddWidget}
+                      data-testid={`${sheetId}-add-widget-btn`}
+                      className='gap-1 [&_svg]:size-3.5'
+                    >
+                      <SvgSpriteLoader id='plus' size={14} />
+                      Add a widget
+                    </Button>
+                  </PermissionGuard>
+                )}
+              </div>
+            </div>
+            {!!sheetLayout?.length && (
               <FiltersWrapper
-                allowClear={false}
+                allowClear
                 label='Filter'
                 className='px-0'
-                allowActions={false}
+                allowActions
                 filterConfig={filtersConfig ?? []}
                 isPeriodicityEnabled
                 isRightAligned
+                isSheetFilters
+                persistId={sheetId}
               />
-              {isFilterInitialized &&
-                !sheetDetails?.sheet_config?.currency?.hide_currency_filter &&
-                currency &&
-                !!sheetLayout?.length && (
-                  <div className='flex items-center gap-2'>
-                    {!!filtersConfig?.length && <div className='border-GRAY_400 h-7 border-r'></div>}
-                    <SingleSelectFilter
-                      filterKey='currency'
-                      options={PAGE_CURRENCY_OPTIONS.filter((option) => option !== LOCAL_CURRENCY)}
-                      onFilterChange={(value) => setCurrency(value)}
-                      value={currency}
-                      showColumnLabel={false}
-                      label='Currency'
-                    />
-                  </div>
-                )}
-            </div>
+            )}
           </div>
           <CommonWrapper
             isNoData={!sheetLayout?.length}
             noDataBanner={<EmptySheet onAddWidget={handleAddWidget} />}
-            className='pb-20'
+            className='h-[calc(100vh-200px)] overflow-x-hidden overflow-y-scroll px-3 pb-20 [&::-webkit-scrollbar]:hidden'
           >
             {sheetDetails && (
               <ResponsiveGridLayout
@@ -352,23 +373,6 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
             )}
           </CommonWrapper>
         </CommonWrapper>
-        {!!sheetLayout?.length && isSelfServePagesEnabled && (
-          <PermissionGuard
-            resourceType={ResourceType.PAGE}
-            resourceId={pageId}
-            privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}
-          >
-            <div
-              className={cn('fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all', {
-                'left-7/12 -translate-x-7/12': isSidebarOpen,
-              })}
-            >
-              <Button size='medium' variant='secondary' className='bg-white shadow' onClick={handleAddWidget}>
-                Add a widget
-              </Button>
-            </div>
-          </PermissionGuard>
-        )}
       </div>
     </InitializeSheetsFilters>
   );

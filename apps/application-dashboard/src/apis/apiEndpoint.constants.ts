@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   AUTH_INITIATE_LOGOUT_FLOW_GET: `auth/relay/self-service/logout/browser`,
   AUTH_INITIAL_LOGIN_FLOW_BY_EMAIL_POST: `auth/login/flow/create`,
   USER_WHOAMI_GET: 'auth/whoami',
+  AUTH_BASE_URL_GET: `auth/api-base-url`,
   AUTH_ERROR_DETAILS_GET: `auth/relay/internal/self-service/errors`,
   TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/teams`,
   USER_TEAMS_BY_ORGANIZATION_ID_GET: `organizations/{{organizationId}}/team-members`,
@@ -83,6 +84,9 @@ export const API_ENDPOINTS = {
   UPDATE_SHEET_LAYOUT_PUT: `pages/{{pageId}}/sheets/{{sheetId}}/update-layout`,
   SHEET_CREATE_POST: `pages/{{pageId}}/sheets/`,
   PAGES_CREATE_POST: `pages/`,
+  PAGES_SHEETS_FILTER_CONFIG_POST: `pages/{{pageId}}/sheets/{{sheetId}}/filters`,
+  PAGES_SHEETS_FILTER_CONFIG_PATCH: `pages/{{pageId}}/sheets/{{sheetId}}/filters/{{filterId}}`,
+  PAGES_SHEETS_FILTER_CONFIG_DELETE: `pages/{{pageId}}/sheets/{{sheetId}}/filters/{{filterId}}`,
 
   PAYMENTS_SOURCE_ACCOUNTS_GET: `payments/source-accounts`,
   PAYMENTS_DESTINATION_ACCOUNTS_GET: `payments/destination-accounts`,

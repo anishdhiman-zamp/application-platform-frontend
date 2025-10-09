@@ -33,6 +33,21 @@ const nextConfig = {
         hostname: 'd2zmqfd18ltqnx.cloudfront.net',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'd2v2rvx5m3g178.cloudfront.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'd1spwmgn2nexj7.cloudfront.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'd2hx62c6x4ihoz.cloudfront.net',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {

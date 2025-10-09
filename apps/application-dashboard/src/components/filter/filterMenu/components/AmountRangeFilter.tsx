@@ -1,13 +1,14 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { debounce, useOnClickOutside } from 'hooks';
 import { SIZE_TYPES } from 'types/common/components';
-import { OptionsType } from 'types/commonTypes';
+import { defaultFnType, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import Input from 'components/common/input';
 import { Tooltip } from 'components/common/tooltip';
 import { AmountRangeFilterValue, FILTER_TYPES } from 'components/filter/filter.types';
+import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 
 interface AmountRangeFilterProps {
@@ -19,6 +20,7 @@ interface AmountRangeFilterProps {
   initialEndValue?: string;
   onChange: (value: Record<string, AmountRangeFilterValue | object>) => void;
   filterKey: string;
+  onConfigureFilter?: defaultFnType;
 }
 
 const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
@@ -30,6 +32,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
   initialStartValue,
   initialEndValue,
   onChange,
+  onConfigureFilter,
 }) => {
   const ref = useRef(null);
 
@@ -130,7 +133,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
             >
               {AMOUNT_RANGE_FILTER_OPTIONS.map((option) => (
                 <div
-                  className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2'
+                  className='hover:bg-GRAY_100 f-12-500 rounded-md px-2.5 py-2 text-left!'
                   key={option.value}
                   onClick={() => onOperatorChange(option)}
                 >
@@ -140,7 +143,8 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
             </div>
           )}
         </div>
-        <div className='text-GRAY_700 flex cursor-pointer justify-end'>
+        <div className='text-GRAY_700 flex cursor-pointer items-center justify-end gap-3'>
+          <ConfigureFilterButton onConfigureFilter={onConfigureFilter} />
           <SvgSpriteLoader
             id='refresh-ccw-01'
             iconCategory={ICON_SPRITE_TYPES.ARROWS}
@@ -160,6 +164,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           <Input
             size={SIZE_TYPES.XSMALL}
             value={startValue}
+            type='number'
             placeholder='type a value...'
             onChange={(e) => onInputChange(true, e.target.value)}
             disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL || isDisabled}
@@ -173,6 +178,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           <Input
             size={SIZE_TYPES.XSMALL}
             value={endValue}
+            type='number'
             placeholder='type a value...'
             onChange={(e) => onInputChange(false, e.target.value)}
             disabled={isDisabled}

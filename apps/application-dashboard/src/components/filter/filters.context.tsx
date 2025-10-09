@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
+import { createContext, Dispatch, FC, ReactElement, useContext, useReducer } from 'react';
 import { PERSISTENT_FILTER_ID, usePersistFilters } from 'hooks/usePersistFilters';
 import { MapAny } from 'types/commonTypes';
 import { FilterConfigType, FilterEntityMenuType } from 'components/filter/filter.types';
@@ -11,7 +11,7 @@ enum filtersContextActions {
   RESET_ALL_FILTERS = 'RESET_ALL_FILTERS',
   ADD_EMPTY_STATE_FILTER = 'ADD_EMPTY_STATE_FILTER',
   REMOVE_FILTER = 'REMOVE_FILTER',
-  GET_FILTERS_FROM_LOCAL_STORAGE = 'GET_FILTERS_FROM_LOCAL_STORAGE',
+  GET_FILTERS_FROM_STORAGE = 'GET_FILTERS_FROM_STORAGE',
   SET_PERSIST_ID = 'SET_PERSIST_ID',
   SET_INITIALISED = 'SET_INITIALISED',
   RESET_INITIALISED = 'RESET_INITIALISED',
@@ -23,6 +23,7 @@ enum filtersContextActions {
   SET_TOTAL_ROWS = 'SET_TOTAL_ROWS',
   SET_FILTER_LOADING = 'SET_FILTER_LOADING',
   SET_STATUS_BAR = 'SET_STATUS_BAR',
+  SET_DATASET_ID_AND_WIDGETS_MAPPING = 'SET_DATASET_ID_AND_WIDGETS_MAPPING',
 }
 
 interface InitialStateType {
@@ -39,6 +40,8 @@ interface InitialStateType {
   periodicity?: FILTER_PERIODICITIES;
   currentPageFilters: string[];
   totalRows: number;
+  allSelectedFilters: MapAny;
+  datasetIdAndWidgetsMapping?: Record<string, string[]>;
 }
 
 export interface ActionType {
@@ -58,6 +61,8 @@ const initialState: InitialStateType = {
   selectedFiltersInUI: {},
   currentPageFilters: [],
   totalRows: 0,
+  allSelectedFilters: {},
+  datasetIdAndWidgetsMapping: {},
 };
 
 const context = createContext<{
@@ -99,18 +104,28 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
       case filtersContextActions.INITIALIZE_DEFAULT_FILTERS:
         return {
           ...state,
-          selectedFilters: { ...state?.selectedFilters, ...action?.payload?.selectedFilters },
-          selectedFiltersInUI: { ...state?.selectedFiltersInUI, ...action?.payload?.selectedFilters },
-          currentPageFilters: Object.keys(action?.payload?.selectedFilters),
+          selectedFilters: action?.payload?.selectedFilters ?? {},
+          selectedFiltersInUI: action?.payload?.selectedFilters ?? {},
+          currentPageFilters: Object.keys(action?.payload?.selectedFilters ?? {}),
           isFilterInitialized: true,
+          allSelectedFilters: {
+            ...(action?.payload?.selectedFilters ?? {}),
+            ...(action?.payload?.allSelectedFilters ?? {}),
+          },
         };
-      case filtersContextActions.GET_FILTERS_FROM_LOCAL_STORAGE: {
+      case filtersContextActions.GET_FILTERS_FROM_STORAGE: {
         const selectedFilters = getFiltersFromStorageForPage(action?.payload?.persistId);
 
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
         // removeAccountsFilterObject(selectedFilters);
 
-        return { ...state, selectedFilters, selectedFiltersInUI: { ...selectedFilters }, isFilterInitialized: true };
+        return {
+          ...state,
+          selectedFilters,
+          selectedFiltersInUI: { ...selectedFilters },
+          currentPageFilters: Object.keys(selectedFilters),
+          isFilterInitialized: true,
+        };
       }
       case filtersContextActions.SET_FILTERS:
         return { ...state, filters: { ...state?.filters, ...action?.payload?.filters } };
@@ -129,6 +144,11 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           ...action?.payload?.selectedFilters,
         };
 
+        // Save filters to localStorage if persistId is set
+        if (state?.persistId) {
+          onSetFiltersToStorage(state?.persistId, selectedFilters);
+        }
+
         // Needed to migrate to the new accounts filter that add an array of account ids as opposed to an object with accounts data
 
         return {
@@ -136,11 +156,17 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
           selectedFilters,
           selectedFiltersInUI,
           currentPageFilters: Object.keys(selectedFilters),
+          allSelectedFilters: { ...state?.allSelectedFilters, ...selectedFilters },
         };
       }
 
       case filtersContextActions.REPLACE_FILTERS: {
         const selectedFilters = { ...action?.payload?.selectedFilters };
+
+        // Save filters to localStorage if persistId is set
+        if (state?.persistId) {
+          onSetFiltersToStorage(state?.persistId, selectedFilters);
+        }
 
         return {
           ...state,
@@ -236,6 +262,10 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
 
       case filtersContextActions.SET_FILTER_LOADING: {
         return { ...state, isFilterLoading: action?.payload?.isFilterLoading };
+      }
+
+      case filtersContextActions.SET_DATASET_ID_AND_WIDGETS_MAPPING: {
+        return { ...state, datasetIdAndWidgetsMapping: action?.payload?.datasetIdAndWidgetsMapping };
       }
 
       default:

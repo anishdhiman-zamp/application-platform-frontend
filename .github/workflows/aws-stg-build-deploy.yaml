@@ -62,6 +62,7 @@ jobs:
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ steps.vars.outputs.AWS_SECRET_NAME }}
 
     steps:
       - id: vars
@@ -83,6 +84,7 @@ jobs:
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_OUTPUT
           echo "APP_NAME=$APP_NAME" >> $GITHUB_OUTPUT
           echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
+          echo "AWS_SECRET_NAME=zamp-stg-us-application-platform-frontend-env" >> $GITHUB_OUTPUT
 
       - name: Output deployment info
         run: |
@@ -109,6 +111,7 @@ jobs:
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ needs.prepare-env.outputs.AWS_SECRET_NAME }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
@@ -139,8 +142,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
-
-
       - name: "Install AWS CLI"
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
@@ -156,8 +157,10 @@ jobs:
         with:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
-  
 
+      - name: Copy AWS Secret
+        run: aws secretsmanager get-secret-value --secret-id "${{ env.AWS_SECRET_NAME }}" --query SecretString --output text > .env
+  
       - uses: actions/cache@v4
         with:
           path: .turbo
@@ -180,11 +183,17 @@ jobs:
           NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
+          NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
+          NEXT_PUBLIC_DEFAULT_REGION: "us"
+          NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
-          
+          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
+          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
+          echo "NODE_OPTIONS: $NODE_OPTIONS"
+                    
           # Build the application
           npm run build
           
@@ -230,6 +239,8 @@ jobs:
             --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend \
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
+            --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-stg-aws-us.zamp.ai \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION=us \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
@@ -284,6 +295,7 @@ jobs:
       AWS_ACCOUNT_ID: ${{needs.prepare-env.outputs.AWS_ACCOUNT_ID}}
       VALUES_FILE: ${{needs.prepare-env.outputs.VALUES_FILE}}
       NEW_TAG: ${{needs.create-tag.outputs.NEW_TAG}}
+      AWS_SECRET_NAME: ${{needs.prepare-env.outputs.AWS_SECRET_NAME}}
 
     steps:
       - name: "Checkout repository on : ${{ github.REF }}"
@@ -684,7 +696,7 @@ jobs:
             const resultME = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'aws-prd-build-deploy.yaml',
+              workflow_id: 'aws-prd-me-build-deploy.yaml',
               ref: 'main',
               inputs: {
                 BRANCH: 'main',

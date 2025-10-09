@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { MapAny } from 'types/commonTypes';
+import { defaultFnType, MapAny } from 'types/commonTypes';
 import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { MultiSelectFilterValue } from 'components/filter/filter.types';
@@ -14,9 +14,18 @@ interface TagsProps {
   tagColorMap?: MapAny;
   label?: string;
   isDisabled?: boolean;
+  onConfigureFilter?: defaultFnType;
 }
 
-const Tags: FC<TagsProps> = ({ column, values, className, tagColorMap, label, isDisabled = false }) => {
+const Tags: FC<TagsProps> = ({
+  column,
+  values,
+  className,
+  tagColorMap,
+  label,
+  isDisabled = false,
+  onConfigureFilter,
+}) => {
   return (
     <MultiSelectFilterMenuItem
       column={column}
@@ -36,6 +45,7 @@ const Tags: FC<TagsProps> = ({ column, values, className, tagColorMap, label, is
         );
       }}
       isDisabled={isDisabled}
+      onConfigureFilter={onConfigureFilter}
     />
   );
 };

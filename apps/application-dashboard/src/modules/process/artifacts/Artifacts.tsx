@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
@@ -13,16 +13,18 @@ import { useParams } from 'next/navigation';
 import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useAppDispatch } from '@/hooks/toolkit';
 import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
+import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
   EmailArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 const BrowserArtifact = dynamic(
   () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
@@ -37,8 +39,8 @@ const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components
 });
 
 interface ArtifactsProps {
-  onClose: () => void;
-  onExpand: () => void;
+  onCloseArtifacts: defaultFnType;
+  onExpandArtifacts: defaultFnType;
   isExpanded: boolean;
   filters: MapAny;
   onArtifactClick: (props: HandleShowArtifactsProps) => void;
@@ -47,9 +49,9 @@ interface ArtifactsProps {
 }
 
 const Artifacts = ({
-  onClose,
-  onExpand,
   isExpanded,
+  onCloseArtifacts,
+  onExpandArtifacts,
   onArtifactClick,
   filters,
   missingFields,
@@ -58,7 +60,7 @@ const Artifacts = ({
   const params = useParams();
   const processId = params?.processId as string;
   const activityId = params?.activityId;
-
+  const dispatch = useAppDispatch();
   const [allArtifactsSideDrawerOpen, setAllArtifactsSideDrawerOpen] = useState(false);
   const {
     state: { artifactType, artifactId },
@@ -115,6 +117,7 @@ const Artifacts = ({
                 emitHITLActionPayload={emitHITLActionPayload}
                 processId={processId}
                 activityId={activityId as string}
+                onCloseArtifacts={onCloseArtifacts}
                 showPdfSearch
                 className='w-1/2'
               />
@@ -141,7 +144,7 @@ const Artifacts = ({
             processId={processId}
             activityId={activityId as string}
             emitHITLActionPayload={emitHITLActionPayload}
-            onClose={onClose}
+            onCloseArtifacts={onCloseArtifacts}
           />
         );
 
@@ -155,6 +158,7 @@ const Artifacts = ({
               emitHITLActionPayload={emitHITLActionPayload}
               processId={processId}
               activityId={activityId as string}
+              onCloseArtifacts={onCloseArtifacts}
               key={id}
             />
           </CompletedFieldsProvider>
@@ -191,11 +195,19 @@ const Artifacts = ({
     return isFetching && artifactType !== ARTIFACT_TYPE.PDF;
   }, [isFetching, artifactType]);
 
+  useEffect(() => {
+    dispatch(closeSidebar());
+
+    return () => {
+      dispatch(openSidebar());
+    };
+  }, [dispatch]);
+
   return (
     <div className='animate-fade-in relative h-full w-full'>
       <ArtifactTopbar
-        onClose={onClose}
-        onExpand={onExpand}
+        onCloseArtifacts={onCloseArtifacts}
+        onExpandArtifacts={onExpandArtifacts}
         isExpanded={isExpanded}
         title={title}
         onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}

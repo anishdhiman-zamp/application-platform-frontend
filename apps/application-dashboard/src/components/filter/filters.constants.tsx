@@ -146,9 +146,9 @@ export const TAGS_SELECT_FILTER_OPTIONS = [
 ];
 
 export const OPERATOR = {
-  InOperator: { label: 'equals', value: CONDITION_OPERATOR_TYPE.IN },
+  InOperator: { label: 'contains', value: CONDITION_OPERATOR_TYPE.IN },
   EqualOperator: { label: 'equals', value: CONDITION_OPERATOR_TYPE.EQUAL },
-  NotInOperator: { label: 'is not equal', value: CONDITION_OPERATOR_TYPE.NOT_IN },
+  NotInOperator: { label: 'does not contain', value: CONDITION_OPERATOR_TYPE.NOT_IN },
   GreaterThanOperator: { label: 'is greater than', value: CONDITION_OPERATOR_TYPE.GREATER_THAN },
   GreaterThanOrEqualOperator: { label: 'is greater than or equal', value: CONDITION_OPERATOR_TYPE.GREATER_THAN_EQUAL },
   LessThanOperator: { label: 'is less than', value: CONDITION_OPERATOR_TYPE.LESS_THAN },

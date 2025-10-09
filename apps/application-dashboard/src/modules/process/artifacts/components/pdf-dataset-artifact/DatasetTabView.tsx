@@ -6,6 +6,7 @@ import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-ar
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
 import { useAppSelector } from '@/hooks/toolkit';
 import {
@@ -14,7 +15,7 @@ import {
 } from '@/modules/process/artifacts/context/completedFields.context';
 import { useFieldCounts } from '@/modules/process/hooks/useFieldsCounts';
 import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import { defaultFnType, type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
@@ -23,6 +24,7 @@ interface DatasetArtifactProps {
   emitHITLActionPayload: EmitHITLActionPayload;
   processId: string;
   activityId: string;
+  onCloseArtifacts: defaultFnType;
   className?: string;
   showPdfSearch?: boolean;
 }
@@ -34,6 +36,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   emitHITLActionPayload,
   processId,
   activityId,
+  onCloseArtifacts,
   className,
   showPdfSearch = false,
 }) => {
@@ -49,7 +52,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     completedOptionalFieldsCount,
     missingRequiredFieldsCount,
     missingOptionalFieldsCount,
-  } = useFieldCounts(completedFields, missingFields);
+  } = useFieldCounts(completedFields, missingFields, activityId);
+
+  const [activeTab, setActiveTab] = useState<string>('');
+  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
 
   const filterKeys = useMemo(
     () => Object.keys(filters?.dataset_to_filter_map ?? missingFields ?? {}),
@@ -62,17 +68,26 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     );
   }, [datasetArtifact?.datasets, filterKeys]);
 
-  const [activeTab, setActiveTab] = useState<string>('');
-  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
-
-  const currentDatasetHasMissingFields = useMemo(
-    () => (missingFields?.[activeTab]?.cells?.filter((cell) => cell.is_required) ?? []).length > 0,
-    [missingFields, activeTab],
-  );
-
   const progress = useMemo(() => {
     return (completedRequiredFieldsCount / missingRequiredFieldsCount) * 100;
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
+
+  const isContinueButtonDisabled = useMemo(
+    () =>
+      missingRequiredFieldsCount !== completedRequiredFieldsCount ||
+      missingOptionalFieldsCount !== completedOptionalFieldsCount,
+    [
+      missingRequiredFieldsCount,
+      completedRequiredFieldsCount,
+      missingOptionalFieldsCount,
+      completedOptionalFieldsCount,
+    ],
+  );
+
+  const showMissingFieldsBar = useMemo(
+    () => missingRequiredFieldsCount > 0 || missingOptionalFieldsCount > 0,
+    [missingRequiredFieldsCount, missingOptionalFieldsCount],
+  );
 
   const handleSubmitAndContinue = async () => {
     const { logGroupId, hitlRequestId, ctaActionId, ctaValue } = emitHITLActionPayload;
@@ -95,6 +110,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     try {
       await emitHITLAction({ processId, activityRunId: activityId, payload }).unwrap();
       completedFieldsDispatch({ type: CompletedFieldsActions.RESET_COMPLETED_FIELDS });
+      onCloseArtifacts();
     } catch (err: any) {
       toast.error(err?.data?.message ?? 'Something went wrong');
     }
@@ -111,37 +127,42 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       className={cn('border-GRAY_400 h-full w-full border-r', className)}
     >
       <div className='w-full overflow-x-auto [scrollbar-width:none]'>
-        {missingRequiredFieldsCount > 0 && (
+        {showMissingFieldsBar && (
           <div className='bg-GRAY_100 flex items-center justify-between px-4 py-1.5'>
             <div className='flex items-center gap-x-1.5'>
               <SvgSpriteLoader id='alert-triangle' size={14} />
               <span className='f-11-500 text-GRAY_1000'>Please add all required fields to continue</span>
             </div>
             <div className='flex items-center gap-x-4'>
-              <span className='f-11-500 text-GRAY_700'>
-                {completedOptionalFieldsCount}/{missingOptionalFieldsCount} Optional
-              </span>
-              <div className='flex items-center gap-x-1.5'>
-                <ProgressBar
-                  trackColor={COLORS.GRAY_500}
-                  indicatorColor={COLORS.GREEN_300}
-                  indicatorWidth={2}
-                  trackWidth={2}
-                  size={16}
-                  progress={progress}
-                  animate={false}
-                />
-                <span className='f-11-500 text-GRAY_1000'>
-                  {completedRequiredFieldsCount}/{missingRequiredFieldsCount} Required
+              {missingOptionalFieldsCount > 0 && (
+                <span className='f-11-500 text-GRAY_700'>
+                  {completedOptionalFieldsCount}/{missingOptionalFieldsCount} Optional
                 </span>
-              </div>
+              )}
+              {missingRequiredFieldsCount > 0 && (
+                <div className='flex items-center gap-x-1.5'>
+                  <ProgressBar
+                    trackColor={COLORS.GRAY_500}
+                    indicatorColor={COLORS.GREEN_300}
+                    indicatorWidth={2}
+                    trackWidth={2}
+                    size={16}
+                    progress={progress}
+                    animate={false}
+                  />
+                  <span className='f-11-500 text-GRAY_1000'>
+                    {completedRequiredFieldsCount}/{missingRequiredFieldsCount} Required
+                  </span>
+                </div>
+              )}
+
               <Button
                 size='xsmall'
                 isLoading={isLoading}
-                disabled={missingRequiredFieldsCount !== completedRequiredFieldsCount}
+                disabled={isContinueButtonDisabled}
                 onClick={handleSubmitAndContinue}
                 className={cn('f-11-500', {
-                  'bg-GRAY_300 text-GRAY_700': missingRequiredFieldsCount !== completedRequiredFieldsCount,
+                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled,
                 })}
               >
                 Continue
@@ -159,18 +180,20 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
 
             return (
               <TabsTrigger
-                key={tab.dataset_id}
                 value={tab.dataset_id}
+                key={tab.dataset_id}
                 className='hover:bg-GRAY_50 data-[state=active]:bg-GRAY_100 max-w-[120px] items-center rounded! border-none px-2! py-1!'
               >
                 <SvgSpriteLoader id='coins-stacked-04' color={COLORS.GRAY_900} size={12} />
-                <span
-                  className={cn('f-12-500 ml-1.5 truncate', {
-                    'text-GRAY_1000': activeTab === tab.dataset_id,
-                  })}
-                >
-                  {tab.dataset_name}
-                </span>
+                <TooltipV2 tooltipBody={tab.dataset_name} side={SIDE_OPTIONS.TOP} showOnlyWhenTruncated asChildTrigger>
+                  <p
+                    className={cn('f-12-500 ml-1.5 truncate', {
+                      'text-GRAY_1000': activeTab === tab.dataset_id,
+                    })}
+                  >
+                    {tab.dataset_name}
+                  </p>
+                </TooltipV2>
                 {hasMissingFields && (
                   <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
                     {requiredCount}
@@ -192,8 +215,8 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
             filters?.dataset_to_filter_map?.[activeTab]?.filters ?? missingFields?.[activeTab]?.filters ?? {}
           }
           missingFields={missingFields?.[activeTab]?.cells ?? []}
-          hasMissingFields={currentDatasetHasMissingFields}
           showPdfSearch={showPdfSearch}
+          isMissingFieldsBarVisible={showMissingFieldsBar}
         />
       </TabsContent>
     </Tabs>

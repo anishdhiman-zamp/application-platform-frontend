@@ -10,8 +10,7 @@ import { useParams } from 'next/navigation';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { useAppSelector } from '@/hooks/toolkit';
 import { ResponsiveGridLayoutType } from '@/types/commonTypes';
 import { Tooltip, TooltipPositions } from 'components/common/tooltip';
 import CommonWrapper from 'components/commonWrapper';
@@ -43,14 +42,17 @@ const KpiTag: FC<KpiTagProps> = ({
 }) => {
   const params = useParams();
   const pageId = params?.pageId as string;
+  const selectedDatasetIds = useAppSelector((state) => state.sheetFilters.selectedDatasetIds);
   const valueContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const windowWidth = useWindowDimensions().width;
   const [showTooltip, setShowTooltip] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isSelfServePagesEnabled, setIsSelfServePagesEnabled] = useState(false);
 
-  const { evaluate, ldClient } = useFeatureFlags();
+  const isDatasetSelected = useMemo(
+    () => selectedDatasetIds?.includes(widgetDetails?.data_mappings?.mappings?.[0]?.dataset_id),
+    [selectedDatasetIds, widgetDetails],
+  );
 
   const {
     data: widgetData,
@@ -108,34 +110,23 @@ const KpiTag: FC<KpiTagProps> = ({
     };
   }, [containerRef, valueContainerRef, widgetData, isFetching, windowWidth]);
 
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.SELF_SERVE_PAGES)
-        .then((res) => {
-          setIsSelfServePagesEnabled(res);
-        })
-        .catch(() => {
-          setIsSelfServePagesEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient]);
-
   return (
     <div className='group relative'>
-      {isSelfServePagesEnabled && (
-        <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
-          <WidgetOptions
-            setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-            widgetDetails={widgetDetails}
-            currentWidgetLayout={currentWidgetLayout}
-          />
-        </PermissionGuard>
-      )}
+      <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
+        <WidgetOptions
+          setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          widgetDetails={widgetDetails}
+          currentWidgetLayout={currentWidgetLayout}
+        />
+      </PermissionGuard>
+
       <div
         className={cn('border-GRAY_400 z-9999 h-full rounded-xl border bg-white px-6 pt-4.5 pb-5', {
           'animate-pulse opacity-85': isFetching,
+          'shadow-chart-highlight': isDatasetSelected,
         })}
         ref={containerRef}
+        data-testid={`${widgetDetails.widget_instance_id}-kpi-tag`}
       >
         <div className='f-13-450 text-GRAY_900 mb-2 truncate'>{widgetDetails?.title}</div>
         <CommonWrapper

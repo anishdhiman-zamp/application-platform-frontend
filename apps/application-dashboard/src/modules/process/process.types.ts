@@ -94,7 +94,7 @@ export type EmailArtifactWrapperProps = {
   artifactId: string;
   activityId: string;
   emitHITLActionPayload: EmitHITLActionPayload;
-  onClose: defaultFnType;
+  onCloseArtifacts: defaultFnType;
 };
 
 export interface HandleShowArtifactsProps extends EmitHITLActionPayload {
@@ -156,4 +156,19 @@ export interface DocumentItemType {
     artifact_type: string;
     process_id: string;
   };
+}
+
+export interface ActivityRunRowData {
+  id: string;
+  status: ACTIVITY_RUN_STATUS;
+  activity_updated_at?: string;
+  updated_at?: string;
+  created_at?: string;
+  [key: string]: unknown; // Allow for additional dynamic fields from the API
+}
+
+export interface FieldRequirementType {
+  rowId: string;
+  columnId: string;
+  isRequired: boolean;
 }

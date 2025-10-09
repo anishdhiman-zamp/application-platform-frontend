@@ -1,13 +1,14 @@
 'use client';
 
 import { FC, useEffect, useMemo, useState } from 'react';
+import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useWhoAmIQuery } from '@/apis/auth';
+import { useGetBaseUrlQuery, useWhoAmIQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -26,14 +27,21 @@ type OrgSwitcherProps = {
 };
 
 export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
-  const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
+  const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
   const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
-
+  const { data: baseUrlData } = useGetBaseUrlQuery(
+    { email: user?.user_email ?? '' },
+    { refetchOnMountOrArgChange: false },
+  );
   const { logout, isLoggingOut } = useLogout();
+
+  const regionList = useMemo(() => {
+    return baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
+  }, [baseUrlData]);
   const {
     data: organizations,
     isLoading: loading,
@@ -52,6 +60,10 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     setSelectedOrg(org);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
     router.push(ROUTES_PATH.PROCESSES);
+  };
+
+  const handleRegionChange = (region: { region: string; url: string }) => {
+    window.open(`https://app-${region.region}.zamp.ai`, '_blank');
   };
 
   const selectedOrgColor = useMemo(
@@ -111,7 +123,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
           className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
           sideOffset={5}
         >
-          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto'>
+          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}
@@ -132,6 +144,22 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
                   />
                 </DropdownMenuItem>
               ))}
+              {regionList?.length
+                ? regionList?.map((item, idx) => (
+                    <DropdownMenuItem
+                      className='p-0'
+                      data-testid={`region-switcher-item-${item?.region?.toLowerCase()}`}
+                      key={item.region}
+                      onClick={() => handleRegionChange(item)}
+                    >
+                      <OrgCard
+                        isSelected={false}
+                        name={`${item.region.toUpperCase()} - Region`}
+                        className={ORG_COLORS[organizations?.length ?? 0 + 1 + idx]}
+                      />
+                    </DropdownMenuItem>
+                  ))
+                : null}
             </CommonWrapper>
           </div>
           <div className='border-GRAY_400 mt-0.5 border-t pt-0.5' onClick={logout}>

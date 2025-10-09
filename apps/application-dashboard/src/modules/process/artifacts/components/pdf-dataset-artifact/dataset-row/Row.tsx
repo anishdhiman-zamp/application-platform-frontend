@@ -11,7 +11,7 @@ import { useCompletedFields } from 'modules/process/artifacts/context/completedF
 import type { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import type { MapAny } from 'types/commonTypes';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
-import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
+import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { COLORS } from '@/constants/colors';
@@ -39,6 +39,7 @@ interface RowProps {
   clickedField: string;
   setClickedField: (field: string) => void;
   datasetId: string;
+  activityId: string;
   showPdfSearch?: boolean;
   filterConfig?: DatasetFilterConfigResponseType[];
   rowData: MapAny;
@@ -49,6 +50,7 @@ const Row: FC<RowProps> = ({
   keyValue: [key, value],
   rowId,
   selectedKey,
+  activityId,
   columns,
   onChange,
   missingFields = [],
@@ -81,8 +83,8 @@ const Row: FC<RowProps> = ({
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
   const currentDatasetCompletedFields = useMemo(
-    () => completedFields[datasetId]?.filter((field) => field.isRequired) ?? [],
-    [completedFields, datasetId],
+    () => completedFields[activityId]?.[datasetId]?.filter((field) => field.isRequired) ?? [],
+    [completedFields, datasetId, activityId],
   );
 
   const isColumnVisible =
@@ -93,6 +95,10 @@ const Row: FC<RowProps> = ({
   const formattedValue = useMemo(() => {
     if (columnConfig?.type === FILTER_TYPES.DATE_RANGE && !columnConfig?.metadata?.config?.value_format) {
       return getFormattedDate({ type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.ddMMMyyyy }, value) as string;
+    }
+
+    if (columnConfig?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.DOCUMENT) {
+      return Array.isArray(value) ? value[0]?.name : value;
     }
 
     const formatted = valueFormatter?.(undefined, value, rowData) ?? value;
@@ -121,7 +127,7 @@ const Row: FC<RowProps> = ({
     [currentDatasetCompletedFields, key, rowId, value, missingFields],
   );
 
-  const shouldShowInputDirectly = isEditable && isValueEmpty(value);
+  const shouldShowInputDirectly = useMemo(() => isEditable && isValueEmpty(value), [isEditable, value]);
 
   useEffect(() => {
     setEditingValue(formattedValue);
