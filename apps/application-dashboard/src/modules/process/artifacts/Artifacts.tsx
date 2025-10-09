@@ -24,7 +24,7 @@ import type {
   EmailArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
-import type { MapAny } from '@/types/commonTypes';
+import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 const BrowserArtifact = dynamic(
   () => import('@/modules/process/artifacts/components/browser-artifact/BrowserArtifacts'),
@@ -39,8 +39,8 @@ const PdfArtifact = dynamic(() => import('@/modules/process/artifacts/components
 });
 
 interface ArtifactsProps {
-  onClose: () => void;
-  onExpand: () => void;
+  onCloseArtifacts: defaultFnType;
+  onExpandArtifacts: defaultFnType;
   isExpanded: boolean;
   filters: MapAny;
   onArtifactClick: (props: HandleShowArtifactsProps) => void;
@@ -49,9 +49,9 @@ interface ArtifactsProps {
 }
 
 const Artifacts = ({
-  onClose,
-  onExpand,
   isExpanded,
+  onCloseArtifacts,
+  onExpandArtifacts,
   onArtifactClick,
   filters,
   missingFields,
@@ -117,6 +117,7 @@ const Artifacts = ({
                 emitHITLActionPayload={emitHITLActionPayload}
                 processId={processId}
                 activityId={activityId as string}
+                onCloseArtifacts={onCloseArtifacts}
                 showPdfSearch
                 className='w-1/2'
               />
@@ -143,7 +144,7 @@ const Artifacts = ({
             processId={processId}
             activityId={activityId as string}
             emitHITLActionPayload={emitHITLActionPayload}
-            onClose={onClose}
+            onCloseArtifacts={onCloseArtifacts}
           />
         );
 
@@ -157,6 +158,7 @@ const Artifacts = ({
               emitHITLActionPayload={emitHITLActionPayload}
               processId={processId}
               activityId={activityId as string}
+              onCloseArtifacts={onCloseArtifacts}
               key={id}
             />
           </CompletedFieldsProvider>
@@ -204,8 +206,8 @@ const Artifacts = ({
   return (
     <div className='animate-fade-in relative h-full w-full'>
       <ArtifactTopbar
-        onClose={onClose}
-        onExpand={onExpand}
+        onCloseArtifacts={onCloseArtifacts}
+        onExpandArtifacts={onExpandArtifacts}
         isExpanded={isExpanded}
         title={title}
         onOpenAllArtifacts={() => setAllArtifactsSideDrawerOpen(true)}

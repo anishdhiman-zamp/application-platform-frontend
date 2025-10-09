@@ -57,11 +57,10 @@ import { useResourceAccess } from '@/hooks/useResourceAccess';
 import Notification from '@/modules/data/Notification';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import {
-  type CompletedField,
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
-import { ARTIFACT_TYPE, DATASET_VIEW_TYPE } from '@/modules/process/process.types';
+import { ARTIFACT_TYPE, DATASET_VIEW_TYPE, type FieldRequirementType } from '@/modules/process/process.types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
 import CustomHeader from 'components/common/table/CustomHeader';
@@ -87,7 +86,7 @@ type DatasetByIdProps = {
 type MissingFieldControlProps = {
   totalMissingFields: number;
   currentIndex: number;
-  completedFields: CompletedField[];
+  completedFields: FieldRequirementType[];
   goPrevious: defaultFnType;
   goNext: defaultFnType;
   className?: string;
@@ -291,11 +290,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     (rows: MapAny[]) => {
       if (!rows || !missingFields || !activityId) return;
 
-      const fieldsToAdd: Array<{
-        rowId: string;
-        columnId: string;
-        isRequired: boolean;
-      }> = [];
+      const fieldsToAdd: FieldRequirementType[] = [];
+
+      const fieldsToRemove: FieldRequirementType[] = [];
 
       // Check each row for pre-filled values
       rows.forEach((row) => {
@@ -307,15 +304,23 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         missingFields.forEach((missingField) => {
           if (missingField.id === rowId) {
             const columnValue = row[missingField.column];
+            const isAlreadyCompleted = currentDatasetCompletedFields.some(
+              (field) => field.rowId === rowId && field.columnId === missingField.column,
+            );
 
             // Check if the value is not empty and not already completed
             if (!isValueEmpty(columnValue)) {
-              const isAlreadyCompleted = currentDatasetCompletedFields.some(
-                (field) => field.rowId === rowId && field.columnId === missingField.column,
-              );
-
               if (!isAlreadyCompleted) {
                 fieldsToAdd.push({
+                  rowId,
+                  columnId: missingField.column,
+                  isRequired: missingField.is_required ?? false,
+                });
+              }
+            } else {
+              // If value is empty and field is already completed, mark it for removal
+              if (isAlreadyCompleted) {
+                fieldsToRemove.push({
                   rowId,
                   columnId: missingField.column,
                   isRequired: missingField.is_required ?? false,
@@ -337,12 +342,23 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
           },
         });
       });
+
+      // Remove fields that are now empty
+      fieldsToRemove.forEach((field) => {
+        completedFieldsDispatch({
+          type: CompletedFieldsActions.REMOVE_COMPLETED_FIELD,
+          payload: {
+            datasetId: id as string,
+            activityId: activityId as string,
+            field,
+          },
+        });
+      });
     },
     [missingFields, activityId, id, currentDatasetCompletedFields, completedFieldsDispatch],
   );
 
   const handleUpdateCompletedFields = (rowId: string | string[], columnId: string) => {
-    toast.success(DatasetActionMessages[DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD].SUCCESS);
     setIsServerSideDataLoading(true);
     tableRef.current?.api?.refreshServerSide();
 
@@ -432,8 +448,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const onCellEditRequest = (event: CellEditRequestEvent) => {
     const { colDef, newValue, data, source, node } = event;
     const { field } = colDef;
-    const oldValue = data?.[field as string];
-    const value = isValueEmpty(newValue) ? (typeof oldValue === 'number' ? 0 : '-') : newValue;
+    const value = isValueEmpty(newValue) ? null : newValue;
     const updatedRow = { ...event.data, [field as string]: value };
 
     // Optimistic update
@@ -578,11 +593,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }, 0);
   };
 
-  const handleTextareaChange = (key: string, value: string, rowId: string) => {
+  const handleTextareaChange = (key: string, value: any, rowId: string) => {
     if (!rowData) return;
 
     // Optimistic update of local state
-    const updatedRowData = { ...rowData, [key]: value };
+    const newValue = isValueEmpty(value) ? null : value;
+
+    const updatedRowData = { ...rowData, [key]: newValue };
 
     setRowData(updatedRowData);
 
@@ -591,7 +608,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       const rowNode = gridApi.getDisplayedRowAtIndex(selectedRowIndex);
 
       if (rowNode?.data) {
-        const updatedGridData = { ...rowNode.data, [key]: value };
+        const updatedGridData = { ...rowNode.data, [key]: newValue };
 
         rowNode.setData(updatedGridData);
       }
@@ -601,7 +618,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     updateApi({
       rowId: rowId,
       field: key,
-      newValue: value,
+      newValue,
     });
   };
 
