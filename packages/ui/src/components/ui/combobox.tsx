@@ -78,6 +78,20 @@ export function Combobox({
   disableSelectedOptions = false,
   tooltipBody,
 }: ComboboxProps) {
+  // Force portal usage for Safari to avoid transform context issues
+  const shouldUsePortal = React.useMemo(() => {
+    if (typeof window === 'undefined') return isPortalNeeded;
+
+    // Detect Safari and force portal usage
+    const userAgent = window.navigator.userAgent;
+    const isSafariUA = /^((?!chrome|android).)*safari/i.test(userAgent);
+    const isWebKit = /webkit/i.test(userAgent);
+    const isChrome = /chrome/i.test(userAgent);
+    const isSafari = isSafariUA && isWebKit && !isChrome;
+
+    return isPortalNeeded || isSafari;
+  }, [isPortalNeeded]);
+
   const isValueEqual = React.useCallback((a: ComboboxOption['value'], b: ComboboxOption['value']): boolean => {
     if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
       return a === b;
@@ -122,7 +136,7 @@ export function Combobox({
       >
         {children}
       </TooltipAnchorOrTrigger>
-      <Portal isNeeded={isPortalNeeded}>
+      <Portal isNeeded={shouldUsePortal}>
         <PopoverContent
           align={align}
           side={side}
