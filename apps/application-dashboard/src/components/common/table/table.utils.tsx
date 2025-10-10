@@ -61,7 +61,7 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
           return {
             column: condition.colId,
             operator: condition.type,
-            value: [...condition.filter.map((item) => Number(item))],
+            value: condition.filter.map((item) => Number(item)),
           };
         } else if (condition.filter !== '') {
           return {
