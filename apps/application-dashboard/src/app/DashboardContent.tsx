@@ -20,7 +20,7 @@ import { openSidebar } from 'store/slices/layout-configs';
 import { setDashboardLoader } from 'store/slices/user';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import DashboardLoader from 'components/common/loader/DashboardLoader';
+import DashboardLoader from '@/components/common/loader/DashboardLoader';
 import {
   fadeOutOffsetTimeDifference,
   minLoaderDuration,

@@ -1,4 +1,3 @@
-'use client';
 import Image from 'next/image';
 import { SCREEN_SUPPORT, ZAMP_LOGO } from '@/constants/icons';
 
