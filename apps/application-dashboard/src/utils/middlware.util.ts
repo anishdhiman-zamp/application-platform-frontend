@@ -40,7 +40,10 @@ export async function getUserSession(
   }
 
   try {
-    const oryKratosSession = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE);
+    const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
+    const cookieName = `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`;
+
+    const oryKratosSession = getServerSideCookie(request, cookieName);
 
     if (!oryKratosSession) {
       return { session: null, cached: true };
@@ -53,9 +56,6 @@ export async function getUserSession(
     }
 
     console.log('baseUrl', `${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`);
-
-    const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
-    const cookieName = `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`;
 
     const response = await fetch(`${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`, {
       headers: {
