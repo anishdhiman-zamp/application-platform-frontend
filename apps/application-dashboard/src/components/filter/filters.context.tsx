@@ -122,8 +122,8 @@ export const StateProvider: FC<{ children: ReactElement }> = ({ children }) => {
         return {
           ...state,
           selectedFilters,
-          selectedFiltersInUI: { ...selectedFilters },
-          currentPageFilters: Object.keys(selectedFilters),
+          selectedFiltersInUI: { ...(selectedFilters || {}) },
+          currentPageFilters: Object.keys(selectedFilters || {}),
           isFilterInitialized: true,
         };
       }

@@ -28,6 +28,8 @@ export const ROUTES_PATH = {
   SETTINGS: '/settings',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   WIDGET_CREATE: '/widgets/create',
+  INVALID_SCREEN_SIZE: '/invalid-screen-size',
+  MEMBERSHIP_PENDING: '/membership-pending',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {

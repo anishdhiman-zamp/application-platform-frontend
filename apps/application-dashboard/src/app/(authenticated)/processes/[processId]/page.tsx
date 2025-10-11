@@ -29,6 +29,10 @@ const Process = () => {
     checkValidProcess();
   }, [processes]);
 
+  if (!processes?.length) {
+    return null;
+  }
+
   return (
     <ProcessById
       key={params?.processId as string}
