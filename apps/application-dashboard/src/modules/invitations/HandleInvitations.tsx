@@ -53,7 +53,7 @@ export const HandleInvitations: FC = () => {
           });
         });
       } else {
-        router.push(ROUTES_PATH.HOME);
+        window.location.href = ROUTES_PATH.HOME;
       }
     }
   }, [invitationsData, loadingInvitations]);
