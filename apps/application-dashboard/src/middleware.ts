@@ -108,9 +108,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
 };
 
 export async function middleware(request: NextRequest) {
-  const isAuthenticated = await validateSession(request);
-
-  console.log('isAuthenticated', isAuthenticated);
+  const isAuthenticated = validateSession(request);
 
   if (!isAuthenticated) {
     return handleUnauthenticatedRoutes(request);

@@ -1,4 +1,5 @@
-import React from 'react';
+'use client';
+
 import { useSelector } from 'react-redux';
 import { useGetOrganizationMembershipRequestsAllQuery } from 'apis/people';
 import { ZAMP_ICON } from 'constants/icons';

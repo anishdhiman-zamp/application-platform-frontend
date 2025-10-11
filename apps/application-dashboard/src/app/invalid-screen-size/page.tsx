@@ -1,11 +1,10 @@
-'use client';
 import Image from 'next/image';
 import { SCREEN_SUPPORT, ZAMP_LOGO } from '@/constants/icons';
 
 export default function InvalidScreenSize() {
   return (
     <div>
-      <div className='fixed z-[10000] flex h-screen w-screen items-center justify-center bg-white p-6'>
+      <div className='fixed flex h-screen w-screen items-center justify-center bg-white p-6'>
         <Image
           width={115}
           height={28}
