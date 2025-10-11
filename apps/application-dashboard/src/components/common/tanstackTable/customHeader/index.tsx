@@ -1,6 +1,6 @@
 import { FC, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { SortDirection } from '@zamp-platform/tanstack-table';
-import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { PIVOT_HEADER_BG } from 'constants/icons';
@@ -259,39 +259,41 @@ const CustomHeaderTk: FC<CustomHeaderProps> = ({
             {!hideFloatingFilter && <SvgSpriteLoader id='chevron-down' width={12} height={12} className='ml-2.5' />}
           </div>
         </PopoverTrigger>
-        <PopoverContent
-          data-id='custom-header-tk-filter-popover-content'
-          align='start'
-          sideOffset={0}
-          className={cn('p-0 text-black', isFilterOpen && '!border-none shadow-none')}
-          onOpenAutoFocus={preventAutoFocus}
-        >
-          {closingRef.current ? null : isFilterOpen ? (
-            <FilterDropdownMenu
-              filterKey={colId}
-              label={headerLabel}
-              filterType={filterType}
-              {...(filterType === FILTER_TYPES.TAGS && { filterComponentProps })}
-            />
-          ) : (
-            <MainMenuPopover
-              isSelfServe={isSelfServe}
-              isCurrentUserAdmin={isCurrentUserAdmin}
-              headerName={headerName}
-              setHeaderName={setHeaderName}
-              handleHeaderNameBlur={handleHeaderNameBlur}
-              handleHeaderNameKeyDown={handleHeaderNameKeyDown}
-              filterType={filterType}
-              dateFormat={dateFormat}
-              metadata={metadata}
-              handleMenuOptionClick={handleMenuOptionClick}
-              filteredMenuOptions={filteredMenuOptions}
-              isTagColumn={isTagColumn}
-              filtersCount={filtersCount}
-              selectedFilters={selectedFilters}
-            />
-          )}
-        </PopoverContent>
+        <PopoverPortal>
+          <PopoverContent
+            data-id='custom-header-tk-filter-popover-content'
+            align='start'
+            sideOffset={0}
+            className={cn('p-0 text-black', isFilterOpen && '!border-none shadow-none')}
+            onOpenAutoFocus={preventAutoFocus}
+          >
+            {closingRef.current ? null : isFilterOpen ? (
+              <FilterDropdownMenu
+                filterKey={colId}
+                label={headerLabel}
+                filterType={filterType}
+                {...(filterType === FILTER_TYPES.TAGS && { filterComponentProps })}
+              />
+            ) : (
+              <MainMenuPopover
+                isSelfServe={isSelfServe}
+                isCurrentUserAdmin={isCurrentUserAdmin}
+                headerName={headerName}
+                setHeaderName={setHeaderName}
+                handleHeaderNameBlur={handleHeaderNameBlur}
+                handleHeaderNameKeyDown={handleHeaderNameKeyDown}
+                filterType={filterType}
+                dateFormat={dateFormat}
+                metadata={metadata}
+                handleMenuOptionClick={handleMenuOptionClick}
+                filteredMenuOptions={filteredMenuOptions}
+                isTagColumn={isTagColumn}
+                filtersCount={filtersCount}
+                selectedFilters={selectedFilters}
+              />
+            )}
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
 
       {/* Date Format Popover */}

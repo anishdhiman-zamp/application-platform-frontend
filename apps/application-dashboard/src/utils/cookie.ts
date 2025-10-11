@@ -1,0 +1,19 @@
+export const PREV_ROUTE_COOKIE = 'zamp_prev_route';
+export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
+export const USER_SESSION_COOKIE = 'zamp_user_session';
+export const SESSION_CACHE_MAX_AGE = 60 * 5;
+export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+export const setCookie = (name: string, value: string, maxAge = COOKIE_MAX_AGE) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; samesite=lax`;
+  }
+};
+
+export const getCookie = (name: string) => {
+  if (typeof document === 'undefined') return null;
+
+  const cookie = document.cookie.split(';').find((c) => c.trim().startsWith(`${name}=`));
+
+  return cookie ? cookie.split('=')[1] : null;
+};
