@@ -1,7 +1,8 @@
 import { flexRender, getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC } from 'react';
+import { useThrottle } from '@zamp-platform/utils';
+import React, { FC, useCallback } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
@@ -12,6 +13,8 @@ import { isNonMovableColumn, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../cons
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
+import { useRowHighlighting } from '../hooks/useRowHighlighting';
+import { useScrollPositionPreservation } from '../hooks/useScrollPositionPreservation';
 import { useScrollSync } from '../hooks/useScrollSync';
 import { useSkeletonStates } from '../hooks/useSkeletonStates';
 import { useTableEffects } from '../hooks/useTableEffects';
@@ -41,6 +44,8 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   initialColumnOrder = [],
   emptyStateStatus,
   virtualizationOptions = {},
+  preserveScrollPosition,
+  rowHighlighting,
 }) => {
   const {
     overscan = VIRTUALIZATION_DEFAULTS.OVERSCAN, // number of items to render outside viewport
@@ -136,6 +141,67 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     onBodyScroll: (e) => fetchMoreOnBottomReached(e.currentTarget),
   });
 
+  // row virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: flatRowData?.length + skeletonRowCount,
+    estimateSize: () => estimateSize,
+    getScrollElement: () => tableContainerRef.current,
+    measureElement:
+      measureElement && typeof window !== 'undefined'
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+    overscan,
+  });
+
+  const isVirtualizationReady = rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getTotalSize() > 0;
+
+  // Use scroll position preservation hook
+  const { saveScrollPosition, hasScrollPositionToRestore } = useScrollPositionPreservation({
+    key: preserveScrollPosition?.key || '',
+    tableContainerRef,
+    isDataLoaded: flatRowData.length > 0,
+    totalRowCount,
+    isVirtualizationReady,
+    saveScrollPosition: preserveScrollPosition?.saveScrollPosition,
+    getScrollPosition: preserveScrollPosition?.getScrollPosition,
+    hasScrollPositionToRestore: preserveScrollPosition?.hasScrollPositionToRestore,
+  });
+
+  const { highlightedRowIndex, setHighlightedRowIndex } = useRowHighlighting({
+    key: rowHighlighting?.key || '',
+    isDataLoaded: flatRowData.length > 0,
+    isVirtualizationReady,
+    hasScrollPositionToRestore,
+    rowVirtualizer,
+    setHighlightedRowIndex: rowHighlighting?.setHighlightedRowIndex,
+    getHighlightedRowIndex: rowHighlighting?.getHighlightedRowIndex,
+    clearHighlightedRowIndex: rowHighlighting?.clearHighlightedRowIndex,
+  });
+
+  const throttleHandleBodyScroll = useThrottle(saveScrollPosition, 100);
+
+  const enhancedHandleBodyScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      handleBodyScroll(e);
+      if (preserveScrollPosition?.enabled) {
+        throttleHandleBodyScroll();
+      }
+    },
+    [handleBodyScroll, throttleHandleBodyScroll, preserveScrollPosition?.enabled],
+  );
+
+  const enhancedHandleRowClick = useCallback(
+    (rowData: ActivityRunRowData, rowIndex?: number) => {
+      if (rowHighlighting?.enabled && typeof rowIndex === 'number') {
+        setHighlightedRowIndex(rowIndex);
+      }
+      if (onRowClicked) {
+        onRowClicked(rowData, rowIndex);
+      }
+    },
+    [onRowClicked, rowHighlighting?.enabled, setHighlightedRowIndex],
+  );
+
   // table
   const table = useReactTable({
     data: flatRowData,
@@ -163,18 +229,6 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     columnOrder,
     onColumnMoved,
     setColumnOrder,
-  });
-
-  // row virtualizer
-  const rowVirtualizer = useVirtualizer({
-    count: flatRowData?.length + skeletonRowCount,
-    estimateSize: () => estimateSize, // Configurable row height estimation
-    getScrollElement: () => tableContainerRef.current,
-    measureElement:
-      measureElement && typeof window !== 'undefined'
-        ? (element) => element?.getBoundingClientRect().height
-        : undefined,
-    overscan,
   });
 
   // Use table sync hook for external state synchronization
@@ -260,7 +314,7 @@ export const TanStackTable: FC<TanStackTableProps> = ({
 
       {/* Scrollable Body Container */}
       <div
-        onScroll={handleBodyScroll}
+        onScroll={preserveScrollPosition?.enabled ? enhancedHandleBodyScroll : handleBodyScroll}
         ref={tableContainerRef}
         className='tan-scroll relative w-full'
         style={{
@@ -356,17 +410,23 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                   const row = tableRows[virtualRow.index] as Row<unknown>;
 
                   // ---- actual rows with data ----
+                  const isHighlighted = rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index;
+
                   return (
                     <tr
                       data-index={virtualRow.index}
                       ref={(node) => rowVirtualizer.measureElement(node)}
                       key={row?.id}
-                      className='group absolute flex cursor-pointer'
+                      className={cn('group absolute flex cursor-pointer', isHighlighted && 'bg-BACKGROUND_GRAY_2')}
                       style={{
                         transform: `translateY(${virtualRow.start}px)`,
                         width: '100%',
                       }}
-                      onClick={() => onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)}
+                      onClick={() =>
+                        rowHighlighting?.enabled
+                          ? enhancedHandleRowClick(row?.original as ActivityRunRowData, virtualRow.index)
+                          : onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)
+                      }
                     >
                       {row.getVisibleCells().map((cell) => {
                         const raw = cell.getValue();
@@ -378,7 +438,11 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                           <td
                             key={cell.id}
                             data-testid={`table-cell-${colId}`}
-                            className={cn('group-hover:bg-BACKGROUND_GRAY_2', cellClass)}
+                            className={cn(
+                              'group-hover:bg-BACKGROUND_GRAY_2',
+                              isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                              cellClass,
+                            )}
                             style={{
                               width: `${cell.column.getSize()}px`,
                               minWidth: `${cell.column.getSize()}px`,
@@ -393,7 +457,11 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                           >
                             {showCustomCell ? (
                               <span
-                                className={cn('group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!', cellClass)}
+                                className={cn(
+                                  'group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                  cellClass,
+                                )}
                                 style={{
                                   width: `${cell.column.getSize()}px`,
                                   minWidth: `${cell.column.getSize()}px`,
@@ -409,11 +477,21 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                                 {flexRender(cell.column.columnDef.cell, ctx)}
                               </span>
                             ) : raw == null || (typeof raw === 'string' && raw.trim() === '') ? (
-                              <span className='text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!'>
+                              <span
+                                className={cn(
+                                  'text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                )}
+                              >
                                 N/A
                               </span>
                             ) : (
-                              <span className='group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!'>
+                              <span
+                                className={cn(
+                                  'group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!',
+                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
+                                )}
+                              >
                                 {String(raw)}
                               </span>
                             )}

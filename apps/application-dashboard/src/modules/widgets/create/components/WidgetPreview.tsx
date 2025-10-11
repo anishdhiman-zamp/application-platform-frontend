@@ -93,7 +93,7 @@ const WidgetPreview = () => {
       >
         {renderPreviewWidget()}
       </CommonWrapper>
-      {!isKpiWidget && formData?.datasetId && <WidgetInfo />}
+      {!isKpiWidget && formData?.datasetId && mockWidgetDetails && previewData.length > 0 && <WidgetInfo />}
     </div>
   );
 };

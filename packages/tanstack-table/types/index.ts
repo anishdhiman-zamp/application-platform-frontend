@@ -91,4 +91,18 @@ export interface TanStackTableProps {
   isTabChange?: boolean; // Track if this is a tab change vs filter change
   emptyStateStatus?: string; // Status for empty state component
   virtualizationOptions?: VirtualizationOptions;
+  preserveScrollPosition?: {
+    key: string;
+    enabled: boolean;
+    saveScrollPosition?: (key: string, position: { scrollTop: number; scrollLeft: number }) => void;
+    getScrollPosition?: (key: string) => { scrollTop: number; scrollLeft: number } | null;
+    hasScrollPositionToRestore?: (key: string) => boolean;
+  };
+  rowHighlighting?: {
+    key: string;
+    enabled: boolean;
+    setHighlightedRowIndex?: (key: string, rowIndex: number) => void;
+    getHighlightedRowIndex?: (key: string) => number | null;
+    clearHighlightedRowIndex?: (key: string) => void;
+  };
 }
