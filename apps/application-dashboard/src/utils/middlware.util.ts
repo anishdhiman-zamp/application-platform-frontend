@@ -51,11 +51,16 @@ export async function getUserSession(
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');
     }
+
+    console.log('baseUrl', `${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`);
+
     const response = await fetch(`${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`, {
       headers: {
         Cookie: `${ORY_KRATOS_SESSION_COOKIE}=${oryKratosSession}`,
       },
     });
+
+    console.log('response', response);
 
     if (!response.ok) {
       return { session: null, cached: false };
@@ -65,6 +70,8 @@ export async function getUserSession(
 
     return { session, cached: false };
   } catch {
+    console.log('error', { session: null, cached: false });
+
     return { session: null, cached: false };
   }
 }
