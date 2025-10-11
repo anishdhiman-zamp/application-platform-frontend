@@ -133,6 +133,6 @@ export const config = {
      * - sw.js (service worker)
      * - membership-pending (membership pending page)
      */
-    '/((?!_next/static|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js).*)',
+    '/((?!_next/static|abc|_next/image|_vercel|api/health-check|auth|favicon.ico|icons|mp4|public|sw.js).*)',
   ],
 };
