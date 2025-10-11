@@ -54,9 +54,12 @@ export async function getUserSession(
 
     console.log('baseUrl', `${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`);
 
+    const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
+    const cookieName = `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`;
+
     const response = await fetch(`${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`, {
       headers: {
-        Cookie: `${ORY_KRATOS_SESSION_COOKIE}=${oryKratosSession}`,
+        Cookie: `${cookieName}=${oryKratosSession}`,
       },
     });
 
