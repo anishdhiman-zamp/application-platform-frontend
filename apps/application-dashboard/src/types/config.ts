@@ -1,7 +1,7 @@
 export interface NavigationItemSchema {
   label: string;
   id: string;
-  iconId: string;
+  iconUrl: string;
   path: string;
   children?: NavigationItemSchema[];
   isHidden?: boolean;

@@ -14,18 +14,23 @@ type Props = {
 export const FeatureFlagsProvider = ({ children }: Props) => {
   const user = useSelector((state: RootState) => state.user.user);
 
-  if (ENVIRONMENT === 'local' || !user) return children;
+  if (ENVIRONMENT === 'local') return children;
+
+  // Always render LDProvider, but conditionally provide user context
+  const context = user
+    ? {
+        kind: 'user',
+        key: user.user_id || '',
+        email: user.user_email || '',
+        organizationIds: user.orgs?.map((org) => org.organization_id) || [],
+      }
+    : {
+        kind: 'user',
+        key: 'anonymous',
+      };
 
   return (
-    <LDProvider
-      clientSideID={LAUNCH_DARKLY_CLIENT_SIDE_ID}
-      context={{
-        kind: 'user',
-        key: user?.user_id || '',
-        email: user?.user_email || '',
-        organizationIds: user?.orgs?.map((org) => org.organization_id) || [],
-      }}
-    >
+    <LDProvider clientSideID={LAUNCH_DARKLY_CLIENT_SIDE_ID} context={context}>
       {children}
     </LDProvider>
   );

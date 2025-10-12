@@ -40,7 +40,6 @@ const DashboardContent: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     if (previousRoute === pathname) return;
-
     setPreviousRoute(pathname);
     scrollToTop();
   }, [pathname, previousRoute]);
