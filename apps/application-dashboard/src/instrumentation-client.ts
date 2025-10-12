@@ -7,12 +7,12 @@ import { SENTRY_DSN } from 'constants/common.constants';
 
 const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
-if (environment === 'production') {
+if (environment === 'development') {
   Sentry.init({
     dsn: SENTRY_DSN,
 
     // Add optional integrations for additional features
-    integrations: [Sentry.replayIntegration()],
+    integrations: [Sentry.replayIntegration(), Sentry.browserTracingIntegration()],
 
     allowUrls: ['zamp.ai'],
 
