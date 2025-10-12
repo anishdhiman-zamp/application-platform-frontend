@@ -30,8 +30,10 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
+
   const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },

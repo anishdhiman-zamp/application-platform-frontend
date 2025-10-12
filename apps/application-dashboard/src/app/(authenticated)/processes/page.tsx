@@ -10,6 +10,7 @@ import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
 export default function Page() {
+  console.log('called processes page');
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
   const { data: processes, isSuccess: isSuccessProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
