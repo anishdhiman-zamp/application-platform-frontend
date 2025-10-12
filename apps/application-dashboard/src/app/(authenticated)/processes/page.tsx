@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import Image from 'next/image';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
+import { ZAMP_LOGO_LOADER_GIF } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
@@ -35,7 +35,7 @@ export default function Page() {
 
   return (
     <div className='flex h-full w-full items-center justify-center rounded-tl-xl bg-white'>
-      <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+      <Image src={ZAMP_LOGO_LOADER_GIF} alt='zamp logo loader' width={140} height={140} unoptimized />
     </div>
   );
 }

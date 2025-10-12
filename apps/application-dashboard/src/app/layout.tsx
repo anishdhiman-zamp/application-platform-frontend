@@ -39,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className='light-mode h-screen antialiased'>
         <NetworkStatus />
         <Toaster />
+        {/* <Suspense> */}
         {children}
+        {/* </Suspense> */}
       </body>
     </html>
   );
