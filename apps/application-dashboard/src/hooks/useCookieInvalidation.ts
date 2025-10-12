@@ -13,18 +13,10 @@ export const useCookieInvalidation = (cookieId: string) => {
       clearSessionCookie();
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        clearSessionCookie();
-      }
-    };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 };

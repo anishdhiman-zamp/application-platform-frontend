@@ -1,5 +1,3 @@
-'use client';
-
 import OrgMembershipPending from 'modules/login/OrgMembershipPending';
 
 const MembershipPendingPage = () => {

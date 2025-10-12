@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { useOnClickOutside } from 'hooks';
 import { useRouter } from 'next/navigation';
 import { MapAny } from 'types/commonTypes';
@@ -94,8 +94,8 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
 
   const onClick = () => {
     setIsOpen((prev) => !prev);
-    setIsHighlighted(true);
     if (isSheetFilters) {
+      setIsHighlighted(true);
       updateDatasetIds(filterDatasetIds);
     }
   };
@@ -171,25 +171,27 @@ const FilterDropdownV2: FC<FilterDropdownProps> = ({
             isHighlighted={isHighlighted}
           />
         </PopoverTrigger>
-        <PopoverContent className='mt-1 border-none p-0'>
-          <FilterDropdownMenu
-            forView='filters'
-            filterKey={filter?.key}
-            filterType={filter?.type as FILTER_TYPES}
-            label={filter?.label}
-            className='w-full min-w-[200px]'
-            isOpen={isOpen}
-            updateContextOnChange
-            onClose={() => setIsOpen(false)}
-            allowClear={allowClear}
-            isPeriodicityEnabled={isPeriodicityEnabled}
-            onFilterChange={onChange}
-            showColumnLabel={showColumnLabel}
-            isDisabled={isDisabled}
-            onConfigureFilter={isSheetFilters ? handleConfigureFilter : undefined}
-            {...props}
-          />
-        </PopoverContent>
+        <PopoverPortal>
+          <PopoverContent className='mt-1 border-none p-0'>
+            <FilterDropdownMenu
+              forView='filters'
+              filterKey={filter?.key}
+              filterType={filter?.type as FILTER_TYPES}
+              label={filter?.label}
+              className='w-full min-w-[200px]'
+              isOpen={isOpen}
+              updateContextOnChange
+              onClose={() => setIsOpen(false)}
+              allowClear={allowClear}
+              isPeriodicityEnabled={isPeriodicityEnabled}
+              onFilterChange={onChange}
+              showColumnLabel={showColumnLabel}
+              isDisabled={isDisabled}
+              onConfigureFilter={isSheetFilters ? handleConfigureFilter : undefined}
+              {...props}
+            />
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );

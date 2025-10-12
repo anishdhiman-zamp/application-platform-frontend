@@ -56,6 +56,20 @@ export const getConditionValues = (condition: MapAny): FilterType | null => {
           operator: condition.type,
           value: '',
         };
+      } else if (condition.type === CONDITION_OPERATOR_TYPE.IN) {
+        if (Array.isArray(condition.filter) && condition.filter?.length) {
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: condition.filter.map((item) => Number(item)),
+          };
+        } else if (condition.filter !== '') {
+          return {
+            column: condition.colId,
+            operator: condition.type,
+            value: [Number(condition.filter)],
+          };
+        } else return null;
       } else if (condition.filter !== '') {
         return {
           column: condition.colId,

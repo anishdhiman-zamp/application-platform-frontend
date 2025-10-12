@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import type { CompletedField } from 'modules/process/artifacts/context/completedFields.context';
-import type { MissingFieldsConfigType } from '@/modules/process/process.types';
+import type { FieldRequirementType, MissingFieldsConfigType } from 'modules/process/process.types';
 
 export const useFieldCounts = (
-  completedFields: Record<string, Record<string, CompletedField[]>>,
+  completedFields: Record<string, Record<string, FieldRequirementType[]>>,
   missingFields: MissingFieldsConfigType,
   activityId?: string,
 ) => {

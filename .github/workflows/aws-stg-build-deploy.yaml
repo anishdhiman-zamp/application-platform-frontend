@@ -62,6 +62,7 @@ jobs:
       TIMESTAMP: ${{ steps.vars.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ steps.vars.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ steps.vars.outputs.AWS_SECRET_NAME }}
 
     steps:
       - id: vars
@@ -110,6 +111,7 @@ jobs:
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
+      AWS_SECRET_NAME: ${{ needs.prepare-env.outputs.AWS_SECRET_NAME }}
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
@@ -182,14 +184,12 @@ jobs:
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
           NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
-          NEXT_PUBLIC_DEFAULT_REGION: "us"
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
-          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
           echo "NODE_OPTIONS: $NODE_OPTIONS"
                     
           # Build the application
@@ -238,7 +238,6 @@ jobs:
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
             --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-stg-aws-us.zamp.ai \
-            --build-arg NEXT_PUBLIC_DEFAULT_REGION=us \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT

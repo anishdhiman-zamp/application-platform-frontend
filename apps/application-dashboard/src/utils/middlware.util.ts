@@ -40,7 +40,10 @@ export async function getUserSession(
   }
 
   try {
-    const oryKratosSession = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE);
+    const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
+    const cookieName = `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`;
+
+    const oryKratosSession = getServerSideCookie(request, cookieName);
 
     if (!oryKratosSession) {
       return { session: null, cached: true };
@@ -51,11 +54,16 @@ export async function getUserSession(
     if (!baseUrl) {
       throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');
     }
+
+    console.log('baseUrl', `${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`);
+
     const response = await fetch(`${baseUrl}/${API_ENDPOINTS.USER_WHOAMI_GET}`, {
       headers: {
-        Cookie: `${ORY_KRATOS_SESSION_COOKIE}=${oryKratosSession}`,
+        Cookie: `${cookieName}=${oryKratosSession}`,
       },
     });
+
+    console.log('response', response);
 
     if (!response.ok) {
       return { session: null, cached: false };
@@ -65,6 +73,8 @@ export async function getUserSession(
 
     return { session, cached: false };
   } catch {
+    console.log('error', { session: null, cached: false });
+
     return { session: null, cached: false };
   }
 }
@@ -79,11 +89,9 @@ export function checkOrgMembership(session: Session | null, pathname: string): b
   return orgs.length === 0 && !pathname.includes(ROUTES_PATH.INVITATIONS);
 }
 
-export async function validateSession(request: NextRequest): Promise<boolean> {
+export function validateSession(request: NextRequest): boolean {
   try {
     const region = process.env.NEXT_PUBLIC_DEFAULT_REGION;
-
-    console.log('regionnn', `${ORY_KRATOS_SESSION_COOKIE}${region?.length ? '_' + region : ''}`);
 
     const oryKratosSession = getServerSideCookie(
       request,
