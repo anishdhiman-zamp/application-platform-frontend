@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration variables
-PORT=8080  # Hardcoded port
+PORT=8001  # Hardcoded port
 
 # Get CODER_WORKSPACE_NAME from environment
 if [ -z "$CODER_WORKSPACE_NAME" ]; then
