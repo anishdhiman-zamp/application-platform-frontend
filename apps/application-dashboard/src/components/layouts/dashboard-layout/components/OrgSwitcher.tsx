@@ -12,6 +12,7 @@ import { useGetBaseUrlQuery, useWhoAmIQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
@@ -98,7 +99,12 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
             className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
             data-testid='org-switcher-trigger'
           >
-            <div className='flex w-full items-center justify-between gap-2 select-none'>
+            <CommonWrapper
+              isLoading={loading}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<SkeletonElement className='bg-GRAY_400 h-6 w-full rounded' />}
+              className='flex w-full items-center justify-between gap-2 select-none'
+            >
               <div
                 className={cn(
                   selectedOrgColor,
@@ -117,7 +123,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
                   setIsShowMenu={setIsOrgSwitcherMenuOpen}
                 />
               )}
-            </div>
+            </CommonWrapper>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
