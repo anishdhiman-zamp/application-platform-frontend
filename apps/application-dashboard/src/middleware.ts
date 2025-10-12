@@ -27,6 +27,14 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   }
 
   if (pathname === ROUTES_PATH.LOGIN) {
+    if (request.headers.get('host') === DOMAINS.PRODUCTION) {
+      const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
+
+      if (oryKratosSessionMe) {
+        return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
+      }
+    }
+
     return NextResponse.next();
   }
 
