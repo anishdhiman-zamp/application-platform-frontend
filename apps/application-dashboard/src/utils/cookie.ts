@@ -4,6 +4,13 @@ export const USER_SESSION_COOKIE = 'zamp_user_session';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;
 export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
+export const SESSION_COOKIE_NAMES = {
+  PRODUCTION: 'ory_kratos_session_us',
+  US_PRODUCTION: 'ory_kratos_session_us',
+  ME_PRODUCTION: 'ory_kratos_session_me',
+  DEVELOPMENT: 'ory_kratos_session',
+};
+
 export const setCookie = (name: string, value: string, maxAge = COOKIE_MAX_AGE) => {
   if (typeof document !== 'undefined') {
     document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; samesite=lax`;

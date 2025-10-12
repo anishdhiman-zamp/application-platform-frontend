@@ -6,8 +6,10 @@ import {
   ORY_KRATOS_SESSION_COOKIE,
   PREV_ROUTE_COOKIE,
   SESSION_CACHE_MAX_AGE,
+  SESSION_COOKIE_NAMES,
   USER_SESSION_COOKIE,
 } from 'utils/cookie';
+import { DOMAINS } from '@/constants/domains';
 import {
   checkOrgMembership,
   clearServerSideCookie,
@@ -25,6 +27,14 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   }
 
   if (pathname === ROUTES_PATH.LOGIN) {
+    if (request.headers.get('host') === DOMAINS.PRODUCTION) {
+      const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
+
+      if (oryKratosSessionMe) {
+        return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
+      }
+    }
+
     return NextResponse.next();
   }
 
@@ -71,6 +81,19 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     case ROUTES_PATH.LOGIN: {
       const { session } = await getUserSession(request, false);
       const response = NextResponse.next();
+
+      if (request.headers.get('host') === DOMAINS.PRODUCTION) {
+        const oryKratosSessionUs = getServerSideCookie(request, SESSION_COOKIE_NAMES.US_PRODUCTION);
+        const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
+
+        if (oryKratosSessionUs) {
+          return NextResponse.redirect(new URL(`https://${DOMAINS.US_PRODUCTION}/login`, request.url));
+        }
+
+        if (oryKratosSessionMe) {
+          return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
+        }
+      }
 
       if (session) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
