@@ -72,6 +72,19 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       const { session } = await getUserSession(request, false);
       const response = NextResponse.next();
 
+      if (request.headers.get('host') === 'app.zamp.ai') {
+        const oryKratosSessionUs = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_us');
+        const oryKratosSessionMe = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_me');
+
+        if (oryKratosSessionUs) {
+          return NextResponse.redirect(new URL('https://app-us.zamp.ai/login', request.url));
+        }
+
+        if (oryKratosSessionMe) {
+          return NextResponse.redirect(new URL('https://app-me.zamp.ai/login', request.url));
+        }
+      }
+
       if (session) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
