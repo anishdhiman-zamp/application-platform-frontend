@@ -6,6 +6,7 @@ import {
   ORY_KRATOS_SESSION_COOKIE,
   PREV_ROUTE_COOKIE,
   SESSION_CACHE_MAX_AGE,
+  SESSION_COOKIE_NAMES,
   USER_SESSION_COOKIE,
 } from 'utils/cookie';
 import { DOMAINS } from '@/constants/domains';
@@ -74,8 +75,8 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       const response = NextResponse.next();
 
       if (request.headers.get('host') === DOMAINS.PRODUCTION) {
-        const oryKratosSessionUs = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_us');
-        const oryKratosSessionMe = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_me');
+        const oryKratosSessionUs = getServerSideCookie(request, SESSION_COOKIE_NAMES.US_PRODUCTION);
+        const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
 
         if (oryKratosSessionUs) {
           return NextResponse.redirect(new URL(`https://${DOMAINS.US_PRODUCTION}/login`, request.url));
