@@ -8,6 +8,7 @@ import {
   SESSION_CACHE_MAX_AGE,
   USER_SESSION_COOKIE,
 } from 'utils/cookie';
+import { DOMAINS } from '@/constants/domains';
 import {
   checkOrgMembership,
   clearServerSideCookie,
@@ -72,16 +73,16 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       const { session } = await getUserSession(request, false);
       const response = NextResponse.next();
 
-      if (request.headers.get('host') === 'app.zamp.ai') {
+      if (request.headers.get('host') === DOMAINS.PRODUCTION) {
         const oryKratosSessionUs = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_us');
         const oryKratosSessionMe = getServerSideCookie(request, ORY_KRATOS_SESSION_COOKIE + '_me');
 
         if (oryKratosSessionUs) {
-          return NextResponse.redirect(new URL('https://app-us.zamp.ai/login', request.url));
+          return NextResponse.redirect(new URL(`https://${DOMAINS.US_PRODUCTION}/login`, request.url));
         }
 
         if (oryKratosSessionMe) {
-          return NextResponse.redirect(new URL('https://app-me.zamp.ai/login', request.url));
+          return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
         }
       }
 
