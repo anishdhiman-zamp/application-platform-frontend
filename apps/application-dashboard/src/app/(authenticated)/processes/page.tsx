@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import Image from 'next/image';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
-import { ZAMP_LOGO_LOADER_GIF } from '@/constants/icons';
+import ZampLogoGifLoader from '@/components/common/loader/ZampLogoGifLoader';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
@@ -33,9 +32,5 @@ export default function Page() {
     }
   }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
 
-  return (
-    <div className='flex h-full w-full items-center justify-center rounded-tl-xl bg-white'>
-      <Image src={ZAMP_LOGO_LOADER_GIF} alt='zamp logo loader' width={140} height={140} unoptimized />
-    </div>
-  );
+  return <ZampLogoGifLoader />;
 }
