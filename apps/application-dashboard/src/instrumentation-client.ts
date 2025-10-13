@@ -12,7 +12,7 @@ if (environment === 'production') {
     dsn: SENTRY_DSN,
 
     // Add optional integrations for additional features
-    integrations: [Sentry.replayIntegration()],
+    integrations: [Sentry.replayIntegration(), Sentry.browserTracingIntegration()],
 
     allowUrls: ['zamp.ai'],
 
