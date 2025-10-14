@@ -134,7 +134,6 @@ const Topbar = () => {
             onClick={handleSidebarToggle}
             src={FLEX_ALIGN_RIGHT}
             alt='toggle sidebar'
-            color='#8F8F8F'
           />
         </div>
       </div>
