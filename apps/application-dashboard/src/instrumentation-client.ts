@@ -7,7 +7,7 @@ import { SENTRY_DSN } from 'constants/common.constants';
 
 const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
-if (environment === 'development') {
+if (environment === 'production') {
   Sentry.init({
     dsn: SENTRY_DSN,
 
