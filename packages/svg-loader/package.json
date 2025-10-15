@@ -19,7 +19,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development",
-    "dev:watch": "webpack watch --mode development"
+    "dev:watch": "webpack watch --mode development",
+    "prepare": "npm run build"
   },
   "peerDependencies": {
     "idb-keyval": "^6.2.1"
