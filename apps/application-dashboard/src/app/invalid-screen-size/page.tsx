@@ -1,9 +1,9 @@
-import { SCREEN_SUPPORT, ZAMP_LOGO } from 'constants/icons';
 import Image from 'next/image';
+import { SCREEN_SUPPORT, ZAMP_LOGO } from '@/constants/icons';
 
-const ScreenSupport = () => {
+export default function InvalidScreenSize() {
   return (
-    <div className='fixed z-1000 flex h-screen w-screen items-center justify-center bg-white p-6'>
+    <div className='fixed z-[10000] flex h-screen w-screen items-center justify-center bg-white p-6'>
       <Image
         width={115}
         height={28}
@@ -19,6 +19,4 @@ const ScreenSupport = () => {
       </div>
     </div>
   );
-};
-
-export default ScreenSupport;
+}

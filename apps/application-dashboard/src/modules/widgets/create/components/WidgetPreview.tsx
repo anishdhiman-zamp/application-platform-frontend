@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import AGChartsWidgets from 'modules/widgets/AgChartWidgets';
+import WidgetInfo from 'modules/widgets/create/components/WidgetInfo';
 import { useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
 import { WIDGET_TYPES, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
 import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
@@ -57,11 +58,14 @@ const WidgetPreview = () => {
 
       case WIDGET_TYPES.KPI:
         return (
-          <div className='space-y-4'>
-            <h2 className='f-22-400 text-gray-900'>{formData.title || 'New Widget'}</h2>
-            <p className='f-64-400 text-gray-950'>
-              {getCommaSeparatedNumber(previewData[0]?.data?.[0]?.value ?? 0, 2)}
-            </p>
+          <div className='space-y-2.5'>
+            <div className='min-w-125 space-y-4 rounded-xl border border-gray-400 bg-white p-9'>
+              <h2 className='f-22-400 text-gray-900'>{formData.title || 'New Widget'}</h2>
+              <p className='f-64-400 text-gray-950'>
+                {getCommaSeparatedNumber(previewData[0]?.data?.[0]?.value ?? 0, 2)}
+              </p>
+            </div>
+            <WidgetInfo />
           </div>
         );
 
@@ -77,17 +81,20 @@ const WidgetPreview = () => {
   const isKpiWidget = useMemo(() => formData.visualizationType === WIDGET_TYPES.KPI, [formData.visualizationType]);
 
   return (
-    <CommonWrapper
-      isLoading={isFetching}
-      skeletonType={SkeletonTypes.CUSTOM}
-      className={cn('h-100 overflow-hidden rounded-xl border border-gray-200', {
-        'bg-white': !(isKpiWidget && formData?.datasetId),
-        'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
-      })}
-      loader={<ZampLogoLoader className='bg-transparent' />}
-    >
-      {renderPreviewWidget()}
-    </CommonWrapper>
+    <div className='space-y-2.5'>
+      <CommonWrapper
+        isLoading={isFetching}
+        skeletonType={SkeletonTypes.CUSTOM}
+        className={cn('h-100 overflow-hidden rounded-xl border border-gray-200', {
+          'bg-white': !(isKpiWidget && formData?.datasetId),
+          'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
+        })}
+        loader={<ZampLogoLoader className='bg-transparent' />}
+      >
+        {renderPreviewWidget()}
+      </CommonWrapper>
+      {!isKpiWidget && formData?.datasetId && mockWidgetDetails && previewData.length > 0 && <WidgetInfo />}
+    </div>
   );
 };
 

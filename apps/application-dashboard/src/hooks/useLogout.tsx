@@ -5,7 +5,7 @@ import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } fr
 import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { resetPostHog } from 'utils/postHog';
-import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
+import { PREV_ROUTE_COOKIE, setCookie } from '@/utils/cookie';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -25,6 +25,10 @@ export const useLogout = () => {
   }, [pathname, searchParams]);
 
   const handleLogout = useCallback(async () => {
+    if (fullPath && fullPath !== '/') {
+      setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath));
+    }
+
     logOut(logoutFlow?.logout_url ?? '')
       .then(() => {
         whoAmI()
@@ -33,7 +37,6 @@ export const useLogout = () => {
           })
           .finally(() => {
             resetPostHog();
-            setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, fullPath);
             router.push(ROUTES_PATH.LOGIN);
           });
       })

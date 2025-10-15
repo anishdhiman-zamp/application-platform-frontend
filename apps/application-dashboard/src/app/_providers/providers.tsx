@@ -3,8 +3,6 @@
 import React, { Suspense, useState } from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@zamp-platform/tanstack-table';
-import { AuthGuard } from '@/components/hoc/AuthGuard';
-import { RouteGuard } from '@/components/hoc/RouteGuard';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
 import { FeatureFlagsProvider } from '@/modules/feature-flags/provider';
 import { store } from '@/store';
@@ -18,11 +16,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
     <Suspense fallback={null}>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <AuthGuard loginRoute='/login'>
-            <FeatureFlagsProvider>
-              <RouteGuard>{children}</RouteGuard>
-            </FeatureFlagsProvider>
-          </AuthGuard>
+          <FeatureFlagsProvider>{children}</FeatureFlagsProvider>
         </QueryClientProvider>
       </Provider>
     </Suspense>

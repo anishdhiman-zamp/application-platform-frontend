@@ -48,6 +48,10 @@ const Page = () => {
     checkIsPageValid();
   }, [pageId, pages, isFetching]);
 
+  if (!pages?.length) {
+    return null;
+  }
+
   return (
     <CommonWrapper isError={isError} refetchFunction={refetch}>
       <div className='relative h-full w-full rounded-tl-md'></div>

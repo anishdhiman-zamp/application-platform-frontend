@@ -9,16 +9,16 @@ import {
   TanStackTable,
   VisibilityState,
 } from '@zamp-platform/tanstack-table';
+import { useTableStateRedux } from 'hooks/useTableStateRedux';
 import { formatTanStackColumns } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
 import { useRouter } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
-import { checkIsObjectEmpty, snakeCaseToSentenceCase } from 'utils/common';
-import { useLazyGetActivityRunsQuery } from '@/apis/processes';
+import { checkIsObjectEmpty } from 'utils/common';
+import { useGetFilterConfigByProcessIdQuery, useLazyGetActivityRunsQuery } from '@/apis/processes';
 import DisplayOptions from '@/components/common/table/DisplayOptions';
 import { myThemeWithProcess } from '@/components/common/table/table.constants';
-import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { getEncodedRequest } from '@/components/common/tanstackTable/table.utils';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
@@ -31,40 +31,57 @@ import { filtersContextActions, useFiltersContextStore } from 'components/filter
 interface ActivityByStatusProps {
   processId: string;
   status: string;
-  filterConfigData?: MapAny;
-  isFilterConfigLoading: boolean;
-  isFilterConfigError: boolean;
-  isFilterConfigUninitialized: boolean;
-  refetchFilterConfig: () => void;
   totalCount: number;
 }
 
-const ActivityByStatus: FC<ActivityByStatusProps> = ({
-  processId,
-  status,
-  filterConfigData,
-  isFilterConfigLoading,
-  isFilterConfigError,
-  isFilterConfigUninitialized,
-  refetchFilterConfig,
-  totalCount,
-}) => {
+const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalCount }) => {
   const {
     dispatch,
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
   const { columnVisibility, columnOrder, setColumnVisibility, setColumnOrder } = useDisplayOptionContext(); // Use shared display-option context
+
   const [getActivityRuns, { data: activityRunsData, isError: lazyloadActivityRunsError }] =
     useLazyGetActivityRunsQuery();
+
+  const {
+    data: filterConfigData,
+    refetch: refetchFilterConfig,
+    isLoading: isFilterConfigLoading,
+    isError: isFilterConfigError,
+    isUninitialized: isFilterConfigUninitialized,
+  } = useGetFilterConfigByProcessIdQuery(
+    {
+      processId: processId as string,
+    },
+    {
+      skip: !processId,
+    },
+  );
+
   const router = useRouter();
+
+  const {
+    saveScrollPosition,
+    getScrollPosition,
+    hasScrollPositionToRestore,
+    setHighlightedRowIndex,
+    getHighlightedRowIndex,
+    clearHighlightedRowIndex,
+  } = useTableStateRedux();
   const tableRef = useRef<Table<MapAny>>(null);
   const datasetTableRef = useRef<HTMLDivElement>(null);
+
   const [totalRows, setTotalRows] = useState<number>(0);
   const [columns, setColumns] = useState<ColumnDef<ActivityRunRowData>[]>([]);
   const [table, setTable] = useState<Table<MapAny> | null>(null);
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
-  const shouldShowEmptyState = totalCount === 0 && checkIsObjectEmpty(selectedFilters);
+
+  const shouldShowEmptyState = useMemo(
+    () => totalCount === 0 && checkIsObjectEmpty(selectedFilters),
+    [totalCount, selectedFilters],
+  );
 
   // ClientSideDatasource - used to fetch data from server
   const clientSideDatasource: TanStackClientSideDatasourceProps = useMemo(() => {
@@ -191,21 +208,25 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
   };
 
   // handle row-clicked
-  const handleRowClicked = (rowData: ActivityRunRowData, rowIndex?: number) => {
-    // Navigate to activity logs for the clicked activity run
-    if (rowData?.id) {
-      router.push(
-        getProcessActivityLogsRouteById(
-          processId,
-          rowData.id,
-          status,
-          encodeURIComponent(JSON.stringify(selectedFilters)),
-          rowIndex ?? -1,
-          totalRows,
-        ),
-      );
-    }
-  };
+  const handleRowClicked = useCallback(
+    (rowData: ActivityRunRowData, rowIndex?: number) => {
+      // Navigate to activity logs for the clicked activity run
+
+      if (rowData?.id) {
+        router.push(
+          getProcessActivityLogsRouteById(
+            processId,
+            rowData.id,
+            status,
+            encodeURIComponent(JSON.stringify(selectedFilters)),
+            rowIndex ?? -1,
+            totalCount,
+          ),
+        );
+      }
+    },
+    [processId, status, selectedFilters, totalCount],
+  );
 
   // Setup columns and filters configuration based on filter-config
   const setupColumnsAndFilters = () => {
@@ -223,24 +244,6 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
 
     if (columns?.length > 0) {
       setColumns(columns as ColumnDef<ActivityRunRowData>[]);
-      dispatch({
-        type: filtersContextActions.SET_FILTERS_CONFIG,
-        payload: {
-          filtersConfig: filterConfigData?.data
-            ?.filter(
-              (item: MapAny) =>
-                !item?.metadata?.is_hidden &&
-                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS &&
-                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS,
-            )
-            ?.map((column: MapAny) => ({
-              key: column?.column,
-              label: snakeCaseToSentenceCase(column?.column),
-              values: column?.options,
-              type: column?.type,
-            })),
-        },
-      });
 
       if (isNoRowsOverlayVisible || activityRunsData?.total_count === 0) return;
     }
@@ -318,6 +321,20 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({
             onColumnVisible={handleColumnVisible}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
+            preserveScrollPosition={{
+              key: `${processId}-${status}`,
+              enabled: true,
+              saveScrollPosition,
+              getScrollPosition,
+              hasScrollPositionToRestore,
+            }}
+            rowHighlighting={{
+              key: `${processId}-${status}`,
+              enabled: true,
+              setHighlightedRowIndex,
+              getHighlightedRowIndex,
+              clearHighlightedRowIndex,
+            }}
           />
         </div>
       </CommonWrapper>

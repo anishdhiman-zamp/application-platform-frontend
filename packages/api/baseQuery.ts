@@ -1,10 +1,8 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { captureException } from '@sentry/browser';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
+import { getFromLocalStorage, isBrowser, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
-
-import { SESSION_STORAGE_KEYS, setToSessionStorage } from '@/utils/sessionstorage';
 
 import { API_DOMAIN } from './api.utils';
 import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
@@ -60,7 +58,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   }
 
   const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
-  const path = window.location.pathname;
+
+  // Check if we're in a browser environment
+  const path = isBrowser() ? window.location.pathname : '';
 
   const isLoginRoute = path === LOGIN_PATH;
 
@@ -70,20 +70,10 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     const status = error?.status;
     const data = (error as { data?: { error?: { code?: string } } }).data;
 
-    if (status === 401 && !isLoginRoute) {
-      let loginUrl = LOGIN_PATH;
-      let query = '';
+    if (status === 401 && !isLoginRoute && isBrowser()) {
+      const loginUrl = LOGIN_PATH;
 
-      if (window.location.pathname && window.location.pathname !== '/') {
-        const queryParams = new URLSearchParams(window.location.search);
-        loginUrl += '?redirect_to=' + window.location.pathname;
-        queryParams.forEach((value, key) => {
-          query += `&${key}=${value}`;
-        });
-        setToSessionStorage(SESSION_STORAGE_KEYS.PATHNAME_PRE_LOGOUT, path + query.replace('&', '?'));
-      }
-
-      window.location.href = `${loginUrl}${query}`;
+      window.location.href = loginUrl;
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
