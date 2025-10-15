@@ -68,7 +68,7 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
 
   if (error) {
     const status = error?.status;
-    const data = (error as { data?: { error?: { code?: string } } }).data;
+    const data = (error as { data?: { error?: { code?: string } | string } }).data;
 
     if (status === 401 && !isLoginRoute && isBrowser()) {
       const loginUrl = LOGIN_PATH;
@@ -79,12 +79,14 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore status can be string on abort
     if (status !== 401 && error?.error !== ABORT_ERROR) {
-      const errorObj = new Error(JSON.stringify(`${status}=${data?.error?.code ?? 'NA'}`));
+      const errorObj = new Error(
+        JSON.stringify(`${status}=${typeof data?.error === 'string' ? data.error : (data?.error?.code ?? 'NA')}`),
+      );
 
       captureException(errorObj, {
         extra: {
           error: JSON.stringify(error),
-          args: JSON.stringify(args),
+          url: args?.url,
           rtkEndpoint: api?.endpoint,
         },
       });
