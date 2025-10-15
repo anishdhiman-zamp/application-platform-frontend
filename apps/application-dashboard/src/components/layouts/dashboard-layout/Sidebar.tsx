@@ -72,24 +72,27 @@ const Sidebar = () => {
               ))}
             </div>
 
-            <div className='px-2 py-2.5'>
-              <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
-              <CommonWrapper
-                isLoading={isLoading}
-                skeletonType={SkeletonTypes.CUSTOM}
-                loader={<SkeletonLoaderSidebarPages />}
-              >
-                {processes?.map((process) => (
-                  <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
-                    <ProcessNavTab
-                      label={process?.display_name}
-                      processId={process?.id}
-                      isSelected={params?.processId === process?.id}
-                    />
-                  </Link>
-                ))}
-              </CommonWrapper>
-            </div>
+            <CommonWrapper
+              isLoading={isLoading}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<SkeletonLoaderSidebarPages />}
+              className='px-2 py-2.5'
+            >
+              {processes && processes?.length > 0 && (
+                <>
+                  <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
+                  {processes?.map((process) => (
+                    <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
+                      <ProcessNavTab
+                        label={process?.display_name}
+                        processId={process?.id}
+                        isSelected={params?.processId === process?.id}
+                      />
+                    </Link>
+                  ))}
+                </>
+              )}
+            </CommonWrapper>
 
             <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
           </div>

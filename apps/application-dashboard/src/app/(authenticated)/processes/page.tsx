@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
 import ZampLogoGifLoader from '@/components/common/loader/ZampLogoGifLoader';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
@@ -11,6 +13,7 @@ export default function Page() {
   const { data: processes, isSuccess: isSuccessProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
+  const router = useRouter();
 
   const { data: pages, isSuccess: isSuccessPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -28,6 +31,8 @@ export default function Page() {
         pushToMostRelevantProcess();
       } else if (pages && pages?.length > 0) {
         pushToMostRelevantPage();
+      } else {
+        router.push(ROUTES_PATH.TEAM);
       }
     }
   }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
