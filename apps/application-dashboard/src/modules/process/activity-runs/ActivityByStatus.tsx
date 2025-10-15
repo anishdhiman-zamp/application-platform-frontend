@@ -218,7 +218,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
             processId,
             rowData.id,
             status,
-            encodeURIComponent(JSON.stringify(selectedFilters)),
+            encodeURIComponent(JSON.stringify(selectedFilters || {})),
             rowIndex ?? -1,
             totalCount,
           ),
