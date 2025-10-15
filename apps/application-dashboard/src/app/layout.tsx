@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className='light-mode h-screen antialiased'>
         <NetworkStatus />
         <Toaster />
-        {children}
+        <Suspense>{children}</Suspense>
       </body>
     </html>
   );

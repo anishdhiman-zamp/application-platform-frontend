@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
-import CommonWrapper from '@/components/commonWrapper';
-import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
+import ZampLogoGifLoader from '@/components/common/loader/ZampLogoGifLoader';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
@@ -14,6 +13,7 @@ export default function Page() {
   const { data: processes, isSuccess: isSuccessProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
+  const router = useRouter();
 
   const { data: pages, isSuccess: isSuccessPages } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -31,21 +31,11 @@ export default function Page() {
         pushToMostRelevantProcess();
       } else if (pages && pages?.length > 0) {
         pushToMostRelevantPage();
+      } else {
+        router.push(ROUTES_PATH.TEAM);
       }
     }
   }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
 
-  return (
-    <CommonWrapper
-      isLoading={true}
-      skeletonType={SkeletonTypes.CUSTOM}
-      loader={
-        <div className='z-50 flex h-screen w-full items-center justify-center bg-white'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
-        </div>
-      }
-    >
-      <></>
-    </CommonWrapper>
-  );
+  return <ZampLogoGifLoader />;
 }

@@ -15,12 +15,12 @@ const SheetLayout: FC<SheetLayoutProps> = ({ children, sheetsTabs, widget, creat
   const isFilterOpen = searchParams?.get('isFilterOpen') === 'true';
 
   return (
-    <div>
+    <div className='h-full w-full'>
       {sheetsTabs}
       {widget}
-      <div className='flex justify-between'>
-        <div className={cn('transition-all', isFilterOpen ? 'w-[calc(100%-296px)]' : 'w-full')}>{children}</div>
-        <div className={cn('transition-all', isFilterOpen ? 'w-74' : 'w-0')}>{createEditFilter}</div>
+      <div className='flex h-full justify-between'>
+        <div className={cn('h-full transition-all', isFilterOpen ? 'w-[calc(100%-296px)]' : 'w-full')}>{children}</div>
+        <div className={cn('h-full transition-all', isFilterOpen ? 'w-74' : 'w-0')}>{createEditFilter}</div>
       </div>
     </div>
   );

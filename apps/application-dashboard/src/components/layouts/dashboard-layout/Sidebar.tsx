@@ -63,22 +63,24 @@ const Sidebar = () => {
               {SIDEBAR_ITEMS.map((item) => (
                 <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
                   <SidebarTab
-                    key={item?.label}
-                    name={item?.label}
-                    iconId={item?.iconId}
+                    key={item.label}
+                    name={item.label}
+                    iconUrl={item.iconUrl}
                     isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
                   />
                 </Link>
               ))}
             </div>
-            {processes && processes?.length > 0 && (
-              <div className='px-2 py-2.5'>
-                <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
-                <CommonWrapper
-                  isLoading={isLoading}
-                  skeletonType={SkeletonTypes.CUSTOM}
-                  loader={<SkeletonLoaderSidebarPages />}
-                >
+
+            <CommonWrapper
+              isLoading={isLoading}
+              skeletonType={SkeletonTypes.CUSTOM}
+              loader={<SkeletonLoaderSidebarPages />}
+              className='px-2 py-2.5'
+            >
+              {processes && processes?.length > 0 && (
+                <>
+                  <div className='f-12-550 text-GRAY_700 px-1.5 py-2'>Processes</div>
                   {processes?.map((process) => (
                     <Link prefetch href={getProcessRouteById(process?.id)} key={process?.id} className='cursor-pointer'>
                       <ProcessNavTab
@@ -88,9 +90,10 @@ const Sidebar = () => {
                       />
                     </Link>
                   ))}
-                </CommonWrapper>
-              </div>
-            )}
+                </>
+              )}
+            </CommonWrapper>
+
             <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
           </div>
           <OrgSwitcher isSidebarOpen={isSidebarOpen} />

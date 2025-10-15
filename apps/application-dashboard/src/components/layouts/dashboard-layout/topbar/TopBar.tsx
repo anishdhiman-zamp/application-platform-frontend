@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
+import { FLEX_ALIGN_RIGHT, KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -114,28 +112,28 @@ const Topbar = () => {
     <div className='flex h-12 items-center justify-between'>
       <div
         className={cn(
-          'text-GRAY_700 flex h-12 items-center justify-between py-4 transition-all',
-          isSidebarOpen ? 'w-[240px]' : 'w-[48px]',
+          'text-GRAY_700 flex h-12 items-center justify-between py-4 pr-5 pl-4 transition-all',
+          isSidebarOpen ? 'w-60' : 'w-12',
         )}
       >
-        <div className={cn('flex-1 pl-4 transition-all', isSidebarOpen ? 'w-[203px] opacity-100' : 'w-0 opacity-0')}>
+        <div className={cn('flex-1 transition-all', isSidebarOpen ? 'w-[204px] opacity-100' : 'w-0 opacity-0')}>
           <Image
             width={16}
             height={16}
             alt='zamp logo'
             className='w-4 cursor-pointer align-middle'
             src={ZAMP_ICON}
-            priority={true}
+            priority
           />
         </div>
-        <div className={cn('border-r', isSidebarOpen ? 'border-BACKGROUND_GRAY_1' : 'border-GRAY_400')}>
-          <SvgSpriteLoader
-            className='cursor-pointer pr-5'
+        <div className='flex-shrink-0'>
+          <Image
+            className='cursor-pointer'
             width={16}
             height={16}
             onClick={handleSidebarToggle}
-            iconCategory={ICON_SPRITE_TYPES.LAYOUT}
-            id='flex-align-right'
+            src={FLEX_ALIGN_RIGHT}
+            alt='toggle sidebar'
           />
         </div>
       </div>

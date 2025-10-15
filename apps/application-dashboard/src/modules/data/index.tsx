@@ -3,7 +3,7 @@ import { RowClickedEvent } from 'ag-grid-community';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { ListingPropsType } from 'modules/data/data.types';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ZampLogoGifLoader from '@/components/common/loader/ZampLogoGifLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DataTable from 'components/common/table/DataTable';
@@ -24,7 +24,7 @@ const Listing: FC<ListingPropsType> = ({ onRowClicked }) => {
   return (
     <CommonWrapper
       isLoading={isLoading}
-      loader={<ZampLogoLoader />}
+      loader={<ZampLogoGifLoader />}
       skeletonType={SkeletonTypes.CUSTOM}
       className='h-full'
     >

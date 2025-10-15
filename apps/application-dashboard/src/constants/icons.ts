@@ -158,6 +158,13 @@ export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 // knowledge based
 export const KNOWLEDGE_BASED_ICON = IMAGE_PREFIX + '/images/kb-background.svg';
 
+export const COINS_STACKED_04 = '/icons/coins-stacked-04.svg';
+export const USERS_02 = '/icons/users-02.svg';
+export const FLEX_ALIGN_RIGHT = '/icons/flex-align-right.svg';
+
+//GIF
+export const ZAMP_LOGO_LOADER_GIF = '/gifs/zamp-logo-loader.gif';
+
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;
 
