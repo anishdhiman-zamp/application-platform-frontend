@@ -1,3 +1,5 @@
+'use client';
+
 import { ChangeEvent, FormEvent, useState } from 'react';
 import {
   BASE_API_URL,
@@ -13,13 +15,11 @@ import {
   setToLocalStorage,
 } from '@zamp-platform/utils';
 import { LOGIN_PROVIDERS } from 'constants/auth.constants';
-import { ZAMP_FULL_LOGO, ZAMP_LOGIN_BG } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
 import RegionsSelectDropdown from 'modules/login/RegionsSelectDropdown';
-import Image from 'next/image';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
@@ -202,39 +202,30 @@ export const LoginForm = () => {
   }
 
   return (
-    <div className='bg-BG_GRAY_5 relative flex h-screen w-screen items-center justify-center'>
-      <video autoPlay muted loop className='absolute z-0 h-full w-full object-cover'>
-        <source src={ZAMP_LOGIN_BG} type='video/mp4' />
-        <span className='f-14-400 text-GRAY_1000'>Your browser does not support the video tag.</span>
-      </video>
-      <div className='rounded-4.5 shadow-table-filter-menu border-GRAY_100 z-50 w-[580px] border bg-white px-16 py-[82px]'>
-        <Image src={ZAMP_FULL_LOGO} priority alt='ZAMP' width={98} height={24} />
-        <form onSubmit={handleSubmit}>
-          <div className='mt-10 flex gap-2'>
-            <Input
-              id='login-email'
-              placeholder='Enter your email address'
-              className='flex-1'
-              name='email'
-              type='email'
-              value={email}
-              error={error ? error : ''}
-              autoFocus
-              onChange={handleEmailChange}
-              disabled={inputDisabled}
-              size={SIZE_TYPES.LARGE}
-            />
-            {allRegions.length > 1 && (
-              <RegionsSelectDropdown
-                selectedRegion={selectedRegion}
-                setSelectedRegion={setSelectedRegion}
-                regions={allRegions}
-              />
-            )}
-          </div>
-          <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
-        </form>
+    <form onSubmit={handleSubmit}>
+      <div className='mt-10 flex gap-2'>
+        <Input
+          id='login-email'
+          placeholder='Enter your email address'
+          className='flex-1'
+          name='email'
+          type='email'
+          value={email}
+          error={error ? error : ''}
+          autoFocus
+          onChange={handleEmailChange}
+          disabled={inputDisabled}
+          size={SIZE_TYPES.LARGE}
+        />
+        {allRegions.length > 1 && (
+          <RegionsSelectDropdown
+            selectedRegion={selectedRegion}
+            setSelectedRegion={setSelectedRegion}
+            regions={allRegions}
+          />
+        )}
       </div>
-    </div>
+      <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
+    </form>
   );
 };

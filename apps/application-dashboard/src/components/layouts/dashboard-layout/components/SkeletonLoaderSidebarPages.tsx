@@ -1,4 +1,3 @@
-import React from 'react';
 import SkeletonElement from 'components/skeletons/SkeletonElement';
 
 const SkeletonLoaderSidebarPages = () => {

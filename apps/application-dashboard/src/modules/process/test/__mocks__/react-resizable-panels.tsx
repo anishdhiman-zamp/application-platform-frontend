@@ -20,16 +20,14 @@ const ResizablePanel = createMockComponent('ResizablePanel');
 const ResizablePanelGroup = createMockComponent('ResizablePanelGroup');
 
 // Mock imperative functions
-const ImperativePanelHandle = jest.fn();
 const disableGlobalCursorStyles = jest.fn();
 
-// Export the mocked components
+// Export the mocked components (ImperativePanelHandle is a TYPE, not exported as value)
 module.exports = {
   __esModule: true,
   Panel,
   PanelGroup,
   PanelResizeHandle,
-  ImperativePanelHandle,
   disableGlobalCursorStyles,
   ResizableHandle,
   ResizablePanel,

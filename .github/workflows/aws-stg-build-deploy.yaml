@@ -157,9 +157,6 @@ jobs:
         with:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
-
-      - name: Copy AWS Secret
-        run: aws secretsmanager get-secret-value --secret-id "${{ env.AWS_SECRET_NAME }}" --query SecretString --output text > .env
   
       - uses: actions/cache@v4
         with:

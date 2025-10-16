@@ -1,7 +1,7 @@
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { captureException } from '@sentry/browser';
-import { getFromLocalStorage, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
+import { getFromLocalStorage, isBrowser, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
 
 import { API_DOMAIN } from './api.utils';
@@ -58,7 +58,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   }
 
   const result = await baseQuery(args.timeout, args.domain, currentOrgId)(args, api, extraOptions);
-  const path = window.location.pathname;
+
+  // Check if we're in a browser environment
+  const path = isBrowser() ? window.location.pathname : '';
 
   const isLoginRoute = path === LOGIN_PATH;
 
@@ -66,9 +68,9 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
 
   if (error) {
     const status = error?.status;
-    const data = (error as { data?: { error?: { code?: string } } }).data;
+    const data = (error as { data?: { error?: { code?: string } | string } }).data;
 
-    if (status === 401 && !isLoginRoute) {
+    if (status === 401 && !isLoginRoute && isBrowser()) {
       const loginUrl = LOGIN_PATH;
 
       window.location.href = loginUrl;
@@ -77,12 +79,14 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore status can be string on abort
     if (status !== 401 && error?.error !== ABORT_ERROR) {
-      const errorObj = new Error(JSON.stringify(`${status}=${data?.error?.code ?? 'NA'}`));
+      const errorObj = new Error(
+        JSON.stringify(`${status}=${typeof data?.error === 'string' ? data.error : (data?.error?.code ?? 'NA')}`),
+      );
 
       captureException(errorObj, {
         extra: {
           error: JSON.stringify(error),
-          args: JSON.stringify(args),
+          url: args?.url,
           rtkEndpoint: api?.endpoint,
         },
       });
