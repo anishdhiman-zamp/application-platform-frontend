@@ -4,7 +4,7 @@ import { useGetPagesQuery } from 'apis/pages';
 import { persistLastVisitedPage, persistLastVisitedSheet } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import { useParams, useRouter } from 'next/navigation';
-import ZampLogoGifLoader from '@/components/common/loader/ZampLogoGifLoader';
+import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
@@ -49,7 +49,7 @@ const Page = () => {
   return (
     <CommonWrapper
       isLoading={isFetching}
-      loader={<ZampLogoGifLoader />}
+      loader={<ZampLogoWebpLoader />}
       skeletonType={SkeletonTypes.CUSTOM}
       isError={isError}
       refetchFunction={refetch}
