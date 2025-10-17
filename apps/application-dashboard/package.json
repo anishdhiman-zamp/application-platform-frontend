@@ -41,6 +41,7 @@
     "@tiptap/extension-underline": "^2.14.0",
     "@tiptap/react": "^2.14.0",
     "@tiptap/starter-kit": "^2.14.0",
+    "@vercel/speed-insights": "^1.2.0",
     "@xyflow/react": "^12.5.5",
     "@zamp-platform/api": "*",
     "@zamp-platform/chat": "*",
