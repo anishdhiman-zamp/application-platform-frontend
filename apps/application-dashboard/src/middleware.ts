@@ -64,6 +64,16 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
   if (pathname !== ROUTES_PATH.MEMBERSHIP_PENDING && pathname !== ROUTES_PATH.LOGIN) {
     const { session, cached } = await getUserSession(request);
 
+    const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
+
+    if (prevRoute) {
+      const response = NextResponse.redirect(new URL(prevRoute, request.url));
+
+      clearServerSideCookie(response, PREV_ROUTE_COOKIE);
+
+      return response;
+    }
+
     if (checkOrgMembership(session, pathname)) {
       return NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
     }
@@ -113,16 +123,6 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       break;
     }
     case ROUTES_PATH.HOME: {
-      const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
-
-      if (prevRoute) {
-        const response = NextResponse.redirect(new URL(prevRoute, request.url));
-
-        clearServerSideCookie(response, PREV_ROUTE_COOKIE);
-
-        return response;
-      }
-
       return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
     }
     default:

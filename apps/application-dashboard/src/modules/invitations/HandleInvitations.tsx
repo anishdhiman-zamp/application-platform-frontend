@@ -16,6 +16,8 @@ export const HandleInvitations: FC = () => {
 
   const [handledInvitations, setHandledInvitations] = useState<string[]>([]);
 
+  const isInvitationsPage = window.location.pathname === ROUTES_PATH.INVITATIONS;
+
   const { data: invitationsData, isLoading: loadingInvitations } = useGetMyInvitationsQuery();
   const [whoAmI] = useLazyWhoAmIQuery();
   const [acceptInvitation] = useAcceptInvitationMutation();
@@ -49,14 +51,22 @@ export const HandleInvitations: FC = () => {
           invitationsData.invitations.map((invitation) => invitation.organization_invitation_id),
         ).finally(() => {
           whoAmI().finally(() => {
-            router.push(ROUTES_PATH.HOME);
+            if (isInvitationsPage || invitationsData.invitations.length > 0) {
+              router.push(ROUTES_PATH.HOME);
+            }
           });
         });
       } else {
-        window.location.href = ROUTES_PATH.HOME;
+        if (isInvitationsPage) {
+          window.location.href = ROUTES_PATH.HOME;
+        }
       }
     }
   }, [invitationsData, loadingInvitations]);
+
+  if (!isInvitationsPage) {
+    return null;
+  }
 
   return (
     <CommonWrapper
