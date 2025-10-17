@@ -1,11 +1,9 @@
 'use client';
-import React, { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
+import { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
-import { ZAMP_ICON_BLACK } from 'constants/icons';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
@@ -107,9 +105,7 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
   const formDisabled = loading || !loginFlow;
 
   return (
-    <div className={`mx-auto mt-[30vh] flex w-96 flex-col items-center gap-10 ${className}`}>
-      <Image src={ZAMP_ICON_BLACK} width={48} height={38} alt='Zamp' priority />
-
+    <div className={`mx-auto mt-10 flex w-full flex-col items-center gap-10 ${className}`}>
       {userFacingError &&
         userFacingError.map((error, index) => (
           <div key={index} className='text-red-600'>
