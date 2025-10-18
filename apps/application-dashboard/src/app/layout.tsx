@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
+// Import global styles
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import NetworkStatus from '@/components/NetWorkStatus';
-// Import global styles
 import '@zamp-platform/ui/globals.css';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='en' className={inter.className}>
       <body className='light-mode h-screen antialiased'>
+        <SpeedInsights />
         <NetworkStatus />
         <Toaster />
         <Suspense>{children}</Suspense>
