@@ -73,7 +73,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
 
   const isContinueButtonDisabled = useMemo(
-    () => missingRequiredFieldsCount !== completedRequiredFieldsCount || completedRequiredFieldsCount === 0,
+    () => missingRequiredFieldsCount !== completedRequiredFieldsCount || completedOptionalFieldsCount === 0,
     [missingRequiredFieldsCount, completedRequiredFieldsCount, completedOptionalFieldsCount],
   );
 
@@ -169,7 +169,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
         <TabsList className='flex h-full w-full flex-nowrap items-center justify-start gap-1 overflow-x-auto bg-white pr-8 whitespace-nowrap [scrollbar-width:none]'>
           {datasets.map((tab) => {
             const requiredCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => c.is_required)?.length ?? 0;
-            const optionalCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => !c.is_required)?.length ?? 0;
 
             return (
               <TabsTrigger
@@ -190,7 +189,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                 {requiredCount > 0 && (
                   <span className={cn('f-11-500 text-GRAY_700 ml-1', 'text-RED_800')}>{requiredCount}</span>
                 )}
-                {optionalCount > 0 && <span className='f-11-500 text-GRAY_700 ml-1'>{optionalCount}</span>}
               </TabsTrigger>
             );
           })}

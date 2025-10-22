@@ -286,79 +286,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       });
   };
 
-  // Function to check and update pre-filled fields
-  const checkAndUpdatePreFilledFields = useCallback(
-    (rows: MapAny[]) => {
-      if (!rows || !missingFields || !activityId) return;
-
-      const fieldsToAdd: FieldRequirementType[] = [];
-
-      const fieldsToRemove: FieldRequirementType[] = [];
-
-      // Check each row for pre-filled values
-      rows.forEach((row) => {
-        const rowId = row?.id ?? row?._zamp_id;
-
-        if (!rowId) return;
-
-        // Check each required missing field for this row
-        missingFields.forEach((missingField) => {
-          if (missingField.id === rowId) {
-            const columnValue = row[missingField.column];
-            const isAlreadyCompleted = currentDatasetCompletedFields.some(
-              (field) => field.rowId === rowId && field.columnId === missingField.column,
-            );
-
-            // Check if the value is not empty and not already completed
-            if (!isValueEmpty(columnValue)) {
-              if (!isAlreadyCompleted) {
-                fieldsToAdd.push({
-                  rowId,
-                  columnId: missingField.column,
-                  isRequired: missingField.is_required ?? false,
-                });
-              }
-            } else {
-              // If value is empty and field is already completed, mark it for removal
-              if (isAlreadyCompleted) {
-                fieldsToRemove.push({
-                  rowId,
-                  columnId: missingField.column,
-                  isRequired: missingField.is_required ?? false,
-                });
-              }
-            }
-          }
-        });
-      });
-
-      // Add all pre-filled fields to completed fields
-      fieldsToAdd.forEach((field) => {
-        completedFieldsDispatch({
-          type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
-          payload: {
-            datasetId: id as string,
-            activityId: activityId as string,
-            field,
-          },
-        });
-      });
-
-      // Remove fields that are now empty
-      fieldsToRemove.forEach((field) => {
-        completedFieldsDispatch({
-          type: CompletedFieldsActions.REMOVE_COMPLETED_FIELD,
-          payload: {
-            datasetId: id as string,
-            activityId: activityId as string,
-            field,
-          },
-        });
-      });
-    },
-    [missingFields, activityId, id, currentDatasetCompletedFields, completedFieldsDispatch],
-  );
-
   const handleUpdateCompletedFields = (rowId: string | string[], columnId: string, value?: string | null) => {
     setIsServerSideDataLoading(true);
     tableRef.current?.api?.refreshServerSide();
@@ -522,7 +449,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   };
 
   const scrollToMissingField = (index: number) => {
-    const { id, column } = requiredMissingFields?.[index] ?? {};
+    const { id, column } = missingFields?.[index] ?? {};
 
     if (!id || !column) return;
 
@@ -551,7 +478,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   };
 
   const goNext = () => {
-    if (currentIndex < (requiredMissingFields?.length ?? 0) - 1) {
+    if (currentIndex < (missingFields?.length ?? 0) - 1) {
       setCurrentIndex((prev) => {
         const next = prev + 1;
 
@@ -742,13 +669,13 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   }, [isNoRowsOverlayVisible]);
 
   useEffect(() => {
-    if (gridReady && isInitialDataLoaded && requiredMissingFields?.length > 0 && currentIndex === -1) {
+    if (gridReady && isInitialDataLoaded && missingFields && missingFields?.length > 0 && currentIndex === -1) {
       requestAnimationFrame(() => {
         setCurrentIndex(0);
         scrollToMissingField(0);
       });
     }
-  }, [gridReady, isInitialDataLoaded, requiredMissingFields?.length, currentIndex, id]);
+  }, [gridReady, isInitialDataLoaded, missingFields, currentIndex, id]);
 
   useEffect(() => {
     if (isInitialDataLoaded) {
@@ -757,13 +684,6 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       }
     }
   }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, activeTab, selectedRowIndex]);
-
-  // Add this useEffect to check for pre-filled fields when data is loaded
-  useEffect(() => {
-    if (isInitialDataLoaded && datasetArtifacts?.data?.rows) {
-      checkAndUpdatePreFilledFields(datasetArtifacts.data.rows);
-    }
-  }, [isInitialDataLoaded, datasetArtifacts?.data?.rows, checkAndUpdatePreFilledFields]);
 
   return (
     <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DATASET_VIEW_TYPE)}>
@@ -930,9 +850,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
             />
           </div>
         </CommonWrapper>
-        {gridReady && !!requiredMissingFields?.length && (
+        {gridReady && !!missingFields?.length && (
           <MissingFieldControl
-            totalMissingFields={requiredMissingFields?.length ?? 0}
+            totalMissingFields={missingFields?.length ?? 0}
             currentIndex={currentIndex}
             completedFields={currentDatasetCompletedFields}
             goPrevious={goPrevious}
