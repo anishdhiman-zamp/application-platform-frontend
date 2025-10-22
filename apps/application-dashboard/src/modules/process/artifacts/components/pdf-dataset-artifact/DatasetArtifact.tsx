@@ -254,6 +254,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     actionType = DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD,
     rowId: string | string[] = '',
     columnId = '',
+    value?: string | null,
   ) => {
     if (showPolling) {
       setIsPolling(true);
@@ -271,7 +272,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     })
       .then((response) => {
         if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
-          handleUpdateCompletedFields(rowId, columnId);
+          handleUpdateCompletedFields(rowId, columnId, value);
         } else if (response?.status === DATASET_ACTION_STATUS.FAILED) {
           toast.error(DatasetActionMessages[actionType].ERROR);
         }
@@ -358,7 +359,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     [missingFields, activityId, id, currentDatasetCompletedFields, completedFieldsDispatch],
   );
 
-  const handleUpdateCompletedFields = (rowId: string | string[], columnId: string) => {
+  const handleUpdateCompletedFields = (rowId: string | string[], columnId: string, value?: string | null) => {
     setIsServerSideDataLoading(true);
     tableRef.current?.api?.refreshServerSide();
 
@@ -366,10 +367,16 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       setIsServerSideDataLoading(false);
     }, 1000);
 
+    // Check if value is empty (null, undefined, or empty string)
+    const isEmpty = isValueEmpty(value);
+    const actionType = isEmpty
+      ? CompletedFieldsActions.REMOVE_COMPLETED_FIELD
+      : CompletedFieldsActions.ADD_COMPLETED_FIELD;
+
     if (Array.isArray(rowId)) {
       rowId.forEach((id) => {
         completedFieldsDispatch({
-          type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
+          type: actionType,
           payload: {
             datasetId: id as string,
             activityId: activityId as string,
@@ -385,7 +392,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       });
     } else {
       completedFieldsDispatch({
-        type: CompletedFieldsActions.ADD_COMPLETED_FIELD,
+        type: actionType,
         payload: {
           datasetId: id as string,
           activityId: activityId as string,
@@ -435,9 +442,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         .unwrap()
         .then((response) => {
           if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
-            handleUpdateCompletedFields(rowId, field);
+            handleUpdateCompletedFields(rowId, field, newValue);
           } else {
-            handleSuccessfulUpdate(response, false, DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD, rowId, field);
+            handleSuccessfulUpdate(response, false, DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD, rowId, field, newValue);
           }
         })
         .catch(handleApiError);

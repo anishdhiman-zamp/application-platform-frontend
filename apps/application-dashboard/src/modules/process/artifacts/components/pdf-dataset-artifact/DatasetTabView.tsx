@@ -176,7 +176,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
         <TabsList className='flex h-full w-full flex-nowrap items-center justify-start gap-1 overflow-x-auto bg-white pr-8 whitespace-nowrap [scrollbar-width:none]'>
           {datasets.map((tab) => {
             const requiredCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => c.is_required)?.length ?? 0;
-            const hasMissingFields = missingFields?.[tab.dataset_id]?.cells?.length > 0;
+            const optionalCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => !c.is_required)?.length ?? 0;
 
             return (
               <TabsTrigger
@@ -194,9 +194,11 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                     {tab.dataset_name}
                   </p>
                 </TooltipV2>
-                {hasMissingFields && (
-                  <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
-                    {requiredCount}
+                {(requiredCount > 0 || optionalCount > 0) && (
+                  <span className='f-11-500 ml-1'>
+                    {requiredCount > 0 && <span className='text-RED_800'>{requiredCount}</span>}
+                    {requiredCount > 0 && optionalCount > 0 && <span className='text-GRAY_700'>/</span>}
+                    {optionalCount > 0 && <span className='text-GRAY_700'>{optionalCount}</span>}
                   </span>
                 )}
               </TabsTrigger>
