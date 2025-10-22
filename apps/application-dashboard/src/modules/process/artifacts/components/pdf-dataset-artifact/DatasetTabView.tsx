@@ -73,15 +73,8 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
 
   const isContinueButtonDisabled = useMemo(
-    () =>
-      missingRequiredFieldsCount !== completedRequiredFieldsCount ||
-      missingOptionalFieldsCount !== completedOptionalFieldsCount,
-    [
-      missingRequiredFieldsCount,
-      completedRequiredFieldsCount,
-      missingOptionalFieldsCount,
-      completedOptionalFieldsCount,
-    ],
+    () => missingRequiredFieldsCount !== completedRequiredFieldsCount || completedRequiredFieldsCount === 0,
+    [missingRequiredFieldsCount, completedRequiredFieldsCount, completedOptionalFieldsCount],
   );
 
   const showMissingFieldsBar = useMemo(
@@ -194,13 +187,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                     {tab.dataset_name}
                   </p>
                 </TooltipV2>
-                {(requiredCount > 0 || optionalCount > 0) && (
-                  <span className='f-11-500 ml-1'>
-                    {requiredCount > 0 && <span className='text-RED_800'>{requiredCount}</span>}
-                    {requiredCount > 0 && optionalCount > 0 && <span className='text-GRAY_700'>/</span>}
-                    {optionalCount > 0 && <span className='text-GRAY_700'>{optionalCount}</span>}
-                  </span>
+                {requiredCount > 0 && (
+                  <span className={cn('f-11-500 text-GRAY_700 ml-1', 'text-RED_800')}>{requiredCount}</span>
                 )}
+                {optionalCount > 0 && <span className='f-11-500 text-GRAY_700 ml-1'>{optionalCount}</span>}
               </TabsTrigger>
             );
           })}
