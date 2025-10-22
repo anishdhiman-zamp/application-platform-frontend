@@ -1,6 +1,6 @@
 export const PREV_ROUTE_COOKIE = 'zamp_prev_route';
 export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
-export const USER_SESSION_COOKIE = 'zamp_user_session';
+export const USER_SESSION_COOKIE = 'zamp_user_session_v2';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;
 export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 

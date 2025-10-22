@@ -81,7 +81,14 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     if (session && !cached) {
       const response = NextResponse.next();
 
-      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(session), SESSION_CACHE_MAX_AGE);
+      const sessionCache = {
+        user_id: session?.user_id,
+        user_email: session?.user_email,
+        org_count: session?.orgs?.length || 0,
+        cached_at: Date.now(),
+      };
+
+      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
 
       return response;
     }
