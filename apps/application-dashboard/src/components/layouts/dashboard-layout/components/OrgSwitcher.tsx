@@ -38,7 +38,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
-    { refetchOnMountOrArgChange: false },
+    { refetchOnMountOrArgChange: false, skip: !user?.user_email },
   );
   const { logout, isLoggingOut } = useLogout();
 
