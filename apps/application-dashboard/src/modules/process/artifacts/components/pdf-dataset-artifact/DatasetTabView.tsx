@@ -73,8 +73,15 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   }, [completedRequiredFieldsCount, missingRequiredFieldsCount]);
 
   const isContinueButtonDisabled = useMemo(
-    () => missingRequiredFieldsCount !== completedRequiredFieldsCount || completedOptionalFieldsCount === 0,
-    [missingRequiredFieldsCount, completedRequiredFieldsCount, completedOptionalFieldsCount],
+    () =>
+      (missingRequiredFieldsCount > 0 && missingRequiredFieldsCount !== completedRequiredFieldsCount) ||
+      (missingOptionalFieldsCount > 0 && completedOptionalFieldsCount === 0),
+    [
+      missingRequiredFieldsCount,
+      completedRequiredFieldsCount,
+      completedOptionalFieldsCount,
+      missingOptionalFieldsCount,
+    ],
   );
 
   const showMissingFieldsBar = useMemo(
