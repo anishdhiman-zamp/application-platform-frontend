@@ -151,6 +151,23 @@ dev: ## Start all frontend services
 dev-hot: ## Start all services with hot reload enabled
 	@HOT_RELOAD=true $(MAKE) dev
 
+dev-parallel: ## Start services for parallel orchestration (skips cleanup)
+	@echo -e "\033[34mStarting Frontend (parallel mode)...\033[0m"
+	@echo -e "\033[36mHOT_RELOAD=$(HOT_RELOAD)\033[0m"
+	@echo -e "\033[36mFRONTEND_PORT=$(FRONTEND_PORT)\033[0m"
+	@echo ""
+	@echo -e "\033[34mChecking dependencies...\033[0m"
+	@if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then \
+		echo -e "\033[33m⚠️  Dependencies not installed. Installing now...\033[0m"; \
+		$(MAKE) install; \
+	else \
+		echo -e "\033[32m✅ Dependencies are installed\033[0m"; \
+	fi
+	@echo ""
+	$(MAKE) start-frontend
+	@echo ""
+	@echo -e "\033[32m✅ Frontend services started!\033[0m"
+
 dev-stop: ## Stop all frontend services
 	@echo -e "\033[34mStopping frontend development environment...\033[0m"
 	@for pid_file in $(PID_DIR)/*.pid; do \
