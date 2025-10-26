@@ -2,6 +2,7 @@
 
 # Configuration variables
 PORT=8001  # Hardcoded port
+API_SERVICE=pantheon-api
 
 # Get CODER_WORKSPACE_NAME from environment
 if [ -z "$CODER_WORKSPACE_NAME" ]; then
@@ -10,7 +11,7 @@ if [ -z "$CODER_WORKSPACE_NAME" ]; then
 fi
 
 # Construct the API URL
-NEXT_PUBLIC_BASE_API_URL="https://${PORT}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
+NEXT_PUBLIC_BASE_API_URL="https://${API_SERVICE}--main--${CODER_WORKSPACE_NAME}--${WORKSPACE_USER}.coder-live.zamp.dev"
 
 update_env_file() {
     local env_file=$1
