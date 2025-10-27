@@ -65,7 +65,8 @@ export const useResourceAccess = ({
   const {
     data: audiencesData,
     isLoading: isLoadingAudiencesData,
-    refetch: refetchAudiencesData,
+    refetch,
+    isUninitialized,
   } = useGetAudiencesByResourceIdQuery(
     { resourceRoute: resourceTypeRouteMap[resourceType], resourceId },
     { skip: shouldSkipAudiencesQuery || skipAudienceData, refetchOnMountOrArgChange: false },
@@ -89,6 +90,12 @@ export const useResourceAccess = ({
     },
     [audiencesData, organizationId, userId, userTeams],
   );
+
+  const refetchAudiencesData = useCallback(() => {
+    if (!isUninitialized) {
+      refetch();
+    }
+  }, [refetch, isUninitialized]);
 
   return {
     audiencesData: audiencesData ?? [],

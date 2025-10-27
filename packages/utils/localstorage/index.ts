@@ -1,3 +1,5 @@
+import { isBrowser } from '../browser';
+
 export enum LOCAL_STORAGE_KEYS {
   XZAMP_GOD_MODE = 'XZAMP_GOD_MODE',
   XZAMP_USER = 'TMS_XZAMP_USER',
@@ -14,7 +16,7 @@ export enum LOCAL_STORAGE_KEYS {
 }
 
 export const getFromLocalStorage = (key: string) => {
-  if (typeof window === 'undefined') {
+  if (!isBrowser()) {
     return '';
   }
 
@@ -23,9 +25,15 @@ export const getFromLocalStorage = (key: string) => {
 };
 
 export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
+  if (!isBrowser()) {
+    return;
+  }
   localStorage.setItem(key, value);
 };
 
 export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
+  if (!isBrowser()) {
+    return;
+  }
   localStorage.removeItem(key);
 };

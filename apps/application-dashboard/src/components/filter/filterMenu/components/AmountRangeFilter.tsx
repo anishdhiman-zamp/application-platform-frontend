@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { debounce, useOnClickOutside } from 'hooks';
@@ -164,6 +164,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           <Input
             size={SIZE_TYPES.XSMALL}
             value={startValue}
+            type='number'
             placeholder='type a value...'
             onChange={(e) => onInputChange(true, e.target.value)}
             disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL || isDisabled}
@@ -177,6 +178,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
           <Input
             size={SIZE_TYPES.XSMALL}
             value={endValue}
+            type='number'
             placeholder='type a value...'
             onChange={(e) => onInputChange(false, e.target.value)}
             disabled={isDisabled}

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { defaultFnType, MapAny, OptionsType } from 'types/commonTypes';
 import { FILTER_TYPES, FilterConfigType } from 'components/filter/filter.types';
 import { AG_GRID_FILTER_TYPES } from 'components/filter/filters.constants';

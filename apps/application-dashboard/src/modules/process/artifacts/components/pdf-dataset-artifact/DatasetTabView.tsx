@@ -15,7 +15,7 @@ import {
 } from '@/modules/process/artifacts/context/completedFields.context';
 import { useFieldCounts } from '@/modules/process/hooks/useFieldsCounts';
 import type { DatasetArtifactsResponseType, PdfDatasetArtifactsResponseType } from '@/types/api/processApi.types';
-import { type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
+import { defaultFnType, type MapAny, SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface DatasetArtifactProps {
   datasetArtifact: DatasetArtifactsResponseType | PdfDatasetArtifactsResponseType;
@@ -24,6 +24,7 @@ interface DatasetArtifactProps {
   emitHITLActionPayload: EmitHITLActionPayload;
   processId: string;
   activityId: string;
+  onCloseArtifacts: defaultFnType;
   className?: string;
   showPdfSearch?: boolean;
 }
@@ -35,6 +36,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   emitHITLActionPayload,
   processId,
   activityId,
+  onCloseArtifacts,
   className,
   showPdfSearch = false,
 }) => {
@@ -72,13 +74,13 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
 
   const isContinueButtonDisabled = useMemo(
     () =>
-      missingRequiredFieldsCount !== completedRequiredFieldsCount ||
-      missingOptionalFieldsCount !== completedOptionalFieldsCount,
+      (missingRequiredFieldsCount > 0 && missingRequiredFieldsCount !== completedRequiredFieldsCount) ||
+      (missingOptionalFieldsCount > 0 && completedOptionalFieldsCount === 0),
     [
       missingRequiredFieldsCount,
       completedRequiredFieldsCount,
-      missingOptionalFieldsCount,
       completedOptionalFieldsCount,
+      missingOptionalFieldsCount,
     ],
   );
 
@@ -108,6 +110,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     try {
       await emitHITLAction({ processId, activityRunId: activityId, payload }).unwrap();
       completedFieldsDispatch({ type: CompletedFieldsActions.RESET_COMPLETED_FIELDS });
+      onCloseArtifacts();
     } catch (err: any) {
       toast.error(err?.data?.message ?? 'Something went wrong');
     }
@@ -173,7 +176,6 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
         <TabsList className='flex h-full w-full flex-nowrap items-center justify-start gap-1 overflow-x-auto bg-white pr-8 whitespace-nowrap [scrollbar-width:none]'>
           {datasets.map((tab) => {
             const requiredCount = missingFields?.[tab.dataset_id]?.cells?.filter((c) => c.is_required)?.length ?? 0;
-            const hasMissingFields = missingFields?.[tab.dataset_id]?.cells?.length > 0;
 
             return (
               <TabsTrigger
@@ -191,10 +193,8 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
                     {tab.dataset_name}
                   </p>
                 </TooltipV2>
-                {hasMissingFields && (
-                  <span className={cn('f-11-500 text-GRAY_700 ml-1', { 'text-RED_800': requiredCount > 0 })}>
-                    {requiredCount}
-                  </span>
+                {requiredCount > 0 && (
+                  <span className={cn('f-11-500 text-GRAY_700 ml-1', 'text-RED_800')}>{requiredCount}</span>
                 )}
               </TabsTrigger>
             );

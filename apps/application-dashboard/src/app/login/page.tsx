@@ -1,14 +1,5 @@
-'use client';
-
-import React from 'react';
-import { Provider } from 'react-redux';
-import { LoginForm } from 'modules/login/LoginForm';
-import { store } from '@/store';
+import { LoginRoot } from '@/modules/login/LoginRoot';
 
 export default function LoginPage() {
-  return (
-    <Provider store={store}>
-      <LoginForm />
-    </Provider>
-  );
+  return <LoginRoot />;
 }

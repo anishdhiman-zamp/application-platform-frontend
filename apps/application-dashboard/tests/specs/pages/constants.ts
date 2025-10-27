@@ -54,6 +54,7 @@ export const TEST_IDS = {
   WIDGET_DONE_BTN: 'widget-creation-form-done-btn',
   KPI_TAG_SELECT_TRIGGER: 'kpi-select-button',
   SELECT_BUTTON_SLIDER: 'select-button-slider',
+  WIDGET_INFO: 'widget-info',
 
   // Chart configuration
   X_AXIS_SELECT_TRIGGER: 'bar-line-chart-form-x-axis-select-trigger',

@@ -1,20 +1,15 @@
 import type { FC, RefObject } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import DisplayField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DisplayField';
 import EditableField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/EditableField';
-import { artifactContextActions, useArtifactContextStore } from 'modules/process/artifacts/context/artifact.context';
 import { useCompletedFields } from 'modules/process/artifacts/context/completedFields.context';
 import type { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import type { MapAny } from 'types/commonTypes';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
-import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
-import { COLORS } from '@/constants/colors';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import {
   getColumnOrderingVisibilityForCurrentDataset,
@@ -62,12 +57,10 @@ const Row: FC<RowProps> = ({
   clickedField,
   setClickedField,
   datasetId,
-  showPdfSearch,
   filterConfig = [],
   rowData,
   isPdfDataset = false,
 }) => {
-  const { dispatch } = useArtifactContextStore();
   const {
     state: { completedFields },
   } = useCompletedFields();
@@ -83,7 +76,7 @@ const Row: FC<RowProps> = ({
   const column = useMemo(() => columns.find((col) => col?.field === key), [columns, key]);
   const columnConfig = useMemo(() => filterConfig.find((col) => col?.column === key), [filterConfig, key]);
   const currentDatasetCompletedFields = useMemo(
-    () => completedFields[activityId]?.[datasetId]?.filter((field) => field.isRequired) ?? [],
+    () => completedFields[activityId]?.[datasetId] ?? [],
     [completedFields, datasetId, activityId],
   );
 
@@ -127,24 +120,7 @@ const Row: FC<RowProps> = ({
     [currentDatasetCompletedFields, key, rowId, value, missingFields],
   );
 
-  const shouldShowInputDirectly = isEditable && isValueEmpty(value);
-
-  useEffect(() => {
-    setEditingValue(formattedValue);
-  }, [formattedValue]);
-
-  useEffect(() => {
-    if (isEditing) {
-      editTextareaRef.current?.focus();
-    }
-  }, [isEditing]);
-
-  const handleSearch = () => {
-    dispatch({
-      type: artifactContextActions.SET_SEARCH_TERM,
-      payload: { searchTerm: value },
-    });
-  };
+  const shouldShowInputDirectly = useMemo(() => isEditable && !isCompleted, [isEditable, isCompleted]);
 
   const handleClick = () => {
     setClickedField(fieldId);
@@ -178,6 +154,14 @@ const Row: FC<RowProps> = ({
       handleEditCancel();
     }
   };
+
+  useEffect(() => setEditingValue(formattedValue), [formattedValue]);
+
+  useEffect(() => {
+    if (isEditing) {
+      editTextareaRef.current?.focus();
+    }
+  }, [isEditing]);
 
   if (!column || !isColumnVisible) return null;
 
@@ -219,22 +203,6 @@ const Row: FC<RowProps> = ({
           onClick={handleClick}
           isPdfDataset={isPdfDataset}
         />
-      )}
-
-      {showPdfSearch && (
-        <Button
-          variant='outline'
-          size='icon'
-          className='hover:bg-GRAY_200 absolute right-4 bottom-4 h-6 w-6 rounded-sm !px-2.5 !py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100'
-          onClick={(e) => {
-            e.stopPropagation();
-            handleSearch();
-          }}
-        >
-          <TooltipV2 tooltipBody='Search in PDF'>
-            <SvgSpriteLoader id='search-sm' size={10} color={COLORS.GRAY_1000} className='cursor-pointer' />
-          </TooltipV2>
-        </Button>
       )}
     </div>
   );

@@ -1,5 +1,3 @@
-'use client';
-
 import { Button } from '@zamp-platform/ui';
 import Link from 'next/link';
 

@@ -1,14 +1,15 @@
 'use client';
 
 import { FC, ReactNode } from 'react';
-import Providers from 'app/_providers/providers';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
-interface AuthenticatedLayoutProps {
+interface LoginLayoutProps {
   children: ReactNode;
 }
 
-const LoginLayout: FC<AuthenticatedLayoutProps> = ({ children }) => {
-  return <Providers>{children}</Providers>;
+const LoginLayout: FC<LoginLayoutProps> = ({ children }) => {
+  return <Provider store={store}>{children}</Provider>;
 };
 
 export default LoginLayout;

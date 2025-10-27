@@ -1,3 +1,4 @@
+import { COINS_STACKED_04, USERS_02 } from 'constants/icons';
 import { NavigationItemSchema } from 'types/config';
 
 export const ROUTES_PATH = {
@@ -28,6 +29,8 @@ export const ROUTES_PATH = {
   SETTINGS: '/settings',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   WIDGET_CREATE: '/widgets/create',
+  INVALID_SCREEN_SIZE: '/invalid-screen-size',
+  MEMBERSHIP_PENDING: '/membership-pending',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -111,13 +114,13 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
   {
     label: 'Data',
     id: 'data',
-    iconId: 'coins-stacked-04',
+    iconUrl: COINS_STACKED_04,
     path: ROUTES_PATH.DATA,
   },
   {
     label: 'People',
     id: 'people',
-    iconId: 'users-02',
+    iconUrl: USERS_02,
     path: ROUTES_PATH.TEAM,
   },
 ];

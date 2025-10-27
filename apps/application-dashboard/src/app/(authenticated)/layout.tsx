@@ -6,7 +6,8 @@ import AgChartInit from 'app/_providers/ag-chart';
 import PostHogProviderWrapper from 'app/_providers/posthog-provider';
 import Providers from 'app/_providers/providers';
 import { SSEProvider } from 'app/_providers/sse-provider';
-import DashboardContent from 'app/DashboardContent';
+import UserDetailsProvider from 'app/_providers/user-details-provider';
+import LayoutWrapper from '@/components/layouts/LayoutWrapper';
 
 interface AuthenticatedLayoutProps {
   children: ReactNode;
@@ -18,10 +19,11 @@ const AuthenticatedLayout: FC<AuthenticatedLayoutProps> = ({ children }) => {
   return (
     <Providers>
       <AgChartInit />
+      <UserDetailsProvider />
       <PostHogProviderWrapper>
-        <DashboardContent>
+        <LayoutWrapper>
           <SSEProvider sseEventBus={sseEventBus}>{children}</SSEProvider>
-        </DashboardContent>
+        </LayoutWrapper>
       </PostHogProviderWrapper>
     </Providers>
   );

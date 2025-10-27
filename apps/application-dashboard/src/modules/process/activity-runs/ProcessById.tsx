@@ -4,20 +4,23 @@ import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
+import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
+import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import { PERSISTENT_FILTER_ID } from '@/hooks/usePersistFilters';
 import { ColumnOrderingVisibilityType } from '@/modules/data/data.types';
 import { getColumnOrderingVisibilityForCurrentDataset } from '@/modules/data/data.utils';
 import ActivityByStatus from '@/modules/process/activity-runs/ActivityByStatus';
 import { DisplayOptionProvider } from '@/modules/process/activity-runs/contextWrapper/DisplayOptionContext';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
+import type { MapAny } from '@/types/commonTypes';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
-import { useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
+import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
 interface ProcessByIdProps {
   processId: string;
@@ -30,7 +33,8 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   const searchParams = useSearchParams();
   const initialLoadDone = useRef(false);
   const {
-    state: { selectedFilters },
+    state: { selectedFilters, isFilterInitialized },
+    dispatch,
   } = useFiltersContextStore();
   const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState<string>(status || '');
@@ -53,18 +57,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
       ),
     },
     {
-      skip: !processId || isOrgSwitchIsInProgress,
+      skip: !processId || isOrgSwitchIsInProgress || !isFilterInitialized,
       refetchOnMountOrArgChange: true,
     },
   );
 
-  const {
-    data: filterConfigData,
-    refetch: refetchFilterConfig,
-    isLoading: isFilterConfigLoading,
-    isError: isFilterConfigError,
-    isUninitialized: isFilterConfigUninitialized,
-  } = useGetFilterConfigByProcessIdQuery(
+  const { data: filterConfigData, isLoading: isFilterConfigLoading } = useGetFilterConfigByProcessIdQuery(
     {
       processId: processId as string,
     },
@@ -124,6 +122,46 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
     initialLoadDone.current = false;
   }, [processId]);
 
+  // Initialize filters on component mount
+  useEffect(() => {
+    if (!isFilterInitialized && processId) {
+      // Set persist ID for this process
+      dispatch({
+        type: filtersContextActions.SET_PERSIST_ID,
+        payload: { persistId: `${PERSISTENT_FILTER_ID.PROCESS}_${processId}` },
+      });
+
+      // Load filters from localStorage
+      dispatch({
+        type: filtersContextActions.GET_FILTERS_FROM_STORAGE,
+        payload: { persistId: `${PERSISTENT_FILTER_ID.PROCESS}_${processId}` },
+      });
+    }
+  }, [processId, isFilterInitialized, dispatch]);
+
+  useEffect(() => {
+    if (filterConfigData?.data?.length && !isFilterConfigLoading) {
+      dispatch({
+        type: filtersContextActions.SET_FILTERS_CONFIG,
+        payload: {
+          filtersConfig: filterConfigData?.data
+            ?.filter(
+              (item: MapAny) =>
+                !item?.metadata?.is_hidden &&
+                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS &&
+                item?.metadata?.custom_type !== CUSTOM_COLUMNS_TYPE.ACTIVITY_CURRENT_STATUS,
+            )
+            ?.map((column: MapAny) => ({
+              key: column?.column,
+              label: snakeCaseToSentenceCase(column?.column),
+              values: column?.options,
+              type: column?.type,
+            })),
+        },
+      });
+    }
+  }, [filterConfigData?.data, dispatch, isFilterConfigLoading]);
+
   return (
     <CommonWrapper
       className={cn('h-full', {
@@ -173,7 +211,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                   {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
                 </span>
                 <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
-                  {formatNumber(item?.count, 0, true, false, true)}
+                  {getCommaSeparatedNumber(item?.count)}
                 </span>
               </button>
             ))}
@@ -192,11 +230,6 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                 <ActivityByStatus
                   processId={processId}
                   status={item?.status}
-                  filterConfigData={filterConfigData}
-                  isFilterConfigLoading={isFilterConfigLoading}
-                  isFilterConfigError={isFilterConfigError}
-                  isFilterConfigUninitialized={isFilterConfigUninitialized}
-                  refetchFilterConfig={refetchFilterConfig}
                   totalCount={getTotalCountForStatus(item?.status)}
                 />
               </div>

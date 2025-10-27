@@ -1,5 +1,6 @@
 import { createContext, Dispatch, FC, ReactElement, useContext, useEffect, useReducer } from 'react';
 import { captureException } from '@sentry/browser';
+import { FieldRequirementType } from 'modules/process/process.types';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -7,18 +8,13 @@ import {
   setToLocalStorage,
 } from '@/utils/localstorage';
 
-export interface CompletedField {
-  rowId: string;
-  columnId: string;
-  isRequired: boolean;
-}
-
 interface CompletedFieldsState {
-  completedFields: Record<string, Record<string, CompletedField[]>>;
+  completedFields: Record<string, Record<string, FieldRequirementType[]>>;
 }
 
 export enum CompletedFieldsActions {
   ADD_COMPLETED_FIELD = 'ADD_COMPLETED_FIELD',
+  REMOVE_COMPLETED_FIELD = 'REMOVE_COMPLETED_FIELD',
   LOAD_FROM_STORAGE = 'LOAD_FROM_STORAGE',
   RESET_COMPLETED_FIELDS = 'RESET_COMPLETED_FIELDS',
 }
@@ -28,8 +24,8 @@ interface CompletedFieldsAction {
   payload?: {
     datasetId?: string;
     activityId?: string;
-    completedFields?: Record<string, Record<string, CompletedField[]>>;
-    field?: CompletedField;
+    completedFields?: Record<string, Record<string, FieldRequirementType[]>>;
+    field?: FieldRequirementType;
   };
 }
 
@@ -64,6 +60,33 @@ const completedFieldsReducer = (state: CompletedFieldsState, action: CompletedFi
           [activityId]: {
             ...existingActivityFields,
             [datasetId]: [...existingFields, field],
+          },
+        },
+      };
+    }
+    case CompletedFieldsActions.REMOVE_COMPLETED_FIELD: {
+      if (!action.payload?.datasetId || !action.payload?.activityId || !action.payload?.field) return state;
+
+      const datasetId = action.payload.datasetId;
+      const activityId = action.payload.activityId;
+      const field = action.payload.field;
+
+      // Get existing fields for this activity and dataset
+      const existingActivityFields = state.completedFields[activityId] || {};
+      const existingFields = existingActivityFields[datasetId] || [];
+
+      // Filter out the field to remove
+      const updatedFields = existingFields.filter(
+        (f) => !(f.rowId === field.rowId && f.columnId === field.columnId && f.isRequired === field.isRequired),
+      );
+
+      return {
+        ...state,
+        completedFields: {
+          ...state.completedFields,
+          [activityId]: {
+            ...existingActivityFields,
+            [datasetId]: updatedFields,
           },
         },
       };
