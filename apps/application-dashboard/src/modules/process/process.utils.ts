@@ -119,12 +119,12 @@ export const handleStrokeShimmerSequence = ({
  */
 export const formatRowValue = (value: unknown): string => {
   if (value === null || value === undefined || value === '') {
-    return '-';
+    return 'N/A';
   }
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return '-';
+      return 'N/A';
     }
 
     return formatArrayValue(value);

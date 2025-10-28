@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { captureException } from '@sentry/nextjs';
 import Image from 'next/image';
 import { PAUSED_OVERLAY } from '@/constants/icons';
 import PlayButton from '@/modules/process/artifacts/components/browser-artifact/PlayButton';
@@ -20,9 +21,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, className = '' }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const handleError = () => {
+  const handleError = (e: ErrorEvent) => {
     setIsLoading(false);
     setError(true);
+    captureException(e);
   };
 
   const handlePlay = () => setIsPlaying(true);
