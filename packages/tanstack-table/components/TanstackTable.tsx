@@ -1,6 +1,6 @@
-import { flexRender, getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
+import type { Header } from '@tanstack/react-table';
+import { getCoreRowModel, getSortedRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { cn } from '@zamp-platform/ui/utils';
 import { useThrottle } from '@zamp-platform/utils';
 import React, { FC, useCallback } from 'react';
 
@@ -9,7 +9,7 @@ import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
 import { ActivityRunRowData } from '@/modules/process/process.types';
 import { MapAny } from '@/types/commonTypes';
 
-import { isNonMovableColumn, QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
+import { QUERY_KEYS, VIRTUALIZATION_DEFAULTS } from '../constants';
 import { useColumnDragAndDrop } from '../hooks/useColumnDragAndDrop';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useInfiniteTableData } from '../hooks/useInfiniteTableData';
@@ -21,6 +21,8 @@ import { useTableEffects } from '../hooks/useTableEffects';
 import { useTableState } from '../hooks/useTableState';
 import { useTableSync } from '../hooks/useTableSync';
 import { CUSTOM_COLUMN_TYPE, SortDirection, TanStackTableProps, VirtualizationOptions } from '../types';
+import TanstackHeader from './TanstackHeader';
+import TanstackRow from './TanstackRow';
 
 export const TanStackTable: FC<TanStackTableProps> = ({
   columns,
@@ -219,6 +221,8 @@ export const TanStackTable: FC<TanStackTableProps> = ({
     onColumnOrderChange: setColumnOrder,
     enableColumnPinning: true,
     debugTable: process.env.NODE_ENV === 'development',
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange', // Real-time column resizing
   });
   const skeletonLoaderHeaderList = table.getHeaderGroups()[0]?.headers;
   const { rows: tableRows } = table.getRowModel();
@@ -278,34 +282,16 @@ export const TanStackTable: FC<TanStackTableProps> = ({
           <thead className='grid w-full'>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} style={{ display: 'flex', width: '100%', minWidth: `50px` }}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th
-                      data-testid={`tanstack-table-header-${header.id}`}
-                      key={header.id}
-                      className={cn('flex cursor-pointer overflow-hidden capitalize', headerClass)}
-                      style={{
-                        width: `${header.getSize()}px`,
-                        minWidth: `${header.getSize()}px`,
-                        ...(header.id === CUSTOM_COLUMN_TYPE.STATUS && {
-                          maxWidth: `${header.getSize()}px`,
-                          flex: '0 0 auto',
-                        }),
-                        ...(header.id !== CUSTOM_COLUMN_TYPE.STATUS && {
-                          flex: '1 0 auto',
-                        }),
-                      }}
-                      draggable
-                      onDragStart={(e) => handleHeaderDragStart(header.id, e)}
-                      onDragOver={handleHeaderDragOver}
-                      onDrop={(e) => handleHeaderDrop(header.id, e)}
-                    >
-                      <div className={'flex h-full w-full cursor-pointer items-center justify-between select-none'}>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </div>
-                    </th>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TanstackHeader
+                    key={header.id}
+                    header={header as Header<MapAny, MapAny>}
+                    headerClass={headerClass}
+                    handleHeaderDragStart={handleHeaderDragStart}
+                    handleHeaderDragOver={handleHeaderDragOver}
+                    handleHeaderDrop={handleHeaderDrop}
+                  />
+                ))}
               </tr>
             ))}
           </thead>
@@ -410,95 +396,23 @@ export const TanStackTable: FC<TanStackTableProps> = ({
                   const row = tableRows[virtualRow.index] as Row<unknown>;
 
                   // ---- actual rows with data ----
-                  const isHighlighted = rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index;
+                  const isHighlightedVal = Boolean(
+                    rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index,
+                  );
 
                   return (
-                    <tr
-                      data-index={virtualRow.index}
-                      ref={(node) => rowVirtualizer.measureElement(node)}
+                    <TanstackRow
                       key={row?.id}
-                      className={cn('group absolute flex cursor-pointer', isHighlighted && 'bg-BACKGROUND_GRAY_2')}
-                      style={{
-                        transform: `translateY(${virtualRow.start}px)`,
-                        width: '100%',
-                      }}
-                      onClick={() =>
-                        rowHighlighting?.enabled
-                          ? enhancedHandleRowClick(row?.original as ActivityRunRowData, virtualRow.index)
-                          : onRowClicked?.(row?.original as ActivityRunRowData, virtualRow.index)
-                      }
-                    >
-                      {row.getVisibleCells().map((cell) => {
-                        const raw = cell.getValue();
-                        const ctx = { ...cell.getContext(), absoluteRowIndex: virtualRow.index };
-                        const colId = cell.column.id;
-                        const showCustomCell = isNonMovableColumn(colId);
-
-                        return (
-                          <td
-                            key={cell.id}
-                            data-testid={`table-cell-${colId}`}
-                            className={cn(
-                              'group-hover:bg-BACKGROUND_GRAY_2',
-                              isHighlighted && 'bg-BACKGROUND_GRAY_2',
-                              cellClass,
-                            )}
-                            style={{
-                              width: `${cell.column.getSize()}px`,
-                              minWidth: `${cell.column.getSize()}px`,
-                              ...(colId === CUSTOM_COLUMN_TYPE.STATUS && {
-                                maxWidth: `${cell.column.getSize()}px`,
-                                flex: '0 0 auto',
-                              }),
-                              ...(colId !== CUSTOM_COLUMN_TYPE.STATUS && {
-                                flex: '1 0 auto',
-                              }),
-                            }}
-                          >
-                            {showCustomCell ? (
-                              <span
-                                className={cn(
-                                  'group-hover:bg-BACKGROUND_GRAY_2 flex justify-between py-2!',
-                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
-                                  cellClass,
-                                )}
-                                style={{
-                                  width: `${cell.column.getSize()}px`,
-                                  minWidth: `${cell.column.getSize()}px`,
-                                  ...(colId === CUSTOM_COLUMN_TYPE.STATUS && {
-                                    maxWidth: `${cell.column.getSize()}px`,
-                                    flex: '0 0 auto',
-                                  }),
-                                  ...(colId !== CUSTOM_COLUMN_TYPE.STATUS && {
-                                    flex: '1 0 auto',
-                                  }),
-                                }}
-                              >
-                                {flexRender(cell.column.columnDef.cell, ctx)}
-                              </span>
-                            ) : raw == null || (typeof raw === 'string' && raw.trim() === '') ? (
-                              <span
-                                className={cn(
-                                  'text-13 group-hover:bg-BACKGROUND_GRAY_2 text-gray-550 px-4! py-1!',
-                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
-                                )}
-                              >
-                                N/A
-                              </span>
-                            ) : (
-                              <span
-                                className={cn(
-                                  'group-hover:bg-BACKGROUND_GRAY_2! truncate px-4! py-1!',
-                                  isHighlighted && 'bg-BACKGROUND_GRAY_2',
-                                )}
-                              >
-                                {String(raw)}
-                              </span>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
+                      row={row}
+                      virtualRow={virtualRow}
+                      rowVirtualizer={rowVirtualizer}
+                      highlightedRowIndex={highlightedRowIndex ?? undefined}
+                      isHighlighted={isHighlightedVal}
+                      rowHighlighting={{ enabled: !!rowHighlighting?.enabled }}
+                      enhancedHandleRowClick={enhancedHandleRowClick}
+                      onRowClicked={onRowClicked}
+                      cellClass={cellClass}
+                    />
                   );
                 })}
           </tbody>
