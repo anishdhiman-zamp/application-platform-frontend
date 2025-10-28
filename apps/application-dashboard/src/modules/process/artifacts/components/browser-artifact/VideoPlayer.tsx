@@ -24,7 +24,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, className = '' }
   const handleError = (e: ErrorEvent) => {
     setIsLoading(false);
     setError(true);
-    captureException(e);
+    captureException(e, {
+      extra: { signedUrl: src },
+    });
   };
 
   const handlePlay = () => setIsPlaying(true);
