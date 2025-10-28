@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
+import { N_A_VALUE } from '@/modules/process/process.constant';
 import { formatRowValue } from '@/modules/process/process.utils';
 
 interface DisplayFieldProps {
@@ -22,7 +23,7 @@ const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick, i
           'bg-ORANGE_100 underline underline-offset-2': isCompleted,
           'border-BLUE_700': isClicked,
           'max-w-full': isPdfDataset,
-          'text-GRAY_400': formattedValue === 'N/A',
+          'text-GRAY_400': formattedValue === N_A_VALUE,
         },
       )}
       onClick={onClick}

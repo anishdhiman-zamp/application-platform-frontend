@@ -2,7 +2,7 @@ import { MutableRefObject } from 'react';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import { formatArrayValue } from 'modules/data/data.utils';
-import { ARTIFACT_ICON_MAPPING } from 'modules/process/process.constant';
+import { ARTIFACT_ICON_MAPPING, N_A_VALUE } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
@@ -119,12 +119,12 @@ export const handleStrokeShimmerSequence = ({
  */
 export const formatRowValue = (value: unknown): string => {
   if (value === null || value === undefined || value === '') {
-    return 'N/A';
+    return N_A_VALUE;
   }
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return 'N/A';
+      return N_A_VALUE;
     }
 
     return formatArrayValue(value);
