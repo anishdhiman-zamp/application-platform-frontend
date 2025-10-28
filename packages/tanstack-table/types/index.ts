@@ -105,4 +105,7 @@ export interface TanStackTableProps {
     getHighlightedRowIndex?: (key: string) => number | null;
     clearHighlightedRowIndex?: (key: string) => void;
   };
+  showHeaderSkeleton?: boolean; // Show skeleton for headers when table is not ready
+  tableHeaderSkeletonWidth?: number[];
+  tableBodySkeletonRowCount?: number;
 }

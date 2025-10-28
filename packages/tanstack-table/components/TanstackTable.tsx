@@ -6,6 +6,8 @@ import React, { FC, useCallback } from 'react';
 
 import SkeletonElement from '@/components/common/skeletons/SkeletonElement';
 import CustomNoRowsOverlay from '@/components/common/table/CustomNoRowsOverlay';
+import SkeletonBody from '@/components/common/tanstackTable/skeletons/SkeletonBody';
+import SkeletonHeader from '@/components/common/tanstackTable/skeletons/SkeletonHeader';
 import { ActivityRunRowData } from '@/modules/process/process.types';
 import { MapAny } from '@/types/commonTypes';
 
@@ -48,6 +50,9 @@ export const TanStackTable: FC<TanStackTableProps> = ({
   virtualizationOptions = {},
   preserveScrollPosition,
   rowHighlighting,
+  showHeaderSkeleton = false,
+  tableHeaderSkeletonWidth = [30, 30, 30],
+  tableBodySkeletonRowCount = 20,
 }) => {
   const {
     overscan = VIRTUALIZATION_DEFAULTS.OVERSCAN, // number of items to render outside viewport
@@ -280,20 +285,24 @@ export const TanStackTable: FC<TanStackTableProps> = ({
           className={customTheme}
         >
           <thead className='grid w-full'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} style={{ display: 'flex', width: '100%', minWidth: `50px` }}>
-                {headerGroup.headers.map((header) => (
-                  <TanstackHeader
-                    key={header.id}
-                    header={header as Header<MapAny, MapAny>}
-                    headerClass={headerClass}
-                    handleHeaderDragStart={handleHeaderDragStart}
-                    handleHeaderDragOver={handleHeaderDragOver}
-                    handleHeaderDrop={handleHeaderDrop}
-                  />
-                ))}
-              </tr>
-            ))}
+            {showHeaderSkeleton ? (
+              <SkeletonHeader columnsWidth={tableHeaderSkeletonWidth} />
+            ) : (
+              table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} style={{ display: 'flex', width: '100%', minWidth: `50px` }}>
+                  {headerGroup.headers.map((header) => (
+                    <TanstackHeader
+                      key={header.id}
+                      header={header as Header<MapAny, MapAny>}
+                      headerClass={headerClass}
+                      handleHeaderDragStart={handleHeaderDragStart}
+                      handleHeaderDragOver={handleHeaderDragOver}
+                      handleHeaderDrop={handleHeaderDrop}
+                    />
+                  ))}
+                </tr>
+              ))
+            )}
           </thead>
         </table>
       </div>
@@ -325,96 +334,65 @@ export const TanStackTable: FC<TanStackTableProps> = ({
             }}
           >
             {/* <---- "Full Table" skeleton loader (tab or filter changes) ----> */}
-            {showOverlaySkeleton
-              ? Array.from({ length: 20 }).map((_, skeletonRowIdx) => {
+            {showOverlaySkeleton ? (
+              <SkeletonBody columnsWidth={tableHeaderSkeletonWidth} rowCount={tableBodySkeletonRowCount} />
+            ) : (
+              rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                // <---- "Fetch More" skeleton loader ---->
+                if (showFetchMoreSkeleton && virtualRow?.index >= flatRowData?.length) {
                   return (
                     <tr
-                      key={`skeleton-${skeletonRowIdx}`}
-                      className='absolute flex h-10 w-full'
+                      data-index={virtualRow.index}
+                      ref={(node) => rowVirtualizer.measureElement(node)}
+                      key={`skeleton-${virtualRow.index}`}
                       style={{
-                        transform: `translateY(${skeletonRowIdx * 40}px)`,
+                        transform: `translateY(${virtualRow.start}px)`,
                       }}
+                      className='absolute flex h-10 w-full'
                     >
-                      {skeletonLoaderHeaderList?.map((header, colIdx) => (
+                      {skeletonLoaderHeaderList?.map((header) => (
                         <td
-                          data-testid='overlay-skeleton-cell'
-                          key={`skeleton-cell-${skeletonRowIdx}-${colIdx}`}
-                          className='flex items-center px-2 py-2'
+                          data-testid='fetch-more-skeleton-cell'
+                          key={`skeleton-cell-${virtualRow.index}-${header.id}`}
                           style={{
-                            width: `${header.getSize()}px`,
+                            display: 'flex',
+                            width: header.getSize(),
                             minWidth: `${header.getSize()}px`,
                             ...(header.id === CUSTOM_COLUMN_TYPE.STATUS && {
                               maxWidth: `${header.getSize()}px`,
                               flex: '0 0 auto',
                             }),
-                            ...(header.id !== CUSTOM_COLUMN_TYPE.STATUS && {
-                              flex: '1 0 auto',
-                            }),
                           }}
+                          className='flex items-center px-2 py-2'
                         >
                           <SkeletonElement className='h-3.5 w-full rounded-sm bg-gray-200' />
                         </td>
                       ))}
                     </tr>
                   );
-                })
-              : rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                  // <---- "Fetch More" skeleton loader ---->
-                  if (showFetchMoreSkeleton && virtualRow?.index >= flatRowData?.length) {
-                    return (
-                      <tr
-                        data-index={virtualRow.index}
-                        ref={(node) => rowVirtualizer.measureElement(node)}
-                        key={`skeleton-${virtualRow.index}`}
-                        style={{
-                          transform: `translateY(${virtualRow.start}px)`,
-                        }}
-                        className='absolute flex h-10 w-full'
-                      >
-                        {skeletonLoaderHeaderList?.map((header) => (
-                          <td
-                            data-testid='fetch-more-skeleton-cell'
-                            key={`skeleton-cell-${virtualRow.index}-${header.id}`}
-                            style={{
-                              display: 'flex',
-                              width: header.getSize(),
-                              minWidth: `${header.getSize()}px`,
-                              ...(header.id === CUSTOM_COLUMN_TYPE.STATUS && {
-                                maxWidth: `${header.getSize()}px`,
-                                flex: '0 0 auto',
-                              }),
-                            }}
-                            className='flex items-center px-2 py-2'
-                          >
-                            <SkeletonElement className='h-3.5 w-full rounded-sm bg-gray-200' />
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  }
+                }
 
-                  const row = tableRows[virtualRow.index] as Row<unknown>;
+                const row = tableRows[virtualRow.index] as Row<unknown>;
 
-                  // ---- actual rows with data ----
-                  const isHighlightedVal = Boolean(
-                    rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index,
-                  );
+                // ---- actual rows with data ----
+                const isHighlightedVal = Boolean(rowHighlighting?.enabled && highlightedRowIndex === virtualRow.index);
 
-                  return (
-                    <TanstackRow
-                      key={row?.id}
-                      row={row}
-                      virtualRow={virtualRow}
-                      rowVirtualizer={rowVirtualizer}
-                      highlightedRowIndex={highlightedRowIndex ?? undefined}
-                      isHighlighted={isHighlightedVal}
-                      rowHighlighting={{ enabled: !!rowHighlighting?.enabled }}
-                      enhancedHandleRowClick={enhancedHandleRowClick}
-                      onRowClicked={onRowClicked}
-                      cellClass={cellClass}
-                    />
-                  );
-                })}
+                return (
+                  <TanstackRow
+                    key={row?.id}
+                    row={row}
+                    virtualRow={virtualRow}
+                    rowVirtualizer={rowVirtualizer}
+                    highlightedRowIndex={highlightedRowIndex ?? undefined}
+                    isHighlighted={isHighlightedVal}
+                    rowHighlighting={{ enabled: !!rowHighlighting?.enabled }}
+                    enhancedHandleRowClick={enhancedHandleRowClick}
+                    onRowClicked={onRowClicked}
+                    cellClass={cellClass}
+                  />
+                );
+              })
+            )}
           </tbody>
         </table>
 

@@ -12,6 +12,7 @@ import {
 import { useTableStateRedux } from 'hooks/useTableStateRedux';
 import { formatTanStackColumns } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
+import { ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
 import { useRouter } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
@@ -321,6 +322,9 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
             onColumnVisible={handleColumnVisible}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
+            showHeaderSkeleton={isFilterConfigLoading || columns.length === 0}
+            tableHeaderSkeletonWidth={ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH}
+            tableBodySkeletonRowCount={30}
             preserveScrollPosition={{
               key: `${processId}-${status}`,
               enabled: true,
