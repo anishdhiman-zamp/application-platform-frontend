@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
+import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -171,7 +171,7 @@ export const LoginForm = () => {
     }
     const allRegionsResponse = await getApiDomainAndRegions(email);
 
-    doLogin(allRegionsResponse[0].url);
+    doLogin(allRegionsResponse?.length > 0 ? allRegionsResponse[0]?.url : BASE_API_URL);
   };
 
   const inputDisabled = loading;
