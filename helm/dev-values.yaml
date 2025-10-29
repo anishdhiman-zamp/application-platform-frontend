@@ -34,7 +34,7 @@ default:
     injection:
       enabled: true
     volumeMount:
-      enabled: false
+      enabled: true
       secrets:
       - data:  
           - fileName: ".env"
