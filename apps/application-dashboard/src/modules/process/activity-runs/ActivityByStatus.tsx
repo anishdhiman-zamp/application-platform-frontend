@@ -12,6 +12,7 @@ import {
 import { useTableStateRedux } from 'hooks/useTableStateRedux';
 import { formatTanStackColumns } from 'modules/data/data.utils';
 import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
+import { ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
 import { useRouter } from 'next/navigation';
 import { type MapAny } from 'types/commonTypes';
@@ -46,9 +47,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
 
   const {
     data: filterConfigData,
-    refetch: refetchFilterConfig,
     isLoading: isFilterConfigLoading,
-    isError: isFilterConfigError,
     isUninitialized: isFilterConfigUninitialized,
   } = useGetFilterConfigByProcessIdQuery(
     {
@@ -273,28 +272,29 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
 
   return (
     <>
-      <CommonWrapper className={'h-fit w-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div data-testid='activity-by-status-table-header' className='z-1000 flex items-center justify-between pr-4'>
-          <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
-          </div>
-          <div className='relative items-center gap-2.5'>
-            {table && (
-              <DisplayOptions
-                tableRef={null as any}
-                isTanStackTable
-                isGroupByDisabled
-                table={table}
-                columnOrder={columnOrder}
-                datasetId={processId ?? ''}
-                columnVisibility={columnVisibility}
-                setColumnOrder={handleColumnOrderDisplayOption}
-                setColumnVisibility={handleColumnVisibilityDisplayOption}
-              />
-            )}
-          </div>
+      <div
+        data-testid='activity-by-status-table-header'
+        className='z-1000 flex h-fit w-full items-center justify-between pr-4'
+      >
+        <div className='flex items-center py-3'>
+          <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
         </div>
-      </CommonWrapper>
+        <div className='relative items-center gap-2.5'>
+          {table && (
+            <DisplayOptions
+              tableRef={null as any}
+              isTanStackTable
+              isGroupByDisabled
+              table={table}
+              columnOrder={columnOrder}
+              datasetId={processId ?? ''}
+              columnVisibility={columnVisibility}
+              setColumnOrder={handleColumnOrderDisplayOption}
+              setColumnVisibility={handleColumnVisibilityDisplayOption}
+            />
+          )}
+        </div>
+      </div>
 
       <CommonWrapper
         isError={lazyloadActivityRunsError}
@@ -321,6 +321,9 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
             onColumnVisible={handleColumnVisible}
             initialColumnOrder={columnOrder}
             initialColumnVisibility={columnVisibility}
+            showHeaderSkeleton={isFilterConfigLoading || columns.length === 0}
+            tableHeaderSkeletonWidth={ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH}
+            tableBodySkeletonRowCount={30}
             preserveScrollPosition={{
               key: `${processId}-${status}`,
               enabled: true,
