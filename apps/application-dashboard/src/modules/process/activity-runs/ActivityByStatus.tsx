@@ -47,9 +47,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
 
   const {
     data: filterConfigData,
-    refetch: refetchFilterConfig,
     isLoading: isFilterConfigLoading,
-    isError: isFilterConfigError,
     isUninitialized: isFilterConfigUninitialized,
   } = useGetFilterConfigByProcessIdQuery(
     {
@@ -274,28 +272,29 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
 
   return (
     <>
-      <CommonWrapper className={'h-fit w-full'} isError={isFilterConfigError} refetchFunction={refetchFilterConfig}>
-        <div data-testid='activity-by-status-table-header' className='z-1000 flex items-center justify-between pr-4'>
-          <div className='flex items-center py-3'>
-            <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
-          </div>
-          <div className='relative items-center gap-2.5'>
-            {table && (
-              <DisplayOptions
-                tableRef={null as any}
-                isTanStackTable
-                isGroupByDisabled
-                table={table}
-                columnOrder={columnOrder}
-                datasetId={processId ?? ''}
-                columnVisibility={columnVisibility}
-                setColumnOrder={handleColumnOrderDisplayOption}
-                setColumnVisibility={handleColumnVisibilityDisplayOption}
-              />
-            )}
-          </div>
+      <div
+        data-testid='activity-by-status-table-header'
+        className='z-1000 flex h-fit w-full items-center justify-between pr-4'
+      >
+        <div className='flex items-center py-3'>
+          <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
         </div>
-      </CommonWrapper>
+        <div className='relative items-center gap-2.5'>
+          {table && (
+            <DisplayOptions
+              tableRef={null as any}
+              isTanStackTable
+              isGroupByDisabled
+              table={table}
+              columnOrder={columnOrder}
+              datasetId={processId ?? ''}
+              columnVisibility={columnVisibility}
+              setColumnOrder={handleColumnOrderDisplayOption}
+              setColumnVisibility={handleColumnVisibilityDisplayOption}
+            />
+          )}
+        </div>
+      </div>
 
       <CommonWrapper
         isError={lazyloadActivityRunsError}

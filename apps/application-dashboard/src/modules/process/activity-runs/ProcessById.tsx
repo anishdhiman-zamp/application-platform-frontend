@@ -178,8 +178,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center':
-          isActivityRunsSummaryLoading || activityRunsSummaryData?.status_summary?.length === 0,
+        'flex flex-col items-center justify-center': isActivityRunsSummaryLoading || isFilterConfigLoading,
       })}
       isError={isActivityRunsSummaryError || isFilterConfigError}
       refetchFunction={refetchConditionalSummaryOrFilterConfigApi}
