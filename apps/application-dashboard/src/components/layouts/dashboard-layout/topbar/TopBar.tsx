@@ -17,6 +17,7 @@ import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -85,9 +86,9 @@ const Topbar = () => {
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
-      if (isKnowledgeBaseEnabled)
-        return (
-          <div className='flex items-center gap-3'>
+      return (
+        <div className='flex items-center gap-3'>
+          {isKnowledgeBaseEnabled && (
             <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
               <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
                 <div className='flex gap-1'>
@@ -96,9 +97,11 @@ const Topbar = () => {
                 </div>
               </Button>
             </Link>
-            <ShareButton />
-          </div>
-        );
+          )}
+          <FeedbackStatusButton processId={processId} />
+          <ShareButton />
+        </div>
+      );
     }
 
     return <ShareButton />;

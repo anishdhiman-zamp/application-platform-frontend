@@ -5,6 +5,7 @@ import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizableP
 import { useParams } from 'next/navigation';
 import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
+import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
 import Summary from '@/modules/process/activity-summary/SummarySection';
@@ -20,6 +21,7 @@ import {
   type EmitHITLActionPayload,
   type HandleShowArtifactsProps,
 } from '@/modules/process/process.types';
+import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -31,6 +33,7 @@ const Activity = () => {
   const activityId = params?.activityId as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
+  const dispatch = useAppDispatch();
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -146,6 +149,18 @@ const Activity = () => {
       toast.dismiss('redirecting');
     }
   }, [isLoadingArtifact]);
+
+  useEffect(() => {
+    dispatch(closeSidebar());
+
+    setTimeout(() => {
+      dispatch(closeSidebar());
+    }, 300);
+
+    return () => {
+      dispatch(openSidebar());
+    };
+  }, [dispatch]);
 
   return (
     <ResizablePanelGroup direction='horizontal' className='h-full w-full'>

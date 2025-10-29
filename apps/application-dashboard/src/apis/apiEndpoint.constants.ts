@@ -23,6 +23,12 @@ export const API_ENDPOINTS = {
   TEAMS_BY_ORGANIZATION_ID_PATCH: `organizations/{{organizationId}}/teams/{{teamId}}`,
   TEAMS_BY_ORGANIZATION_ID_DELETE: `organizations/{{organizationId}}/teams/{{teamId}}`,
 
+  // feedback
+  FEEDBACKS_GET: `feedbacks`,
+  FEEDBACKS_ARCHIVE_POST: `feedbacks/archive`,
+  FEEDBACKS_UN_ARCHIVE_POST: `feedbacks/unarchive`,
+  FEEDBACKS_APPLY_POST: `feedbacks/apply`,
+
   TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
   TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,
 
