@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Load environment variables from .env.local if it exists
+if [ -f ".env.local" ]; then
+    echo "Loading environment variables from .env.local..."
+    set -a  # automatically export all variables
+    source .env.local
+    set +a  # stop automatically exporting
+fi
+
 # Kill any existing Chrome instances using port 9222
 echo "Cleaning up any existing Chrome instances..."
 lsof -ti:9222 | xargs kill -9 2>/dev/null

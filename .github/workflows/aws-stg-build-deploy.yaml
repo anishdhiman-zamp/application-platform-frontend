@@ -110,6 +110,7 @@ jobs:
       ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+      SECRET_NAME: zamp-stg-us-app-dashboard-frontend-secrets
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
       AWS_SECRET_NAME: ${{ needs.prepare-env.outputs.AWS_SECRET_NAME }}
     outputs:
@@ -175,13 +176,32 @@ jobs:
           # Install all dependencies (will use cache if available)
           npm ci
 
+      - name: Fetch secrets from AWS Secrets Manager
+        run: |
+          echo "Fetching secrets from AWS Secrets Manager..."
+          echo "Secret Name: ${{ env.SECRET_NAME }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+          
+          # Fetch the secret and parse it
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id zamp-stg-us-app-dashboard-frontend-secrets \
+            --region us-east-1 \
+            --query SecretString \
+            --output text)
+          
+          # Export secrets as environment variables
+          echo "$SECRET_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' >> $GITHUB_ENV
+          
+          echo "✅ Secrets loaded successfully"
+
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
+          # NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
           TIMESTAMP: "${TIMESTAMP}"
-          NEXT_PUBLIC_ENVIRONMENT: "staging"
-          NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
-          NEXT_PUBLIC_DEFAULT_REGION: "stg"
+          # NEXT_PUBLIC_ENVIRONMENT: "staging"
+          # NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
+          # NEXT_PUBLIC_DEFAULT_REGION: "stg"
+          # SELENIUM_GRID_AUTH_TOKEN: ""
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application for tag: $NEW_TAG"
@@ -230,14 +250,15 @@ jobs:
           
           # Build Docker image using the Dockerfile  
           # Application is already built, so Docker will just package it
+          # Build args come from AWS Secrets Manager environment variables
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
-            --build-arg NEXT_PUBLIC_ASSET_PREFIX=https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend \
-            --build-arg TIMESTAMP="${TIMESTAMP}" \
-            --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
-            --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-stg-aws-us.zamp.ai \
-            --build-arg NEXT_PUBLIC_DEFAULT_REGION=stg \
+            --build-arg NEXT_PUBLIC_ASSET_PREFIX="$NEXT_PUBLIC_ASSET_PREFIX" \
+            --build-arg TIMESTAMP="$TIMESTAMP" \
+            --build-arg NEXT_PUBLIC_ENVIRONMENT="$NEXT_PUBLIC_ENVIRONMENT" \
+            --build-arg NEXT_PUBLIC_BASE_API_URL="$NEXT_PUBLIC_BASE_API_URL" \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION="$NEXT_PUBLIC_DEFAULT_REGION" \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT

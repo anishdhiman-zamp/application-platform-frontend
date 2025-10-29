@@ -32,9 +32,9 @@ default:
       enabled: false
   externalSecrets:
     injection:
-      enabled: false
+      enabled: true
     volumeMount:
-      enabled: false
+      enabled: true
       secrets:
       - data:  
           - fileName: ".env"

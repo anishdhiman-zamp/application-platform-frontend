@@ -32,17 +32,17 @@ default:
       enabled: false
   externalSecrets:
     injection:
-      enabled: false
+      enabled: true
     volumeMount:
       enabled: false
-      # secrets:
-      # - data:  
-      #     - fileName: ".env"
-      #       mountPath: "/home/node/app/.env"
-      #       secretKey: zamp-dev-us-app-dashboard-frontend-secrets
-      #   refreshInterval: 1h
-      #   secretStoreName: aws-secrets-manager
-      #   secretName: env
+      secrets:
+      - data:  
+          - fileName: ".env"
+            mountPath: "/home/node/app/.env"
+            secretKey: zamp-dev-us-app-dashboard-frontend-secrets
+        refreshInterval: 1h
+        secretStoreName: aws-secrets-manager
+        secretName: env
 deployment:
   - name: "svc"
     rollingUpdate:

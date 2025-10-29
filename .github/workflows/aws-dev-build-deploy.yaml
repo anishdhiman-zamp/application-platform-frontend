@@ -78,6 +78,7 @@ jobs:
       ENVIRONMENT: ${{ needs.prepare-env.outputs.ENVIRONMENT }}
       TIMESTAMP: ${{ needs.prepare-env.outputs.TIMESTAMP }}
       ASSETS_S3_BUCKET: ${{ needs.prepare-env.outputs.ASSETS_S3_BUCKET }}
+      SECRET_NAME: zamp-dev-us-app-dashboard-frontend-secrets
     outputs:
       IMAGE_TAG: ${{ steps.build.outputs.IMAGE_TAG }}
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
@@ -135,12 +136,34 @@ jobs:
           # Install all dependencies (will use cache if available)
           npm ci
 
+      - name: Fetch secrets from AWS Secrets Manager
+        run: |
+          echo "Fetching secrets from AWS Secrets Manager..."
+          echo "Secret Name: ${{ env.SECRET_NAME }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+          
+          # Fetch the secret and parse it
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id ${{ env.SECRET_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query SecretString \
+            --output text)
+          
+          # Export secrets as environment variables
+          echo "$SECRET_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' >> $GITHUB_ENV
+          
+          echo "✅ Secrets loaded successfully"
+
       - name: Build application
         env:
-          NEXT_PUBLIC_ASSET_PREFIX: "https://d2zmqfd18ltqnx.cloudfront.net/application-platform-frontend"
+          # Variables below come from AWS Secrets Manager (fetched in previous step)
+          # - NEXT_PUBLIC_ASSET_PREFIX
+          # - NEXT_PUBLIC_ENVIRONMENT
+          # - NEXT_PUBLIC_BASE_API_URL
+          # - SELENIUM_GRID_AUTH_TOKEN
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "development"
-          NEXT_PUBLIC_BASE_API_URL: "https://api-dev-aws-us.zamp.ai"
+          # NEXT_PUBLIC_BASE_API_URL: "https://api-dev-aws-us.zamp.ai"
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application with environment variables:"
