@@ -4,6 +4,8 @@ import { useGetPagesQuery } from 'apis/pages';
 import { persistLastVisitedPage, persistLastVisitedSheet } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import { useParams, useRouter } from 'next/navigation';
+import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
 
@@ -40,13 +42,19 @@ const Page = () => {
 
   useEffect(() => {
     if (isFetching) return;
-
     //on invalid page, redirect to valid page
     checkIsPageValid();
   }, [pageId, pages, isFetching]);
 
   return (
-    <CommonWrapper isError={isError} refetchFunction={refetch}>
+    <CommonWrapper
+      isLoading={isFetching}
+      loader={<ZampLogoWebpLoader />}
+      skeletonType={SkeletonTypes.CUSTOM}
+      isError={isError}
+      refetchFunction={refetch}
+      className='h-full'
+    >
       <div className='relative h-full w-full rounded-tl-md'>
         <Sheets key={`${pageId}-${currentSheetId}`} pageId={pageId as string} sheetId={currentSheetId} />
       </div>

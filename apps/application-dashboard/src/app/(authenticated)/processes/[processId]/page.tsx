@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useGetProcessesQuery } from '@/apis/pages';
+import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import ProcessById from '@/modules/process/activity-runs/ProcessById';
 
@@ -30,7 +31,7 @@ const Process = () => {
   }, [processes]);
 
   if (!processes?.length) {
-    return null;
+    return <ZampLogoWebpLoader />;
   }
 
   return (

@@ -14,7 +14,7 @@ export type LayoutConfigState = {
 const initialState: LayoutConfigState = {
   modalStack: [],
   fullPageLayoutStack: [],
-  isSidebarOpen: false,
+  isSidebarOpen: true,
 };
 
 export const layoutConfigsSlice = createSlice({

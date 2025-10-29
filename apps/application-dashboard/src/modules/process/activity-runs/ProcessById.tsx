@@ -4,7 +4,7 @@ import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { cn, formatNumber, snakeCaseToSentenceCase } from 'utils/common';
+import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -41,8 +41,8 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
   const {
     data: activityRunsSummaryData,
-    isError,
-    isLoading,
+    isError: isActivityRunsSummaryError,
+    isLoading: isActivityRunsSummaryLoading,
     refetch: refetchActivityRunsSummary,
   } = useGetActivityRunsSummaryQuery(
     {
@@ -62,7 +62,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
     },
   );
 
-  const { data: filterConfigData, isLoading: isFilterConfigLoading } = useGetFilterConfigByProcessIdQuery(
+  const {
+    data: filterConfigData,
+    isLoading: isFilterConfigLoading,
+    isError: isFilterConfigError,
+    refetch: refetchFilterConfig,
+  } = useGetFilterConfigByProcessIdQuery(
     {
       processId: processId as string,
     },
@@ -104,6 +109,14 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
     return visibility;
   }, [initialColumnPreferences]);
+
+  const refetchConditionalSummaryOrFilterConfigApi = () => {
+    if (isActivityRunsSummaryError) {
+      refetchActivityRunsSummary();
+    } else if (isFilterConfigError) {
+      refetchFilterConfig();
+    }
+  };
 
   useEffect(() => {
     if (activityRunsSummaryData) {
@@ -165,11 +178,11 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isLoading || activityRunsSummaryData?.status_summary?.length === 0,
+        'flex flex-col items-center justify-center': isActivityRunsSummaryLoading || isFilterConfigLoading,
       })}
-      isError={isError}
-      refetchFunction={refetchActivityRunsSummary}
-      isLoading={isLoading}
+      isError={isActivityRunsSummaryError || isFilterConfigError}
+      refetchFunction={refetchConditionalSummaryOrFilterConfigApi}
+      isLoading={isActivityRunsSummaryLoading || isFilterConfigLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={activityRunsSummaryData?.status_summary?.length === 0}
       noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}
@@ -211,7 +224,7 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                   {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
                 </span>
                 <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
-                  {formatNumber(item?.count, 0, true, false, true)}
+                  {getCommaSeparatedNumber(item?.count)}
                 </span>
               </button>
             ))}

@@ -144,9 +144,9 @@ export const SPRINKLR = IMAGE_PREFIX + '/icons/agents/artifacts/sprinklr.svg';
 export const REDIRECT = IMAGE_PREFIX + '/icons/agents/artifacts/redirect.svg';
 export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 
-export const NEEDS_ATTENTION_EMPTY_STATE = '/images/empty-state/needs-attention.png';
-export const DONE_EMPTY_STATE = '/images/empty-state/done.png';
-export const IN_PROGRESS_EMPTY_STATE = '/images/empty-state/in-progress.png';
+export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.webp';
+export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.webp';
+export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.webp';
 
 export const SHEET_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/sheet.png';
 
@@ -157,6 +157,13 @@ export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 
 // knowledge based
 export const KNOWLEDGE_BASED_ICON = IMAGE_PREFIX + '/images/kb-background.svg';
+
+export const COINS_STACKED_04 = IMAGE_PREFIX + '/icons/coins-stacked-04.svg';
+export const USERS_02 = IMAGE_PREFIX + '/icons/users-02.svg';
+export const FLEX_ALIGN_RIGHT = IMAGE_PREFIX + '/icons/flex-align-right.svg';
+
+//GIF
+export const ZAMP_LOGO_LOADER_WEBP = IMAGE_PREFIX + '/loaders/zamp-logo-loader.webp';
 
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;

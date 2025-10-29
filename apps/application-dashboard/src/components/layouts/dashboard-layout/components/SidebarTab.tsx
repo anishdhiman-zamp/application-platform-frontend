@@ -1,19 +1,15 @@
-import React, { FC, memo, ReactNode } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { FC, memo } from 'react';
+import Image from 'next/image';
 import { cn } from 'utils/common';
 
 type SidebarTabProps = {
-  isSelected?: boolean;
-  iconId?: string;
-  iconColor?: string;
   name: string;
-  isNew?: boolean;
-  shortcutLabel?: string[];
+  iconUrl: string;
+  isSelected?: boolean;
   className?: string;
-  icon?: ReactNode;
 };
 
-const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconId, iconColor, name, className = '', icon = null }) => {
+const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconUrl, name, className = '' }) => {
   return (
     <div
       className={cn(
@@ -23,8 +19,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconId, iconColor, name, 
       )}
       role='presentation'
     >
-      {icon}
-      {iconId && <SvgSpriteLoader id={iconId} size={14} className='min-w-4' color={iconColor} />}
+      <Image src={iconUrl} alt={name} priority height={14} width={14} className='min-w-4' />
       <div className='f-13-500 truncate whitespace-nowrap select-none'>{name}</div>
     </div>
   );

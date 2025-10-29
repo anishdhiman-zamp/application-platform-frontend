@@ -157,9 +157,6 @@ jobs:
         with:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
-
-      - name: Copy AWS Secret
-        run: aws secretsmanager get-secret-value --secret-id "${{ env.AWS_SECRET_NAME }}" --query SecretString --output text > .env
   
       - uses: actions/cache@v4
         with:
@@ -184,7 +181,7 @@ jobs:
           TIMESTAMP: "${TIMESTAMP}"
           NEXT_PUBLIC_ENVIRONMENT: "staging"
           NEXT_PUBLIC_BASE_API_URL: "https://api-stg-aws-us.zamp.ai"
-          NEXT_PUBLIC_DEFAULT_REGION: "us"
+          NEXT_PUBLIC_DEFAULT_REGION: "stg"
           NODE_OPTIONS: "--max-old-space-size=8192"
         run: |
           echo "Building application for tag: $NEW_TAG"
@@ -240,7 +237,7 @@ jobs:
             --build-arg TIMESTAMP="${TIMESTAMP}" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=staging \
             --build-arg NEXT_PUBLIC_BASE_API_URL=https://api-stg-aws-us.zamp.ai \
-            --build-arg NEXT_PUBLIC_DEFAULT_REGION=us \
+            --build-arg NEXT_PUBLIC_DEFAULT_REGION=stg \
             --push .
           
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT

@@ -63,7 +63,10 @@ jest.mock('components/DynamicLottiePlayer', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => {
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    return <img {...props} alt={props.alt || ''} />;
+  },
 }));
 
 describe('HandleInvitations', () => {
@@ -109,8 +112,9 @@ describe('HandleInvitations', () => {
 
     delete (window as any).location;
     (window as any).location = {
+      pathname: '/invitations',
       search: '?region=us',
-      href: 'http://localhost:3000?region=us',
+      href: 'http://localhost:3000/invitations?region=us',
       origin: 'http://localhost:3000',
     };
   });

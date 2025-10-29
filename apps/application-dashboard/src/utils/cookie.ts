@@ -1,8 +1,15 @@
 export const PREV_ROUTE_COOKIE = 'zamp_prev_route';
 export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
-export const USER_SESSION_COOKIE = 'zamp_user_session';
+export const USER_SESSION_COOKIE = 'zamp_user_session_v2';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;
 export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+export const SESSION_COOKIE_NAMES = {
+  PRODUCTION: 'ory_kratos_session_us',
+  US_PRODUCTION: 'ory_kratos_session_us',
+  ME_PRODUCTION: 'ory_kratos_session_me',
+  DEVELOPMENT: 'ory_kratos_session',
+};
 
 export const setCookie = (name: string, value: string, maxAge = COOKIE_MAX_AGE) => {
   if (typeof document !== 'undefined') {

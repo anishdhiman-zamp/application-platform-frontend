@@ -6,8 +6,10 @@ import {
   ORY_KRATOS_SESSION_COOKIE,
   PREV_ROUTE_COOKIE,
   SESSION_CACHE_MAX_AGE,
+  SESSION_COOKIE_NAMES,
   USER_SESSION_COOKIE,
 } from 'utils/cookie';
+import { DOMAINS } from '@/constants/domains';
 import {
   checkOrgMembership,
   clearServerSideCookie,
@@ -25,6 +27,14 @@ const handleUnauthenticatedRoutes = (request: NextRequest) => {
   }
 
   if (pathname === ROUTES_PATH.LOGIN) {
+    if (request.headers.get('host') === DOMAINS.PRODUCTION) {
+      const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
+
+      if (oryKratosSessionMe) {
+        return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
+      }
+    }
+
     return NextResponse.next();
   }
 
@@ -54,6 +64,16 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
   if (pathname !== ROUTES_PATH.MEMBERSHIP_PENDING && pathname !== ROUTES_PATH.LOGIN) {
     const { session, cached } = await getUserSession(request);
 
+    const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
+
+    if (prevRoute) {
+      const response = NextResponse.redirect(new URL(prevRoute, request.url));
+
+      clearServerSideCookie(response, PREV_ROUTE_COOKIE);
+
+      return response;
+    }
+
     if (checkOrgMembership(session, pathname)) {
       return NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
     }
@@ -61,7 +81,14 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     if (session && !cached) {
       const response = NextResponse.next();
 
-      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(session), SESSION_CACHE_MAX_AGE);
+      const sessionCache = {
+        user_id: session?.user_id,
+        user_email: session?.user_email,
+        org_count: session?.orgs?.length || 0,
+        cached_at: Date.now(),
+      };
+
+      setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
 
       return response;
     }
@@ -71,6 +98,19 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     case ROUTES_PATH.LOGIN: {
       const { session } = await getUserSession(request, false);
       const response = NextResponse.next();
+
+      if (request.headers.get('host') === DOMAINS.PRODUCTION) {
+        const oryKratosSessionUs = getServerSideCookie(request, SESSION_COOKIE_NAMES.US_PRODUCTION);
+        const oryKratosSessionMe = getServerSideCookie(request, SESSION_COOKIE_NAMES.ME_PRODUCTION);
+
+        if (oryKratosSessionUs) {
+          return NextResponse.redirect(new URL(`https://${DOMAINS.US_PRODUCTION}/login`, request.url));
+        }
+
+        if (oryKratosSessionMe) {
+          return NextResponse.redirect(new URL(`https://${DOMAINS.ME_PRODUCTION}/login`, request.url));
+        }
+      }
 
       if (session) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
@@ -90,16 +130,6 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       break;
     }
     case ROUTES_PATH.HOME: {
-      const prevRoute = getServerSideCookie(request, PREV_ROUTE_COOKIE);
-
-      if (prevRoute) {
-        const response = NextResponse.redirect(new URL(prevRoute, request.url));
-
-        clearServerSideCookie(response, PREV_ROUTE_COOKIE);
-
-        return response;
-      }
-
       return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
     }
     default:
