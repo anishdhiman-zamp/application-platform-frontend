@@ -40,8 +40,8 @@ default:
           - fileName: ".env"
             mountPath: "/home/node/app/.env"
             secretKey: zamp-stg-us-application-platform-frontend-env
-        refreshInterval: 1h
-        secretStoreName: aws-secrets-manager
+        refreshInterval: 1m
+        secretStoreName: zamp-stg-us-clustersecretstore
         secretName: env
 deployment:
   - name: "svc"
@@ -83,7 +83,7 @@ deployment:
               - sleep 120
     autoscaling:
       enabled: true
-      minReplicas: 1
+      minReplicas: 2
       maxReplicas: 3
       targetCPUUtilizationPercentage: 80
       targetMemoryUtilizationPercentage: 80 
