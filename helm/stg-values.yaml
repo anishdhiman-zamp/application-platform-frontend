@@ -39,7 +39,7 @@ default:
       - data:  
           - fileName: ".env"
             mountPath: "/home/node/app/.env"
-            secretKey: zamp-stg-us-application-platform-frontend-env
+            secretKey: zamp-stg-us-app-dashboard-frontend-secrets
         refreshInterval: 1m
         secretStoreName: zamp-stg-us-clustersecretstore
         secretName: env
