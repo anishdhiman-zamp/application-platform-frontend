@@ -368,7 +368,7 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "✅ Staging deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
-          echo "🎯 Environment: https://app-stg-aws.zamp.ai" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 Environment: https://app-stg.zamp.ai" >> $GITHUB_STEP_SUMMARY
           echo "🏷️ Tag: $NEW_TAG" >> $GITHUB_STEP_SUMMARY
 
   run-e2e-tests:
@@ -385,7 +385,7 @@ jobs:
       FAILED_TESTS: ${{ steps.playwright-tests.outputs.FAILED_TESTS }}
       SKIPPED_TESTS: ${{ steps.playwright-tests.outputs.SKIPPED_TESTS }}
     env:
-      PLAYWRIGHT_TEST_BASE_URL: "https://app-stg-aws.zamp.ai"
+      PLAYWRIGHT_TEST_BASE_URL: "https://app-stg.zamp.ai"
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
       NODE_ENV: test
     steps:

@@ -122,7 +122,7 @@ async function globalSetup(config: FullConfig) {
     const currentURL = page.url();
 
     console.log(`🌐 Currently at: ${currentURL}`);
-    if (currentURL.includes(isSeleniumLocalBrowser ? 'app-dev-aws.zamp.ai' : 'app-stg-aws.zamp.ai')) {
+    if (currentURL.includes(isSeleniumLocalBrowser ? 'app-dev.zamp.ai' : 'app-stg.zamp.ai')) {
       console.log(`Redirected to ${baseUrl}`);
       break;
     }
