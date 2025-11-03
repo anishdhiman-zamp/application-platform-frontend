@@ -1,10 +1,12 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { Check, Loader } from 'lucide-react';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetFeedbacksQuery } from '@/apis/feedback';
+import { useEventBus } from '@/app/_providers/sse-provider';
 import { MESSAGE_ICON, QUEUED_ICON } from '@/constants/icons';
 import { FEEDBACK_STATUS } from '@/modules/feedback/feedback.constants';
 
@@ -18,10 +20,13 @@ const FeedbackStatusButton: FC<FeedbackStatusButtonProps> = ({ processId = '' })
   const searchParams = useSearchParams();
   const isFeedbackStatus = searchParams?.get('feedback-status') === 'true';
 
-  const { data: feedbacksList, isLoading: isLoadingFeedbacks } = useGetFeedbacksQuery(
-    { process_id: processId },
-    { skip: !processId },
-  );
+  const { sseEventBus } = useEventBus();
+
+  const {
+    data: feedbacksList,
+    refetch: refetchFeedbacks,
+    isLoading: isLoadingFeedbacks,
+  } = useGetFeedbacksQuery({ process_id: processId }, { skip: !processId });
 
   const {
     successFeedbackItems,
@@ -72,6 +77,14 @@ const FeedbackStatusButton: FC<FeedbackStatusButtonProps> = ({ processId = '' })
       }, 1000);
     }
   }, [isFeedbackStatus]);
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EventType.FEEDBACK, (data: BaseEventPayload) => {
+      if (data?.source_id === processId) refetchFeedbacks();
+    });
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, refetchFeedbacks, processId]);
 
   if (isLoadingFeedbacks || !feedbacksList?.feedbacks?.length) {
     return null;

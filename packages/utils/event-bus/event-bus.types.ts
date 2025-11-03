@@ -47,4 +47,5 @@ export const enum EventType {
   CONVERSATION = 'conversation',
   WEBHOOK = 'webhook',
   COMPONENT = 'component',
+  FEEDBACK = 'feedback',
 }
