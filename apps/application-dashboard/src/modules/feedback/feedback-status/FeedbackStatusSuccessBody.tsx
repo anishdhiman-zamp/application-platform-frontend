@@ -1,24 +1,23 @@
 import { type FC } from 'react';
 import { Check } from 'lucide-react';
-import { FeedbackItemType } from '@/types/api/feedbacks.types';
+import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
+import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
 
-interface FeedbackStatusSuccessBodyProps {
-  items: FeedbackItemType[];
-}
+const FeedbackStatusSuccessBody: FC = () => {
+  const { state } = useFeedbackContextStore();
+  const { successFeedbackItems: items } = state;
 
-const FeedbackStatusSuccessBody: FC<FeedbackStatusSuccessBodyProps> = ({ items }) => {
   return (
     <div>
-      <div className='f-14-400 text-GRAY_700'>
+      <div className='f-14-400 text-GRAY_700 max-h-[400px] overflow-y-auto'>
         <div className='flex flex-col gap-3 p-4'>
           {items?.map((item) => (
-            <div key={item?.id} className='flex items-start gap-2 select-none'>
-              <Check size={12} />
-              <div className='min-w-0 flex-1'>
-                <div className='f-12-450 text-gray-1000 truncate'>{item?.title}</div>
-                <div className='f-11-450 mt-1 truncate text-gray-700'>{item?.initiated_by}</div>
-              </div>
-            </div>
+            <FeedbackListCard
+              key={item?.id}
+              icon={<Check size={12} className='text-ORANGE_1000 mt-0.5' />}
+              feedback={item}
+              initiatedBy={item?.initiated_by}
+            />
           ))}
         </div>
         <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>

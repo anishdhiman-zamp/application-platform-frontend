@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { FLEX_ALIGN_RIGHT, KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
+import { FLEX_ALIGN_RIGHT, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
+import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
@@ -15,9 +16,11 @@ import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
+import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
@@ -88,14 +91,13 @@ const Topbar = () => {
       return (
         <div className='flex items-center gap-3'>
           {isKnowledgeBaseEnabled && (
-            <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-              <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
-                <div className='flex gap-1'>
-                  <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
-                  Knowledge Base
-                </div>
-              </Button>
-            </Link>
+            <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+              <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+                <Button id='knowledge-base-btn' size='small' variant='secondary'>
+                  <BookOpen size={12} className='' />
+                </Button>
+              </Link>
+            </TooltipV2>
           )}
           {/* <FeedbackStatusButton processId={processId} /> */}
           <ShareButton />

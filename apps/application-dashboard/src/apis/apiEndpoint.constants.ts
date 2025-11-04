@@ -26,8 +26,10 @@ export const API_ENDPOINTS = {
   // feedback
   FEEDBACKS_GET: `feedbacks`,
   FEEDBACKS_ARCHIVE_POST: `feedbacks/archive`,
+  FEEDBACKS_DELETE_POST: `feedbacks/delete`,
   FEEDBACKS_UN_ARCHIVE_POST: `feedbacks/unarchive`,
   FEEDBACKS_APPLY_POST: `feedbacks/apply`,
+  FEEDBACKS_STOP_PROCESSING_POST: `feedbacks/stop-processing-for-process`,
 
   TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
   TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,

@@ -56,3 +56,7 @@ export interface ArchiveFeedbackPayloadType {
   process_id: string;
   feedback_ids: string[];
 }
+
+export interface StopProcessingFeedbackPayloadType {
+  process_id: string;
+}

@@ -2,7 +2,11 @@ import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { APITags } from '@/constants/api.constants';
 import { baseApi } from '@/services/baseApi';
-import { ArchiveFeedbackPayloadType, FeedbacksResponseType } from '@/types/api/feedbacks.types';
+import {
+  ArchiveFeedbackPayloadType,
+  FeedbacksResponseType,
+  StopProcessingFeedbackPayloadType,
+} from '@/types/api/feedbacks.types';
 
 const Feedbacks = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,17 +14,9 @@ const Feedbacks = baseApi.injectEndpoints({
       query: ({ process_id }) => ({ url: API_ENDPOINTS.FEEDBACKS_GET, params: { process_id } }),
       providesTags: [APITags.GET_FEEDBACKS],
     }),
-    archiveFeedback: builder.mutation<void, ArchiveFeedbackPayloadType>({
+    deleteFeedback: builder.mutation<void, ArchiveFeedbackPayloadType>({
       query: (payload) => ({
-        url: API_ENDPOINTS.FEEDBACKS_ARCHIVE_POST,
-        method: REQUEST_TYPES.POST,
-        body: payload,
-      }),
-      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
-    }),
-    unArchiveFeedback: builder.mutation<void, ArchiveFeedbackPayloadType>({
-      query: (payload) => ({
-        url: API_ENDPOINTS.FEEDBACKS_UN_ARCHIVE_POST,
+        url: API_ENDPOINTS.FEEDBACKS_DELETE_POST,
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
@@ -32,13 +28,22 @@ const Feedbacks = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
+    }),
+    stopProcessingFeedback: builder.mutation<void, StopProcessingFeedbackPayloadType>({
+      query: (payload) => ({
+        url: API_ENDPOINTS.FEEDBACKS_STOP_PROCESSING_POST,
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
     }),
   }),
 });
 
 export const {
   useGetFeedbacksQuery,
-  useArchiveFeedbackMutation,
-  useUnArchiveFeedbackMutation,
+  useDeleteFeedbackMutation,
   useApplyFeedbackMutation,
+  useStopProcessingFeedbackMutation,
 } = Feedbacks;

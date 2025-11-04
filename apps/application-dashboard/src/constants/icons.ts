@@ -167,6 +167,7 @@ export const PLAY_ICON = IMAGE_PREFIX + '/icons/feedback/play.svg';
 export const COINS_STACKED_04 = IMAGE_PREFIX + '/icons/coins-stacked-04.svg';
 export const USERS_02 = IMAGE_PREFIX + '/icons/users-02.svg';
 export const FLEX_ALIGN_RIGHT = IMAGE_PREFIX + '/icons/flex-align-right.svg';
+export const FEEDBACK_OPEN_ICON = IMAGE_PREFIX + '/icons/feedback/feedback-open.svg';
 
 //GIF
 export const ZAMP_LOGO_LOADER_WEBP = IMAGE_PREFIX + '/loaders/zamp-logo-loader.webp';
