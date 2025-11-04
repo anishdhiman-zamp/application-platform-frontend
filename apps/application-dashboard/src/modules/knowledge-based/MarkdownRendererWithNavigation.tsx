@@ -2,11 +2,14 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { captureException } from '@sentry/browser';
+import { toast } from '@zamp-platform/ui';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
+import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
@@ -41,11 +44,28 @@ const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: Markdown
 
   const getMarkdownContent = useCallback(async () => {
     if (!data || !data?.content_signed_url) return;
-    const response = await fetch(data?.content_signed_url);
-    const content = await response.text();
 
-    setMarkdownContent(content);
-    setHeaders(extractHeadersFromMarkdown(content));
+    try {
+      const response = await fetch(data?.content_signed_url);
+
+      if (!response.ok) {
+        setMarkdownContent('');
+        setHeaders([]);
+        toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+
+        return;
+      }
+
+      const content = await response.text();
+
+      setMarkdownContent(content);
+      setHeaders(extractHeadersFromMarkdown(content));
+    } catch (error) {
+      setMarkdownContent('');
+      setHeaders([]);
+      captureException(error);
+      toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+    }
   }, [data]);
 
   useEffect(() => {
