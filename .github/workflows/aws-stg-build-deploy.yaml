@@ -375,6 +375,9 @@ jobs:
     name: Run E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
     needs:
       - create-tag
       - prepare-env
@@ -388,6 +391,9 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: "https://app-stg.zamp.ai"
       NEW_TAG: ${{ needs.create-tag.outputs.NEW_TAG }}
       NODE_ENV: test
+      AWS_REGION: ${{ needs.prepare-env.outputs.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ needs.prepare-env.outputs.AWS_ACCOUNT_ID }}
+      SECRET_NAME: zamp-stg-us-app-dashboard-frontend-secrets
     steps:
       - name: Test Setup Info
         run: |
@@ -398,6 +404,31 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: "Set up AWS credentials using OIDC"
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      - name: Fetch secrets from AWS Secrets Manager
+        run: |
+          echo "Fetching secrets from AWS Secrets Manager for E2E tests..."
+          echo "Secret Name: ${{ env.SECRET_NAME }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+
+          # Fetch the secret and parse it
+          SECRET_JSON=$(aws secretsmanager get-secret-value \
+            --secret-id ${{ env.SECRET_NAME }} \
+            --region ${{ env.AWS_REGION }} \
+            --query SecretString \
+            --output text)
+
+          # Export secrets as environment variables
+          echo "$SECRET_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' >> $GITHUB_ENV
+
+          echo "✅ Secrets loaded successfully for E2E tests"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
