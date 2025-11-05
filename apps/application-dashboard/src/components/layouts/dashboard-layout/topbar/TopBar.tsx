@@ -19,6 +19,7 @@ import { cn } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
@@ -53,6 +54,7 @@ const Topbar = () => {
   const dispatch = useAppDispatch();
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
+  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
 
   useEffect(() => {
@@ -67,6 +69,18 @@ const Topbar = () => {
         })
         .catch(() => {
           setIsKnowledgeBaseEnabled(false);
+        });
+
+      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
+        .then((res: string[]) => {
+          if (res?.includes(processId ?? '')) {
+            setIsFeedbackEnabled(true);
+          } else {
+            setIsFeedbackEnabled(false);
+          }
+        })
+        .catch(() => {
+          setIsFeedbackEnabled(false);
         });
     }
   }, [evaluate, ldClient, processId]);
@@ -99,7 +113,7 @@ const Topbar = () => {
               </Link>
             </TooltipV2>
           )}
-          {/* <FeedbackStatusButton processId={processId} /> */}
+          {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
           <ShareButton />
         </div>
       );

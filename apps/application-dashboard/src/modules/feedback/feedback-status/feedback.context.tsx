@@ -18,6 +18,7 @@ interface FeedbackContextState {
   successFeedbackItems: FeedbackItemType[];
   isLoading: boolean;
   processId: string;
+  hasFeedback: boolean;
 }
 
 type SetFeedbackItemsAction = {
@@ -75,6 +76,7 @@ const initialState: FeedbackContextState = {
   successFeedbackItems: [],
   isLoading: false,
   processId: '',
+  hasFeedback: false,
 };
 
 const context = createContext<{
@@ -106,6 +108,7 @@ export const FeedbackProvider: FC<FeedbackProviderProps> = ({ children, processI
         return {
           ...state,
           ...splitFeedbacks,
+          hasFeedback: !!action.payload.feedbacks?.length,
         };
       }
       case feedbackContextActions.SET_LOADING:
