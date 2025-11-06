@@ -127,7 +127,8 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       if (!checkOrgMembership(session, pathname)) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
-      break;
+
+      return NextResponse.next();
     }
     case ROUTES_PATH.HOME: {
       return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
