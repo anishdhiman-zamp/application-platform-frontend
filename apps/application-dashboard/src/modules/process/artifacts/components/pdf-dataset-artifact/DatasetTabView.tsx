@@ -101,7 +101,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       responses: [
         {
           action_id: ctaActionId ?? '',
-          values: [ctaValue ?? ''],
+          values: ctaValue ? [ctaValue] : [],
           cta_component_type: CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
         },
       ],
