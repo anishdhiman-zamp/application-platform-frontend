@@ -44,6 +44,7 @@ export const LoginForm = () => {
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
       setEmail(e.target.value);
+      setError(null);
     }
   };
 
@@ -141,7 +142,7 @@ export const LoginForm = () => {
       setHasError(false);
 
       if (response.status !== API_STATUS_CODES.OK) {
-        setError(respJson.error);
+        setError(respJson.error || respJson?.detail);
         removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
         setHasError(true);
         setLoading(false);
