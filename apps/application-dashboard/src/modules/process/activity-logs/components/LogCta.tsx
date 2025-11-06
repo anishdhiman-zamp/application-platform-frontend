@@ -52,7 +52,7 @@ const LogCta: FC<LogCtaProps> = ({
       responses: [
         {
           action_id: cta?.cta_action_id,
-          values: [cta?.cta_value],
+          values: cta?.cta_value ? [cta.cta_value] : [],
           cta_component_type: cta?.cta_component_type,
         },
       ],
