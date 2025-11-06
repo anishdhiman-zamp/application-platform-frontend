@@ -31,8 +31,8 @@ export const FEEDBACK_BADGE_CONFIG = [
   {
     key: 'open',
     icon: <Image src={FEEDBACK_OPEN_ICON} alt='feedback open' width={12} height={12} className='min-h-3 min-w-3' />,
-    bgClassName: 'bg-GRAY_200',
-    textClassName: '',
+    bgClassName: 'bg-blue-200',
+    textClassName: 'text-blue-900',
     stateKey: 'openFeedbackItems',
   },
   {
