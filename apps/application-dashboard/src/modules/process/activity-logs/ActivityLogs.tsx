@@ -1,5 +1,4 @@
 import { type FC } from 'react';
-import LogInput from 'modules/process/activity-logs/components/LogInput';
 import LogTopbar from 'modules/process/activity-logs/components/LogTopbar';
 import LogsSection from 'modules/process/activity-logs/LogsSection';
 import type { HandleShowArtifactsProps } from 'modules/process/process.types';
@@ -19,7 +18,6 @@ const ActivityLogs: FC<ActivityLogsProps> = ({ handleShowArtifacts, processId, a
       <LogTopbar />
       <LogsSection processId={processId} activityId={activityId} handleShowArtifacts={handleShowArtifacts} />
       {/* <ProcessConformationPopover /> */}
-      <LogInput processId={processId} activityId={activityId} />
     </div>
   );
 };

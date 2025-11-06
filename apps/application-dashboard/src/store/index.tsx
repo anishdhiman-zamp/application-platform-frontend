@@ -1,6 +1,7 @@
 import { Action, combineReducers, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { chatApi } from '@zamp-platform/chat';
+import feedbacksSliceReducer from 'store/slices/feedbacks';
 import layoutConfigsSliceReducer from 'store/slices/layout-configs';
 import sheetFiltersSliceReducer from 'store/slices/sheet-filters';
 import tableStateSliceReducer from 'store/slices/table-state';
@@ -14,6 +15,7 @@ const reducer = combineReducers({
   layoutConfig: layoutConfigsSliceReducer,
   sheetFilters: sheetFiltersSliceReducer,
   tableState: tableStateSliceReducer,
+  feedbacks: feedbacksSliceReducer,
 });
 
 export const store = configureStore({

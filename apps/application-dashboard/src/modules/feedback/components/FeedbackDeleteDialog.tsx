@@ -19,9 +19,16 @@ interface FeedbackDeleteDialogProps {
   onOpenChange: (open: boolean) => void;
   processId?: string;
   feedback: FeedbackItemType;
+  onDeleteSuccess?: () => void;
 }
 
-const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({ open, onOpenChange, processId = '', feedback }) => {
+const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
+  open,
+  onOpenChange,
+  processId = '',
+  feedback,
+  onDeleteSuccess,
+}) => {
   const [deleteFeedback, { isLoading: isDeleting }] = useDeleteFeedbackMutation();
   const { dispatch } = useFeedbackContextStore();
 
@@ -38,6 +45,7 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({ open, onOpenChang
           payload: { id: feedback.id, status: feedback.status },
         });
         onOpenChange(false);
+        onDeleteSuccess?.();
       })
       .catch(() => {
         onOpenChange(false);

@@ -19,6 +19,7 @@ import { cn } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import WorkWithPace from '@/modules/chatbot/WorkWithPace';
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
@@ -47,6 +48,7 @@ const ShareButton = () => {
 
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
@@ -127,7 +129,7 @@ const Topbar = () => {
   };
 
   return (
-    <div className='flex h-12 items-center justify-between'>
+    <div className='flex h-12 items-center'>
       <div
         className={cn(
           'text-GRAY_700 flex h-12 items-center justify-between py-4 pr-5 pl-4 transition-all',
@@ -155,9 +157,11 @@ const Topbar = () => {
           />
         </div>
       </div>
-
-      <BreadCrumb isSidebarOpen={isSidebarOpen} />
-      <div className='pr-8'>{renderRightSideActions}</div>
+      <div className='flex w-full items-center justify-between'>
+        <BreadCrumb isSidebarOpen={isSidebarOpen} />
+        <WorkWithPace />
+        <div className='pr-8'>{renderRightSideActions}</div>
+      </div>
     </div>
   );
 };

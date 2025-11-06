@@ -120,7 +120,7 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
             {chat?.messages?.map((message: ChatMessage, idx: number) => (
               <ChatCard
                 key={`${message?.message_content}-${idx}`}
-                message={message?.message_content?.message}
+                message={message?.message_content?.message ?? ''}
                 senderType={message?.sender_type}
               />
             ))}

@@ -68,6 +68,7 @@ export const COLORS = {
 
   BACKGROUND_GRAY_1: '#FBFBFB',
   BACKGROUND_GRAY_2: '#FAFAFA',
+  YELLOW_300: '#F5D7AA',
 };
 
 export const CHART_PALETTE_COLORS = [

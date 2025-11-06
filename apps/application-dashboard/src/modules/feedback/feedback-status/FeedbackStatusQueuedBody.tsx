@@ -58,18 +58,28 @@ const FeedbackStatusQueuedBody: FC = () => {
     return selectedItemIds.size > 0 ? items.filter((item) => selectedItemIds.has(item.id)) : items;
   }, [selectedItemIds, items]);
 
+  const handleCheck = (e: React.MouseEvent<HTMLButtonElement>, item: FeedbackItemType) => {
+    e.stopPropagation();
+    handleSelect(item);
+  };
+
   return (
     <div>
-      <div className='f-14-400 max-h-[400px] overflow-y-auto'>
+      <div className='f-14-400 text-gray-1000 max-h-[400px] overflow-y-auto'>
         <div className='flex flex-col gap-3 p-4'>
           {items?.map((item) => (
             <FeedbackListCard
               key={item?.id}
-              icon={<Checkbox checked={selectedItemIds.has(item?.id)} className='mt-1 flex-shrink-0' />}
+              icon={
+                <Checkbox
+                  checked={selectedItemIds.has(item?.id)}
+                  className='mt-1 flex-shrink-0'
+                  onClick={(e) => handleCheck(e, item)}
+                />
+              }
               feedback={item}
               initiatedBy={item?.initiated_by}
               processId={processId}
-              onCheck={() => handleSelect(item)}
               allowDelete
             />
           ))}
@@ -80,7 +90,7 @@ const FeedbackStatusQueuedBody: FC = () => {
               ? `${selectedItemIds.size} Feedback selected`
               : 'Select feedback to test only some of them'}
           </div>
-          <Button size='small' className='w-24' onClick={handleApply} isLoading={isApplying}>
+          <Button size='small' className='min-w-24' onClick={handleApply} isLoading={isApplying}>
             <div className='flex items-center gap-1'>
               <Image src={PLAY_ICON} alt='play' width={12} height={12} />
               {selectedItemIds.size > 0 ? `Apply these ${selectedItemIds.size}` : 'Apply All'}

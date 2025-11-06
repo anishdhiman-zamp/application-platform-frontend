@@ -13,8 +13,14 @@ interface MarkdownBlockProps {
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
   return (
-    <div className='prose prose-sm max-w-none text-gray-900' data-testid='markdown-block'>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
+    <div className='prose prose-sm f-13-450 max-w-none' data-testid='markdown-block'>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeSlug]}
+        components={{
+          a: ({ ...props }) => <a {...props} className='text-blue-700' style={{ textDecoration: 'none' }} />,
+        }}
+      >
         {payload.text}
       </ReactMarkdown>
     </div>

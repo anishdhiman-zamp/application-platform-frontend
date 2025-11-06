@@ -29,7 +29,7 @@ export const API_ENDPOINTS = {
   FEEDBACKS_DELETE_POST: `feedbacks/delete`,
   FEEDBACKS_UN_ARCHIVE_POST: `feedbacks/unarchive`,
   FEEDBACKS_APPLY_POST: `feedbacks/apply`,
-  FEEDBACKS_STOP_PROCESSING_POST: `feedbacks/stop-processing-for-process`,
+  FEEDBACKS_STOP_PROCESSING_POST: `feedbacks/stop-processing`,
 
   TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
   TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,
@@ -161,4 +161,8 @@ export const API_ENDPOINTS = {
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   UNIFIED_SSE: `events`,
+
+  //Deepgram Speech to text
+  DEEPGRAM_AUTHENTICATE_GET: `/deepgram/generate-access-token`,
+  INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
 };

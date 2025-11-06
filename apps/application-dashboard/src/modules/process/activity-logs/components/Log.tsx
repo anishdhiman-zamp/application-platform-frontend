@@ -1,4 +1,5 @@
 import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { LocationType } from '@zamp-platform/chat';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
@@ -11,6 +12,8 @@ import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from
 import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
+import ChatbotWrapper from '@/modules/chatbot';
+import CommentButton from '@/modules/chatbot/CommentButton';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -165,24 +168,38 @@ const Log: FC<LogProps> = ({
         </div>
         {/* body */}
         <motion.div
-          className='flex w-full origin-top flex-col items-start justify-start pb-10'
+          className='group flex w-full origin-top flex-col items-start justify-start pb-10'
           initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
           animate={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].animate}
           onAnimationComplete={() => setStaggerAnimationBegin(true)}
         >
-          <LogMessageAnimation
-            text={message}
-            className={'f-13-450 w-full text-left break-words'}
-            delay={0.2}
-            shimmer={isLogsLoading}
-            shimmerControlRef={shimmerControlRef}
-            isLastLog={isLastLog}
-            showAnimation={staggerAnimationBegin}
-            onStaggerComplete={() => {
-              staggerCompleteRef.current = true;
-              handleLineHeightUpdate();
-            }}
-          />
+          <div className='flex items-center gap-2'>
+            <LogMessageAnimation
+              text={message}
+              className='f-13-450 w-full text-left break-words'
+              delay={0.2}
+              shimmer={isLogsLoading}
+              shimmerControlRef={shimmerControlRef}
+              isLastLog={isLastLog}
+              showAnimation={staggerAnimationBegin}
+              onStaggerComplete={() => {
+                staggerCompleteRef.current = true;
+                handleLineHeightUpdate();
+              }}
+            />
+            <ChatbotWrapper
+              annotationLocation={{
+                type: LocationType.LOG,
+                data: {
+                  process_id: processId,
+                  activity_run_id: activityId,
+                  log_id: log_group_id,
+                },
+              }}
+            >
+              <CommentButton />
+            </ChatbotWrapper>
+          </div>
 
           {thought_steps?.length > 0 && (
             <ReasoningAccordion

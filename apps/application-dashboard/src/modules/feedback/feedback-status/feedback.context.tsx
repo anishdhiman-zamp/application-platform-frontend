@@ -16,6 +16,7 @@ interface FeedbackContextState {
   queuedFeedbackItems: FeedbackItemType[];
   processingFeedbackItems: FeedbackItemType[];
   successFeedbackItems: FeedbackItemType[];
+  allFeedbackItems: FeedbackItemType[];
   isLoading: boolean;
   processId: string;
   hasFeedback: boolean;
@@ -74,6 +75,7 @@ const initialState: FeedbackContextState = {
   queuedFeedbackItems: [],
   processingFeedbackItems: [],
   successFeedbackItems: [],
+  allFeedbackItems: [],
   isLoading: false,
   processId: '',
   hasFeedback: false,
@@ -108,6 +110,7 @@ export const FeedbackProvider: FC<FeedbackProviderProps> = ({ children, processI
         return {
           ...state,
           ...splitFeedbacks,
+          allFeedbackItems: action.payload.feedbacks,
           hasFeedback: !!action.payload.feedbacks?.length,
         };
       }

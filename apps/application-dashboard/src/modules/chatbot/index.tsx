@@ -1,0 +1,164 @@
+import { cloneElement, FC, isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Chatbot from 'modules/chatbot/Chatbot';
+import FeedbackList from 'modules/chatbot/FeedbackList';
+import { getFeedbackItems } from 'modules/chatbot/utils';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { RootState } from '@/store';
+import { removeFeedbackItem } from '@/store/slices/feedbacks';
+import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+
+interface ChatbotProps {
+  children: React.ReactNode;
+  annotationLocation: LocationData;
+  hideFeedbackCount?: boolean;
+  onChatbotTrigger?: (openChatbot: () => void) => void;
+}
+
+const ChatbotWrapper: FC<ChatbotProps> = ({
+  children,
+  annotationLocation,
+  hideFeedbackCount = false,
+  onChatbotTrigger,
+}) => {
+  const dispatch = useDispatch();
+  const allFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
+  const matchingFeedbackItems = getFeedbackItems(allFeedbackItems, annotationLocation);
+
+  const [currentFeedbackItem, setCurrentFeedbackItem] = useState<FeedbackItemType>();
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [isNewConversation, setIsNewConversation] = useState(false);
+  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
+
+  const showFeedbackList = useMemo(
+    () =>
+      matchingFeedbackItems.length > 1 ||
+      (matchingFeedbackItems.length === 1 &&
+        [FEEDBACK_STATUS.PROCESSING, FEEDBACK_STATUS.APPLIED].includes(
+          matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
+        )),
+    [matchingFeedbackItems],
+  );
+
+  const disableAddMoreFeedback = useMemo(
+    () =>
+      matchingFeedbackItems.find((item) =>
+        [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(item?.status as FEEDBACK_STATUS),
+      ) !== undefined,
+    [matchingFeedbackItems],
+  );
+
+  const handleOpenChatbot = useCallback((feedbackItem?: FeedbackItemType) => {
+    if (feedbackItem) {
+      setCurrentFeedbackItem(feedbackItem);
+    } else {
+      setIsNewConversation(true);
+      setCurrentFeedbackItem(undefined);
+    }
+    setShowChatbot(true);
+  }, []);
+
+  const handleDeleteSuccess = (feedbackId?: string) => {
+    if (feedbackId) {
+      dispatch(removeFeedbackItem(feedbackId));
+    }
+  };
+
+  const handleCloseChatbot = () => {
+    setShowChatbot(false);
+    if (showFeedbackList) {
+      setCurrentFeedbackItem(undefined);
+    }
+  };
+
+  useEffect(() => {
+    if (currentFeedbackItem) return;
+    if (
+      matchingFeedbackItems.length === 1 &&
+      [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(matchingFeedbackItems[0]?.status as FEEDBACK_STATUS)
+    ) {
+      setCurrentFeedbackItem(matchingFeedbackItems[0]);
+    } else if (matchingFeedbackItems.length > 1) {
+      const firstOpenFeedbackItem = matchingFeedbackItems.find((item) => item?.status === FEEDBACK_STATUS.OPEN);
+
+      if (firstOpenFeedbackItem) {
+        setCurrentFeedbackItem(firstOpenFeedbackItem);
+      }
+    }
+  }, [matchingFeedbackItems]);
+
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
+        .then((res: string[]) => {
+          if (res?.includes(annotationLocation.data.process_id ?? '')) {
+            setIsFeedbackEnabled(true);
+          } else {
+            setIsFeedbackEnabled(false);
+          }
+        })
+        .catch(() => {
+          setIsFeedbackEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient, annotationLocation.data.process_id]);
+
+  // Expose the openChatbot function to parent components
+  useEffect(() => {
+    if (onChatbotTrigger && isFeedbackEnabled) {
+      onChatbotTrigger(() => handleOpenChatbot());
+    }
+  }, [onChatbotTrigger, isFeedbackEnabled, handleOpenChatbot]);
+
+  // Clone children and inject onClick handler
+  const enhancedChildren = useMemo(() => {
+    if (isValidElement(children)) {
+      return cloneElement(children as React.ReactElement<any>, {
+        onClick: () => handleOpenChatbot(),
+      });
+    }
+
+    return children;
+  }, [children, handleOpenChatbot]);
+
+  return (
+    <>
+      {isFeedbackEnabled ? (
+        <>
+          {showFeedbackList && !showChatbot ? (
+            <FeedbackList
+              items={matchingFeedbackItems}
+              processId={annotationLocation.data.process_id}
+              onOpenChatbot={handleOpenChatbot}
+              hideFeedbackCount={hideFeedbackCount}
+              annotationLocation={annotationLocation}
+              onDeleteSuccess={handleDeleteSuccess}
+              disableAddMoreFeedback={disableAddMoreFeedback}
+            >
+              {enhancedChildren}
+            </FeedbackList>
+          ) : (
+            <Chatbot
+              annotationLocation={annotationLocation}
+              hideFeedbackCount={hideFeedbackCount}
+              feedbackItem={currentFeedbackItem}
+              showChatbot={showChatbot}
+              feedbackItemsLength={matchingFeedbackItems.length}
+              onCloseChatbot={handleCloseChatbot}
+              isNewConversation={isNewConversation || !showFeedbackList}
+              setCurrentFeedbackItem={setCurrentFeedbackItem}
+            >
+              {enhancedChildren}
+            </Chatbot>
+          )}
+        </>
+      ) : null}
+    </>
+  );
+};
+
+export default ChatbotWrapper;

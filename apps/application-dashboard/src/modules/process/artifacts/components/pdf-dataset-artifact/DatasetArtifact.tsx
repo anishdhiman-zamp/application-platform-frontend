@@ -568,6 +568,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         tableRef,
         handleRulesListingSideDrawerOpen,
         missingFields,
+        isArtifact: true,
       });
 
       if (columns?.length > 0) {
@@ -646,6 +647,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         tableRef,
         handleRulesListingSideDrawerOpen,
         missingFields,
+        isArtifact: true,
       });
 
       if (columns?.length > 0) {

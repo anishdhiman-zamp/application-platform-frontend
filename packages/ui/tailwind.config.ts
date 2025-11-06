@@ -262,6 +262,7 @@ const config = {
         'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',
         smooth:
           '0 15px 80px 0 rgba(0, 0, 0, 0.05), 0 6.267px 33.422px 0 rgba(0, 0, 0, 0.04), 0 3.35px 17.869px 0 rgba(0, 0, 0, 0.03), 0 1.878px 10.017px 0 rgba(0, 0, 0, 0.03), 0 0.998px 5.32px 0 rgba(0, 0, 0, 0.02), 0 0.415px 2.214px 0 rgba(0, 0, 0, 0.01)',
+        'keyboard-keys-shadow': '-1px -1px 0.25px 0px #00000017 inset',
       },
       fontSize: {
         '8': [
@@ -538,6 +539,7 @@ const config = {
           'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.8) 5%, white 10%, white 80%, white 90%, rgba(255,255,255,0.8) 95%, transparent 100%)',
         'gradient-to-white': 'linear-gradient(90deg, rgba(255,255,255,0) 0%, #FFF 100%)',
         'gradient-to-transparent': 'linear-gradient(0deg, #FFF 50%, rgba(255,255,255,0) 100%)',
+        'chatbot-gradient': 'repeating-linear-gradient(135deg,#e5e5e5_0,#e5e5e5_1px,white_1px,white_6px)',
       },
       keyframes: {
         'accordion-down': {

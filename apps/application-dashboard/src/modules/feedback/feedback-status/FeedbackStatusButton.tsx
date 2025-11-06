@@ -1,4 +1,5 @@
 import { FC, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
@@ -7,6 +8,7 @@ import { useGetFeedbacksQuery } from '@/apis/feedback';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { FEEDBACK_BADGE_CONFIG } from '@/modules/feedback/feedback.constants';
 import { FeedbackProvider, useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { setFeedbackItems } from '@/store/slices/feedbacks';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackStatusButtonProps {
@@ -18,9 +20,10 @@ const FeedbackStatusButtonContent: FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const searchParams = useSearchParams();
   const isFeedbackStatus = searchParams?.get('feedback-status') === 'true';
+  const dispatch = useDispatch();
 
   const { state } = useFeedbackContextStore();
-  const { isLoading, processId, hasFeedback } = state;
+  const { isLoading, processId, hasFeedback, allFeedbackItems } = state;
 
   const { sseEventBus } = useEventBus();
 
@@ -50,6 +53,12 @@ const FeedbackStatusButtonContent: FC = () => {
       }, 1000);
     }
   }, [isFeedbackStatus]);
+
+  useEffect(() => {
+    if (allFeedbackItems?.length) {
+      dispatch(setFeedbackItems(allFeedbackItems));
+    }
+  }, [dispatch, allFeedbackItems]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EventType.FEEDBACK, (data: BaseEventPayload) => {
