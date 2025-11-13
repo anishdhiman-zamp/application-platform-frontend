@@ -46,6 +46,7 @@ export const HandleInvitations: FC = () => {
   useEffect(() => {
     if (loadingInvitations === false) {
       // use finally because we don't want to block the flow if invitation acceptance fails
+
       if (invitationsData) {
         handleAcceptInvitations(
           invitationsData.invitations.map((invitation) => invitation.organization_invitation_id),

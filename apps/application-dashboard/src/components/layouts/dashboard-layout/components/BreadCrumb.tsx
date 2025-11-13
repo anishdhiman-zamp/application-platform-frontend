@@ -193,7 +193,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
 
   return (
     <div
-      className={cn('bg-BACKGROUND_GRAY_1 z-1000 flex h-full w-full items-center gap-2 transition-all', {
+      className={cn('bg-BACKGROUND_GRAY_1 z-1000 flex h-full items-center gap-2 transition-all', {
         'pl-1': breadcrumbStack?.length <= 1 && isSidebarOpen,
       })}
     >

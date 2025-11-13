@@ -192,3 +192,5 @@ export const DEFAULT_TRANSFORMED_DATA = {
   maxValueLength: 0,
   showCurrency: false,
 };
+
+export const WIO_PRD_ORG_ID = '41a93df3-3652-4f3e-9984-dca250721da1';

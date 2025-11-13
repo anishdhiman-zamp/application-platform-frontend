@@ -4,7 +4,10 @@ import { formRequestUrlWithParams } from '@zamp-platform/utils';
 
 import {
   CreateConversationPayloadType,
+  CreateConversationPayloadTypeV2,
   CreateConversationResponseType,
+  GetConversationByIdRequestType,
+  GetConversationByIdResponseType,
   PostMessagePayloadType,
   PostMessageResponseType,
 } from '../types/chat.types';
@@ -20,6 +23,9 @@ export const chatApi = baseApiProvider(APITags, 'chatApi');
 export const API_ENDPOINTS = {
   POST_MESSAGE: '/conversations/{{conversationId}}/messages',
   CREATE_CONVERSATION: '/conversations/',
+  POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
+  GET_CONVERSATION_BY_ID: 'v2/conversations/{{conversationId}}',
+  CREATE_CONVERSATION_V2: 'v2/conversations',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -38,7 +44,36 @@ const ConversationService = chatApi.injectEndpoints({
         body,
       }),
     }),
+    getConversationById: builder.query<GetConversationByIdResponseType, GetConversationByIdRequestType>({
+      query: ({ conversationId, resourceId, resourceType }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.GET_CONVERSATION_BY_ID, { conversationId }),
+        params: {
+          resource_id: resourceId,
+          resource_type: resourceType,
+        },
+      }),
+    }),
+    createConversationV2: builder.mutation<CreateConversationResponseType, CreateConversationPayloadTypeV2>({
+      query: (body) => ({
+        url: API_ENDPOINTS.CREATE_CONVERSATION_V2,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
+    sendMessageV2: builder.mutation<PostMessageResponseType, PostMessagePayloadType>({
+      query: ({ conversationId, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.POST_MESSAGE_V2, { conversationId }),
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useSendMessageMutation, useCreateConversationMutation } = ConversationService;
+export const {
+  useSendMessageMutation,
+  useCreateConversationMutation,
+  useGetConversationByIdQuery,
+  useCreateConversationV2Mutation,
+  useSendMessageV2Mutation,
+} = ConversationService;

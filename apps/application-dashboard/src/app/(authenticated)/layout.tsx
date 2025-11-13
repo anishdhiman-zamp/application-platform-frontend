@@ -21,9 +21,9 @@ const AuthenticatedLayout: FC<AuthenticatedLayoutProps> = ({ children }) => {
       <AgChartInit />
       <UserDetailsProvider />
       <PostHogProviderWrapper>
-        <LayoutWrapper>
-          <SSEProvider sseEventBus={sseEventBus}>{children}</SSEProvider>
-        </LayoutWrapper>
+        <SSEProvider sseEventBus={sseEventBus}>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </SSEProvider>
       </PostHogProviderWrapper>
     </Providers>
   );

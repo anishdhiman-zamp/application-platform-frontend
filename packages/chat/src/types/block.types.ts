@@ -9,8 +9,14 @@ export const enum BlockType {
 
 export const enum ActionType {
   STATE_UPDATE = 'state_update',
-  INTERNAL_API = 'internal-api',
-  REDIRECT = 'redirect',
+  INTERNAL_API = 'internal_api',
+  INTERNAL_REDIRECT = 'internal_redirect',
+}
+
+export const enum DisplayLayerActionType {
+  SEND_BUTTON_TEXT_AS_NEW_MESSAGE = 'send_button_text_as_new_message',
+  SEND_BUTTON_TEXT_WITH_SELECTED_OPTION = 'send_button_text_with_selected_option',
+  SEND_BUTTON_TEXT_WITH_STOP_PROCESSING = 'send_button_text_with_stop_processing',
 }
 
 export interface SingleSelectOption {
@@ -23,6 +29,26 @@ export interface SingleSelectOption {
 export interface BlockAction {
   type: ActionType;
   dependent_elements?: string[];
+  action_id: string;
+  url?: string;
+  display_layer_action?: DisplayLayerActionType;
+}
+
+export interface BlockInteraction {
+  interacted_by_id: string;
+  interacted_by_name: string;
+  interacted_at: string;
+  payload: {
+    is_clicked: boolean;
+    dependent_elements_interactions: Record<string, string>;
+  };
+}
+
+export interface BlockPayload {
+  id: string;
+  is_disabled: boolean;
+  label: string;
+  value: string;
 }
 
 export interface PlainTextBlockType {
@@ -58,12 +84,9 @@ export interface ButtonBlockType {
   id: string;
   type: BlockType.BUTTON;
   order: number;
-  payload: {
-    is_disabled: boolean;
-    label: string;
-    value: string;
-    action: BlockAction;
-  };
+  payload: BlockPayload;
+  action: BlockAction;
+  interaction: BlockInteraction;
 }
 
 export interface QuestionBlockType {

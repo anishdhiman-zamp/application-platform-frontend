@@ -6,7 +6,9 @@ import { CURRENCY_SYMBOLS } from 'modules/page/pages.constants';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import DeleteWidgetDialog from 'modules/widgets/components/DeleteWidgetDialog';
 import WidgetOptions from 'modules/widgets/WidgetOptions';
+import { WIO_PRD_ORG_ID } from 'modules/widgets/widgets.constant';
 import { useParams } from 'next/navigation';
+import { RootState } from 'store';
 import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
@@ -42,6 +44,7 @@ const KpiTag: FC<KpiTagProps> = ({
 }) => {
   const params = useParams();
   const pageId = params?.pageId as string;
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const selectedDatasetIds = useAppSelector((state) => state.sheetFilters.selectedDatasetIds);
   const valueContainerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,7 +79,11 @@ const KpiTag: FC<KpiTagProps> = ({
     const key = primaryValue?.alias ?? primaryValue?.column;
     const data = widgetData?.result?.[0]?.data[0] as Record<string, any>;
 
+    // Skip currency formatting for specific organization
+    const shouldSkipCurrencyFormatting = organizationId === WIO_PRD_ORG_ID;
+
     const currency =
+      !shouldSkipCurrencyFormatting &&
       (defaultCurrency || widgetData?.currency) &&
       (CURRENCY_SYMBOLS[defaultCurrency as keyof typeof CURRENCY_SYMBOLS] ??
         CURRENCY_SYMBOLS[widgetData?.currency as keyof typeof CURRENCY_SYMBOLS] ??
@@ -87,7 +94,7 @@ const KpiTag: FC<KpiTagProps> = ({
     return currency
       ? `${currency} ${getCommaSeparatedNumber(Number(data?.[key]), 2)}`
       : getCommaSeparatedNumber(Number(data?.[key]), 0);
-  }, [widgetData]);
+  }, [widgetData, organizationId]);
 
   useEffect(() => {
     const callback = () => {

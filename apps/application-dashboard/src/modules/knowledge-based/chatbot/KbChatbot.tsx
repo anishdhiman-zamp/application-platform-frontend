@@ -12,6 +12,7 @@ import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import KnowledgeBasedTopbar from 'modules/knowledge-based/KnowledgeBasedTopbar';
 import { useParams } from 'next/navigation';
 import { useSSEContext } from '@/app/_providers/sse-provider';
+import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import ChatCard from '@/modules/knowledge-based/chatbot/ChatCard';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import type { defaultFnType } from '@/types/commonTypes';
@@ -53,19 +54,23 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
 
   useEffect(() => {
     const init = async () => {
-      const conversationId = await chat.createConversation({
-        resource_id: processId,
-        resource_type: ResourceType.PROCESS,
-        annotation_type: AnnotationType.KB,
-        message_content: {
-          message: userMessage || 'Hello, how are you?',
-        },
-      });
+      try {
+        const conversationId = await chat.createConversation({
+          resource_id: processId,
+          resource_type: ResourceType.PROCESS,
+          annotation_type: AnnotationType.KB,
+          message_content: {
+            message: userMessage || 'Hello, how are you?',
+          },
+        });
 
-      setIsLoading(true);
+        setIsLoading(true);
 
-      if (!conversationId) {
-        throw new Error('Failed to create conversation');
+        if (!conversationId) {
+          toast.error(KB_TOAST_MESSAGES.FAILED_CONVERSATION_CREATION);
+        }
+      } catch {
+        setIsLoading(false);
       }
     };
 
@@ -115,7 +120,7 @@ const KbChatbot = ({ onClose, userMessage, title }: KbChatbotProps) => {
             {chat?.messages?.map((message: ChatMessage, idx: number) => (
               <ChatCard
                 key={`${message?.message_content}-${idx}`}
-                message={message?.message_content?.message}
+                message={message?.message_content?.message ?? ''}
                 senderType={message?.sender_type}
               />
             ))}

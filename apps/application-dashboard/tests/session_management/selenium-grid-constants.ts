@@ -11,7 +11,7 @@ interface SeleniumGridConfigType {
 export function getDefaultSeleniumConfig(): SeleniumGridConfigType {
   return {
     hubUrl: 'https://zamp-stg-us-seleniumgrid.zamp.ai/wd/hub',
-    authorization: 'Basic YWRtaW46MFFkZ1Zia2gyczdNM1Bn',
+    authorization: process.env.SELENIUM_GRID_AUTH_TOKEN ?? '',
     browserName: 'chrome',
     cdpHost: 'zamp-stg-us-seleniumgrid.zamp.ai',
   };

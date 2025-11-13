@@ -13,10 +13,10 @@ export const PLAYWRIGHT_ENV_CREDENTIALS = {
     totpSecret: '', // generate your totp secret => https://zxing.org/w/decode.jspx
   },
   localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
-  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg-aws.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
+  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg.zamp.ai', // run on stg = 'https://app-stg.zamp.ai'
   isSeleniumLocalBrowser: USE_LOCAL_SELENIUM_BROWSER,
   storageState: STORAGE_STATE,
-  baseBEUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://api-dev-aws-us.zamp.ai' : 'https://api-stg-aws-us.zamp.ai', // run on stg = 'https://api-stg-aws-us.zamp.ai'
+  baseBEUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://api-dev.zamp.ai' : 'https://api-stg.zamp.ai', // run on stg = 'https://api-stg.zamp.ai'
 };
 
 export default defineConfig({
