@@ -107,7 +107,7 @@ const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType
 
   const rowId = params.data?.id;
 
-  return missingFields.some((field) => field.id === rowId && field.column === params.column.colId);
+  return missingFields.some((field) => field?.id === rowId && field?.column === params?.column?.colId);
 };
 
 export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
