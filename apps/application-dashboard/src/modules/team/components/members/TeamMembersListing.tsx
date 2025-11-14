@@ -32,7 +32,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
     { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
 
-  const hasAudiencesData = (teamMembersData?.length ?? 0) > 0;
+  const hasAudiencesData = useMemo(() => (teamMembersData?.length ?? 0) > 0, [teamMembersData]);
 
   // get teams data
   const { data: teamsData } = useGetTeamsByOrganizationIdQuery(
