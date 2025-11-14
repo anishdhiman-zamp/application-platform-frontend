@@ -17,6 +17,7 @@ type PeopleTabsPropsType = {
   isLoadingTeamMembersData: boolean;
   filteredInvitedMembers: InvitedAudiencesByOrganisationIdResponse[];
   isLoadingInvitedTeamMembersData: boolean;
+  search: string;
 };
 
 const PeopleTabs: FC<PeopleTabsPropsType> = ({
@@ -24,6 +25,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   isLoadingTeamMembersData,
   filteredInvitedMembers,
   isLoadingInvitedTeamMembersData,
+  search,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,6 +58,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
             hasPeoplePolicy={hasPeoplePolicy}
             data={filteredTeamMembers}
             isLoadingTeamMembersData={isLoadingTeamMembersData}
+            search={search}
           />
         );
       case TEAM_TABS_TYPES.INVITED_MEMBERS:
@@ -63,6 +66,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
           <InvitedMembersListing
             data={filteredInvitedMembers}
             isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData}
+            search={search}
           />
         );
       default:

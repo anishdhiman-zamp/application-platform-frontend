@@ -147,6 +147,7 @@ export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.webp';
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.webp';
 export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.webp';
+export const TEAM_MEMBERS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/team-members.webp';
 
 export const SHEET_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/sheet.png';
 

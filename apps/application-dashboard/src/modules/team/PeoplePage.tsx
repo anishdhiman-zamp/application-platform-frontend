@@ -71,6 +71,7 @@ const PeoplePage = () => {
         isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
         filteredInvitedMembers={filteredInvitedMembers ?? []}
         isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
+        search={search}
       />
     </div>
   );
