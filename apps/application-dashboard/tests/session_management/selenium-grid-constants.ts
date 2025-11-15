@@ -10,10 +10,10 @@ interface SeleniumGridConfigType {
  */
 export function getDefaultSeleniumConfig(): SeleniumGridConfigType {
   return {
-    hubUrl: 'https://zamp-stg-us-seleniumgrid.zamp.ai/wd/hub',
+    hubUrl: process.env.URL_SELENIUM_GRID_HUB ?? '',
     authorization: process.env.SELENIUM_GRID_AUTH_TOKEN ?? '',
     browserName: 'chrome',
-    cdpHost: 'zamp-stg-us-seleniumgrid.zamp.ai',
+    cdpHost: process.env.SELENIUM_GRID_CDP_HOST ?? '',
   };
 }
 
@@ -38,6 +38,7 @@ export const SELENIUM_GRID_SESSION_PAYLOAD = {
           '--disable-web-security',
           '--disable-features=IsolateOrigins,site-per-process,TranslateUI',
           '--disable-blink-features',
+          '--disable-blink-features=AutomationControlled',
           '--disable-extensions-except=',
           '--disable-component-extensions-with-background-pages',
           '--disable-default-apps',

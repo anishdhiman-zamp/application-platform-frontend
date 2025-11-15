@@ -140,9 +140,8 @@ const Row: FC<RowProps> = ({
   };
 
   const handleEditSave = () => {
-    if (editingValue !== value) {
-      onChange?.(key, editingValue, rowId);
-    }
+    onChange?.(key, editingValue, rowId);
+
     setIsEditing(false);
   };
 
