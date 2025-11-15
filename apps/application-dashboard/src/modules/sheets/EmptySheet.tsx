@@ -16,7 +16,7 @@ const EmptySheet = ({ onAddWidget }: EmptySheetProps) => {
   const sheetId = params?.sheetId as string;
 
   return (
-    <div className='flex h-[calc(100vh-120px)] flex-col items-center justify-center'>
+    <div className='flex h-full flex-col items-center justify-center'>
       <Image
         src={SHEET_EMPTY_STATE}
         alt='Empty sheet'
