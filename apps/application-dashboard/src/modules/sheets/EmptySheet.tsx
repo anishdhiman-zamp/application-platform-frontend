@@ -23,6 +23,7 @@ const EmptySheet = ({ onAddWidget }: EmptySheetProps) => {
         width={264}
         height={266}
         data-testid={`${sheetId}-empty-sheet-image`}
+        unoptimized
       />
       <PermissionGuard resourceType={ResourceType.PAGE} resourceId={pageId} privilege={PAGE_ACCESS_PRIVILEGES.ADMIN}>
         <Button
