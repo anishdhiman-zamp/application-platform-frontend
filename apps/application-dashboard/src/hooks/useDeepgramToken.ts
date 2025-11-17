@@ -22,14 +22,14 @@ const TOKEN_REFRESH_BUFFER = 300;
 const TOKEN_TTL = 3600;
 
 // Module-level token storage to persist across component unmounts/remounts
-let globalTokenMetadata: TokenMetadata | null = null;
+let globalDeepgramTokenMetadata: TokenMetadata | null = null;
 
 /**
  * Check if token needs refresh based on expiration time and buffer
  */
 const isTokenExpiredOrExpiring = (): boolean => {
-  if (!globalTokenMetadata) return true;
-  const { fetchedAt, expiresIn } = globalTokenMetadata;
+  if (!globalDeepgramTokenMetadata) return true;
+  const { fetchedAt, expiresIn } = globalDeepgramTokenMetadata;
   const elapsed = (Date.now() - fetchedAt) / 1000;
   const remaining = expiresIn - elapsed;
 
@@ -58,8 +58,8 @@ export const useDeepgramToken = (): UseDeepgramTokenReturn => {
   useEffect(() => {
     if (accessTokenResponse?.access_token && accessTokenResponse?.expires_in) {
       // Only update if we don't have a token or if the cached token is different/newer
-      if (!globalTokenMetadata || globalTokenMetadata.token !== accessTokenResponse.access_token) {
-        globalTokenMetadata = {
+      if (!globalDeepgramTokenMetadata || globalDeepgramTokenMetadata.token !== accessTokenResponse.access_token) {
+        globalDeepgramTokenMetadata = {
           token: accessTokenResponse.access_token,
           fetchedAt: Date.now(),
           expiresIn: accessTokenResponse.expires_in,
@@ -76,13 +76,13 @@ export const useDeepgramToken = (): UseDeepgramTokenReturn => {
       if (result.data?.access_token) {
         return result.data.access_token;
       }
-      throw new Error('Failed to refresh Deepgram access token');
+      throw new Error('Failed to refresh access token');
     }
-    if (!globalTokenMetadata?.token) {
-      throw new Error('No Deepgram access token available');
+    if (!globalDeepgramTokenMetadata?.token) {
+      throw new Error('No access token available');
     }
 
-    return globalTokenMetadata.token;
+    return globalDeepgramTokenMetadata.token;
   }, [refetchToken]);
 
   return {
