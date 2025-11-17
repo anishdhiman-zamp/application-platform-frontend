@@ -15,15 +15,16 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
   const importFileHistoryRef = useRef<HTMLDivElement>(null);
   const [isHoveredLoaders, setIsHoveredLoaders] = useState(false);
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
-  const { data } = useGetFileImportHistoryQuery({ datasetId });
+  const { data, isLoading: isHistoryLoading } = useGetFileImportHistoryQuery({ datasetId });
   const fileImportHistoryData = data?.file_uploads || [];
+  const showEmptyState = !isHistoryLoading && !datasetBulkLoaders?.length && !fileImportHistoryData?.length;
 
   useOnClickOutside(importFileHistoryRef, onClose);
 
   return (
     <>
       <div className='fixed top-[94px] left-0 z-1000 flex h-[calc(100vh-136px)]! w-screen justify-end'>
-        {!datasetBulkLoaders?.length && !fileImportHistoryData?.length ? (
+        {showEmptyState ? (
           <div className='absolute top-0 right-8 z-50' ref={importFileHistoryRef}>
             <HistoryEmptyState />
           </div>
@@ -39,7 +40,11 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
                 setIsHoveredLoaders={setIsHoveredLoaders}
                 datasetBulkLoaders={datasetBulkLoaders}
               />
-              <HistoryList isHoveredLoaders={isHoveredLoaders} fileImportHistoryData={fileImportHistoryData} />
+              <HistoryList
+                isHoveredLoaders={isHoveredLoaders}
+                isHistoryLoading={isHistoryLoading}
+                fileImportHistoryData={fileImportHistoryData}
+              />
             </div>
           </div>
         )}
