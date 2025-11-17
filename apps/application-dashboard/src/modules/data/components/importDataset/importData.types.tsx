@@ -44,6 +44,7 @@ export enum FILE_MIME {
 export type HistoryListPropsType = {
   fileImportHistoryData: FileHistoryDataType[];
   isHoveredLoaders: boolean;
+  isHistoryLoading: boolean;
 };
 
 export type HistoryBulkLoadersPropsType = {
