@@ -59,6 +59,7 @@ const FeedbackStatusQueuedBody: FC = () => {
   }, [selectedItemIds, items]);
 
   const handleCheck = (e: React.MouseEvent<HTMLButtonElement>, item: FeedbackItemType) => {
+    e.preventDefault();
     e.stopPropagation();
     handleSelect(item);
   };
@@ -75,6 +76,7 @@ const FeedbackStatusQueuedBody: FC = () => {
                   checked={selectedItemIds.has(item?.id)}
                   className='mt-1 flex-shrink-0'
                   onClick={(e) => handleCheck(e, item)}
+                  id='check-feedback'
                 />
               }
               feedback={item}

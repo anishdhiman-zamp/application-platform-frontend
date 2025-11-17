@@ -4,6 +4,7 @@ import Chatbot from 'modules/chatbot/Chatbot';
 import FeedbackList from 'modules/chatbot/FeedbackList';
 import { getFeedbackItems } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
@@ -15,6 +16,8 @@ interface ChatbotProps {
   annotationLocation: LocationData;
   hideFeedbackCount?: boolean;
   onChatbotTrigger?: (openChatbot: () => void) => void;
+  className?: string;
+  onChatbotStateChange?: (isOpen: boolean) => void;
 }
 
 const ChatbotWrapper: FC<ChatbotProps> = ({
@@ -22,7 +25,12 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   annotationLocation,
   hideFeedbackCount = false,
   onChatbotTrigger,
+  className,
+  onChatbotStateChange,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const allFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
   const matchingFeedbackItems = getFeedbackItems(allFeedbackItems, annotationLocation);
@@ -52,15 +60,19 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     [matchingFeedbackItems],
   );
 
-  const handleOpenChatbot = useCallback((feedbackItem?: FeedbackItemType) => {
-    if (feedbackItem) {
-      setCurrentFeedbackItem(feedbackItem);
-    } else {
-      setIsNewConversation(true);
-      setCurrentFeedbackItem(undefined);
-    }
-    setShowChatbot(true);
-  }, []);
+  const handleOpenChatbot = useCallback(
+    (feedbackItem?: FeedbackItemType) => {
+      if (feedbackItem) {
+        setCurrentFeedbackItem(feedbackItem);
+      } else {
+        setIsNewConversation(true);
+        setCurrentFeedbackItem(undefined);
+      }
+      setShowChatbot(true);
+      onChatbotStateChange?.(true);
+    },
+    [onChatbotStateChange],
+  );
 
   const handleDeleteSuccess = (feedbackId?: string) => {
     if (feedbackId) {
@@ -68,8 +80,31 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     }
   };
 
+  const handleRemoveChatbotParams = () => {
+    // Remove all query params with chatbot prefix if any exist
+    if (searchParams && pathname) {
+      const hasChatbotParams = Array.from(searchParams.keys()).some((key) => key.startsWith('chatbot_'));
+
+      if (hasChatbotParams) {
+        const params = new URLSearchParams(searchParams.toString());
+
+        Array.from(params.keys()).forEach((key) => {
+          if (key.startsWith('chatbot_')) {
+            params.delete(key);
+          }
+        });
+
+        const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+
+        router.replace(newUrl);
+      }
+    }
+  };
+
   const handleCloseChatbot = () => {
+    handleRemoveChatbotParams();
     setShowChatbot(false);
+    onChatbotStateChange?.(false);
     if (showFeedbackList) {
       setCurrentFeedbackItem(undefined);
     }
@@ -138,6 +173,8 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               annotationLocation={annotationLocation}
               onDeleteSuccess={handleDeleteSuccess}
               disableAddMoreFeedback={disableAddMoreFeedback}
+              onCloseFeedbackList={handleRemoveChatbotParams}
+              className={className}
             >
               {enhancedChildren}
             </FeedbackList>
@@ -151,6 +188,8 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               onCloseChatbot={handleCloseChatbot}
               isNewConversation={isNewConversation || !showFeedbackList}
               setCurrentFeedbackItem={setCurrentFeedbackItem}
+              className={className}
+              onOpenChatbot={handleOpenChatbot}
             >
               {enhancedChildren}
             </Chatbot>

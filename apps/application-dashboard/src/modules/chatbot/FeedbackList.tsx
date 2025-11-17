@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { MessageSquare, Plus } from 'lucide-react';
 import { doesUrlMatchLocation, getFeedbackItemConfig } from 'modules/chatbot/utils';
@@ -15,6 +15,8 @@ interface FeedbackListProps {
   onDeleteSuccess?: (feedbackId?: string) => void;
   hideFeedbackCount?: boolean;
   annotationLocation: LocationData;
+  onCloseFeedbackList: () => void;
+  className?: string;
 }
 
 const FeedbackList: FC<FeedbackListProps> = ({
@@ -26,9 +28,22 @@ const FeedbackList: FC<FeedbackListProps> = ({
   onDeleteSuccess,
   hideFeedbackCount = false,
   annotationLocation,
+  onCloseFeedbackList,
+  className,
 }) => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Handle chatbot open/close state changes
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        onCloseFeedbackList?.();
+      }
+    },
+    [onCloseFeedbackList],
+  );
 
   // Check URL params on mount to determine if chatbot should be open
   useEffect(() => {
@@ -38,8 +53,8 @@ const FeedbackList: FC<FeedbackListProps> = ({
   }, [searchParams, annotationLocation]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+      <PopoverTrigger className={className}>
         {!hideFeedbackCount ? (
           <Button
             variant='outline'
@@ -68,6 +83,7 @@ const FeedbackList: FC<FeedbackListProps> = ({
                   initiatedBy={item?.initiated_by}
                   processId={processId}
                   onDeleteSuccess={() => onDeleteSuccess?.(item?.id)}
+                  withoutLinkWrapper
                   {...getFeedbackItemConfig(item as FeedbackItemType, onOpenChatbot)}
                 />
               ))}

@@ -17,16 +17,16 @@ import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { RootState } from '@/store';
 import { LocationData } from '@/types/api/feedbacks.types';
 
-const useChatInput = (
-  chat: ReturnType<typeof useChat>,
-  annotationLocation: LocationData,
-  setIsLoading: (isLoading: boolean) => void,
-  conversationId?: string,
-  setHeader?: (header: string) => void,
-) => {
-  const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
+interface UseChatInputProps {
+  chat: ReturnType<typeof useChat>;
+  annotationLocation: LocationData;
+  setIsLoading: (isLoading: boolean) => void;
+  conversationId?: string;
+  setHeader?: (header: string) => void;
+}
 
-  const [firstMessage, setFirstMessage] = useState('');
+const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, setHeader }: UseChatInputProps) => {
+  const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const params = useParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
@@ -35,6 +35,8 @@ const useChatInput = (
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [firstMessage, setFirstMessage] = useState('');
+
   const [getSignedUrl] = useGetSignedUrlMutation();
 
   const init = async () => {
@@ -158,6 +160,8 @@ const useChatInput = (
     handleFileSelect,
     removeAttachment,
     isUploading,
+    firstMessage,
+    setFirstMessage,
   };
 };
 
