@@ -10,9 +10,6 @@ const Admin = () => {
       <Link href={ROUTES_PATH.ADMIN_DATASETS}>
         <Button id='admin-datasets'>MANAGE DATASETS</Button>
       </Link>
-      <Link href={ROUTES_PATH.ADMIN_ASSETS}>
-        <Button id='admin-assets'>MANAGE ASSETS</Button>
-      </Link>
     </div>
   );
 };
