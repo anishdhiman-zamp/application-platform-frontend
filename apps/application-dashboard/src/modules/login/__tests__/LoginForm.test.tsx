@@ -205,11 +205,33 @@ describe('LoginForm', () => {
     });
   });
 
-  it('should show regions dropdown when multiple regions are available', async () => {
+  it('should proceed with login using first region when multiple regions are available', async () => {
+    const mockLoginFlow = {
+      ui: {
+        nodes: [
+          {
+            group: 'oidc',
+            attributes: {
+              value: 'google',
+              logo_url: 'https://example.com/logo.png',
+            },
+          },
+        ],
+        action: 'https://api.zamp.ai/auth/login',
+        method: 'POST',
+      },
+    };
+
     mockGetApiDomainAndRegions.mockResolvedValue([
       { region: 'us', url: 'https://api-us.zamp.ai' },
       { region: 'me', url: 'https://api-me.zamp.ai' },
     ]);
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue(mockLoginFlow),
+    });
 
     render(createElement(LoginForm));
 
@@ -224,7 +246,13 @@ describe('LoginForm', () => {
     }
 
     await waitFor(() => {
-      expect(screen.getByTestId('regions-dropdown')).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('https://api-us.zamp.ai'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ email: 'test@example.com' }),
+        }),
+      );
     });
   });
 

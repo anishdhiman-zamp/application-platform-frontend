@@ -1,13 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
-import {
-  BASE_API_URL,
-  DEFAULT_REGION,
-  getApiDomainAndRegions,
-  reinitializeApiDomain,
-  REQUEST_TYPES,
-} from '@zamp-platform/api';
+import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -19,7 +13,6 @@ import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
-import RegionsSelectDropdown from 'modules/login/RegionsSelectDropdown';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
@@ -35,11 +28,6 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
-  const [allRegions, setAllRegions] = useState<{ region: string; url: string }[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<{ region: string; url: string }>({
-    region: DEFAULT_REGION,
-    url: BASE_API_URL,
-  });
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
@@ -184,16 +172,7 @@ export const LoginForm = () => {
     }
     const allRegionsResponse = await getApiDomainAndRegions(email);
 
-    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
-      setAllRegions(allRegionsResponse);
-      setLoading(false);
-
-      return;
-    } else if (allRegionsResponse.length === 1) {
-      doLogin(allRegionsResponse[0].url);
-    } else {
-      doLogin(selectedRegion.url);
-    }
+    doLogin(allRegionsResponse?.length > 0 ? allRegionsResponse[0]?.url : BASE_API_URL);
   };
 
   const inputDisabled = loading;
@@ -218,13 +197,6 @@ export const LoginForm = () => {
           disabled={inputDisabled}
           size={SIZE_TYPES.LARGE}
         />
-        {allRegions.length > 1 && (
-          <RegionsSelectDropdown
-            selectedRegion={selectedRegion}
-            setSelectedRegion={setSelectedRegion}
-            regions={allRegions}
-          />
-        )}
       </div>
       <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
     </form>
