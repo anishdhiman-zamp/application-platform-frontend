@@ -23,7 +23,7 @@ const ChatHeader = ({
   return (
     <>
       <div
-        className={cn('flex items-center justify-between rounded-t-xl border bg-white p-3.5', {
+        className={cn('flex items-center justify-between rounded-t-2xl border bg-white p-3.5', {
           'f-12-550': hasRealTitle,
           'f-12-450 text-gray-700': !hasRealTitle,
         })}

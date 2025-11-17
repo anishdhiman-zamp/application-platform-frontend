@@ -15,6 +15,7 @@ import {
 export enum APITags {
   CREATE_CONVERSATION = 'CREATE_CONVERSATION',
   POST_MESSAGE = 'POST_MESSAGE',
+  GET_CONVERSATION_BY_ID = 'GET_CONVERSATION_BY_ID',
 }
 export const API_TAGS = Object.values(APITags);
 
@@ -52,6 +53,7 @@ const ConversationService = chatApi.injectEndpoints({
           resource_type: resourceType,
         },
       }),
+      providesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
     createConversationV2: builder.mutation<CreateConversationResponseType, CreateConversationPayloadTypeV2>({
       query: (body) => ({
@@ -66,6 +68,7 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
+      invalidatesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
   }),
 });

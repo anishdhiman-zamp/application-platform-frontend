@@ -72,6 +72,7 @@ const Row: FC<RowProps> = ({
   const processId = params?.processId as string;
   const [isEditing, setIsEditing] = useState(false);
   const [editingValue, setEditingValue] = useState('');
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const fieldId = `${rowId}-${key}`;
   const isSelected = selectedKey === key;
@@ -140,9 +141,8 @@ const Row: FC<RowProps> = ({
   };
 
   const handleEditSave = () => {
-    if (editingValue !== value) {
-      onChange?.(key, editingValue, rowId);
-    }
+    onChange?.(key, editingValue, rowId);
+
     setIsEditing(false);
   };
 
@@ -207,6 +207,7 @@ const Row: FC<RowProps> = ({
             isClicked={isClicked}
             onClick={handleClick}
             isPdfDataset={isPdfDataset}
+            textClassName={cn({ 'bg-blue-300': isChatbotOpen })}
           />
         )}
         <ChatbotWrapper
@@ -220,6 +221,7 @@ const Row: FC<RowProps> = ({
               dataset_field_id: key,
             },
           }}
+          onChatbotStateChange={setIsChatbotOpen}
         >
           <CommentButton />
         </ChatbotWrapper>

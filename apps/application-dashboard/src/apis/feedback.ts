@@ -20,7 +20,6 @@ const Feedbacks = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
-      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
     }),
     applyFeedback: builder.mutation<void, ArchiveFeedbackPayloadType>({
       query: (payload) => ({

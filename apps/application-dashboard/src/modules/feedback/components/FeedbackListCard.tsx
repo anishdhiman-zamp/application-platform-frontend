@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
-import { cn } from '@zamp-platform/ui/utils';
-import { Trash2 } from 'lucide-react';
-import { findTimeDifference } from 'modules/data/data.utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
+import { ChevronDown } from 'lucide-react';
+import FeedbackCard from 'modules/feedback/components/FeedbackCard';
 import FeedbackDeleteDialog from 'modules/feedback/components/FeedbackDeleteDialog';
+import Link from 'next/link';
 import { createChatbotUrl } from '@/modules/chatbot/utils';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -15,59 +16,64 @@ interface FeedbackListCardProps {
   onCheck?: () => void;
   allowDelete?: boolean;
   onDeleteSuccess?: () => void;
+  withoutLinkWrapper?: boolean;
 }
 
-const FeedbackListCard: FC<FeedbackListCardProps> = ({
-  feedback,
-  icon,
-  initiatedBy,
-  processId,
-  allowDelete,
-  onCheck,
-  timePrefix,
-  onDeleteSuccess,
-}) => {
+const selectors = ['#delete-feedback', '#check-feedback'];
+
+const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
+  const { feedback, processId, allowDelete, onDeleteSuccess, withoutLinkWrapper = false } = props;
   const [confirmItem, setConfirmItem] = useState<boolean>(false);
 
-  const handleDelete = (e: React.MouseEvent<SVGSVGElement>) => {
-    e.stopPropagation();
-    setConfirmItem(true);
+  const handleFeedbackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.target as HTMLElement;
+
+    if (selectors.some((selector) => target.closest(selector))) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
-  const handleFeedbackClick = () => {
-    const url = createChatbotUrl(feedback?.annotation_data?.location);
+  const renderFeedbackContent = () => {
+    const feedbackCard = <FeedbackCard {...props} setConfirmItem={setConfirmItem} />;
 
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (withoutLinkWrapper) {
+      const shouldShowAccordion = !allowDelete && feedback?.summary?.feedback_points?.length;
+
+      if (shouldShowAccordion) {
+        return (
+          <Accordion type='single' collapsible>
+            <AccordionItem value='feedback-item' className='border-none'>
+              <AccordionTrigger
+                className='items-start p-0'
+                icon={ChevronDown}
+                iconRotation={180}
+                useTooltip
+                tooltipContent='View change logic'
+              >
+                {feedbackCard}
+              </AccordionTrigger>
+              <AccordionContent className='f-12-450 px-5 py-2 text-gray-900'>
+                {feedback?.summary?.feedback_points?.join(', ') || ''}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        );
+      }
+
+      return feedbackCard;
+    }
+
+    return (
+      <Link href={createChatbotUrl(feedback?.annotation_data?.location)} onClick={handleFeedbackClick} prefetch>
+        {feedbackCard}
+      </Link>
+    );
   };
 
   return (
     <>
-      <div
-        className={cn('flex cursor-pointer items-start gap-2 select-none')}
-        onClick={onCheck ? onCheck : handleFeedbackClick}
-      >
-        {icon}
-        <div className='min-w-0 flex-1'>
-          <div className='f-12-450 text-gray-1000 truncate'>{feedback?.title}</div>
-          <div className='mt-1 flex items-center gap-1.5'>
-            <div className='f-11-450 truncate text-gray-700'>
-              {timePrefix
-                ? `${timePrefix} ${findTimeDifference(feedback?.created_at)}`
-                : findTimeDifference(feedback?.created_at)}
-            </div>
-            {initiatedBy && <div className='h-[2px] w-[2px] rounded-full bg-gray-700'></div>}
-            <div className='f-11-450 truncate text-gray-700'>{feedback?.initiated_by}</div>
-          </div>
-        </div>
-        {allowDelete && (
-          <Trash2
-            onClick={handleDelete}
-            size={12}
-            className='mt-1 cursor-pointer opacity-70 transition-opacity duration-200 hover:opacity-100'
-            aria-label='Delete feedback'
-          />
-        )}
-      </div>
+      {renderFeedbackContent()}
       {allowDelete && confirmItem && (
         <FeedbackDeleteDialog
           open={confirmItem}

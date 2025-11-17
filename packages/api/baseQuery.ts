@@ -5,6 +5,7 @@ import { getFromLocalStorage, isBrowser, LOCAL_STORAGE_KEYS } from '@zamp-platfo
 import { Mutex } from 'async-mutex';
 
 import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
 
 import { API_DOMAIN } from './api.utils';
 import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
@@ -43,10 +44,12 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   extraOptions,
 ) => {
   const state = api.getState() as UserState;
+  const userSessionCookie = getCookie(USER_SESSION_COOKIE);
+  const defaultOrgId = userSessionCookie ? JSON.parse(decodeURIComponent(userSessionCookie)).default_org_id : '';
   const currentOrgId =
     state?.user?.user?.orgs?.[0]?.organization_id ||
     getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
-    '';
+    defaultOrgId;
 
   await mutex.waitForUnlock();
 

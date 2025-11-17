@@ -17,6 +17,7 @@ interface ChatInputProps {
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
+  header: string;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
@@ -25,6 +26,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   conversationId,
   setHeader,
   isDisabled,
+  header,
 }) => {
   const {
     value,
@@ -36,7 +38,14 @@ export const ChatInput: FC<ChatInputProps> = ({
     handleFileSelect,
     removeAttachment,
     isUploading,
-  } = useChatInput(chat, annotationLocation, setIsLoading, conversationId, setHeader);
+    firstMessage,
+  } = useChatInput({
+    chat,
+    annotationLocation,
+    setIsLoading,
+    conversationId,
+    setHeader,
+  });
 
   const { transcript, isRecording, startRecording, stopRecording, microphoneState, connectionState, microphone } =
     useTranscription();
@@ -111,7 +120,11 @@ export const ChatInput: FC<ChatInputProps> = ({
   );
 
   return (
-    <div className='w-full border-t p-3'>
+    <div
+      className={cn('w-full border-t p-3', {
+        'border-none p-0': !(firstMessage || header),
+      })}
+    >
       {/* Hidden file input */}
       <input
         ref={fileInputRef}

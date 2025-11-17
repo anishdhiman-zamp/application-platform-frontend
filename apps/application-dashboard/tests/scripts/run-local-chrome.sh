@@ -1,11 +1,14 @@
 #!/bin/bash
 
-# Load environment variables from .env.local if it exists
-if [ -f ".env.local" ]; then
-    echo "Loading environment variables from .env.local..."
+# Load environment variables from .env if it exists
+if [ -f ".env" ]; then
+    echo "Loading environment variables from .env..."
     set -a  # automatically export all variables
-    source .env.local
+    source .env
     set +a  # stop automatically exporting
+else
+    echo "⚠️  .env file not found! Tests will fail without environment variables."
+    exit 1
 fi
 
 # Kill any existing Chrome instances using port 9222

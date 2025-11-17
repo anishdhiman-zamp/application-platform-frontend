@@ -539,7 +539,7 @@ const config = {
           'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.8) 5%, white 10%, white 80%, white 90%, rgba(255,255,255,0.8) 95%, transparent 100%)',
         'gradient-to-white': 'linear-gradient(90deg, rgba(255,255,255,0) 0%, #FFF 100%)',
         'gradient-to-transparent': 'linear-gradient(0deg, #FFF 50%, rgba(255,255,255,0) 100%)',
-        'chatbot-gradient': 'repeating-linear-gradient(135deg,#e5e5e5_0,#e5e5e5_1px,white_1px,white_6px)',
+        'chatbot-gradient': 'repeating-linear-gradient(135deg, #e5e5e5 0, #e5e5e5 1px, white 1px, white 6px)',
       },
       keyframes: {
         'accordion-down': {
