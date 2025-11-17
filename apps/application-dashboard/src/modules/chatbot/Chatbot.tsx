@@ -11,7 +11,7 @@ import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation } from 'modules/chatbot/utils';
 import { useSearchParams } from 'next/navigation';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
 import { RootState } from '@/store';
 import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
 import { MapAny } from '@/types/commonTypes';
@@ -179,7 +179,7 @@ const Chatbot = ({
           <PopoverContent className='w-[380px] space-y-1.5 border-none bg-transparent p-0 shadow-none'>
             <div className='shadow-chatbot-shadow bg-chatbot-gradient flex max-h-[400px] flex-col rounded-[22px] border border-gray-500 p-1.5'>
               {chat.isLoadingConversationHistory && !isNewConversation ? (
-                <ZampLogoLoader className='h-[140px]' />
+                <ZampLogoWebpLoader />
               ) : (
                 <>
                   {header && (
