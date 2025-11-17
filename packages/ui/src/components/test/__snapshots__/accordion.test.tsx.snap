@@ -28,7 +28,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for collapsible
       >
         Collapsible Section
         <svg
-          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 transition-transform duration-200"
+          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -94,7 +94,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for default acc
       >
         Section 1
         <svg
-          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 transition-transform duration-200"
+          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -159,7 +159,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for multiple ty
       >
         Section 1
         <svg
-          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 transition-transform duration-200"
+          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -217,7 +217,7 @@ exports[`Accordion Component - Functional Tests matches snapshot for multiple ty
       >
         Section 2
         <svg
-          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 transition-transform duration-200"
+          class="lucide lucide-chevron-right text-GRAY_700 h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200"
           fill="none"
           height="24"
           stroke="currentColor"

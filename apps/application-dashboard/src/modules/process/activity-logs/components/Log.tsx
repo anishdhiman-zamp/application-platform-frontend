@@ -12,6 +12,8 @@ import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from
 import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import ChatbotWrapper from '@/modules/chatbot';
 import CommentButton from '@/modules/chatbot/CommentButton';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
@@ -50,6 +52,10 @@ const Log: FC<LogProps> = ({
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
   const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
+  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+
+  const { evaluate, ldClient } = useFeatureFlags();
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -112,12 +118,32 @@ const Log: FC<LogProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
+        .then((res: string[]) => {
+          if (res?.includes(processId ?? '')) {
+            setIsFeedbackEnabled(true);
+          } else {
+            setIsFeedbackEnabled(false);
+          }
+        })
+        .catch(() => {
+          setIsFeedbackEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient, processId]);
+
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>
       {isLogsLoading && sender_type === SENDER_TYPE.SYSTEM ? (
         <div className='w-[60px] shrink-0' />
       ) : (
-        <div className='flex w-[60px] shrink-0 items-start justify-start'>
+        <div
+          className={cn('flex w-[60px] shrink-0 items-start justify-start', {
+            'mt-0.5': isFeedbackEnabled,
+          })}
+        >
           <motion.div
             className='f-12-450 text-GRAY_700 origin-top whitespace-nowrap'
             initial={LINE_BODY_LOGS_ANIMATION_SEQUENCE[1].initial}
@@ -143,7 +169,9 @@ const Log: FC<LogProps> = ({
               duration: 0.5,
               ease: 'linear',
             }}
-            className='relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1'
+            className={cn('relative z-10 origin-center -translate-y-[5px] transform bg-white pt-1', {
+              'pt-1.5': isFeedbackEnabled,
+            })}
           >
             <LogStatusIndicator
               fillColor={statusIndicatorColor.fillColor}
@@ -176,7 +204,9 @@ const Log: FC<LogProps> = ({
           <div className='flex items-center gap-2'>
             <LogMessageAnimation
               text={message}
-              className='f-13-450 w-full text-left break-words'
+              className={cn('f-13-450 w-full text-left break-words', {
+                'bg-blue-300': isChatbotOpen,
+              })}
               delay={0.2}
               shimmer={isLogsLoading}
               shimmerControlRef={shimmerControlRef}
@@ -196,6 +226,8 @@ const Log: FC<LogProps> = ({
                   log_id: log_group_id,
                 },
               }}
+              className='flex h-5 items-start self-baseline'
+              onChatbotStateChange={setIsChatbotOpen}
             >
               <CommentButton />
             </ChatbotWrapper>

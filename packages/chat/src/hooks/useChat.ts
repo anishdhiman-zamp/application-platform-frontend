@@ -4,11 +4,14 @@ import { captureException } from '@sentry/browser';
 import { UseSSEOptions } from '@zamp-platform/utils';
 import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { useEventBus } from '@/app/_providers/sse-provider';
 import type { MapAny } from '@/types/commonTypes';
 
 import {
+  APITags,
+  chatApi,
   useCreateConversationMutation,
   useCreateConversationV2Mutation,
   useGetConversationByIdQuery,
@@ -39,6 +42,7 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
 }
 
 export const useChat = (config: ChatConfig) => {
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sendMessageMutation, { isLoading: isSendingMessage, error: sendMessageError }] = useSendMessageMutation();
   const [sendMessageV2Mutation, { isLoading: isSendingMessageV2, error: sendMessageV2Error }] =
@@ -49,13 +53,13 @@ export const useChat = (config: ChatConfig) => {
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
 
-  const { data: conversationHistory, isFetching: isLoadingConversationHistory } = useGetConversationByIdQuery(
+  const { data: conversationHistory, isLoading: isLoadingConversationHistory } = useGetConversationByIdQuery(
     {
       conversationId: config.conversationId || '',
       resourceId: config.resourceId,
       resourceType: config.resourceType,
     },
-    { skip: !config.resourceId || !config.resourceType || !config.conversationId },
+    { skip: !config.resourceId || !config.resourceType || !config.conversationId, refetchOnMountOrArgChange: false },
   );
 
   const { sseEventBus } = useEventBus();
@@ -110,6 +114,12 @@ export const useChat = (config: ChatConfig) => {
           case SSEEventType.NEW_CHAT_MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
+            // invalidate the conversation by id cache
+            if (newMessage.conversation_id) {
+              dispatch(
+                chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
+              );
+            }
             config.onNewMessage?.(newMessage);
             break;
           default:
@@ -118,7 +128,7 @@ export const useChat = (config: ChatConfig) => {
         captureException(error);
       }
     },
-    [config],
+    [dispatch, _conversationId],
   );
 
   useEffect(() => {

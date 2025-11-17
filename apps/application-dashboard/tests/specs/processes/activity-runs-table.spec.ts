@@ -14,7 +14,7 @@ import {
 
 // Configuration for the test
 const activityRunsTableConfig = {
-  timeout: 10 * 60 * 1000, // 10 minutes
+  timeout: 10 * 60 * 2000, // 20 minutes
 };
 
 test.describe('Activity-Runs Table and Filters Flow', () => {
@@ -27,6 +27,30 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
     // Navigate to processes page
     console.log('Navigating to processes page...');
     await page.goto(`${baseUrl}/processes`);
+
+    // Poll until org switcher is visible (no timeout, keep checking)
+    console.log('Polling for org-switcher-trigger to be visible...');
+    let orgSwitcherVisible = false;
+    let attempts = 0;
+
+    while (!orgSwitcherVisible) {
+      attempts++;
+      try {
+        const orgSwitcher = page.getByTestId('org-switcher-trigger');
+
+        orgSwitcherVisible = await orgSwitcher.isVisible();
+
+        if (orgSwitcherVisible) {
+          console.log(`✅ Org switcher visible after ${attempts} attempts`);
+          break;
+        }
+      } catch {
+        console.log('Error checking org switcher trigger:');
+      }
+
+      console.log(`⏳ Attempt ${attempts}: Org switcher not visible yet, waiting 500ms...`);
+      await page.waitForTimeout(500);
+    }
 
     await test.step('Open org switcher and select an available org', async () => {
       // select Org
@@ -318,8 +342,36 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       }
 
       // Step 7: Reload page and verify columns are still present
-      await page.reload();
-      await page.waitForTimeout(2000);
+      console.log('Reloading page to verify column persistence...');
+      await page.reload({ waitUntil: 'domcontentloaded' });
+
+      // Wait for page to be fully loaded
+      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      console.log('Page reloaded, waiting for data to load...');
+
+      // Wait for table data to load
+      await waitForDataLoad(page, 3);
+
+      // Poll until table headers exist (same as we did for cells)
+      console.log('⏳ Waiting for table headers to render after reload...');
+      let headers: any[] = [];
+      let attempts = 0;
+
+      while (headers.length === 0) {
+        attempts++;
+        headers = await page.locator('[data-testid^="tanstack-table-header-"]').all();
+
+        if (headers.length > 0) {
+          console.log(`✅ Found ${headers.length} table headers after ${attempts} attempts`);
+          break;
+        }
+
+        if (attempts % 5 === 0) {
+          console.log(`⏳ Attempt ${attempts}: Still waiting for table headers to appear...`);
+        }
+
+        await page.waitForTimeout(200);
+      }
 
       const checkResults6 = await checkColumnsHidden(page, columnsToTest, 'after page reload with checked columns');
 

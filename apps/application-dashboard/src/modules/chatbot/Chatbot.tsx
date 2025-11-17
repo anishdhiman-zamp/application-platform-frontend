@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { BlockRenderer, ButtonBlockType, DisplayLayerActionType, ResourceType, useChat } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
@@ -11,12 +11,11 @@ import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation } from 'modules/chatbot/utils';
 import { useSearchParams } from 'next/navigation';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
 import { RootState } from '@/store';
-import { removeFeedbackItem } from '@/store/slices/feedbacks';
 import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
 import { MapAny } from '@/types/commonTypes';
-import { getUserNameFromEmail } from '@/utils/common';
+import { cn, getUserNameFromEmail } from '@/utils/common';
 
 interface ChatbotProps {
   children: React.ReactNode;
@@ -28,6 +27,8 @@ interface ChatbotProps {
   onCloseChatbot?: () => void;
   isNewConversation?: boolean;
   setCurrentFeedbackItem: (feedbackItem?: FeedbackItemType) => void;
+  className?: string;
+  onOpenChatbot?: () => void;
 }
 
 const Chatbot = ({
@@ -40,18 +41,20 @@ const Chatbot = ({
   onCloseChatbot,
   isNewConversation = false,
   setCurrentFeedbackItem,
+  className,
+  onOpenChatbot,
 }: ChatbotProps) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
+
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
     payload: MapAny;
   }>();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const dispatch = useDispatch();
 
   const { runAction } = useActionHub(setIsLoading);
 
@@ -71,7 +74,7 @@ const Chatbot = ({
       setIsOpen(open);
       if (!open) {
         onCloseChatbot?.();
-      }
+      } else onOpenChatbot?.();
     },
     [onCloseChatbot],
   );
@@ -110,8 +113,7 @@ const Chatbot = ({
     }
   };
 
-  const handleDeleteFeedbackSuccess = (feedbackId?: string) => {
-    dispatch(removeFeedbackItem(feedbackId || ''));
+  const handleDeleteFeedbackSuccess = () => {
     setIsOpen(false);
     setCurrentFeedbackItem(undefined);
     setHeader('');
@@ -159,7 +161,7 @@ const Chatbot = ({
   return (
     <>
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger>
+        <PopoverTrigger className={className}>
           {(feedbackItem || feedbackItemsLength > 0) && !hideFeedbackCount ? (
             <Button
               variant='outline'
@@ -175,17 +177,23 @@ const Chatbot = ({
         </PopoverTrigger>
         <PopoverPortal>
           <PopoverContent className='w-[380px] space-y-1.5 border-none bg-transparent p-0 shadow-none'>
-            <div className='rounded-4.5 shadow-chatbot-shadow bg-chatbot-gradient flex max-h-[400px] flex-col border border-gray-500 p-1.5'>
+            <div className='shadow-chatbot-shadow bg-chatbot-gradient flex max-h-[400px] flex-col rounded-[22px] border border-gray-500 p-1.5'>
               {chat.isLoadingConversationHistory && !isNewConversation ? (
-                <ZampLogoLoader className='h-[140px]' />
+                <ZampLogoWebpLoader />
               ) : (
                 <>
-                  <ChatHeader
-                    title={header}
-                    feedbackItem={feedbackItem}
-                    onDeleteSuccess={handleDeleteFeedbackSuccess}
-                  />
-                  <div className='flex min-h-0 flex-1 flex-col rounded-b-xl border-x border-b bg-white'>
+                  {header && (
+                    <ChatHeader
+                      title={header}
+                      feedbackItem={feedbackItem}
+                      onDeleteSuccess={handleDeleteFeedbackSuccess}
+                    />
+                  )}
+                  <div
+                    className={cn('flex min-h-0 flex-1 flex-col rounded-b-[16px] border-x border-b bg-white', {
+                      'border-none': !header,
+                    })}
+                  >
                     {chat.messages.length > 0 && (
                       <div
                         ref={messagesContainerRef}
@@ -220,6 +228,7 @@ const Chatbot = ({
                         conversationId={feedbackItem?.conversation_id}
                         setHeader={setHeader}
                         isDisabled={isLoading}
+                        header={header}
                       />
                     </div>
                   </div>

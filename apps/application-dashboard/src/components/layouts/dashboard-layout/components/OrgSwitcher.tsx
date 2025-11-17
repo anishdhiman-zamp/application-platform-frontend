@@ -96,7 +96,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
       <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
         <DropdownMenuTrigger asChild>
           <div
-            className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            className='border-GRAY_400 bg-BG_GRAY_1 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
             data-testid='org-switcher-trigger'
           >
             <CommonWrapper
@@ -110,10 +110,14 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
                   selectedOrgColor,
                   'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
                 )}
+                data-testid='dummy'
               >
                 {selectedOrg?.name?.[0] || defaultOrgName[0]}
               </div>
-              <div className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
+              <div
+                className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'
+                data-testid={`select-org-${selectedOrg?.name?.toLowerCase()}`}
+              >
                 {selectedOrg?.name || defaultOrgName}
               </div>
               {isSidebarOpen && (
@@ -131,7 +135,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
           className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
           sideOffset={5}
         >
-          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
+          <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}

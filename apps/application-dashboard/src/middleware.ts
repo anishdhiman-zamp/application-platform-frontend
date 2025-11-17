@@ -82,6 +82,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
           user_id: session.user_id,
           user_email: session.user_email,
           org_count: session.orgs?.length ?? 0,
+          default_org_id: session?.orgs?.[0]?.organization_id,
           cached_at: Date.now(),
         };
 
@@ -98,6 +99,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
         user_id: session?.user_id,
         user_email: session?.user_email,
         org_count: session?.orgs?.length || 0,
+        default_org_id: session?.orgs?.[0]?.organization_id,
         cached_at: Date.now(),
       };
 

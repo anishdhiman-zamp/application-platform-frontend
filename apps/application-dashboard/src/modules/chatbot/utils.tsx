@@ -157,12 +157,12 @@ export const getFeedbackItemConfig = (
       };
     case FEEDBACK_STATUS.PROCESSING:
       return {
-        icon: <Loader size={12} className='mt-1' />,
+        icon: <Loader size={12} className='mt-0.5' />,
         onCheck: defaultFn,
       };
     case FEEDBACK_STATUS.APPLIED:
       return {
-        icon: <Check size={12} />,
+        icon: <Check size={12} className='text-ORANGE_1000 mt-0.5' />,
         onCheck: defaultFn,
       };
     default:

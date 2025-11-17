@@ -19,7 +19,6 @@ export const ROUTES_PATH = {
   MONEY_TRANSFER: '/payments/money-transfer',
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
-  ADMIN_ASSETS: '/admin/assets',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId',

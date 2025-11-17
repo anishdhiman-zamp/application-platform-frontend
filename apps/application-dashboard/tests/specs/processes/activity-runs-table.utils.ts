@@ -106,12 +106,25 @@ export async function waitForDataLoad(
 export async function validateColumnValues(page: Page, columnId: string, expectedValue: string): Promise<void> {
   console.log(`Validating that all ${columnId} values match "${expectedValue}"...`);
 
-  // Get all cells in the specified column
-  const cells = await page.locator(`[data-testid="table-cell-${columnId}"]`).all();
-  // console.log(`Found ${cells.length} ${columnId} cells to validate`);
+  // Poll until cells are available (wait for API and rendering)
+  console.log(`⏳ Waiting for ${columnId} cells to appear after data load...`);
+  let cells: any[] = [];
+  let attempts = 0;
 
-  if (cells.length === 0) {
-    throw new Error(`No ${columnId} cells found in the table`);
+  while (cells.length === 0) {
+    attempts++;
+    cells = await page.locator(`[data-testid="table-cell-${columnId}"]`).all();
+
+    if (cells.length > 0) {
+      console.log(`Found ${cells.length} ${columnId} cells after ${attempts} attempts`);
+      break;
+    }
+
+    if (attempts % 5 === 0) {
+      console.log(`⏳ Attempt ${attempts}: Still waiting for ${columnId} cells to appear...`);
+    }
+
+    await page.waitForTimeout(200);
   }
 
   // Check each cell value
@@ -124,6 +137,8 @@ export async function validateColumnValues(page: Page, columnId: string, expecte
       throw new Error(`Validation failed: Cell ${i + 1} contains "${cleanCellText}" but expected "${expectedValue}"`);
     }
   }
+
+  console.log(`✅ All ${cells.length} ${columnId} cells validated successfully`);
 }
 
 /**

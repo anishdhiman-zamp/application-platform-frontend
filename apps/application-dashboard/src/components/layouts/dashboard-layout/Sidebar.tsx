@@ -25,10 +25,18 @@ const Sidebar = () => {
   const hash = useHash();
   const pathname = pathTrim + hash;
 
-  const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
+  const {
+    data: pages,
+    isLoading: isLoadingPages,
+    isSuccess: isSuccessPages,
+  } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
+  const {
+    data: processes,
+    isLoading: isLoadingProcesses,
+    isSuccess: isSuccessProcesses,
+  } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
@@ -45,12 +53,14 @@ const Sidebar = () => {
   }, [pages]);
 
   useEffect(() => {
-    if (processes) {
-      pushToMostRelevantProcess();
-    } else if (pages) {
-      pushToMostRelevantPage();
+    if (isSuccessPages && isSuccessProcesses) {
+      if (processes && processes?.length > 0) {
+        pushToMostRelevantProcess();
+      } else if (pages && pages?.length > 0) {
+        pushToMostRelevantPage();
+      }
     }
-  }, [pages, processes]);
+  }, [pages, processes, isSuccessPages, isSuccessProcesses]);
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 

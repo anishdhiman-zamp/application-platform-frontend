@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@zamp-platform/ui/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -12,19 +13,52 @@ function AccordionItem({ className, ...props }: React.ComponentProps<typeof Acco
   return <AccordionPrimitive.Item data-slot='accordion-item' className={cn('border-b', className)} {...props} />;
 }
 
-function AccordionTrigger({ className, children, ...props }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+interface AccordionTriggerProps extends React.ComponentProps<typeof AccordionPrimitive.Trigger> {
+  icon?: React.ComponentType<{ className?: string }>;
+  iconRotation?: 90 | 180;
+  useTooltip?: boolean;
+  tooltipContent?: React.ReactNode;
+}
+
+function AccordionTrigger({
+  className,
+  children,
+  icon,
+  iconRotation = 90,
+  useTooltip = false,
+  tooltipContent,
+  ...props
+}: AccordionTriggerProps) {
+  const Icon = icon || ChevronRight;
+  const rotationClass =
+    iconRotation === 180 ? '[&[data-state=open]>svg]:rotate-180' : '[&[data-state=open]>svg]:rotate-90';
+
+  const iconElement = (
+    <Icon className='text-GRAY_700 h-4 w-4 shrink-0 cursor-pointer transition-transform duration-200' />
+  );
+
   return (
     <AccordionPrimitive.Header className='flex'>
       <AccordionPrimitive.Trigger
         data-slot='accordion-trigger'
         className={cn(
-          'flex flex-1 items-center justify-between py-4 text-left text-sm font-medium transition-all [&[data-state=open]>svg]:rotate-90',
+          'flex flex-1 items-center justify-between py-4 text-left text-sm font-medium transition-all',
+          rotationClass,
           className,
         )}
         {...props}
       >
         {children}
-        <ChevronRight className='text-GRAY_700 h-4 w-4 shrink-0 transition-transform duration-200' />
+        {useTooltip && tooltipContent ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>{iconElement}</TooltipTrigger>
+              <TooltipContent>{tooltipContent}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          iconElement
+        )}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );

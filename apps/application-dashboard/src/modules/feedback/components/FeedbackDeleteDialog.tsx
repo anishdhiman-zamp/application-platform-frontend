@@ -1,4 +1,5 @@
 import { type FC } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Button,
   Dialog,
@@ -12,6 +13,7 @@ import {
 import { findTimeDifference } from 'modules/data/data.utils';
 import { useDeleteFeedbackMutation } from '@/apis/feedback';
 import { feedbackContextActions, useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { removeFeedbackItem } from '@/store/slices/feedbacks';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackDeleteDialogProps {
@@ -30,7 +32,8 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
   onDeleteSuccess,
 }) => {
   const [deleteFeedback, { isLoading: isDeleting }] = useDeleteFeedbackMutation();
-  const { dispatch } = useFeedbackContextStore();
+  const { dispatch: feedbackContextDispatch } = useFeedbackContextStore();
+  const dispatch = useDispatch();
 
   const handleDelete = () => {
     if (!processId || !feedback?.id) return;
@@ -40,10 +43,11 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
     })
       .unwrap()
       .then(() => {
-        dispatch({
+        feedbackContextDispatch({
           type: feedbackContextActions.REMOVE_FEEDBACK_ITEM,
           payload: { id: feedback.id, status: feedback.status },
         });
+        dispatch(removeFeedbackItem(feedback.id));
         onOpenChange(false);
         onDeleteSuccess?.();
       })
