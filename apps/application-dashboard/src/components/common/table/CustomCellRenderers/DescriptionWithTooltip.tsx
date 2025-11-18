@@ -20,7 +20,7 @@ const DescriptionWithTooltip = (params: ICellRendererParams) => {
     <div
       ref={cellRef}
       className={cn(
-        'max-w-[400px] truncate rounded-sm px-1.5 py-1 transition-colors duration-200',
+        'f-12-400 h-6 max-w-[400px] cursor-pointer truncate rounded-sm px-1.5 py-1 transition-colors duration-200',
         isTruncated && 'hover:bg-gray-50',
         !params.value && 'text-gray-600',
       )}

@@ -302,7 +302,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
         errorCardSubTitle='Please try again later'
         refetchFunction={handleRefetch}
       >
-        <div className='z-10 h-full w-full' ref={datasetTableRef} id='activity-by-status-table'>
+        <div className='z-10 h-full w-full' ref={datasetTableRef} id='full-height-cell-table'>
           <TanStackTable
             tableRef={tableRef}
             columns={columns}

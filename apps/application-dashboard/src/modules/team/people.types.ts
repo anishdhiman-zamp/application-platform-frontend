@@ -44,6 +44,7 @@ export type MembersEmailPropsType = {
 export type InvitedMembersListingPropsType = {
   isLoadingInvitedTeamMembersData: boolean;
   data: InvitedAudiencesByOrganisationIdResponse[];
+  search: string;
 };
 
 export type MembersNamePropsType = {
@@ -80,6 +81,7 @@ export type TeamMembersListingPropsType = {
   isLoadingTeamMembersData: boolean;
   data: AudiencesByOrganisationIdResponse[];
   hasPeoplePolicy: boolean;
+  search: string;
 };
 
 export type CustomTeamsDropdownPropsType = {
