@@ -32,10 +32,9 @@ export const LISTING_COLUMNS: ColDef[] = [
     field: 'title',
     headerName: 'Datasets',
     headerClass: 'px-6!',
-    cellClass: 'px-6!',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center'>
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
           <div className='f-13-500 flex items-center gap-2.5'>
             <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
             {params.value}
@@ -48,10 +47,9 @@ export const LISTING_COLUMNS: ColDef[] = [
     field: 'description',
     headerName: 'Description',
     headerClass: 'px-7.5!',
-    cellClass: 'px-6!',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center'>
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
           <DescriptionWithTooltip {...params} />
         </Link>
       );
@@ -80,7 +78,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     headerClass: 'px-6!',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center'>
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
           <SvgSpriteLoader id='arrow-narrow-right' width={14} height={14} color={COLORS.GRAY_900} />
         </Link>
       );
@@ -88,7 +86,7 @@ export const LISTING_COLUMNS: ColDef[] = [
     width: 108,
     flex: 0,
     minWidth: 108,
-    cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell px-6!'),
+    cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell'),
     sortable: false,
   },
 ];

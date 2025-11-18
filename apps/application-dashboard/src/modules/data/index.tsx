@@ -25,7 +25,7 @@ const Listing = () => {
       skeletonType={SkeletonTypes.CUSTOM}
       className='h-full'
     >
-      <div className='overflow-hidden rounded-tl-xl' id='full-height-table'>
+      <div className='overflow-hidden rounded-tl-xl' id='full-height-cell-table'>
         <DataTable
           columns={columns}
           rows={data?.datasets ?? []}
