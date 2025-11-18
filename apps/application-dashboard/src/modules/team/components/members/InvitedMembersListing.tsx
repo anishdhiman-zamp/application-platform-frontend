@@ -41,9 +41,9 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({
             ))}
           </div>
           <CommonWrapper
-            isLoading={isLoadingInvitedTeamMembersData}
+            isLoading={isLoadingInvitedTeamMembersData || true}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<SkeletonLoaderListing />}
+            loader={<SkeletonLoaderListing columns={3} length={12} />}
             className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
             {reversedData?.map((row, index) => (
