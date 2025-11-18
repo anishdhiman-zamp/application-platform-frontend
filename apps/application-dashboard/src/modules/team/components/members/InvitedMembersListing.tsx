@@ -41,7 +41,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({
             ))}
           </div>
           <CommonWrapper
-            isLoading={isLoadingInvitedTeamMembersData || true}
+            isLoading={isLoadingInvitedTeamMembersData}
             skeletonType={SkeletonTypes.CUSTOM}
             loader={<SkeletonLoaderListing columns={3} length={12} />}
             className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
