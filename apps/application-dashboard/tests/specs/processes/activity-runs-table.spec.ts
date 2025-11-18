@@ -345,9 +345,12 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       console.log('Reloading page to verify column persistence...');
       await page.reload({ waitUntil: 'domcontentloaded' });
 
-      // Wait for page to be fully loaded
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
-      console.log('Page reloaded, waiting for data to load...');
+      // Wait for the table to be visible (more reliable than networkidle)
+      await page.waitForSelector('[data-testid^="tanstack-table-header-"]', {
+        timeout: 10000,
+        state: 'visible',
+      });
+      console.log('Page reloaded, table headers visible...');
 
       // Wait for table data to load
       await waitForDataLoad(page, 3);

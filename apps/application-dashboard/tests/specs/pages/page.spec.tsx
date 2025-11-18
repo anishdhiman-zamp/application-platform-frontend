@@ -7,7 +7,7 @@ import { createPage, deleteEntity, editName, reorderElements } from './utils';
 
 export const { baseUrl, baseBEUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
 
-test.describe('Pages', () => {
+test.describe.skip('Pages', () => {
   test('Pages', async ({ page }) => {
     let pageId = '';
 

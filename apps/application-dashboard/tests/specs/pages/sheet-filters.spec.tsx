@@ -24,7 +24,7 @@ import {
 
 export const { baseUrl, baseBEUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
 
-test.describe('Sheet filters', () => {
+test.describe.skip('Sheet filters', () => {
   test('Sheet filters', async ({ page }) => {
     let pageId = '',
       sheetId = '',

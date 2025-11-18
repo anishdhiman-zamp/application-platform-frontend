@@ -202,6 +202,9 @@ jobs:
           # NEXT_PUBLIC_DEFAULT_REGION: "stg"
           # SELENIUM_GRID_AUTH_TOKEN: ""
           NODE_OPTIONS: "--max-old-space-size=8192"
+          # Skip type checking during build to prevent OOM (saves memory)
+          NEXT_TYPESCRIPT_NO_CHECK: true
+          SKIP_ENV_VALIDATION: true
         run: |
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
@@ -378,6 +381,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
     needs:
       - create-tag
       - prepare-env
