@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { FLEX_ALIGN_RIGHT, KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
+import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
@@ -16,7 +16,9 @@ import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
+import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { COLORS } from '@/constants/colors';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
@@ -157,14 +159,7 @@ const Topbar = () => {
           />
         </div>
         <div className='flex-shrink-0'>
-          <Image
-            className='cursor-pointer'
-            width={16}
-            height={16}
-            onClick={handleSidebarToggle}
-            src={FLEX_ALIGN_RIGHT}
-            alt='toggle sidebar'
-          />
+          <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} onClick={handleSidebarToggle} />
         </div>
       </div>
       <div className='flex w-full items-center justify-between'>

@@ -1,6 +1,3 @@
-import { COINS_STACKED_04, USERS_02 } from 'constants/icons';
-import { NavigationItemSchema } from 'types/config';
-
 export const ROUTES_PATH = {
   HOME: '/',
   LOGIN: '/login',
@@ -94,32 +91,3 @@ export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
-
-export const SETTING_SIDEBAR_ITEMS = [
-  {
-    label: 'People',
-    id: 'people',
-    iconId: 'users-02',
-    path: ROUTES_PATH.TEAM,
-  },
-  {
-    label: 'Policies',
-    id: 'policies',
-    iconId: 'shield-zap',
-    path: ROUTES_PATH.POLICIES,
-  },
-];
-export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
-  {
-    label: 'Data',
-    id: 'data',
-    iconUrl: COINS_STACKED_04,
-    path: ROUTES_PATH.DATA,
-  },
-  {
-    label: 'People',
-    id: 'people',
-    iconUrl: USERS_02,
-    path: ROUTES_PATH.TEAM,
-  },
-];

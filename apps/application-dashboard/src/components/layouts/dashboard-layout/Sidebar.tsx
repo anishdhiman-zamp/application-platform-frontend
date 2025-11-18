@@ -2,13 +2,14 @@
 
 import { memo, useEffect, useMemo } from 'react';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { getProcessRouteById } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -75,7 +76,7 @@ const Sidebar = () => {
                   <SidebarTab
                     key={item.label}
                     name={item.label}
-                    iconUrl={item.iconUrl}
+                    iconComponent={item.iconComponent}
                     isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
                   />
                 </Link>
