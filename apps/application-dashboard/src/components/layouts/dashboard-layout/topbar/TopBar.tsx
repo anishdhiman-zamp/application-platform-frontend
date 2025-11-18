@@ -159,7 +159,13 @@ const Topbar = () => {
           />
         </div>
         <div className='flex-shrink-0'>
-          <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} onClick={handleSidebarToggle} />
+          <FlexAlignRight
+            height={16}
+            width={16}
+            color={COLORS.GRAY_700}
+            className='cursor-pointer'
+            onClick={handleSidebarToggle}
+          />
         </div>
       </div>
       <div className='flex w-full items-center justify-between'>
