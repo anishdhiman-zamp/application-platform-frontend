@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 export interface NavigationItemSchema {
   label: string;
   id: string;
-  iconUrl: string;
+  iconComponent: ReactNode;
   path: string;
   children?: NavigationItemSchema[];
   isHidden?: boolean;
