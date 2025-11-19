@@ -218,6 +218,20 @@ jobs:
 
           echo "✅ Secrets loaded successfully"
 
+      - name: Type Check
+        run: |
+          echo "🔍 Running TypeScript type checking..."
+          cd apps/application-dashboard
+          npx tsc --noEmit
+          echo "✅ Type checking completed"
+
+      - name: Lint
+        run: |
+          echo "🧹 Running ESLint..."
+          cd apps/application-dashboard
+          npm run lint
+          echo "✅ Linting completed"
+
       - name: Build application with Memory Profiling
         env:
           CI: true
