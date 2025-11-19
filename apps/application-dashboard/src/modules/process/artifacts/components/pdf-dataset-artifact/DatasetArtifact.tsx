@@ -19,7 +19,6 @@ import {
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import ExportDataset from 'modules/data/components/exportDataset';
@@ -49,6 +48,7 @@ import { type defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
@@ -70,7 +70,6 @@ import { getEncodedRequest } from 'components/common/table/table.utils';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -699,13 +698,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         refetchFunction={refetchFilterConfig}
         loader={
           <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
+            <ZampLogoLoader />
           </div>
         }
       >

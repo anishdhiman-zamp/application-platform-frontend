@@ -1,9 +1,8 @@
 import type { FC } from 'react';
 import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
 import VideoPlayer from '@/modules/process/artifacts/components/browser-artifact/VideoPlayer';
 import type { BrowserArtifactsResponseType } from '@/types/api/processApi.types';
 
@@ -39,7 +38,7 @@ const BrowserArtifact: FC<BrowserArtifactProps> = ({ browserArtifact, processId,
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
         <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+          <ZampLogoLoader />
         </div>
       }
       className='bg-BG_GRAY_2 h-full w-full p-3'

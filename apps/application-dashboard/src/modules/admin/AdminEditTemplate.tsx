@@ -5,12 +5,11 @@ import { type Edge } from '@xyflow/react';
 import { useGetTemplatesMutation, useUpsertTemplateMutation } from '@/apis/admin';
 import { Button } from '@/components/common/button/Button';
 import Input from '@/components/common/input';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
 import FullScreenPopup from '@/components/FullScreenPopup';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
 import { SIZE_TYPES } from '@/types/common/components';
 import { toast } from 'components/common/toast/Toast';
 
@@ -74,13 +73,7 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
           <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
+            <ZampLogoLoader />
           </div>
         }
       >

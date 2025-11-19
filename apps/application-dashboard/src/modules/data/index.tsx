@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import DataTable from 'components/common/table/DataTable';
@@ -21,7 +21,7 @@ const Listing = () => {
   return (
     <CommonWrapper
       isLoading={isLoading}
-      loader={<ZampLogoWebpLoader />}
+      loader={<ZampLogoPageLoader />}
       skeletonType={SkeletonTypes.CUSTOM}
       className='h-full'
     >

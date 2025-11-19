@@ -5,7 +5,6 @@ import { ColDef } from 'ag-grid-community';
 import { useGetAllDatasetsQuery } from 'apis/admin';
 import { useLazyGetActionStatusQuery } from 'apis/dataset';
 import { POLLING_STATUS } from 'constants/common.constants';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import usePolling from 'hooks/usePolling';
 import { ADMIN_DATASET_LISTING_COLUMNS } from 'modules/admin/admin.constants';
 import { AdminDeleteDatasetDetailsType, EditDatasetType } from 'modules/admin/admin.types';
@@ -18,6 +17,7 @@ import Link from 'next/link';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { Button } from 'components/common/button/Button';
 import DataTable from 'components/common/table/DataTable';
@@ -25,7 +25,6 @@ import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const AdminDatasetListing = () => {
   const { data, isLoading, isError, refetch } = useGetAllDatasetsQuery();
@@ -163,13 +162,7 @@ const AdminDatasetListing = () => {
           className='h-full w-full'
           loader={
             <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-              <DynamicLottiePlayer
-                src={ZAMP_LOGO_LOADER}
-                className='lottie-player h-[140px]'
-                autoplay
-                loop
-                keepLastFrame
-              />
+              <ZampLogoLoader />
             </div>
           }
         >

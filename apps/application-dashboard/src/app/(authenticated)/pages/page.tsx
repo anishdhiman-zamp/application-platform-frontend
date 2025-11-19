@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useGetPagesQuery } from '@/apis/pages';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
 export default function Page() {
@@ -18,5 +18,5 @@ export default function Page() {
     }
   }, [pages]);
 
-  return <ZampLogoWebpLoader />;
+  return <ZampLogoPageLoader />;
 }

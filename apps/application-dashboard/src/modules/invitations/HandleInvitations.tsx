@@ -4,11 +4,10 @@ import { FC, useEffect, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 export const HandleInvitations: FC = () => {
   const [handledInvitations, setHandledInvitations] = useState<string[]>([]);
@@ -76,7 +75,7 @@ export const HandleInvitations: FC = () => {
           className='z-1000 flex h-full w-full items-center justify-center bg-white'
           data-testid='handle-invitations-wrapper'
         >
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+          <ZampLogoLoader />
         </div>
       }
     >

@@ -1,17 +1,16 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { CellEditRequestEvent, RowDragEndEvent } from 'ag-grid-community';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { DisplayConfigHeadersListV2 } from 'modules/admin/admin.constants';
 import { AdminDatasetByIdPropsType } from 'modules/admin/admin.types';
 import { transformDatasetFilterConfigResponseTypeToDisplayConfigType } from 'modules/admin/admin.utils';
 import AdminHeader from 'modules/admin/AdminHeader';
 import { cn } from 'utils/common';
 import { useGetDatasetFilterConfigQuery } from '@/apis/dataset';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import DatasetTable from '@/components/common/table/DatasetTable';
 import { DisplayConfigType } from '@/types/api/admin.types';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const AdminDatasetByIdV2: FC<AdminDatasetByIdPropsType> = ({ id }) => {
   const { isFetching, data, isError } = useGetDatasetFilterConfigQuery(
@@ -82,7 +81,7 @@ const AdminDatasetByIdV2: FC<AdminDatasetByIdPropsType> = ({ id }) => {
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
         <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
+          <ZampLogoLoader />
         </div>
       }
     >

@@ -1,13 +1,13 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import { useGetAllDatasetsQuery, useTransformDatasetMutation } from 'apis/admin';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { DatasetTypeOptions, ProviderOptions, TRANSFORM_DATASET_LABEL_PROPS } from 'modules/admin/admin.constants';
 import { DatasetType, ProviderType } from 'modules/admin/admin.types';
 import DatasetById from 'modules/data/Dataset';
 import { TransformDatasetResponseType } from 'types/api/admin.types';
 import { defaultFn, defaultFnType, OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
 import { SIZE_TYPES } from '@/types/common/components';
 import { Button } from 'components/common/button/Button';
 import { Dropdown } from 'components/common/dropdown';
@@ -15,7 +15,6 @@ import Input from 'components/common/input';
 import { Label } from 'components/common/Label';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FullScreenPopup from 'components/FullScreenPopup';
 
 type AdminDatasetTransformProps = {
@@ -106,13 +105,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
           <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
+            <ZampLogoLoader />
           </div>
         }
       >

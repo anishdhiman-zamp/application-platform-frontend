@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
@@ -37,5 +37,5 @@ export default function Page() {
     }
   }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
 
-  return <ZampLogoWebpLoader />;
+  return <ZampLogoPageLoader />;
 }

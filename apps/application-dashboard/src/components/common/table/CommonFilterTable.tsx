@@ -9,7 +9,6 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useGetFilterConfigQuery, useLazyGetDataQuery } from 'apis/filterTable';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import {
   formatColumns,
   formatDrilldownFilters,
@@ -22,12 +21,12 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
+import ZampLogoLoader from 'components/common/loader/ZampLogoLoader';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import { getColumnType, getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore } from 'components/filter/filters.context';
 
@@ -277,13 +276,7 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
           <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
+            <ZampLogoLoader />
           </div>
         }
       >
