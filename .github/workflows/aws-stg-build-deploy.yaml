@@ -159,17 +159,42 @@ jobs:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
 
-      - uses: actions/cache@v4
+      - name: Cache Turbo
+        uses: actions/cache@v4
         with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          path: |
+            .turbo
+            apps/application-dashboard/.next/cache
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}-
             ${{ runner.os }}-turbo-
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
 
+      - name: Check System Resources
+        run: |
+          echo "=== System Resources Check ==="
+          echo ""
+          echo "📊 MEMORY BREAKDOWN:"
+          free -h
+          echo ""
+          echo "🔍 DETAILED MEMORY INFO:"
+          cat /proc/meminfo | grep -E "(MemTotal|MemFree|MemAvailable|Cached|SwapTotal|SwapFree)"
+          echo ""
+          echo "🖥️  CPU INFO:"
+          echo "CPU Cores: $(nproc)"
+          echo "CPU Model: $(cat /proc/cpuinfo | grep "model name" | head -1 | cut -d: -f2)"
+          echo ""
+          echo "💾 DISK SPACE:"
+          df -h / | tail -1
+          echo ""
+          echo "🔍 TOP MEMORY CONSUMERS (Before Build):"
+          ps aux --sort=-%mem | head -10
+          echo "================================"
+      
       - name: Install dependencies
         run: |
           # Install all dependencies (will use cache if available)
@@ -193,30 +218,107 @@ jobs:
 
           echo "✅ Secrets loaded successfully"
 
-      - name: Build application
+      - name: Type Check
+        run: |
+          echo "🔍 Running TypeScript type checking..."
+          cd apps/application-dashboard
+          npx tsc --noEmit
+          echo "✅ Type checking completed"
+
+      - name: Lint
+        run: |
+          echo "🧹 Running ESLint..."
+          cd apps/application-dashboard
+          npm run lint
+          echo "✅ Linting completed"
+
+      - name: Build application with Memory Profiling
         env:
-          # NEXT_PUBLIC_ASSET_PREFIX: "https://d2v2rvx5m3g178.cloudfront.net/application-platform-frontend"
+          CI: true
           TIMESTAMP: "${TIMESTAMP}"
-          # NEXT_PUBLIC_ENVIRONMENT: "staging"
-          # NEXT_PUBLIC_BASE_API_URL: "https://api-stg.zamp.ai"
-          # NEXT_PUBLIC_DEFAULT_REGION: "stg"
-          # SELENIUM_GRID_AUTH_TOKEN: ""
-          NODE_OPTIONS: "--max-old-space-size=8192"
-          # Skip type checking during build to prevent OOM (saves memory)
-          NEXT_TYPESCRIPT_NO_CHECK: true
+          # Optimize Node.js memory based on runner capacity
+          NODE_OPTIONS: "--max-old-space-size=10240 --max-semi-space-size=256"
+          # Skip environment validation if using external secrets
           SKIP_ENV_VALIDATION: true
         run: |
+          echo "=== Build Configuration ==="
           echo "Building application for tag: $NEW_TAG"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
           echo "TIMESTAMP: $TIMESTAMP"
           echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
           echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
           echo "NODE_OPTIONS: $NODE_OPTIONS"
-                    
+          echo "CI: $CI"
+          echo "=========================="
+          echo ""
+          
+          # Memory snapshot before build
+          echo "📊 MEMORY BEFORE BUILD:"
+          free -h
+          echo ""
+          echo "🔍 TOP PROCESSES (Before):"
+          ps aux --sort=-%mem | head -5
+          echo "================================"
+          echo ""
+          
+          # Start background memory monitor
+          echo "🔬 Starting real-time memory monitor..."
+          (
+            while true; do
+              TIMESTAMP=$(date '+%H:%M:%S')
+              MEM_USED=$(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2 }')
+              MEM_AVAIL=$(free -h | awk 'NR==2{print $7}')
+              NODE_MEM=$(ps aux | grep 'node' | grep -v grep | awk '{sum+=$6} END {printf "%.1f", sum/1024}')
+              echo "[$TIMESTAMP] Memory: $MEM_USED used, $MEM_AVAIL available, Node.js: ${NODE_MEM}MB"
+              sleep 10
+            done
+          ) &
+          MONITOR_PID=$!
+          
+          # Ensure monitor is killed on script exit (even if build fails)
+          trap "kill $MONITOR_PID 2>/dev/null || true" EXIT
+          
           # Build the application
-          npm run build
+          echo "🚀 Starting build process..."
+          npm run build 2>&1 | while IFS= read -r line; do
+            echo "$line"
+            # Track memory at key build stages
+            if echo "$line" | grep -qE "(Compiling|Linting|checking validity|Creating an optimized|Compiled successfully)"; then
+              MEM_NOW=$(free -h | awk 'NR==2{print $3 "/" $2}')
+              echo "   └─ [MEMORY: $MEM_NOW]"
+            fi
+          done
+          BUILD_EXIT_CODE=$?
+          
+          # Stop memory monitor
+          kill $MONITOR_PID 2>/dev/null || true
+          
+          echo ""
+          echo "================================"
+          echo "📊 MEMORY AFTER BUILD:"
+          free -h
+          echo ""
+          echo "🔍 TOP MEMORY CONSUMERS (After):"
+          ps aux --sort=-%mem | head -10
+          echo ""
+          echo "📈 MEMORY STATISTICS:"
+          cat /proc/meminfo | grep -E "(MemTotal|MemFree|MemAvailable|Cached|SwapTotal|SwapFree|Dirty|Shmem)"
+          echo ""
+          
+          # Check if build succeeded
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "❌ BUILD FAILED with exit code: $BUILD_EXIT_CODE"
+            echo ""
+            echo "🔍 DIAGNOSING OOM (Out of Memory)..."
+            echo "Checking dmesg for OOM killer messages:"
+            sudo dmesg | tail -50 | grep -i -E "(kill|oom|memory)" || echo "No OOM messages found"
+            echo ""
+            echo "Last system messages:"
+            sudo journalctl -n 50 --no-pager | grep -i -E "(killed|oom|memory)" || echo "No relevant messages"
+            exit $BUILD_EXIT_CODE
+          fi
 
-          echo "Build completed successfully!"
+          echo "✅ Build completed successfully!"
           echo "Build artifacts:"
           ls -la apps/application-dashboard/.next/
 
