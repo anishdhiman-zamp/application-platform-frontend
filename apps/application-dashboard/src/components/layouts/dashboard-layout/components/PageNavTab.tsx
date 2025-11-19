@@ -109,7 +109,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
         )}
         data-testid={`${pageId}-page-nav-tab`}
       >
-        <PageIcon height={16} width={16} isSelected={isSelected} />
+        <PageIcon height={14} width={14} isSelected={isSelected} />
 
         <div className='flex-1'>{optimisticName}</div>
 

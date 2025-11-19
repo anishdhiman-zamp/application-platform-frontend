@@ -1,7 +1,6 @@
 'use client';
 
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { Activity } from 'lucide-react';
 import { cn } from 'utils/common';
 
 interface ProcessNavTabProps {
@@ -18,14 +17,8 @@ const ProcessNavTab = ({ label, isSelected }: ProcessNavTabProps) => {
         isSelected ? 'bg-GRAY_100 text-GRAY_1000' : '',
       )}
     >
-      <SvgSpriteLoader
-        iconCategory={ICON_SPRITE_TYPES.GENERAL}
-        id='activity'
-        height={16}
-        width={16}
-        className='w-[14px] cursor-pointer align-middle'
-      />
-      <div>{label}</div>
+      <Activity height={14} width={14} className='cursor-pointer' strokeWidth={1.7} />
+      <span className='flex-1'>{label}</span>
     </div>
   );
 };
