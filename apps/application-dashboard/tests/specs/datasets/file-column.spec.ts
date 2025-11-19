@@ -51,7 +51,7 @@ test.describe.skip('File Column', () => {
 
       if (errorVisible) {
         console.log('Skipping test: API is not returning data');
-        test.info().skip('API is not returning data');
+        test.skip(true, 'API is not returning data');
 
         return;
       }
