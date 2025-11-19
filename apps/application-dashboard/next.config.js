@@ -7,15 +7,25 @@ const nextConfig = {
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
   experimental: {
     serverActions: {},
+    // Optimize memory usage during builds
+    optimizePackageImports: ['lucide-react', '@zamp-platform/ui'],
   },
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
     };
+
+    // Optimize build performance and memory usage
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+      };
+    }
 
     return config;
   },
