@@ -37,7 +37,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
     tableStatusIcon: {
       color: COLORS.ORANGE_300,
     },
-    label: 'Needs attention',
+    label: 'Needs review',
   },
   [ACTIVITY_RUN_STATUS.VOID]: {
     tabStatusIcon: {
