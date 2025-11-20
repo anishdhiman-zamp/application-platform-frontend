@@ -25,7 +25,7 @@ export const STATUS_ICON_COLOR_MAPPING = {
       strokeColor: COLORS.RED_900,
     },
     tableStatusIcon: {
-      color: COLORS.RED_200,
+      color: COLORS.RED_900,
     },
     label: 'Needs attention',
   },
