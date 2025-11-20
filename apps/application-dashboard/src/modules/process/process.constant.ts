@@ -21,13 +21,23 @@ import {
 export const STATUS_ICON_COLOR_MAPPING = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
     tabStatusIcon: {
+      fillColor: COLORS.RED_200,
+      strokeColor: COLORS.RED_900,
+    },
+    tableStatusIcon: {
+      color: COLORS.RED_200,
+    },
+    label: 'Needs attention',
+  },
+  [ACTIVITY_RUN_STATUS.NEEDS_REVIEW]: {
+    tabStatusIcon: {
       fillColor: COLORS.ORANGE_200,
       strokeColor: COLORS.ORANGE_300,
     },
     tableStatusIcon: {
       color: COLORS.ORANGE_300,
     },
-    label: 'Needs attention',
+    label: 'Needs review',
   },
   [ACTIVITY_RUN_STATUS.VOID]: {
     tabStatusIcon: {
@@ -175,6 +185,11 @@ export const EMPTY_STATE_BY_STATUS = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
     title: 'No blockers right now',
     description: 'Sit back and let things flow, we’ll nudge you when it’s time to step in.',
+    iconUrl: NEEDS_ATTENTION_EMPTY_STATE,
+  },
+  [ACTIVITY_RUN_STATUS.NEEDS_REVIEW]: {
+    title: 'Nothing to review right now',
+    description: 'Everything that’s wrapped up nicely will land here. Sit tight!',
     iconUrl: NEEDS_ATTENTION_EMPTY_STATE,
   },
   [ACTIVITY_RUN_STATUS.IN_PROGRESS]: {
