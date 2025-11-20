@@ -128,7 +128,7 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   useEffect(() => {
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
-  }, [transcript]);
+  }, [transcript, setValue]);
 
   return (
     <div
