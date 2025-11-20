@@ -7,6 +7,7 @@ import type { defaultFnType, MapAny } from '@/types/commonTypes';
 
 export enum ACTIVITY_RUN_STATUS {
   NEEDS_ATTENTION = 'NEEDS_ATTENTION',
+  NEEDS_REVIEW = 'NEEDS_REVIEW',
   VOID = 'VOID',
   IN_PROGRESS = 'IN_PROGRESS',
   PAUSED = 'PAUSED',
