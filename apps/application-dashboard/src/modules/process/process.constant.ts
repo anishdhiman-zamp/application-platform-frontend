@@ -189,7 +189,7 @@ export const EMPTY_STATE_BY_STATUS = {
   },
   [ACTIVITY_RUN_STATUS.NEEDS_REVIEW]: {
     title: 'Nothing to review right now',
-    description: 'Everything that’s wrapped up nicely will land here. Sit tight!',
+    description: 'Everything that needs to be reviewed will land here.',
     iconUrl: NEEDS_ATTENTION_EMPTY_STATE,
   },
   [ACTIVITY_RUN_STATUS.IN_PROGRESS]: {
