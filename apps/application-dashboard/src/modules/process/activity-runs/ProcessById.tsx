@@ -220,7 +220,11 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                     STATUS_ICON_COLOR_MAPPING[item?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor
                   }
                 />
-                <span className={cn('f-12-500 text-GRAY_900', { 'text-GRAY_1000': activeTab === item?.status })}>
+                <span
+                  className={cn('f-12-500 text-GRAY_900 whitespace-nowrap', {
+                    'text-GRAY_1000': activeTab === item?.status,
+                  })}
+                >
                   {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
                 </span>
                 <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
