@@ -208,7 +208,7 @@ export const useDeepgramConnection = (options?: UseDeepgramConnectionOptions): U
         stopMicrophone();
       }
     };
-  }, [connection, options?.isRecording, stopMicrophone]);
+  }, []);
 
   return {
     connection,

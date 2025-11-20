@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScribe } from '@elevenlabs/react';
 import { captureException } from '@sentry/browser';
+import { MicrophoneState, useMicrophoneRecorder } from 'hooks/useMicrophoneRecorder';
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
+import type { defaultFnType } from '@/types/commonTypes';
 
 interface ElevenLabsConnectionOptions {
   modelId?: string;
@@ -18,6 +20,7 @@ interface ElevenLabsConnectionOptions {
 
 interface UseElevanlabsConnectionOptions {
   onCommittedTranscript?: (data: { text: string }) => void;
+  isRecording?: boolean;
 }
 
 interface UseElevanlabsConnectionReturn {
@@ -27,6 +30,10 @@ interface UseElevanlabsConnectionReturn {
   isLoadingToken: boolean;
   tokenError: boolean;
   isCommitting: boolean;
+  microphone: MediaRecorder | null;
+  microphoneState: MicrophoneState | null;
+  startRecording: () => Promise<void>;
+  stopRecording: defaultFnType;
 }
 
 /**
@@ -41,6 +48,11 @@ export const useElevanlabsConnection = (options?: UseElevanlabsConnectionOptions
 
   const [getSpeechToTextAccessToken, { isLoading: isLoadingToken, isError: tokenError }] =
     useLazyGetSpeechToTextAccessTokenQuery({});
+
+  const { setupMicrophone, microphone, startMicrophone, stopMicrophone, microphoneState } = useMicrophoneRecorder();
+
+  // Track if microphone has been started to avoid duplicate starts
+  const hasMicStartedRef = useRef(false);
 
   // Update ref when callback changes
   useEffect(() => {
@@ -63,17 +75,14 @@ export const useElevanlabsConnection = (options?: UseElevanlabsConnectionOptions
       }
     },
     onError: (error: unknown) => {
-      console.error('Scribe error:', error);
       setIsConnected(false);
       captureException(error instanceof Error ? error : new Error(String(error)));
     },
     onAuthError: (error: unknown) => {
-      console.error('Scribe auth error:', error);
       setIsConnected(false);
       captureException(error instanceof Error ? error : new Error(String(error)));
     },
     onQuotaExceededError: (error: unknown) => {
-      console.error('Scribe quota exceeded error:', error);
       setIsConnected(false);
       captureException(error instanceof Error ? error : new Error(String(error)));
     },
@@ -118,6 +127,18 @@ export const useElevanlabsConnection = (options?: UseElevanlabsConnectionOptions
     [scribe, getSpeechToTextAccessToken],
   );
 
+  // Start recording: setup microphone (actual start happens in effect when connection is ready)
+  const startRecording = useCallback(async () => {
+    if (microphone) return; // Already set up
+    await setupMicrophone();
+  }, [setupMicrophone, microphone]);
+
+  // Stop recording: stop microphone
+  const stopRecording = useCallback(() => {
+    stopMicrophone();
+    hasMicStartedRef.current = false;
+  }, [stopMicrophone]);
+
   // Gracefully disconnect from ElevenLabs
   const disconnectFromElevenLabs = useCallback(async () => {
     try {
@@ -136,7 +157,27 @@ export const useElevanlabsConnection = (options?: UseElevanlabsConnectionOptions
       scribe.disconnect();
       setIsConnected(false);
     }
-  }, [scribe]);
+    stopMicrophone();
+    hasMicStartedRef.current = false;
+  }, [scribe, stopMicrophone]);
+
+  // Start microphone recording when connection is ready and recording is active
+  useEffect(() => {
+    if (!microphone || !isConnected || !options?.isRecording || hasMicStartedRef.current) {
+      return;
+    }
+
+    // Start microphone recording for visualization
+    startMicrophone();
+    hasMicStartedRef.current = true;
+
+    return () => {
+      if (hasMicStartedRef.current) {
+        stopMicrophone();
+        hasMicStartedRef.current = false;
+      }
+    };
+  }, [microphone, isConnected, options?.isRecording, startMicrophone, stopMicrophone]);
 
   // Cleanup: disconnect when component unmounts
   useEffect(() => {
@@ -144,15 +185,22 @@ export const useElevanlabsConnection = (options?: UseElevanlabsConnectionOptions
       if (scribe.isConnected) {
         scribe.disconnect();
       }
+      if (options?.isRecording) {
+        stopMicrophone();
+      }
     };
   }, []);
 
   return {
     connectToElevenLabs,
     disconnectFromElevenLabs,
+    startRecording,
+    stopRecording,
     isConnected,
     isLoadingToken,
     tokenError,
     isCommitting,
+    microphone,
+    microphoneState,
   };
 };

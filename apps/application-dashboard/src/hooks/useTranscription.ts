@@ -54,7 +54,7 @@ export const defaultElevenLabsOptions: TranscriptionOptions = {
  * and provider-specific WebSocket connections
  */
 export const useTranscription = (
-  provider: SpeechToTextProvider = SpeechToTextProvider.DEEPGRAM,
+  provider: SpeechToTextProvider = SpeechToTextProvider.ELEVENLABS,
 ): UseTranscriptionReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [accumulatedTranscript, setAccumulatedTranscript] = useState('');
@@ -83,8 +83,8 @@ export const useTranscription = (
     connectToDeepgram,
     disconnectFromDeepgram,
     connectionState: deepgramConnectionState,
-    microphone,
-    microphoneState,
+    microphone: deepgramMicrophone,
+    microphoneState: deepgramMicrophoneState,
     startRecording: startDeepgramRecording,
     stopRecording: stopDeepgramRecording,
   } = useDeepgramConnection({
@@ -98,8 +98,13 @@ export const useTranscription = (
     disconnectFromElevenLabs,
     isConnected: elevenLabsIsConnected,
     isCommitting: elevenLabsIsCommitting,
+    microphone: elevenLabsMicrophone,
+    microphoneState: elevenLabsMicrophoneState,
+    startRecording: startElevenLabsRecording,
+    stopRecording: stopElevenLabsRecording,
   } = useElevanlabsConnection({
     onCommittedTranscript: onElevenLabsTranscript,
+    isRecording,
   });
 
   // Determine connection state based on provider
@@ -124,6 +129,7 @@ export const useTranscription = (
           await startDeepgramRecording();
           await connectToDeepgram({ ...defaultDeepgramOptions, ...options });
         } else {
+          await startElevenLabsRecording();
           await connectToElevenLabs({
             ...defaultElevenLabsOptions,
             ...options,
@@ -135,7 +141,7 @@ export const useTranscription = (
         isStartingRef.current = false;
       }
     },
-    [isRecording, connectToDeepgram, connectToElevenLabs, provider, startDeepgramRecording],
+    [isRecording, connectToDeepgram, connectToElevenLabs, provider, startDeepgramRecording, startElevenLabsRecording],
   );
 
   const stopRecording = useCallback(async () => {
@@ -147,13 +153,19 @@ export const useTranscription = (
         stopDeepgramRecording();
         disconnectFromDeepgram();
       } else {
+        stopElevenLabsRecording();
         await disconnectFromElevenLabs();
       }
     } catch (error) {
       captureException(error);
       throw error;
     }
-  }, [stopDeepgramRecording, disconnectFromDeepgram, disconnectFromElevenLabs, provider]);
+  }, [stopDeepgramRecording, stopElevenLabsRecording, disconnectFromDeepgram, disconnectFromElevenLabs, provider]);
+
+  // Determine microphone and microphoneState based on provider
+  const microphone = provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophone : elevenLabsMicrophone;
+  const microphoneState =
+    provider === SpeechToTextProvider.DEEPGRAM ? deepgramMicrophoneState : elevenLabsMicrophoneState;
 
   return {
     transcript: accumulatedTranscript,
