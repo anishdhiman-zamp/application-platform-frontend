@@ -1,4 +1,5 @@
 import { type FC, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Checkbox } from '@zamp-platform/ui';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
@@ -7,13 +8,16 @@ import { useRouter } from 'next/navigation';
 import { useApplyFeedbackMutation, useLazyGetFeedbacksQuery } from '@/apis/feedback';
 import { PLAY_ICON } from '@/constants/icons';
 import FeedbackReapplyDialog from '@/modules/feedback/components/FeedbackReapplyDialog';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 import { ArchiveFeedbackPayloadType, FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const FeedbackStatusQueuedBody: FC = () => {
   const router = useRouter();
-  const { state } = useFeedbackContextStore();
-  const { queuedFeedbackItems: items, processId, processingFeedbackItems } = state;
+  const {
+    queuedFeedbackItems: items,
+    processId,
+    processingFeedbackItems,
+  } = useSelector((state: RootState) => state?.feedbacks);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 

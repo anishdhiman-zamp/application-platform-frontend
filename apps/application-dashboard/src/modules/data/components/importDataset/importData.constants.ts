@@ -17,10 +17,12 @@ export const FILE_SIZE = {
 
 export const FileMimeType: Record<string, string> = {
   [FILE_MIME.APPLICATION_PDF]: 'pdf',
+  [FILE_MIME.DOCX]: 'docx',
   [FILE_MIME.IMAGE_JPEG]: 'jpeg',
   [FILE_MIME.IMAGE_PNG]: 'png',
   [FILE_MIME.IMAGE_BMP]: 'bmp',
   [FILE_MIME.TEXT_CSV]: 'csv',
+  [FILE_MIME.TEXT_PLAIN]: 'txt',
 };
 
 export const FileExtensionToTypeMap: Record<string, string> = {

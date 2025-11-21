@@ -1,36 +1,8 @@
-import { LocationType } from '@zamp-platform/chat';
+import { AnnotationData } from '@zamp-platform/chat';
 import { FEEDBACK_STATUS, SCOPE_TYPE } from '@/modules/feedback/feedback.constants';
 
 export interface FeedbackSummary {
   feedback_points: string[];
-}
-
-export interface DatasetFieldLocationData {
-  process_id: string;
-  activity_run_id: string;
-  dataset_id: string;
-  dataset_row_id: string;
-  dataset_field_id: string;
-}
-
-export interface LogLocationData {
-  process_id: string;
-  activity_run_id: string;
-  log_id: string;
-}
-
-export interface ActivityRunLocationData {
-  process_id: string;
-  activity_run_id: string;
-}
-
-export type LocationData =
-  | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
-  | ({ type: LocationType.LOG } & { data: LogLocationData })
-  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData });
-
-export interface AnnotationData {
-  location: LocationData;
 }
 
 export interface FeedbackItemType {

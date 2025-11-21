@@ -1,10 +1,11 @@
 import { FC, useCallback, useEffect, useState } from 'react';
+import { LocationData } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { MessageSquare, Plus } from 'lucide-react';
 import { doesUrlMatchLocation, getFeedbackItemConfig } from 'modules/chatbot/utils';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
 import { useSearchParams } from 'next/navigation';
-import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackListProps {
   children: React.ReactNode;
@@ -12,7 +13,6 @@ interface FeedbackListProps {
   processId: string;
   onOpenChatbot: (feedbackItem?: FeedbackItemType) => void;
   disableAddMoreFeedback?: boolean;
-  onDeleteSuccess?: (feedbackId?: string) => void;
   hideFeedbackCount?: boolean;
   annotationLocation: LocationData;
   onCloseFeedbackList: () => void;
@@ -25,7 +25,6 @@ const FeedbackList: FC<FeedbackListProps> = ({
   processId,
   onOpenChatbot,
   disableAddMoreFeedback = false,
-  onDeleteSuccess,
   hideFeedbackCount = false,
   annotationLocation,
   onCloseFeedbackList,
@@ -69,8 +68,8 @@ const FeedbackList: FC<FeedbackListProps> = ({
         )}
       </PopoverTrigger>
       <PopoverPortal>
-        <PopoverContent className='w-[380px] space-y-1.5 border-none bg-transparent p-0 shadow-none'>
-          <div className='rounded-xl border bg-white px-4 pt-3 pb-4' style={{ boxShadow: '0px 2px 8px 1px #41414114' }}>
+        <PopoverContent className='shadow-chatbot-shadow w-[380px] space-y-1.5 rounded-xl border-none bg-transparent p-0 backdrop-blur-lg'>
+          <div className='rounded-xl border bg-white px-4 pt-3 pb-4'>
             <div className='f-12-450 flex items-center gap-1 text-gray-700'>
               <span>Feedback on this field</span>
               <span>{items.length}</span>
@@ -82,7 +81,6 @@ const FeedbackList: FC<FeedbackListProps> = ({
                   feedback={item}
                   initiatedBy={item?.initiated_by}
                   processId={processId}
-                  onDeleteSuccess={() => onDeleteSuccess?.(item?.id)}
                   withoutLinkWrapper
                   {...getFeedbackItemConfig(item as FeedbackItemType, onOpenChatbot)}
                 />

@@ -1,12 +1,12 @@
 import { type FC } from 'react';
+import { useSelector } from 'react-redux';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
 import Image from 'next/image';
 import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
 const FeedbackStatusOpenBody: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { openFeedbackItems: items, processId } = state;
+  const { openFeedbackItems: items, processId } = useSelector((state: RootState) => state?.feedbacks);
 
   return (
     <div>

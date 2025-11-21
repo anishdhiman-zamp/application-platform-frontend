@@ -10,8 +10,10 @@ import {
   FileMimeType,
 } from 'modules/data/components/importDataset/importData.constants';
 import { getFileType } from 'modules/data/components/importDataset/importData.utils';
+import { RootState } from 'store';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
 import { FileUploaderWrapperPropsType } from '@/components/file-upload/fileUpload.types';
+import { useAppSelector } from '@/hooks/toolkit';
 import { SignedUrlResponseType } from '@/types/api/fileUpload.types';
 import { API_STATUS_CODES } from '@/types/common/statusCodes';
 
@@ -35,6 +37,8 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
   showUploadButton,
   uploadPath = API_ENDPOINTS.DATASET_SIGNED_UPLOAD_URL_POST,
 }) => {
+  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+
   const hiddenFileInput = useRef<HTMLInputElement>(null);
   const [getSignedUrl] = useGetSignedUrlMutation();
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +125,7 @@ const FileUploaderWrapper: FC<FileUploaderWrapperPropsType> = ({
           payload: {
             file_name: filesToUpload?.name,
             file_type: fileType,
+            organization_id: organizationId,
           },
         };
 

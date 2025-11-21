@@ -1,14 +1,16 @@
-import { FC, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { captureException } from '@sentry/nextjs';
+import { ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
 import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
+import { useFeedbacksProvider } from 'modules/feedback/feedback-status/useFeedbacks';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetFeedbacksQuery } from '@/apis/feedback';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { FEEDBACK_BADGE_CONFIG, FEEDBACK_STATUS } from '@/modules/feedback/feedback.constants';
-import { FeedbackProvider, useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
-import { setFeedbackItems } from '@/store/slices/feedbacks';
+import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackStatusButtonProps {
@@ -22,14 +24,14 @@ const FeedbackStatusButtonContent: FC = () => {
   const isFeedbackStatus = searchParams?.get('feedback-status') === 'true';
   const defaultTab = (searchParams?.get('tab') as FEEDBACK_STATUS) || FEEDBACK_STATUS.OPEN;
   const [activeTab, setActiveTab] = useState<FEEDBACK_STATUS>(defaultTab);
-  const dispatch = useDispatch();
 
-  const { state } = useFeedbackContextStore();
-  const { isLoading, processId, hasFeedback, allFeedbackItems } = state;
+  const feedbackState = useSelector((state: RootState) => state?.feedbacks);
+  const { isLoading, processId, hasFeedback, openFeedbackItems = [], queuedFeedbackItems = [] } = feedbackState;
 
   const { sseEventBus } = useEventBus();
 
   const { refetch: refetchFeedbacks } = useGetFeedbacksQuery({ process_id: processId }, { skip: !processId });
+  const [getConversationById] = useLazyGetConversationByIdQuery();
 
   const handlePopoverOpenChange = (open: boolean) => {
     if (open) {
@@ -48,6 +50,22 @@ const FeedbackStatusButtonContent: FC = () => {
     }
   };
 
+  const prefetchAllOpenAndQueuedFeedbackConversations = useCallback(async () => {
+    try {
+      await Promise.all(
+        [...openFeedbackItems, ...queuedFeedbackItems].map((item) =>
+          getConversationById({
+            conversationId: item.conversation_id,
+            resourceId: item.process_id,
+            resourceType: ResourceType.PROCESS,
+          }),
+        ),
+      );
+    } catch (error) {
+      captureException(error);
+    }
+  }, [openFeedbackItems, queuedFeedbackItems, getConversationById]);
+
   useEffect(() => {
     if (isFeedbackStatus) {
       setTimeout(() => {
@@ -63,12 +81,6 @@ const FeedbackStatusButtonContent: FC = () => {
   }, [defaultTab]);
 
   useEffect(() => {
-    if (allFeedbackItems?.length) {
-      dispatch(setFeedbackItems(allFeedbackItems));
-    }
-  }, [dispatch, allFeedbackItems]);
-
-  useEffect(() => {
     const sub = sseEventBus.subscribe(EventType.FEEDBACK, (data: BaseEventPayload) => {
       if (data?.source_id === processId) refetchFeedbacks();
     });
@@ -76,28 +88,24 @@ const FeedbackStatusButtonContent: FC = () => {
     return () => sub.unsubscribe();
   }, [sseEventBus, refetchFeedbacks, processId]);
 
+  useEffect(() => {
+    prefetchAllOpenAndQueuedFeedbackConversations();
+  }, [openFeedbackItems, queuedFeedbackItems]);
+
   if (isLoading || !hasFeedback) {
     return null;
   }
 
   const handleBadgeClick = (config: (typeof FEEDBACK_BADGE_CONFIG)[number]) => {
-    const badgeToStatusMap: Record<string, FEEDBACK_STATUS> = {
-      open: FEEDBACK_STATUS.OPEN,
-      queued: FEEDBACK_STATUS.QUEUED,
-      processing: FEEDBACK_STATUS.PROCESSING,
-      success: FEEDBACK_STATUS.APPLIED,
-    };
-
-    const status = badgeToStatusMap[config.key];
-
-    if (status) {
-      setActiveTab(status);
+    if (config.key) {
+      setActiveTab(config.key);
       setIsPopoverOpen(true);
     }
   };
 
   const renderBadge = (config: (typeof FEEDBACK_BADGE_CONFIG)[number]) => {
-    const items = state[config.stateKey as keyof typeof state] as FeedbackItemType[];
+    const items = feedbackState[config.stateKey] as FeedbackItemType[];
+
     const count = items?.length || 0;
 
     if (!count) return null;
@@ -137,15 +145,13 @@ const FeedbackStatusButtonContent: FC = () => {
 };
 
 const FeedbackStatusButton: FC<FeedbackStatusButtonProps> = ({ processId = '' }) => {
+  useFeedbacksProvider(processId);
+
   if (!processId) {
     return null;
   }
 
-  return (
-    <FeedbackProvider processId={processId}>
-      <FeedbackStatusButtonContent />
-    </FeedbackProvider>
-  );
+  return <FeedbackStatusButtonContent />;
 };
 
 export default FeedbackStatusButton;

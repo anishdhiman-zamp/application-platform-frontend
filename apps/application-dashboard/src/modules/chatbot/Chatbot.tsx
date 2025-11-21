@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { BlockRenderer, ButtonBlockType, DisplayLayerActionType, ResourceType, useChat } from '@zamp-platform/chat';
+import {
+  BlockRenderer,
+  ButtonBlockType,
+  DisplayLayerActionType,
+  LocationData,
+  ResourceType,
+  SenderType,
+  useChat,
+} from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
@@ -9,11 +17,11 @@ import { ChatInput } from 'modules/chatbot/ChatInput';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
 import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
-import { doesUrlMatchLocation } from 'modules/chatbot/utils';
+import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { useSearchParams } from 'next/navigation';
 import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
 import { RootState } from '@/store';
-import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { MapAny } from '@/types/commonTypes';
 import { cn, getUserNameFromEmail } from '@/utils/common';
 
@@ -55,6 +63,9 @@ const Chatbot = ({
     payload: MapAny;
   }>();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [popoverSide, setPopoverSide] = useState<'top' | 'bottom'>('bottom');
+
+  const chatbotInstanceId = useMemo(() => generateChatbotInstanceId(annotationLocation), [annotationLocation]);
 
   const { runAction } = useActionHub(setIsLoading);
 
@@ -67,6 +78,8 @@ const Chatbot = ({
     conversationId: feedbackItem?.conversation_id,
     setHeader,
   });
+
+  const isAnalysing = isLoading || chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
 
   // Handle chatbot open/close state changes
   const handleOpenChange = useCallback(
@@ -117,7 +130,9 @@ const Chatbot = ({
     setIsOpen(false);
     setCurrentFeedbackItem(undefined);
     setHeader('');
+    onCloseChatbot?.();
     chat.clearMessages();
+    chat.setConversationId(null);
   };
 
   const handleOpenChangeForStopProcessing = (open: boolean) => {
@@ -148,6 +163,29 @@ const Chatbot = ({
     }
   }, [chat.messages.length]);
 
+  // Calculate optimal popover position based on available space
+  useEffect(() => {
+    if (isOpen) {
+      // Use a small delay to ensure the trigger element is rendered
+      const timeoutId = setTimeout(() => {
+        const triggerElement = document.querySelector(`[data-testid="${chatbotInstanceId}"]`) as HTMLElement;
+
+        if (triggerElement) {
+          const rect = triggerElement.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+
+          // Calculate available space in top and bottom directions
+          const spaceTop = rect.top;
+          const spaceBottom = viewportHeight - rect.bottom;
+
+          setPopoverSide(spaceTop > spaceBottom ? 'top' : 'bottom');
+        }
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen]);
+
   // Scroll to last message when popover opens with existing messages
   useEffect(() => {
     if (isOpen && chat.messages.length > 0) {
@@ -161,7 +199,13 @@ const Chatbot = ({
   return (
     <>
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger className={className}>
+        <PopoverTrigger
+          className={cn(className, {
+            '[&_button[data-comment-button]]:bg-accent [&_button[data-comment-button]]:text-accent-foreground [&_button[data-comment-button]]:opacity-100':
+              isOpen,
+          })}
+          data-testid={chatbotInstanceId}
+        >
           {(feedbackItem || feedbackItemsLength > 0) && !hideFeedbackCount ? (
             <Button
               variant='outline'
@@ -176,8 +220,21 @@ const Chatbot = ({
           )}
         </PopoverTrigger>
         <PopoverPortal>
-          <PopoverContent className='w-[380px] space-y-1.5 border-none bg-transparent p-0 shadow-none'>
-            <div className='shadow-chatbot-shadow bg-chatbot-gradient flex max-h-[400px] flex-col rounded-[22px] border border-gray-500 p-1.5'>
+          <PopoverContent
+            side={popoverSide}
+            sideOffset={8}
+            className={cn(
+              'shadow-chatbot-shadow w-[380px] space-y-1.5 rounded-[22px] border border-gray-500 bg-transparent p-0 backdrop-blur-lg',
+              {
+                'rounded-[20px]': !header,
+              },
+            )}
+          >
+            <div
+              className={cn('bg-chatbot-gradient flex max-h-[400px] flex-col rounded-[22px] p-1.5', {
+                'rounded-[20px]': !header,
+              })}
+            >
               {chat.isLoadingConversationHistory && !isNewConversation ? (
                 <ZampLogoWebpLoader />
               ) : (
@@ -190,9 +247,12 @@ const Chatbot = ({
                     />
                   )}
                   <div
-                    className={cn('flex min-h-0 flex-1 flex-col rounded-b-[16px] border-x border-b bg-white', {
-                      'border-none': !header,
-                    })}
+                    className={cn(
+                      'shadow-table-filter-menu flex min-h-0 flex-1 flex-col rounded-b-[16px] border-x border-b bg-white',
+                      {
+                        'border-none': !header,
+                      },
+                    )}
                   >
                     {chat.messages.length > 0 && (
                       <div
@@ -212,12 +272,12 @@ const Chatbot = ({
                             />
                           </div>
                         ))}
-                      </div>
-                    )}
-                    {isLoading && (
-                      <div className='flex w-full items-center gap-1.5 p-4 text-gray-700'>
-                        <PaceAvatar />
-                        <ShimmerText text='Analysing...' autoAnimate={true} />
+                        {isAnalysing && (
+                          <div className='flex w-full items-center gap-1.5 text-gray-700'>
+                            <PaceAvatar />
+                            <ShimmerText text='Analysing...' autoAnimate={true} />
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className='flex flex-shrink-0'>
@@ -225,9 +285,9 @@ const Chatbot = ({
                         chat={chat}
                         annotationLocation={annotationLocation}
                         setIsLoading={setIsLoading}
-                        conversationId={feedbackItem?.conversation_id}
+                        conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
                         setHeader={setHeader}
-                        isDisabled={isLoading}
+                        isDisabled={isAnalysing}
                         header={header}
                       />
                     </div>

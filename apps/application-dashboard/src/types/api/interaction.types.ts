@@ -48,3 +48,12 @@ export interface PostInteractionResponseType {
     created_at: string;
   };
 }
+
+export interface PostInteractionDisablePayloadType {
+  conversationId: string;
+  messageId: string;
+  params: {
+    resource_id: string;
+    resource_type: string;
+  };
+}

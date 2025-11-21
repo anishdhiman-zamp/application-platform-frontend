@@ -1,3 +1,5 @@
+import { MessageAttachmentType } from '../..';
+
 export const enum BlockType {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -5,6 +7,7 @@ export const enum BlockType {
   BUTTON = 'button',
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
+  ATTACHMENTS = 'attachments',
 }
 
 export const enum ActionType {
@@ -49,6 +52,7 @@ export interface BlockPayload {
   is_disabled: boolean;
   label: string;
   value: string;
+  is_display?: boolean;
 }
 
 export interface PlainTextBlockType {
@@ -108,6 +112,15 @@ export interface QuestionGroupBlockType {
   };
 }
 
+export interface AttachmentsBlockType {
+  id: string;
+  order: number;
+  type: BlockType.ATTACHMENTS;
+  payload: {
+    attachments: MessageAttachmentType[];
+  };
+}
+
 export enum TEXT_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -119,8 +132,16 @@ export type Block =
   | SingleSelectBlockType
   | ButtonBlockType
   | QuestionGroupBlockType
-  | QuestionBlockType;
+  | QuestionBlockType
+  | AttachmentsBlockType;
 
 export interface BlockMessage {
   block: Block[];
+}
+
+export interface UploadedFileType {
+  file_id: string;
+  file_name: string;
+  file_type?: string;
+  file?: File;
 }

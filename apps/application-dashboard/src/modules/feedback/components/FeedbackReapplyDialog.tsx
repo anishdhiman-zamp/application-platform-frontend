@@ -150,6 +150,7 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
                         feedback={item}
                         initiatedBy={item.initiated_by}
                         timePrefix='Started'
+                        withoutLinkWrapper
                       />
                     ))}
                   </div>
@@ -195,6 +196,7 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
                         feedback={item}
                         initiatedBy={item.initiated_by}
                         timePrefix='Started'
+                        withoutLinkWrapper
                       />
                     ))}
                   </div>

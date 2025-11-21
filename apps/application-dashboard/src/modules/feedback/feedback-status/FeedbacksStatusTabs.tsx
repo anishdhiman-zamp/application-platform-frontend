@@ -1,8 +1,9 @@
 import { type FC, useCallback, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { createTabsConfig, FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { TabConfig } from 'modules/feedback/feedback.types';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
 interface FeedbacksStatusTabsProps {
   activeTab: FEEDBACK_STATUS;
@@ -10,9 +11,9 @@ interface FeedbacksStatusTabsProps {
 }
 
 const FeedbacksStatusTabs: FC<FeedbacksStatusTabsProps> = ({ activeTab, setActiveTab }) => {
-  const { state } = useFeedbackContextStore();
-  const { successFeedbackItems, processingFeedbackItems, queuedFeedbackItems, openFeedbackItems } = state;
-
+  const { successFeedbackItems, processingFeedbackItems, queuedFeedbackItems, openFeedbackItems } = useSelector(
+    (state: RootState) => state?.feedbacks,
+  );
   const validTab = [
     FEEDBACK_STATUS.PROCESSING,
     FEEDBACK_STATUS.APPLIED,

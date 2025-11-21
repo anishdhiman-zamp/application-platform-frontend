@@ -1,16 +1,16 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button } from '@zamp-platform/ui';
 import { Ban, Loader } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { useRouter } from 'next/navigation';
 import { useLazyGetFeedbacksQuery, useStopProcessingFeedbackMutation } from '@/apis/feedback';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
 const FeedbackStatusProcessingBody = () => {
   const router = useRouter();
-  const { state } = useFeedbackContextStore();
-  const { processingFeedbackItems: items, processId } = state;
+  const { processingFeedbackItems: items, processId } = useSelector((state: RootState) => state?.feedbacks);
   const [isStopProcess, setIsStopProcess] = useState<boolean>(false);
 
   const [stopProcessingFeedback, { isLoading: isStoppingProcessing }] = useStopProcessingFeedbackMutation();

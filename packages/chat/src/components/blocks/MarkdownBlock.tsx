@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
@@ -13,12 +14,19 @@ interface MarkdownBlockProps {
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
   return (
-    <div className='prose prose-sm f-13-450 max-w-none' data-testid='markdown-block'>
+    <div className='prose prose-sm f-13-450 text-gray-1000 max-w-none' data-testid='markdown-block'>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug]}
         components={{
-          a: ({ ...props }) => <a {...props} className='text-blue-700' style={{ textDecoration: 'none' }} />,
+          a: ({ href, ...props }) => {
+            if (!href) return null;
+            return (
+              <Link href={href} className='text-blue-700'>
+                {props.children}
+              </Link>
+            );
+          },
         }}
       >
         {payload.text}
