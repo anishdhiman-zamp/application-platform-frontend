@@ -277,7 +277,13 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
         className='z-1000 flex h-fit w-full items-center justify-between pr-4'
       >
         <div className='flex items-center py-3'>
-          <FiltersWrapper label='Filter' filterConfig={filtersConfig ?? []} className='px-3' isProcessContext />
+          <FiltersWrapper
+            label='Filter'
+            filterConfig={filtersConfig ?? []}
+            className='px-3'
+            isProcessContext
+            testIdSuffix={status}
+          />
         </div>
         <div className='relative items-center gap-2.5'>
           {table && (

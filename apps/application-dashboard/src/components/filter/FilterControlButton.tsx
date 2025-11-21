@@ -21,6 +21,7 @@ interface FilterControlButtonProps extends PropsWithChildren {
   disabled?: boolean;
   id?: string;
   tooltipPosition?: SIDE_OPTIONS;
+  testIdSuffix?: string;
 }
 
 const FilterControlButton: FC<FilterControlButtonProps> = ({
@@ -37,6 +38,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   isLoading = false,
   id = '',
   disabled = false,
+  testIdSuffix,
 }) => {
   const onButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (disabled || isLoading) {
@@ -57,7 +59,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
         )}
         onClick={onButtonClick}
         ref={buttonRef}
-        data-testid={`filter-control-button-${id}`}
+        data-testid={`filter-control-button-${id}${testIdSuffix && `-${testIdSuffix}`}`}
         disabled={disabled}
       >
         {isLoading ? (
