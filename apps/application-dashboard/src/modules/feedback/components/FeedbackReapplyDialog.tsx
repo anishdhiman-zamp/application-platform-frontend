@@ -9,10 +9,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogHeaderTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@zamp-platform/ui';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
-import { useApplyFeedbackMutation } from '@/apis/feedback';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { useRouter } from 'next/navigation';
+import { useApplyFeedbackMutation, useLazyGetFeedbacksQuery } from '@/apis/feedback';
 import { ArchiveFeedbackPayloadType, FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackReapplyDialogProps {
@@ -30,11 +36,13 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
   processingFeedbackItems,
   processId,
 }) => {
+  const router = useRouter();
   const [yetToBeAppliedExpanded, setYetToBeAppliedExpanded] = useState(true);
   const [processingExpanded, setProcessingExpanded] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(selectedFeedbackItems.map((item) => item.id)));
 
   const [applyFeedback, { isLoading: isApplying }] = useApplyFeedbackMutation();
+  const [getFeedbacks, { isFetching: isGettingFeedbacks }] = useLazyGetFeedbacksQuery();
 
   const { totalSelectedProcessingCount, totalSelectedYetToBeAppliedCount } = useMemo(() => {
     return {
@@ -51,12 +59,19 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
 
     applyFeedback(payload)
       .unwrap()
-      .finally(() => {
-        onOpenChange(false);
+      .then(() => {
+        getFeedbacks({ process_id: processId })
+          .unwrap()
+          .then(() => {
+            router.push(`${window.location.pathname}?tab=${FEEDBACK_STATUS.PROCESSING}`);
+            onOpenChange(false);
+          });
       });
   };
 
-  const handleToggleSelection = (itemId: string) => {
+  const handleToggleSelection = (e: React.MouseEvent<HTMLButtonElement>, itemId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     setSelectedIds((prev) => {
       const newSet = new Set(prev);
 
@@ -69,6 +84,11 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
       return newSet;
     });
   };
+
+  const allowApply = useMemo(() => {
+    // check if any item is selected from selectedFeedbackItems
+    return selectedFeedbackItems.some((item) => selectedIds.has(item.id));
+  }, [selectedIds, selectedFeedbackItems]);
 
   useEffect(() => {
     setSelectedIds(
@@ -119,11 +139,17 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
                     {selectedFeedbackItems.map((item) => (
                       <FeedbackListCard
                         key={item.id}
-                        icon={<Checkbox checked={selectedIds.has(item.id)} className='mt-1 flex-shrink-0' />}
+                        icon={
+                          <Checkbox
+                            checked={selectedIds.has(item.id)}
+                            className='mt-1 flex-shrink-0'
+                            onClick={(e) => handleToggleSelection(e, item.id)}
+                            id='check-feedback'
+                          />
+                        }
                         feedback={item}
                         initiatedBy={item.initiated_by}
                         timePrefix='Started'
-                        onCheck={() => handleToggleSelection(item.id)}
                       />
                     ))}
                   </div>
@@ -158,11 +184,17 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
                     {processingFeedbackItems.map((item) => (
                       <FeedbackListCard
                         key={item.id}
-                        icon={<Checkbox checked={selectedIds.has(item.id)} className='mt-1 flex-shrink-0' />}
+                        icon={
+                          <Checkbox
+                            checked={selectedIds.has(item.id)}
+                            className='mt-1 flex-shrink-0'
+                            onClick={(e) => handleToggleSelection(e, item.id)}
+                            id='check-feedback'
+                          />
+                        }
                         feedback={item}
                         initiatedBy={item.initiated_by}
                         timePrefix='Started'
-                        onCheck={() => handleToggleSelection(item.id)}
                       />
                     ))}
                   </div>
@@ -177,15 +209,28 @@ const FeedbackReapplyDialog: FC<FeedbackReapplyDialogProps> = ({
               Cancel
             </Button>
           </DialogClose>
-          <Button
-            variant='default'
-            size='medium'
-            onClick={handleDialogApply}
-            isLoading={isApplying}
-            disabled={selectedIds.size === 0}
-          >
-            Apply {selectedIds.size} feedback
-          </Button>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  variant='default'
+                  size='medium'
+                  className='min-w-[126px]'
+                  onClick={handleDialogApply}
+                  isLoading={isApplying || isGettingFeedbacks}
+                  disabled={!allowApply}
+                >
+                  Apply {allowApply ? selectedIds.size : ''} feedback
+                </Button>
+              </TooltipTrigger>
+              {!allowApply && (
+                <TooltipContent>
+                  Please select at least one item from yet to be applied to apply feedback.
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </DialogFooter>
       </DialogContent>
     </Dialog>
