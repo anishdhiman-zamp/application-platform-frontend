@@ -1,17 +1,17 @@
-import { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { type FC, useCallback, useEffect, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { createTabsConfig, FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { TabConfig } from 'modules/feedback/feedback.types';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
 
-const FeedbacksStatusTabs: FC = () => {
+interface FeedbacksStatusTabsProps {
+  activeTab: FEEDBACK_STATUS;
+  setActiveTab: (tab: FEEDBACK_STATUS) => void;
+}
+
+const FeedbacksStatusTabs: FC<FeedbacksStatusTabsProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useFeedbackContextStore();
   const { successFeedbackItems, processingFeedbackItems, queuedFeedbackItems, openFeedbackItems } = state;
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const defaultTab = (searchParams?.get('tab') as FEEDBACK_STATUS) || FEEDBACK_STATUS.OPEN;
-  const [activeTab, setActiveTab] = useState<FEEDBACK_STATUS>(defaultTab);
 
   const validTab = [
     FEEDBACK_STATUS.PROCESSING,
@@ -25,9 +25,9 @@ const FeedbacksStatusTabs: FC = () => {
 
   const setActiveTabCallback = useCallback(
     (newTab: FEEDBACK_STATUS) => {
-      setActiveTab((prev: FEEDBACK_STATUS) => (prev === newTab ? prev : newTab));
+      setActiveTab(newTab);
     },
-    [router, searchParams],
+    [setActiveTab],
   );
 
   useEffect(() => {
