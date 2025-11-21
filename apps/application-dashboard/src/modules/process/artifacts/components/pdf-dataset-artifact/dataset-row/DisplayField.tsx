@@ -10,9 +10,18 @@ interface DisplayFieldProps {
   onClick: () => void;
   onDoubleClick?: () => void;
   isPdfDataset?: boolean;
+  textClassName?: string;
 }
 
-const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick, isPdfDataset }: DisplayFieldProps) => {
+const DisplayField = ({
+  value,
+  isCompleted,
+  isClicked,
+  onClick,
+  onDoubleClick,
+  isPdfDataset,
+  textClassName,
+}: DisplayFieldProps) => {
   const formattedValue = useMemo(() => formatRowValue(value), [value]);
 
   return (
@@ -29,7 +38,7 @@ const DisplayField = ({ value, isCompleted, isClicked, onClick, onDoubleClick, i
       onClick={onClick}
       onDoubleClick={onDoubleClick}
     >
-      {formattedValue}
+      <span className={textClassName}>{formattedValue}</span>
     </div>
   );
 };

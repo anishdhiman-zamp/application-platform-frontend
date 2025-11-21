@@ -4,6 +4,9 @@ import { captureException } from '@sentry/browser';
 import { getFromLocalStorage, isBrowser, LOCAL_STORAGE_KEYS } from '@zamp-platform/utils';
 import { Mutex } from 'async-mutex';
 
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+
 import { API_DOMAIN } from './api.utils';
 import { ABORT_ERROR, CUSTOM_ERROR, LOGIN_PATH, ORG_SWITCH_IN_PROGRESS_ERROR, REQUEST_TIMEOUT } from './constants';
 
@@ -41,10 +44,12 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   extraOptions,
 ) => {
   const state = api.getState() as UserState;
+  const userSessionCookie = getCookie(USER_SESSION_COOKIE);
+  const defaultOrgId = userSessionCookie ? JSON.parse(decodeURIComponent(userSessionCookie)).default_org_id : '';
   const currentOrgId =
     state?.user?.user?.orgs?.[0]?.organization_id ||
     getFromLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID) ||
-    '';
+    defaultOrgId;
 
   await mutex.waitForUnlock();
 
@@ -62,7 +67,10 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
   // Check if we're in a browser environment
   const path = isBrowser() ? window.location.pathname : '';
 
-  const isLoginRoute = path === LOGIN_PATH;
+  const normalizedPath = path.replace(/\/$/, '');
+
+  const shouldSkip401Redirect =
+    normalizedPath === ROUTES_PATH.LOGIN || normalizedPath === ROUTES_PATH.MEMBERSHIP_PENDING;
 
   const error = result?.error;
 
@@ -70,7 +78,7 @@ const baseQueryWithAuth: BaseQueryFn<CustomFetchArgs, unknown, FetchBaseQueryErr
     const status = error?.status;
     const data = (error as { data?: { error?: { code?: string } | string } }).data;
 
-    if (status === 401 && !isLoginRoute && isBrowser()) {
+    if (status === 401 && !shouldSkip401Redirect && isBrowser()) {
       const loginUrl = LOGIN_PATH;
 
       window.location.href = loginUrl;

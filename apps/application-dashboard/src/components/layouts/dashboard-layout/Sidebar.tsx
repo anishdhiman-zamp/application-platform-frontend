@@ -2,13 +2,14 @@
 
 import { memo, useEffect, useMemo } from 'react';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { getProcessRouteById } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -25,10 +26,18 @@ const Sidebar = () => {
   const hash = useHash();
   const pathname = pathTrim + hash;
 
-  const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
+  const {
+    data: pages,
+    isLoading: isLoadingPages,
+    isSuccess: isSuccessPages,
+  } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
+  const {
+    data: processes,
+    isLoading: isLoadingProcesses,
+    isSuccess: isSuccessProcesses,
+  } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
@@ -45,12 +54,14 @@ const Sidebar = () => {
   }, [pages]);
 
   useEffect(() => {
-    if (processes) {
-      pushToMostRelevantProcess();
-    } else if (pages) {
-      pushToMostRelevantPage();
+    if (isSuccessPages && isSuccessProcesses) {
+      if (processes && processes?.length > 0) {
+        pushToMostRelevantProcess();
+      } else if (pages && pages?.length > 0) {
+        pushToMostRelevantPage();
+      }
     }
-  }, [pages, processes]);
+  }, [pages, processes, isSuccessPages, isSuccessProcesses]);
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -65,7 +76,7 @@ const Sidebar = () => {
                   <SidebarTab
                     key={item.label}
                     name={item.label}
-                    iconUrl={item.iconUrl}
+                    iconComponent={item.iconComponent}
                     isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
                   />
                 </Link>

@@ -16,7 +16,12 @@ import { cyclicIterator } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
-const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTeamMembersData, hasPeoplePolicy }) => {
+const TeamMembersListing: FC<TeamMembersListingPropsType> = ({
+  data,
+  isLoadingTeamMembersData,
+  hasPeoplePolicy,
+  search,
+}) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
 
@@ -32,7 +37,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
     { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
 
-  const hasAudiencesData = (teamMembersData?.length ?? 0) > 0;
+  const hasAudiencesData = useMemo(() => (teamMembersData?.length ?? 0) > 0, [teamMembersData]);
 
   // get teams data
   const { data: teamsData } = useGetTeamsByOrganizationIdQuery(
@@ -68,6 +73,10 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
     [data, userTeamMembersData],
   );
 
+  if (search && allAudiencesAndTeamsData?.length === 0) {
+    return <EmptyStateListing title='No team members found' />;
+  }
+
   return hasAudiencesData || isLoadingTeamMembersData ? (
     <>
       <div className='border-b-0.5 border-DIVIDER_GRAY grid grid-cols-4 gap-4'>
@@ -80,22 +89,21 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({ data, isLoadingTe
       <CommonWrapper
         isLoading={isLoadingTeamMembersData}
         skeletonType={SkeletonTypes.CUSTOM}
-        loader={<SkeletonLoaderListing columns={4} />}
+        loader={<SkeletonLoaderListing columns={4} length={12} />}
+        className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
       >
-        <div className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-          {allAudiencesAndTeamsData?.map((row, index) => (
-            <TeamMemberCard
-              key={`${row?.user_id}-${index}`}
-              member
-              row={row}
-              teamsData={teamsData ?? []}
-              organizationId={organizationId}
-              hasPeoplePolicy={hasPeoplePolicy}
-              teamsRandomColorRef={teamsRandomColorRef}
-              value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
-            />
-          ))}
-        </div>
+        {allAudiencesAndTeamsData?.map((row, index) => (
+          <TeamMemberCard
+            key={`${row?.user_id}-${index}`}
+            member
+            row={row}
+            teamsData={teamsData ?? []}
+            organizationId={organizationId}
+            hasPeoplePolicy={hasPeoplePolicy}
+            teamsRandomColorRef={teamsRandomColorRef}
+            value={{ user_id: row?.user_id, privilege: row?.privilege, userEmail: row?.email }}
+          />
+        ))}
       </CommonWrapper>
     </>
   ) : (

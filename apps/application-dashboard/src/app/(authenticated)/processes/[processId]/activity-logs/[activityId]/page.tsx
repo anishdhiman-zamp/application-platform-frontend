@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { LocationType } from '@zamp-platform/chat';
 import { type ImperativePanelHandle, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
-import { useParams } from 'next/navigation';
-import { useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useGetActivityArtifactsQuery, useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
+import { useAppDispatch } from '@/hooks/toolkit';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
 import Summary from '@/modules/process/activity-summary/SummarySection';
@@ -20,17 +22,20 @@ import {
   type EmitHITLActionPayload,
   type HandleShowArtifactsProps,
 } from '@/modules/process/process.types';
+import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type { OtherArtifactsResponseType } from '@/types/api/processApi.types';
 import type { MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 const Activity = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
 
   const processId = params?.processId as string;
   const activityId = params?.activityId as string;
 
   const panelRef = useRef<ImperativePanelHandle>(null);
+  const dispatch = useAppDispatch();
 
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -46,8 +51,43 @@ const Activity = () => {
 
   const [getArtifact, { isFetching: isLoadingArtifact }] = useLazyGetArtifactsByArtifactIdQuery();
 
+  // Fetch artifacts to get artifact IDs for dataset fields
+  const { data: allArtifacts } = useGetActivityArtifactsQuery(
+    { processId, activityRunId: activityId },
+    { skip: !processId || !activityId, refetchOnMountOrArgChange: false },
+  );
+
   useActivitySSE({ activityId, processId });
   const { dispatch: artifactTypeDispatch } = useArtifactContextStore();
+
+  // Handle chatbot URL params to auto-open artifacts
+  useEffect(() => {
+    const chatbotType = searchParams?.get('chatbot_annotation_location_type');
+    const datasetId = searchParams?.get('chatbot_dataset_id');
+
+    // Only auto-open for dataset field chatbots
+    if (chatbotType === LocationType.DATASET_FIELD && datasetId && allArtifacts?.artifacts) {
+      // Find the artifact that contains this dataset
+      const artifact = allArtifacts.artifacts.find((art) => {
+        if (art.artifact_type === ARTIFACT_TYPE.PDF_DATASET || art.artifact_type === ARTIFACT_TYPE.DATASET) {
+          const artifactData = art.artifact_data as any;
+          const datasets = artifactData?.datasets || [];
+
+          return datasets.some((ds: MapAny) => ds.dataset_id === datasetId);
+        }
+
+        return false;
+      });
+
+      if (artifact) {
+        // Auto-open the artifact
+        handleShowArtifacts({
+          artifactType: artifact.artifact_type,
+          artifactId: artifact.id,
+        });
+      }
+    }
+  }, [searchParams, allArtifacts]);
 
   const handleDragging = (dragging: boolean) => setIsDragging(dragging);
 
@@ -146,6 +186,18 @@ const Activity = () => {
       toast.dismiss('redirecting');
     }
   }, [isLoadingArtifact]);
+
+  useEffect(() => {
+    dispatch(closeSidebar());
+
+    setTimeout(() => {
+      dispatch(closeSidebar());
+    }, 300);
+
+    return () => {
+      dispatch(openSidebar());
+    };
+  }, [dispatch]);
 
   return (
     <ResizablePanelGroup direction='horizontal' className='h-full w-full'>

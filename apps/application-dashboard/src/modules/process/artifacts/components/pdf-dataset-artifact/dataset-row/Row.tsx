@@ -1,16 +1,20 @@
 import type { FC, RefObject } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { LocationType } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import DisplayField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/DisplayField';
 import EditableField from 'modules/process/artifacts/components/pdf-dataset-artifact/dataset-row/EditableField';
 import { useCompletedFields } from 'modules/process/artifacts/context/completedFields.context';
+import { useParams } from 'next/navigation';
 import type { DatasetFilterConfigResponseType } from 'types/api/dataset.types';
 import type { MapAny } from 'types/commonTypes';
 import type { ColumnDef } from '@/components/common/agGridTable/AgGridTable';
 import { CUSTOM_COLUMNS_TYPE, VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
+import ChatbotWrapper from '@/modules/chatbot';
+import CommentButton from '@/modules/chatbot/CommentButton';
 import {
   getColumnOrderingVisibilityForCurrentDataset,
   getFormattedDate,
@@ -64,9 +68,11 @@ const Row: FC<RowProps> = ({
   const {
     state: { completedFields },
   } = useCompletedFields();
-
+  const params = useParams();
+  const processId = params?.processId as string;
   const [isEditing, setIsEditing] = useState(false);
   const [editingValue, setEditingValue] = useState('');
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const fieldId = `${rowId}-${key}`;
   const isSelected = selectedKey === key;
@@ -135,9 +141,8 @@ const Row: FC<RowProps> = ({
   };
 
   const handleEditSave = () => {
-    if (editingValue !== value) {
-      onChange?.(key, editingValue, rowId);
-    }
+    onChange?.(key, editingValue, rowId);
+
     setIsEditing(false);
   };
 
@@ -175,35 +180,52 @@ const Row: FC<RowProps> = ({
       )}
     >
       <span className='f-11-450 text-GRAY_700'>{column.headerName}</span>
-
-      {isEditable ? (
-        <EditableField
-          value={formattedValue}
-          editingValue={editingValue}
-          onInputChange={setEditingValue}
-          onBlur={handleEditSave}
-          onKeyDown={handleKeyDown}
-          onClick={handleClick}
-          onDoubleClick={handleDoubleClick}
-          isEditing={isEditing}
-          shouldShowInputDirectly={shouldShowInputDirectly}
-          isRequired={isRequired}
-          isCompleted={isCompleted}
-          isSelected={isSelected}
-          textareaRef={textareaRef}
-          editTextareaRef={editTextareaRef}
-          isClicked={isClicked}
-          isPdfDataset={isPdfDataset}
-        />
-      ) : (
-        <DisplayField
-          value={formattedValue}
-          isCompleted={isCompleted}
-          isClicked={isClicked}
-          onClick={handleClick}
-          isPdfDataset={isPdfDataset}
-        />
-      )}
+      <div className='group flex w-full items-center justify-between'>
+        {isEditable ? (
+          <EditableField
+            value={formattedValue}
+            editingValue={editingValue}
+            onInputChange={setEditingValue}
+            onBlur={handleEditSave}
+            onKeyDown={handleKeyDown}
+            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
+            isEditing={isEditing}
+            shouldShowInputDirectly={shouldShowInputDirectly}
+            isRequired={isRequired}
+            isCompleted={isCompleted}
+            isSelected={isSelected}
+            textareaRef={textareaRef}
+            editTextareaRef={editTextareaRef}
+            isClicked={isClicked}
+            isPdfDataset={isPdfDataset}
+          />
+        ) : (
+          <DisplayField
+            value={formattedValue}
+            isCompleted={isCompleted}
+            isClicked={isClicked}
+            onClick={handleClick}
+            isPdfDataset={isPdfDataset}
+            textClassName={cn({ 'bg-blue-300': isChatbotOpen })}
+          />
+        )}
+        <ChatbotWrapper
+          annotationLocation={{
+            type: LocationType.DATASET_FIELD,
+            data: {
+              process_id: processId,
+              activity_run_id: activityId,
+              dataset_id: datasetId,
+              dataset_row_id: rowId,
+              dataset_field_id: key,
+            },
+          }}
+          onChatbotStateChange={setIsChatbotOpen}
+        >
+          <CommentButton />
+        </ChatbotWrapper>
+      </div>
     </div>
   );
 };

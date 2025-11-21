@@ -112,10 +112,15 @@ process.stdin.on('end', () => {
 
   const markdownPlaywrightComment = `
 ## 🎭 Playwright Test Results
+
 ${summaryTable}
+
 ${statusMessage}
+
 ${failedTestsSection}
+
 ${skippedTestsSection}
+
 📊 Dive deeper into test results: [View full report](https://github.com/${repo}/actions/runs/${runId})
 🕓 Executed on: ${formattedDate}
 🧩 **Test Environment**
@@ -123,7 +128,9 @@ ${skippedTestsSection}
 - Browser: Chromium + WebKit
 - Headless: true
 - Triggered by: @${actor}
+
 ---
+
 ✨ Powered by Playwright & GitHub Actions – Keeping bugs in check! 🐞
   `.trim();
 

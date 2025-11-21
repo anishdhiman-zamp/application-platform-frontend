@@ -1,15 +1,14 @@
-import { FC, memo } from 'react';
-import Image from 'next/image';
+import { FC, memo, type ReactNode } from 'react';
 import { cn } from 'utils/common';
 
 type SidebarTabProps = {
   name: string;
-  iconUrl: string;
+  iconComponent: ReactNode;
   isSelected?: boolean;
   className?: string;
 };
 
-const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconUrl, name, className = '' }) => {
+const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconComponent, name, className = '' }) => {
   return (
     <div
       className={cn(
@@ -19,7 +18,7 @@ const SidebarTab: FC<SidebarTabProps> = ({ isSelected, iconUrl, name, className 
       )}
       role='presentation'
     >
-      <Image src={iconUrl} alt={name} priority height={14} width={14} className='min-w-4' />
+      {iconComponent}
       <div className='f-13-500 truncate whitespace-nowrap select-none'>{name}</div>
     </div>
   );

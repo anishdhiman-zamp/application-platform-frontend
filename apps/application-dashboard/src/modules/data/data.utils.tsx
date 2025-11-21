@@ -38,6 +38,7 @@ import {
 } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/ActivityLinkWrapper';
+import ChatbotCellWrapper from '@/components/common/table/CustomCellWrapper/ChatbotCellWrapper';
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
 import CustomHeaderTk from '@/components/common/tanstackTable/customHeader';
 import { toast } from '@/components/common/toast/Toast';
@@ -54,7 +55,7 @@ import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
-  const lastUpdatedTime = createDateObjectFromUTCString(updated_at);
+  const lastUpdatedTime = new Date(updated_at);
 
   const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
 
@@ -106,7 +107,7 @@ const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType
 
   const rowId = params.data?.id;
 
-  return missingFields.some((field) => field.id === rowId && field.column === params.column.id);
+  return missingFields.some((field) => field?.id === rowId && field?.column === params?.column?.colId);
 };
 
 export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
@@ -123,6 +124,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   missingFields,
   wrapLink,
   isSelfServe,
+  isArtifact,
 }) => {
   const columns: ColDef[] = [];
 
@@ -139,7 +141,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     let formattedColumn: ColDef = {
       field: column?.column,
       hide: column?.metadata?.is_hidden,
-      cellRendererParams: column?.metadata,
+      cellRendererParams: { ...column?.metadata, datasetId },
       editable: (params: MapAny) =>
         !!(
           column?.metadata?.is_editable &&
@@ -173,7 +175,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
           ActivityLinkWrapper,
           CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column],
         )
-      : CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
+      : isArtifact
+        ? withLinkCellWrapper(
+            ChatbotCellWrapper,
+            CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column],
+          )
+        : CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     formattedColumn.headerComponentParams = {

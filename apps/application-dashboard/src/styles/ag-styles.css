@@ -267,10 +267,10 @@
   background-color: #fef9da !important;
 }
 
-#activity-by-status-table .ag-cell-wrapper {
+#full-height-cell-table .ag-cell-wrapper {
   height: 100%;
 }
 
-#activity-by-status-table .ag-cell-value {
+#full-height-cell-table .ag-cell-value {
   height: 100%;
 }

@@ -1,47 +1,56 @@
 'use client';
 
 import { Button } from '@zamp-platform/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { ActionType, BlockAction } from '../../types/block.types';
+import { ActionType, ButtonBlockType } from '../../types/block.types';
 
 interface ButtonBlockProps {
-  payload: {
-    is_disabled: boolean;
-    label: string;
-    value: string;
-    action: BlockAction;
-  };
-  elementValues: Record<string, string>;
-  onAction: (action: BlockAction, payload: Record<string, string>) => void;
+  elementValues: Record<string, { label: string; value: string }>;
+  onAction: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void;
   isLoading?: boolean;
+  blockConfig: ButtonBlockType;
+  conversationId?: string;
+  messageId?: string;
 }
 
-export const ButtonBlock: React.FC<ButtonBlockProps> = ({ payload, elementValues, onAction, isLoading = false }) => {
+export const ButtonBlock: React.FC<ButtonBlockProps> = ({
+  blockConfig,
+  elementValues,
+  onAction,
+  isLoading = false,
+  conversationId,
+  messageId,
+}) => {
   const handleClick = () => {
-    const actionPayload: Record<string, string> = {};
+    const actionPayload: Record<string, { label: string; value: string }> = {};
 
-    if (payload.action.type === ActionType.INTERNAL_API && payload.action.dependent_elements) {
-      payload.action.dependent_elements.forEach((elementId) => {
+    if (blockConfig?.action?.type === ActionType.INTERNAL_API && blockConfig?.action?.dependent_elements) {
+      blockConfig?.action?.dependent_elements?.forEach((elementId) => {
         if (elementValues[elementId]) {
           actionPayload[elementId] = elementValues[elementId];
         }
       });
     }
 
-    onAction(payload.action, actionPayload);
+    onAction(blockConfig, { ...actionPayload, conversationId: conversationId || '', messageId: messageId || '' });
   };
+
+  const buttonVariant = useMemo(
+    () => (blockConfig?.action?.type === ActionType.INTERNAL_REDIRECT ? 'secondary' : 'default'),
+    [blockConfig?.action?.type],
+  );
 
   return (
     <Button
       onClick={handleClick}
-      variant={payload.action.type === ActionType.REDIRECT ? 'secondary' : 'default'}
+      variant={buttonVariant}
       size='small'
       isLoading={isLoading}
-      disabled={isLoading || payload.is_disabled}
+      disabled={isLoading || blockConfig?.payload?.is_disabled}
       data-testid='button-block'
     >
-      {payload.label}
+      {blockConfig?.payload?.label}
     </Button>
   );
 };

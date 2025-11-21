@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,

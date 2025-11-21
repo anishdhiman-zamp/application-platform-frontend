@@ -1,9 +1,11 @@
 import { FC, memo, useEffect, useMemo, useState } from 'react';
+import { LocationType } from '@zamp-platform/chat';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import DatasetArtifact from 'modules/process/artifacts/components/pdf-dataset-artifact/DatasetArtifact';
 import { CTA_COMPONENT_TYPE, EmitHITLActionPayload, MissingFieldsConfigType } from 'modules/process/process.types';
+import { useSearchParams } from 'next/navigation';
 import { useEmitHITLActionMutation } from '@/apis/processes';
 import ProgressBar from '@/components/common/RingProgress';
 import TooltipV2 from '@/components/common/TooltipV2';
@@ -41,6 +43,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
   showPdfSearch = false,
 }) => {
   const userId = useAppSelector((state) => state.user?.user?.user_id);
+  const searchParams = useSearchParams();
 
   const {
     state: { completedFields },
@@ -101,7 +104,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
       responses: [
         {
           action_id: ctaActionId ?? '',
-          values: [ctaValue ?? ''],
+          values: ctaValue ? [ctaValue] : [],
           cta_component_type: CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
         },
       ],
@@ -116,9 +119,27 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     }
   };
 
+  // Initialize active tab based on URL params (for chatbot deep linking) or default to first dataset
   useEffect(() => {
-    if (datasets?.length > 0) setActiveTab(datasets[0]?.dataset_id);
-  }, [datasets]);
+    if (datasets?.length > 0) {
+      const chatbotType = searchParams?.get('chatbot_annotation_location_type');
+      const datasetIdFromUrl = searchParams?.get('chatbot_dataset_id');
+
+      // If chatbot params indicate a specific dataset field, select that dataset
+      if (chatbotType === LocationType.DATASET_FIELD && datasetIdFromUrl) {
+        const datasetExists = datasets.some((ds) => ds.dataset_id === datasetIdFromUrl);
+
+        if (datasetExists) {
+          setActiveTab(datasetIdFromUrl);
+
+          return;
+        }
+      }
+
+      // Default to first dataset
+      setActiveTab(datasets[0]?.dataset_id);
+    }
+  }, [datasets, searchParams]);
 
   return (
     <Tabs

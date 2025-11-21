@@ -147,6 +147,7 @@ export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.webp';
 export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.webp';
 export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.webp';
+export const TEAM_MEMBERS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/team-members.webp';
 
 export const SHEET_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/sheet.png';
 
@@ -158,9 +159,13 @@ export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 // knowledge based
 export const KNOWLEDGE_BASED_ICON = IMAGE_PREFIX + '/images/kb-background.svg';
 
-export const COINS_STACKED_04 = IMAGE_PREFIX + '/icons/coins-stacked-04.svg';
-export const USERS_02 = IMAGE_PREFIX + '/icons/users-02.svg';
-export const FLEX_ALIGN_RIGHT = IMAGE_PREFIX + '/icons/flex-align-right.svg';
+// feedback
+export const QUEUED_ICON = IMAGE_PREFIX + '/icons/feedback/status/queued.svg';
+export const FEEDBACK_SUCCESS_ICON = IMAGE_PREFIX + '/icons/feedback/status/feedback-success.svg';
+export const LOADER_02 = IMAGE_PREFIX + '/icons/feedback/status/loader-02.svg';
+export const MESSAGE_ICON = IMAGE_PREFIX + '/icons/feedback/message.svg';
+export const PLAY_ICON = IMAGE_PREFIX + '/icons/feedback/play.svg';
+export const FEEDBACK_OPEN_ICON = IMAGE_PREFIX + '/icons/feedback/feedback-open.svg';
 
 //GIF
 export const ZAMP_LOGO_LOADER_WEBP = IMAGE_PREFIX + '/loaders/zamp-logo-loader.webp';

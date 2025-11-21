@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { FLEX_ALIGN_RIGHT, KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
+import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
+import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
 import PaymentActions from 'modules/payments/components/PaymentActions';
@@ -15,9 +16,15 @@ import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
+import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
+import TooltipV2 from '@/components/common/TooltipV2';
+import { COLORS } from '@/constants/colors';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import WorkWithPace from '@/modules/chatbot/WorkWithPace';
+import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
 
@@ -43,6 +50,7 @@ const ShareButton = () => {
 
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
@@ -50,6 +58,7 @@ const Topbar = () => {
   const dispatch = useAppDispatch();
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
+  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
 
   useEffect(() => {
@@ -64,6 +73,18 @@ const Topbar = () => {
         })
         .catch(() => {
           setIsKnowledgeBaseEnabled(false);
+        });
+
+      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
+        .then((res: string[]) => {
+          if (res?.includes(processId ?? '')) {
+            setIsFeedbackEnabled(true);
+          } else {
+            setIsFeedbackEnabled(false);
+          }
+        })
+        .catch(() => {
+          setIsFeedbackEnabled(false);
         });
     }
   }, [evaluate, ldClient, processId]);
@@ -85,20 +106,31 @@ const Topbar = () => {
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
-      if (isKnowledgeBaseEnabled)
-        return (
-          <div className='flex items-center gap-3'>
-            <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-              <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
-                <div className='flex gap-1'>
-                  <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
-                  Knowledge Base
-                </div>
-              </Button>
-            </Link>
-            <ShareButton />
-          </div>
-        );
+      return (
+        <div className='flex items-center gap-3'>
+          {isKnowledgeBaseEnabled &&
+            (isFeedbackEnabled ? (
+              <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+                <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+                  <Button id='knowledge-base-btn' size='small' variant='secondary'>
+                    <BookOpen size={12} className='' />
+                  </Button>
+                </Link>
+              </TooltipV2>
+            ) : (
+              <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+                <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
+                  <div className='flex gap-1'>
+                    <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
+                    Knowledge Base
+                  </div>
+                </Button>
+              </Link>
+            ))}
+          {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
+          <ShareButton />
+        </div>
+      );
     }
 
     return <ShareButton />;
@@ -109,7 +141,7 @@ const Topbar = () => {
   };
 
   return (
-    <div className='flex h-12 items-center justify-between'>
+    <div className='flex h-12 items-center'>
       <div
         className={cn(
           'text-GRAY_700 flex h-12 items-center justify-between py-4 pr-5 pl-4 transition-all',
@@ -127,19 +159,20 @@ const Topbar = () => {
           />
         </div>
         <div className='flex-shrink-0'>
-          <Image
-            className='cursor-pointer'
-            width={16}
+          <FlexAlignRight
             height={16}
+            width={16}
+            color={COLORS.GRAY_700}
+            className='cursor-pointer'
             onClick={handleSidebarToggle}
-            src={FLEX_ALIGN_RIGHT}
-            alt='toggle sidebar'
           />
         </div>
       </div>
-
-      <BreadCrumb isSidebarOpen={isSidebarOpen} />
-      <div className='pr-8'>{renderRightSideActions}</div>
+      <div className='flex w-full items-center justify-between'>
+        <BreadCrumb isSidebarOpen={isSidebarOpen} />
+        <WorkWithPace />
+        <div className='pr-8'>{renderRightSideActions}</div>
+      </div>
     </div>
   );
 };

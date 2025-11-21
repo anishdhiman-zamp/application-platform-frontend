@@ -147,16 +147,21 @@ const getBarLineChartFields = (
   mapping: BarLineChartWidgetMapping,
   widgetType: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART,
 ): ChartSpecificFields => {
+  // Defensive check: Ensure required fields exist
+  if (!mapping?.fields?.x_axis?.[0] || !mapping?.fields?.y_axis?.[0]) {
+    return {};
+  }
+
   const chartFields = {
     xAxis: {
-      column: mapping.fields.x_axis[0].column,
-      column_type: mapping.fields.x_axis[0].type,
+      column: mapping.fields.x_axis[0].column || '',
+      column_type: mapping.fields.x_axis[0].type || '',
       filter_type: mapping.fields.x_axis[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     yAxis: {
-      column: mapping.fields.y_axis[0].column,
+      column: mapping.fields.y_axis[0].column || '',
       aggregation: mapping.fields.y_axis[0].aggregation || AGGREGATION_TYPES.SUM,
-      column_type: mapping.fields.y_axis[0].type,
+      column_type: mapping.fields.y_axis[0].type || '',
       filter_type: mapping.fields.y_axis[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     ...(mapping.fields.group_by?.[0]?.column
@@ -175,17 +180,22 @@ const getBarLineChartFields = (
 };
 
 const getDonutChartFields = (mapping: PieDonutChartWidgetMapping): ChartSpecificFields => {
+  // Defensive check: Ensure required fields exist
+  if (!mapping?.fields?.values?.[0] || !mapping?.fields?.slices?.[0]) {
+    return {};
+  }
+
   const donutChartFields = {
     field: {
-      column: mapping.fields.values?.[0]?.column || '',
-      aggregation: mapping.fields.values?.[0]?.aggregation || AGGREGATION_TYPES.SUM,
-      column_type: mapping.fields.values?.[0]?.type || '',
-      filter_type: mapping.fields.values?.[0]?.drilldown_filter_type || FILTER_TYPES.SEARCH,
+      column: mapping.fields.values[0].column || '',
+      aggregation: mapping.fields.values[0].aggregation || AGGREGATION_TYPES.SUM,
+      column_type: mapping.fields.values[0].type || '',
+      filter_type: mapping.fields.values[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     groupBy: {
-      column: mapping.fields.slices?.[0]?.column || '',
-      column_type: mapping.fields.slices?.[0]?.type || '',
-      filter_type: mapping.fields.slices?.[0]?.drilldown_filter_type || FILTER_TYPES.SEARCH,
+      column: mapping.fields.slices[0].column || '',
+      column_type: mapping.fields.slices[0].type || '',
+      filter_type: mapping.fields.slices[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     dataFormat: 'value' as const,
   };

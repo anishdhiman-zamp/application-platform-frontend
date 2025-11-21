@@ -86,4 +86,5 @@ export type FormatColumnsParamsType = {
   missingFields?: MissingFieldItemType[];
   wrapLink?: boolean;
   isSelfServe?: boolean;
+  isArtifact?: boolean;
 };

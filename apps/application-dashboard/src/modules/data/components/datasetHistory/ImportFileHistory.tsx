@@ -6,24 +6,25 @@ import HistoryBulkLoaders from 'modules/data/components/datasetHistory/HistoryBu
 import HistoryEmptyState from 'modules/data/components/datasetHistory/HistoryEmptyState';
 import HistoryList from 'modules/data/components/datasetHistory/HistoryList';
 import { ImportFileHistoryPropsType } from 'modules/data/components/importDataset/importData.types';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { RootState } from 'store';
 
 const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
+  const params = useParams();
+  const datasetId = params?.datasetId as string;
   const importFileHistoryRef = useRef<HTMLDivElement>(null);
   const [isHoveredLoaders, setIsHoveredLoaders] = useState(false);
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
-  const searchParams = useSearchParams();
-  const datasetId = searchParams?.get('datasetId') as string;
-  const { data } = useGetFileImportHistoryQuery({ datasetId });
+  const { data, isLoading: isHistoryLoading } = useGetFileImportHistoryQuery({ datasetId });
   const fileImportHistoryData = data?.file_uploads || [];
+  const showEmptyState = !isHistoryLoading && !datasetBulkLoaders?.length && !fileImportHistoryData?.length;
 
   useOnClickOutside(importFileHistoryRef, onClose);
 
   return (
     <>
       <div className='fixed top-[94px] left-0 z-1000 flex h-[calc(100vh-136px)]! w-screen justify-end'>
-        {!datasetBulkLoaders?.length && !fileImportHistoryData?.length ? (
+        {showEmptyState ? (
           <div className='absolute top-0 right-8 z-50' ref={importFileHistoryRef}>
             <HistoryEmptyState />
           </div>
@@ -39,7 +40,11 @@ const ImportFileHistory: FC<ImportFileHistoryPropsType> = ({ onClose }) => {
                 setIsHoveredLoaders={setIsHoveredLoaders}
                 datasetBulkLoaders={datasetBulkLoaders}
               />
-              <HistoryList isHoveredLoaders={isHoveredLoaders} fileImportHistoryData={fileImportHistoryData} />
+              <HistoryList
+                isHoveredLoaders={isHoveredLoaders}
+                isHistoryLoading={isHistoryLoading}
+                fileImportHistoryData={fileImportHistoryData}
+              />
             </div>
           </div>
         )}

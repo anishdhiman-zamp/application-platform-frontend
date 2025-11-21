@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { AnnotationType, ChatMessage, ChatMessageType, ResourceType, SenderType, useChat } from '@zamp-platform/chat';
+import { toast } from '@zamp-platform/ui';
 import { useAppSelector } from 'hooks/toolkit';
 import { RootState } from 'store';
 import { useSSEContext } from '@/app/_providers/sse-provider';
+import { KB_TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 
 interface ChatComponentProps {
   type: AnnotationType;
@@ -36,7 +38,7 @@ export const ChatComponent: React.FC<ChatComponentProps> = ({ type, className = 
       });
 
       if (!conversationId) {
-        throw new Error('Failed to create conversation');
+        toast.error(KB_TOAST_MESSAGES.FAILED_CONVERSATION_CREATION);
       }
     };
 

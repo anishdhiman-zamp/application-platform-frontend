@@ -1,6 +1,6 @@
 'use client';
 
-import React, { KeyboardEvent, useOptimistic, useState } from 'react';
+import { KeyboardEvent, useOptimistic, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetPagesQuery, useGetProcessesQuery, useUpdatePageMutation } from 'apis/pages';
@@ -10,9 +10,9 @@ import { KEYBOARD_KEYS } from 'constants/shortcuts';
 import { useRouter } from 'next/navigation';
 import { PageResponseType } from 'types/api/pagesApi.types';
 import { cn, preventAutoFocus } from 'utils/common';
+import PageIcon from '@/assets/Icons/PageIcon';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
-import PageIcon from '@/components/icons/PageIcon';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from '@/modules/shareResource/shareResource.types';
 import DeletePageDialog from 'components/layouts/dashboard-layout/components/DeletePageDialog';
 
@@ -109,7 +109,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
         )}
         data-testid={`${pageId}-page-nav-tab`}
       >
-        <PageIcon isSelected={isSelected} />
+        <PageIcon height={14} width={14} isSelected={isSelected} />
 
         <div className='flex-1'>{optimisticName}</div>
 

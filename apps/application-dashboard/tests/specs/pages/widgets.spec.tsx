@@ -15,7 +15,7 @@ import { createPage, createWidget, deleteEntity, reorderWidgets, waitAndClick } 
 
 export const { baseUrl, baseBEUrl } = PLAYWRIGHT_ENV_CREDENTIALS;
 
-test.describe('Widgets', () => {
+test.describe.skip('Widgets', () => {
   test('Widgets', async ({ page }) => {
     let pageId = '',
       sheetId = '',

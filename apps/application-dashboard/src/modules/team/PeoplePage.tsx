@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
@@ -9,12 +11,21 @@ import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 
 const PeoplePage = () => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { data: teamMembersData, isLoading: isLoadingTeamMembersData } = useGetAudiencesByOrganisationIdQuery(
+
+  const {
+    data: teamMembersData,
+    isLoading: isLoadingTeamMembersData,
+    isUninitialized: isUninitializedTeamMembersData,
+  } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
-  const { data: invitedTeamMembersData, isLoading: isLoadingInvitedTeamMembersData } =
-    useGetInvitedAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+  const {
+    data: invitedTeamMembersData,
+    isLoading: isLoadingInvitedTeamMembersData,
+    isUninitialized: isUninitializedInvitedTeamMembersData,
+  } = useGetInvitedAudiencesByOrganisationIdQuery({ organizationId }, { skip: !organizationId });
+
   const [search, setSearch] = useState('');
   const [filteredTeamMembers, setFilteredTeamMembers] = useState(teamMembersData);
   const [filteredInvitedMembers, setFilteredInvitedMembers] = useState(invitedTeamMembersData);
@@ -57,9 +68,9 @@ const PeoplePage = () => {
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
       <PeopleTabs
         filteredTeamMembers={filteredTeamMembers ?? []}
-        isLoadingTeamMembersData={isLoadingTeamMembersData}
+        isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
         filteredInvitedMembers={filteredInvitedMembers ?? []}
-        isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData}
+        isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
         search={search}
       />
     </div>

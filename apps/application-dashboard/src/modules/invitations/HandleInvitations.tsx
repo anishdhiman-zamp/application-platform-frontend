@@ -6,14 +6,11 @@ import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { useRouter } from 'next/navigation';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 export const HandleInvitations: FC = () => {
-  const router = useRouter();
-
   const [handledInvitations, setHandledInvitations] = useState<string[]>([]);
 
   const isInvitationsPage = window.location.pathname === ROUTES_PATH.INVITATIONS;
@@ -46,19 +43,20 @@ export const HandleInvitations: FC = () => {
   useEffect(() => {
     if (loadingInvitations === false) {
       // use finally because we don't want to block the flow if invitation acceptance fails
+
       if (invitationsData) {
         handleAcceptInvitations(
           invitationsData.invitations.map((invitation) => invitation.organization_invitation_id),
         ).finally(() => {
           whoAmI().finally(() => {
             if (isInvitationsPage || invitationsData.invitations.length > 0) {
-              router.push(ROUTES_PATH.HOME);
+              window.location.href = ROUTES_PATH.PROCESSES;
             }
           });
         });
       } else {
         if (isInvitationsPage) {
-          window.location.href = ROUTES_PATH.HOME;
+          window.location.href = ROUTES_PATH.PROCESSES;
         }
       }
     }

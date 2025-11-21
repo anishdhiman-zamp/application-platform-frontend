@@ -75,7 +75,21 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     }
 
     if (checkOrgMembership(session, pathname)) {
-      return NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
+      const response = NextResponse.redirect(new URL(ROUTES_PATH.MEMBERSHIP_PENDING, request.url));
+
+      if (session) {
+        const sessionCache = {
+          user_id: session.user_id,
+          user_email: session.user_email,
+          org_count: session.orgs?.length ?? 0,
+          default_org_id: session?.orgs?.[0]?.organization_id,
+          cached_at: Date.now(),
+        };
+
+        setServerSideUserCookie(response, USER_SESSION_COOKIE, JSON.stringify(sessionCache), SESSION_CACHE_MAX_AGE);
+      }
+
+      return response;
     }
 
     if (session && !cached) {
@@ -85,6 +99,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
         user_id: session?.user_id,
         user_email: session?.user_email,
         org_count: session?.orgs?.length || 0,
+        default_org_id: session?.orgs?.[0]?.organization_id,
         cached_at: Date.now(),
       };
 
@@ -113,7 +128,11 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       }
 
       if (session) {
-        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
+        const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
+
+        return NextResponse.redirect(
+          new URL(hasOrgs ? ROUTES_PATH.PROCESSES : ROUTES_PATH.MEMBERSHIP_PENDING, request.url),
+        );
       }
 
       clearServerSideCookie(response, ORY_KRATOS_SESSION_COOKIE);
@@ -124,10 +143,13 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
     case ROUTES_PATH.MEMBERSHIP_PENDING: {
       const { session } = await getUserSession(request);
 
-      if (!checkOrgMembership(session, pathname)) {
+      const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
+
+      if (hasOrgs) {
         return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
-      break;
+
+      return NextResponse.next();
     }
     case ROUTES_PATH.HOME: {
       return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
