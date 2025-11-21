@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef } from 'react';
+import { FC, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
 import { useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
@@ -47,8 +47,16 @@ export const ChatInput: FC<ChatInputProps> = ({
     setHeader,
   });
 
-  const { transcript, isRecording, startRecording, stopRecording, microphoneState, connectionState, microphone } =
-    useTranscription();
+  const {
+    transcript,
+    isRecording,
+    startRecording,
+    stopRecording,
+    microphoneState,
+    connectionState,
+    microphone,
+    isCommitting,
+  } = useTranscription();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +104,6 @@ export const ChatInput: FC<ChatInputProps> = ({
   const handleAccept = () => {
     try {
       stopRecording();
-      setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
     } catch {
       toast.error('Failed to stop recording. Please try again.');
     }
@@ -118,6 +125,10 @@ export const ChatInput: FC<ChatInputProps> = ({
     () => isRecording && connectionState !== SOCKET_STATES.open,
     [isRecording, connectionState],
   );
+
+  useEffect(() => {
+    setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
+  }, [transcript, setValue]);
 
   return (
     <div
@@ -167,11 +178,11 @@ export const ChatInput: FC<ChatInputProps> = ({
         </div>
       )}
 
-      <div className={cn(shouldShowRecorder ? 'relative w-full rounded-md border border-gray-600 p-1.5' : '')}>
+      <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
         {/* Middle - Textarea and button wrapper */}
         <div className='relative'>
           {shouldShowRecorder ? (
-            <div className='flex w-full items-center gap-2'>
+            <div className='flex w-full items-center justify-between gap-2'>
               <Button
                 variant='ghost'
                 size='icon'
@@ -190,6 +201,8 @@ export const ChatInput: FC<ChatInputProps> = ({
                 className='!size-5 [&_svg]:size-3'
                 aria-label='Accept recording'
                 onClick={handleAccept}
+                disabled={isCommitting}
+                isLoading={isCommitting}
               >
                 <Check className='text-white' />
               </Button>

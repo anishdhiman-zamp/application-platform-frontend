@@ -162,7 +162,8 @@ export const API_ENDPOINTS = {
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   UNIFIED_SSE: `events`,
 
-  //Deepgram Speech to text
-  DEEPGRAM_AUTHENTICATE_GET: `/deepgram/generate-access-token`,
+  //Voice Agents
+  SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
+
   INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
 };
