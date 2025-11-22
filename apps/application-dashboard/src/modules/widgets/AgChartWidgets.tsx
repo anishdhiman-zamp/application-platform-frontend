@@ -3,7 +3,6 @@ import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import { AgChartOptions } from 'ag-charts-community';
 import { AgCharts } from 'ag-charts-react';
 import { useGetWidgetDataQuery } from 'apis/widgets';
-import { WIDGET_LOADER } from 'constants/lottie/widget-loader';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import { AG_CHART_THEME } from 'modules/widgets/AgTheme';
 import DeleteWidgetDialog from 'modules/widgets/components/DeleteWidgetDialog';
@@ -18,11 +17,11 @@ import { WidgetDataType, WidgetInstanceTypeWrapper } from 'types/api/widgets.typ
 import { OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { WIDGET_LOADER_SVG } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 interface WidgetsWrapperProps {
   widgetDetails: WidgetInstanceTypeWrapper;
@@ -155,24 +154,19 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           className='z-1000!'
           resizeProps={resizeProps}
           isLoading={isLoading || isFilterLoading}
+          isNoData={!transformedData?.length}
         />
         <CommonWrapper
           isLoading={isLoading || isFilterLoading}
           skeletonType={SkeletonTypes.CUSTOM}
           isNoData={!transformedData?.length}
-          className='h-full'
-          noDataBanner={<NoWidgetData className={cn({ 'animate-pulse opacity-100': isFetching }, 'h-60')} />}
+          noDataBanner={<NoWidgetData className={cn({ 'animate-pulse opacity-100': isFetching }, 'h-full')} />}
           isError={isError}
           refetchFunction={refetch}
+          className='h-[calc(100%-12px)]'
           loader={
             <div className='flex h-full w-full items-center justify-center'>
-              <DynamicLottiePlayer
-                src={WIDGET_LOADER}
-                className='lottie-player h-[150px]'
-                autoplay
-                loop
-                keepLastFrame
-              />
+              <img src={WIDGET_LOADER_SVG} alt='widget loader' className='h-[150px]' />
             </div>
           }
         >
