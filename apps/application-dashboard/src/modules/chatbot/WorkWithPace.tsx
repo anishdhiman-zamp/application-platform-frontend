@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { LocationType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import { useParams } from 'next/navigation';
 import { FUNCTION_KEYS_ICON, KEYBOARD_KEYS } from '@/constants/shortcuts';
+import useKeyDown from '@/hooks/useKeyDown';
 import ChatbotWrapper from '@/modules/chatbot';
 
 const WorkWithPace = () => {
@@ -16,27 +17,13 @@ const WorkWithPace = () => {
     openChatbotRef.current = openChatbot;
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Command/Meta + P
-      if ((event.metaKey || event.ctrlKey) && event.code === KEYBOARD_KEYS.P) {
-        // Prevent the default browser print dialog
-        event.preventDefault();
-        event.stopPropagation();
+  const handleOpenChatbot = () => {
+    if (openChatbotRef.current) {
+      openChatbotRef.current();
+    }
+  };
 
-        if (openChatbotRef.current) {
-          openChatbotRef.current();
-        }
-      }
-    };
-
-    // Use capture phase to ensure we intercept the event before other handlers
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown, { capture: true });
-    };
-  }, []);
+  useKeyDown(handleOpenChatbot, [KEYBOARD_KEYS.META, KEYBOARD_KEYS.K]);
 
   if (!processId || !activityRunId) {
     return null;
@@ -68,7 +55,7 @@ const WorkWithPace = () => {
             {FUNCTION_KEYS_ICON.META_KEY}
           </span>
           <span className='shadow-keyboard-keys-shadow flex h-4 w-4 items-center justify-center rounded-sm border'>
-            P
+            K
           </span>
         </div>
       </Button>

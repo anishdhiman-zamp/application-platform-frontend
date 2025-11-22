@@ -5,7 +5,7 @@ import FeedbackStatusProcessingBody from 'modules/feedback/feedback-status/Feedb
 import FeedbackStatusQueuedBody from 'modules/feedback/feedback-status/FeedbackStatusQueuedBody';
 import FeedbackStatusSuccessBody from 'modules/feedback/feedback-status/FeedbackStatusSuccessBody';
 import Image from 'next/image';
-import { FEEDBACK_OPEN_ICON, QUEUED_ICON } from '@/constants/icons';
+import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 export enum FEEDBACK_STATUS {
@@ -29,28 +29,28 @@ export enum LOCATION_TYPE {
 
 export const FEEDBACK_BADGE_CONFIG = [
   {
-    key: 'open',
+    key: FEEDBACK_STATUS.OPEN,
     icon: <Image src={FEEDBACK_OPEN_ICON} alt='feedback open' width={12} height={12} className='min-h-3 min-w-3' />,
     bgClassName: 'bg-blue-200',
     textClassName: 'text-blue-900',
     stateKey: 'openFeedbackItems',
   },
   {
-    key: 'queued',
-    icon: <Image src={QUEUED_ICON} alt='menu' width={12} height={12} className='min-h-3 min-w-3' />,
+    key: FEEDBACK_STATUS.QUEUED,
+    icon: <ChartNoAxesColumn size={12} className='rotate-90' />,
     bgClassName: 'bg-GRAY_200',
     textClassName: '',
     stateKey: 'queuedFeedbackItems',
   },
   {
-    key: 'processing',
+    key: FEEDBACK_STATUS.PROCESSING,
     icon: <Loader size={12} />,
     bgClassName: 'bg-GRAY_200',
     textClassName: '',
     stateKey: 'processingFeedbackItems',
   },
   {
-    key: 'success',
+    key: FEEDBACK_STATUS.APPLIED,
     icon: <Check size={12} />,
     bgClassName: 'bg-orange-200',
     textClassName: 'text-ORANGE_1000',

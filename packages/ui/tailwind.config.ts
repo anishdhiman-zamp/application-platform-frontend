@@ -260,6 +260,7 @@ const config = {
         'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
         'menu-shadow': 'var(--menu-shadow)',
         'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',
+        'chatbot-shadow': '0px 2px 9.5px 1px #4141411F',
         smooth:
           '0 15px 80px 0 rgba(0, 0, 0, 0.05), 0 6.267px 33.422px 0 rgba(0, 0, 0, 0.04), 0 3.35px 17.869px 0 rgba(0, 0, 0, 0.03), 0 1.878px 10.017px 0 rgba(0, 0, 0, 0.03), 0 0.998px 5.32px 0 rgba(0, 0, 0, 0.02), 0 0.415px 2.214px 0 rgba(0, 0, 0, 0.01)',
         'keyboard-keys-shadow': '-1px -1px 0.25px 0px #00000017 inset',

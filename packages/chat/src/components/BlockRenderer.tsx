@@ -5,7 +5,14 @@ import React, { useState } from 'react';
 
 import { Block, BlockMessage, BlockType, ButtonBlockType } from '../types/block.types';
 import { extractInitialValues } from './block.utils';
-import { ButtonBlock, MarkdownBlock, PlainTextBlock, QuestionGroupBlock, SingleSelectBlock } from './blocks';
+import {
+  AttachmentsBlock,
+  ButtonBlock,
+  MarkdownBlock,
+  PlainTextBlock,
+  QuestionGroupBlock,
+  SingleSelectBlock,
+} from './blocks';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -95,6 +102,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BlockType.QUESTION_GROUP:
         return <QuestionGroupBlock key={block?.id} payload={block?.payload} />;
+
+      case BlockType.ATTACHMENTS:
+        return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
 
       default:
         return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
-import { useGetDeepgramAccessTokenQuery } from '@/apis/deepgram';
+import { useGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 
 interface TokenMetadata {
   token: string;
@@ -40,7 +40,7 @@ const isTokenExpiredOrExpiring = (): boolean => {
  * Hook to manage Deepgram access token with automatic refresh
  * Token is stored at module level to persist across component unmounts/remounts
  */
-export const useDeepgramToken = (): UseDeepgramTokenReturn => {
+export const useDeepgramToken = (skip?: boolean): UseDeepgramTokenReturn => {
   // Only fetch token if we don't have a valid one
   const shouldSkipTokenFetch = !isTokenExpiredOrExpiring();
 
@@ -51,7 +51,7 @@ export const useDeepgramToken = (): UseDeepgramTokenReturn => {
     isLoading: isLoadingAccessToken,
     isError: isTokenError,
     refetch: refetchToken,
-  } = useGetDeepgramAccessTokenQuery({ ttl_seconds: TOKEN_TTL }, { skip: shouldSkipTokenFetch });
+  } = useGetSpeechToTextAccessTokenQuery({ ttl_seconds: TOKEN_TTL }, { skip: shouldSkipTokenFetch || skip });
 
   // Update global token metadata when new token is received (from fetch or cache)
   // This ensures globalTokenMetadata stays in sync with RTK Query cache

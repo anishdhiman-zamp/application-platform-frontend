@@ -12,8 +12,7 @@ import {
 } from '@zamp-platform/ui';
 import { findTimeDifference } from 'modules/data/data.utils';
 import { useDeleteFeedbackMutation } from '@/apis/feedback';
-import { feedbackContextActions, useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
-import { removeFeedbackItem } from '@/store/slices/feedbacks';
+import { removeFeedbackItem } from '@/store/slices/feedback.slice';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackDeleteDialogProps {
@@ -32,7 +31,6 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
   onDeleteSuccess,
 }) => {
   const [deleteFeedback, { isLoading: isDeleting }] = useDeleteFeedbackMutation();
-  const { dispatch: feedbackContextDispatch } = useFeedbackContextStore();
   const dispatch = useDispatch();
 
   const handleDelete = () => {
@@ -43,11 +41,7 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
     })
       .unwrap()
       .then(() => {
-        feedbackContextDispatch({
-          type: feedbackContextActions.REMOVE_FEEDBACK_ITEM,
-          payload: { id: feedback.id, status: feedback.status },
-        });
-        dispatch(removeFeedbackItem(feedback.id));
+        dispatch(removeFeedbackItem({ id: feedback.id, status: feedback.status }));
         onOpenChange(false);
         onDeleteSuccess?.();
       })

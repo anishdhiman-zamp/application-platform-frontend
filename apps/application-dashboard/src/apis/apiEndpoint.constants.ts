@@ -105,9 +105,9 @@ export const API_ENDPOINTS = {
   PAYMENTS_CONFIG_GET: `payments/config`,
   PAYMENTS_APPROVALS_INFO_GET: `payments/{{paymentId}}/approvals-info`,
   PAYMENTS_TEMPLATE_APPROVALS_INFO_GET: `payments/templates/{{templateId}}/approvals-info`,
-  FORMS_SIGNED_UPLOAD_URL_POST: `v1/forms/file-upload/init`,
-  FORMS_SIGNED_UPLOAD_ACK_POST: `v1/forms/file-upload/{{fileImportId}}/ack`,
-  DOWNLOAD_FILE_GET: `v1/forms/file-upload/{{fileImportId}}/download`,
+  FORMS_SIGNED_UPLOAD_URL_POST: `file-imports/initiate`,
+  FORMS_SIGNED_UPLOAD_ACK_POST: `file-imports/{{fileImportId}}/acknowledge`,
+  DOWNLOAD_FILE_GET: `file-imports/{{fileImportId}}/download-url`,
   PAYMENTS_AUDIENCES_GET: `payments/audiences`,
 
   DUAL_ADMIN_POLICY_GET: `/dual-admin-policy`,
@@ -162,7 +162,9 @@ export const API_ENDPOINTS = {
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   UNIFIED_SSE: `events`,
 
-  //Deepgram Speech to text
-  DEEPGRAM_AUTHENTICATE_GET: `/deepgram/generate-access-token`,
+  //Voice Agents
+  SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
+
   INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
+  INTERACTION_DISABLE_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable`,
 };

@@ -1,11 +1,11 @@
 import { type FC } from 'react';
+import { useSelector } from 'react-redux';
 import { Check } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
 const FeedbackStatusSuccessBody: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { successFeedbackItems: items } = state;
+  const { successFeedbackItems: items } = useSelector((state: RootState) => state?.feedbacks);
 
   return (
     <div>

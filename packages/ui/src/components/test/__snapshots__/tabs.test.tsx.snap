@@ -16,7 +16,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
     <button
       aria-controls="radix-«r9»-content-tab1"
       aria-selected="true"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
@@ -30,7 +30,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
     <button
       aria-controls="radix-«r9»-content-tab2"
       aria-selected="false"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
@@ -84,7 +84,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with custom
     <button
       aria-controls="radix-«rc»-content-tab1"
       aria-selected="true"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border custom-trigger"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border custom-trigger"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
@@ -127,7 +127,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     <button
       aria-controls="radix-«re»-content-tab1"
       aria-selected="true"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
@@ -141,7 +141,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     <button
       aria-controls="radix-«re»-content-tab2"
       aria-selected="false"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
@@ -155,7 +155,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     <button
       aria-controls="radix-«re»-content-tab3"
       aria-selected="false"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
@@ -169,7 +169,7 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     <button
       aria-controls="radix-«re»-content-tab4"
       aria-selected="false"
-      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
+      class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"

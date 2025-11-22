@@ -27,7 +27,6 @@ const Feedbacks = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
-      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
     }),
     stopProcessingFeedback: builder.mutation<void, StopProcessingFeedbackPayloadType>({
       query: (payload) => ({
@@ -35,13 +34,13 @@ const Feedbacks = baseApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body: payload,
       }),
-      invalidatesTags: (_, error) => (error ? [] : [APITags.GET_FEEDBACKS]),
     }),
   }),
 });
 
 export const {
   useGetFeedbacksQuery,
+  useLazyGetFeedbacksQuery,
   useDeleteFeedbackMutation,
   useApplyFeedbackMutation,
   useStopProcessingFeedbackMutation,

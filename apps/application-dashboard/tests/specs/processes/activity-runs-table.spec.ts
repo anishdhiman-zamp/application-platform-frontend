@@ -79,8 +79,8 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       // Go to "DONE" tab
       await switchToTab(page, 'DONE');
 
-      // Click the filter button to open menu (use nth(3) since there are multiple)
-      await page.getByTestId('filter-control-button-add-filters').nth(3).click();
+      // Click the filter button for the DONE tab (using tab-specific test ID)
+      await page.getByTestId('filter-control-button-add-filters-DONE').click();
       await page.waitForTimeout(1000);
 
       // Test column data
@@ -92,11 +92,12 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         },
       ];
 
-      await page.getByTestId(`filter-menu-item-${testColumnData[0].colId}`).nth(3).click();
+      // Select the filter column (filter menu items are in the dropdown, use last for now)
+      await page.getByTestId(`filter-menu-item-${testColumnData[0].colId}`).last().click();
       await page.waitForTimeout(1000);
 
       // Wait for filter input to appear and type the value
-      const filterInput = page.locator('input[placeholder="type a value..."]').nth(3);
+      const filterInput = page.locator('input[placeholder="type a value..."]').last();
 
       // Wait for the input to be visible
       await filterInput.waitFor({ state: 'visible', timeout: 5000 });
@@ -112,17 +113,17 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         throw new Error(`Expected input value to be "EUR" but got "${inputValue}"`);
       }
 
-      // Apply the filter by clicking on the specific filter menu item
-      await page.getByTestId(`filter-menu-item-${testColumnData[0].value}`).nth(3).click();
+      // Apply the filter by clicking on the specific filter menu item - use last() for DONE tab
+      await page.getByTestId(`filter-menu-item-${testColumnData[0].value}`).last().click();
 
-      // Wait for data to load using skeleton detection
-      await waitForDataLoad(page, 3);
+      // Wait for data to load using skeleton detection - use last for DONE tab
+      await waitForDataLoad(page, 'last');
 
       // Validate all cells in the column contain the expected value
       await validateColumnValues(page, testColumnData[0].colId, testColumnData[0].value);
 
-      // Clear filter
-      await page.getByTestId('filter-control-button-clear-all-filters').nth(3).click();
+      // Clear filter - use tab-specific test ID for DONE tab
+      await page.getByTestId('filter-control-button-clear-all-filters-DONE').click();
       await page.waitForTimeout(1000);
       await page.getByTestId('clear-filters-confirmation-popup-yes').click();
     });
@@ -278,7 +279,7 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       }
 
       // Open display options popup
-      await page.getByTestId('display-options-icon').locator('button').nth(2).click();
+      await page.getByTestId('display-options-icon').locator('button').nth(3).click();
       await page.getByTestId('display-options-item-Columns').click();
       await page.waitForTimeout(1000);
 
@@ -353,7 +354,7 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       console.log('Page reloaded, table headers visible...');
 
       // Wait for table data to load
-      await waitForDataLoad(page, 3);
+      await waitForDataLoad(page, 'last');
 
       // Poll until table headers exist (same as we did for cells)
       console.log('⏳ Waiting for table headers to render after reload...');

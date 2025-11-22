@@ -15,14 +15,13 @@ interface FeedbackListCardProps {
   processId?: string;
   onCheck?: () => void;
   allowDelete?: boolean;
-  onDeleteSuccess?: () => void;
   withoutLinkWrapper?: boolean;
 }
 
 const selectors = ['#delete-feedback', '#check-feedback'];
 
 const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
-  const { feedback, processId, allowDelete, onDeleteSuccess, withoutLinkWrapper = false } = props;
+  const { feedback, processId, allowDelete, withoutLinkWrapper = false } = props;
   const [confirmItem, setConfirmItem] = useState<boolean>(false);
 
   const handleFeedbackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -80,7 +79,6 @@ const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
           onOpenChange={(open) => !open && setConfirmItem(false)}
           feedback={feedback}
           processId={processId}
-          onDeleteSuccess={onDeleteSuccess}
         />
       )}
     </>

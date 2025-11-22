@@ -6,29 +6,57 @@ import {
   ChatMessage,
   ChatMessageType,
   DisplayLayerActionType,
+  LocationData,
   LocationType,
+  MessageAttachmentType,
   ResourceType,
   ScopeType,
   SenderType,
 } from '@zamp-platform/chat';
 import { ChartNoAxesColumn, Check, Loader } from 'lucide-react';
+import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
 import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
-import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+import { store } from '@/store';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
+import { SignedUrlBodyType, SignedUrlResponseType } from '@/types/api/fileUpload.types';
 import {
   DependentElementInteraction,
   PostInteractionPayloadType,
   PostInteractionResponseType,
 } from '@/types/api/interaction.types';
 import { defaultFn, MapAny } from '@/types/commonTypes';
-import { getUserNameFromEmail } from '@/utils/common';
+
+/**
+ * Generates a unique ID for a chatbot instance based on annotation location
+ * @param annotationLocation - The location data for annotation
+ * @returns Unique chatbot instance ID string
+ */
+export const generateChatbotInstanceId = (annotationLocation: LocationData): string => {
+  const { type, data } = annotationLocation;
+  const parts = [
+    type,
+    data.process_id,
+    data.activity_run_id,
+    'dataset_id' in data ? data.dataset_id : undefined,
+    'dataset_row_id' in data ? data.dataset_row_id : undefined,
+    'dataset_field_id' in data ? data.dataset_field_id : undefined,
+    'log_id' in data ? data.log_id : undefined,
+  ].filter(Boolean);
+
+  return `chatbot-${parts.join('-')}`;
+};
 
 export const getFeedbackItems = (feedbackItems: FeedbackItemType[], annotationLocation: LocationData) => {
   const matchingFeedbackItems: FeedbackItemType[] = [];
 
   for (const item of feedbackItems) {
-    const itemLocation = item.annotation_data.location;
+    const itemLocation = item?.annotation_data?.location;
+
+    if (!itemLocation) {
+      continue;
+    }
 
     if (
       itemLocation.data.process_id !== annotationLocation.data.process_id ||
@@ -206,15 +234,57 @@ export const updateMessageInArray = (
   });
 };
 
+/**
+ * Updates button elements in the last message to have is_display = false
+ * @param lastMessage - The last message in the chat
+ * @param setMessages - Function to update the chat messages
+ */
+export const updateButtonElementsDisplay = (
+  lastMessage: ChatMessage,
+  setMessages: (updater: (prevMessages: ChatMessage[]) => ChatMessage[]) => void,
+): void => {
+  const lastMessageElements = lastMessage?.message_content?.elements || [];
+
+  if (lastMessageElements.length > 0) {
+    const updatedElements = lastMessageElements.map((element) => {
+      if (element?.type === BlockType.BUTTON && element?.payload?.is_display !== false) {
+        return {
+          ...element,
+          payload: {
+            ...element.payload,
+            is_display: false,
+          },
+        };
+      }
+
+      return element;
+    });
+
+    setMessages((prevMessages) => [
+      ...prevMessages.slice(0, -1),
+      {
+        ...lastMessage,
+        message_content: {
+          ...lastMessage.message_content,
+          elements: updatedElements,
+        },
+      },
+    ]);
+  }
+};
+
 export const createChatbotUrl = (annotationLocation: LocationData) => {
   let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?chatbot_process_id=${annotationLocation?.data?.process_id}&chatbot_activity_run_id=${annotationLocation?.data?.activity_run_id}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:
-      url += `&chatbot_annotation_location_type=dataset_field&chatbot_dataset_id=${annotationLocation?.data?.dataset_id}&chatbot_dataset_row_id=${annotationLocation?.data?.dataset_row_id}&chatbot_dataset_field_id=${annotationLocation?.data?.dataset_field_id}`;
+      url += `&chatbot_annotation_location_type=${LocationType.DATASET_FIELD}&chatbot_dataset_id=${annotationLocation?.data?.dataset_id}&chatbot_dataset_row_id=${annotationLocation?.data?.dataset_row_id}&chatbot_dataset_field_id=${annotationLocation?.data?.dataset_field_id}`;
       break;
     case LocationType.LOG:
-      url += `&chatbot_annotation_location_type=log&chatbot_log_id=${annotationLocation?.data?.log_id}`;
+      url += `&chatbot_annotation_location_type=${LocationType.LOG}&chatbot_log_id=${annotationLocation?.data?.log_id}`;
+      break;
+    case LocationType.ACTIVITY_RUN:
+      url += `&chatbot_annotation_location_type=${LocationType.ACTIVITY_RUN}`;
       break;
   }
 
@@ -232,6 +302,10 @@ export const doesUrlMatchLocation = (searchParams: URLSearchParams, location: Lo
 
   if (processId !== location.data.process_id || activityRunId !== location.data.activity_run_id) {
     return false;
+  }
+
+  if (location.type === LocationType.ACTIVITY_RUN) {
+    return true;
   }
 
   if (location.type === LocationType.DATASET_FIELD) {
@@ -296,8 +370,8 @@ export const uploadFileToSignedUrl = async (uploadUrl: string, file: File, fileT
 export const createUserMessagePayload = (
   inputValue: string,
   resourceId: string,
-  senderEmail: string,
-  attachments?: Array<{ file_id: string }>,
+  senderName: string,
+  attachments?: MessageAttachmentType[],
 ): ChatMessage => {
   return {
     resource_id: resourceId,
@@ -321,7 +395,7 @@ export const createUserMessagePayload = (
     sender_type: SenderType.USER,
     timestamp: new Date().toISOString(),
     metadata: {},
-    sender_name: getUserNameFromEmail(senderEmail),
+    sender_name: senderName,
   };
 };
 
@@ -337,29 +411,38 @@ export interface UploadedFile {
  * @param file - The file to upload
  * @param getSignedUrl - Function to get signed URL
  * @param uploadPath - API endpoint path for signed URL
+ * @param postFormsSignedUploadAck - Optional function to call after successful upload
  * @returns Promise with uploaded file metadata
  */
 export const processFileUpload = async (
   file: File,
-  getSignedUrl: (params: { path: string; payload: { file_name: string; file_type: string } }) => Promise<{
+  getSignedUrl: (params: SignedUrlBodyType) => Promise<{
     upload_url: string;
     file_upload_id: string;
   }>,
   uploadPath: string,
+  postFormsSignedUploadAck?: (params: { fileImportId: string }) => Promise<unknown>,
 ): Promise<UploadedFile> => {
   const fileType = file.type || 'application/octet-stream';
+  const organizationId = store.getState()?.user?.user?.orgs?.[0]?.organization_id ?? '';
 
   // Get signed URL
   const response = await getSignedUrl({
     path: uploadPath,
     payload: {
       file_name: file.name,
-      file_type: fileType,
+      file_type: FileMimeType[fileType] ?? fileType,
+      organization_id: organizationId,
     },
   });
 
   // Upload file to signed URL
   await uploadFileToSignedUrl(response.upload_url, file, fileType);
+
+  // Call postFormsSignedUploadAck after successful upload
+  if (postFormsSignedUploadAck) {
+    await postFormsSignedUploadAck({ fileImportId: response.file_upload_id });
+  }
 
   return {
     file_id: response.file_upload_id,
@@ -374,43 +457,35 @@ export const processFileUpload = async (
  * @param files - FileList to upload
  * @param getSignedUrl - Function to get signed URL
  * @param uploadPath - API endpoint path for signed URL
+ * @param postFormsSignedUploadAck - Optional function to call after successful upload
  * @returns Promise with array of uploaded file metadata
  */
 export const processMultipleFileUploads = async (
   files: FileList,
-  getSignedUrl: (params: { path: string; payload: { file_name: string; file_type: string } }) => Promise<{
-    upload_url: string;
-    file_upload_id: string;
-  }>,
+  getSignedUrl: (params: SignedUrlBodyType) => Promise<SignedUrlResponseType>,
   uploadPath: string,
+  postFormsSignedUploadAck?: (params: { fileImportId: string }) => Promise<unknown>,
 ): Promise<UploadedFile[]> => {
   const uploadPromises: Promise<UploadedFile>[] = [];
 
   for (let i = 0; i < files.length; i++) {
-    uploadPromises.push(processFileUpload(files[i], getSignedUrl, uploadPath));
+    uploadPromises.push(processFileUpload(files[i], getSignedUrl, uploadPath, postFormsSignedUploadAck));
   }
 
   return Promise.all(uploadPromises);
 };
 
 /**
- * Handles file uploads with RTK Query mutation
- * @param files - FileList to upload
+ * Wraps RTK Query mutation for getSignedUrl to handle errors
  * @param getSignedUrlMutation - RTK Query mutation function that returns signed URL
- * @param uploadPath - API endpoint path for signed URL
- * @returns Promise with array of uploaded file metadata
+ * @returns Wrapped function that throws on error
  */
-export const handleFileUploadsWithMutation = async (
-  files: FileList,
-  getSignedUrlMutation: (params: {
-    path: string;
-    payload: { file_name: string; file_type: string };
-  }) => Promise<
-    { data: { upload_url: string; file_upload_id: string }; error?: undefined } | { data?: undefined; error: unknown }
-  >,
-  uploadPath: string,
-): Promise<UploadedFile[]> => {
-  const getSignedUrlWrapper = async (params: { path: string; payload: { file_name: string; file_type: string } }) => {
+export const wrapGetSignedUrl = (
+  getSignedUrlMutation: (
+    params: SignedUrlBodyType,
+  ) => Promise<{ data: SignedUrlResponseType; error?: undefined } | { data?: undefined; error: unknown }>,
+): ((params: SignedUrlBodyType) => Promise<SignedUrlResponseType>) => {
+  return async (params: SignedUrlBodyType) => {
     const result = await getSignedUrlMutation(params);
 
     if ('error' in result) {
@@ -419,8 +494,48 @@ export const handleFileUploadsWithMutation = async (
 
     return result.data;
   };
+};
 
-  return processMultipleFileUploads(files, getSignedUrlWrapper, uploadPath);
+/**
+ * Wraps RTK Query mutation for postFormsSignedUploadAck to handle errors
+ * @param postFormsSignedUploadAckMutation - RTK Query mutation function
+ * @returns Wrapped function that throws on error
+ */
+export const wrapPostFormsSignedUploadAck = (
+  postFormsSignedUploadAckMutation: (params: {
+    fileImportId: string;
+  }) => Promise<{ data: void; error?: undefined } | { data?: undefined; error: unknown }>,
+): ((params: { fileImportId: string }) => Promise<void>) => {
+  return async (params: { fileImportId: string }) => {
+    const result = await postFormsSignedUploadAckMutation(params);
+
+    if ('error' in result) {
+      throw new Error('Failed to acknowledge file upload');
+    }
+
+    return result.data;
+  };
+};
+
+/**
+ * Handles file uploads with RTK Query mutation
+ * @param files - FileList to upload
+ * @param getSignedUrlMutation - RTK Query mutation function that returns signed URL
+ * @param uploadPath - API endpoint path for signed URL
+ * @param postFormsSignedUploadAck - Optional function to call after successful upload
+ * @returns Promise with array of uploaded file metadata
+ */
+export const handleFileUploadsWithMutation = async (
+  files: FileList,
+  getSignedUrlMutation: (
+    params: SignedUrlBodyType,
+  ) => Promise<{ data: SignedUrlResponseType; error?: undefined } | { data?: undefined; error: unknown }>,
+  uploadPath: string,
+  postFormsSignedUploadAck?: (params: { fileImportId: string }) => Promise<unknown>,
+): Promise<UploadedFile[]> => {
+  const getSignedUrlWrapper = wrapGetSignedUrl(getSignedUrlMutation);
+
+  return processMultipleFileUploads(files, getSignedUrlWrapper, uploadPath, postFormsSignedUploadAck);
 };
 
 /**
@@ -447,8 +562,8 @@ export const createConversationPayload = (
   activityRunId: string,
   messageText: string,
   annotationLocation: LocationData,
-  senderEmail: string,
-  attachments?: Array<{ file_id: string }>,
+  senderName: string,
+  attachments?: MessageAttachmentType[],
 ) => {
   return {
     resource_id: processId,
@@ -473,6 +588,6 @@ export const createConversationPayload = (
     annotation_data: {
       location: annotationLocation,
     },
-    sender_name: getUserNameFromEmail(senderEmail),
+    sender_name: senderName,
   };
 };

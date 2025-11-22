@@ -1,18 +1,19 @@
-import { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { type FC, useCallback, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import { createTabsConfig, FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { TabConfig } from 'modules/feedback/feedback.types';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
-const FeedbacksStatusTabs: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { successFeedbackItems, processingFeedbackItems, queuedFeedbackItems, openFeedbackItems } = state;
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const defaultTab = (searchParams?.get('tab') as FEEDBACK_STATUS) || FEEDBACK_STATUS.OPEN;
-  const [activeTab, setActiveTab] = useState<FEEDBACK_STATUS>(defaultTab);
+interface FeedbacksStatusTabsProps {
+  activeTab: FEEDBACK_STATUS;
+  setActiveTab: (tab: FEEDBACK_STATUS) => void;
+}
 
+const FeedbacksStatusTabs: FC<FeedbacksStatusTabsProps> = ({ activeTab, setActiveTab }) => {
+  const { successFeedbackItems, processingFeedbackItems, queuedFeedbackItems, openFeedbackItems } = useSelector(
+    (state: RootState) => state?.feedbacks,
+  );
   const validTab = [
     FEEDBACK_STATUS.PROCESSING,
     FEEDBACK_STATUS.APPLIED,
@@ -25,9 +26,9 @@ const FeedbacksStatusTabs: FC = () => {
 
   const setActiveTabCallback = useCallback(
     (newTab: FEEDBACK_STATUS) => {
-      setActiveTab((prev: FEEDBACK_STATUS) => (prev === newTab ? prev : newTab));
+      setActiveTab(newTab);
     },
-    [router, searchParams],
+    [setActiveTab],
   );
 
   useEffect(() => {
@@ -54,31 +55,32 @@ const FeedbacksStatusTabs: FC = () => {
     [openFeedbackItems, queuedFeedbackItems, processingFeedbackItems, successFeedbackItems],
   );
 
-  useEffect(() => {
-    const lengthByTab = {
-      [FEEDBACK_STATUS.OPEN]: openFeedbackItems.length,
-      [FEEDBACK_STATUS.QUEUED]: queuedFeedbackItems.length,
-      [FEEDBACK_STATUS.PROCESSING]: processingFeedbackItems.length,
-      [FEEDBACK_STATUS.APPLIED]: successFeedbackItems.length,
-    } as const;
-    const currentLen = lengthByTab[validTab as keyof typeof lengthByTab];
+  //temp commented
+  // useEffect(() => {
+  //   const lengthByTab = {
+  //     [FEEDBACK_STATUS.OPEN]: openFeedbackItems.length,
+  //     [FEEDBACK_STATUS.QUEUED]: queuedFeedbackItems.length,
+  //     [FEEDBACK_STATUS.PROCESSING]: processingFeedbackItems.length,
+  //     [FEEDBACK_STATUS.APPLIED]: successFeedbackItems.length,
+  //   } as const;
+  //   const currentLen = lengthByTab[validTab as keyof typeof lengthByTab];
 
-    if (currentLen === 0) {
-      const firstWithItems = tabsConfig.find((t) => t.items.length > 0);
+  //   if (currentLen === 0) {
+  //     const firstWithItems = tabsConfig.find((t) => t.items.length > 0);
 
-      if (firstWithItems && firstWithItems.value !== validTab) {
-        setActiveTabCallback(firstWithItems.value);
-      }
-    }
-  }, [
-    validTab,
-    openFeedbackItems.length,
-    queuedFeedbackItems.length,
-    processingFeedbackItems.length,
-    successFeedbackItems.length,
-    tabsConfig,
-    setActiveTabCallback,
-  ]);
+  //     if (firstWithItems && firstWithItems.value !== validTab) {
+  //       setActiveTabCallback(firstWithItems.value);
+  //     }
+  //   }
+  // }, [
+  //   validTab,
+  //   openFeedbackItems.length,
+  //   queuedFeedbackItems.length,
+  //   processingFeedbackItems.length,
+  //   successFeedbackItems.length,
+  //   tabsConfig,
+  //   setActiveTabCallback,
+  // ]);
 
   return (
     <div className='shadow-menu-shadow border-0.5 border-GRAY_500 rounded-2.5 w-full max-w-full overflow-hidden bg-white'>

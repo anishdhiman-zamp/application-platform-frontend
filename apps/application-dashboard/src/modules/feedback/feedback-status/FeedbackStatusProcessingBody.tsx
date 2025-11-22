@@ -1,21 +1,30 @@
-import { type FC, useState } from 'react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button } from '@zamp-platform/ui';
 import { Ban, Loader } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
-import { useStopProcessingFeedbackMutation } from '@/apis/feedback';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { useRouter } from 'next/navigation';
+import { useLazyGetFeedbacksQuery, useStopProcessingFeedbackMutation } from '@/apis/feedback';
+import { RootState } from '@/store';
 
-const FeedbackStatusProcessingBody: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { processingFeedbackItems: items, processId } = state;
-  const [stopProcessingFeedback, { isLoading: isStoppingProcessing }] = useStopProcessingFeedbackMutation();
+const FeedbackStatusProcessingBody = () => {
+  const router = useRouter();
+  const { processingFeedbackItems: items, processId } = useSelector((state: RootState) => state?.feedbacks);
   const [isStopProcess, setIsStopProcess] = useState<boolean>(false);
+
+  const [stopProcessingFeedback, { isLoading: isStoppingProcessing }] = useStopProcessingFeedbackMutation();
+  const [getFeedbacks, { isFetching: isGettingFeedbacks }] = useLazyGetFeedbacksQuery();
 
   const handleStopProcessing = () => {
     stopProcessingFeedback({ process_id: processId })
       .unwrap()
       .then(() => {
-        setIsStopProcess(false);
+        getFeedbacks({ process_id: processId })
+          .unwrap()
+          .then(() => {
+            router.push(`${window.location.pathname}?tab=${FEEDBACK_STATUS.QUEUED}`);
+          });
       });
   };
 
@@ -37,12 +46,17 @@ const FeedbackStatusProcessingBody: FC = () => {
           {isStopProcess ? (
             <div className='flex w-full items-center justify-between gap-2'>
               <div className='f-11-450 text-gray-1000 flex-grow'>Are you sure you want to stop processing?</div>
-              <Button variant='outline' size='small' onClick={() => setIsStopProcess(false)}>
+              <Button
+                disabled={isStoppingProcessing || isGettingFeedbacks}
+                variant='outline'
+                size='small'
+                onClick={() => setIsStopProcess(false)}
+              >
                 Cancel
               </Button>
               <Button
                 size='small'
-                isLoading={isStoppingProcessing}
+                isLoading={isStoppingProcessing || isGettingFeedbacks}
                 onClick={handleStopProcessing}
                 className='min-w-[50px]'
               >
