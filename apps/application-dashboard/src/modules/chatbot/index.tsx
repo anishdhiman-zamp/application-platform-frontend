@@ -1,5 +1,6 @@
 import { cloneElement, FC, isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { LocationData } from '@zamp-platform/chat';
 import Chatbot from 'modules/chatbot/Chatbot';
 import FeedbackList from 'modules/chatbot/FeedbackList';
 import { getFeedbackItems } from 'modules/chatbot/utils';
@@ -8,8 +9,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
-import { removeFeedbackItem } from '@/store/slices/feedbacks';
-import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatbotProps {
   children: React.ReactNode;
@@ -31,9 +31,11 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
-  const allFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
-  const matchingFeedbackItems = getFeedbackItems(allFeedbackItems, annotationLocation);
+  const feedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
+  const matchingFeedbackItems = useMemo(
+    () => getFeedbackItems(feedbackItems, annotationLocation),
+    [feedbackItems, annotationLocation],
+  );
 
   const [currentFeedbackItem, setCurrentFeedbackItem] = useState<FeedbackItemType>();
   const [showChatbot, setShowChatbot] = useState(false);
@@ -73,12 +75,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     },
     [onChatbotStateChange],
   );
-
-  const handleDeleteSuccess = (feedbackId?: string) => {
-    if (feedbackId) {
-      dispatch(removeFeedbackItem(feedbackId));
-    }
-  };
 
   const handleRemoveChatbotParams = () => {
     // Remove all query params with chatbot prefix if any exist
@@ -171,7 +167,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               onOpenChatbot={handleOpenChatbot}
               hideFeedbackCount={hideFeedbackCount}
               annotationLocation={annotationLocation}
-              onDeleteSuccess={handleDeleteSuccess}
               disableAddMoreFeedback={disableAddMoreFeedback}
               onCloseFeedbackList={handleRemoveChatbotParams}
               className={className}

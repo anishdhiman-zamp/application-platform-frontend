@@ -23,10 +23,13 @@ const ChatHeader = ({
   return (
     <>
       <div
-        className={cn('flex items-center justify-between rounded-t-2xl border bg-white p-3.5', {
-          'f-12-550': hasRealTitle,
-          'f-12-450 text-gray-700': !hasRealTitle,
-        })}
+        className={cn(
+          'shadow-table-filter-menu flex items-center justify-between rounded-t-2xl border bg-white p-3.5',
+          {
+            'f-12-550': hasRealTitle,
+            'f-12-450 text-gray-700': !hasRealTitle,
+          },
+        )}
       >
         <span className='max-w-[340px] truncate'>{displayTitle}</span>
         {feedbackItem && (

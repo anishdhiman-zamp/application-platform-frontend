@@ -42,15 +42,19 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   );
 
   return (
-    <Button
-      onClick={handleClick}
-      variant={buttonVariant}
-      size='small'
-      isLoading={isLoading}
-      disabled={isLoading || blockConfig?.payload?.is_disabled}
-      data-testid='button-block'
-    >
-      {blockConfig?.payload?.label}
-    </Button>
+    <>
+      {blockConfig?.payload?.is_display !== false && (
+        <Button
+          onClick={handleClick}
+          variant={buttonVariant}
+          size='small'
+          isLoading={isLoading}
+          disabled={isLoading || blockConfig?.payload?.is_disabled}
+          data-testid='button-block'
+        >
+          {blockConfig?.payload?.label}
+        </Button>
+      )}
+    </>
   );
 };

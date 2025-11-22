@@ -32,11 +32,13 @@ interface FiltersContainerProps {
   isPlayground?: boolean;
   isSheetFilters?: boolean;
   isProcessContext?: boolean;
+  testIdSuffix?: string;
 }
 
 const FiltersContainer: FC<FiltersContainerProps> = ({
   onClearAllFilters = defaultFn,
   persistId,
+  testIdSuffix,
   onSetTotalSelectedFilters,
   filterConfig,
   className = 'px-6',
@@ -163,7 +165,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
         ))}
 
         {!isSheetFilters && !isPlayground && allowActions && !filtersList?.length && (
-          <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} />
+          <FiltersMenu label={label} onAddFilter={onAddEmptyFilter} testIdSuffix={testIdSuffix} />
         )}
 
         {!isSheetFilters && !isPlayground && allowActions && filtersList?.length > 0 ? (
@@ -172,6 +174,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
               tooltipText='Add Filters'
               currentPageFilters={currentPageFilters}
               onAddFilter={onAddEmptyFilter}
+              testIdSuffix={testIdSuffix}
             />
 
             <div className='relative'>
@@ -183,6 +186,7 @@ const FiltersContainer: FC<FiltersContainerProps> = ({
                 icon='x-close'
                 iconCategory={ICON_SPRITE_TYPES.GENERAL}
                 id='clear-all-filters'
+                testIdSuffix={testIdSuffix}
               >
                 {shouldShowConfirmationPopup ? (
                   <ClearFiltersConfirmationPopup

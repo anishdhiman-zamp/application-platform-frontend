@@ -1,21 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
-import { useChat } from '@zamp-platform/chat';
+import { ActionType, BlockType, LocationData, ResourceType, useChat } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import {
   createConversationPayload,
   createUserMessagePayload,
   handleFileUploadsWithMutation,
   UploadedFile,
+  wrapPostFormsSignedUploadAck,
 } from 'modules/chatbot/utils';
 import { MAX_TEXTAREA_HEIGHT } from 'modules/process/process.constant';
 import { useParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
 import { useGetSignedUrlMutation } from '@/apis/fileUpload';
+import { usePostInteractionDisableMutation } from '@/apis/interaction';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import { RootState } from '@/store';
-import { LocationData } from '@/types/api/feedbacks.types';
 
 interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
@@ -26,7 +28,7 @@ interface UseChatInputProps {
 }
 
 const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, setHeader }: UseChatInputProps) => {
-  const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
+  const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
@@ -38,6 +40,8 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
   const [firstMessage, setFirstMessage] = useState('');
 
   const [getSignedUrl] = useGetSignedUrlMutation();
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
+  const [postInteractionDisable] = usePostInteractionDisableMutation();
 
   const init = async () => {
     const payload = createConversationPayload(
@@ -45,10 +49,13 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
       activityRunId,
       firstMessage || 'Hello, how are you?',
       annotationLocation,
-      currentUserEmail || '',
-      attachments.length > 0 ? attachments.map((att) => ({ file_id: att.file_id })) : undefined,
+      currentUserName || '',
+      attachments.length > 0
+        ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
+        : undefined,
     );
 
+    setAttachments([]);
     const response = await chat.createConversationV2(payload);
 
     setIsLoading(true);
@@ -61,16 +68,47 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
+    const uploadingFiles = Array.from(files).map((file) => ({
+      file_id: '',
+      file_name: file.name,
+      file_type: file.type,
+      file: file,
+    }));
+
     setIsUploading(true);
+    setAttachments((prev) => [...prev, ...uploadingFiles]);
 
     try {
       const newAttachments = await handleFileUploadsWithMutation(
         files,
         getSignedUrl,
         API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
+        wrapPostFormsSignedUploadAck(postFormsSignedUploadAck),
       );
 
-      setAttachments((prev) => [...prev, ...newAttachments]);
+      const tempEntriesMap = new Map<string, number>();
+
+      setAttachments((prev) => {
+        prev.forEach((item, index) => {
+          if (item.file_id === '' && !tempEntriesMap.has(item.file_name)) {
+            tempEntriesMap.set(item.file_name, index);
+          }
+        });
+
+        const updated = [...prev];
+
+        newAttachments.forEach((newAttachment) => {
+          const index = tempEntriesMap.get(newAttachment.file_name);
+
+          if (index !== undefined) {
+            updated[index] = newAttachment;
+          } else {
+            updated.push(newAttachment);
+          }
+        });
+
+        return updated;
+      });
       toast.success('Files uploaded successfully');
     } catch (error) {
       captureException(error);
@@ -92,12 +130,10 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
     if (!firstMessage && !conversationId) {
       setFirstMessage(value);
       setHeader?.('Analysing...');
-      setAttachments([]);
 
       return;
     }
     handleSendMessage(value);
-    setAttachments([]);
   };
 
   const handleSendMessage = async (inputValue: string) => {
@@ -109,13 +145,37 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
     const messagePayload = createUserMessagePayload(
       inputValue,
       processId,
-      currentUserEmail || '',
-      attachments.length > 0 ? attachments.map((att) => ({ file_id: att.file_id })) : undefined,
+      currentUserName || '',
+      attachments.length > 0
+        ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
+        : undefined,
     );
 
     setValue('');
+    setAttachments([]);
+
+    const lastMessage = chat.messages[chat.messages.length - 1];
+    let messageId = '';
+
+    if (lastMessage?.message_content?.elements) {
+      for (const element of lastMessage.message_content.elements) {
+        if (element?.type === BlockType.BUTTON && element?.action?.type === ActionType.INTERNAL_API) {
+          messageId = lastMessage.id || '';
+        }
+      }
+    }
 
     try {
+      if (messageId) {
+        postInteractionDisable({
+          conversationId: conversationId || '',
+          messageId: messageId,
+          params: {
+            resource_id: processId,
+            resource_type: ResourceType.PROCESS,
+          },
+        });
+      }
       await chat.sendMessage(messagePayload, true);
     } catch (error) {
       captureException(error);

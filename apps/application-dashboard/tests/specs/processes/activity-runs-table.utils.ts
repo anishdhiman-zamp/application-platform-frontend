@@ -66,30 +66,33 @@ export async function switchToTab(page: Page, tabStatus: string, waitTime = 1000
 /**
  * Waits for skeleton loading cells to appear and disappear, indicating data load completion
  * @param page - The Playwright page object
- * @param skeletonIndex - Index of skeleton element to monitor (default: 0)
+ * @param skeletonIndex - Index of skeleton element to monitor (default: 0) or 'last' for the last skeleton
  * @param appearTimeout - Timeout for skeleton to appear (default: 5000ms)
  * @param disappearTimeout - Timeout for skeleton to disappear (default: 15000ms)
  */
 export async function waitForDataLoad(
   page: Page,
-  skeletonIndex = 0,
+  skeletonIndex: number | 'last' = 0,
   appearTimeout = 5000,
   disappearTimeout = 15000,
 ): Promise<void> {
   try {
+    const skeletonLocator = page.locator('[data-testid="fetch-more-skeleton-cell"]');
+    const targetSkeleton = skeletonIndex === 'last' ? skeletonLocator.last() : skeletonLocator.nth(skeletonIndex);
+
     // Wait for skeleton cells to appear (data is loading)
-    await page.locator('[data-testid="fetch-more-skeleton-cell"]').nth(skeletonIndex).waitFor({
+    await targetSkeleton.waitFor({
       state: 'visible',
       timeout: appearTimeout,
     });
-    console.log('Skeleton cells appeared, data is loading...');
+    console.log(`Skeleton cells appeared (${skeletonIndex}), data is loading...`);
 
     // Wait for skeleton cells to disappear (data has loaded)
-    await page.locator('[data-testid="fetch-more-skeleton-cell"]').nth(skeletonIndex).waitFor({
+    await targetSkeleton.waitFor({
       state: 'hidden',
       timeout: disappearTimeout,
     });
-    console.log('Skeleton cells disappeared, data has loaded');
+    console.log(`Skeleton cells disappeared (${skeletonIndex}), data has loaded`);
   } catch (error) {
     console.log('No skeleton cells detected, using fallback wait...', error);
     // Fallback wait if no skeleton detected

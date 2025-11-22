@@ -8,6 +8,7 @@ const CommentButton = () => {
       <Button
         variant='ghost'
         size='icon'
+        data-comment-button
         className='h-5 w-7.5 text-gray-900 opacity-0 group-hover:opacity-100 [&_svg]:size-3'
       >
         <MessageSquarePlusIcon />

@@ -1,20 +1,28 @@
 import { type FC, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Checkbox } from '@zamp-platform/ui';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
-import { useApplyFeedbackMutation } from '@/apis/feedback';
+import { useRouter } from 'next/navigation';
+import { useApplyFeedbackMutation, useLazyGetFeedbacksQuery } from '@/apis/feedback';
 import { PLAY_ICON } from '@/constants/icons';
 import FeedbackReapplyDialog from '@/modules/feedback/components/FeedbackReapplyDialog';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 import { ArchiveFeedbackPayloadType, FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const FeedbackStatusQueuedBody: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { queuedFeedbackItems: items, processId, processingFeedbackItems } = state;
+  const router = useRouter();
+  const {
+    queuedFeedbackItems: items,
+    processId,
+    processingFeedbackItems,
+  } = useSelector((state: RootState) => state?.feedbacks);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [applyFeedback, { isLoading: isApplying }] = useApplyFeedbackMutation();
+  const [getFeedbacks, { isFetching: isGettingFeedbacks }] = useLazyGetFeedbacksQuery();
 
   const handleSelect = (item: FeedbackItemType) => {
     if (selectedItemIds.has(item?.id)) {
@@ -49,8 +57,13 @@ const FeedbackStatusQueuedBody: FC = () => {
 
     applyFeedback(payload)
       .unwrap()
-      .finally(() => {
-        setSelectedItemIds(new Set());
+      .then(() => {
+        getFeedbacks({ process_id: processId })
+          .unwrap()
+          .then(() => {
+            router.push(`${window.location.pathname}?tab=${FEEDBACK_STATUS.PROCESSING}`);
+            setSelectedItemIds(new Set());
+          });
       });
   };
 
@@ -87,15 +100,11 @@ const FeedbackStatusQueuedBody: FC = () => {
           ))}
         </div>
         <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
-          <div>
-            {selectedItemIds.size > 0
-              ? `${selectedItemIds.size} Feedback selected`
-              : 'Select feedback to test only some of them'}
-          </div>
-          <Button size='small' className='min-w-24' onClick={handleApply} isLoading={isApplying}>
+          <div className='text-GRAY_700'>Select feedback to test only some of them</div>
+          <Button size='small' className='min-w-24' onClick={handleApply} isLoading={isApplying || isGettingFeedbacks}>
             <div className='flex items-center gap-1'>
               <Image src={PLAY_ICON} alt='play' width={12} height={12} />
-              {selectedItemIds.size > 0 ? `Apply these ${selectedItemIds.size}` : 'Apply All'}
+              {selectedItemIds.size > 0 ? `Apply ${selectedItemIds.size} feedback` : 'Apply All'}
             </div>
           </Button>
         </div>
