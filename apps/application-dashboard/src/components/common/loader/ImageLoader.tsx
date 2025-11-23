@@ -1,7 +1,7 @@
-import { FC } from 'react';
+import { FC, HTMLAttributes } from 'react';
 import { cn } from '@zamp-platform/ui/utils';
 
-interface ImageLoaderProps {
+interface ImageLoaderProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
   imageSrc: string;
   imageClassName?: string;
@@ -9,9 +9,9 @@ interface ImageLoaderProps {
   height?: number;
 }
 
-const ImageLoader: FC<ImageLoaderProps> = ({ className, imageSrc, imageClassName, width, height }) => {
+const ImageLoader: FC<ImageLoaderProps> = ({ className, imageSrc, imageClassName, width, height, ...props }) => {
   return (
-    <div className={cn('flex h-full w-full items-center justify-center bg-white', className)}>
+    <div className={cn('flex h-full w-full items-center justify-center bg-white', className)} {...props}>
       <img src={imageSrc} alt='loader' width={width} height={height} className={imageClassName} />
     </div>
   );
