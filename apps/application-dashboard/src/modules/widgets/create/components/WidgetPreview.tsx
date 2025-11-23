@@ -7,7 +7,8 @@ import AGChartsWidgets from 'modules/widgets/AgChartWidgets';
 import WidgetInfo from 'modules/widgets/create/components/WidgetInfo';
 import { useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
 import { WIDGET_TYPES, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
-import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import useMockData from '@/modules/widgets/create/hooks/useMockData';
 import usePreviewData from '@/modules/widgets/create/hooks/usePreviewData';
 import { getCommaSeparatedNumber } from '@/utils/common';
@@ -89,7 +90,7 @@ const WidgetPreview = () => {
           'bg-white': !(isKpiWidget && formData?.datasetId),
           'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
         })}
-        loader={<ZampLogoPageLoader />}
+        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />}
       >
         {renderPreviewWidget()}
       </CommonWrapper>

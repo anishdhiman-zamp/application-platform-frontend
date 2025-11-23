@@ -17,7 +17,8 @@ import Link from 'next/link';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { Button } from 'components/common/button/Button';
 import DataTable from 'components/common/table/DataTable';
@@ -161,9 +162,12 @@ const AdminDatasetListing = () => {
           refetchFunction={refetch}
           className='h-full w-full'
           loader={
-            <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-              <ZampLogoLoader />
-            </div>
+            <ImageLoader
+              imageSrc={ZAMP_LOGO_LOADER_SVG}
+              width={140}
+              height={140}
+              className='z-50 flex h-[calc(100vh-200px)]'
+            />
           }
         >
           <DataTable

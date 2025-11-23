@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useGetProcessesQuery } from '@/apis/pages';
-import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import ProcessById from '@/modules/process/activity-runs/ProcessById';
 
@@ -31,7 +32,7 @@ const Process = () => {
   }, [processes]);
 
   if (!processes?.length) {
-    return <ZampLogoPageLoader />;
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />;
   }
 
   return (

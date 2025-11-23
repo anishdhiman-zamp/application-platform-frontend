@@ -7,7 +7,8 @@ import DatasetById from 'modules/data/Dataset';
 import { TransformDatasetResponseType } from 'types/api/admin.types';
 import { defaultFn, defaultFnType, OptionsType } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { SIZE_TYPES } from '@/types/common/components';
 import { Button } from 'components/common/button/Button';
 import { Dropdown } from 'components/common/dropdown';
@@ -104,9 +105,7 @@ const AdminDatasetTransform: FC<AdminDatasetTransformProps> = ({ onClose, onSucc
         isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-            <ZampLogoLoader />
-          </div>
+          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000 overflow-y-auto' />
         }
       >
         <div className='h-full space-y-4 overflow-y-auto'>

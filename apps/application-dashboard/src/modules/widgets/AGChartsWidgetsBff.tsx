@@ -15,6 +15,7 @@ import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { OptionsType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetTransformedWidgetDataQuery } from '@/apis/widgets';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { WIDGET_LOADER_SVG } from '@/constants/icons';
 import { useWidgetLoadTime } from '@/hooks/useLayoutEffect';
 import CommonWrapper from 'components/commonWrapper';
@@ -134,9 +135,11 @@ const AGChartsWidgetsBff: FC<WidgetsWrapperProps> = ({
         isError={isError}
         refetchFunction={refetch}
         loader={
-          <div className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'>
-            <img src={WIDGET_LOADER_SVG} alt='widget loader' className='h-[150px]' />
-          </div>
+          <ImageLoader
+            className='absolute top-0 left-0 z-100 flex h-full w-full items-center justify-center'
+            imageSrc={WIDGET_LOADER_SVG}
+            imageClassName='h-[150px]'
+          />
         }
       >
         {chartOptions && (

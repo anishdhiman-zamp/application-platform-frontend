@@ -18,7 +18,8 @@ import { useRouter } from 'next/navigation';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -175,11 +176,7 @@ const AdminDatasetDag: FC = () => {
       <CommonWrapper
         isLoading={isFetching}
         isError={isError}
-        loader={
-          <div className='flex h-full items-center justify-center'>
-            <ZampLogoLoader />
-          </div>
-        }
+        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetch}
         className='h-full w-full'

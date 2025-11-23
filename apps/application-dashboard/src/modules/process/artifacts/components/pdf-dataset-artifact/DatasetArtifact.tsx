@@ -48,11 +48,12 @@ import { type defaultFnType, MapAny, SIDE_OPTIONS } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, formatPlural, snakeCaseToSentenceCase } from 'utils/common';
 import { useLazyGetDatasetArtifactsQuery } from '@/apis/processes';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { POSITION } from '@/constants/common.constants';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import Notification from '@/modules/data/Notification';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
@@ -697,9 +698,12 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-            <ZampLogoLoader />
-          </div>
+          <ImageLoader
+            imageSrc={ZAMP_LOGO_LOADER_SVG}
+            width={140}
+            height={140}
+            className='z-50 h-[calc(100vh-200px)]'
+          />
         }
       >
         <div className='flex flex-wrap items-center justify-between gap-y-3 px-4 py-3'>

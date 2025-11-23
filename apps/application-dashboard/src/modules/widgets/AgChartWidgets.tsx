@@ -16,6 +16,7 @@ import { useParams } from 'next/navigation';
 import { WidgetDataType, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
 import { OptionsType, ResponsiveGridLayoutType } from 'types/commonTypes';
 import { cn, snakeCaseToSentenceCase } from 'utils/common';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { WIDGET_LOADER_SVG } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
@@ -165,9 +166,11 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
           refetchFunction={refetch}
           className='h-[calc(100%-12px)]'
           loader={
-            <div className='flex h-full w-full items-center justify-center'>
-              <img src={WIDGET_LOADER_SVG} alt='widget loader' className='h-[150px]' />
-            </div>
+            <ImageLoader
+              className='flex h-full w-full items-center justify-center'
+              imageSrc={WIDGET_LOADER_SVG}
+              imageClassName='h-[150px]'
+            />
           }
         >
           {chartOptions && (

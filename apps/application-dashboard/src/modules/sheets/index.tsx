@@ -17,10 +17,11 @@ import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import { useRouter } from 'next/navigation';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
@@ -224,11 +225,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
           isError={isSheetDetailsError}
           className='h-full'
           refetchFunction={refetchSheetDetails}
-          loader={
-            <div className='z-1000 flex h-full w-full items-center justify-center bg-white'>
-              <ZampLogoLoader />
-            </div>
-          }
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000' />}
         >
           <div className='z-100 space-y-4 border-b px-8 pb-4'>
             <div className='flex items-center justify-between'>

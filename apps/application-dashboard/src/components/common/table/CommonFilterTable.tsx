@@ -21,7 +21,8 @@ import { MapAny } from 'types/commonTypes';
 import { FilterModelType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
-import ZampLogoLoader from 'components/common/loader/ZampLogoLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import ImageLoader from 'components/common/loader/ImageLoader';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
 import { getColumnType, getEncodedRequest } from 'components/common/table/table.utils';
@@ -275,9 +276,12 @@ const CommonFilterTable: FC<CommonFilterTableProps> = ({
         isLoading={isFilterConfigFetching}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-            <ZampLogoLoader />
-          </div>
+          <ImageLoader
+            imageSrc={ZAMP_LOGO_LOADER_SVG}
+            width={140}
+            height={140}
+            className='z-50 flex h-[calc(100vh-200px)]'
+          />
         }
       >
         <div className='flex items-center justify-between py-3 pr-8'>

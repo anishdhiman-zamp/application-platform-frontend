@@ -19,7 +19,8 @@ import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { useSearchParams } from 'next/navigation';
-import ZampLogoPageLoader from '@/components/common/loader/ZampLogoPageLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { MapAny } from '@/types/commonTypes';
@@ -236,7 +237,7 @@ const Chatbot = ({
               })}
             >
               {chat.isLoadingConversationHistory && !isNewConversation ? (
-                <ZampLogoPageLoader />
+                <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />
               ) : (
                 <>
                   {header && (

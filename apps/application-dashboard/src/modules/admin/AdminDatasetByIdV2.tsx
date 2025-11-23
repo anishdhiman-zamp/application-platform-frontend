@@ -6,8 +6,9 @@ import { transformDatasetFilterConfigResponseTypeToDisplayConfigType } from 'mod
 import AdminHeader from 'modules/admin/AdminHeader';
 import { cn } from 'utils/common';
 import { useGetDatasetFilterConfigQuery } from '@/apis/dataset';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import DatasetTable from '@/components/common/table/DatasetTable';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { DisplayConfigType } from '@/types/api/admin.types';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -80,9 +81,7 @@ const AdminDatasetByIdV2: FC<AdminDatasetByIdPropsType> = ({ id }) => {
       isError={isError}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-          <ZampLogoLoader />
-        </div>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000 overflow-y-auto' />
       }
     >
       <AdminHeader
