@@ -101,7 +101,7 @@ const KnowledgeBaseHome = () => {
                   <div className='f-13-500 mb-9 flex items-center justify-center gap-1 rounded-full border border-blue-700 px-4 py-2 text-blue-700'>
                     <KBIcon /> Knowledge Base
                   </div>
-                  <div className='f-22-550 mb-7 flex items-center gap-1 select-none'>
+                  <div className='f-22-550 mb-7 flex items-center gap-1 whitespace-nowrap select-none'>
                     Ask
                     <PaceIcon height={20} width={20} />
                     Pace anything about {processName ?? 'Process'}
