@@ -1,4 +1,4 @@
-import { ZAMP_LOGO } from 'constants/icons';
+import { ZAMP_FULL_LOGO } from 'constants/icons';
 import Image from 'next/image';
 
 const DashboardDowntime = () => {
@@ -9,7 +9,7 @@ const DashboardDowntime = () => {
         height={28}
         alt={'zamp logo'}
         className='absolute top-8 left-8'
-        src={ZAMP_LOGO}
+        src={ZAMP_FULL_LOGO}
         draggable='false'
         priority
       />
