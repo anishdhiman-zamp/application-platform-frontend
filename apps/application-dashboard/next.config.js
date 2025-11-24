@@ -5,13 +5,13 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
-  // Skip type checking and linting during build to reduce memory usage
-  // These will be run separately in CI
+  // Skip type checking and linting ONLY in CI (they run separately there)
+  // Enable them for local development for immediate feedback
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.CI === 'true',
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.CI === 'true',
   },
   experimental: {
     serverActions: {},
