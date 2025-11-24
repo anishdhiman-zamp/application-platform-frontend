@@ -237,9 +237,8 @@ const Table: FC<TableProps> = ({
 
   const formatCellValue = useCallback(
     (params: ValueFormatterParams) => {
-      const { value, column } = params;
+      const { value } = params;
 
-      console.log('column', column, value);
       const isMissingField = checkIsMissingField(params);
       const isEmpty = isValueEmpty(value);
 
