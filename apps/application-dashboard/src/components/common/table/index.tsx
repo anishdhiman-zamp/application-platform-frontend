@@ -238,6 +238,7 @@ const Table: FC<TableProps> = ({
   const formatCellValue = useCallback(
     (params: ValueFormatterParams) => {
       const { value } = params;
+
       const isMissingField = checkIsMissingField(params);
       const isEmpty = isValueEmpty(value);
 
@@ -257,7 +258,7 @@ const Table: FC<TableProps> = ({
       }
 
       // Return original value for all other cases
-      return value;
+      return value?.toString();
     },
     [checkIsMissingField, shouldShowNA, isValueEmpty],
   );
