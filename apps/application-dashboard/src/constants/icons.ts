@@ -37,7 +37,6 @@ export const CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/chevron-right.svg';
 export const DISABLED_CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/disabled-chevron-right.svg';
 export const RED_ALERT_ICON = IMAGE_PREFIX + '/icons/red-alert-circle.svg';
 export const GREEN_CHECK_ICON = IMAGE_PREFIX + '/icons/green-check-circle.svg';
-export const ZAMP_LOGO = IMAGE_PREFIX + '/icons/zampBlack.svg';
 export const SCREEN_SUPPORT = IMAGE_PREFIX + '/images/screen-support.svg';
 export const DATASET_ICON = IMAGE_PREFIX + '/icons/dataset.svg';
 export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
