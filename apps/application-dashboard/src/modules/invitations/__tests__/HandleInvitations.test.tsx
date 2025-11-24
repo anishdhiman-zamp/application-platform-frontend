@@ -56,11 +56,6 @@ jest.mock('@zamp-platform/utils', () => ({
   },
 }));
 
-jest.mock('components/DynamicLottiePlayer', () => ({
-  __esModule: true,
-  default: () => <div data-testid='mocked-lottie-player' />,
-}));
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {

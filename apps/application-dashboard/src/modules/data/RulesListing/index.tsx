@@ -3,8 +3,7 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { captureException } from '@sentry/browser';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
-import { DRAG_ICON } from 'constants/icons';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
+import { DRAG_ICON, ZAMP_LOGO_LOADER_SVG } from 'constants/icons';
 import { DatasetColumnRequest } from 'modules/data/data.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
@@ -15,15 +14,15 @@ import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import { getUserId } from 'utils/accessPermission/accessPermission.utils';
+import Input from '@/components/common/input';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { Button } from 'components/common/button/Button';
-import Input from 'components/common/input';
 import Popup from 'components/common/popup/Popup';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -266,17 +265,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           isError={isError}
           className='h-[calc(100vh-180px)] overflow-auto pl-1.5'
           skeletonType={SkeletonTypes.CUSTOM}
-          loader={
-            <div className='flex h-full items-center justify-center'>
-              <DynamicLottiePlayer
-                src={ZAMP_LOGO_LOADER}
-                className='lottie-player h-[140px]'
-                autoplay
-                loop
-                keepLastFrame
-              />
-            </div>
-          }
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
         >
           <ResponsiveGridLayout
             className='layout'

@@ -3,9 +3,10 @@
 import { useMemo } from 'react';
 import { LISTING_COLUMNS } from 'modules/data/data.constants';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import DataTable from 'components/common/table/DataTable';
 import { PAGE_SIZE } from 'components/common/table/table.constants';
 
@@ -21,7 +22,7 @@ const Listing = () => {
   return (
     <CommonWrapper
       isLoading={isLoading}
-      loader={<ZampLogoWebpLoader />}
+      loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />}
       skeletonType={SkeletonTypes.CUSTOM}
       className='h-full'
     >

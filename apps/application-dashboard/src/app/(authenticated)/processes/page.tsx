@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetPagesQuery, useGetProcessesQuery } from '@/apis/pages';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
@@ -37,5 +38,5 @@ export default function Page() {
     }
   }, [processes, pages, isOrgSwitchIsInProgress, isSuccessProcesses, isSuccessPages]);
 
-  return <ZampLogoWebpLoader />;
+  return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />;
 }

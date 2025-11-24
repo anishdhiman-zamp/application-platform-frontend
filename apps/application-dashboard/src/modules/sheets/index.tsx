@@ -5,7 +5,6 @@ import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
 import EmptySheet from 'modules/sheets/EmptySheet';
@@ -18,15 +17,16 @@ import WidgetSwitcher from 'modules/widgets/components/widgetSwitcher';
 import { WidgetSize } from 'modules/widgets/widget.types';
 import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/widgets/widgets.constant';
 import { useRouter } from 'next/navigation';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
 import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 import 'react-grid-layout/css/styles.css'; // Include default styles
@@ -225,17 +225,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
           isError={isSheetDetailsError}
           className='h-full'
           refetchFunction={refetchSheetDetails}
-          loader={
-            <div className='z-1000 flex h-full w-full items-center justify-center bg-white'>
-              <DynamicLottiePlayer
-                src={ZAMP_LOGO_LOADER}
-                className='lottie-player h-[140px]'
-                autoplay
-                loop
-                keepLastFrame
-              />
-            </div>
-          }
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000' />}
         >
           <div className='z-100 space-y-4 border-b px-8 pb-4'>
             <div className='flex items-center justify-between'>
