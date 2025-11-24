@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Cleanup function
+cleanup() {
+    echo "Cleaning up..."
+    if [ ! -z "$chrome_pid" ] && ps -p $chrome_pid > /dev/null 2>&1; then
+        echo "Killing Chrome process (PID: $chrome_pid)"
+        kill $chrome_pid 2>/dev/null || true
+    fi
+    lsof -ti:9222 | xargs kill -9 2>/dev/null || true
+    rm -rf "$tmp_dir" 2>/dev/null || true
+    rm -f version.json 2>/dev/null || true
+}
+
+# Set trap to cleanup on exit
+trap cleanup EXIT INT TERM
+
 # Load environment variables from .env if it exists
 if [ -f ".env" ]; then
     echo "Loading environment variables from .env..."
@@ -13,11 +28,22 @@ fi
 
 # Kill any existing Chrome instances using port 9222
 echo "Cleaning up any existing Chrome instances..."
-lsof -ti:9222 | xargs kill -9 2>/dev/null
+lsof -ti:9222 | xargs kill -9 2>/dev/null || true
+sleep 1
 
-# Clean up old Chrome profile
-echo "Cleaning up old Chrome profile..."
+# Kill any existing chrome-debug processes
+pkill -f "chrome-debug" 2>/dev/null || true
+sleep 1
+
+# Clean up old Chrome profile and session data
+echo "Cleaning up old Chrome profile and session data..."
 rm -rf /tmp/chrome-debug
+mkdir -p /tmp/chrome-debug
+
+# Clear old CDP session data to force fresh connection
+echo "Clearing old browser session data..."
+rm -f tests/session_management/.cdp-session.json
+rm -f tests/session-secrets/session-state.json
 
 # Create temp directory for output
 tmp_dir=$(mktemp -d)
@@ -31,19 +57,47 @@ echo "Starting Chrome with remote debugging..."
     --force-device-scale-factor=1 \
     --no-first-run \
     --no-default-browser-check \
+    --disable-gpu \
+    --disable-dev-shm-usage \
+    --disable-software-rasterizer \
     --user-data-dir=/tmp/chrome-debug \
     --no-startup-window \
     "about:blank" > "$chrome_output" 2>&1 &
 chrome_pid=$!
 
-# Wait a bit for Chrome to start
-sleep 3
+echo "Chrome PID: $chrome_pid"
 
-# Check if Chrome process is running
-if ! ps -p $chrome_pid > /dev/null; then
-    echo "Failed to start Chrome. Output:"
+# Wait for Chrome to initialize
+sleep 5
+
+# Check if Chrome process is running and port is open
+echo "Checking if Chrome is ready..."
+max_check=5
+check_count=0
+chrome_ready=false
+
+while [ $check_count -lt $max_check ]; do
+    if ps -p $chrome_pid > /dev/null 2>&1; then
+        # Check if port is listening
+        if lsof -ti:9222 > /dev/null 2>&1; then
+            echo "✅ Chrome is running and port 9222 is open"
+            chrome_ready=true
+            break
+        else
+            echo "Chrome is running but port 9222 not ready yet... waiting"
+        fi
+    else
+        echo "Chrome process died unexpectedly"
+        break
+    fi
+    sleep 1
+    check_count=$((check_count + 1))
+done
+
+if [ "$chrome_ready" = false ]; then
+    echo "❌ Failed to start Chrome. Output:"
     cat "$chrome_output"
-    rm -rf "$tmp_dir"  # Clean up temp directory
+    rm -rf "$tmp_dir"
     exit 1
 fi
 
@@ -71,8 +125,6 @@ while [ $attempt -lt $max_attempts ]; do
     attempt=$((attempt + 1))
 done
 
-rm version.json
-
 if [ -z "$websocket_url" ]; then
     echo "Failed to get WebSocket URL"
     exit 1
@@ -82,10 +134,10 @@ fi
 echo "Running Playwright tests..."
 export SELENIUM_CDP_URL="$websocket_url"
 export USE_LOCAL_SELENIUM=true
+
+# Pass through all command line arguments to playwright
+# If no arguments provided, default to all tests in tests/specs
 npx playwright test tests/specs --config=playwright.config.ts --headed --reporter=line
 
-# Clean up temporary files
-rm -rf "$tmp_dir"
-
-# Chrome will be cleaned up by global teardown
-echo "Tests completed. Chrome will be cleaned up automatically."
+# Cleanup will be handled by trap
+echo "Tests completed. Cleanup will be handled automatically."

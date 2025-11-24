@@ -15,6 +15,7 @@ import ColumnListingTk from 'components/common/tanstackTable/displayOptions';
 import TooltipV2 from 'components/common/TooltipV2';
 
 type DisplayOptionsProps = {
+  testIdSuffix?: string;
   tableRef: RefObject<AgGridReact | null>;
   datasetId: string;
   isGroupByDisabled?: boolean;
@@ -33,6 +34,7 @@ type DisplayOptionsProps = {
 };
 
 const DisplayOptions: FC<DisplayOptionsProps> = ({
+  testIdSuffix,
   tableRef,
   datasetId,
   isGroupByDisabled = false,
@@ -107,7 +109,7 @@ const DisplayOptions: FC<DisplayOptionsProps> = ({
     <div className='relative z-40' ref={menuRef}>
       <DropdownMenu open={isOpen} onOpenChange={handleDropdownOpenChange}>
         <TooltipV2 tooltipBody='Display options' className='cursor-pointer' asChildTrigger>
-          <div data-testid='display-options-icon'>
+          <div data-testid={`display-options-icon${testIdSuffix ? `-${testIdSuffix}` : ''}`}>
             <DropdownMenuTrigger asChild>
               <Button
                 className='flex h-5.5 w-5.5 items-center justify-center p-1 ring-0 select-none focus-visible:ring-0 focus-visible:ring-offset-0'
