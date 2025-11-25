@@ -5,9 +5,8 @@ import Chatbot from 'modules/chatbot/Chatbot';
 import FeedbackList from 'modules/chatbot/FeedbackList';
 import { getFeedbackItems } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import useIsFeedbackEnabled from 'modules/feedback/useIsFeedbackEnabled';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -40,9 +39,8 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   const [currentFeedbackItem, setCurrentFeedbackItem] = useState<FeedbackItemType>();
   const [showChatbot, setShowChatbot] = useState(false);
   const [isNewConversation, setIsNewConversation] = useState(false);
-  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState(false);
 
-  const { evaluate, ldClient } = useFeatureFlags();
+  const isFeedbackEnabled = useIsFeedbackEnabled();
 
   const showFeedbackList = useMemo(
     () =>
@@ -121,22 +119,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
       }
     }
   }, [matchingFeedbackItems]);
-
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
-        .then((res: string[]) => {
-          if (res?.includes(annotationLocation.data.process_id ?? '')) {
-            setIsFeedbackEnabled(true);
-          } else {
-            setIsFeedbackEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsFeedbackEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient, annotationLocation.data.process_id]);
 
   // Expose the openChatbot function to parent components
   useEffect(() => {

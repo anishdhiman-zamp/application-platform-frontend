@@ -23,6 +23,7 @@ import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
+import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
@@ -58,8 +59,8 @@ const Topbar = () => {
   const dispatch = useAppDispatch();
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
-  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
+  const isFeedbackEnabled = useIsFeedbackEnabled();
 
   useEffect(() => {
     if (ldClient) {
@@ -73,18 +74,6 @@ const Topbar = () => {
         })
         .catch(() => {
           setIsKnowledgeBaseEnabled(false);
-        });
-
-      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
-        .then((res: string[]) => {
-          if (res?.includes(processId ?? '')) {
-            setIsFeedbackEnabled(true);
-          } else {
-            setIsFeedbackEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsFeedbackEnabled(false);
         });
     }
   }, [evaluate, ldClient, processId]);
@@ -108,25 +97,24 @@ const Topbar = () => {
 
       return (
         <div className='flex items-center gap-3'>
-          {isKnowledgeBaseEnabled &&
-            (isFeedbackEnabled ? (
-              <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-                <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-                  <Button id='knowledge-base-btn' size='small' variant='secondary'>
-                    <BookOpen size={12} className='' />
-                  </Button>
-                </Link>
-              </TooltipV2>
-            ) : (
+          {isFeedbackEnabled ? (
+            <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
               <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-                <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
-                  <div className='flex gap-1'>
-                    <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
-                    Knowledge Base
-                  </div>
+                <Button id='knowledge-base-btn' size='small' variant='secondary'>
+                  <BookOpen size={12} className='' />
                 </Button>
               </Link>
-            ))}
+            </TooltipV2>
+          ) : isKnowledgeBaseEnabled ? (
+            <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+              <Button id='knowledge-base-btn' size='small' variant='secondary' className='w-[146px]'>
+                <div className='flex gap-1'>
+                  <Image src={KNOWLEDGE_BASED} height={16} width={16} alt='' />
+                  Knowledge Base
+                </div>
+              </Button>
+            </Link>
+          ) : null}
           {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
           <ShareButton />
         </div>
