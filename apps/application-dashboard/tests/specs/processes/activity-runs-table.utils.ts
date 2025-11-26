@@ -59,8 +59,45 @@ export async function checkColumnsHidden(page: Page, columnsToCheck: string[], t
  * @param waitTime - Time to wait after clicking the tab (default: 1000ms)
  */
 export async function switchToTab(page: Page, tabStatus: string, waitTime = 1000): Promise<void> {
-  await page.getByTestId(`activity-runs-status-tab-${tabStatus}`).click();
-  await page.waitForTimeout(waitTime);
+  console.log(`Switching to ${tabStatus} tab...`);
+
+  const tabTestId = `activity-runs-status-tab-${tabStatus}`;
+  const tabLocator = page.getByTestId(tabTestId);
+
+  // Wait for the tab to be visible and clickable
+  try {
+    await tabLocator.waitFor({ state: 'visible', timeout: 10000 });
+    console.log(`${tabStatus} tab is visible`);
+  } catch (error) {
+    console.error(`❌ ${tabStatus} tab not visible after 10s:`, error);
+    throw new Error(`Tab ${tabStatus} not visible`);
+  }
+
+  // Try to click the tab with retries
+  let clicked = false;
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Attempting to click ${tabStatus} tab (attempt ${attempt}/${maxAttempts})...`);
+      await tabLocator.click({ timeout: 5000 });
+      clicked = true;
+      console.log(`Clicked ${tabStatus} tab successfully`);
+      break;
+    } catch (error) {
+      console.error(`❌ Failed to click ${tabStatus} tab (attempt ${attempt}):`, error);
+      if (attempt === maxAttempts) {
+        throw new Error(`Failed to click ${tabStatus} tab after ${maxAttempts} attempts`);
+      }
+      await page.waitForTimeout(1000);
+    }
+  }
+
+  if (clicked) {
+    console.log(`Waiting ${waitTime}ms for tab content to load...`);
+    await page.waitForTimeout(waitTime);
+    console.log(`Switched to ${tabStatus} tab`);
+  }
 }
 
 /**
@@ -141,7 +178,7 @@ export async function validateColumnValues(page: Page, columnId: string, expecte
     }
   }
 
-  console.log(`✅ All ${cells.length} ${columnId} cells validated successfully`);
+  console.log(`All ${cells.length} ${columnId} cells validated successfully`);
 }
 
 /**
@@ -188,11 +225,14 @@ export async function toggleColumns(page: Page, columnTestIds: string[], shouldC
  * @param targetColumnId - The column ID to drop after (e.g., 'invoice_amount')
  */
 export async function dragColumnAfter(page: Page, sourceColumnId: string, targetColumnId: string): Promise<void> {
+  console.log(`[dragColumnAfter] Starting drag: ${sourceColumnId} -> after ${targetColumnId}`);
+
   // Find the source and target columns
   const sourceColumn = page.getByTestId(`display-options-item-${sourceColumnId}`);
   const targetColumn = page.getByTestId(`display-options-item-${targetColumnId}`);
 
   // Check if both columns exist
+  console.log(`[dragColumnAfter] Checking if columns are visible...`);
   const sourceExists = await sourceColumn.isVisible().catch(() => false);
   const targetExists = await targetColumn.isVisible().catch(() => false);
 

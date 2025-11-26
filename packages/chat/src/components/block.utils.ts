@@ -1,7 +1,7 @@
 import { captureException } from '@sentry/browser';
 
 import { toast } from '../../../ui/src/components/ui/toast';
-import { Block, BlockType } from '../types/block.types';
+import { Block, BLOCK_TYPE } from '../types/block.types';
 import { ChatMessage, ChatMessageType, GetConversationByIdResponseType, SenderType } from '../types/chat.types';
 
 /**
@@ -19,7 +19,7 @@ export const extractInitialValues = (blocks: Block[]): Record<string, { label: s
 
   blocks.forEach((block) => {
     switch (block.type) {
-      case BlockType.SINGLE_SELECT:
+      case BLOCK_TYPE.SINGLE_SELECT:
         if (block.payload.initial_value) {
           initialValues[block.id] = { label: block.payload.initial_value, value: block.payload.initial_value };
         }

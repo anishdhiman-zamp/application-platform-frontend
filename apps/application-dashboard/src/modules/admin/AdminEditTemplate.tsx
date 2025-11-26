@@ -5,12 +5,12 @@ import { type Edge } from '@xyflow/react';
 import { useGetTemplatesMutation, useUpsertTemplateMutation } from '@/apis/admin';
 import { Button } from '@/components/common/button/Button';
 import Input from '@/components/common/input';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
 import FullScreenPopup from '@/components/FullScreenPopup';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { SIZE_TYPES } from '@/types/common/components';
 import { toast } from 'components/common/toast/Toast';
 
@@ -73,15 +73,7 @@ const AdminEditTemplate: FC<AdminEditTemplateProps> = ({ isOpen, onClose, edge }
         isError={isError}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={
-          <div className='z-1000 flex h-full w-full items-center justify-center overflow-y-auto bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
-          </div>
+          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000 overflow-y-auto' />
         }
       >
         <div className='m-4 flex items-center justify-between'>

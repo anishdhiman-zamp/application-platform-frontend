@@ -1,7 +1,7 @@
 import { REQUEST_TYPES } from '@zamp-platform/api';
 import {
   Block,
-  BlockType,
+  BLOCK_TYPE,
   ButtonBlockType,
   ChatMessage,
   ChatMessageType,
@@ -247,7 +247,7 @@ export const updateButtonElementsDisplay = (
 
   if (lastMessageElements.length > 0) {
     const updatedElements = lastMessageElements.map((element) => {
-      if (element?.type === BlockType.BUTTON && element?.payload?.is_display !== false) {
+      if (element?.type === BLOCK_TYPE.BUTTON && element?.payload?.is_display !== false) {
         return {
           ...element,
           payload: {
@@ -382,7 +382,7 @@ export const createUserMessagePayload = (
       elements: [
         {
           id: `m_txt_${Date.now()}`,
-          type: BlockType.PLAIN_TEXT,
+          type: BLOCK_TYPE.PLAIN_TEXT,
           order: 0,
           payload: {
             text: inputValue,
@@ -576,7 +576,7 @@ export const createConversationPayload = (
       elements: [
         {
           id: 'm_txt_001',
-          type: BlockType.PLAIN_TEXT,
+          type: BLOCK_TYPE.PLAIN_TEXT,
           order: 0,
           payload: {
             text: messageText,

@@ -98,7 +98,7 @@ jobs:
           TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
           # FIXME: Replace with your actual values
           echo "HELM_CHART_NAME=zamp-svc" >> $GITHUB_OUTPUT
-          echo "SLACK_WEBHOOK_URL=PRD_SLACK_WEBHOOK_URL" >> $GITHUB_OUTPUT
+          echo "SLACK_WEBHOOK_URL=SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND" >> $GITHUB_OUTPUT
           echo "SSH_PRIVATE_KEY=SSH_PRIVATE_KEY" >> $GITHUB_OUTPUT
           echo "ECR_REPO=zamp-prd-me-application-platform-frontend-ecr" >> $GITHUB_OUTPUT
           echo "HELM_REPOSITORY=zamp-prd-me-helmcharts" >> $GITHUB_OUTPUT

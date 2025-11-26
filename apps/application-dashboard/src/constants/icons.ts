@@ -37,7 +37,6 @@ export const CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/chevron-right.svg';
 export const DISABLED_CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/disabled-chevron-right.svg';
 export const RED_ALERT_ICON = IMAGE_PREFIX + '/icons/red-alert-circle.svg';
 export const GREEN_CHECK_ICON = IMAGE_PREFIX + '/icons/green-check-circle.svg';
-export const ZAMP_LOGO = IMAGE_PREFIX + '/icons/zampBlack.svg';
 export const SCREEN_SUPPORT = IMAGE_PREFIX + '/images/screen-support.svg';
 export const DATASET_ICON = IMAGE_PREFIX + '/icons/dataset.svg';
 export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
@@ -167,8 +166,9 @@ export const MESSAGE_ICON = IMAGE_PREFIX + '/icons/feedback/message.svg';
 export const PLAY_ICON = IMAGE_PREFIX + '/icons/feedback/play.svg';
 export const FEEDBACK_OPEN_ICON = IMAGE_PREFIX + '/icons/feedback/feedback-open.svg';
 
-//GIF
-export const ZAMP_LOGO_LOADER_WEBP = IMAGE_PREFIX + '/loaders/zamp-logo-loader.webp';
+//Loaders
+export const ZAMP_LOGO_LOADER_SVG = '/loaders/zamp-logo-loader.svg';
+export const WIDGET_LOADER_SVG = '/loaders/widget-loader.svg';
 
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;

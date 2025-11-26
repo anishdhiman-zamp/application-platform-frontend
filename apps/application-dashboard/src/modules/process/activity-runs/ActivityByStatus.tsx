@@ -297,6 +297,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
               columnVisibility={columnVisibility}
               setColumnOrder={handleColumnOrderDisplayOption}
               setColumnVisibility={handleColumnVisibilityDisplayOption}
+              testIdSuffix={status}
             />
           )}
         </div>

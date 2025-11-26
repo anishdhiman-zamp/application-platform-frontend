@@ -12,10 +12,9 @@ import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from
 import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
 import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import ChatbotWrapper from '@/modules/chatbot';
 import CommentButton from '@/modules/chatbot/CommentButton';
+import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
@@ -52,10 +51,9 @@ const Log: FC<LogProps> = ({
   const showBlueStrokeRef = useRef<((show: boolean) => void) | null>(null);
   const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
-  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
-  const { evaluate, ldClient } = useFeatureFlags();
+  const isFeedbackEnabled = useIsFeedbackEnabled();
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -117,22 +115,6 @@ const Log: FC<LogProps> = ({
       stopStrokeShimmerSequenceLoopRef.current = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
-        .then((res: string[]) => {
-          if (res?.includes(processId ?? '')) {
-            setIsFeedbackEnabled(true);
-          } else {
-            setIsFeedbackEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsFeedbackEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient, processId]);
 
   return (
     <div className={cn('flex w-full items-start justify-start gap-x-5 pt-1')} data-log-id={data?.log_group_id}>

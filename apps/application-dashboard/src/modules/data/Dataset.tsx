@@ -17,7 +17,6 @@ import {
   useLazyGetDatasetDataQuery,
   useUpdateDatasetDataMutation,
 } from 'apis/dataset';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { useOnClickOutside } from 'hooks';
 import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
@@ -58,6 +57,8 @@ import {
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useResourceAccess } from '@/hooks/useResourceAccess';
 import CustomHeader from 'components/common/table/CustomHeader';
 import DatasetTable from 'components/common/table/DatasetTable';
@@ -66,7 +67,6 @@ import { getColumnType, getEncodedRequest } from 'components/common/table/table.
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
 import { CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
@@ -529,15 +529,12 @@ const DatasetById: FC<DatasetByIdProps> = ({
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetchFilterConfig}
         loader={
-          <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
-          </div>
+          <ImageLoader
+            imageSrc={ZAMP_LOGO_LOADER_SVG}
+            width={140}
+            height={140}
+            className='z-50 h-[calc(100vh-200px)]'
+          />
         }
       >
         <div className={cn('flex items-center justify-between gap-y-3 pr-8')}>

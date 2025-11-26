@@ -19,7 +19,7 @@ import {
   useSendMessageV2Mutation,
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
-import { BlockType } from '../types/block.types';
+import { BLOCK_TYPE } from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -95,7 +95,7 @@ export const useChat = (config: ChatConfig) => {
         ...(messagePayload.message_content.elements || []),
         {
           id: 'element_2',
-          type: BlockType.ATTACHMENTS,
+          type: BLOCK_TYPE.ATTACHMENTS,
           order: 2,
           payload: {
             attachments: messagePayload.message_content.attachments,
@@ -194,7 +194,7 @@ export const useChat = (config: ChatConfig) => {
                 ...(messagePayload.message_content.elements || []),
                 {
                   id: 'element_2',
-                  type: BlockType.ATTACHMENTS,
+                  type: BLOCK_TYPE.ATTACHMENTS,
                   order: 2,
                   payload: {
                     attachments: messagePayload.message_content.attachments,

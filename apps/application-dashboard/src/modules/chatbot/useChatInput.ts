@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
-import { ActionType, BlockType, LocationData, ResourceType, useChat } from '@zamp-platform/chat';
+import { ActionType, BLOCK_TYPE, LocationData, ResourceType, useChat } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import {
   createConversationPayload,
@@ -159,7 +159,7 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
     if (lastMessage?.message_content?.elements) {
       for (const element of lastMessage.message_content.elements) {
-        if (element?.type === BlockType.BUTTON && element?.action?.type === ActionType.INTERNAL_API) {
+        if (element?.type === BLOCK_TYPE.BUTTON && element?.action?.type === ActionType.INTERNAL_API) {
           messageId = lastMessage.id || '';
         }
       }

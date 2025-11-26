@@ -1,11 +1,10 @@
 'use client';
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { type Edge, type Node, ReactFlow, useEdgesState, useNodesState, useReactFlow } from '@xyflow/react';
 import { useGetAllDatasetsQuery, useGetDatasetDagQuery } from 'apis/admin';
 import { useLazyGetActionStatusQuery } from 'apis/dataset';
 import { POLLING_STATUS } from 'constants/common.constants';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { ROUTES_PATH } from 'constants/routeConfig';
 import usePolling from 'hooks/usePolling';
 import { EdgeOptions, S3_INGESTION_EDGE_LABEL } from 'modules/admin/admin.constants';
@@ -19,12 +18,13 @@ import { useRouter } from 'next/navigation';
 import { CreateDatasetResponseType, TransformDatasetResponseType } from 'types/api/admin.types';
 import { DatasetActionStatusResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import '@xyflow/react/dist/style.css';
 
 const AdminDatasetDag: FC = () => {
@@ -176,17 +176,7 @@ const AdminDatasetDag: FC = () => {
       <CommonWrapper
         isLoading={isFetching}
         isError={isError}
-        loader={
-          <div className='flex h-full items-center justify-center'>
-            <DynamicLottiePlayer
-              src={ZAMP_LOGO_LOADER}
-              className='lottie-player h-[140px]'
-              autoplay
-              loop
-              keepLastFrame
-            />
-          </div>
-        }
+        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
         skeletonType={SkeletonTypes.CUSTOM}
         refetchFunction={refetch}
         className='h-full w-full'

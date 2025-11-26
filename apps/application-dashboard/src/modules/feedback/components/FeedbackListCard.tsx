@@ -53,7 +53,7 @@ const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
                 {feedbackCard}
               </AccordionTrigger>
               <AccordionContent className='f-12-450 px-5 py-2 text-gray-900'>
-                {feedback?.summary?.feedback_points?.join(', ') || ''}
+                {feedback?.summary?.feedback_points?.join(' ') || ''}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
