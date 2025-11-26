@@ -137,7 +137,7 @@ jobs:
           cache: "npm"
 
       - name: "Set up AWS credentials using OIDC"
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists
           aws-region: ${{ env.AWS_REGION }}
@@ -424,7 +424,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Set up AWS credentials using OIDC"
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # FIXME: Make sure this role exists in staging account
           aws-region: ${{ env.AWS_REGION }}
@@ -512,7 +512,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Set up AWS credentials using OIDC"
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region: ${{ env.AWS_REGION }}
