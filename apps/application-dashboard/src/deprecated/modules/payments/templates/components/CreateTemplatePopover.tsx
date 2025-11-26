@@ -1,0 +1,169 @@
+import Input from '@/components/common/input';
+import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { COLORS } from '@/constants/colors';
+import { RecipientDetailsType } from '@/deprecated/apis/paymentApi.types';
+import {
+  useCreateTemplateMutation,
+  useGetSourceAccountsQuery,
+  useLazyGetDestinationAccountsQuery,
+  useLazyGetRecipientBySourceAccountQuery,
+} from '@/deprecated/apis/payments';
+import SelectAccountDropdown from '@/deprecated/modules/payments/move-money/components/SelectAccountDropdown';
+import SelectBeneDropdown from '@/deprecated/modules/payments/move-money/components/SelectBeneDropdown';
+import { defaultAccountData } from '@/deprecated/modules/payments/payments.constant';
+import { AccountDetailsType, MOVE_MONEY_TYPE } from '@/deprecated/modules/payments/payments.types';
+import { TITLE_MAP } from '@/deprecated/modules/payments/templates/templates.constant';
+import { SIZE_TYPES } from '@/types/common/components';
+import { defaultFnType } from '@/types/commonTypes';
+import { captureException } from '@sentry/browser';
+import { Button, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { toast } from 'components/common/toast/Toast';
+import { FC, useState } from 'react';
+
+type CreateTemplatePopoverProps = {
+  isOpen: boolean;
+  onClose: defaultFnType;
+  paymentType: MOVE_MONEY_TYPE;
+};
+
+const CreateTemplatePopover: FC<CreateTemplatePopoverProps> = ({ isOpen, onClose, paymentType }) => {
+  const isSingleTransfer = paymentType === MOVE_MONEY_TYPE.SINGLE_TRANSFER;
+  const [destinationAccountDetails, setDestinationAccountDetails] = useState<AccountDetailsType | undefined>();
+  const [sourceAccountDetails, setSourceAccountDetails] = useState<AccountDetailsType | undefined>();
+  const [recipientDetails, setRecipientDetails] = useState<RecipientDetailsType | undefined>();
+  const [templateName, setTemplateName] = useState<string>('');
+  const [destinationAccountList, setDestinationAccountList] = useState<AccountDetailsType[]>([]);
+
+  const [createTemplate, { isLoading: isCreateTemplateLoading }] = useCreateTemplateMutation();
+  const { data: sourceAccounts, isLoading } = useGetSourceAccountsQuery({}, { refetchOnMountOrArgChange: false });
+  const [
+    getRecipientBySourceAccount,
+    { data: recipientBySourceAccount, isLoading: isRecipientBySourceAccountLoading },
+  ] = useLazyGetRecipientBySourceAccountQuery();
+  const [getDestinationAccounts, { isLoading: isDestinationAccountsLoading }] = useLazyGetDestinationAccountsQuery();
+
+  const handleSubmit = () => {
+    createTemplate({
+      template_name: templateName,
+      details: [
+        {
+          order: '1',
+          source_account_id: sourceAccountDetails?.id ?? '',
+          destination_account_id: destinationAccountDetails?.id ?? '',
+        },
+      ],
+      description: 'NA',
+      type: paymentType,
+    })
+      .unwrap()
+      .then(() => {
+        toast.success('Template created successfully');
+        onClose();
+      })
+      .catch(() => {
+        toast.error('Failed to create template');
+      });
+  };
+
+  const handleSourceAccountSelect = (account: AccountDetailsType) => {
+    setSourceAccountDetails(account);
+    setDestinationAccountDetails(defaultAccountData);
+    setDestinationAccountList([]);
+    setRecipientDetails(undefined);
+    if (!isSingleTransfer && account.id) {
+      getDestinationAccounts({ source_account_id: account.id ?? '' })
+        .unwrap()
+        .then((res) => {
+          setDestinationAccountList(res.accounts);
+        })
+        .catch((error) => {
+          captureException(error);
+          toast.error(TOAST_MESSAGES.ERROR_FETCHING_ACCOUNTS);
+        });
+    } else if (isSingleTransfer && account.id) {
+      getRecipientBySourceAccount({ source_account_id: account.id ?? '' });
+    }
+  };
+
+  const handleRecipientSelect = (recipient: RecipientDetailsType) => {
+    setRecipientDetails(recipient);
+    setDestinationAccountDetails(undefined);
+    if (recipient?.accounts?.length) {
+      setDestinationAccountList(recipient?.accounts ?? []);
+    }
+  };
+
+  return (
+    <div>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent showCloseButton className='min-h-[600px]'>
+          <DialogHeader>{TITLE_MAP[paymentType as keyof typeof TITLE_MAP] ?? ''}</DialogHeader>
+          <DialogBody className='flex justify-center p-6'>
+            <div className='mx-auto flex w-[300px] flex-col gap-5'>
+              <div className='flex items-end gap-2'>
+                <Input
+                  id='ADD_ACCOUNT_SEARCH_BANK'
+                  size={SIZE_TYPES.LARGE}
+                  autoFocus
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  focusClassNames=''
+                  placeholder='New Template'
+                  inputWrapperClassName='border-b border-dashed border-GRAY_1000'
+                  inputFontClassName='f-22-550 px-0! pb-0! font-medium'
+                />
+                <SvgSpriteLoader id='edit-03' className='pl-10' size={14} color={COLORS.GRAY_900} />
+              </div>
+              <SelectAccountDropdown
+                accountsList={sourceAccounts?.accounts ?? []}
+                shouldReset={false}
+                accountDetails={sourceAccountDetails}
+                onAccountSelect={handleSourceAccountSelect}
+                label='Source account'
+                isLoading={isLoading}
+              />
+              {sourceAccountDetails && isSingleTransfer && (
+                <SelectBeneDropdown
+                  onSelect={handleRecipientSelect}
+                  defaultSelectedRecipient={recipientDetails}
+                  shouldReset={false}
+                  label='Recipient'
+                  showTemplate={false}
+                  recipientList={recipientBySourceAccount?.recipients ?? []}
+                  isLoading={isRecipientBySourceAccountLoading}
+                />
+              )}
+              {((isSingleTransfer && recipientDetails) || !isSingleTransfer) && sourceAccountDetails && (
+                <SelectAccountDropdown
+                  accountsList={destinationAccountList}
+                  shouldReset={false}
+                  accountDetails={destinationAccountDetails}
+                  onAccountSelect={(account: AccountDetailsType) => setDestinationAccountDetails(account)}
+                  label={isSingleTransfer ? 'Recipient account' : 'Destination account'}
+                  isLoading={isDestinationAccountsLoading || isRecipientBySourceAccountLoading}
+                  showCurrencyLogo={isSingleTransfer}
+                />
+              )}
+            </div>
+          </DialogBody>
+          <DialogFooter className='flex justify-end gap-2'>
+            <Button size='small' variant='secondary' onClick={onClose}>
+              Discard
+            </Button>
+            <Button
+              disabled={!destinationAccountDetails || !sourceAccountDetails || !templateName}
+              isLoading={isCreateTemplateLoading}
+              size='small'
+              onClick={handleSubmit}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default CreateTemplatePopover;
