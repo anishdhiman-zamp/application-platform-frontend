@@ -109,7 +109,7 @@ const Topbar = () => {
     }
 
     return <ShareButton />;
-  }, [pathname, isKnowledgeBaseEnabled, processId]);
+  }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled]);
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());
