@@ -1,5 +1,6 @@
 module.exports = {
   ...require('@zamp-platform/config/eslint.js'),
+  ignorePatterns: ['src/unused/**'],
   overrides: [
     ...(require('@zamp-platform/config/eslint.js').overrides || []),
     {
