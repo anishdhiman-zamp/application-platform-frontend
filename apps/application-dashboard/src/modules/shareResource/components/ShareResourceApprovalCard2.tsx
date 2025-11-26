@@ -5,12 +5,12 @@ import ShareResourceAccessDetails from 'modules/shareResource/components/ShareRe
 import { useApprovalActionMutation } from '@/apis/people';
 import AudienceMember from '@/components/audience-member';
 import { toast } from '@/components/common/toast/Toast';
-import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
-import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/modules/policies/constants';
-import { RESOURCE_ACTION_TYPE } from '@/modules/policies/types';
+import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/constants/payments.constants';
+import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/constants/policies.constants';
 import { PRIVILEGES_LIST } from '@/modules/team/people.constants';
 import { AudiencesByResourceResponse } from '@/types/api/collaboration.types';
 import type { GetTeamPendingApprovalsResponse, GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
+import { RESOURCE_ACTION_TYPE } from '@/types/api/policies.types';
 import type { defaultFnType } from '@/types/commonTypes';
 import { getUserNameFromAudience, snakeCaseToSentenceCase } from '@/utils/common';
 

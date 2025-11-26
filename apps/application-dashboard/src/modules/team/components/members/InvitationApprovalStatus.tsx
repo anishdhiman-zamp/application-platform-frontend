@@ -3,7 +3,7 @@ import { useGetAudiencesByOrganisationIdQuery, useGetPolicyResultApprovalsQuery 
 import { useAppSelector } from 'hooks/toolkit';
 import InvitationApprovalActions from 'modules/team/components/members/InvitationApprovalActions';
 import { RootState } from 'store';
-import { Approval, ApprovalStatus, PolicyResultStatus } from 'types/api/policies.types';
+import { Approval, ApprovalStatus, PolicyResultStatus } from '@/types/api/policies.types';
 import { getUserDisplayName } from '@/utils/common';
 
 type InvitationApprovalStatusProps = {

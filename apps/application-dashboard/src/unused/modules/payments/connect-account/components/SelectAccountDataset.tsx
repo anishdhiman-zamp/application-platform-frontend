@@ -1,0 +1,58 @@
+import { useMemo, useState } from 'react';
+import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { DATASET_TABLE } from 'constants/icons';
+import Image from 'next/image';
+import { ACCOUNT_DATASET_OPTIONS } from '@/unused/modules/payments/connect-account/connect-account-dummydata';
+import Input from 'components/common/input';
+
+interface SelectAccountDatasetProps {
+  onSelectDataset: (dataset: string) => void;
+}
+
+const SelectAccountDataset = ({ onSelectDataset }: SelectAccountDatasetProps) => {
+  const [search, setSearch] = useState('');
+
+  const filteredDatasetOptions = useMemo(() => {
+    return ACCOUNT_DATASET_OPTIONS.filter((item) => item.label?.toLowerCase().includes(search?.toLowerCase()));
+  }, [search]);
+
+  return (
+    <div>
+      <Input
+        autoFocus
+        placeholder='Search dataset...'
+        inputClassName='border-none w-full focus:outline-hidden focus:border-none focus:shadow-none px-0!'
+        value={search}
+        trailingIconProps={
+          search
+            ? {
+                id: 'x',
+                iconCategory: ICON_SPRITE_TYPES.GENERAL,
+                onClick: () => setSearch(''),
+              }
+            : undefined
+        }
+        onChange={(e) => {
+          if (e?.target?.value !== undefined) {
+            setSearch(e.target.value);
+          }
+        }}
+      />
+      {filteredDatasetOptions.map((item) => (
+        <div
+          onClick={() => onSelectDataset(item.value)}
+          key={item.value}
+          className='hover:bg-GRAY_100 flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-3'
+        >
+          <Image src={DATASET_TABLE} alt='dataset-table' width={20} height={20} />
+          <div className='f-13-500'>{item.label}</div>
+        </div>
+      ))}
+      {filteredDatasetOptions?.length === 0 && (
+        <div className='f-12-450 text-GRAY_700 mb-6.5 block animate-pulse'>No results found</div>
+      )}
+    </div>
+  );
+};
+
+export default SelectAccountDataset;

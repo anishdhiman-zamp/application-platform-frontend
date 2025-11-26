@@ -1,5 +1,4 @@
 import CustomiseDatasetAccess from 'modules/shareResource/CustomiseDatasetAccess';
-import CustomisePaymentsAccess from 'modules/shareResource/CustomisePaymentsAccess';
 import { ResourceType } from 'modules/shareResource/shareResource.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { FilterModelType } from '@/types/components/table.type';
@@ -30,16 +29,6 @@ const CustomiseAccess = ({
           isOpen={isOpen}
           onClose={onClose}
           datasetId={datasetId}
-          fgacFilters={fgacFilters}
-          onSave={onSave}
-          isSaving={isSaving}
-        />
-      );
-    case ResourceType.PAYMENTS:
-      return (
-        <CustomisePaymentsAccess
-          isOpen={isOpen}
-          onClose={onClose}
           fgacFilters={fgacFilters}
           onSave={onSave}
           isSaving={isSaving}

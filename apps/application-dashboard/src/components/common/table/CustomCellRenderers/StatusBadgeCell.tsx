@@ -1,4 +1,4 @@
-import { PAYMENT_STATUS_TYPES } from '@/modules/payments/payments.types';
+import { PAYMENT_STATUS_TYPES } from '@/constants/payments.constants';
 import { cn } from '@/utils/common';
 
 type StatusBadgeCellProps = {
