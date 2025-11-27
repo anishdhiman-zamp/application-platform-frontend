@@ -39,7 +39,6 @@
         ".env*",
         "!src/**/*.test.{ts,tsx,js,jsx}",
         "!src/**/*.spec.{ts,tsx,js,jsx}",
-        "!src/deprecated/**",
         "!pages/**/*.test.{ts,tsx,js,jsx}",
         "!pages/**/*.spec.{ts,tsx,js,jsx}",
         "!components/**/*.test.{ts,tsx,js,jsx}",
@@ -72,8 +71,7 @@
         "components/**/*.{ts,tsx,js,jsx}",
         ".eslintrc.*",
         "eslint.config.*",
-        "package.json",
-        "!src/deprecated/**"
+        "package.json"
       ],
       "outputs": []
     },
@@ -85,8 +83,7 @@
         "components/**/*.{ts,tsx}",
         "tsconfig.json",
         "next-env.d.ts",
-        "package.json",
-        "!src/deprecated/**"
+        "package.json"
       ],
       "outputs": []
     },

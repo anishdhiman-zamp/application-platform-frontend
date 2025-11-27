@@ -1,6 +1,5 @@
 module.exports = {
   ...require('@zamp-platform/config/eslint.js'),
-  ignorePatterns: ['src/deprecated/**'],
   overrides: [
     ...(require('@zamp-platform/config/eslint.js').overrides || []),
     {
