@@ -8,8 +8,6 @@ import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
-import PaymentActions from 'modules/payments/components/PaymentActions';
-import SharePaymentsPopup from 'modules/payments/share-resource/SharePaymentsPopup';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
@@ -38,8 +36,6 @@ const ShareButton = () => {
       return <SharePagePopup pageId={params?.pageId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
       return <ShareDatasetPopup datasetId={params?.datasetId || ''} />;
-    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PAYMENTS):
-      return <SharePaymentsPopup paymentConfigId={params?.paymentConfigId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
       return <ShareProcessPopup processId={params?.processId || ''} />;
     case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
@@ -79,15 +75,6 @@ const Topbar = () => {
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
-    if (pathname?.includes(ROUTES_PATH.PAYMENTS)) {
-      return (
-        <div className='flex items-center gap-3'>
-          <PaymentActions />
-          <ShareButton />
-        </div>
-      );
-    }
-
     if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
       return null;
     }

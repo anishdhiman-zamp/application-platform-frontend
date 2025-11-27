@@ -26,6 +26,10 @@ import {
   RemoveTeamFromAudienceRequestType,
   UpdateTeamRequestType,
 } from 'types/api/people.types';
+import { formRequestUrlWithParams } from 'utils/common';
+import { APITags } from '@/constants/api.constants';
+import { baseApi } from '@/services/baseApi';
+import type { Organization } from '@/types/api/auth.types';
 import {
   type GetDualAdminPolicyResponse,
   GetPendingApprovalsResponse,
@@ -34,11 +38,7 @@ import {
   type PolicyApprovalRequest,
   ProcessApprovalRequest,
   ProcessApprovalResponse,
-} from 'types/api/policies.types';
-import { formRequestUrlWithParams } from 'utils/common';
-import { APITags } from '@/constants/api.constants';
-import { baseApi } from '@/services/baseApi';
-import type { Organization } from '@/types/api/auth.types';
+} from '@/types/api/policies.types';
 
 const People = baseApi.injectEndpoints({
   endpoints: (builder) => ({

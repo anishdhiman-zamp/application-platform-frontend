@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import PeoplePage from 'modules/team/PeoplePage';
 import { useHash } from '@/hooks/useHash';
-import DualAdminHome from '@/modules/dualAdmin/DualAdminHome';
 import { SETTINGS_TABS } from '@/modules/settings/settings.type';
 
 const Settings = () => {
@@ -17,8 +16,6 @@ const Settings = () => {
   }, [path]);
 
   switch (currentTab) {
-    case SETTINGS_TABS.DUAL_ADMIN:
-      return <DualAdminHome />;
     case SETTINGS_TABS.TEAM:
     default:
       return <PeoplePage />;
