@@ -61,6 +61,7 @@ import {
   CompletedFieldsActions,
   useCompletedFields,
 } from '@/modules/process/artifacts/context/completedFields.context';
+import { useChatbotDatasetNavigation } from '@/modules/process/hooks/useChatbotDatasetNavigation';
 import { ARTIFACT_TYPE, DATASET_VIEW_TYPE, type FieldRequirementType } from '@/modules/process/process.types';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import type { MissingFieldItemType } from '@/types/api/processApi.types';
@@ -476,6 +477,16 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
       api?.setFocusedCell(rowNode?.rowIndex as number, column);
     }
   };
+
+  // Handle chatbot deep linking navigation
+  useChatbotDatasetNavigation({
+    datasetId: id as string,
+    gridReady,
+    isInitialDataLoaded,
+    gridApi,
+    setActiveTab,
+    scrollToCell,
+  });
 
   const goNext = () => {
     if (currentIndex < (missingFields?.length ?? 0) - 1) {

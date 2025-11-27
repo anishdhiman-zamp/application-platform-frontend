@@ -14,6 +14,7 @@ import {
   SenderType,
 } from '@zamp-platform/chat';
 import { ChartNoAxesColumn, Check, Loader } from 'lucide-react';
+import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
@@ -274,17 +275,17 @@ export const updateButtonElementsDisplay = (
 };
 
 export const createChatbotUrl = (annotationLocation: LocationData) => {
-  let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?chatbot_process_id=${annotationLocation?.data?.process_id}&chatbot_activity_run_id=${annotationLocation?.data?.activity_run_id}`;
+  let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:
-      url += `&chatbot_annotation_location_type=${LocationType.DATASET_FIELD}&chatbot_dataset_id=${annotationLocation?.data?.dataset_id}&chatbot_dataset_row_id=${annotationLocation?.data?.dataset_row_id}&chatbot_dataset_field_id=${annotationLocation?.data?.dataset_field_id}`;
+      url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.DATASET_FIELD}&${CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ID}=${annotationLocation?.data?.dataset_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ROW_ID}=${annotationLocation?.data?.dataset_row_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_FIELD_ID}=${annotationLocation?.data?.dataset_field_id}`;
       break;
     case LocationType.LOG:
-      url += `&chatbot_annotation_location_type=${LocationType.LOG}&chatbot_log_id=${annotationLocation?.data?.log_id}`;
+      url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.LOG}&${CHATBOT_LOCATION_PARAMS.CHATBOT_LOG_ID}=${annotationLocation?.data?.log_id}`;
       break;
     case LocationType.ACTIVITY_RUN:
-      url += `&chatbot_annotation_location_type=${LocationType.ACTIVITY_RUN}`;
+      url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.ACTIVITY_RUN}`;
       break;
   }
 
@@ -292,13 +293,13 @@ export const createChatbotUrl = (annotationLocation: LocationData) => {
 };
 
 export const doesUrlMatchLocation = (searchParams: URLSearchParams, location: LocationData): boolean => {
-  const urlType = searchParams.get('chatbot_annotation_location_type');
+  const urlType = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE);
 
   if (urlType !== location.type) return false;
 
   // Check common fields
-  const processId = searchParams.get('chatbot_process_id');
-  const activityRunId = searchParams.get('chatbot_activity_run_id');
+  const processId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID);
+  const activityRunId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID);
 
   if (processId !== location.data.process_id || activityRunId !== location.data.activity_run_id) {
     return false;
@@ -309,19 +310,19 @@ export const doesUrlMatchLocation = (searchParams: URLSearchParams, location: Lo
   }
 
   if (location.type === LocationType.DATASET_FIELD) {
-    const datasetFieldId = searchParams.get('chatbot_dataset_field_id');
+    const datasetFieldId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_FIELD_ID);
 
     if (datasetFieldId !== location.data.dataset_field_id) return false;
 
     // Check additional dataset fields
-    const datasetId = searchParams.get('chatbot_dataset_id');
-    const datasetRowId = searchParams.get('chatbot_dataset_row_id');
+    const datasetId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ID);
+    const datasetRowId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ROW_ID);
 
     return datasetId === location.data.dataset_id && datasetRowId === location.data.dataset_row_id;
   }
 
   if (location.type === LocationType.LOG) {
-    const logId = searchParams.get('chatbot_log_id');
+    const logId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_LOG_ID);
 
     return logId === location.data.log_id;
   }

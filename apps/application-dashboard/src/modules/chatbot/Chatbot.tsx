@@ -58,6 +58,7 @@ const Chatbot = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
+  const urlBasedOpenHandled = useRef(false);
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
@@ -90,7 +91,7 @@ const Chatbot = ({
         onCloseChatbot?.();
       } else onOpenChatbot?.();
     },
-    [onCloseChatbot],
+    [onCloseChatbot, onOpenChatbot],
   );
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -143,19 +144,26 @@ const Chatbot = ({
     }
   };
 
-  // Check URL params on mount to determine if chatbot should be open
+  // Check URL params to determine if chatbot should be open (takes precedence over prop)
   useEffect(() => {
-    if (searchParams && doesUrlMatchLocation(searchParams, annotationLocation)) {
-      setIsOpen(true);
-    }
-  }, [searchParams, annotationLocation]);
+    const urlMatches = searchParams && doesUrlMatchLocation(searchParams, annotationLocation);
 
-  // Sync isOpen state with showChatbot prop changes
-  useEffect(() => {
-    if (showChatbot !== undefined) {
-      setIsOpen(showChatbot);
+    if (urlMatches) {
+      // URL params match - always keep open, regardless of prop
+      if (!urlBasedOpenHandled.current) {
+        urlBasedOpenHandled.current = true;
+      }
+      setIsOpen(true);
+    } else {
+      // URL params don't match - sync with prop
+      if (urlBasedOpenHandled.current) {
+        urlBasedOpenHandled.current = false;
+      }
+      if (showChatbot !== undefined) {
+        setIsOpen(showChatbot);
+      }
     }
-  }, [showChatbot]);
+  }, [searchParams, annotationLocation, showChatbot]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
