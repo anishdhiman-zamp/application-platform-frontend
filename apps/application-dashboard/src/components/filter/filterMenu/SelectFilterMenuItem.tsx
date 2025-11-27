@@ -63,14 +63,17 @@ const SelectFilterMenuItem = ({
         inputRef={searchRef}
         placeholder='Search...'
         className='sticky top-0 z-10 bg-white'
-        inputClassName=' border-none w-full focus:outline-hidden focus:border-none focus:shadow-none'
+        inputClassName='border-none w-full focus:outline-hidden focus:border-none focus:shadow-none !p-2.5 !text-xs !placeholder-GRAY_500'
         value={search}
         trailingIconProps={
           search
             ? {
                 id: 'x',
                 iconCategory: ICON_SPRITE_TYPES.GENERAL,
-                onClick: () => setSearch(''),
+                onClick: () => {
+                  setSearch('');
+                  searchRef.current?.focus();
+                },
               }
             : undefined
         }
@@ -80,14 +83,14 @@ const SelectFilterMenuItem = ({
           }
         }}
       />
-      <div className='px-2.5'>
+      <div className='flex flex-col gap-1 px-2.5'>
         {filteredMenuItems?.length > 0 ? (
           filteredMenuItems?.map((filter, index) => (
             <div
               key={index}
               data-testid={`filter-menu-item-${filter?.key}`}
               className={cn(
-                `flex w-full items-center rounded p-2`,
+                `flex w-full items-center rounded px-1 py-1.5`,
                 checkIfFilterIsSelected(filter?.key) ? 'cursor-default opacity-30' : 'hover:bg-GRAY_70 cursor-pointer',
               )}
               onClick={() => !checkIfFilterIsSelected(filter?.key) && onAddFilter(filter?.key)}
@@ -96,7 +99,7 @@ const SelectFilterMenuItem = ({
             </div>
           ))
         ) : (
-          <div className='f-12-450 text-GRAY_700 flex items-center justify-center p-2'>No results found</div>
+          <div className='f-12-450 text-GRAY_500 flex items-center py-2'>No results found</div>
         )}
       </div>
     </div>
