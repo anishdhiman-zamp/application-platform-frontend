@@ -1,10 +1,9 @@
 'use client';
 
-import DualAdminHome from '@/deprecated/modules/dualAdmin/DualAdminHome';
+import { useEffect, useState } from 'react';
+import PeoplePage from 'modules/team/PeoplePage';
 import { useHash } from '@/hooks/useHash';
 import { SETTINGS_TABS } from '@/modules/settings/settings.type';
-import PeoplePage from 'modules/team/PeoplePage';
-import { useEffect, useState } from 'react';
 
 const Settings = () => {
   const path = useHash();
@@ -17,8 +16,6 @@ const Settings = () => {
   }, [path]);
 
   switch (currentTab) {
-    case SETTINGS_TABS.DUAL_ADMIN:
-      return <DualAdminHome />;
     case SETTINGS_TABS.TEAM:
     default:
       return <PeoplePage />;
