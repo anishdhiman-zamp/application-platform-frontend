@@ -14,6 +14,7 @@ const PermissionGuard: FC<PermissionGuardProps> = ({ resourceType, resourceId, c
     resourceType,
     resourceId,
     skipAudienceData: false,
+    skipTeamsData: false,
   });
 
   const hasPermission = checkUserPrivilege(privilege);
