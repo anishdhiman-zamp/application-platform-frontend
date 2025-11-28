@@ -22,12 +22,11 @@ import { RootState } from '@/store';
 interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader?: (header: string) => void;
 }
 
-const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, setHeader }: UseChatInputProps) => {
+const useChatInput = ({ chat, annotationLocation, conversationId, setHeader }: UseChatInputProps) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
   const processId = params?.processId as string;
@@ -57,8 +56,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
     setAttachments([]);
     const response = await chat.createConversationV2(payload);
-
-    setIsLoading(true);
 
     if (!response?.conversation_id) {
       throw new Error('Failed to create conversation');
@@ -123,7 +120,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
   };
 
   const handleSubmit = () => {
-    setIsLoading(true);
     if (value.trim()) {
       setValue('');
     }
@@ -138,9 +134,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
   const handleSendMessage = async (inputValue: string) => {
     if (!inputValue.trim()) return;
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 500);
 
     const messagePayload = createUserMessagePayload(
       inputValue,

@@ -2,6 +2,7 @@
 
 import { Label } from '@zamp-platform/ui';
 import { Radio, RadioGroup } from '@zamp-platform/ui';
+import Link from 'next/link';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
@@ -36,7 +37,14 @@ export const SingleSelectBlock: React.FC<SingleSelectBlockProps> = ({ payload, b
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeSlug]}
                   components={{
-                    a: ({ ...props }) => <a {...props} className='text-blue-700' />,
+                    a: ({ href, ...props }) => {
+                      if (!href) return null;
+                      return (
+                        <Link href={href} className='text-blue-700'>
+                          {props.children}
+                        </Link>
+                      );
+                    },
                   }}
                 >
                   {option.label}

@@ -13,7 +13,6 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 interface ChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
@@ -22,7 +21,6 @@ interface ChatInputProps {
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
   annotationLocation,
-  setIsLoading,
   conversationId,
   setHeader,
   isDisabled,
@@ -42,7 +40,6 @@ export const ChatInput: FC<ChatInputProps> = ({
   } = useChatInput({
     chat,
     annotationLocation,
-    setIsLoading,
     conversationId,
     setHeader,
   });

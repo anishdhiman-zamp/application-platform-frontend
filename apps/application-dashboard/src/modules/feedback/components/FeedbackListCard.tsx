@@ -64,7 +64,7 @@ const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
     }
 
     return (
-      <Link href={createChatbotUrl(feedback?.annotation_data?.location)} onClick={handleFeedbackClick} prefetch>
+      <Link href={createChatbotUrl(feedback)} onClick={handleFeedbackClick} prefetch>
         {feedbackCard}
       </Link>
     );
