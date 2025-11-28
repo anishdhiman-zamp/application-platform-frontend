@@ -184,7 +184,7 @@ const AGChartsWidgets: FC<WidgetsWrapperProps> = ({
                   ></div>
                 </div>
               )}
-              <AgCharts options={chartOptions as AgChartOptions} />
+              <AgCharts options={chartOptions as AgChartOptions} key={widgetDetails?.widget_instance_id} />
             </div>
           )}
         </CommonWrapper>

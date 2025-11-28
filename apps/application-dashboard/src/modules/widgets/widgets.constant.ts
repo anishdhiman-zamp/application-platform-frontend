@@ -38,6 +38,8 @@ export enum WidgetDataValueType {
   DATETIME = 'DATETIME',
   INTEGER = 'INTEGER',
   TIMESTAMP_NTZ = 'TIMESTAMP_NTZ',
+  INT8 = 'INT8',
+  VARCHAR = 'VARCHAR',
 }
 
 export const AG_CHART_TYPES = {
@@ -73,7 +75,7 @@ export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, 
   }
 };
 
-export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
+export const getCategoryAxis = (periodicity: PERIODICITY_TYPES, isXaxisTimestamp?: boolean) => {
   return {
     type: 'category' as const,
     position: 'bottom',
@@ -84,7 +86,7 @@ export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
       minSpacing: 20,
       autoRotate: false,
       formatter: function (params: MapAny) {
-        if (isValidDate(params.value)) {
+        if (isXaxisTimestamp && isValidDate(params.value)) {
           return getFormattedDateWithPeriodicity(periodicity, params.value);
         }
 
