@@ -20,6 +20,7 @@ const nextConfig = {
   },
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+    NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
   },
   webpack: (config, { isServer }) => {
     config.resolve.fallback = {
@@ -44,6 +45,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
         pathname: '/**',
       },
       {
