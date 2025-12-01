@@ -16,12 +16,14 @@ import { usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 
 const LayoutChildren: FC<{ children: ReactNode }> = ({ children }) => {
   const pathname = usePathname() || '/';
   const containerRef = useRef<HTMLDivElement>(null);
   const [previousRoute, setPreviousRoute] = useState<string>(pathname);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const isSettingsPage = pathname?.startsWith(ROUTES_PATH.SETTINGS);
 
   useEffect(() => {
     if (previousRoute === pathname) return;
@@ -48,10 +50,16 @@ const LayoutChildren: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <div ref={containerRef} className='relative flex h-screen grow flex-col'>
+    <div
+      ref={containerRef}
+      className={cn('relative flex h-screen grow flex-col', {
+        'h-full': isSettingsPage,
+      })}
+    >
       <div
-        className={cn('border-GRAY_400 relative mx-auto h-[calc(100vh-48px)] w-full border bg-white', {
-          'rounded-tl-xl': isSidebarOpen,
+        className={cn('border-GRAY_400 relative mx-auto h-screen w-full border bg-white', {
+          'h-[calc(100vh-48px)]': !isSettingsPage,
+          'rounded-tl-xl': isSidebarOpen && !isSettingsPage,
         })}
       >
         {renderChildrenWithProps(children)}

@@ -2,14 +2,14 @@
 
 import { memo, useEffect, useMemo } from 'react';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { getProcessRouteById } from 'constants/routeConfig';
+import { getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
-import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
+import { SETTINGS_ID, SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -20,7 +20,7 @@ import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTa
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
 const Sidebar = () => {
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const { isSidebarOpen, lastVisitedSettingsRoute } = useAppSelector((state: RootState) => state.layoutConfig);
   const params = useParams();
   const pathTrim = usePathname();
   const hash = useHash();
@@ -71,16 +71,20 @@ const Sidebar = () => {
         <div className='w-60'>
           <div className='h-full'>
             <div className='border-GRAY_400 border-b px-2 pb-4'>
-              {SIDEBAR_ITEMS.map((item) => (
-                <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
-                  <SidebarTab
-                    key={item.label}
-                    name={item.label}
-                    iconComponent={item.iconComponent}
-                    isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
-                  />
-                </Link>
-              ))}
+              {SIDEBAR_ITEMS.map((item) => {
+                const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.TEAM : item.path;
+
+                return (
+                  <Link prefetch href={itemPath} key={item.label} className='cursor-pointer'>
+                    <SidebarTab
+                      key={item.label}
+                      name={item.label}
+                      iconComponent={item.iconComponent}
+                      isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
+                    />
+                  </Link>
+                );
+              })}
             </div>
 
             <CommonWrapper

@@ -1,20 +1,43 @@
-import { COLORS } from 'constants/colors';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { Link2 } from 'lucide-react';
 import CoinsStacked04 from '@/assets/Icons/CoinsStacked04';
 import Users02 from '@/assets/Icons/Users02';
 import type { NavigationItemSchema } from '@/types/config';
 
 export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
   {
-    label: 'Data',
     id: 'data',
-    iconComponent: <CoinsStacked04 width={16} height={16} color={COLORS.GRAY_1000} />,
+    label: 'Data',
+    iconComponent: <CoinsStacked04 width={16} height={16} />,
     path: ROUTES_PATH.DATA,
   },
   {
-    label: 'People',
     id: 'people',
-    iconComponent: <Users02 width={16} height={16} color={COLORS.GRAY_1000} />,
+    label: 'People',
+    iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.TEAM,
   },
+  // {
+  //   id: 'settings',
+  //   label: 'Settings',
+  //   iconComponent: <Settings width={16} height={16} />,
+  //   path: ROUTES_PATH.TEAM,
+  // },
 ];
+
+export const SETTINGS_TABS = [
+  {
+    id: 'people',
+    label: 'People',
+    iconComponent: <Users02 width={16} height={16} />,
+    path: ROUTES_PATH.TEAM,
+  },
+  {
+    label: 'Integrations',
+    id: 'integrations',
+    iconComponent: <Link2 width={16} height={16} className='-rotate-45' />,
+    path: ROUTES_PATH.INTEGRATIONS,
+  },
+];
+
+export const SETTINGS_ID = 'settings';

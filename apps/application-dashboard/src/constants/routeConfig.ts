@@ -21,12 +21,13 @@ export const ROUTES_PATH = {
   PROCESS: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
-  TEAM: '/team',
+  TEAM: '/settings/team',
   SETTINGS: '/settings',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
+  INTEGRATIONS: '/settings/integrations',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
