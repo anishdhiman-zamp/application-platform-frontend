@@ -5,7 +5,7 @@ import type { MapAny } from '@/types/commonTypes';
  * This serves as the foundation for all event types including SSE, webhooks, and component events.
  */
 export interface BaseEventPayload {
-  type: EventType;
+  type: EVENT_TYPE;
   source_id?: string;
   timestamp?: string;
   payload?: string | MapAny;
@@ -30,12 +30,12 @@ export interface EventBusSubscription {
  * Supports any type of event communication pattern.
  */
 export interface EventBusInterface {
-  subscribe<T = BaseEventPayload>(topic: EventType, callback: EventCallback<T>): EventBusSubscription;
-  unsubscribe(topic: EventType, callback: EventCallback): void;
-  publish<T = BaseEventPayload>(topic: EventType, event: T): void;
+  subscribe<T = BaseEventPayload>(topic: EVENT_TYPE, callback: EventCallback<T>): EventBusSubscription;
+  unsubscribe(topic: EVENT_TYPE, callback: EventCallback): void;
+  publish<T = BaseEventPayload>(topic: EVENT_TYPE, event: T): void;
   clear(): void;
-  getTopics(): EventType[];
-  getSubscriberCount(topic: EventType): number;
+  getTopics(): EVENT_TYPE[];
+  getSubscriberCount(topic: EVENT_TYPE): number;
 }
 
 /**
@@ -49,6 +49,5 @@ export const enum EVENT_TYPE {
   WEBHOOK = 'webhook',
   COMPONENT = 'component',
   FEEDBACK = 'feedback',
+  TEST = 'test',
 }
-
-export type EventType = (typeof EVENT_TYPE)[keyof typeof EVENT_TYPE];

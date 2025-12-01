@@ -2,10 +2,10 @@
 
 import type {
   BaseEventPayload,
+  EVENT_TYPE,
   EventBusInterface,
   EventBusSubscription,
   EventCallback,
-  EventType,
 } from './event-bus.types';
 
 /**
@@ -19,7 +19,7 @@ import type {
 
 class EventBus implements EventBusInterface {
   /** Map of topic names to their subscriber callbacks */
-  private topics: Map<EventType, Set<EventCallback>> = new Map();
+  private topics: Map<EVENT_TYPE, Set<EventCallback>> = new Map();
 
   /**
    * Subscribe to a topic with a callback function.
@@ -27,7 +27,7 @@ class EventBus implements EventBusInterface {
    * @param callback - Function to call when events are published to this topic
    * @returns Subscription object with unsubscribe method
    */
-  subscribe<T = BaseEventPayload>(topic: EventType, callback: EventCallback<T>): EventBusSubscription {
+  subscribe<T = BaseEventPayload>(topic: EVENT_TYPE, callback: EventCallback<T>): EventBusSubscription {
     if (!this.topics.has(topic)) {
       this.topics.set(topic, new Set());
     }
@@ -44,7 +44,7 @@ class EventBus implements EventBusInterface {
    * @param topic - The topic name to unsubscribe from
    * @param callback - The callback function to remove
    */
-  unsubscribe(topic: EventType, callback: EventCallback): void {
+  unsubscribe(topic: EVENT_TYPE, callback: EventCallback): void {
     const callbacks = this.topics.get(topic);
     if (callbacks) {
       callbacks.delete(callback);
@@ -59,7 +59,7 @@ class EventBus implements EventBusInterface {
    * @param topic - The topic name to publish to
    * @param event - The event data to send to subscribers
    */
-  publish<T = BaseEventPayload>(topic: EventType, event: T): void {
+  publish<T = BaseEventPayload>(topic: EVENT_TYPE, event: T): void {
     const callbacks = this.topics.get(topic);
     if (callbacks) {
       callbacks.forEach((callback) => callback(event as BaseEventPayload));
@@ -78,7 +78,7 @@ class EventBus implements EventBusInterface {
    * Get all active topic names.
    * @returns Array of topic names that have active subscriptions
    */
-  getTopics(): EventType[] {
+  getTopics(): EVENT_TYPE[] {
     return Array.from(this.topics.keys());
   }
 
@@ -87,7 +87,7 @@ class EventBus implements EventBusInterface {
    * @param topic - The topic name to check
    * @returns Number of active subscribers for the topic
    */
-  getSubscriberCount(topic: EventType): number {
+  getSubscriberCount(topic: EVENT_TYPE): number {
     return this.topics.get(topic)?.size ?? 0;
   }
 }
