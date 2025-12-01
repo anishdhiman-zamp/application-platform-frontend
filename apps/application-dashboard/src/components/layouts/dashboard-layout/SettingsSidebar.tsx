@@ -1,10 +1,10 @@
 'use client';
 
 import { memo } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { useAppSelector } from 'hooks/toolkit';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { RootState } from 'store';
@@ -24,7 +24,7 @@ const SettingsSidebar = () => {
         <div className='flex h-full w-60 flex-col'>
           {/* Back button */}
           <div className='px-2 py-5'>
-            <div className='text-GRAY_700 flex w-full items-center gap-2.5 rounded-md px-2.5 transition-colors'>
+            <div className='text-GRAY_700 flex w-full items-center gap-2.5'>
               <Link prefetch href={lastVisitedRouteBeforeSettings || ROUTES_PATH.PROCESSES} className='cursor-pointer'>
                 <ArrowLeft width={16} height={16} />
               </Link>
@@ -47,20 +47,20 @@ const SettingsSidebar = () => {
 
           {/* Logout button */}
           <div className='border-GRAY_400 border-t px-2 py-3'>
-            <button
+            <Button
+              id='logout-btn'
+              variant='ghost'
+              size='small'
               onClick={logout}
               disabled={isLoggingOut}
-              className={cn(
-                'text-GRAY_700 hover:bg-GRAY_100 flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 transition-colors',
-                { 'cursor-not-allowed opacity-50': isLoggingOut },
-              )}
+              className={cn('text-GRAY_700 hover:text-GRAY_700 w-full justify-start gap-2.5 rounded-md px-2', {
+                'cursor-not-allowed': isLoggingOut,
+              })}
             >
-              <div className='flex h-4 w-4 items-center justify-center'>
-                <SvgSpriteLoader id='log-out-02' size={16} />
-              </div>
+              <LogOut width={14} height={14} />
               <span className='f-13-500 flex-1 text-left select-none'>Logout</span>
               {isLoggingOut && <Loader2 className='w-4 animate-spin' />}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

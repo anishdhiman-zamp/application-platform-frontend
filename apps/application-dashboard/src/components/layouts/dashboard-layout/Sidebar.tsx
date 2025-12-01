@@ -72,7 +72,7 @@ const Sidebar = () => {
           <div className='h-full'>
             <div className='border-GRAY_400 border-b px-2 pb-4'>
               {SIDEBAR_ITEMS.map((item) => {
-                const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.TEAM : item.path;
+                const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
 
                 return (
                   <Link prefetch href={itemPath} key={item.label} className='cursor-pointer'>
