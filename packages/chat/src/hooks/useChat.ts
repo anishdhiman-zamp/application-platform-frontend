@@ -2,7 +2,7 @@
 
 import { captureException } from '@sentry/browser';
 import { UseSSEOptions } from '@zamp-platform/utils';
-import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -164,14 +164,14 @@ export const useChat = (config: ChatConfig) => {
   }, [config.conversationId]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) handleMessage(data);
     });
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.CONVERSATION_V2, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) handleMessage(data);
     });
     return () => sub.unsubscribe();
