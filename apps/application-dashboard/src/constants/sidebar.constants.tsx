@@ -30,7 +30,7 @@ export const SETTINGS_TABS = [
     id: 'people',
     label: 'People',
     iconComponent: <Users02 width={16} height={16} />,
-    path: ROUTES_PATH.TEAM,
+    path: ROUTES_PATH.SETTINGS_TEAM,
   },
   {
     label: 'Integrations',
