@@ -42,39 +42,39 @@ const FeedbackStatusProcessingBody = () => {
             />
           ))}
         </div>
-        <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
-          {isStopProcess ? (
-            <div className='flex w-full items-center justify-between gap-2'>
-              <div className='f-11-450 text-gray-1000 flex-grow'>Are you sure you want to stop processing?</div>
-              <Button
-                disabled={isStoppingProcessing || isGettingFeedbacks}
-                variant='outline'
-                size='small'
-                onClick={() => setIsStopProcess(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                size='small'
-                isLoading={isStoppingProcessing || isGettingFeedbacks}
-                onClick={handleStopProcessing}
-                className='min-w-[50px]'
-              >
-                Yes
-              </Button>
-            </div>
-          ) : (
-            <div className='flex w-full items-center justify-between gap-2'>
-              <div className='f-11-400 flex-grow text-gray-700'>Feedback is being processed</div>
-              <Button variant='outline' size='small' onClick={() => setIsStopProcess(true)}>
-                <div className='f-11-500 flex items-center gap-1'>
-                  <Ban size={12} />
-                  Stop
-                </div>
-              </Button>
-            </div>
-          )}
-        </div>
+      </div>
+      <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
+        {isStopProcess ? (
+          <div className='flex w-full items-center justify-between gap-2'>
+            <div className='f-11-450 text-gray-1000 flex-grow'>Are you sure you want to stop processing?</div>
+            <Button
+              disabled={isStoppingProcessing || isGettingFeedbacks}
+              variant='outline'
+              size='small'
+              onClick={() => setIsStopProcess(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size='small'
+              isLoading={isStoppingProcessing || isGettingFeedbacks}
+              onClick={handleStopProcessing}
+              className='min-w-[50px]'
+            >
+              Yes
+            </Button>
+          </div>
+        ) : (
+          <div className='flex w-full items-center justify-between gap-2'>
+            <div className='f-11-400 flex-grow text-gray-700'>Feedback is being processed</div>
+            <Button variant='outline' size='small' onClick={() => setIsStopProcess(true)}>
+              <div className='f-11-500 flex items-center gap-1'>
+                <Ban size={12} />
+                Stop
+              </div>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

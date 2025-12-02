@@ -20,9 +20,9 @@ const FeedbackStatusSuccessBody: FC = () => {
             />
           ))}
         </div>
-        <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
-          <div>These feedback have been applied</div>
-        </div>
+      </div>
+      <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
+        <div>These feedback have been applied</div>
       </div>
     </div>
   );

@@ -23,9 +23,9 @@ const FeedbackStatusOpenBody: FC = () => {
             />
           ))}
         </div>
-        <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
-          <div className='text-GRAY_700'>Questions are still unanswered, click to continue chat</div>
-        </div>
+      </div>
+      <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
+        <div className='text-GRAY_700'>Questions are still unanswered, click to continue chat</div>
       </div>
     </div>
   );
