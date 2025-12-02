@@ -226,7 +226,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     };
   }, [id, fxCurrency, getDatasetArtifacts, processId, activityId]);
 
-  const handleUpdateCompletedFields = (rowId: string | string[], columnId: string, value?: string | null) => {
+  const handleUpdateCompletedFields = (rowId: string | string[], columnId: string, value?: string | number | null) => {
     setIsServerSideDataLoading(true);
     tableRef.current?.api?.refreshServerSide();
 
@@ -285,7 +285,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }: {
       rowId: string | string[];
       field: string;
-      newValue: string;
+      newValue: string | number | null;
       operator?: CONDITION_OPERATOR_TYPE;
       idColumn?: string;
     }) => {
@@ -470,11 +470,26 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     }, 0);
   };
 
-  const handleTextareaChange = (key: string, value: any, rowId: string) => {
+  const handleTextareaChange = (key: string, value: string, rowId: string) => {
     if (!rowData) return;
 
-    // Optimistic update of local state
-    const newValue = isValueEmpty(value) ? null : value;
+    // Get the column config to check the type
+    const columnConfig = filterConfigData?.data?.find((col) => col.column === key);
+    const isNumberField = columnConfig?.type === FILTER_TYPES.AMOUNT_RANGE;
+
+    // Convert value based on column type
+    let newValue: string | number | null;
+
+    if (isValueEmpty(value)) {
+      newValue = null;
+    } else if (isNumberField) {
+      // Parse the value as a number for amount/number fields
+      const parsedNumber = parseFloat(value);
+
+      newValue = isNaN(parsedNumber) ? null : parsedNumber;
+    } else {
+      newValue = value;
+    }
 
     const updatedRowData = { ...rowData, [key]: newValue };
 
