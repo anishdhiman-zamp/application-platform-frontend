@@ -250,7 +250,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
     operator?: CONDITION_OPERATOR_TYPE;
     idColumn?: string;
   }) => {
-    console.log('updateApi called');
     updateDatasetData({
       datasetId: id as string,
       data: {
