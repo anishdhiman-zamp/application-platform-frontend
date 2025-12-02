@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import type { FilterConfig } from 'modules/widgets/Pivot/pivot.types';
 import { DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
 import { MissingFieldItemType } from '@/types/api/processApi.types';
-import { MapAny } from '@/types/commonTypes';
+import { defaultFnType, MapAny } from '@/types/commonTypes';
 
 export type UserAccessToDataSetType = {
   name: string;
@@ -76,7 +76,7 @@ export type FormatColumnsParamsType = {
   filterConfig: DatasetFilterConfigResponseType[];
   currentUserHasEditAccess?: boolean;
   datasetId: string;
-  handleSuccessfulUpdate?: () => void;
+  handleSuccessfulUpdate?: defaultFnType;
   tableRef: RefObject<AgGridReact | null>;
   handleRulesListingSideDrawerOpen?: (ruleColumnDetailsValue: RuleColumnDetailsType) => void;
   sortColumn?: string;

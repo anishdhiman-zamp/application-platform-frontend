@@ -29,7 +29,7 @@ type RulesListingSideDrawerProps = {
   onClose: defaultFnType;
   datasetId: string;
   column: string;
-  handleSuccessfulUpdate: () => void;
+  handleSuccessfulUpdate: defaultFnType;
   onDeleteRuleId: (ruleId: string) => void;
   columnLabel: string;
   tagColorMap: MapAny;
