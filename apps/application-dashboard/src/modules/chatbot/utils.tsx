@@ -274,8 +274,12 @@ export const updateButtonElementsDisplay = (
   }
 };
 
-export const createChatbotUrl = (annotationLocation: LocationData) => {
-  let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
+export const createChatbotUrl = (feedback: FeedbackItemType) => {
+  const annotationLocation = feedback?.annotation_data?.location;
+  const conversationId = feedback?.conversation_id;
+  const feedbackId = feedback?.id;
+
+  let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID}=${conversationId}&${CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID}=${feedbackId}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:

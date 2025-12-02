@@ -9,7 +9,6 @@ import {
   getMultiSelectColumns,
   getNonDateRangeColumns,
 } from 'modules/widgets/create/utils';
-import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { AGGREGATION_TYPES, WIDGET_TYPES } from '@/types/api/widgets.types';
 
 const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, formData, datasetColumns }) => {
@@ -19,10 +18,7 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
     chartType as keyof typeof formData.chartSpecificFields
   ] as BarLineChartFields;
 
-  const xAxisOptions = useMemo(
-    () => datasetColumns.filter((column) => column.filter_type === FILTER_TYPES.DATE_RANGE),
-    [datasetColumns],
-  );
+  const xAxisOptions = useMemo(() => datasetColumns, [datasetColumns]);
 
   const yAxisOptions = useMemo(() => getNonDateRangeColumns(datasetColumns), [datasetColumns]);
 
@@ -56,9 +52,9 @@ const BarLineChartForm: FC<ChartSpecificFormProps> = ({ handleChartFieldChange, 
       groupByOptions?.length > 0 &&
       !fields?.groupBy?.column
     ) {
-      const xAxisValue = xAxisOptions[0].value;
-      const yAxisValue = yAxisOptions[0].value;
-      const groupByValue = groupByOptions[0].value;
+      const xAxisValue = xAxisOptions?.length > 1 ? xAxisOptions?.[1]?.value : xAxisOptions?.[0]?.value;
+      const yAxisValue = yAxisOptions?.[0]?.value;
+      const groupByValue = groupByOptions?.[0]?.value;
       const selectedXAxisColumn = datasetColumns.find((column) => column.value === xAxisValue);
       const selectedYAxisColumn = datasetColumns.find((column) => column.value === yAxisValue);
       const selectedGroupByColumn = datasetColumns.find((column) => column.value === groupByValue);

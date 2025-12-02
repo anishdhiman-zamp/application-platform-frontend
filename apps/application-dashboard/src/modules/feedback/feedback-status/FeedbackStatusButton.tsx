@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import { ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
-import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
 import { useFeedbacksProvider } from 'modules/feedback/feedback-status/useFeedbacks';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -81,7 +81,7 @@ const FeedbackStatusButtonContent: FC = () => {
   }, [defaultTab]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.FEEDBACK, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.FEEDBACK, (data: BaseEventPayload) => {
       if (data?.source_id === processId) refetchFeedbacks();
     });
 

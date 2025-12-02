@@ -1,12 +1,12 @@
 'use client';
-import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/utils';
 import { useGetPagesQuery, useUpdateSheetByPageIdMutation } from 'apis/pages';
 import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.constants';
 import { PAGE_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource';
+import EditableHeader from 'modules/sheets/EditableHeader';
 import EmptySheet from 'modules/sheets/EmptySheet';
 import InitializeSheetsFilters from 'modules/sheets/InitializeSheetsFilters';
 import { computeSheetLayout, getDatasetIdAndWidgetsMapping, getLastWidgetLayout } from 'modules/sheets/sheets.utils';
@@ -19,12 +19,10 @@ import { ROW_HEIGHT, SCREEN_BREAKPOINTS, WIDGETS_LAYOUT_MARGIN } from 'modules/w
 import { useRouter } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import TooltipV2 from '@/components/common/TooltipV2';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useIsEditingBreadcrumbAllowed from '@/hooks/useIsEditingBreadcrumbAllowed';
-import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
+import { ResponsiveGridLayoutType } from '@/types/commonTypes';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
@@ -50,25 +48,12 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   } = useFiltersContextStore();
 
   const [currency, setCurrency] = useState<string[]>(['USD']);
-  const [isEditingSheetName, setIsEditingSheetName] = useState(false);
-  const [sheetName, setSheetName] = useState('');
-  const [finalSheetName, setFinalSheetName] = useState<string>();
-  const [inputWidth, setInputWidth] = useState(150);
-  const spanRef = useRef<HTMLSpanElement>(null);
   const [updateSheetByPageId] = useUpdateSheetByPageIdMutation();
   const [sheetLayout, setSheetLayout] = useState<ResponsiveGridLayoutType[]>([]);
 
   const { handleDragStart, handleDragStop } = useUpdateSheetLayout({ setSheetLayout, pageId, sheetId });
 
   const isEditingSheetNameAllowed = useIsEditingBreadcrumbAllowed();
-
-  const updateInputWidth = useCallback(() => {
-    if (spanRef.current && sheetDetails?.name) {
-      const spanWidth = spanRef.current.clientWidth;
-
-      setInputWidth(spanWidth ? spanWidth + 20 : 184);
-    }
-  }, []);
 
   const [widgetDetails, setWidgetDetails] = useState<{
     height: number;
@@ -119,23 +104,12 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
     );
   }, [isFilterInitialized, sheetDetails?.sheet_config?.currency?.hide_currency_filter, currency, sheetLayout]);
 
-  const handleInputBlur = () => {
-    setIsEditingSheetName(false);
-    const trimmedName = sheetName?.trim();
-
-    if (trimmedName === sheetDetails?.name || !trimmedName) {
-      setSheetName(sheetDetails?.name ?? '');
-
-      return;
-    }
-
-    setFinalSheetName(trimmedName);
-
+  const onSheetNameChange = (value: string) => {
     updateSheetByPageId({
       pageId: pageId as string,
       sheetId: sheetId as string,
       body: {
-        name: trimmedName,
+        name: value,
       },
     })
       .unwrap()
@@ -144,16 +118,7 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
       })
       .catch(() => {
         toast.error(TOAST_MESSAGES.ERROR_SHEET_NAME_UPDATE);
-        setSheetName(sheetDetails?.name ?? '');
       });
-  };
-
-  const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === KEYBOARD_KEYS.ENTER) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleInputBlur();
-    }
   };
 
   const handleAddWidget = () => {
@@ -196,20 +161,6 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
   }, [pageId, sheetId]);
 
   useEffect(() => {
-    if (sheetDetails) {
-      const name = sheetDetails?.name ?? '';
-
-      setSheetName(name);
-      setFinalSheetName(name);
-      setInputWidth(name.length * 15);
-    }
-  }, [sheetDetails]);
-
-  useEffect(() => {
-    updateInputWidth();
-  }, [sheetName]);
-
-  useEffect(() => {
     dispatch({
       type: filtersContextActions.SET_DATASET_ID_AND_WIDGETS_MAPPING,
       payload: { datasetIdAndWidgetsMapping: getDatasetIdAndWidgetsMapping(sheetDetails) },
@@ -230,39 +181,12 @@ const Sheets = ({ pageId, sheetId, isPageLoading, isBff }: SheetsProps) => {
           <div className='z-100 space-y-4 border-b px-8 pb-4'>
             <div className='flex items-center justify-between'>
               {isEditingSheetNameAllowed ? (
-                <>
-                  {isEditingSheetName ? (
-                    <div className='relative inline-block'>
-                      <span ref={spanRef} className='f-24-450 invisible absolute whitespace-pre' aria-hidden='true'>
-                        {sheetName}
-                      </span>
-                      <input
-                        value={sheetName}
-                        onChange={(e) => setSheetName(e.target.value)}
-                        onBlur={handleInputBlur}
-                        autoFocus
-                        style={{ width: `${inputWidth}px` }}
-                        className={cn('f-24-450 bg-GRAY_50 rounded-lg px-2.5 py-1 focus:outline-none', {
-                          'bg-white': sheetName?.length === 0,
-                        })}
-                        placeholder='Add sheet title'
-                        onKeyDown={handleEditKeyDown}
-                        data-testid={`${sheetId}-sheet-name-input`}
-                      />
-                    </div>
-                  ) : (
-                    <TooltipV2 tooltipBody='Rename' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-                      <Button
-                        variant='ghost'
-                        className='text-GRAY_950 rounded-lg px-2.5 py-1'
-                        onClick={() => setIsEditingSheetName(true)}
-                        data-testid={`${sheetId}-sheet-name-edit-btn`}
-                      >
-                        <span className='f-24-450'>{finalSheetName || sheetDetails?.name}</span>
-                      </Button>
-                    </TooltipV2>
-                  )}
-                </>
+                <EditableHeader
+                  id={sheetId}
+                  initialValue={sheetDetails?.name}
+                  placeholder='Add sheet title'
+                  onChange={onSheetNameChange}
+                />
               ) : (
                 <span className='f-24-450'>{sheetDetails?.name}</span>
               )}

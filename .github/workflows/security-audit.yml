@@ -1,0 +1,151 @@
+name: Security Audit
+
+on:
+  pull_request:
+    branches: [ main, staging, development ]
+  push:
+    branches: [ main ]
+  schedule:
+    # Run every Monday at 00:00 UTC to catch newly disclosed vulnerabilities
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: |
+        echo "🔍 Running security audit..."
+        npm audit --audit-level=moderate || AUDIT_FAILED=true
+        
+        if [ "$AUDIT_FAILED" = true ]; then
+          echo ""
+          echo "⚠️  Security vulnerabilities detected"
+          echo ""
+          
+          # Generate detailed audit report
+          npm audit --json > audit-report.json
+          
+          echo "### ⚠️ Security Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Moderate or higher severity vulnerabilities found." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action Required:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review the audit output above" >> $GITHUB_STEP_SUMMARY
+          echo "2. Run \`npm audit fix\` locally to attempt automatic fixes" >> $GITHUB_STEP_SUMMARY
+          echo "3. For breaking changes, run \`npm audit fix --force\` (review changes carefully)" >> $GITHUB_STEP_SUMMARY
+          echo "4. Manually update packages if automatic fixes don't work" >> $GITHUB_STEP_SUMMARY
+          
+          exit 1
+        fi
+        
+        echo "✅ No vulnerabilities found (moderate or higher)"
+    
+    - name: Check package-lock.json integrity
+      run: |
+        echo "🔍 Verifying package-lock.json integrity..."
+        
+        # Check if package-lock.json has been modified
+        if ! git diff --exit-code package-lock.json; then
+          echo "❌ package-lock.json has been modified during installation!"
+          echo ""
+          echo "This could indicate:"
+          echo "  - Inconsistency between package.json and package-lock.json"
+          echo "  - Corruption or tampering of package-lock.json"
+          echo "  - Outdated lock file"
+          echo ""
+          echo "Action required: Run 'npm install' locally and commit the updated package-lock.json"
+          exit 1
+        fi
+        
+        echo "✅ package-lock.json integrity verified"
+    
+    - name: Upload audit report
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-audit-report
+        path: audit-report.json
+        retention-days: 30
+    
+    - name: Notify Slack on failure
+      if: failure()
+      uses: slackapi/slack-github-action@v1
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND }}
+      with:
+        payload: |
+          {
+            "text": "🚨 Security Audit Failed",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🚨 Security Audit Failed",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Trigger:* ${{ github.event_name }}"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "⚠️ Security vulnerabilities detected in dependencies.\n\n*Action Required:*\n• Review the workflow logs\n• Run `npm audit` locally\n• Create a PR with fixes"
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Workflow Run",
+                      "emoji": true
+                    },
+                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
+    
+    - name: Security audit summary
+      if: success()
+      run: |
+        echo "### ✅ Security Audit Passed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "All security checks completed successfully:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| npm audit | ✅ No vulnerabilities (moderate or higher) |" >> $GITHUB_STEP_SUMMARY
+        echo "| Package lock integrity | ✅ Verified |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "_Next scheduled scan: Every Monday at 00:00 UTC_" >> $GITHUB_STEP_SUMMARY
+

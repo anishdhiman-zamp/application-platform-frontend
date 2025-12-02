@@ -110,3 +110,14 @@ export function createTabsConfig({
     },
   ];
 }
+
+export const FEEDBACK_APPLIED_MESSAGE = 'This feedback has been applied. Work with Pace to give more feedback.';
+export const FEEDBACK_PROCESSING_MESSAGE = 'This feedback is processing. Work with Pace to give more feedback.';
+
+export const FEEDBACK_STATUS_MESSAGES: Record<FEEDBACK_STATUS, string> = {
+  [FEEDBACK_STATUS.APPLIED]: FEEDBACK_APPLIED_MESSAGE,
+  [FEEDBACK_STATUS.PROCESSING]: FEEDBACK_PROCESSING_MESSAGE,
+  [FEEDBACK_STATUS.OPEN]: '',
+  [FEEDBACK_STATUS.QUEUED]: '',
+  [FEEDBACK_STATUS.ARCHIVED]: '',
+} as const;
