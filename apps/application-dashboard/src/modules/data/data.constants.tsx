@@ -159,3 +159,13 @@ export const COLUMN_TYPE_WIDTH_MAP = {
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: COLUMN_WIDTHS.ACTIVITY_STATUS,
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: COLUMN_WIDTHS.ACTIVITY_DOCUMENT,
 } as const;
+
+export const enum ColumnType {
+  ID = 'id',
+  _ZAMP_ID = '_zamp_id',
+}
+
+export const enum SourceType {
+  EDIT = 'edit',
+  API = 'api',
+}
