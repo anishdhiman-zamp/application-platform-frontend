@@ -232,7 +232,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     };
   }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId]);
 
-  const handleSuccessfulUpdate = (actionType = DATASET_ACTION_TYPE.TAGGING) => {
+  const handleSuccessfulUpdate = (actionType = DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD) => {
     tableRef.current?.api?.refreshServerSide();
     toast.success(DatasetActionMessages[actionType].SUCCESS);
   };
