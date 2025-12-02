@@ -1,6 +1,6 @@
 import { cloneElement, FC, isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { LocationData } from '@zamp-platform/chat';
+import { LocationData, ScopeType } from '@zamp-platform/chat';
 import Chatbot from 'modules/chatbot/Chatbot';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import FeedbackList from 'modules/chatbot/FeedbackList';
@@ -18,6 +18,7 @@ interface ChatbotProps {
   onChatbotTrigger?: (openChatbot: () => void) => void;
   className?: string;
   onChatbotStateChange?: (isOpen: boolean) => void;
+  scope?: ScopeType;
 }
 
 const ChatbotWrapper: FC<ChatbotProps> = ({
@@ -27,7 +28,8 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   onChatbotTrigger,
   className,
   onChatbotStateChange,
-}) => {
+  scope = ScopeType.ACTIVITY_RUN,
+}: ChatbotProps & { scope?: ScopeType }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -185,6 +187,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               setCurrentFeedbackItem={setCurrentFeedbackItem}
               className={className}
               onOpenChatbot={handleOpenChatbot}
+              scope={scope}
             >
               {enhancedChildren}
             </Chatbot>

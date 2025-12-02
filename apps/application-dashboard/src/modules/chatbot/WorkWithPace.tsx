@@ -1,5 +1,5 @@
-import { useCallback, useRef } from 'react';
-import { LocationType } from '@zamp-platform/chat';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import { useParams } from 'next/navigation';
@@ -12,9 +12,16 @@ const WorkWithPace = () => {
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
   const openChatbotRef = useRef<(() => void) | null>(null);
+  const [chatbotSessionKey, setChatbotSessionKey] = useState(0);
 
   const handleChatbotTrigger = useCallback((openChatbot: () => void) => {
     openChatbotRef.current = openChatbot;
+  }, []);
+
+  const handleChatbotStateChange = useCallback((isOpen: boolean) => {
+    if (!isOpen) {
+      setChatbotSessionKey((prev) => prev + 1);
+    }
   }, []);
 
   const handleOpenChatbot = () => {
@@ -25,21 +32,36 @@ const WorkWithPace = () => {
 
   useKeyDown(handleOpenChatbot, [KEYBOARD_KEYS.META, KEYBOARD_KEYS.K]);
 
-  if (!processId || !activityRunId) {
+  const annotationLocation = useMemo(() => {
+    if (activityRunId)
+      return {
+        type: LocationType.ACTIVITY_RUN as const,
+        data: {
+          process_id: processId,
+          activity_run_id: activityRunId,
+        },
+      };
+
+    return {
+      type: LocationType.PROCESS as const,
+      data: {
+        process_id: processId,
+      },
+    };
+  }, [activityRunId, processId]);
+
+  if (!processId) {
     return null;
   }
 
   return (
     <ChatbotWrapper
-      annotationLocation={{
-        type: LocationType.ACTIVITY_RUN,
-        data: {
-          process_id: processId,
-          activity_run_id: activityRunId,
-        },
-      }}
+      key={chatbotSessionKey}
+      annotationLocation={annotationLocation}
+      scope={activityRunId ? ScopeType.ACTIVITY_RUN : ScopeType.PROCESS}
       hideFeedbackCount
       onChatbotTrigger={handleChatbotTrigger}
+      onChatbotStateChange={handleChatbotStateChange}
     >
       <Button
         variant='outline'
