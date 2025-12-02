@@ -275,7 +275,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
-    console.log('onCellEditRequest called');
     const { colDef, newValue, data, source, node } = event;
     const { field } = colDef;
     const updatedRow = { ...event.data, [field as string]: newValue };
