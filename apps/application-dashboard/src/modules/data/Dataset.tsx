@@ -24,7 +24,6 @@ import {
   formatDrilldownFilters,
   formatUrlFilters,
   getFilters,
-  handleApiError,
   handleColumnMoved,
   handleDrilldownClick,
   removeCellFocus,
@@ -37,7 +36,7 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { DatasetDataResponseType, DatasetUpdateResponseType } from 'types/api/dataset.types';
+import { DatasetDataResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
@@ -233,7 +232,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     };
   }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId]);
 
-  const handleSuccessfulUpdate = (data: DatasetUpdateResponseType, actionType = DATASET_ACTION_TYPE.TAGGING) => {
+  const handleSuccessfulUpdate = (actionType = DATASET_ACTION_TYPE.TAGGING) => {
     tableRef.current?.api?.refreshServerSide();
     toast.success(DatasetActionMessages[actionType].SUCCESS);
   };
@@ -272,8 +271,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
       },
     })
       .unwrap()
-      .then((response) => handleSuccessfulUpdate(response))
-      .catch((err) => handleApiError(err));
+      .then(() => handleSuccessfulUpdate())
+      .catch(() => toast.error(DatasetActionMessages[DATASET_ACTION_TYPE.TAGGING].ERROR));
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
@@ -357,9 +356,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
     });
   };
 
-  const handleDeleteRuleSuccess = (data: DatasetUpdateResponseType) => {
+  const handleDeleteRuleSuccess = () => {
     setIsRulesListingSideDrawerOpen(false);
-    handleSuccessfulUpdate(data, DATASET_ACTION_TYPE.RULE_DELETION);
+    handleSuccessfulUpdate(DATASET_ACTION_TYPE.RULE_DELETION);
   };
 
   useEffect(() => {
