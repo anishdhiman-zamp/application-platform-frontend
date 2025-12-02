@@ -60,6 +60,10 @@ export const findTimeDifference = (updated_at: string): string => {
   const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
 
   if (differenceInMinutesValue < 60) {
+    if (differenceInMinutesValue === 0) {
+      return 'just now';
+    }
+
     return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
   }
 
