@@ -272,7 +272,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     })
       .unwrap()
       .then(() => handleSuccessfulUpdate())
-      .catch(() => toast.error(DatasetActionMessages[DATASET_ACTION_TYPE.TAGGING].ERROR));
+      .catch(() => toast.error(DatasetActionMessages[DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD].ERROR));
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
