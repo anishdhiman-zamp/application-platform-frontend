@@ -11,37 +11,24 @@ import {
   IServerSideGetRowsRequest,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import {
-  useGetDatasetFilterConfigQuery,
-  useLazyGetActionStatusQuery,
-  useLazyGetDatasetDataQuery,
-  useUpdateDatasetDataMutation,
-} from 'apis/dataset';
+import { useGetDatasetFilterConfigQuery, useLazyGetDatasetDataQuery, useUpdateDatasetDataMutation } from 'apis/dataset';
 import { useOnClickOutside } from 'hooks';
-import usePolling from 'hooks/usePolling';
 import DatasetHistory from 'modules/data/components/datasetHistory/index';
 import ExportDataset from 'modules/data/components/exportDataset';
 import ImportDataset from 'modules/data/components/importDataset/index';
 import TableSchemaAlignmentStatus from 'modules/data/components/importDataset/TableSchemaAlignmentStatus';
-import { DatasetActionMessages } from 'modules/data/data.constants';
-import {
-  DATASET_ACTION_STATUS,
-  DATASET_ACTION_TYPE,
-  LOADER_STATUS,
-  RuleColumnDetailsType,
-} from 'modules/data/data.types';
+import { ColumnType, DatasetActionMessages, SourceType } from 'modules/data/data.constants';
+import { DATASET_ACTION_TYPE, LOADER_STATUS, RuleColumnDetailsType } from 'modules/data/data.types';
 import {
   formatColumns,
   formatDrilldownFilters,
   formatUrlFilters,
   getFilters,
-  handleApiError,
   handleColumnMoved,
   handleDrilldownClick,
   removeCellFocus,
   syncFilterConfigHiddenColumnsInLocalStorage,
 } from 'modules/data/data.utils';
-import Notification from 'modules/data/Notification';
 import RowPropertiesSideDrawer from 'modules/data/RowProperties';
 import RulesListingSideDrawer from 'modules/data/RulesListing';
 import RuleDelete from 'modules/data/RulesListing/RuleDelete';
@@ -49,11 +36,7 @@ import { LOCAL_CURRENCY, PAGE_CURRENCY_OPTIONS } from 'modules/page/pages.consta
 import { DATASET_ACCESS_PRIVILEGES, ResourceType } from 'modules/shareResource/shareResource.types';
 import SingleSelectFilter from 'modules/widgets/components/SingleSelectFilter';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import {
-  DatasetActionStatusResponseType,
-  DatasetDataResponseType,
-  DatasetUpdateResponseType,
-} from 'types/api/dataset.types';
+import { DatasetDataResponseType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { FilterModelType, LogicalOperatorType } from 'types/components/table.type';
 import { checkIsObjectEmpty, cn, snakeCaseToSentenceCase } from 'utils/common';
@@ -131,15 +114,12 @@ const DatasetById: FC<DatasetByIdProps> = ({
     },
   );
 
-  const [getActionStatus] = useLazyGetActionStatusQuery();
   const [getDatasetData, { data: datasetData, isError: lazyloadDataSetError }] = useLazyGetDatasetDataQuery();
 
   const {
     dispatch,
     state: { selectedFilters, filtersConfig },
   } = useFiltersContextStore();
-
-  const { startPolling } = usePolling();
 
   const currentUserHasEditAccess = useMemo(() => {
     return (
@@ -151,7 +131,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
 
   const [gridReady, setGridReady] = useState<boolean>(false);
   const [columns, setColumns] = useState<ColDef[]>([]);
-  const [isPolling, setIsPolling] = useState<boolean>(false);
   const [totalRows, setTotalRows] = useState<number>(0);
   const [ruleColumnDetails, setRuleColumnDetails] = useState<RuleColumnDetailsType>({
     colId: '',
@@ -163,12 +142,10 @@ const DatasetById: FC<DatasetByIdProps> = ({
   const [exportsDatasetQuery, setExportsDatasetQuery] = useState<string>('');
   const [datasetTitle, setDatasetTitle] = useState<string>('');
   const [fxCurrency, setFxCurrency] = useState<string[]>([currency]);
-  const [initiatedActionIds, setInitiatedActionIds] = useState<string[]>([]);
   const [isNoRowsOverlayVisible, setIsNoRowsOverlayVisible] = useState<boolean>(false);
   const [cachedDatasetData, setCachedDatasetData] = useState<DatasetDataResponseType>();
   const [hiddenColumnFilters, setHiddenColumnFilters] = useState<MapAny>();
   const [deleteRuleId, setDeleteRuleId] = useState<string>();
-  const [pollingMessage, setPollingMessage] = useState<string>('');
   const [showAiTransformationStatus, setShowAiTransformationStatus] = useState<{
     open: boolean;
     status: string;
@@ -255,41 +232,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
     };
   }, [getDatasetData, id, fxCurrency, cachedDatasetData, drilldownFilters, processId, activityId]);
 
-  const handleSuccessfulUpdate = (
-    data: DatasetUpdateResponseType,
-    showPolling = true,
-    actionType = DATASET_ACTION_TYPE.TAGGING,
-  ) => {
-    if (showPolling) {
-      setIsPolling(true);
-      setPollingMessage(DatasetActionMessages[actionType].IN_PROGRESS);
-    }
-    setInitiatedActionIds((prev) => [...prev, data.action_id]);
-    startPolling({
-      fn: () =>
-        getActionStatus({ datasetId: id as string, params: { action_ids: [...initiatedActionIds, data.action_id] } }),
-      validate: (data: DatasetActionStatusResponseType[]) => {
-        return data?.filter((item) => !item.is_completed)?.length === 0;
-      },
-      interval: 30000,
-      maxAttempts: 50,
-    })
-      .then((response) => {
-        if (response?.status === DATASET_ACTION_STATUS.SUCCESSFUL) {
-          toast.success(DatasetActionMessages[actionType].SUCCESS);
-          tableRef.current?.api?.refreshServerSide();
-          refetchFilterConfig();
-        } else if (response?.status === DATASET_ACTION_STATUS.FAILED) {
-          toast.error(DatasetActionMessages[actionType].ERROR);
-        }
-      })
-      .catch(() => {
-        toast.error(DatasetActionMessages[actionType].ERROR);
-      })
-      .finally(() => {
-        setIsPolling(false);
-        setPollingMessage('');
-      });
+  const handleSuccessfulUpdate = (actionType = DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD) => {
+    tableRef.current?.api?.refreshServerSide();
+    toast.success(DatasetActionMessages[actionType].SUCCESS);
   };
 
   const updateApi = ({
@@ -297,11 +242,13 @@ const DatasetById: FC<DatasetByIdProps> = ({
     field,
     newValue,
     operator = CONDITION_OPERATOR_TYPE.EQUAL,
+    idColumn = ColumnType.ID,
   }: {
     rowId: string | string[];
     field: string;
     newValue: string;
     operator?: CONDITION_OPERATOR_TYPE;
+    idColumn?: string;
   }) => {
     updateDatasetData({
       datasetId: id as string,
@@ -310,7 +257,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
           logical_operator: LogicalOperatorType.OperatorLogicalAnd,
           conditions: [
             {
-              column: '_zamp_id',
+              column: idColumn,
               value: rowId,
               operator: operator,
             },
@@ -323,8 +270,8 @@ const DatasetById: FC<DatasetByIdProps> = ({
       },
     })
       .unwrap()
-      .then((response) => handleSuccessfulUpdate(response, false))
-      .catch((err) => handleApiError(err));
+      .then(() => handleSuccessfulUpdate())
+      .catch(() => toast.error(DatasetActionMessages[DATASET_ACTION_TYPE.UPDATE_MISSING_FIELD].ERROR));
   };
 
   const onCellEditRequest = (event: CellEditRequestEvent) => {
@@ -335,7 +282,17 @@ const DatasetById: FC<DatasetByIdProps> = ({
     // Optimistic update
     node.setData(updatedRow);
 
-    if (source === 'commit') updateApi({ rowId: data?._zamp_id as string, field: field as string, newValue });
+    if (source === SourceType.EDIT || source === SourceType.API) {
+      const rowId = data?._zamp_id || data?.id;
+      const idColumn = data?._zamp_id ? ColumnType._ZAMP_ID : ColumnType.ID;
+
+      updateApi({
+        rowId: rowId as string,
+        field: field as string,
+        newValue,
+        idColumn,
+      });
+    }
   };
 
   const onFillEnd = (event: FillEndEvent) => {
@@ -349,6 +306,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
     let newValue = '';
     let loopStartIndex = startIndex;
     let loopEndIndex = endIndex;
+    let idColumn = ColumnType.ID;
 
     if (startIndex > endIndex) {
       loopStartIndex = endIndex;
@@ -357,7 +315,15 @@ const DatasetById: FC<DatasetByIdProps> = ({
     for (let i = loopStartIndex; i <= loopEndIndex; i++) {
       const row = tableRef.current?.api?.getDisplayedRowAtIndex(i);
 
-      rowIds.push(row?.data?._zamp_id as string);
+      const rowId = row?.data?._zamp_id || row?.data?.id;
+
+      rowIds.push(rowId as string);
+
+      // Set idColumn based on first row
+      if (i === loopStartIndex) {
+        idColumn = row?.data?._zamp_id ? ColumnType._ZAMP_ID : ColumnType.ID;
+      }
+
       if (i === startIndex) {
         newValue = row?.data?.[field as string] as string;
       }
@@ -368,6 +334,7 @@ const DatasetById: FC<DatasetByIdProps> = ({
       field,
       newValue,
       operator: CONDITION_OPERATOR_TYPE.IN,
+      idColumn,
     });
   };
 
@@ -387,9 +354,9 @@ const DatasetById: FC<DatasetByIdProps> = ({
     });
   };
 
-  const handleDeleteRuleSuccess = (data: DatasetUpdateResponseType) => {
+  const handleDeleteRuleSuccess = () => {
     setIsRulesListingSideDrawerOpen(false);
-    handleSuccessfulUpdate(data, true, DATASET_ACTION_TYPE.RULE_DELETION);
+    handleSuccessfulUpdate(DATASET_ACTION_TYPE.RULE_DELETION);
   };
 
   useEffect(() => {
@@ -543,7 +510,6 @@ const DatasetById: FC<DatasetByIdProps> = ({
           </div>
 
           <div className='relative flex items-center gap-2.5'>
-            {!isReadOnly && <Notification isPolling={isPolling} message={pollingMessage} />}
             {!isReadOnly && (
               <TableSchemaAlignmentStatus
                 showAiTransformationStatus={showAiTransformationStatus}

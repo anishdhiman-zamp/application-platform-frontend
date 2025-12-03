@@ -27,6 +27,7 @@ export const enum AnnotationType {
 
 export const enum ScopeType {
   ACTIVITY_RUN = 'activity_run',
+  PROCESS = 'process',
 }
 
 export const enum LocationType {
@@ -153,10 +154,15 @@ export interface ActivityRunLocationData {
   activity_run_id: string;
 }
 
+export interface ProcessLocationData {
+  process_id: string;
+}
+
 export type LocationData =
   | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
   | ({ type: LocationType.LOG } & { data: LogLocationData })
-  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData });
+  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
 
 export interface AnnotationData {
   location: LocationData;
