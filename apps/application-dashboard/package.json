@@ -75,9 +75,9 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "peerDependencies": {
-    "next": "^15",
-    "react": "^19",
-    "react-dom": "^19"
+    "next": "^15.5.7",
+    "react": "^19.1.2",
+    "react-dom": "^19.1.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
