@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import type { IntegrationType } from 'modules/integrations/integration.types';
 import IntegrationCard from 'modules/integrations/IntegrationCard';
 import IntegrationHeader from 'modules/integrations/IntegrationHeader';
@@ -9,7 +9,7 @@ interface IntegrationsListProps {
   integrations: IntegrationType[];
 }
 
-const IntegrationsList = ({ integrations }: IntegrationsListProps) => {
+const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);

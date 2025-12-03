@@ -3,35 +3,22 @@ import type { IntegrationsDataType, IntegrationType } from '@/modules/integratio
 import IntegrationsList from '@/modules/integrations/IntegrationsList';
 
 const IntegrationsPage = async () => {
-  let integrations: IntegrationType[] = [];
+  const cdnUrl = IMAGE_PREFIX;
 
-  try {
-    const cdnUrl = IMAGE_PREFIX;
-
-    if (cdnUrl) {
-      // If CDN URL is available, fetch from CDN
-      const integrationsUrl = `${cdnUrl}/integrations/integrations.json`;
-      const response = await fetch(integrationsUrl, { cache: 'no-store' });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch from CDN: ${response.status} ${response.statusText}`);
-      }
-
-      const data: IntegrationsDataType = await response.json();
-
-      integrations = data.integrations;
-    }
-    // } else {
-    //   // Otherwise, read directly from the public folder filesystem
-    //   const filePath = join(process.cwd(), 'public', 'integrations', 'integrations.json');
-    //   const fileContents = await readFile(filePath, 'utf-8');
-    //   const data: IntegrationsDataType = JSON.parse(fileContents);
-
-    //   integrations = data.integrations;
-    // }
-  } catch (error) {
-    console.error('Failed to load integrations:', error);
+  if (!cdnUrl) {
+    throw new Error('CDN URL is not configured');
   }
+
+  // If CDN URL is available, fetch from CDN
+  const integrationsUrl = `${cdnUrl}/integrations/integrations.json`;
+  const response = await fetch(integrationsUrl, { cache: 'no-store' });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch from CDN: ${response.status} ${response.statusText}`);
+  }
+
+  const data: IntegrationsDataType = await response.json();
+  const integrations: IntegrationType[] = data.integrations;
 
   return (
     <div className='h-full w-full pt-10'>

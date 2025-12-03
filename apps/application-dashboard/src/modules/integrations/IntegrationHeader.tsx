@@ -1,5 +1,6 @@
 'use client';
 
+import type { FC } from 'react';
 import { Input } from '@zamp-platform/ui';
 
 interface IntegrationHeaderProps {
@@ -7,7 +8,7 @@ interface IntegrationHeaderProps {
   onSearchChange: (value: string) => void;
 }
 
-const IntegrationHeader = ({ searchQuery, onSearchChange }: IntegrationHeaderProps) => {
+const IntegrationHeader: FC<IntegrationHeaderProps> = ({ searchQuery, onSearchChange }) => {
   return (
     <div className='flex flex-col items-start gap-y-4 px-10'>
       <span className='f-20-600 text-GRAY_1000'>Integrations</span>
