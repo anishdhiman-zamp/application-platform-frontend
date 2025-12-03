@@ -8,7 +8,7 @@ interface PlainTextBlockProps {
 
 export const PlainTextBlock: React.FC<PlainTextBlockProps> = ({ payload }) => {
   return (
-    <div className='text-gray-1000 f-13-450 text-sm whitespace-pre-wrap' data-testid='plain-text-block'>
+    <div className='text-gray-1000 f-13-450 text-sm !whitespace-pre-wrap' data-testid='plain-text-block'>
       {payload.text}
     </div>
   );
