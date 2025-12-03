@@ -13,10 +13,6 @@ interface MarkdownBlockProps {
 }
 
 export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
-  // Convert single newlines to markdown hard breaks (two spaces + newline)
-  // This preserves line breaks that users enter with shift+enter
-  const processedText = payload.text.replace(/\n/g, '  \n');
-
   return (
     <div className='prose prose-sm f-13-450 text-gray-1000 max-w-none' data-testid='markdown-block'>
       <ReactMarkdown
@@ -33,7 +29,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ payload }) => {
           },
         }}
       >
-        {processedText}
+        {payload.text}
       </ReactMarkdown>
     </div>
   );
