@@ -1,5 +1,5 @@
 export const ASSET_PREFIX = process.env.NEXT_PUBLIC_ASSET_PREFIX ?? '';
-const IMAGE_PREFIX = ASSET_PREFIX ? `${ASSET_PREFIX}/public` : '';
+export const IMAGE_PREFIX = ASSET_PREFIX ? `${ASSET_PREFIX}/public` : '';
 
 // Utility function for CSS background images
 export const getBackgroundImageUrl = (path: string): string => {
