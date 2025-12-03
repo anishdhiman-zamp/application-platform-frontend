@@ -86,53 +86,26 @@ jobs:
         path: audit-report.json
         retention-days: 30
     
-    - name: Notify Slack on failure
-      if: failure()
+    - name: Notify Slack on failure (Pull Request)
+      if: failure() && github.event_name == 'pull_request'
       uses: slackapi/slack-github-action@v1
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND }}
       with:
         payload: |
           {
-            "text": "🚨 Security Audit Failed",
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "🚨 Security Audit Failed",
-                  "emoji": true
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Trigger:* ${{ github.event_name }}"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "⚠️ Security vulnerabilities detected in dependencies.\n\n*Action Required:*\n• Review the workflow logs\n• Run `npm audit` locally\n• Create a PR with fixes"
-                }
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View Workflow Run",
-                      "emoji": true
-                    },
-                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                ]
-              }
-            ]
+            "text": "🚨 *Security Audit Failed*\n\n*PR:* <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}>\n*Author:* ${{ github.event.pull_request.user.login }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+          }
+    
+    - name: Notify Slack on failure (Push/Schedule)
+      if: failure() && github.event_name != 'pull_request'
+      uses: slackapi/slack-github-action@v1
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_APPLICATION_PLATFORM_FRONTEND }}
+      with:
+        payload: |
+          {
+            "text": "🚨 *Security Audit Failed*\n\n*Branch:* ${{ github.ref_name }}\n*Trigger:* ${{ github.event_name }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
           }
     
     - name: Security audit summary
