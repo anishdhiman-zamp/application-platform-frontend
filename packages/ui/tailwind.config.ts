@@ -10,6 +10,7 @@ const config = {
     './node_modules/destiny/dist/components/**/*.{js,ts}',
     '../../packages/ui/src/**/*.{ts,tsx}',
     '../../packages/tanstack-table/**/*.{ts,tsx}',
+    '../../packages/chat/src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
