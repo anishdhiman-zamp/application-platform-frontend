@@ -6,6 +6,7 @@ import {
   DisplayLayerActionType,
   LocationData,
   ResourceType,
+  ScopeType,
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
@@ -40,6 +41,7 @@ interface ChatbotProps {
   setCurrentFeedbackItem: (feedbackItem?: FeedbackItemType) => void;
   className?: string;
   onOpenChatbot?: () => void;
+  scope?: ScopeType;
 }
 
 const Chatbot = ({
@@ -54,7 +56,8 @@ const Chatbot = ({
   setCurrentFeedbackItem,
   className,
   onOpenChatbot,
-}: ChatbotProps) => {
+  scope = ScopeType.ACTIVITY_RUN,
+}: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const searchParams = useSearchParams();
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
@@ -167,6 +170,7 @@ const Chatbot = ({
           setHeader={setHeader}
           isDisabled={isAnalysing}
           header={header}
+          scope={scope}
         />
       </div>
     );
