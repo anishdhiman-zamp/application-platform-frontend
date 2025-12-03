@@ -3,10 +3,9 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery, useWhoAmIQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
@@ -181,7 +180,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
               })}
             >
               <div className='flex h-6 w-6 items-center justify-center'>
-                <SvgSpriteLoader id='log-out-02' size={14} />
+                <LogOut width={14} height={14} />
               </div>
               <div className='f-12-450 flex-1'>Logout</div>
               {isLoggingOut && <Loader2 className='w-4 animate-spin' />}
