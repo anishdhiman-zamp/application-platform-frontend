@@ -2,7 +2,7 @@
 
 exports[`Dialog Component - Critical Snapshot Tests matches snapshot for basic dialog 1`] = `
 <button
-  aria-controls="radix-«r1a»"
+  aria-controls="radix-_r_1a_"
   aria-expanded="false"
   aria-haspopup="dialog"
   data-state="closed"
@@ -14,7 +14,7 @@ exports[`Dialog Component - Critical Snapshot Tests matches snapshot for basic d
 
 exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog with close button 1`] = `
 <button
-  aria-controls="radix-«r1g»"
+  aria-controls="radix-_r_1g_"
   aria-expanded="false"
   aria-haspopup="dialog"
   data-state="closed"
@@ -26,7 +26,7 @@ exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog 
 
 exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog with header and footer 1`] = `
 <button
-  aria-controls="radix-«r1d»"
+  aria-controls="radix-_r_1d_"
   aria-expanded="false"
   aria-haspopup="dialog"
   data-state="closed"
@@ -38,7 +38,7 @@ exports[`Dialog Component - Critical Snapshot Tests matches snapshot for dialog 
 
 exports[`Dialog Component - Critical Snapshot Tests matches snapshot for large size 1`] = `
 <button
-  aria-controls="radix-«r1m»"
+  aria-controls="radix-_r_1m_"
   aria-expanded="false"
   aria-haspopup="dialog"
   data-state="closed"
@@ -50,7 +50,7 @@ exports[`Dialog Component - Critical Snapshot Tests matches snapshot for large s
 
 exports[`Dialog Component - Critical Snapshot Tests matches snapshot for small size 1`] = `
 <button
-  aria-controls="radix-«r1j»"
+  aria-controls="radix-_r_1j_"
   aria-expanded="false"
   aria-haspopup="dialog"
   data-state="closed"
