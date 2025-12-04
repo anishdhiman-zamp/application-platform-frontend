@@ -105,3 +105,4 @@ project = "PROJ" AND status != Done
 - Check project permissions
 - Verify issue types are included
 
+

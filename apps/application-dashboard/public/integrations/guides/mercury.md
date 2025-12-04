@@ -116,3 +116,4 @@ Mercury transactions may take up to 24 hours to appear. For faster updates:
 - Check if the account is selected for sync
 - Verify the transaction is not pending
 
+

@@ -146,3 +146,4 @@ Prepare data for accounting:
 - Check image format compatibility
 - Verify sync is enabled for receipts
 
+

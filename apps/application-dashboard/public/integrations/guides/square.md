@@ -77,3 +77,4 @@ Choose which data types to import:
 - Re-authorize the connection
 - Verify your Square account has the required permissions
 
+

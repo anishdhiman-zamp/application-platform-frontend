@@ -84,3 +84,4 @@ Once connected, you'll have access to:
 
 > ℹ️ Medium's API has rate limits. Data syncs every 6 hours to ensure compliance and reliability.
 
+
