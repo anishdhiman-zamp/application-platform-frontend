@@ -12,7 +12,12 @@ const ProcessPill = () => {
       asChildTrigger
       tooltipClassName='px-3 py-2'
     >
-      <Button variant='ghost' size='small' className='f-12-500 h-5 gap-x-0.5 px-1 py-[2px]'>
+      <Button
+        variant='ghost'
+        size='small'
+        onClick={(e) => e.stopPropagation()}
+        className='f-12-500 h-5 gap-x-0.5 px-1 py-[2px]'
+      >
         <Activity width={14} height={14} className='p-[2px]' strokeWidth={1.7} />
         <span>{PROCESS_NAMES.length}</span>
       </Button>

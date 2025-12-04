@@ -2,6 +2,7 @@ import { Link2, RefreshCcw, Unlink } from 'lucide-react';
 import {
   CONNECTION_PILLS_TYPE,
   type ConnectionPillsDetailsMap,
+  type PillConfig,
   PILLS_ACTIONS,
 } from 'modules/integrations/integrations.types';
 
@@ -60,12 +61,6 @@ export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
 
 export const PROCESS_NAMES = ['Account payable', 'Account recievable', 'Chargeback'];
 
-export const PILLS_ACTIONS_ICON_MAP = {
-  [PILLS_ACTIONS.CONNECT]: <Link2 width={14} height={14} className='-rotate-45' />,
-  [PILLS_ACTIONS.RE_AUTH]: <RefreshCcw width={14} height={14} className='text-ORANGE_800' />,
-  [PILLS_ACTIONS.DISCONNECT]: <Unlink width={14} height={14} className='text-RED_800' />,
-};
-
 export const PILL_STYLE_MAP = {
   [CONNECTION_PILLS_TYPE.SYNCED]: 'f-12-500 hover:bg-GRAY_100 h-5 gap-x-0.5 px-1 py-[2px]',
   [CONNECTION_PILLS_TYPE.REAUTH]:
@@ -73,3 +68,21 @@ export const PILL_STYLE_MAP = {
   [CONNECTION_PILLS_TYPE.DISCONNECTED]:
     'f-12-500 text-RED_800 hover:bg-GRAY_100 hover:text-RED_800 h-5 gap-x-0.5 px-1 py-[2px]',
 };
+
+export const PILLS_CONFIG: PillConfig[] = [
+  {
+    type: CONNECTION_PILLS_TYPE.SYNCED,
+    icon: <Link2 width={14} height={14} className='-rotate-45 p-[2px]' />,
+    tooltipWidth: 'w-30',
+  },
+  {
+    type: CONNECTION_PILLS_TYPE.REAUTH,
+    icon: <RefreshCcw width={14} height={14} className='p-[2px]' />,
+    tooltipWidth: 'w-32',
+  },
+  {
+    type: CONNECTION_PILLS_TYPE.DISCONNECTED,
+    icon: <Unlink width={14} height={14} className='p-[2px]' />,
+    tooltipWidth: 'w-30',
+  },
+];

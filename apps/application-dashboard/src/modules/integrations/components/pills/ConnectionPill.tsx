@@ -19,7 +19,7 @@ interface ConnectionPillProps {
 const ConnectionPill: FC<ConnectionPillProps> = ({ config, details }) => {
   const { open, handleOpenChange, tooltipDisabled } = usePopoverWithTooltip();
   const { type, icon, tooltipWidth } = config;
-  const { title, accounts } = details;
+  const { title, accounts, action } = details;
 
   return (
     <TooltipV2
@@ -31,13 +31,13 @@ const ConnectionPill: FC<ConnectionPillProps> = ({ config, details }) => {
     >
       <div className='inline-flex'>
         <Popover open={open} onOpenChange={handleOpenChange}>
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
             <Button variant='ghost' size='small' className={cn(PILL_STYLE_MAP[type], open && 'bg-GRAY_100')}>
               {icon}
               {accounts?.length}
             </Button>
           </PopoverTrigger>
-          <ConnectionPillPopoverContent details={details} />
+          <ConnectionPillPopoverContent accounts={accounts} action={action} type={type} />
         </Popover>
       </div>
     </TooltipV2>

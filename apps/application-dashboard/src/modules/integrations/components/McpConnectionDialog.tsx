@@ -35,7 +35,7 @@ const McpConnectionDialog: FC = () => {
   return (
     <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant='outline' size='small' className='gap-1.5'>
+        <Button variant='outline' size='small' className='gap-1 px-3 py-1.5'>
           <Plus className='h-4 w-4' />
           Add MCP server
         </Button>

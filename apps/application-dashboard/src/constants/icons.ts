@@ -1,20 +1,37 @@
-export const ASSET_PREFIX = process.env.NEXT_PUBLIC_ASSET_PREFIX ?? '';
-export const IMAGE_PREFIX = ASSET_PREFIX ? `${ASSET_PREFIX}/public` : '';
+// ImageKit.io configuration
+export const IMAGEKIT_URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? '';
+
+// For backward compatibility and fallback to local assets
+export const IMAGE_PREFIX = IMAGEKIT_URL_ENDPOINT || '';
 
 // Utility function for CSS background images
 export const getBackgroundImageUrl = (path: string): string => {
-  // Automatically prepend /public if not already present
+  // Remove leading slash and /public prefix for ImageKit
+  const cleanPath = path.replace(/^\/public/, '').replace(/^\//, '');
+
+  if (IMAGEKIT_URL_ENDPOINT) {
+    return `url(${IMAGEKIT_URL_ENDPOINT}/${cleanPath})`;
+  }
+
+  // Fallback to local assets
   const publicPath = path.startsWith('/public') ? path : `/public${path}`;
 
-  return `url(${ASSET_PREFIX}${publicPath})`;
+  return `url(${publicPath})`;
 };
 
 // Utility function for getting asset URLs (for src attributes, etc.)
 export const getAssetUrl = (path: string): string => {
-  // Automatically prepend /public if not already present
+  // Remove leading slash and /public prefix for ImageKit
+  const cleanPath = path.replace(/^\/public/, '').replace(/^\//, '');
+
+  if (IMAGEKIT_URL_ENDPOINT) {
+    return `${IMAGEKIT_URL_ENDPOINT}/${cleanPath}`;
+  }
+
+  // Fallback to local assets
   const publicPath = path.startsWith('/public') ? path : `/public${path}`;
 
-  return `${ASSET_PREFIX}${publicPath}`;
+  return publicPath;
 };
 
 export const ZAMP_ICON = IMAGE_PREFIX + '/icons/zamp-icon.svg';

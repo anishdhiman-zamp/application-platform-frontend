@@ -29,6 +29,7 @@ export const ROUTES_PATH = {
 
   SETTINGS: '/settings',
   INTEGRATIONS: '/settings/integrations',
+  INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_TEAM: '/settings/team',
 };
 
@@ -91,6 +92,10 @@ export const getProcessActivityLogsRouteById = (
 
 export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
   return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
+};
+
+export const getIntegrationDetailRoute = (integrationId: string) => {
+  return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

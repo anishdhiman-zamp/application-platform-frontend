@@ -1,14 +1,16 @@
-import type { FC } from 'react';
+import { type FC, useMemo } from 'react';
 import { Button, PopoverContent, PopoverPortal } from '@zamp-platform/ui';
-import { PILLS_ACTIONS_ICON_MAP } from 'modules/integrations/integrations.constant';
-import type { ConnectionPillsDetails, PILLS_ACTIONS } from 'modules/integrations/integrations.types';
+import { PILLS_CONFIG } from 'modules/integrations/integrations.constant';
+import type { CONNECTION_PILLS_TYPE } from 'modules/integrations/integrations.types';
 
 interface ConnectionPillPopoverContentProps {
-  details: ConnectionPillsDetails;
+  accounts: { id: string; email: string }[];
+  action: string;
+  type: CONNECTION_PILLS_TYPE;
 }
 
-const ConnectionPillPopoverContent: FC<ConnectionPillPopoverContentProps> = ({ details }) => {
-  const { action, accounts } = details;
+const ConnectionPillPopoverContent: FC<ConnectionPillPopoverContentProps> = ({ accounts, action, type }) => {
+  const pillConfig = useMemo(() => PILLS_CONFIG.find((config) => config.type === type), [type]);
 
   return (
     <PopoverPortal>
@@ -18,7 +20,7 @@ const ConnectionPillPopoverContent: FC<ConnectionPillPopoverContentProps> = ({ d
             key={account.id}
             className='hover:bg-GRAY_50 flex items-center justify-between gap-x-1.5 rounded-md px-2.5 py-2'
           >
-            {PILLS_ACTIONS_ICON_MAP[action as PILLS_ACTIONS]}
+            {pillConfig?.icon}
             <span className='f-12-500 flex-1 text-left'>{account.email}</span>
             <Button
               variant='outline'
