@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import ImageKitImage from '@/components/ImageKitImage';
 import { DONE_EMPTY_STATE } from '@/constants/icons';
 import { EMPTY_STATE_BY_STATUS } from '@/modules/process/process.constant';
 import { ACTIVITY_RUN_STATUS } from '@/modules/process/process.types';
@@ -17,7 +17,7 @@ const ActivityRunsEmptyState = ({ status }: { status: ACTIVITY_RUN_STATUS }) => 
   return (
     <div className='animate-opacity flex min-h-[calc(100vh-200px)] w-full flex-col items-center justify-center gap-y-2'>
       <div className='relative flex h-[150px] w-[190px] items-center justify-center'>
-        <Image
+        <ImageKitImage
           src={iconUrl}
           alt={title}
           className='h-full w-full object-cover object-center'

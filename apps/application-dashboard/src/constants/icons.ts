@@ -2,7 +2,7 @@
 export const IMAGEKIT_URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? '';
 
 // For backward compatibility and fallback to local assets
-const IMAGE_PREFIX = IMAGEKIT_URL_ENDPOINT || '';
+export const IMAGE_PREFIX = IMAGEKIT_URL_ENDPOINT || '';
 
 // Utility function for CSS background images
 export const getBackgroundImageUrl = (path: string): string => {
