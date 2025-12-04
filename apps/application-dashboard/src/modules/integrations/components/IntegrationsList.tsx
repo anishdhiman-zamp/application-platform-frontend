@@ -2,6 +2,7 @@
 
 import { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import type { IntegrationType } from 'modules/integrations/integration.types';
+import { cn } from 'utils/common';
 import IntegrationCard from '@/modules/integrations/components/IntegrationCard';
 import IntegrationHeader from '@/modules/integrations/components/IntegrationHeader';
 
@@ -43,7 +44,10 @@ const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
   return (
     <div className='flex h-full w-full flex-col'>
       <div
-        className={`sticky top-0 z-10 bg-white pb-8 transition-colors ${isScrolled ? 'border-GRAY_400 border-b' : ''}`}
+        className={cn(
+          'sticky top-0 z-10 bg-white pb-8 transition-colors',
+          isScrolled ? 'border-GRAY_400 border-b' : '',
+        )}
       >
         <IntegrationHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       </div>
