@@ -47,6 +47,7 @@ export const LoginForm = () => {
       const urlObj = new URL(redirectUrl);
 
       urlObj.searchParams.set('hd', emailDomain);
+      urlObj.searchParams.set('login_hint', email);
 
       setHasError(false);
       window.location.href = urlObj.toString();
