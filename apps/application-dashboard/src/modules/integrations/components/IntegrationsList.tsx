@@ -1,10 +1,10 @@
 'use client';
 
 import { type FC, useEffect, useMemo, useRef, useState } from 'react';
-import type { IntegrationType } from 'modules/integrations/integration.types';
 import { cn } from 'utils/common';
 import IntegrationCard from '@/modules/integrations/components/IntegrationCard';
 import IntegrationHeader from '@/modules/integrations/components/IntegrationHeader';
+import type { IntegrationType } from '@/modules/integrations/integrations.types';
 
 interface IntegrationsListProps {
   integrations: IntegrationType[];
@@ -54,12 +54,23 @@ const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
 
       {/* Integrations Cards Section */}
       <div ref={scrollContainerRef} className='flex-1 overflow-y-auto px-10 pb-10 [scrollbar-width:none]'>
-        <div className='flex flex-col gap-y-2.5'>
-          <span className='f-11-500 text-GRAY_700 tracking-wider uppercase'>Available</span>
-          <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-            {filteredIntegrations.map((integration) => (
-              <IntegrationCard key={integration.id} integration={integration} />
-            ))}
+        <div className='flex flex-col gap-y-8'>
+          <div className='flex flex-col gap-y-2.5'>
+            <span className='f-11-500 text-GRAY_700 tracking-wider uppercase'>Enabled</span>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+              {filteredIntegrations?.slice(0, 4).map((integration) => (
+                <IntegrationCard key={integration.id} integration={integration} isEnabled={true} />
+              ))}
+            </div>
+          </div>
+
+          <div className='flex flex-col gap-y-2.5'>
+            <span className='f-11-500 text-GRAY_700 tracking-wider uppercase'>Available</span>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+              {filteredIntegrations?.slice(4).map((integration) => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
