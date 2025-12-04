@@ -2,8 +2,8 @@
 
 import { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import type { IntegrationType } from 'modules/integrations/integration.types';
-import IntegrationCard from 'modules/integrations/IntegrationCard';
-import IntegrationHeader from 'modules/integrations/IntegrationHeader';
+import IntegrationCard from '@/modules/integrations/components/IntegrationCard';
+import IntegrationHeader from '@/modules/integrations/components/IntegrationHeader';
 
 interface IntegrationsListProps {
   integrations: IntegrationType[];
