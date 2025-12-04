@@ -78,26 +78,28 @@ const FeedbackStatusQueuedBody: FC = () => {
   };
 
   return (
-    <div>
-      <div className='f-14-400 text-gray-1000 max-h-[400px] overflow-y-auto'>
-        <div className='flex flex-col gap-3 p-4'>
-          {items?.map((item) => (
-            <FeedbackListCard
-              key={item?.id}
-              icon={
-                <Checkbox
-                  checked={selectedItemIds.has(item?.id)}
-                  className='mt-1 flex-shrink-0'
-                  onClick={(e) => handleCheck(e, item)}
-                  id='check-feedback'
-                />
-              }
-              feedback={item}
-              initiatedBy={item?.initiated_by}
-              processId={processId}
-              allowDelete
-            />
-          ))}
+    <>
+      <div>
+        <div className='f-14-400 text-gray-1000 max-h-[400px] overflow-y-auto'>
+          <div className='flex flex-col gap-3 p-4'>
+            {items?.map((item) => (
+              <FeedbackListCard
+                key={item?.id}
+                icon={
+                  <Checkbox
+                    checked={selectedItemIds.has(item?.id)}
+                    className='mt-1 flex-shrink-0'
+                    onClick={(e) => handleCheck(e, item)}
+                    id='check-feedback'
+                  />
+                }
+                feedback={item}
+                initiatedBy={item?.initiated_by}
+                processId={processId}
+                allowDelete
+              />
+            ))}
+          </div>
         </div>
         <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
           <div className='text-GRAY_700'>Select feedback to test only some of them</div>
@@ -116,7 +118,7 @@ const FeedbackStatusQueuedBody: FC = () => {
         processingFeedbackItems={processingFeedbackItems}
         processId={processId}
       />
-    </div>
+    </>
   );
 };
 

@@ -9,12 +9,16 @@ export type LayoutConfigState = {
   modalStack: string[];
   fullPageLayoutStack: string[];
   isSidebarOpen: boolean;
+  lastVisitedRouteBeforeSettings: string | null;
+  lastVisitedSettingsRoute: string | null;
 };
 
 const initialState: LayoutConfigState = {
   modalStack: [],
   fullPageLayoutStack: [],
   isSidebarOpen: true,
+  lastVisitedRouteBeforeSettings: null,
+  lastVisitedSettingsRoute: null,
 };
 
 export const layoutConfigsSlice = createSlice({
@@ -56,6 +60,16 @@ export const layoutConfigsSlice = createSlice({
 
       return state;
     },
+    setLastVisitedRouteBeforeSettings: (state, action: { payload: string | null }) => {
+      state.lastVisitedRouteBeforeSettings = action.payload;
+
+      return state;
+    },
+    setLastVisitedSettingsRoute: (state, action: { payload: string | null }) => {
+      state.lastVisitedSettingsRoute = action.payload;
+
+      return state;
+    },
   },
 });
 
@@ -67,6 +81,8 @@ export const {
   toggleSidebar,
   closeSidebar,
   openSidebar,
+  setLastVisitedRouteBeforeSettings,
+  setLastVisitedSettingsRoute,
 } = layoutConfigsSlice.actions;
 
 export default layoutConfigsSlice.reducer;

@@ -1,5 +1,5 @@
-import { useCallback, useRef } from 'react';
-import { LocationType } from '@zamp-platform/chat';
+import { useCallback, useMemo, useRef } from 'react';
+import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import { useParams } from 'next/navigation';
@@ -25,19 +25,32 @@ const WorkWithPace = () => {
 
   useKeyDown(handleOpenChatbot, [KEYBOARD_KEYS.META, KEYBOARD_KEYS.K]);
 
-  if (!processId || !activityRunId) {
+  const annotationLocation = useMemo(() => {
+    if (activityRunId)
+      return {
+        type: LocationType.ACTIVITY_RUN as const,
+        data: {
+          process_id: processId,
+          activity_run_id: activityRunId,
+        },
+      };
+
+    return {
+      type: LocationType.PROCESS as const,
+      data: {
+        process_id: processId,
+      },
+    };
+  }, [activityRunId, processId]);
+
+  if (!processId) {
     return null;
   }
 
   return (
     <ChatbotWrapper
-      annotationLocation={{
-        type: LocationType.ACTIVITY_RUN,
-        data: {
-          process_id: processId,
-          activity_run_id: activityRunId,
-        },
-      }}
+      annotationLocation={annotationLocation}
+      scope={activityRunId ? ScopeType.ACTIVITY_RUN : ScopeType.PROCESS}
       hideFeedbackCount
       onChatbotTrigger={handleChatbotTrigger}
     >

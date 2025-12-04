@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
-import { AttachmentsList, LocationData, useChat } from '@zamp-platform/chat';
+import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, X } from 'lucide-react';
@@ -13,20 +13,20 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 interface ChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
   header: string;
+  scope?: ScopeType;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
   annotationLocation,
-  setIsLoading,
   conversationId,
   setHeader,
   isDisabled,
   header,
+  scope = ScopeType.ACTIVITY_RUN,
 }) => {
   const {
     value,
@@ -42,9 +42,9 @@ export const ChatInput: FC<ChatInputProps> = ({
   } = useChatInput({
     chat,
     annotationLocation,
-    setIsLoading,
     conversationId,
     setHeader,
+    scope,
   });
 
   const {

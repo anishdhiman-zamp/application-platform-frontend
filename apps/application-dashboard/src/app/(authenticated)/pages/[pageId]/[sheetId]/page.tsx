@@ -20,6 +20,7 @@ const Page = () => {
   const {
     data: pages,
     isFetching,
+    isLoading,
     refetch,
     isError,
   } = useGetPagesQuery(undefined, {
@@ -49,7 +50,7 @@ const Page = () => {
 
   return (
     <CommonWrapper
-      isLoading={isFetching}
+      isLoading={isLoading}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />}
       skeletonType={SkeletonTypes.CUSTOM}
       isError={isError}

@@ -21,16 +21,21 @@ export const VISUALIZATION_OPTIONS: SelectButtonOption[] = [
   { value: WIDGET_TYPES.KPI, icon: { type: 'sprite', id: 'hash-02' }, tooltipBody: 'KPI Tag' },
 ];
 
+export const SIZE_OPTIONS_VALUES = {
+  FULL: 'full',
+  HALF: 'half',
+};
+
 export const SIZE_OPTIONS: SelectButtonOption[] = [
   {
-    value: 'half',
-    icon: { type: 'icon', component: <div className='h-[11px] w-2.5 border border-inherit' /> },
-    tooltipBody: 'Half',
-  },
-  {
-    value: 'full',
+    value: SIZE_OPTIONS_VALUES.FULL,
     icon: { type: 'icon', component: <div className='h-2 w-3.5 border border-inherit' /> },
     tooltipBody: 'Full',
+  },
+  {
+    value: SIZE_OPTIONS_VALUES.HALF,
+    icon: { type: 'icon', component: <div className='h-[11px] w-2.5 border border-inherit' /> },
+    tooltipBody: 'Half',
   },
 ];
 

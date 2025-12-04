@@ -3,7 +3,7 @@
 exports[`Popover matches snapshot of full popover structure 1`] = `
 <div>
   <button
-    aria-controls="radix-«r3»"
+    aria-controls="radix-_r_3_"
     aria-expanded="true"
     aria-haspopup="dialog"
     data-slot="popover-trigger"
@@ -27,7 +27,7 @@ exports[`Popover matches snapshot of full popover structure 1`] = `
       data-side="bottom"
       data-slot="popover-content"
       data-state="open"
-      id="radix-«r3»"
+      id="radix-_r_3_"
       role="dialog"
       style="--radix-popover-content-transform-origin: var(--radix-popper-transform-origin); --radix-popover-content-available-width: var(--radix-popper-available-width); --radix-popover-content-available-height: var(--radix-popper-available-height); --radix-popover-trigger-width: var(--radix-popper-anchor-width); --radix-popover-trigger-height: var(--radix-popper-anchor-height);"
       tabindex="-1"

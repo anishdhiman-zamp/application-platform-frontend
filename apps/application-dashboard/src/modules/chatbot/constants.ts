@@ -6,4 +6,6 @@ export const CHATBOT_LOCATION_PARAMS = {
   CHATBOT_LOG_ID: 'chatbot_log_id',
   CHATBOT_PROCESS_ID: 'chatbot_process_id',
   CHATBOT_ACTIVITY_RUN_ID: 'chatbot_activity_run_id',
+  CHATBOT_CONVERSATION_ID: 'chatbot_conversation_id',
+  CHATBOT_FEEDBACK_ID: 'chatbot_feedback_id',
 };

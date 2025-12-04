@@ -2,7 +2,7 @@
 
 import { captureException } from '@sentry/browser';
 import { UseSSEOptions } from '@zamp-platform/utils';
-import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -40,6 +40,7 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
   resourceId?: string;
   resourceType?: ResourceType;
   setHeader?: (header: string) => void;
+  refetchConversationHistory?: boolean;
 }
 
 export const useChat = (config: ChatConfig) => {
@@ -54,13 +55,20 @@ export const useChat = (config: ChatConfig) => {
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
 
-  const { data: conversationHistory, isLoading: isLoadingConversationHistory } = useGetConversationByIdQuery(
+  const {
+    data: conversationHistory,
+    isLoading: isLoadingConversationHistory,
+    isFetching: isFetchingConversationHistory,
+  } = useGetConversationByIdQuery(
     {
       conversationId: config.conversationId || '',
       resourceId: config.resourceId,
       resourceType: config.resourceType,
     },
-    { skip: !config.resourceId || !config.resourceType || !config.conversationId, refetchOnMountOrArgChange: false },
+    {
+      skip: !config.resourceId || !config.resourceType || !config.conversationId,
+      refetchOnMountOrArgChange: config.refetchConversationHistory,
+    },
   );
 
   const { sseEventBus } = useEventBus();
@@ -156,27 +164,27 @@ export const useChat = (config: ChatConfig) => {
   }, [config.conversationId]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.CONVERSATION, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) handleMessage(data);
     });
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.CONVERSATION_V2, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
       if (data?.source_id === _conversationId) handleMessage(data);
     });
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
   useEffect(() => {
-    if (conversationHistory && conversationHistory?.messages?.length > 0) {
+    if (!isFetchingConversationHistory && conversationHistory && conversationHistory?.messages?.length > 0) {
       const historyMessages: ChatMessage[] = getHistoryFormattedMessages(conversationHistory);
 
       setMessages(historyMessages);
       config.setHeader?.(conversationHistory?.conversation?.title || '');
     }
-  }, [conversationHistory]);
+  }, [conversationHistory, isFetchingConversationHistory]);
 
   const sendMessage = useCallback(
     async (messagePayload: ChatMessage, useV2Api?: boolean) => {

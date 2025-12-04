@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { type BaseEventPayload, EventType } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import {
   useLazyGetActivityArtifactsQuery,
   useLazyGetActivityLogsQuery,
@@ -30,7 +30,7 @@ export function useActivitySSE({ activityId, processId }: UseActivitySSEProps) {
   );
 
   useEffect(() => {
-    const sub = sseEventBus.subscribe(EventType.ACTIVITY_LOG, (data: BaseEventPayload) => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.ACTIVITY_LOG, (data: BaseEventPayload) => {
       if (data?.source_id === activityId) handleUpdate(data);
     });
 

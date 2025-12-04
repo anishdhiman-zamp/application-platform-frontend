@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
-import { ActionType, BLOCK_TYPE, LocationData, ResourceType, useChat } from '@zamp-platform/chat';
+import { ActionType, BLOCK_TYPE, LocationData, ResourceType, ScopeType, useChat } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import {
   createConversationPayload,
@@ -22,12 +22,18 @@ import { RootState } from '@/store';
 interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader?: (header: string) => void;
+  scope?: ScopeType;
 }
 
-const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, setHeader }: UseChatInputProps) => {
+const useChatInput = ({
+  chat,
+  annotationLocation,
+  conversationId,
+  setHeader,
+  scope = ScopeType.ACTIVITY_RUN,
+}: UseChatInputProps) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
   const processId = params?.processId as string;
@@ -53,12 +59,11 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
+      scope,
     );
 
     setAttachments([]);
     const response = await chat.createConversationV2(payload);
-
-    setIsLoading(true);
 
     if (!response?.conversation_id) {
       throw new Error('Failed to create conversation');
@@ -123,7 +128,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
   };
 
   const handleSubmit = () => {
-    setIsLoading(true);
     if (value.trim()) {
       setValue('');
     }
@@ -138,9 +142,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
   const handleSendMessage = async (inputValue: string) => {
     if (!inputValue.trim()) return;
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 500);
 
     const messagePayload = createUserMessagePayload(
       inputValue,

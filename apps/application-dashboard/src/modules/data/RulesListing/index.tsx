@@ -8,7 +8,6 @@ import { DatasetColumnRequest } from 'modules/data/data.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
 import Image from 'next/image';
-import { DatasetUpdateResponseType } from 'types/api/dataset.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
@@ -30,7 +29,7 @@ type RulesListingSideDrawerProps = {
   onClose: defaultFnType;
   datasetId: string;
   column: string;
-  handleSuccessfulUpdate: (data: DatasetUpdateResponseType) => void;
+  handleSuccessfulUpdate: defaultFnType;
   onDeleteRuleId: (ruleId: string) => void;
   columnLabel: string;
   tagColorMap: MapAny;
@@ -160,10 +159,10 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
           })),
         },
       })
-        .then((res) => {
+        .then(() => {
           handleApplyChangesPopupClose();
           onClose();
-          handleSuccessfulUpdate(res?.data as DatasetUpdateResponseType);
+          handleSuccessfulUpdate();
         })
         .catch((error) => {
           captureException(error);

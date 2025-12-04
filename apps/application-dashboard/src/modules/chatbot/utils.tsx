@@ -39,7 +39,7 @@ export const generateChatbotInstanceId = (annotationLocation: LocationData): str
   const parts = [
     type,
     data.process_id,
-    data.activity_run_id,
+    'activity_run_id' in data ? data.activity_run_id : undefined,
     'dataset_id' in data ? data.dataset_id : undefined,
     'dataset_row_id' in data ? data.dataset_row_id : undefined,
     'dataset_field_id' in data ? data.dataset_field_id : undefined,
@@ -61,7 +61,9 @@ export const getFeedbackItems = (feedbackItems: FeedbackItemType[], annotationLo
 
     if (
       itemLocation.data.process_id !== annotationLocation.data.process_id ||
-      itemLocation.data.activity_run_id !== annotationLocation.data.activity_run_id
+      ('activity_run_id' in itemLocation.data &&
+        'activity_run_id' in annotationLocation.data &&
+        itemLocation.data.activity_run_id !== annotationLocation.data.activity_run_id)
     ) {
       continue;
     }
@@ -274,8 +276,17 @@ export const updateButtonElementsDisplay = (
   }
 };
 
-export const createChatbotUrl = (annotationLocation: LocationData) => {
-  let url = `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
+export const createChatbotUrl = (feedback: FeedbackItemType) => {
+  const annotationLocation = feedback?.annotation_data?.location;
+  const conversationId = feedback?.conversation_id;
+  const feedbackId = feedback?.id;
+
+  const commonParams = `${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID}=${conversationId}&${CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID}=${feedbackId}`;
+
+  let url =
+    annotationLocation?.type === LocationType.PROCESS
+      ? `/processes/${annotationLocation?.data?.process_id}?${commonParams}`
+      : `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:
@@ -286,6 +297,9 @@ export const createChatbotUrl = (annotationLocation: LocationData) => {
       break;
     case LocationType.ACTIVITY_RUN:
       url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.ACTIVITY_RUN}`;
+      break;
+    case LocationType.PROCESS:
+      url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.PROCESS}`;
       break;
   }
 
@@ -301,7 +315,14 @@ export const doesUrlMatchLocation = (searchParams: URLSearchParams, location: Lo
   const processId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID);
   const activityRunId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID);
 
-  if (processId !== location.data.process_id || activityRunId !== location.data.activity_run_id) {
+  if (location.type === LocationType.PROCESS && processId === location.data.process_id) {
+    return true;
+  }
+
+  if (
+    processId !== location.data.process_id ||
+    ('activity_run_id' in location.data && activityRunId !== location.data.activity_run_id)
+  ) {
     return false;
   }
 
@@ -556,6 +577,7 @@ export const isSubmitKeyPress = (event: React.KeyboardEvent): boolean => {
  * @param annotationLocation - The location data for annotation
  * @param senderEmail - The email of the sender
  * @param attachments - Optional array of file attachments
+ * @param scope - The scope type for the conversation
  * @returns Conversation creation payload
  */
 export const createConversationPayload = (
@@ -565,12 +587,13 @@ export const createConversationPayload = (
   annotationLocation: LocationData,
   senderName: string,
   attachments?: MessageAttachmentType[],
+  scope = ScopeType.ACTIVITY_RUN,
 ) => {
   return {
     resource_id: processId,
     resource_type: ResourceType.PROCESS,
-    scope_type: ScopeType.ACTIVITY_RUN,
-    scope_id: activityRunId,
+    scope_type: scope,
+    scope_id: scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId,
     message_content: {
       text: messageText,
       text_type: 'plain_text',
