@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
@@ -12,16 +12,9 @@ const WorkWithPace = () => {
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
   const openChatbotRef = useRef<(() => void) | null>(null);
-  const [chatbotSessionKey, setChatbotSessionKey] = useState(0);
 
   const handleChatbotTrigger = useCallback((openChatbot: () => void) => {
     openChatbotRef.current = openChatbot;
-  }, []);
-
-  const handleChatbotStateChange = useCallback((isOpen: boolean) => {
-    if (!isOpen) {
-      setChatbotSessionKey((prev) => prev + 1);
-    }
   }, []);
 
   const handleOpenChatbot = () => {
@@ -56,12 +49,10 @@ const WorkWithPace = () => {
 
   return (
     <ChatbotWrapper
-      key={chatbotSessionKey}
       annotationLocation={annotationLocation}
       scope={activityRunId ? ScopeType.ACTIVITY_RUN : ScopeType.PROCESS}
       hideFeedbackCount
       onChatbotTrigger={handleChatbotTrigger}
-      onChatbotStateChange={handleChatbotStateChange}
     >
       <Button
         variant='outline'

@@ -3,7 +3,7 @@
 exports[`Tooltip matches snapshot when open 1`] = `
 <div>
   <button
-    aria-describedby="radix-«r1»"
+    aria-describedby="radix-_r_1_"
     data-state="delayed-open"
   >
     Hover me
