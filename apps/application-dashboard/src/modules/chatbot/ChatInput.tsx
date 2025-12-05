@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
 import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
@@ -18,6 +18,8 @@ interface ChatInputProps {
   isDisabled: boolean;
   header: string;
   scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
@@ -27,6 +29,8 @@ export const ChatInput: FC<ChatInputProps> = ({
   isDisabled,
   header,
   scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
 }) => {
   const {
     value,
@@ -45,6 +49,8 @@ export const ChatInput: FC<ChatInputProps> = ({
     conversationId,
     setHeader,
     scope,
+    externalInputValue,
+    setExternalInputValue,
   });
 
   const {

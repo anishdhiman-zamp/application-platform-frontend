@@ -19,6 +19,7 @@ interface ChatbotProps {
   className?: string;
   onChatbotStateChange?: (isOpen: boolean) => void;
   scope?: ScopeType;
+  clearInputOnClose?: boolean;
 }
 
 const ChatbotWrapper: FC<ChatbotProps> = ({
@@ -29,6 +30,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   className,
   onChatbotStateChange,
   scope = ScopeType.ACTIVITY_RUN,
+  clearInputOnClose = false,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -188,6 +190,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               className={className}
               onOpenChatbot={handleOpenChatbot}
               scope={scope}
+              clearInputOnClose={clearInputOnClose}
             >
               {enhancedChildren}
             </Chatbot>

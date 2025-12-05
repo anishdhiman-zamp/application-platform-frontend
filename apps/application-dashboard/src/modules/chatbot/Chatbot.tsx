@@ -42,6 +42,7 @@ interface ChatbotProps {
   className?: string;
   onOpenChatbot?: () => void;
   scope?: ScopeType;
+  clearInputOnClose?: boolean;
 }
 
 const Chatbot = ({
@@ -57,6 +58,7 @@ const Chatbot = ({
   className,
   onOpenChatbot,
   scope = ScopeType.ACTIVITY_RUN,
+  clearInputOnClose = false,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
@@ -65,6 +67,7 @@ const Chatbot = ({
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const urlBasedOpenHandled = useRef(false);
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
@@ -108,9 +111,12 @@ const Chatbot = ({
       if (!open) {
         onCloseChatbot?.();
         if (hideFeedbackCount) handleDeleteFeedbackSuccess();
+        if (clearInputOnClose) {
+          setInputValue('');
+        }
       } else onOpenChatbot?.();
     },
-    [onCloseChatbot, onOpenChatbot, hideFeedbackCount, handleDeleteFeedbackSuccess],
+    [onCloseChatbot, onOpenChatbot, hideFeedbackCount, handleDeleteFeedbackSuccess, clearInputOnClose],
   );
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -173,6 +179,8 @@ const Chatbot = ({
           isDisabled={isAnalysing}
           header={header}
           scope={scope}
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
         />
       </div>
     );
@@ -248,24 +256,24 @@ const Chatbot = ({
   return (
     <>
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger
-          className={cn(className, {
-            '[&_button[data-comment-button]]:bg-accent [&_button[data-comment-button]]:text-accent-foreground [&_button[data-comment-button]]:opacity-100':
-              isOpen,
-          })}
-          data-testid={chatbotInstanceId}
-        >
+        <PopoverTrigger asChild data-testid={chatbotInstanceId}>
           {(feedbackItem || feedbackItemsLength > 0) && !hideFeedbackCount ? (
             <Button
               variant='outline'
               size='icon'
-              className='bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3'
+              className={cn(
+                'bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3',
+                isOpen && 'opacity-100',
+              )}
+              data-comment-button
             >
               <MessageSquare />
               <span>{feedbackItemsLength || 1}</span>
             </Button>
           ) : (
-            children
+            <span className={className} data-testid={chatbotInstanceId}>
+              {children}
+            </span>
           )}
         </PopoverTrigger>
         <PopoverPortal>
