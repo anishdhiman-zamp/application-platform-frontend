@@ -134,7 +134,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+
+      - name: Cache dependencies and Next.js build
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+            apps/application-dashboard/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
 
       - name: "Set up AWS credentials using OIDC"
         uses: aws-actions/configure-aws-credentials@v4
@@ -145,9 +158,13 @@ jobs:
 
       - name: "Install AWS CLI"
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          if ! command -v aws &> /dev/null; then
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+            unzip -q awscliv2.zip
+            sudo ./aws/install
+          else
+            echo "✅ AWS CLI already installed"
+          fi
 
       - name: "Login to Amazon ECR"
         run: |
@@ -159,46 +176,13 @@ jobs:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
 
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: |
-            .turbo
-            apps/application-dashboard/.next/cache
-          key: ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('**/package-lock.json') }}-
-            ${{ runner.os }}-turbo-
-
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
 
-      - name: Check System Resources
-        run: |
-          echo "=== System Resources Check ==="
-          echo ""
-          echo "📊 MEMORY BREAKDOWN:"
-          free -h
-          echo ""
-          echo "🔍 DETAILED MEMORY INFO:"
-          cat /proc/meminfo | grep -E "(MemTotal|MemFree|MemAvailable|Cached|SwapTotal|SwapFree)"
-          echo ""
-          echo "🖥️  CPU INFO:"
-          echo "CPU Cores: $(nproc)"
-          echo "CPU Model: $(cat /proc/cpuinfo | grep "model name" | head -1 | cut -d: -f2)"
-          echo ""
-          echo "💾 DISK SPACE:"
-          df -h / | tail -1
-          echo ""
-          echo "🔍 TOP MEMORY CONSUMERS (Before Build):"
-          ps aux --sort=-%mem | head -10
-          echo "================================"
-      
       - name: Install dependencies
-        run: |
-          # Install all dependencies (will use cache if available)
-          npm ci
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
 
       - name: Fetch secrets from AWS Secrets Manager
         run: |
@@ -218,109 +202,62 @@ jobs:
 
           echo "✅ Secrets loaded successfully"
 
-      - name: Type Check
+      # OPTIMIZATION: Run type-check and lint in parallel for faster execution
+      - name: Type Check and Lint (Parallel)
         run: |
-          echo "🔍 Running TypeScript type checking..."
           cd apps/application-dashboard
-          npx tsc --noEmit
-          echo "✅ Type checking completed"
+          echo "🔍 Running TypeScript type checking and ESLint in parallel..."
+          
+          # Run both in background
+          npx tsc --noEmit &
+          TYPE_CHECK_PID=$!
+          
+          npm run lint &
+          LINT_PID=$!
+          
+          # Wait for both to complete
+          wait $TYPE_CHECK_PID
+          TYPE_CHECK_EXIT=$?
+          wait $LINT_PID
+          LINT_EXIT=$?
+          
+          # Check results
+          if [ $TYPE_CHECK_EXIT -ne 0 ]; then
+            echo "❌ Type checking failed"
+            exit $TYPE_CHECK_EXIT
+          fi
+          
+          if [ $LINT_EXIT -ne 0 ]; then
+            echo "❌ Linting failed"
+            exit $LINT_EXIT
+          fi
+          
+          echo "✅ Type check and lint completed successfully"
 
-      - name: Lint
-        run: |
-          echo "🧹 Running ESLint..."
-          cd apps/application-dashboard
-          npm run lint
-          echo "✅ Linting completed"
-
-      - name: Build application with Memory Profiling
+      # OPTIMIZATION: Streamlined build without verbose monitoring (saves ~1-2 minutes)
+      - name: Build Application
         env:
           CI: true
           TIMESTAMP: "${TIMESTAMP}"
-          # Optimize Node.js memory based on runner capacity
-          NODE_OPTIONS: "--max-old-space-size=10240 --max-semi-space-size=256"
-          # Skip environment validation if using external secrets
+          NODE_OPTIONS: "--max-old-space-size=10240"
           SKIP_ENV_VALIDATION: true
         run: |
-          echo "=== Build Configuration ==="
-          echo "Building application for tag: $NEW_TAG"
-          echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
-          echo "TIMESTAMP: $TIMESTAMP"
-          echo "NEXT_PUBLIC_BASE_API_URL: $NEXT_PUBLIC_BASE_API_URL"
-          echo "NEXT_PUBLIC_DEFAULT_REGION: $NEXT_PUBLIC_DEFAULT_REGION"
-          echo "NODE_OPTIONS: $NODE_OPTIONS"
-          echo "CI: $CI"
-          echo "=========================="
-          echo ""
+          echo "🚀 Building application for tag: $NEW_TAG"
+          echo "📊 Memory before build: $(free -h | awk 'NR==2{print $3 "/" $2}')"
           
-          # Memory snapshot before build
-          echo "📊 MEMORY BEFORE BUILD:"
-          free -h
-          echo ""
-          echo "🔍 TOP PROCESSES (Before):"
-          ps aux --sort=-%mem | head -5
-          echo "================================"
-          echo ""
-          
-          # Start background memory monitor
-          echo "🔬 Starting real-time memory monitor..."
-          (
-            while true; do
-              TIMESTAMP=$(date '+%H:%M:%S')
-              MEM_USED=$(free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2 }')
-              MEM_AVAIL=$(free -h | awk 'NR==2{print $7}')
-              NODE_MEM=$(ps aux | grep 'node' | grep -v grep | awk '{sum+=$6} END {printf "%.1f", sum/1024}')
-              echo "[$TIMESTAMP] Memory: $MEM_USED used, $MEM_AVAIL available, Node.js: ${NODE_MEM}MB"
-              sleep 10
-            done
-          ) &
-          MONITOR_PID=$!
-          
-          # Ensure monitor is killed on script exit (even if build fails)
-          trap "kill $MONITOR_PID 2>/dev/null || true" EXIT
-          
-          # Build the application
-          echo "🚀 Starting build process..."
-          npm run build 2>&1 | while IFS= read -r line; do
-            echo "$line"
-            # Track memory at key build stages
-            if echo "$line" | grep -qE "(Compiling|Linting|checking validity|Creating an optimized|Compiled successfully)"; then
-              MEM_NOW=$(free -h | awk 'NR==2{print $3 "/" $2}')
-              echo "   └─ [MEMORY: $MEM_NOW]"
-            fi
-          done
+          # Build with minimal output
+          npm run build
           BUILD_EXIT_CODE=$?
           
-          # Stop memory monitor
-          kill $MONITOR_PID 2>/dev/null || true
-          
-          echo ""
-          echo "================================"
-          echo "📊 MEMORY AFTER BUILD:"
-          free -h
-          echo ""
-          echo "🔍 TOP MEMORY CONSUMERS (After):"
-          ps aux --sort=-%mem | head -10
-          echo ""
-          echo "📈 MEMORY STATISTICS:"
-          cat /proc/meminfo | grep -E "(MemTotal|MemFree|MemAvailable|Cached|SwapTotal|SwapFree|Dirty|Shmem)"
-          echo ""
-          
-          # Check if build succeeded
           if [ $BUILD_EXIT_CODE -ne 0 ]; then
-            echo "❌ BUILD FAILED with exit code: $BUILD_EXIT_CODE"
-            echo ""
-            echo "🔍 DIAGNOSING OOM (Out of Memory)..."
-            echo "Checking dmesg for OOM killer messages:"
-            sudo dmesg | tail -50 | grep -i -E "(kill|oom|memory)" || echo "No OOM messages found"
-            echo ""
-            echo "Last system messages:"
-            sudo journalctl -n 50 --no-pager | grep -i -E "(killed|oom|memory)" || echo "No relevant messages"
+            echo "❌ BUILD FAILED"
+            # Only check for OOM on failure
+            sudo dmesg | tail -50 | grep -i -E "(kill|oom|memory)" || echo "No OOM messages"
             exit $BUILD_EXIT_CODE
           fi
 
           echo "✅ Build completed successfully!"
-          echo "Build artifacts:"
-          ls -la apps/application-dashboard/.next/
+          echo "📊 Memory after build: $(free -h | awk 'NR==2{print $3 "/" $2}')"
 
       - id: build
         name: Build and Push Image
@@ -352,12 +289,14 @@ jobs:
             exit 1
           fi
 
-          # Build Docker image using the Dockerfile  
-          # Application is already built, so Docker will just package it
-          # Build args come from AWS Secrets Manager environment variables
+          # Build and push Docker image with inline caching (ECR compatible)
+          # Cache metadata is embedded in the image and reused across builds
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPO:latest \
+            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPO:latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX="$NEXT_PUBLIC_ASSET_PREFIX" \
             --build-arg TIMESTAMP="$TIMESTAMP" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT="$NEXT_PUBLIC_ENVIRONMENT" \
@@ -432,9 +371,13 @@ jobs:
 
       - name: "Install AWS CLI"
         run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
+          if ! command -v aws &> /dev/null; then
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+            unzip -q awscliv2.zip
+            sudo ./aws/install
+          else
+            echo "✅ AWS CLI already installed"
+          fi
 
       - uses: azure/setup-helm@v4
         name: Install Helm
