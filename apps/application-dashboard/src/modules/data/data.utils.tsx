@@ -1152,8 +1152,10 @@ export const prepareExportQuery = (
     alias: capitalizeWords(column.getColDef()?.headerName || column.getColId()),
   }));
 
+  const { pagination, ...baseQueryWithoutPagination } = baseQueryObject;
+
   const finalQuery = {
-    ...baseQueryObject,
+    ...baseQueryWithoutPagination,
     filters: updatedFilters,
     export_columns: exportColumns,
   };
