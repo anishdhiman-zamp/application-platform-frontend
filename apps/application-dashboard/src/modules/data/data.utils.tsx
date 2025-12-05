@@ -1156,7 +1156,6 @@ export const prepareExportQuery = (
 
   const finalQuery = {
     ...baseQueryWithoutPagination,
-    limit: 1000,
     filters: updatedFilters,
     export_columns: exportColumns,
   };
