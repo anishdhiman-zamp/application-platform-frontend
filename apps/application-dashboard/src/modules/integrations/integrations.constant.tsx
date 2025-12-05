@@ -77,12 +77,12 @@ export const PILLS_CONFIG: PillConfig[] = [
   },
   {
     type: CONNECTION_PILLS_TYPE.REAUTH,
-    icon: <RefreshCcw width={14} height={14} className='p-[2px]' />,
+    icon: <RefreshCcw width={14} height={14} className='text-ORANGE_800 p-[2px]' />,
     tooltipWidth: 'w-32',
   },
   {
     type: CONNECTION_PILLS_TYPE.DISCONNECTED,
-    icon: <Unlink width={14} height={14} className='p-[2px]' />,
+    icon: <Unlink width={14} height={14} className='text-RED_800 p-[2px]' />,
     tooltipWidth: 'w-30',
   },
 ];
