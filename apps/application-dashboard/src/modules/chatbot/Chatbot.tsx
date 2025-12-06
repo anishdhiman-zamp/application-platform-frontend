@@ -181,6 +181,7 @@ const Chatbot = ({
           scope={scope}
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
+          autoFocus={isOpen}
         />
       </div>
     );

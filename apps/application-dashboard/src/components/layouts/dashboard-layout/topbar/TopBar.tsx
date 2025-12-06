@@ -147,7 +147,7 @@ const Topbar = () => {
         <div className='min-w-0 flex-1'>
           <BreadCrumb isSidebarOpen={isSidebarOpen} />
         </div>
-        <div className='flex-shrink-0'>
+        <div className='-mi-6 flex-shrink-0'>
           <WorkWithPace />
         </div>
         <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>

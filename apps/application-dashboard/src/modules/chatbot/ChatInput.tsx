@@ -20,6 +20,7 @@ interface ChatInputProps {
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  autoFocus?: boolean;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
@@ -31,6 +32,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  autoFocus = false,
 }) => {
   const {
     value,
@@ -122,6 +124,16 @@ export const ChatInput: FC<ChatInputProps> = ({
   useEffect(() => {
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
+
+  useEffect(() => {
+    if (autoFocus && !isDisabled && !shouldShowRecorder) {
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFocus, isDisabled, shouldShowRecorder]);
 
   return (
     <div
