@@ -7,7 +7,7 @@ import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
 import { Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useGetBaseUrlQuery, useWhoAmIQuery } from '@/apis/auth';
+import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
 import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import CommonWrapper from '@/components/commonWrapper';
@@ -34,7 +34,6 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
 
-  const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
     { refetchOnMountOrArgChange: false, skip: !user?.user_email },
@@ -52,7 +51,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     refetchOnMountOrArgChange: false,
   });
 
-  const defaultOrgName = useMemo(() => session?.orgs?.[0]?.name ?? '', [session]);
+  const defaultOrgName = useMemo(() => user?.orgs?.[0]?.name ?? '', [user]);
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
