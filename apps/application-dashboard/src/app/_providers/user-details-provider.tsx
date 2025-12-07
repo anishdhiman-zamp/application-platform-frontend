@@ -1,13 +1,9 @@
-import { useEffect, useMemo } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useWhoAmIQuery } from '@/apis/auth';
 import NotAuthorized from '@/components/NotAuthorized';
 import { ALLOWED_EMAIL_DOMAINS, ENVIRONMENT } from '@/constants/common.constants';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { useCookieInvalidation } from '@/hooks/useCookieInvalidation';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
 import { setDashboardLoader, setRoles, setUser, setWorkspace } from '@/store/slices/user';
 import { UserRoleIdType } from '@/types/api/auth.types';
@@ -16,16 +12,17 @@ import { identifyPostHogUser } from '@/utils/postHog';
 
 const UserDetailsProvider = () => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const pathname = usePathname();
-  const { evaluate, ldClient } = useFeatureFlags();
   const workspace = useAppSelector((state: RootState) => state.user.workspace);
 
-  const { data: session, isLoading, isSuccess } = useWhoAmIQuery();
+  const {
+    data: session,
+    isLoading,
+    isSuccess,
+  } = useWhoAmIQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   useCookieInvalidation(USER_SESSION_COOKIE);
-
-  const isAdminRoute = useMemo(() => pathname?.startsWith(ROUTES_PATH.ADMIN), [pathname]);
 
   useEffect(() => {
     if (session && isSuccess) {
@@ -45,16 +42,6 @@ const UserDetailsProvider = () => {
       dispatch(setDashboardLoader(true));
     }
   }, [isLoading, session?.user_id, workspace, dispatch]);
-
-  useEffect(() => {
-    if (isAdminRoute && ldClient) {
-      evaluate(FEATURE_FLAGS.ADMIN_PAGE).then((isAdminFeatureEnabled) => {
-        if (!isAdminFeatureEnabled) {
-          router.replace(ROUTES_PATH.NO_ACCESS);
-        }
-      });
-    }
-  }, [isAdminRoute, evaluate, ldClient, router]);
 
   if (
     session &&
