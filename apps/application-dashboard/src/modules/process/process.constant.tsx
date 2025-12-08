@@ -1,8 +1,15 @@
+import React from 'react';
+import { Calendar, FileText, Hash, Link, Mail, Type } from 'lucide-react';
+import BluePrintDataset from 'modules/process/dataset-create-edit/components/BluePrintDataset';
+import PreviewDataset from 'modules/process/dataset-create-edit/components/PreviewDataset';
 import {
   ACTIVITY_RUN_STATUS,
   ARTIFACT_TYPE,
   CTA_ACTION,
   CTA_COMPONENT_TYPE,
+  DatasetColumnHeaderTypes,
+  DatasetColumnTypes,
+  DatasetTabsTypes,
   DATE_SEPARATOR,
   LOG_STATUS,
   PDF_DATASET_TAB,
@@ -255,3 +262,29 @@ export const CTA_COMPONENT_TYPE_ICON_MAPPING = {
 
 export const ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH: number[] = [28, 182, 786, 134, 134, 210, 134];
 export const N_A_VALUE = 'N/A';
+
+export const DATASET_PLAYGROUND_TABS_LIST = [
+  { label: 'Blueprint', value: DatasetTabsTypes.BLUEPRINT },
+  { label: 'Preview', value: DatasetTabsTypes.PREVIEW },
+];
+
+export const TAB_CONTENT_MAPPING = {
+  [DatasetTabsTypes.BLUEPRINT]: <BluePrintDataset />,
+  [DatasetTabsTypes.PREVIEW]: <PreviewDataset />,
+};
+
+export const DATASET_COLUMN_HEADERS_LIST = [
+  { label: 'Column Name', value: DatasetColumnHeaderTypes.COLUMN_NAME },
+  { label: 'Column Type', value: DatasetColumnHeaderTypes.COLUMN_TYPE, width: 200 },
+  { label: 'Required', value: DatasetColumnHeaderTypes.REQUIRED },
+  { label: '', value: DatasetColumnHeaderTypes.ACTIONS, width: 20 },
+];
+
+export const DATASET_COLUMN_TYPES_LIST = [
+  { label: 'Text', value: DatasetColumnTypes.TEXT, icon: Type },
+  { label: 'File', value: DatasetColumnTypes.FILE, icon: FileText },
+  { label: 'Link', value: DatasetColumnTypes.LINK, icon: Link },
+  { label: 'Date', value: DatasetColumnTypes.DATE, icon: Calendar },
+  { label: 'Number', value: DatasetColumnTypes.NUMBER, icon: Hash },
+  { label: 'Email', value: DatasetColumnTypes.EMAIL, icon: Mail },
+];
