@@ -53,6 +53,7 @@ const WorkWithPace = () => {
       scope={activityRunId ? ScopeType.ACTIVITY_RUN : ScopeType.PROCESS}
       hideFeedbackCount
       onChatbotTrigger={handleChatbotTrigger}
+      clearInputOnClose
     >
       <Button
         variant='outline'

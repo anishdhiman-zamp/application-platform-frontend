@@ -10,7 +10,6 @@ export const ROUTES_PATH = {
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   PAGE_SHEET: '/pages/:pageId/:sheetId',
   NO_ACCESS: '/no-access',
-  ADMIN: '/admin',
   PAYMENTS: '/payments',
   INVITATIONS: '/invitations',
   MONEY_TRANSFER: '/payments/money-transfer',

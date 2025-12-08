@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import { ActionType, BLOCK_TYPE, LocationData, ResourceType, ScopeType, useChat } from '@zamp-platform/chat';
@@ -25,6 +25,8 @@ interface UseChatInputProps {
   conversationId?: string;
   setHeader?: (header: string) => void;
   scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
 }
 
 const useChatInput = ({
@@ -33,13 +35,29 @@ const useChatInput = ({
   conversationId,
   setHeader,
   scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
 }: UseChatInputProps) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
 
-  const [value, setValue] = useState('');
+  const [internalValue, setInternalValue] = useState('');
+
+  const hasExternalControl = externalInputValue !== undefined && setExternalInputValue !== undefined;
+  const value = hasExternalControl ? externalInputValue : internalValue;
+
+  const setValue = useCallback(
+    (newValue: SetStateAction<string>) => {
+      if (hasExternalControl && setExternalInputValue) {
+        setExternalInputValue(newValue);
+      } else {
+        setInternalValue(newValue);
+      }
+    },
+    [hasExternalControl, setExternalInputValue],
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);

@@ -9,7 +9,7 @@ interface DateSeparatorProps {
 }
 
 const DateSeparator = ({ date }: DateSeparatorProps) => {
-  const dateObj = new Date(date);
+  const dateObj = new Date(date.replace(/Z$/, ''));
 
   const displayText = useMemo(() => {
     if (isToday(dateObj)) {

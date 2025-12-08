@@ -143,10 +143,14 @@ const Topbar = () => {
           />
         </div>
       </div>
-      <div className='flex w-full items-center justify-between'>
-        <BreadCrumb isSidebarOpen={isSidebarOpen} />
-        <WorkWithPace />
-        <div className='pr-8'>{renderRightSideActions}</div>
+      <div className='flex w-full items-center'>
+        <div className='min-w-0 flex-1'>
+          <BreadCrumb isSidebarOpen={isSidebarOpen} />
+        </div>
+        <div className='-mi-6 flex-shrink-0'>
+          <WorkWithPace />
+        </div>
+        <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
 import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
@@ -18,6 +18,9 @@ interface ChatInputProps {
   isDisabled: boolean;
   header: string;
   scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  autoFocus?: boolean;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
@@ -27,6 +30,9 @@ export const ChatInput: FC<ChatInputProps> = ({
   isDisabled,
   header,
   scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
+  autoFocus = false,
 }) => {
   const {
     value,
@@ -45,6 +51,8 @@ export const ChatInput: FC<ChatInputProps> = ({
     conversationId,
     setHeader,
     scope,
+    externalInputValue,
+    setExternalInputValue,
   });
 
   const {
@@ -116,6 +124,16 @@ export const ChatInput: FC<ChatInputProps> = ({
   useEffect(() => {
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
+
+  useEffect(() => {
+    if (autoFocus && !isDisabled && !shouldShowRecorder) {
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFocus, isDisabled, shouldShowRecorder]);
 
   return (
     <div
