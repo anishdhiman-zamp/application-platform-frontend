@@ -1,7 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DragEndEvent, KeyboardSensor, Modifier, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ColumnDataType, DatasetColumnTypes } from 'modules/process/process.types';
+
+const restrictToFirstItem: Modifier = ({ transform, draggingNodeRect, containerNodeRect }) => {
+  if (!draggingNodeRect || !containerNodeRect) {
+    return transform;
+  }
+
+  // Prevent dragging above the container's top edge
+  const minY = containerNodeRect.top - draggingNodeRect.top;
+
+  return {
+    ...transform,
+    y: Math.max(transform.y, minY),
+  };
+};
 
 export const useDatasetColumns = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -63,6 +78,7 @@ export const useDatasetColumns = () => {
     columns,
     sensors,
     scrollContainerRef,
+    modifiers: [restrictToVerticalAxis, restrictToParentElement, restrictToFirstItem],
     handleDragEnd,
     handleColumnChange,
     handleDeleteColumn,
