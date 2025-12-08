@@ -179,18 +179,17 @@ jobs:
         with:
           ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
 
-      - name: Cache Hit - Dependencies Restored
-        if: steps.cache-deps.outputs.cache-hit == 'true'
+      - name: Cache Status
         run: |
-          echo "✅ Dependencies restored from cache - skipping npm ci"
-          echo "📦 Cached dependencies are up to date"
+          if [ "${{ steps.cache-deps.outputs.cache-hit }}" == "true" ]; then
+            echo "✅ Cache HIT - Dependencies restored from cache"
+          else
+            echo "❌ Cache MISS - Will install dependencies"
+          fi
 
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          echo "📦 Installing dependencies (cache miss)..."
-          npm ci --prefer-offline --no-audit
-          echo "✅ Dependencies installed"
+        run: npm ci --prefer-offline --no-audit
 
       - name: Fetch secrets from AWS Secrets Manager
         run: |
