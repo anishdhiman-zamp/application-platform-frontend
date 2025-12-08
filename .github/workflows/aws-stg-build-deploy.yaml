@@ -144,10 +144,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
             apps/application-dashboard/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-            ${{ runner.os }}-nextjs-
+            ${{ runner.os }}-deps-
 
       - name: "Set up AWS credentials using OIDC"
         uses: aws-actions/configure-aws-credentials@v4
@@ -180,9 +179,18 @@ jobs:
         with:
           ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
 
+      - name: Cache Hit - Dependencies Restored
+        if: steps.cache-deps.outputs.cache-hit == 'true'
+        run: |
+          echo "✅ Dependencies restored from cache - skipping npm ci"
+          echo "📦 Cached dependencies are up to date"
+
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit
+        run: |
+          echo "📦 Installing dependencies (cache miss)..."
+          npm ci --prefer-offline --no-audit
+          echo "✅ Dependencies installed"
 
       - name: Fetch secrets from AWS Secrets Manager
         run: |
@@ -289,14 +297,11 @@ jobs:
             exit 1
           fi
 
-          # Build and push Docker image with inline caching (ECR compatible)
-          # Cache metadata is embedded in the image and reused across builds
+          # Build and push Docker image
           docker buildx build \
             --platform linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPO:latest \
-            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPO:latest \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
             --build-arg NEXT_PUBLIC_ASSET_PREFIX="$NEXT_PUBLIC_ASSET_PREFIX" \
             --build-arg TIMESTAMP="$TIMESTAMP" \
             --build-arg NEXT_PUBLIC_ENVIRONMENT="$NEXT_PUBLIC_ENVIRONMENT" \
