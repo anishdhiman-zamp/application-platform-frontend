@@ -1,4 +1,4 @@
-import { type FC, useMemo } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import ConnectionPills from 'modules/integrations/components/pills/ConnectionPills';
 import ProcessPill from 'modules/integrations/components/pills/ProcessPill';
@@ -8,6 +8,7 @@ import RightArrow from '@/assets/Icons/RightArrow';
 import { IMAGE_PREFIX } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import type { IntegrationType } from '@/modules/integrations/integrations.types';
+import { cn } from '@/utils/common';
 
 interface IntegrationCardProps {
   integration: IntegrationType;
@@ -17,6 +18,7 @@ interface IntegrationCardProps {
 const IntegrationCard: FC<IntegrationCardProps> = ({ integration, isEnabled = false }) => {
   const router = useRouter();
   const { id, display_name, logo, what_possible } = integration;
+  const [isHoveringPills, setIsHoveringPills] = useState(false);
 
   const description = useMemo(() => {
     const items = what_possible.slice(0, 4);
@@ -28,7 +30,10 @@ const IntegrationCard: FC<IntegrationCardProps> = ({ integration, isEnabled = fa
   return (
     <div
       onClick={() => router.push(`${ROUTES_PATH.INTEGRATIONS}/${id}`)}
-      className='border-GRAY_400 hover:border-GRAY_300 hover:bg-BG_GRAY_2 active:border-GRAY_300 active:bg-GRAY_100 group flex h-[170px] cursor-pointer flex-col justify-between rounded-md border bg-white p-3.5 transition-colors select-none'
+      className={cn(
+        'border-GRAY_400 group flex h-[170px] cursor-pointer flex-col justify-between rounded-md border bg-white p-3.5 transition-colors select-none',
+        !isHoveringPills && 'hover:border-GRAY_300 hover:bg-BG_GRAY_2 active:border-GRAY_300 active:bg-GRAY_100',
+      )}
     >
       <div className='flex flex-col gap-y-2'>
         {/* Logo and Name */}
@@ -55,22 +60,29 @@ const IntegrationCard: FC<IntegrationCardProps> = ({ integration, isEnabled = fa
       </div>
 
       {/* Connect Button or Stats */}
-      <div className='mt-4 flex justify-end'>
-        {isEnabled ? (
-          <div className='flex w-full items-center justify-between'>
-            <ConnectionPills />
-            <ProcessPill />
-          </div>
-        ) : (
-          <Button
-            variant='ghost'
-            size='small'
-            className='text-GRAY_700 f-11-500 hover:bg-GRAY_100 group-hover:text-GRAY_1000 group-active:text-GRAY_1000'
-          >
-            Connect
-          </Button>
-        )}
-      </div>
+
+      {isEnabled ? (
+        <div className='flex w-full items-center justify-between'>
+          <ConnectionPills
+            onMouseEnter={() => setIsHoveringPills(true)}
+            onMouseLeave={() => setIsHoveringPills(false)}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <ProcessPill
+            onMouseEnter={() => setIsHoveringPills(true)}
+            onMouseLeave={() => setIsHoveringPills(false)}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ) : (
+        <Button
+          variant='ghost'
+          size='small'
+          className='text-GRAY_700 f-11-500 hover:bg-GRAY_100 group-hover:text-GRAY_1000 group-active:text-GRAY_1000 ml-auto'
+        >
+          Connect
+        </Button>
+      )}
     </div>
   );
 };

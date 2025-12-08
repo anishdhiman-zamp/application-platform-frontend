@@ -10,6 +10,8 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { getAssetUrl, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { useScrollDetection } from '@/hooks/useScrollDetection';
+import { cn } from '@/utils/common';
 
 interface IntegrationGuidePanelProps {
   guide?: string;
@@ -19,6 +21,8 @@ interface IntegrationGuidePanelProps {
 const IntegrationGuidePanel: FC<IntegrationGuidePanelProps> = ({ guide, onClose }) => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
 
   const getMarkdownContent = useCallback(async () => {
     if (!guide) {
@@ -55,26 +59,39 @@ const IntegrationGuidePanel: FC<IntegrationGuidePanelProps> = ({ guide, onClose 
   return (
     <motion.div
       initial={{ width: 0, opacity: 0 }}
-      animate={{ width: '30%', opacity: 1 }}
-      exit={{ width: 0, opacity: 0 }}
-      transition={{
-        duration: 0.3,
-        ease: 'easeInOut',
+      animate={{
+        width: '30%',
+        opacity: 1,
+        transition: {
+          width: { duration: 0.25, ease: 'easeOut' },
+          opacity: { duration: 0.2, delay: 0.25, ease: 'easeOut' },
+        },
+      }}
+      exit={{
+        width: 0,
+        opacity: 0,
+        transition: {
+          opacity: { duration: 0.15, ease: 'easeOut' },
+          width: { duration: 0.25, delay: 0.1, ease: 'easeInOut' },
+        },
       }}
       className='border-GRAY_400 flex h-full flex-shrink-0 flex-col overflow-hidden border-l bg-white'
     >
-      <div className='flex items-center justify-between px-12 pt-5 pb-10'>
+      <div className={cn('flex items-center justify-between px-12 py-5', isScrolled && 'border-GRAY_400 border-b')}>
         <span className='f-13-450 text-GRAY_600'>Connection guide</span>
 
         <X width={16} height={16} onClick={onClose} className='text-GRAY_700 hover:text-GRAY_700 cursor-pointer' />
       </div>
       <CommonWrapper
-        className='flex-1 overflow-y-auto px-12 py-4'
+        className='flex-1 overflow-hidden'
         loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
         skeletonType={SkeletonTypes.CUSTOM}
         isLoading={isLoading}
       >
-        <div className='markdown-body prose prose-sm max-w-none'>
+        <div
+          ref={scrollContainerRef}
+          className='markdown-body prose prose-sm h-full max-w-none overflow-y-auto px-12 py-4'
+        >
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
             {markdownContent}
           </ReactMarkdown>

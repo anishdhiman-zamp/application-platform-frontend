@@ -21,7 +21,7 @@ const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
   onConnectClick,
 }) => {
   return (
-    <div className='mt-18 flex items-center justify-between'>
+    <div className='flex items-center justify-between'>
       <div className='flex items-center gap-x-2'>
         <div className='relative h-7 w-7 flex-shrink-0'>
           <Image

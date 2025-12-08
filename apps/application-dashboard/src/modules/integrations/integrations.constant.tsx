@@ -1,10 +1,14 @@
-import { Link2, RefreshCcw, Unlink } from 'lucide-react';
+import { Link2, RefreshCcw, RotateCcw, Unlink } from 'lucide-react';
 import {
+  ACCOUNT_STATUS,
+  type AccountStatus,
   CONNECTION_PILLS_TYPE,
   type ConnectionPillsDetailsMap,
   type PillConfig,
   PILLS_ACTIONS,
+  type StatusConfig,
 } from 'modules/integrations/integrations.types';
+import ArchiveIcon from '@/assets/Icons/ArchiveIcon';
 
 export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
   synced: {
@@ -86,3 +90,30 @@ export const PILLS_CONFIG: PillConfig[] = [
     tooltipWidth: 'w-30',
   },
 ];
+
+export const STATUS_CONFIG: Record<AccountStatus, StatusConfig> = {
+  [ACCOUNT_STATUS.CONNECTED]: {
+    labelClassName: 'text-GRAY_700',
+    icon: null,
+    actionLabel: 'Archive',
+    actionIcon: <ArchiveIcon height={14} width={14} />,
+  },
+  [ACCOUNT_STATUS.ARCHIVED]: {
+    labelClassName: 'text-GRAY_700',
+    icon: <ArchiveIcon height={14} width={14} />,
+    actionLabel: 'Restore',
+    actionIcon: <RotateCcw height={14} width={14} />,
+  },
+  [ACCOUNT_STATUS.NEEDS_REAUTH]: {
+    labelClassName: 'text-ORANGE_800',
+    icon: <RefreshCcw height={14} width={14} />,
+    actionLabel: 'Re-Auth',
+    actionIcon: null,
+  },
+  [ACCOUNT_STATUS.DISCONNECTED]: {
+    labelClassName: 'text-RED_800',
+    icon: <Unlink height={14} width={14} />,
+    actionLabel: 'Reconnect',
+    actionIcon: null,
+  },
+};

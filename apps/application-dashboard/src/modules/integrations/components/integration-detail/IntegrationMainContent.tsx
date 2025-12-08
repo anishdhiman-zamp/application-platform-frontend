@@ -1,21 +1,41 @@
-import ImageKitImage from '@/components/ImageKitImage';
-import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
+import { type FC } from 'react';
+import AccountSection from 'modules/integrations/components/integration-detail/AccountSection';
+import { ACCOUNT_STATUS, type AccountStatus } from 'modules/integrations/integrations.types';
 
-const IntegrationMainContent = () => {
+interface AccountData {
+  id: string;
+  email: string;
+  status: AccountStatus;
+}
+
+// TODO: Replace with actual data from API
+const MOCK_ACCOUNTS: AccountData[] = [
+  { id: '1', email: 'admin@zamp.ai', status: ACCOUNT_STATUS.CONNECTED },
+  { id: '2', email: 'admin@zamp.ai', status: ACCOUNT_STATUS.ARCHIVED },
+  { id: '3', email: 'admin@zamp.ai', status: ACCOUNT_STATUS.NEEDS_REAUTH },
+  { id: '4', email: 'admin@zamp.ai', status: ACCOUNT_STATUS.DISCONNECTED },
+];
+
+interface IntegrationMainContentProps {
+  accounts?: AccountData[];
+}
+
+const IntegrationMainContent: FC<IntegrationMainContentProps> = ({ accounts = MOCK_ACCOUNTS }) => {
+  const handleAccountAction = (accountId: string, status: AccountStatus) => {
+    // TODO: Implement action handlers based on status
+    console.log(`Action triggered for account ${accountId} with status ${status}`);
+  };
+
   return (
-    <div className='flex flex-1 flex-col items-center justify-center gap-y-2'>
-      <div className='relative flex h-[150px] w-[190px] items-center justify-center'>
-        <ImageKitImage
-          src={NEEDS_ATTENTION_EMPTY_STATE}
-          alt='Your processes will appear here once you get started'
-          className='h-full w-full object-cover object-center'
-          width={190}
-          height={150}
+    <div className='flex w-full flex-1 flex-col gap-y-8'>
+      {accounts.map((account) => (
+        <AccountSection
+          key={account.id}
+          accountEmail={account.email}
+          status={account.status}
+          onActionClick={() => handleAccountAction(account.id, account.status)}
         />
-      </div>
-      <p className='f-14-400 text-GRAY_700 max-w-[260px] text-center text-wrap break-words'>
-        Your processes will appear here once you get started
-      </p>
+      ))}
     </div>
   );
 };

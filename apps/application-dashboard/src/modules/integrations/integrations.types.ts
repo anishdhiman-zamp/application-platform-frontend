@@ -38,3 +38,19 @@ export interface PillConfig {
   icon: ReactNode;
   tooltipWidth: string;
 }
+
+export const ACCOUNT_STATUS = {
+  CONNECTED: 'connected',
+  ARCHIVED: 'archived',
+  NEEDS_REAUTH: 'needs_reauth',
+  DISCONNECTED: 'disconnected',
+} as const;
+
+export type AccountStatus = (typeof ACCOUNT_STATUS)[keyof typeof ACCOUNT_STATUS];
+
+export interface StatusConfig {
+  labelClassName: string;
+  icon: ReactNode | null;
+  actionLabel: string;
+  actionIcon: ReactNode | null;
+}

@@ -1,7 +1,8 @@
 'use client';
 
-import { type FC, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { cn } from 'utils/common';
+import { useScrollDetection } from '@/hooks/useScrollDetection';
 import IntegrationCard from '@/modules/integrations/components/IntegrationCard';
 import IntegrationHeader from '@/modules/integrations/components/IntegrationHeader';
 import type { IntegrationType } from '@/modules/integrations/integrations.types';
@@ -12,8 +13,7 @@ interface IntegrationsListProps {
 
 const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
 
   const filteredIntegrations = useMemo(() => {
     if (!searchQuery.trim()) return integrations;
@@ -26,20 +26,6 @@ const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
         integration.what_possible.some((action) => action.toLowerCase().includes(query)),
     );
   }, [integrations, searchQuery]);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      setIsScrolled(scrollContainer.scrollTop > 0);
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll);
-
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div className='flex h-full w-full flex-col'>
@@ -57,7 +43,7 @@ const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
         <div className='flex flex-col gap-y-8'>
           <div className='flex flex-col gap-y-2.5'>
             <span className='f-11-500 text-GRAY_700 tracking-wider uppercase'>Enabled</span>
-            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
               {filteredIntegrations?.slice(0, 4).map((integration) => (
                 <IntegrationCard key={integration.id} integration={integration} isEnabled={true} />
               ))}
@@ -66,7 +52,7 @@ const IntegrationsList: FC<IntegrationsListProps> = ({ integrations }) => {
 
           <div className='flex flex-col gap-y-2.5'>
             <span className='f-11-500 text-GRAY_700 tracking-wider uppercase'>Available</span>
-            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4'>
               {filteredIntegrations?.slice(4).map((integration) => (
                 <IntegrationCard key={integration.id} integration={integration} />
               ))}
