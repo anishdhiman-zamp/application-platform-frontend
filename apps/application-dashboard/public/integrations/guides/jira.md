@@ -39,14 +39,14 @@ Integrate Jira with Zamp to synchronize issues, track sprint progress, and enhan
 
 ### Issues
 
-| Field | Sync Direction |
-|-------|---------------|
-| Summary | ↔️ Two-way |
-| Description | ↔️ Two-way |
-| Status | ↔️ Two-way |
-| Assignee | ↔️ Two-way |
-| Priority | ↔️ Two-way |
-| Labels | ↔️ Two-way |
+| Field         | Sync Direction           |
+| ------------- | ------------------------ |
+| Summary       | ↔️ Two-way               |
+| Description   | ↔️ Two-way               |
+| Status        | ↔️ Two-way               |
+| Assignee      | ↔️ Two-way               |
+| Priority      | ↔️ Two-way               |
+| Labels        | ↔️ Two-way               |
 | Custom Fields | → One-way (Jira to Zamp) |
 
 ### Projects & Sprints
@@ -104,15 +104,3 @@ project = "PROJ" AND status != Done
 - Review JQL filters
 - Check project permissions
 - Verify issue types are included
-
-
-
-
-
-
-
-
-
-
-
-

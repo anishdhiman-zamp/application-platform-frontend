@@ -30,12 +30,12 @@ Choose which data types to import:
 
 ### Step 3: Configure Sync Schedule
 
-| Option | Description |
-|--------|-------------|
+| Option    | Description                |
+| --------- | -------------------------- |
 | Real-time | Sync as transactions occur |
-| Hourly | Sync every hour |
-| Daily | Sync once per day |
-| Manual | Sync on demand |
+| Hourly    | Sync every hour            |
+| Daily     | Sync once per day          |
+| Manual    | Sync on demand             |
 
 ## Available Data
 
@@ -76,15 +76,3 @@ Choose which data types to import:
 
 - Re-authorize the connection
 - Verify your Square account has the required permissions
-
-
-
-
-
-
-
-
-
-
-
-
