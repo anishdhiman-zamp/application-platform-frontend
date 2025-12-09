@@ -11,11 +11,12 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { getAssetUrl, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
+import type { defaultFnType } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 interface IntegrationGuidePanelProps {
   guide?: string;
-  onClose: () => void;
+  onClose: defaultFnType;
 }
 
 const IntegrationGuidePanel: FC<IntegrationGuidePanelProps> = ({ guide, onClose }) => {

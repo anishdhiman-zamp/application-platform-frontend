@@ -4,13 +4,14 @@ import { cn } from '@zamp-platform/ui/utils';
 import { BookOpen } from 'lucide-react';
 import Image from 'next/image';
 import { IMAGE_PREFIX } from '@/constants/icons';
+import type { defaultFnType } from '@/types/commonTypes';
 
 interface IntegrationDetailHeaderProps {
   displayName: string;
   logo: string;
   showGuide: boolean;
-  onGuideClick: () => void;
-  onConnectClick: () => void;
+  onGuideClick: defaultFnType;
+  onConnectClick: defaultFnType;
 }
 
 const IntegrationDetailHeader: FC<IntegrationDetailHeaderProps> = ({
