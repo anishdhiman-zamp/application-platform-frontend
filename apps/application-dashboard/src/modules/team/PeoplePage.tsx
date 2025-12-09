@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
@@ -66,13 +66,15 @@ const PeoplePage = () => {
   return (
     <div className='h-full w-full p-10'>
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
-      <PeopleTabs
-        filteredTeamMembers={filteredTeamMembers ?? []}
-        isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
-        filteredInvitedMembers={filteredInvitedMembers ?? []}
-        isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
-        search={search}
-      />
+      <Suspense>
+        <PeopleTabs
+          filteredTeamMembers={filteredTeamMembers ?? []}
+          isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
+          filteredInvitedMembers={filteredInvitedMembers ?? []}
+          isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
+          search={search}
+        />
+      </Suspense>
     </div>
   );
 };

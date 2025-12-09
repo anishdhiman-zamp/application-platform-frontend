@@ -1,9 +1,10 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import WidgetPlayground from '@/modules/widgets/create/WidgetPlayground';
 
-const WidgetPage = () => {
+const WidgetPageContent = () => {
   const searchParams = useSearchParams();
   const isWidget = searchParams?.get('isWidget');
 
@@ -16,6 +17,14 @@ const WidgetPage = () => {
   }
 
   return null;
+};
+
+const WidgetPage = () => {
+  return (
+    <Suspense>
+      <WidgetPageContent />
+    </Suspense>
+  );
 };
 
 export default WidgetPage;
