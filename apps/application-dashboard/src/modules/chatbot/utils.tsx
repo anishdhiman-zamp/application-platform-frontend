@@ -89,6 +89,10 @@ export const getFeedbackItems = (feedbackItems: FeedbackItemType[], annotationLo
     if (annotationLocation.type === LocationType.ACTIVITY_RUN && itemLocation.type === LocationType.ACTIVITY_RUN) {
       matchingFeedbackItems.push(item);
     }
+
+    if (annotationLocation.type === LocationType.PROCESS && itemLocation.type === LocationType.PROCESS) {
+      matchingFeedbackItems.push(item);
+    }
   }
 
   return matchingFeedbackItems;

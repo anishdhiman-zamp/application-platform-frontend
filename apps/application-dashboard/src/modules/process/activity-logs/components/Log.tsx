@@ -17,7 +17,7 @@ import CommentButton from '@/modules/chatbot/CommentButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
-import { cn } from '@/utils/common';
+import { cn, ensureUTCTimestamp } from '@/utils/common';
 
 type LogProps = {
   isLastLogOfDate?: boolean;
@@ -90,7 +90,7 @@ const Log: FC<LogProps> = ({
 
   // formatted time
   const formattedTime = useMemo(() => {
-    return format(new Date(updated_at), DATE_FORMATS.HH_MM_A);
+    return format(new Date(ensureUTCTimestamp(updated_at)), DATE_FORMATS.HH_MM_A);
   }, [updated_at]);
 
   // indicator-stroke and shimmer loop
