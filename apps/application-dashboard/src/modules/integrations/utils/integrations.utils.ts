@@ -2,7 +2,7 @@ import { captureException } from '@sentry/nextjs';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { IMAGE_PREFIX } from '@/constants/icons';
-import type { IntegrationsDataType, IntegrationType } from '@/modules/integrations/integrations.types';
+import type { IntegrationsDataType, IntegrationType } from '@/modules/integrations/types/integrations.types';
 
 /**
  * Fetches integrations data from CDN if available, otherwise falls back to local file

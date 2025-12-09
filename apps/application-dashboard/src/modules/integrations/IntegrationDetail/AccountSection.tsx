@@ -1,8 +1,8 @@
 import { type FC, type ReactNode } from 'react';
 import { Button } from '@zamp-platform/ui';
-import ProcessCards from 'modules/integrations/components/integration-detail/ProcessCards';
-import { STATUS_CONFIG } from 'modules/integrations/integrations.constant';
-import { type AccountStatus } from 'modules/integrations/integrations.types';
+import { STATUS_CONFIG } from '@/modules/integrations/constants/integrations.constant';
+import ProcessCards from '@/modules/integrations/IntegrationDetail/ProcessCards';
+import { type AccountStatus } from '@/modules/integrations/types/integrations.types';
 import type { defaultFnType } from '@/types/commonTypes';
 
 export interface AccountSectionProps {

@@ -1,8 +1,8 @@
 'use client';
 
 import type { FC } from 'react';
-import ConnectionPill from 'modules/integrations/components/pills/ConnectionPill';
-import { CONNECTION_PILLS_DETAILS, PILLS_CONFIG } from 'modules/integrations/integrations.constant';
+import { CONNECTION_PILLS_DETAILS, PILLS_CONFIG } from '@/modules/integrations/constants/integrations.constant';
+import ConnectionPill from '@/modules/integrations/Pills/ConnectionPill';
 
 interface ConnectionPillsProps {
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement>) => void;

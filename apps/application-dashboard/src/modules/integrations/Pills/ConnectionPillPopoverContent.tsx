@@ -1,7 +1,7 @@
 import { type FC, useMemo } from 'react';
 import { Button, PopoverContent, PopoverPortal } from '@zamp-platform/ui';
-import { PILLS_CONFIG } from 'modules/integrations/integrations.constant';
-import type { CONNECTION_PILLS_TYPE } from 'modules/integrations/integrations.types';
+import { PILLS_CONFIG } from '@/modules/integrations/constants/integrations.constant';
+import type { CONNECTION_PILLS_TYPE } from '@/modules/integrations/types/integrations.types';
 
 interface ConnectionPillPopoverContentProps {
   accounts: { id: string; email: string }[];

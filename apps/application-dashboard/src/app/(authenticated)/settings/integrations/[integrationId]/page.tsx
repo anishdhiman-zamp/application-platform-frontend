@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import IntegrationDetailPage from '@/modules/integrations/components/integration-detail/IntegrationDetailPage';
-import { fetchIntegrations } from '@/modules/integrations/integrations.utils';
+import IntegrationDetailPage from '@/modules/integrations/IntegrationDetail/IntegrationDetailPage';
+import { fetchIntegrations } from '@/modules/integrations/utils/integrations.utils';
 
 interface IntegrationDetailPageProps {
   params: Promise<{ integrationId: string }>;

@@ -3,9 +3,9 @@
 import { type FC, useMemo, useState } from 'react';
 import { cn } from 'utils/common';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
-import IntegrationCard from '@/modules/integrations/components/IntegrationCard';
-import IntegrationHeader from '@/modules/integrations/components/IntegrationHeader';
-import type { IntegrationType } from '@/modules/integrations/integrations.types';
+import IntegrationCard from '@/modules/integrations/AllIntegrations/IntegrationCard';
+import IntegrationHeader from '@/modules/integrations/AllIntegrations/IntegrationHeader';
+import type { IntegrationType } from '@/modules/integrations/types/integrations.types';
 
 interface IntegrationsListProps {
   integrations: IntegrationType[];

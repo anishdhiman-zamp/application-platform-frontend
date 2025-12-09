@@ -1,4 +1,5 @@
 import { Link2, RefreshCcw, RotateCcw, Unlink } from 'lucide-react';
+import ArchiveIcon from '@/assets/Icons/ArchiveIcon';
 import {
   ACCOUNT_STATUS,
   type AccountStatus,
@@ -7,8 +8,7 @@ import {
   type PillConfig,
   PILLS_ACTIONS,
   type StatusConfig,
-} from 'modules/integrations/integrations.types';
-import ArchiveIcon from '@/assets/Icons/ArchiveIcon';
+} from '@/modules/integrations/types/integrations.types';
 
 export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
   synced: {

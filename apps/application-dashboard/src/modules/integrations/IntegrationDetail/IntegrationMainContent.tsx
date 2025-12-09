@@ -1,6 +1,6 @@
 import { type FC } from 'react';
-import AccountSection from 'modules/integrations/components/integration-detail/AccountSection';
-import { ACCOUNT_STATUS, type AccountStatus } from 'modules/integrations/integrations.types';
+import AccountSection from '@/modules/integrations/IntegrationDetail/AccountSection';
+import { ACCOUNT_STATUS, type AccountStatus } from '@/modules/integrations/types/integrations.types';
 
 interface AccountData {
   id: string;

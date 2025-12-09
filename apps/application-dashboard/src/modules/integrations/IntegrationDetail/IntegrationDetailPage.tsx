@@ -1,16 +1,17 @@
 'use client';
 
 import { type FC, useRef, useState } from 'react';
-import IntegrationDetailHeader from 'modules/integrations/components/integration-detail/IntegrationDetailHeader';
-import IntegrationGuidePanel from 'modules/integrations/components/integration-detail/IntegrationGuidePanel';
-import IntegrationMainContent from 'modules/integrations/components/integration-detail/IntegrationMainContent';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import LeftArrow from '@/assets/Icons/LeftArrow';
 import { COLORS } from '@/constants/colors';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
-import type { IntegrationType } from '@/modules/integrations/integrations.types';
+import ConnectionModal from '@/modules/integrations/components/ConnectionModal';
+import IntegrationDetailHeader from '@/modules/integrations/IntegrationDetail/IntegrationDetailHeader';
+import IntegrationGuidePanel from '@/modules/integrations/IntegrationDetail/IntegrationGuidePanel';
+import IntegrationMainContent from '@/modules/integrations/IntegrationDetail/IntegrationMainContent';
+import type { IntegrationType } from '@/modules/integrations/types/integrations.types';
 import { cn } from '@/utils/common';
 
 interface IntegrationDetailPageProps {
@@ -18,19 +19,20 @@ interface IntegrationDetailPageProps {
 }
 
 const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) => {
-  const { id, guide, display_name, logo, what_possible } = integration;
+  const { guide, display_name, logo, what_possible } = integration;
 
-  const [showGuide, setShowGuide] = useState<boolean>(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { ref: scrollContainerRef, isScrolled } = useScrollDetection();
+
+  const [showGuide, setShowGuide] = useState<boolean>(false);
+  const [isConnectionModalOpen, setIsConnectionModalOpen] = useState<boolean>(false);
 
   const handleGuideClick = () => {
     setShowGuide(!showGuide);
   };
 
   const handleConnectClick = () => {
-    // TODO: Implement connect functionality
-    console.log('Connect clicked for:', id);
+    setIsConnectionModalOpen(true);
   };
 
   return (
@@ -96,6 +98,12 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
       <AnimatePresence>
         {showGuide && <IntegrationGuidePanel guide={guide} onClose={handleGuideClick} />}
       </AnimatePresence>
+
+      <ConnectionModal
+        integration={integration}
+        isOpen={isConnectionModalOpen}
+        onClose={() => setIsConnectionModalOpen(false)}
+      />
     </div>
   );
 };

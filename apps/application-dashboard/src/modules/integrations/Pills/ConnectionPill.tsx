@@ -3,12 +3,12 @@
 import type { FC } from 'react';
 import { Button, Popover, PopoverTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import ConnectionPillPopoverContent from 'modules/integrations/components/pills/ConnectionPillPopoverContent';
-import ConnectionPillTooltipContent from 'modules/integrations/components/pills/ConnectionPillTooltipContent';
-import usePopoverWithTooltip from 'modules/integrations/hooks/usePopoverWithTooltip';
-import { PILL_STYLE_MAP } from 'modules/integrations/integrations.constant';
-import type { ConnectionPillsDetails, PillConfig } from 'modules/integrations/integrations.types';
 import TooltipV2 from '@/components/common/TooltipV2';
+import { PILL_STYLE_MAP } from '@/modules/integrations/constants/integrations.constant';
+import usePopoverWithTooltip from '@/modules/integrations/hooks/usePopoverWithTooltip';
+import ConnectionPillPopoverContent from '@/modules/integrations/Pills/ConnectionPillPopoverContent';
+import ConnectionPillTooltipContent from '@/modules/integrations/Pills/ConnectionPillTooltipContent';
+import type { ConnectionPillsDetails, PillConfig } from '@/modules/integrations/types/integrations.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 
 interface ConnectionPillProps {
