@@ -1,10 +1,10 @@
+'use client';
+
 import { type FC, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
+import IntegrationCardContent from 'modules/integrations/AllIntegrations/IntegrationCardContent';
 import ConnectionModal from 'modules/integrations/components/ConnectionModal';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import RightArrow from '@/assets/Icons/RightArrow';
-import { IMAGE_PREFIX } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import ConnectionPills from '@/modules/integrations/Pills/ConnectionPills';
 import ProcessPill from '@/modules/integrations/Pills/ProcessPill';
@@ -34,40 +34,20 @@ const IntegrationCard: FC<IntegrationCardProps> = ({ integration, isEnabled = fa
     setIsConnectionModalOpen(true);
   };
 
+  const handleCardClick = () => {
+    router.push(`${ROUTES_PATH.INTEGRATIONS}/${id}`);
+  };
+
   return (
     <>
       <div
-        onClick={() => router.push(`${ROUTES_PATH.INTEGRATIONS}/${id}`)}
+        onClick={handleCardClick}
         className={cn(
           'border-GRAY_400 group flex h-[170px] cursor-pointer flex-col justify-between rounded-md border bg-white p-3.5 transition-colors select-none',
           !isHoveringPills && 'hover:border-GRAY_300 hover:bg-BG_GRAY_2 active:border-GRAY_300 active:bg-GRAY_100',
         )}
       >
-        <div className='flex flex-col gap-y-2'>
-          {/* Logo and Name */}
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-x-2'>
-              <div className='relative h-6 w-6 flex-shrink-0'>
-                <Image
-                  src={`${IMAGE_PREFIX}${logo}`}
-                  alt={display_name}
-                  priority
-                  fill
-                  sizes='24px'
-                  className='object-contain'
-                />
-              </div>
-              <span className='f-14-550 text-GRAY_1000'>{display_name}</span>
-            </div>
-
-            <RightArrow width={14} height={14} className='text-GRAY_700 hidden group-hover:block' />
-          </div>
-
-          {/* Description */}
-          <p className='f-12-450 text-GRAY_700 line-clamp-2'>{description}</p>
-        </div>
-
-        {/* Connect Button or Stats */}
+        <IntegrationCardContent logo={logo} displayName={display_name} description={description} />
 
         {isEnabled ? (
           <div className='flex w-full items-center justify-between'>
