@@ -83,21 +83,21 @@ const IntegrationGuidePanel: FC<IntegrationGuidePanelProps> = ({ guide, onClose 
 
         <X width={16} height={16} onClick={onClose} className='text-GRAY_700 hover:text-GRAY_700 cursor-pointer' />
       </div>
-      <CommonWrapper
-        className='flex-1 overflow-hidden'
-        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
-        skeletonType={SkeletonTypes.CUSTOM}
-        isLoading={isLoading}
+      <div
+        ref={scrollContainerRef}
+        className='markdown-body prose prose-sm h-full max-w-none flex-1 overflow-y-auto px-12 py-4'
       >
-        <div
-          ref={scrollContainerRef}
-          className='markdown-body prose prose-sm h-full max-w-none overflow-y-auto px-12 py-4'
+        <CommonWrapper
+          className='h-full'
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
+          skeletonType={SkeletonTypes.CUSTOM}
+          isLoading={isLoading}
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
             {markdownContent}
           </ReactMarkdown>
-        </div>
-      </CommonWrapper>
+        </CommonWrapper>
+      </div>
     </motion.div>
   );
 };

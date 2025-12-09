@@ -63,7 +63,7 @@ export const CONNECTION_PILLS_DETAILS: ConnectionPillsDetailsMap = {
   },
 };
 
-export const PROCESS_NAMES = ['Account payable', 'Account recievable', 'Chargeback'];
+export const PROCESS_NAMES = ['Account payable', 'Account receivable', 'Chargeback'];
 
 export const PILL_STYLE_MAP = {
   [CONNECTION_PILLS_TYPE.SYNCED]: 'f-12-500 hover:bg-GRAY_100 h-5 gap-x-0.5 px-1 py-[2px]',
