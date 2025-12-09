@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
@@ -102,11 +102,7 @@ const Topbar = () => {
               </Button>
             </Link>
           ) : null}
-          {isFeedbackEnabled && (
-            <Suspense>
-              <FeedbackStatusButton processId={processId} />
-            </Suspense>
-          )}
+          {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
           <ShareButton />
         </div>
       );
@@ -149,14 +145,10 @@ const Topbar = () => {
       </div>
       <div className='flex w-full items-center'>
         <div className='min-w-0 flex-1'>
-          <Suspense fallback={<div />}>
-            <BreadCrumb isSidebarOpen={isSidebarOpen} />
-          </Suspense>
+          <BreadCrumb isSidebarOpen={isSidebarOpen} />
         </div>
         <div className='-mi-6 flex-shrink-0'>
-          <Suspense fallback={<div />}>
-            <WorkWithPace />
-          </Suspense>
+          <WorkWithPace />
         </div>
         <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
       </div>
