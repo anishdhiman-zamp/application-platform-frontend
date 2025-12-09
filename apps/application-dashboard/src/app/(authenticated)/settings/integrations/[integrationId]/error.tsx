@@ -8,13 +8,13 @@ interface ErrorProps {
   reset: defaultFnType;
 }
 
-export default function IntegrationsError({ reset }: ErrorProps) {
+export default function IntegrationDetailsError({ reset }: ErrorProps) {
   return (
     <div className='h-full w-full pt-10'>
       <ErrorCard
         type={ErrorCardTypes.GENERAL_API_FAIL}
-        title='Failed to load integrations'
-        subtitle={'Unable to fetch integrations. Please try again later.'}
+        title='Failed to load integration'
+        subtitle={'Unable to fetch integration details. Please try again later.'}
         onClose={reset}
       />
     </div>
