@@ -25,6 +25,7 @@ import {
   type DatasetUrlDataType,
   FormatColumnsParamsType,
 } from 'modules/data/data.types';
+import { N_A_VALUE } from 'modules/process/process.constant';
 import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
@@ -965,6 +966,10 @@ export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) =>
  */
 export const formatArrayValue = (value: MapAny[]): string => {
   // Check if it's an array of objects with same single key
+  if (value?.length === 0) {
+    return N_A_VALUE;
+  }
+
   if (
     value?.length > 0 &&
     value?.every((item) => typeof item === 'object' && item !== null) &&
