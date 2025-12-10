@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { captureException } from '@sentry/browser';
+import { Skeleton } from '@zamp-platform/ui';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ImageToolBar from 'modules/process/artifacts/components/image-artifact/ImageToolBar';
 import Image from 'next/image';
@@ -8,9 +10,19 @@ import { useGetSignedUrlByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ImageArtifactsResponseType } from '@/types/api/processApi.types';
+import { cn } from '@/utils/common';
+
+const ImageLoadingIndicator = () => (
+  <div className='flex h-full w-full items-center justify-center p-4'>
+    <div className='aspect-square max-h-full w-full max-w-md rounded-sm border border-gray-200 bg-white shadow-md'>
+      <Skeleton className='h-full w-full rounded-sm' />
+    </div>
+  </div>
+);
 
 interface ImageArtifactProps {
   imageArtifact: ImageArtifactsResponseType;
+  isArtifactsFetching: boolean;
   processId: string;
   artifactId: string;
 }
@@ -19,13 +31,16 @@ const MIN_SCALE = 0.5;
 const MAX_SCALE = 3.0;
 const ZOOM_STEP = 0.25;
 
-const ImageArtifact = ({ imageArtifact, artifactId, processId }: ImageArtifactProps) => {
+const ImageArtifact = ({ imageArtifact, artifactId, processId, isArtifactsFetching }: ImageArtifactProps) => {
   const [scale, setScale] = useState(1);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isImageError, setIsImageError] = useState(false);
 
   const {
     data: signedUrl,
     isLoading: isSignedUrlLoading,
     isError: isSignedUrlError,
+    isUninitialized: isSignedUrlUninitialized,
     refetch: refetchSignedUrl,
   } = useGetSignedUrlByArtifactIdQuery(
     {
@@ -47,17 +62,37 @@ const ImageArtifact = ({ imageArtifact, artifactId, processId }: ImageArtifactPr
     setScale((prev) => Math.max(prev - ZOOM_STEP, MIN_SCALE));
   }, []);
 
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setIsImageLoaded(true);
+      setIsImageError(true);
+      captureException(e, {
+        extra: { signedUrl: signedUrl?.signed_url },
+      });
+    },
+    [signedUrl?.signed_url],
+  );
+
+  const handleImageLoad = useCallback(() => {
+    setIsImageLoaded(true);
+  }, []);
+
+  const isCommonLoading = useMemo(() => {
+    return isSignedUrlLoading || isArtifactsFetching || isSignedUrlUninitialized;
+  }, [isSignedUrlLoading, isArtifactsFetching, isSignedUrlUninitialized]);
+
   return (
     <CommonWrapper
-      isLoading={isSignedUrlLoading}
-      isError={isSignedUrlError}
+      isLoading={isCommonLoading}
+      isError={isSignedUrlError || isImageError}
       refetchFunction={refetchSignedUrl}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ArtifactLoader />}
       className='bg-BG_GRAY_1 relative h-full w-full p-4'
     >
-      {/* Inner wrapper for the image with zoom support */}
-      <div className='relative h-full w-full overflow-auto'>
+      {!isImageLoaded && <ImageLoadingIndicator />}
+
+      <div className={cn('relative h-full w-full overflow-auto', !isImageLoaded ? 'invisible absolute' : '')}>
         <div
           className='flex h-full w-full items-center justify-center'
           style={{
@@ -74,25 +109,27 @@ const ImageArtifact = ({ imageArtifact, artifactId, processId }: ImageArtifactPr
             }}
           >
             <Image
-              src={
-                signedUrl?.signed_url || 'https://ik.imagekit.io/forrykorc/default-image.jpg?updatedAt=1763993334439'
-              }
+              src={signedUrl?.signed_url || ''}
               alt={imageArtifact?.display_name || 'Image'}
               fill
               className='object-contain'
               priority
+              onLoad={handleImageLoad}
+              onError={handleImageError}
             />
           </div>
         </div>
       </div>
 
-      <ImageToolBar
-        scale={scale}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        minScale={MIN_SCALE}
-        maxScale={MAX_SCALE}
-      />
+      {isImageLoaded && (
+        <ImageToolBar
+          scale={scale}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          minScale={MIN_SCALE}
+          maxScale={MAX_SCALE}
+        />
+      )}
     </CommonWrapper>
   );
 };
