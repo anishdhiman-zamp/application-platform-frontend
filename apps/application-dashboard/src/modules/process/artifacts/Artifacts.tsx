@@ -216,7 +216,6 @@ const Artifacts = ({
     };
   }, [dispatch]);
 
-  console.log('showArtifactLoader', showArtifactLoader);
 
   return (
     <div className='animate-fade-in relative flex h-full w-full flex-col'>
