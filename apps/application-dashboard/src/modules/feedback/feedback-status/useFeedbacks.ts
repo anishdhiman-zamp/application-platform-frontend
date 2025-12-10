@@ -1,7 +1,21 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useGetFeedbacksQuery } from '@/apis/feedback';
-import { setFeedbackItems, setLoading, setProcessId } from '@/store/slices/feedback.slice';
+import { useDispatch, useSelector } from 'react-redux';
+import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
+import { useGetFeedbacksQuery, useGetOpenFeedbackQuery } from '@/apis/feedback';
+import { useEventBus } from '@/app/_providers/sse-provider';
+import { mergeOpenFeedbackItems } from '@/modules/chatbot/utils';
+import { CONVERSATION_EVENT_TYPE } from '@/modules/feedback/feedback.constants';
+import { RootState } from '@/store';
+import {
+  addOpenFeedbackConversation,
+  removeOpenFeedbackConversation,
+  setFeedbackItems,
+  setLoading,
+  setMergedFeedbackItems,
+  setOpenFeedbackConversations,
+  setProcessId,
+} from '@/store/slices/feedback.slice';
+import { MapAny } from '@/types/commonTypes';
 
 /**
  * Hook to initialize feedbacks fetching for a given processId
@@ -9,8 +23,17 @@ import { setFeedbackItems, setLoading, setProcessId } from '@/store/slices/feedb
  */
 export const useFeedbacksProvider = (processId: string) => {
   const dispatch = useDispatch();
-  const { data: feedbacksList, isLoading: isLoadingFeedbacks } = useGetFeedbacksQuery(
-    { process_id: processId },
+  const { sseEventBus } = useEventBus();
+  const feedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
+
+  const {
+    data: feedbacksList,
+    isLoading: isLoadingFeedbacks,
+    refetch: refetchFeedbacks,
+  } = useGetFeedbacksQuery({ process_id: processId }, { skip: !processId });
+
+  const { data: openFeedbackItems, isLoading: isLoadingOpenFeedback } = useGetOpenFeedbackQuery(
+    { processId: processId ?? '' },
     { skip: !processId },
   );
 
@@ -30,5 +53,44 @@ export const useFeedbacksProvider = (processId: string) => {
     }
   }, [dispatch, feedbacksList?.feedbacks]);
 
-  return { isLoading: isLoadingFeedbacks };
+  useEffect(() => {
+    if (openFeedbackItems?.conversations) {
+      dispatch(setOpenFeedbackConversations(openFeedbackItems.conversations));
+    }
+  }, [dispatch, openFeedbackItems?.conversations]);
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.FEEDBACK, (data: BaseEventPayload) => {
+      if (data?.source_id === processId) refetchFeedbacks();
+    });
+
+    const conversationSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
+      const payload = data?.payload as MapAny;
+
+      switch (payload?.type) {
+        case CONVERSATION_EVENT_TYPE.MOVED_TO_FEEDBACK:
+          dispatch(removeOpenFeedbackConversation(data.source_id as string));
+          break;
+        case CONVERSATION_EVENT_TYPE.NEW_CREATED:
+          dispatch(addOpenFeedbackConversation(payload.conversation));
+          break;
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+      conversationSub.unsubscribe();
+    };
+
+    return () => sub.unsubscribe();
+  }, [sseEventBus, refetchFeedbacks, processId]);
+
+  // Update merged feedback items when feedbackItems or openFeedbackItems change
+  useEffect(() => {
+    const merged = mergeOpenFeedbackItems(feedbackItems, openFeedbackItems?.conversations);
+
+    dispatch(setMergedFeedbackItems(merged));
+  }, [feedbackItems, openFeedbackItems?.conversations, dispatch]);
+
+  return { isLoading: isLoadingFeedbacks, isLoadingOpenFeedback };
 };

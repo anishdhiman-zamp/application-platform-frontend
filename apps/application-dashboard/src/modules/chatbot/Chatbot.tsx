@@ -62,7 +62,7 @@ const Chatbot = ({
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
-  const { feedbackItems = [] } = feedbackState;
+  const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
@@ -247,12 +247,12 @@ const Chatbot = ({
   }, [isOpen]);
 
   useEffect(() => {
-    const isFeedbackItemExists = feedbackItems.find((item: FeedbackItemType) => item?.id === feedbackItem?.id);
+    const isFeedbackItemExists = mergedFeedbackItems.find((item: FeedbackItemType) => item?.id === feedbackItem?.id);
 
     if (feedbackItem && !isFeedbackItemExists) {
       handleDeleteFeedbackSuccess();
     }
-  }, [feedbackItems, feedbackItem]);
+  }, [mergedFeedbackItems, feedbackItem]);
 
   return (
     <>
