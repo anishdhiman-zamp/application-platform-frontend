@@ -23,8 +23,7 @@ const DraftFeedbackButton: FC<DraftFeedbackButtonProps> = ({ processId = '' }) =
       <TooltipV2 tooltipBody='All chats' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
         <PopoverTrigger asChild>
           <Button id='draft-feedback-btn' size='small' variant='secondary'>
-            <MessageSquare size={12} className='' />
-            {openFeedbackConversations?.length}
+            <MessageSquare size={12} />
           </Button>
         </PopoverTrigger>
       </TooltipV2>
