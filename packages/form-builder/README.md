@@ -7,10 +7,12 @@ A powerful, schema-driven form builder package built with React Hook Form, featu
 - 🎯 **Schema-Driven** - Define forms using JSON schema
 - 🔄 **Dynamic Fields** - Conditional show/hide based on other field values
 - ✅ **Validation Dependencies** - Apply different validations based on form state
-- 🎨 **Animated Transitions** - Smooth animations using Framer Motion
+- 🎨 **Animated Transitions** - Smooth animations using Framer Motion (with disable option)
 - 📝 **Multiple Field Types** - Text, Select, Radio, Header Text, and more
 - 🔌 **Data Source Integration** - Fetch options from APIs dynamically
 - 🎛️ **Flexible Layout** - Grid-based layout with configurable column spans
+- 🎭 **External Styling** - Control component styles via `classNames` prop
+- ⚡ **Animation Control** - Enable, disable, or customize animations via `animationConfig` prop
 
 ## Installation
 
@@ -241,6 +243,35 @@ import { RadioOption } from '@zamp-platform/form-builder';
 }
 ```
 
+#### Radio with Inline Input (No Label)
+
+When `has_input: true` and `label` is empty, the input appears **inline** next to the radio button. Clicking/focusing the input auto-selects the radio option.
+
+```typescript
+import { RadioOption } from '@zamp-platform/form-builder';
+
+{
+  id: 'feedback',
+  type: 'radio',
+  options: [
+    { label: 'Everything looks good', value: 'approved' },
+    {
+      label: '',  // Empty label = inline input
+      value: 'note',
+      has_input: true,
+      input_placeholder: 'Add a note',
+    } as RadioOption,
+  ],
+}
+```
+
+**Renders as:**
+
+```
+○ Everything looks good
+● [Add a note________________]
+```
+
 **Form Value Output:**
 
 ```typescript
@@ -249,6 +280,130 @@ import { RadioOption } from '@zamp-platform/form-builder';
 
 // "Other" with input selected
 { cancellation_reason: { value: 'other', input: 'The onboarding was confusing' } }
+```
+
+---
+
+## External Styling (`classNames`)
+
+Control the styling of form components without modifying the schema. This is useful when the schema comes from a backend.
+
+### FormBuilderClassNames Interface
+
+```typescript
+interface FormBuilderClassNames {
+  form?: string; // Form container
+  section?: string; // Section wrapper
+  sectionTitle?: string; // Section title label
+  fieldWrapper?: string; // Field container
+  label?: string; // Field labels
+  // Radio specific
+  radioGroup?: string; // RadioGroup container
+  radioItem?: string; // Individual radio item wrapper
+  radio?: string; // Radio button itself
+  radioInput?: string; // Input/textarea in radio options
+  // Input specific
+  input?: string; // Text inputs
+  // Select specific
+  select?: string; // Select dropdowns
+  // Error message
+  errorMessage?: string; // Validation error messages
+}
+```
+
+### Usage
+
+```tsx
+import { FormBuilder, FormBuilderClassNames } from '@zamp-platform/form-builder';
+
+const formClassNames: FormBuilderClassNames = {
+  form: 'gap-2 pb-2',
+  radioGroup: 'gap-3',
+  radioItem: 'space-y-0',
+  radio: 'border-gray-500',
+  radioInput: 'h-8 border-gray-400 bg-white rounded-lg',
+  label: 'text-sm font-medium text-gray-900',
+};
+
+<FormBuilder schema={mySchema} onSubmit={handleSubmit} classNames={formClassNames} />;
+```
+
+---
+
+## Animation Control (`animationConfig`)
+
+Control or disable animations. Useful for forms that should appear instantly without transitions.
+
+### FormBuilderAnimationConfig Interface
+
+```typescript
+interface FormBuilderAnimationConfig {
+  /** Disable all animations */
+  disabled?: boolean;
+  /** Section animation config */
+  section?: {
+    initial?: AnimationTargetConfig;
+    animate?: AnimationTargetConfig;
+    exit?: AnimationTargetConfig;
+    transition?: {
+      duration?: number;
+      delay?: number;
+      ease?: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | 'circIn' | 'circOut' | 'backIn' | 'backOut';
+      staggerChildren?: number;
+    };
+  };
+  /** Field animation config */
+  field?: {
+    initial?: AnimationTargetConfig;
+    animate?: AnimationTargetConfig;
+    exit?: AnimationTargetConfig;
+    transition?: {
+      duration?: number;
+      delay?: number;
+      ease?: string;
+    };
+  };
+}
+
+interface AnimationTargetConfig {
+  opacity?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  rotate?: number;
+  height?: number | string;
+}
+```
+
+### Disable All Animations
+
+```tsx
+import { FormBuilder, FormBuilderAnimationConfig } from '@zamp-platform/form-builder';
+
+const animationConfig: FormBuilderAnimationConfig = {
+  disabled: true,
+};
+
+<FormBuilder schema={mySchema} onSubmit={handleSubmit} animationConfig={animationConfig} />;
+```
+
+### Custom Animations
+
+```tsx
+const animationConfig: FormBuilderAnimationConfig = {
+  section: {
+    initial: { opacity: 0, y: -20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3, ease: 'easeOut' },
+  },
+  field: {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.2 },
+  },
+};
+
+<FormBuilder schema={mySchema} onSubmit={handleSubmit} animationConfig={animationConfig} />;
 ```
 
 ---
@@ -446,11 +601,13 @@ layout: [
 
 ### FormBuilder Props
 
-| Prop       | Type                              | Description                     |
-| ---------- | --------------------------------- | ------------------------------- |
-| `schema`   | `FormSchema`                      | The form schema definition      |
-| `onSubmit` | `(data: any) => void`             | Callback when form is submitted |
-| `ref`      | `React.RefObject<FormBuilderRef>` | Ref to access form methods      |
+| Prop              | Type                              | Description                          |
+| ----------------- | --------------------------------- | ------------------------------------ |
+| `schema`          | `FormSchema`                      | The form schema definition           |
+| `onSubmit`        | `(data: any) => void`             | Callback when form is submitted      |
+| `ref`             | `React.RefObject<FormBuilderRef>` | Ref to access form methods           |
+| `classNames`      | `FormBuilderClassNames`           | Custom class names for styling       |
+| `animationConfig` | `FormBuilderAnimationConfig`      | Animation configuration (or disable) |
 
 ### FormBuilderRef Methods
 
@@ -482,7 +639,14 @@ export {
   SelectOption,
   Condition,
   Expression,
+  FormBuilderClassNames,
+  FormBuilderAnimationConfig,
+  AnimationTargetConfig,
+  AnimationTransitionConfig,
 } from './types';
+
+// Context hooks (for custom field components)
+export { useFormBuilderClassNames, useFormBuilderAnimationConfig } from './utils/classNamesContext';
 
 // Utilities
 export { validateField, createCustomResolver } from './utils/validation';

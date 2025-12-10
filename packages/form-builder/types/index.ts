@@ -123,6 +123,72 @@ export interface FormSchema {
 
 export type FormValues = Record<string, unknown>;
 
+// ClassNames for external styling control
+export interface FormBuilderClassNames {
+  form?: string;
+  section?: string;
+  sectionTitle?: string;
+  fieldWrapper?: string;
+  label?: string;
+  // Radio specific
+  radioGroup?: string;
+  radioItem?: string;
+  radio?: string;
+  radioInput?: string;
+  // Input specific
+  input?: string;
+  // Select specific
+  select?: string;
+  // Error message
+  errorMessage?: string;
+}
+
+// Animation configuration for external control
+export interface AnimationTransitionConfig {
+  duration?: number;
+  delay?: number;
+  ease?:
+    | 'linear'
+    | 'easeIn'
+    | 'easeOut'
+    | 'easeInOut'
+    | 'circIn'
+    | 'circOut'
+    | 'circInOut'
+    | 'backIn'
+    | 'backOut'
+    | 'backInOut';
+  staggerChildren?: number;
+}
+
+export interface AnimationTargetConfig {
+  opacity?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  rotate?: number;
+  height?: number | string;
+}
+
+export interface FormBuilderAnimationConfig {
+  /** Disable all animations */
+  disabled?: boolean;
+  /** Section animation config */
+  section?: {
+    initial?: AnimationTargetConfig;
+    animate?: AnimationTargetConfig;
+    exit?: AnimationTargetConfig;
+    transition?: AnimationTransitionConfig;
+  };
+  /** Field animation config */
+  field?: {
+    initial?: AnimationTargetConfig;
+    animate?: AnimationTargetConfig;
+    exit?: AnimationTargetConfig;
+    transition?: AnimationTransitionConfig;
+  };
+}
+
 // Zod schemas for runtime validation
 export const validationConfigSchema = z.object({
   message: z.string(),

@@ -1,5 +1,13 @@
-import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
+import {
+  FormBuilder,
+  type FormBuilderAnimationConfig,
+  type FormBuilderClassNames,
+  type FormBuilderRef,
+  type FormSchema,
+  type RadioOption,
+} from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
@@ -29,6 +37,51 @@ type LogProps = {
   activityId: string;
 };
 
+const feedbackSchema: FormSchema = {
+  id: 'feedback-form',
+  type: 'feedback',
+  sections: [
+    {
+      id: 'feedback_section',
+      sections: [
+        {
+          id: 'feedback_options',
+          layout: [[{ col_span: 12, field: 'feedback' }]],
+        },
+      ],
+    },
+  ],
+  fields: {
+    feedback: {
+      id: 'feedback',
+      type: 'radio',
+      options: [
+        { label: 'Everything looks good', value: 'approved' },
+        {
+          label: '',
+          value: 'note',
+          has_input: true,
+          input_placeholder: 'Add a note ',
+        } as RadioOption,
+      ],
+    },
+  },
+};
+
+const feedbackFormClassNames: FormBuilderClassNames = {
+  form: 'gap-2 pb-0 mt-2',
+  radioGroup: 'gap-3',
+  radioItem: 'space-y-0',
+  radio: 'h-3 w-3 border-GRAY_1000',
+  radioInput: 'h-8 border-GRAY_400 bg-white rounded-lg placeholder:text-GRAY_500 f-12-450 rounded-md p-3 w-[300px]',
+  label: 'f-12-450 text-GRAY_1000',
+};
+
+// Disable animations for this form
+const feedbackFormAnimationConfig: FormBuilderAnimationConfig = {
+  disabled: true,
+};
+
 const Log: FC<LogProps> = ({
   isLastLogOfDate = false,
   isLastLog = false,
@@ -52,8 +105,13 @@ const Log: FC<LogProps> = ({
   const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-
+  const formBuilderRef = useRef<FormBuilderRef>(null);
   const isFeedbackEnabled = useIsFeedbackEnabled();
+
+  const handleFeedbackSubmit = useCallback((data: Record<string, unknown>) => {
+    console.log('Feedback submitted:', data);
+    // TODO: Handle the feedback submission
+  }, []);
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -223,6 +281,15 @@ const Log: FC<LogProps> = ({
               status={statusIndicatorColor.status}
             />
           )}
+
+          <FormBuilder
+            schema={feedbackSchema}
+            onSubmit={handleFeedbackSubmit}
+            ref={formBuilderRef}
+            classNames={feedbackFormClassNames}
+            animationConfig={feedbackFormAnimationConfig}
+          />
+
           {!!ctas?.length && (
             <LogCta
               ctas={ctas}

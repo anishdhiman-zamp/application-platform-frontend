@@ -2,7 +2,9 @@ import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
+import { useFormAnimation } from '../hooks/useFormAnimation';
 import { FormField as FormFieldType } from '../types';
+import { useFormBuilderAnimationConfig } from '../utils/classNamesContext';
 import { HeaderTextField } from './HeaderTextField';
 import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
@@ -16,6 +18,8 @@ interface FormFieldProps {
 
 export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
+  const animationConfig = useFormBuilderAnimationConfig();
+  const { fieldAnimation } = useFormAnimation(animationConfig);
 
   if (!shouldShow) {
     return null;
@@ -29,10 +33,10 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.2 }}
+        initial={fieldAnimation.initial}
+        animate={fieldAnimation.animate}
+        exit={fieldAnimation.exit}
+        transition={fieldAnimation.transition}
       >
         {(() => {
           switch (fieldWithConfig.type) {

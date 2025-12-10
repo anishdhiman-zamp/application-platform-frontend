@@ -1,10 +1,12 @@
 import { Label } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { motion } from 'framer-motion';
-import React from 'react';
-import { useImperativeHandle } from 'react';
+import React, { useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { FormSchema } from '../types';
+import { useFormAnimation } from '../hooks/useFormAnimation';
+import { FormBuilderAnimationConfig, FormBuilderClassNames, FormSchema } from '../types';
+import { FormBuilderConfigProvider } from '../utils/classNamesContext';
 import { createCustomResolver } from '../utils/validation';
 import { FormSection } from './FormSection';
 
@@ -12,6 +14,8 @@ interface FormBuilderProps {
   schema: FormSchema;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
+  classNames?: FormBuilderClassNames;
+  animationConfig?: FormBuilderAnimationConfig;
 }
 
 export interface FormBuilderRef {
@@ -22,6 +26,8 @@ export const FormBuilder = ({
   ref,
   schema,
   onSubmit,
+  classNames,
+  animationConfig,
 }: FormBuilderProps & {
   ref: React.RefObject<FormBuilderRef | null>;
 }) => {
@@ -44,39 +50,40 @@ export const FormBuilder = ({
     },
   }));
 
+  const { sectionAnimation, nestedAnimation, getStaggerDelay } = useFormAnimation(animationConfig);
+
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className='flex flex-col gap-5 pb-5'>
-        {schema.sections.map((section, index) => (
-          <motion.div
-            key={section.id || index}
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.25,
-              delay: index * 0.15,
-            }}
-            className='form-section flex flex-col'
-          >
-            <Label>{section.title}</Label>
-            {section.sections && (
-              <motion.div
-                className='nested-sections flex flex-col gap-5'
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: 0.1,
-                }}
-              >
-                {section.sections.map((nestedSection) => (
-                  <FormSection key={nestedSection.id} section={nestedSection} fields={schema.fields} />
-                ))}
-              </motion.div>
-            )}
-          </motion.div>
-        ))}
-      </form>
-    </FormProvider>
+    <FormBuilderConfigProvider classNames={classNames} animationConfig={animationConfig}>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onSubmit)} className={cn('flex flex-col gap-5 pb-5', classNames?.form)}>
+          {schema.sections.map((section, index) => (
+            <motion.div
+              key={section.id || index}
+              initial={sectionAnimation.initial}
+              animate={sectionAnimation.animate}
+              transition={{
+                ...sectionAnimation.transition,
+                delay: getStaggerDelay(index),
+              }}
+              className={cn('form-section flex flex-col', classNames?.section)}
+            >
+              <Label className={classNames?.sectionTitle}>{section.title}</Label>
+              {section.sections && (
+                <motion.div
+                  className='nested-sections flex flex-col gap-5'
+                  initial={nestedAnimation.initial}
+                  animate={nestedAnimation.animate}
+                  transition={nestedAnimation.transition}
+                >
+                  {section.sections.map((nestedSection) => (
+                    <FormSection key={nestedSection.id} section={nestedSection} fields={schema.fields} />
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+        </form>
+      </FormProvider>
+    </FormBuilderConfigProvider>
   );
 };
