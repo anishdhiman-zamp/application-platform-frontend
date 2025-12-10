@@ -20,6 +20,7 @@ import { COLORS } from '@/constants/colors';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
+import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButton';
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
@@ -47,6 +48,7 @@ const ShareButton = () => {
 
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
 
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
@@ -102,6 +104,7 @@ const Topbar = () => {
               </Button>
             </Link>
           ) : null}
+          {isFeedbackEnabled && <DraftFeedbackButton processId={processId} />}
           {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
           <ShareButton />
         </div>
@@ -109,7 +112,7 @@ const Topbar = () => {
     }
 
     return <ShareButton />;
-  }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled]);
+  }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled, openFeedbackConversations]);
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());

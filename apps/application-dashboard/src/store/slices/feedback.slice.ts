@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { convertOpenFeedbackToFeedbackItem } from '@/modules/chatbot/utils';
 import { FEEDBACK_STATUS } from '@/modules/feedback/feedback.constants';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -34,6 +35,8 @@ interface FeedbacksState {
   processingFeedbackItems: FeedbackItemType[];
   successFeedbackItems: FeedbackItemType[];
   feedbackItems: FeedbackItemType[];
+  mergedFeedbackItems: FeedbackItemType[];
+  openFeedbackConversations: FeedbackItemType[];
   isLoading: boolean;
   processId: string;
   hasFeedback: boolean;
@@ -45,6 +48,8 @@ const initialState: FeedbacksState = {
   processingFeedbackItems: [],
   successFeedbackItems: [],
   feedbackItems: [],
+  mergedFeedbackItems: [],
+  openFeedbackConversations: [],
   isLoading: false,
   processId: '',
   hasFeedback: false,
@@ -93,9 +98,36 @@ export const feedbacksSlice = createSlice({
       // Recalculate hasFeedback
       state.hasFeedback = state.feedbackItems.length > 0;
     },
+    setMergedFeedbackItems: (state, action: PayloadAction<FeedbackItemType[]>) => {
+      state.mergedFeedbackItems = action.payload;
+    },
+    setOpenFeedbackConversations: (state, action: PayloadAction<FeedbackItemType[]>) => {
+      state.openFeedbackConversations = action.payload;
+    },
+    removeOpenFeedbackConversation: (state, action: PayloadAction<string>) => {
+      state.openFeedbackConversations = state.openFeedbackConversations.filter((item) => item.id !== action.payload);
+      state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== action.payload);
+    },
+    addOpenFeedbackConversation: (state, action: PayloadAction<FeedbackItemType>) => {
+      const exists = state.openFeedbackConversations.some((item) => item.id === action.payload.id);
+
+      if (!exists) {
+        state.openFeedbackConversations = [action.payload, ...state.openFeedbackConversations];
+        state.mergedFeedbackItems = [...state.mergedFeedbackItems, convertOpenFeedbackToFeedbackItem(action.payload)];
+      }
+    },
   },
 });
 
-export const { setFeedbackItems, setLoading, setProcessId, removeFeedbackItem } = feedbacksSlice.actions;
+export const {
+  setFeedbackItems,
+  setLoading,
+  setProcessId,
+  removeFeedbackItem,
+  setMergedFeedbackItems,
+  setOpenFeedbackConversations,
+  removeOpenFeedbackConversation,
+  addOpenFeedbackConversation,
+} = feedbacksSlice.actions;
 
 export default feedbacksSlice.reducer;
