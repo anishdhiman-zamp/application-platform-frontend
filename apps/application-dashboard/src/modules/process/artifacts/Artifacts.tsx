@@ -196,7 +196,7 @@ const Artifacts = ({
             artifactId={artifactId}
             processId={processId}
             isArtifactsFetching={isFetching}
-          />
+        onCloseArtifacts={onCloseArtifacts}
         onExpandArtifacts={onExpandArtifacts}
 
       default:
