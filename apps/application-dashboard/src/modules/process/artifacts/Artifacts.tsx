@@ -196,8 +196,8 @@ const Artifacts = ({
             artifactId={artifactId}
             processId={processId}
             isArtifactsFetching={isFetching}
-        onCloseArtifacts={onCloseArtifacts}
-        onExpandArtifacts={onExpandArtifacts}
+          />
+        );
 
       default:
         return null;
@@ -215,7 +215,6 @@ const Artifacts = ({
       dispatch(openSidebar());
     };
   }, [dispatch]);
-
 
   return (
     <div className='animate-fade-in relative flex h-full w-full flex-col'>
