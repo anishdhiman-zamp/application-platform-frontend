@@ -1,5 +1,14 @@
-import { SelectOption } from '@zamp-platform/ui';
+import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
+
+// Extended SelectOption with radio input support
+export interface RadioOption extends BaseSelectOption {
+  has_input?: boolean;
+  input_placeholder?: string;
+}
+
+// Re-export for backward compatibility
+export type SelectOption = BaseSelectOption;
 
 export type ValidationType =
   | 'required'
@@ -27,12 +36,13 @@ export interface DataSource {
   endpoint: string;
   method: 'GET' | 'POST';
   params?: null | Record<string, string>;
-  body?: null | Record<string, any>;
+  body?: null | Record<string, unknown>;
   triggers?: Array<{
     field: string;
   }>;
-  valueFormatter?: (value: any) => SelectOption[];
-  useCustomHook?: (...args: any[]) => any;
+  valueFormatter?: (value: unknown) => SelectOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useCustomHook?: (...args: unknown[]) => any;
 }
 
 export interface Condition {
@@ -69,7 +79,7 @@ export interface DisplayDependency {
   expressions: Array<{ expression: Expression; config: FieldConfig }>;
 }
 
-export type FieldType = 'text' | 'select' | 'input' | 'multi-select' | 'header-text';
+export type FieldType = 'text' | 'select' | 'input' | 'multi-select' | 'header-text' | 'radio';
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
 
@@ -78,11 +88,11 @@ export interface FormField {
   type: FieldType;
   label?: string;
   placeholder?: string;
-  default_value?: any;
+  default_value?: string | number | boolean | null;
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
-  options?: SelectOption[];
+  options?: SelectOption[] | RadioOption[];
   data_source?: DataSource;
   display_dependencies?: DisplayDependency[];
 }
@@ -111,7 +121,7 @@ export interface FormSchema {
   fields: Record<string, FormField>;
 }
 
-export type FormValues = Record<string, any>;
+export type FormValues = Record<string, unknown>;
 
 // Zod schemas for runtime validation
 export const validationConfigSchema = z.object({
@@ -129,16 +139,16 @@ export const dataSourceSchema = z.object({
   endpoint: z.string(),
   method: z.enum(['GET', 'POST']),
   params: z.record(z.string()),
-  body: z.record(z.any()),
+  body: z.record(z.unknown()),
   triggers: z.array(z.object({ field: z.string() })).optional(),
 });
 
 export const formFieldSchema = z.object({
-  type: z.enum(['text', 'select']),
+  type: z.enum(['text', 'select', 'input', 'multi-select', 'header-text', 'radio']),
   label: z.string(),
   name: z.string().optional(),
   placeholder: z.string().optional(),
-  defaultValue: z.any().optional(),
+  defaultValue: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
   validations: z.array(validationSchema).optional(),
   data_source: dataSourceSchema.optional(),
 });

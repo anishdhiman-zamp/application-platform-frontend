@@ -1,6 +1,6 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
-import { FormSchema } from './types';
+import { FormSchema, RadioOption } from './types';
 
 export const schema: FormSchema = {
   id: 'recipient-with-account',
@@ -214,6 +214,36 @@ export const schema: FormSchema = {
               {
                 col_span: 8,
                 field: 'account_holder_address_line_2',
+              },
+            ],
+          ],
+        },
+      ],
+    },
+    {
+      id: 'recipient_preferences',
+      title: '',
+      sections: [
+        {
+          id: 'transfer_preferences',
+          title: 'Transfer Preferences',
+          layout: [
+            [
+              {
+                col_span: 8,
+                field: 'transfer_frequency',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'notification_preference',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'additional_notes',
               },
             ],
           ],
@@ -1329,6 +1359,67 @@ export const schema: FormSchema = {
           },
         ],
       },
+    },
+    // Radio field examples demonstrating "Other" option with input
+    transfer_frequency: {
+      id: 'transfer_frequency',
+      type: 'radio',
+      label: 'How often do you plan to send transfers?',
+      options: [
+        { label: 'One-time transfer', value: 'one_time' },
+        { label: 'Weekly', value: 'weekly' },
+        { label: 'Monthly', value: 'monthly' },
+        { label: 'Quarterly', value: 'quarterly' },
+        {
+          label: 'Other',
+          value: 'other',
+          has_input: true,
+          input_placeholder: 'Please specify frequency...',
+        } as RadioOption,
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a transfer frequency',
+          },
+        },
+      ],
+    },
+    notification_preference: {
+      id: 'notification_preference',
+      type: 'radio',
+      label: 'How would you like to be notified?',
+      options: [
+        { label: 'Email only', value: 'email' },
+        { label: 'SMS only', value: 'sms' },
+        { label: 'Both Email and SMS', value: 'both' },
+        { label: 'No notifications', value: 'none' },
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a notification preference',
+          },
+        },
+      ],
+    },
+    additional_notes: {
+      id: 'additional_notes',
+      type: 'radio',
+      label: 'Do you have any special requirements?',
+      options: [
+        { label: 'No special requirements', value: 'none' },
+        { label: 'Urgent transfer needed', value: 'urgent' },
+        { label: 'Recurring schedule', value: 'recurring' },
+        {
+          label: 'Other requirements',
+          value: 'other',
+          has_input: true,
+          input_placeholder: 'Please describe your requirements...',
+        } as RadioOption,
+      ],
     },
   },
 };

@@ -4,6 +4,7 @@ import React from 'react';
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { FormField as FormFieldType } from '../types';
 import { HeaderTextField } from './HeaderTextField';
+import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
 import { TextField } from './TextField';
 
@@ -41,6 +42,8 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
               return <TextField className={className} field={fieldWithConfig} name={name} />;
             case 'select':
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
+            case 'radio':
+              return <RadioField className={className} field={fieldWithConfig} name={name} />;
             default:
               return null;
           }
