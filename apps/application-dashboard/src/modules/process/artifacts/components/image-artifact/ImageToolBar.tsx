@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { COLORS } from '@/constants/colors';
 
 interface ImageToolBarProps {
@@ -32,10 +32,9 @@ const ImageToolBar: FC<ImageToolBarProps> = ({
     >
       <div className='flex items-center justify-center gap-x-1.5 px-2.5 py-1.5'>
         {/* Zoom Out */}
-        <SvgSpriteLoader
-          id='zoom-out'
+        <ZoomOut
+          size={14}
           color={isMinZoom ? COLORS.GRAY_600 : COLORS.WHITE}
-          size={12}
           onClick={isMinZoom ? undefined : onZoomOut}
           className={cn('cursor-pointer rounded p-0.5', isMinZoom && 'cursor-not-allowed opacity-50')}
         />
@@ -44,10 +43,9 @@ const ImageToolBar: FC<ImageToolBarProps> = ({
         <span className='f-11-500 min-w-[40px] text-center text-white select-none'>{Math.round(scale * 100)}%</span>
 
         {/* Zoom In */}
-        <SvgSpriteLoader
-          id='zoom-in'
+        <ZoomIn
+          size={14}
           color={isMaxZoom ? COLORS.GRAY_600 : COLORS.WHITE}
-          size={12}
           onClick={isMaxZoom ? undefined : onZoomIn}
           className={cn('cursor-pointer rounded p-0.5', isMaxZoom && 'cursor-not-allowed opacity-50')}
         />

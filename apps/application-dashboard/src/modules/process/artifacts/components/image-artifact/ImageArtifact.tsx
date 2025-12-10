@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { Skeleton } from '@zamp-platform/ui';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
@@ -11,14 +11,6 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ImageArtifactsResponseType } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
-
-const ImageLoadingIndicator = () => (
-  <div className='flex h-full w-full items-center justify-center p-4'>
-    <div className='aspect-square max-h-full w-full max-w-md rounded-sm border border-gray-200 bg-white shadow-md'>
-      <Skeleton className='h-full w-full rounded-sm' />
-    </div>
-  </div>
-);
 
 interface ImageArtifactProps {
   imageArtifact: ImageArtifactsResponseType;
@@ -31,7 +23,7 @@ const MIN_SCALE = 0.5;
 const MAX_SCALE = 3.0;
 const ZOOM_STEP = 0.25;
 
-const ImageArtifact = ({ imageArtifact, artifactId, processId, isArtifactsFetching }: ImageArtifactProps) => {
+const ImageArtifact: FC<ImageArtifactProps> = ({ imageArtifact, artifactId, processId, isArtifactsFetching }) => {
   const [scale, setScale] = useState(1);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isImageError, setIsImageError] = useState(false);
@@ -133,5 +125,13 @@ const ImageArtifact = ({ imageArtifact, artifactId, processId, isArtifactsFetchi
     </CommonWrapper>
   );
 };
+
+const ImageLoadingIndicator = () => (
+  <div className='flex h-full w-full items-center justify-center p-4'>
+    <div className='aspect-square max-h-full w-full max-w-md rounded-sm border border-gray-200 bg-white shadow-md'>
+      <Skeleton className='h-full w-full rounded-sm' />
+    </div>
+  </div>
+);
 
 export default ImageArtifact;
