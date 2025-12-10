@@ -197,7 +197,7 @@ const Artifacts = ({
             processId={processId}
             isArtifactsFetching={isFetching}
           />
-        );
+        onExpandArtifacts={onExpandArtifacts}
 
       default:
         return null;
