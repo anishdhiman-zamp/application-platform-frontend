@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
-import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
 import ImageArtifact from 'modules/process/artifacts/components/image-artifact/ImageArtifact';
 import {
   ARTIFACT_TYPE,
@@ -22,7 +21,6 @@ import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
-  EmailArtifactsResponseType,
   ImageArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
@@ -139,21 +137,21 @@ const Artifacts = ({
 
       case ARTIFACT_TYPE.EMAIL:
         return (
-          <EmailArtifactWrapper
-            key={id}
-            artifactId={artifactId}
-            artifactData={artifactData as EmailArtifactsResponseType}
-            processId={processId}
-            activityId={activityId as string}
-            emitHITLActionPayload={emitHITLActionPayload}
-            onCloseArtifacts={onCloseArtifacts}
-          />
-          // <ImageArtifact
+          // <EmailArtifactWrapper
           //   key={id}
-          //   imageArtifact={artifactData as ImageArtifactsResponseType}
           //   artifactId={artifactId}
+          //   artifactData={artifactData as EmailArtifactsResponseType}
           //   processId={processId}
+          //   activityId={activityId as string}
+          //   emitHITLActionPayload={emitHITLActionPayload}
+          //   onCloseArtifacts={onCloseArtifacts}
           // />
+          <ImageArtifact
+            key={id}
+            imageArtifact={artifactData as ImageArtifactsResponseType}
+            artifactId={artifactId}
+            processId={processId}
+          />
         );
 
       case ARTIFACT_TYPE.DATASET:
