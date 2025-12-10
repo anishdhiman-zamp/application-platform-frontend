@@ -133,6 +133,10 @@ export const formatRowValue = (value: unknown): string => {
     return formatArrayValue(value);
   }
 
+  if (typeof value === 'object' && value !== null) {
+    return JSON.stringify(value);
+  }
+
   // For non-array values, convert to string
   return value.toString();
 };
