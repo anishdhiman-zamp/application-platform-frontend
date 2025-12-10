@@ -15,7 +15,7 @@ const ToolBar: FC<ToolBarPropsType> = ({ usePDFSlickStore, className }) => {
   return (
     <div
       className={cn(
-        'absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap',
+        'absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 transform items-center rounded-md bg-black whitespace-nowrap',
         className,
       )}
     >

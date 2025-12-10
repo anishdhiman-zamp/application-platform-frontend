@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, FileText, Hash, Link, Mail, Type } from 'lucide-react';
 import BluePrintDataset from 'modules/process/dataset-create-edit/components/BluePrintDataset';
 import PreviewDataset from 'modules/process/dataset-create-edit/components/PreviewDataset';
@@ -21,6 +20,7 @@ import {
   DONE_EMPTY_STATE,
   FILE,
   GMAIL,
+  IMAGE,
   IN_PROGRESS_EMPTY_STATE,
   NEEDS_ATTENTION_EMPTY_STATE,
 } from '@/constants/icons';
@@ -113,6 +113,9 @@ export const ARTIFACT_ICON_MAPPING = {
   },
   [ARTIFACT_TYPE.DATASET]: {
     icon_url: DATASET,
+  },
+  [ARTIFACT_TYPE.IMAGE]: {
+    icon_url: IMAGE,
   },
 };
 

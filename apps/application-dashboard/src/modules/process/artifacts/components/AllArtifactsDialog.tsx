@@ -43,14 +43,15 @@ const AllArtifactsDialog = ({ onClose, onArtifactClick }: AllArtifactsDialogProp
   };
 
   return (
-    <div className='absolute z-50 flex h-full w-full items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'>
-      <div className='animate-opacity relative h-full w-full overflow-y-auto rounded-xl'>
-        <div onClick={onClose} className='absolute top-5 left-4 cursor-pointer' aria-label='Close'>
+    <div className='absolute inset-0 z-50 flex h-full w-full bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'>
+      <div className='animate-opacity flex h-full w-full flex-col overflow-y-auto p-5'>
+        {/* Close button */}
+        <div onClick={onClose} className='mb-4 cursor-pointer self-start' aria-label='Close'>
           <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
         </div>
 
         <CommonWrapper
-          className='absolute left-8 flex h-full flex-col items-start justify-start gap-y-2 overflow-y-auto p-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+          className='flex flex-1 flex-col items-start justify-start gap-y-2 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
           isLoading={isLoadingArtifacts}
           isError={isErrorArtifacts}
           skeletonType={SkeletonTypes.CUSTOM}

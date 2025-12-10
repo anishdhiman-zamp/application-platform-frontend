@@ -13,7 +13,7 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 interface PDFViewerAppProps {
   processId: string;
   artifactId: string;
-  isArtifactLoading: boolean;
+  isArtifactsFetching: boolean;
   fileId: string;
   className?: string;
   isSearchBarEnabled?: boolean;
@@ -38,7 +38,7 @@ const PdfArtifact = ({
   processId,
   artifactId,
   fileId,
-  isArtifactLoading,
+  isArtifactsFetching,
   className,
   isSearchBarEnabled = false,
   toolBarClassName,
@@ -67,8 +67,8 @@ const PdfArtifact = ({
   );
 
   const isCommonLoading = useMemo(
-    () => isSignedUrlLoading || isArtifactLoading || isSignedUrlUninitialized,
-    [isSignedUrlLoading, isArtifactLoading, isSignedUrlUninitialized],
+    () => isSignedUrlLoading || isArtifactsFetching || isSignedUrlUninitialized,
+    [isSignedUrlLoading, isArtifactsFetching, isSignedUrlUninitialized],
   );
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const PdfArtifact = ({
       {isDocumentLoaded && !error && isSearchBarEnabled && <SearchBar {...{ usePDFSlickStore }} />}
       {!error && (
         <div className='relative h-full flex-1'>
-          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-48' />
+          <PDFSlickViewer {...{ viewerRef, usePDFSlickStore }} className='!pb-40' />
         </div>
       )}
       {isDocumentLoaded && !error && <ToolBar {...{ usePDFSlickStore }} className={toolBarClassName} />}
