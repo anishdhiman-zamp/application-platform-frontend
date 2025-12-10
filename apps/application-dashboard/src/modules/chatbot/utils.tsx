@@ -13,10 +13,10 @@ import {
   ScopeType,
   SenderType,
 } from '@zamp-platform/chat';
-import { ChartNoAxesColumn, Check, Loader } from 'lucide-react';
+import { ChartNoAxesColumn, Check, Loader, MessageSquare } from 'lucide-react';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
-import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { FEEDBACK_STATUS, SCOPE_TYPE } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
 import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
 import { store } from '@/store';
@@ -28,6 +28,34 @@ import {
   PostInteractionResponseType,
 } from '@/types/api/interaction.types';
 import { defaultFn, MapAny } from '@/types/commonTypes';
+
+/**
+ * Converts open feedback item to FeedbackItemType with conversation_id mapping
+ * @param item - The open feedback item to convert
+ * @returns Converted FeedbackItemType
+ */
+export const convertOpenFeedbackToFeedbackItem = (item: FeedbackItemType): FeedbackItemType => ({
+  ...item,
+  conversation_id: item.id,
+  summary: item.summary ?? { feedback_points: [] },
+  scope_type: item.scope_type ?? SCOPE_TYPE.PROCESS,
+  status: FEEDBACK_STATUS.DRAFT,
+});
+
+/**
+ * Merges feedback items with converted open feedback items
+ * @param feedbackItems - Existing feedback items
+ * @param openFeedbackConversations - Open feedback conversations to convert and merge
+ * @returns Merged array of FeedbackItemType
+ */
+export const mergeOpenFeedbackItems = (
+  feedbackItems: FeedbackItemType[],
+  openFeedbackConversations: FeedbackItemType[] = [],
+): FeedbackItemType[] => {
+  const convertedOpenFeedbackItems = openFeedbackConversations.map(convertOpenFeedbackToFeedbackItem);
+
+  return [...feedbackItems, ...convertedOpenFeedbackItems];
+};
 
 /**
  * Generates a unique ID for a chatbot instance based on annotation location
@@ -200,6 +228,12 @@ export const getFeedbackItemConfig = (
         icon: <Check size={12} className='text-ORANGE_1000 mt-0.5' />,
         onCheck: defaultFn,
       };
+    case FEEDBACK_STATUS.DRAFT:
+      return {
+        icon: <MessageSquare size={12} className='' />,
+        onCheck: () => setCurrentFeedbackItem(feedbackItem),
+        allowDelete: true,
+      };
     default:
       return {
         icon: null,
@@ -282,7 +316,7 @@ export const updateButtonElementsDisplay = (
 
 export const createChatbotUrl = (feedback: FeedbackItemType) => {
   const annotationLocation = feedback?.annotation_data?.location;
-  const conversationId = feedback?.conversation_id;
+  const conversationId = feedback?.conversation_id || feedback?.id;
   const feedbackId = feedback?.id;
 
   const commonParams = `${CHATBOT_LOCATION_PARAMS.CHATBOT_PROCESS_ID}=${annotationLocation?.data?.process_id}&${CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID}=${conversationId}&${CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID}=${feedbackId}`;

@@ -35,12 +35,14 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const feedbackIdParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID);
-  const feedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
+  const mergedFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.mergedFeedbackItems);
+
   const matchingFeedbackItems = useMemo(
-    () => getFeedbackItems(feedbackItems, annotationLocation),
-    [feedbackItems, annotationLocation],
+    () => getFeedbackItems(mergedFeedbackItems, annotationLocation),
+    [mergedFeedbackItems, annotationLocation],
   );
 
   const [currentFeedbackItem, setCurrentFeedbackItem] = useState<FeedbackItemType>();
@@ -58,14 +60,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
             matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
           ))),
     [matchingFeedbackItems, hideFeedbackCount],
-  );
-
-  const disableAddMoreFeedback = useMemo(
-    () =>
-      matchingFeedbackItems.find((item) =>
-        [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(item?.status as FEEDBACK_STATUS),
-      ) !== undefined,
-    [matchingFeedbackItems],
   );
 
   const handleOpenChatbot = useCallback(
@@ -116,11 +110,15 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     if (currentFeedbackItem || hideFeedbackCount) return;
     if (
       matchingFeedbackItems.length === 1 &&
-      [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(matchingFeedbackItems[0]?.status as FEEDBACK_STATUS)
+      [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED, FEEDBACK_STATUS.DRAFT].includes(
+        matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
+      )
     ) {
       setCurrentFeedbackItem(matchingFeedbackItems[0]);
     } else if (matchingFeedbackItems.length > 1) {
-      const firstOpenFeedbackItem = matchingFeedbackItems.find((item) => item?.status === FEEDBACK_STATUS.OPEN);
+      const firstOpenFeedbackItem = matchingFeedbackItems.find(
+        (item) => item?.status === FEEDBACK_STATUS.OPEN || item?.status === FEEDBACK_STATUS.DRAFT,
+      );
 
       if (firstOpenFeedbackItem) {
         setCurrentFeedbackItem(firstOpenFeedbackItem);
@@ -169,7 +167,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               onOpenChatbot={handleOpenChatbot}
               hideFeedbackCount={hideFeedbackCount}
               annotationLocation={annotationLocation}
-              disableAddMoreFeedback={disableAddMoreFeedback}
               onCloseFeedbackList={handleRemoveChatbotParams}
               className={className}
             >

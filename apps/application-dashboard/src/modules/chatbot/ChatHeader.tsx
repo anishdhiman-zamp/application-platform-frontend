@@ -3,6 +3,7 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { Trash } from 'lucide-react';
 import FeedbackDeleteDialog from 'modules/feedback/components/FeedbackDeleteDialog';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 const ChatHeader = ({
@@ -49,6 +50,7 @@ const ChatHeader = ({
         feedback={feedbackItem as FeedbackItemType}
         processId={feedbackItem?.process_id}
         onDeleteSuccess={onDeleteSuccess}
+        isDraftFeedback={feedbackItem?.status === FEEDBACK_STATUS.DRAFT}
       />
     </>
   );
