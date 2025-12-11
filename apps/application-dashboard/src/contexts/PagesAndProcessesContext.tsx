@@ -1,0 +1,103 @@
+'use client';
+
+import { createContext, ReactNode, useContext, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { useAppSelector } from '@/hooks/toolkit';
+import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
+import { usePagesAndProcessesData } from '@/hooks/usePagesAndProcessesData';
+
+interface PagesAndProcessesContextType {
+  pages: ReturnType<typeof usePagesAndProcessesData>['pages'];
+  processes: ReturnType<typeof usePagesAndProcessesData>['processes'];
+  isLoading: boolean;
+  isLoadingPages: boolean;
+  isLoadingProcesses: boolean;
+  isSuccessPages: boolean;
+  isSuccessProcesses: boolean;
+}
+
+const PagesAndProcessesContext = createContext<PagesAndProcessesContextType | undefined>(undefined);
+
+export const usePagesAndProcesses = () => {
+  const context = useContext(PagesAndProcessesContext);
+
+  if (!context) {
+    throw new Error('usePagesAndProcesses must be used within PagesAndProcessesProvider');
+  }
+
+  return context;
+};
+
+interface PagesAndProcessesProviderProps {
+  children: ReactNode;
+}
+
+/**
+ * Provider that fetches pages and processes data once at the layout level.
+ * Also handles navigation logic for routes that need it (e.g., /processes page).
+ * This ensures the API is only called once, even if multiple components need the data.
+ */
+export function PagesAndProcessesProvider({ children }: PagesAndProcessesProviderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { isOrgSwitchIsInProgress } = useAppSelector((state) => state.user);
+
+  // Fetch data once at the provider level
+  const { pages, processes, isLoading, isLoadingPages, isLoadingProcesses, isSuccessPages, isSuccessProcesses } =
+    usePagesAndProcessesData();
+
+  // Get navigation functions
+  const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
+    pagesList: pages ?? [],
+    processesList: processes ?? [],
+  });
+
+  // Handle navigation logic - only for /processes route
+  useEffect(() => {
+    // Check for org switch in progress and reload if needed
+    if (isOrgSwitchIsInProgress) {
+      window.location.reload();
+
+      return;
+    }
+
+    // Only navigate on /processes route
+    if (pathname === ROUTES_PATH.PROCESSES && isSuccessPages && isSuccessProcesses) {
+      if (processes && processes.length > 0) {
+        pushToMostRelevantProcess();
+      } else if (pages && pages.length > 0) {
+        pushToMostRelevantPage();
+      } else {
+        // Fallback navigation if no processes or pages
+        router.push(ROUTES_PATH.TEAM);
+      }
+    }
+  }, [
+    pathname,
+    pages,
+    processes,
+    isSuccessPages,
+    isSuccessProcesses,
+    isOrgSwitchIsInProgress,
+    pushToMostRelevantPage,
+    pushToMostRelevantProcess,
+    router,
+  ]);
+
+  return (
+    <PagesAndProcessesContext.Provider
+      value={{
+        pages,
+        processes,
+        isLoading,
+        isLoadingPages,
+        isLoadingProcesses,
+        isSuccessPages,
+        isSuccessProcesses,
+      }}
+    >
+      {children}
+    </PagesAndProcessesContext.Provider>
+  );
+}

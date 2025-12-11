@@ -94,7 +94,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
       <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
         <DropdownMenuTrigger asChild>
           <div
-            className='border-GRAY_400 bg-BG_GRAY_1 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            className='border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
             data-testid='org-switcher-trigger'
           >
             <CommonWrapper

@@ -1,29 +1,38 @@
 'use client';
 
-import { FC, ReactNode } from 'react';
-import { useSettingsRouteTracking } from '@/hooks/useSettingsRouteTracking';
-import { cn } from '@/utils/common';
-import SettingsSidebar from 'components/layouts/dashboard-layout/SettingsSidebar';
-import Sidebar from 'components/layouts/dashboard-layout/Sidebar';
+import { usePathname } from 'next/navigation';
+import { PagesAndProcessesProvider } from '@/contexts/PagesAndProcessesContext';
+import { isSettingsPage, shouldShowTopbar } from '@/utils/topbarVisibility';
+import Sidebar from 'components/layouts/dashboard-layout/sidebar';
+import SettingsSidebar from 'components/layouts/dashboard-layout/sidebar/SettingsSidebar';
 import Topbar from 'components/layouts/dashboard-layout/topbar/TopBar';
 import LayoutChildren from 'components/layouts/LayoutChildren';
 
-const LayoutWrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  const { isSettingsPage } = useSettingsRouteTracking();
+interface LayoutWrapperProps {
+  children: React.ReactNode;
+}
+
+export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+  const pathname = usePathname();
+
+  const showTopbar = shouldShowTopbar(pathname);
+  const isSettings = isSettingsPage(pathname);
 
   return (
-    <div className='bg-BACKGROUND_GRAY_1 relative'>
-      {!isSettingsPage && <Topbar />}
-      <div
-        className={cn('relative flex h-full w-full min-w-[768px]', {
-          'h-[calc(100vh-48px)]': !isSettingsPage,
-        })}
-      >
-        {isSettingsPage ? <SettingsSidebar /> : <Sidebar />}
-        <LayoutChildren>{children}</LayoutChildren>
+    <PagesAndProcessesProvider>
+      <div className='bg-BACKGROUND_GRAY_1 relative'>
+        <div className='relative flex h-full w-full min-w-[768px]'>
+          {isSettings ? <SettingsSidebar /> : <Sidebar />}
+          <div className='flex h-full w-full grow flex-col'>
+            {showTopbar && (
+              <nav className='sticky top-0 z-10'>
+                <Topbar />
+              </nav>
+            )}
+            <LayoutChildren>{children}</LayoutChildren>
+          </div>
+        </div>
       </div>
-    </div>
+    </PagesAndProcessesProvider>
   );
-};
-
-export default LayoutWrapper;
+}
