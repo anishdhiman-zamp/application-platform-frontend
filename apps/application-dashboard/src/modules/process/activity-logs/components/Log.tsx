@@ -5,6 +5,7 @@ import {
   type FormBuilderAnimationConfig,
   type FormBuilderClassNames,
   type FormBuilderRef,
+  type FormSchema,
 } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
@@ -15,7 +16,13 @@ import LogStatusIndicator from 'modules/process/activity-logs/components/LogStat
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
-import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
+import {
+  CONTENT_TYPE,
+  CTA_ACTION,
+  type HandleShowArtifactsProps,
+  LOG_STATUS,
+  SENDER_TYPE,
+} from 'modules/process/process.types';
 import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
 import ChatbotWrapper from '@/modules/chatbot';
@@ -58,7 +65,7 @@ const Log: FC<LogProps> = ({
   activityId,
 }) => {
   const {
-    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment, form_builder_config },
+    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment },
     status,
     content_type,
     updated_at,
@@ -75,6 +82,8 @@ const Log: FC<LogProps> = ({
   const formBuilderRef = useRef<FormBuilderRef>(null);
   const logCtaRef = useRef<LogCtaRef>(null);
   const isFeedbackEnabled = useIsFeedbackEnabled();
+
+  const submitFormCta = useMemo(() => ctas?.find((cta) => cta?.cta_action === CTA_ACTION.SUBMIT_FORM), [ctas]);
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -253,9 +262,9 @@ const Log: FC<LogProps> = ({
             />
           )}
 
-          {form_builder_config && (
+          {submitFormCta?.form_builder_config && (
             <FormBuilder
-              schema={form_builder_config}
+              schema={submitFormCta.form_builder_config as FormSchema}
               onSubmit={handleFeedbackSubmit}
               ref={formBuilderRef}
               classNames={feedbackFormClassNames}
