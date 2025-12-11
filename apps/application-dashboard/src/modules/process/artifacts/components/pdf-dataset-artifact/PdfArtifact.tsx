@@ -13,9 +13,9 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 interface PDFViewerAppProps {
   processId: string;
   artifactId: string;
-  isArtifactsFetching: boolean;
   fileId: string;
   className?: string;
+  isArtifactsFetching?: boolean;
   isSearchBarEnabled?: boolean;
   toolBarClassName?: string;
 }
@@ -38,9 +38,9 @@ const PdfArtifact = ({
   processId,
   artifactId,
   fileId,
-  isArtifactsFetching,
   className,
   isSearchBarEnabled = false,
+  isArtifactsFetching = false,
   toolBarClassName,
 }: PDFViewerAppProps) => {
   const {
