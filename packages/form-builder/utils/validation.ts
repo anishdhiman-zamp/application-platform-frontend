@@ -3,7 +3,7 @@ import { evaluateValidationDependencies } from './expressionEvaluator';
 
 // Function to validate a field with its dependencies
 export const validateField = (
-  value: unknown,
+  value: any,
   formValues: FormValues,
   validations?: Validation[],
   dependentValidations?: ValidationDependency[],

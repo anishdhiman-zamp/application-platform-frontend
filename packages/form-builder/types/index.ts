@@ -40,9 +40,8 @@ export interface DataSource {
   triggers?: Array<{
     field: string;
   }>;
-  valueFormatter?: (value: unknown) => SelectOption[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useCustomHook?: (...args: unknown[]) => any;
+  valueFormatter?: (value: any) => SelectOption[];
+  useCustomHook?: (...args: any[]) => any;
 }
 
 export interface Condition {
@@ -88,7 +87,7 @@ export interface FormField {
   type: FieldType;
   label?: string;
   placeholder?: string;
-  default_value?: string | number | boolean | null;
+  default_value?: any;
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
@@ -121,7 +120,7 @@ export interface FormSchema {
   fields: Record<string, FormField>;
 }
 
-export type FormValues = Record<string, unknown>;
+export type FormValues = Record<string, any>;
 
 // Zod schemas for runtime validation
 export const validationConfigSchema = z.object({
@@ -139,7 +138,7 @@ export const dataSourceSchema = z.object({
   endpoint: z.string(),
   method: z.enum(['GET', 'POST']),
   params: z.record(z.string()),
-  body: z.record(z.unknown()),
+  body: z.record(z.any()),
   triggers: z.array(z.object({ field: z.string() })).optional(),
 });
 
@@ -148,7 +147,7 @@ export const formFieldSchema = z.object({
   label: z.string(),
   name: z.string().optional(),
   placeholder: z.string().optional(),
-  defaultValue: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
+  defaultValue: z.any().optional(),
   validations: z.array(validationSchema).optional(),
   data_source: dataSourceSchema.optional(),
 });
