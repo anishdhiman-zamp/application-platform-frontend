@@ -107,7 +107,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   };
 
   useEffect(() => {
-    if (currentFeedbackItem || hideFeedbackCount) return;
+    if (currentFeedbackItem || hideFeedbackCount || isNewConversation) return;
     if (
       matchingFeedbackItems.length === 1 &&
       [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED, FEEDBACK_STATUS.DRAFT].includes(
@@ -124,7 +124,7 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
         setCurrentFeedbackItem(firstOpenFeedbackItem);
       }
     }
-  }, [matchingFeedbackItems, hideFeedbackCount]);
+  }, [matchingFeedbackItems, hideFeedbackCount, isNewConversation]);
 
   // Expose the openChatbot function to parent components
   useEffect(() => {

@@ -128,3 +128,8 @@ export const CONVERSATION_EVENT_TYPE = {
   MOVED_TO_FEEDBACK: 'conversation_moved_to_feedback',
   NEW_CREATED: 'new_conversation_created',
 } as const;
+
+export const FEEDBACK_EVENT_TYPE = {
+  CREATED: 'feedback_created',
+  UPDATED: 'feedback_updated',
+} as const;

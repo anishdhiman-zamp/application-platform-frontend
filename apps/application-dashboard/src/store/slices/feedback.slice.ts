@@ -108,6 +108,27 @@ export const feedbacksSlice = createSlice({
       state.openFeedbackConversations = state.openFeedbackConversations.filter((item) => item.id !== action.payload);
       state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== action.payload);
     },
+    addFeedbackItem: (state, action: PayloadAction<FeedbackItemType>) => {
+      const feedbackFromOpenFeedback = state.mergedFeedbackItems.find(
+        (item) => item.id === action.payload.conversation_id,
+      );
+
+      if (feedbackFromOpenFeedback) {
+        state.mergedFeedbackItems = state.mergedFeedbackItems.map((item) =>
+          item.id === action.payload.conversation_id
+            ? { ...item, status: FEEDBACK_STATUS.OPEN, feedback_id: action.payload.id }
+            : item,
+        );
+        state.openFeedbackItems = [action.payload, ...state.openFeedbackItems];
+        state.openFeedbackConversations = state.openFeedbackConversations.filter(
+          (item) => item.id !== action.payload.conversation_id,
+        );
+      } else {
+        state.mergedFeedbackItems = [...state.mergedFeedbackItems, action.payload];
+        state.feedbackItems = [action.payload, ...state.feedbackItems];
+        state.openFeedbackItems = [action.payload, ...state.openFeedbackItems];
+      }
+    },
     addOpenFeedbackConversation: (state, action: PayloadAction<FeedbackItemType>) => {
       const exists = state.openFeedbackConversations.some((item) => item.id === action.payload.id);
 
@@ -128,6 +149,7 @@ export const {
   setOpenFeedbackConversations,
   removeOpenFeedbackConversation,
   addOpenFeedbackConversation,
+  addFeedbackItem,
 } = feedbacksSlice.actions;
 
 export default feedbacksSlice.reducer;
