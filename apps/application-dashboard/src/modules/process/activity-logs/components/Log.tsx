@@ -1,9 +1,15 @@
-import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
+import {
+  FormBuilder,
+  type FormBuilderAnimationConfig,
+  type FormBuilderClassNames,
+  type FormBuilderRef,
+} from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
-import LogCta from 'modules/process/activity-logs/components/LogCta';
+import LogCta, { type LogCtaRef } from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
@@ -29,6 +35,20 @@ type LogProps = {
   activityId: string;
 };
 
+const feedbackFormClassNames: FormBuilderClassNames = {
+  form: 'gap-2 pb-0 mt-2',
+  radioGroup: 'gap-3',
+  radioItem: 'space-y-0',
+  radio: 'h-3 w-3 border-GRAY_1000',
+  radioInput: 'h-8 border-GRAY_400 bg-white rounded-lg placeholder:text-GRAY_500 f-12-450 rounded-md p-3 w-[300px]',
+  label: 'f-12-450 text-GRAY_1000',
+};
+
+// Disable animations for this form
+const feedbackFormAnimationConfig: FormBuilderAnimationConfig = {
+  disabled: true,
+};
+
 const Log: FC<LogProps> = ({
   isLastLogOfDate = false,
   isLastLog = false,
@@ -38,7 +58,7 @@ const Log: FC<LogProps> = ({
   activityId,
 }) => {
   const {
-    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment },
+    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment, form_builder_config },
     status,
     content_type,
     updated_at,
@@ -52,7 +72,8 @@ const Log: FC<LogProps> = ({
   const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-
+  const formBuilderRef = useRef<FormBuilderRef>(null);
+  const logCtaRef = useRef<LogCtaRef>(null);
   const isFeedbackEnabled = useIsFeedbackEnabled();
 
   // sender info visibility
@@ -105,6 +126,14 @@ const Log: FC<LogProps> = ({
   const handleLineHeightUpdate = () => {
     setLineHeight((prev) => prev + 1);
   };
+
+  const handleFeedbackSubmit = useCallback((data: Record<string, unknown>) => {
+    logCtaRef.current?.submitFormData(data);
+  }, []);
+
+  const handleSubmitForm = useCallback(() => {
+    formBuilderRef.current?.submit();
+  }, []);
 
   useEffect(() => {
     const stopStrokeShimmerSequenceLoopRef = { current: false };
@@ -223,14 +252,27 @@ const Log: FC<LogProps> = ({
               status={statusIndicatorColor.status}
             />
           )}
+
+          {form_builder_config && (
+            <FormBuilder
+              schema={form_builder_config}
+              onSubmit={handleFeedbackSubmit}
+              ref={formBuilderRef}
+              classNames={feedbackFormClassNames}
+              animationConfig={feedbackFormAnimationConfig}
+            />
+          )}
+
           {!!ctas?.length && (
             <LogCta
+              ref={logCtaRef}
               ctas={ctas}
               logGroupId={log_group_id}
               processId={processId}
               activityId={activityId}
               handleShowArtifacts={handleShowArtifacts}
               isLastLog={isLastLog}
+              onSubmitForm={handleSubmitForm}
             />
           )}
           {action_comment?.comment && (
