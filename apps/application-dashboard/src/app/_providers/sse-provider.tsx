@@ -56,6 +56,9 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       update: handleSSEEvent,
       message: handleSSEEvent,
     },
+    onError: (error) => {
+      captureException(error);
+    },
   });
 
   const value: SSEContextType = {
