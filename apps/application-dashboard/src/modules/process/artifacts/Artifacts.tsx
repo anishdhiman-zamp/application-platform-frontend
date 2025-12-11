@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import AllArtifactsSideDrawer from 'modules/process/artifacts/components/AllArtifactsSideDrawer';
 import ArtifactLoader from 'modules/process/artifacts/components/ArtifactLoader';
 import ArtifactTopbar from 'modules/process/artifacts/components/ArtifactTopbar';
 import EmailArtifactWrapper from 'modules/process/artifacts/components/email-artifact/EmailArtifactWrapper';
+import ImageArtifact from 'modules/process/artifacts/components/image-artifact/ImageArtifact';
 import {
   ARTIFACT_TYPE,
   type EmitHITLActionPayload,
@@ -14,6 +14,7 @@ import { useGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppDispatch } from '@/hooks/toolkit';
+import AllArtifactsSideDrawer from '@/modules/process/artifacts/components/AllArtifactsDialog';
 import DatasetTabView from '@/modules/process/artifacts/components/pdf-dataset-artifact/DatasetTabView';
 import { useArtifactContextStore } from '@/modules/process/artifacts/context/artifact.context';
 import { CompletedFieldsProvider } from '@/modules/process/artifacts/context/completedFields.context';
@@ -22,6 +23,7 @@ import type {
   BrowserArtifactsResponseType,
   DatasetArtifactsResponseType,
   EmailArtifactsResponseType,
+  ImageArtifactsResponseType,
   PdfDatasetArtifactsResponseType,
 } from '@/types/api/processApi.types';
 import type { defaultFnType, MapAny } from '@/types/commonTypes';
@@ -128,7 +130,7 @@ const Artifacts = ({
               artifactId={artifactId}
               fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
               processId={processId}
-              isArtifactLoading={isFetching}
+              isArtifactsFetching={isFetching}
               isSearchBarEnabled
               className='w-1/2'
             />
@@ -170,7 +172,7 @@ const Artifacts = ({
             processId={processId}
             artifactId={artifactId}
             fileId={(artifactData as PdfDatasetArtifactsResponseType)?.pdf_file?.file_id}
-            isArtifactLoading={isFetching}
+            isArtifactsFetching={isFetching}
             isSearchBarEnabled
             key={id}
           />
@@ -186,13 +188,24 @@ const Artifacts = ({
           />
         );
 
+      case ARTIFACT_TYPE.IMAGE:
+        return (
+          <ImageArtifact
+            key={id}
+            imageArtifact={artifactData as ImageArtifactsResponseType}
+            artifactId={artifactId}
+            processId={processId}
+            isArtifactsFetching={isFetching}
+          />
+        );
+
       default:
         return null;
     }
   }, [artifactType, artifactData, id, filters]);
 
   const showArtifactLoader = useMemo(() => {
-    return isFetching && artifactType !== ARTIFACT_TYPE.PDF;
+    return isFetching && artifactType !== ARTIFACT_TYPE.PDF && artifactType !== ARTIFACT_TYPE.IMAGE;
   }, [isFetching, artifactType]);
 
   useEffect(() => {
@@ -204,7 +217,7 @@ const Artifacts = ({
   }, [dispatch]);
 
   return (
-    <div className='animate-fade-in relative h-full w-full'>
+    <div className='animate-fade-in relative flex h-full w-full flex-col'>
       <ArtifactTopbar
         onCloseArtifacts={onCloseArtifacts}
         onExpandArtifacts={onExpandArtifacts}
@@ -218,7 +231,7 @@ const Artifacts = ({
         skeletonType={SkeletonTypes.CUSTOM}
         isError={isError}
         refetchFunction={refetch}
-        className='h-full w-full'
+        className='flex flex-1 items-center justify-center'
       >
         {artifactComponent}
       </CommonWrapper>
