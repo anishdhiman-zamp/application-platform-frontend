@@ -75,10 +75,7 @@ export const feedbacksSlice = createSlice({
     setProcessId: (state, action: PayloadAction<string>) => {
       state.processId = action.payload;
     },
-    removeFeedbackItem: (
-      state,
-      action: PayloadAction<{ id: string; status: FEEDBACK_STATUS; conversation_id: string }>,
-    ) => {
+    removeFeedbackItem: (state, action: PayloadAction<{ status: FEEDBACK_STATUS; conversation_id: string }>) => {
       const { status, conversation_id } = action.payload;
 
       state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== conversation_id);
