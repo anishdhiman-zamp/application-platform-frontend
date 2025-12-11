@@ -75,23 +75,28 @@ export const feedbacksSlice = createSlice({
     setProcessId: (state, action: PayloadAction<string>) => {
       state.processId = action.payload;
     },
-    removeFeedbackItem: (state, action: PayloadAction<{ id: string; status: FEEDBACK_STATUS }>) => {
-      const { id, status } = action.payload;
+    removeFeedbackItem: (
+      state,
+      action: PayloadAction<{ id: string; status: FEEDBACK_STATUS; conversation_id: string }>,
+    ) => {
+      const { status, conversation_id } = action.payload;
 
-      state.feedbackItems = state.feedbackItems.filter((item) => item.id !== id);
+      state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== conversation_id);
 
       switch (status) {
         case FEEDBACK_STATUS.OPEN:
-          state.openFeedbackItems = state.openFeedbackItems.filter((i) => i.id !== id);
+          state.openFeedbackItems = state.openFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
         case FEEDBACK_STATUS.QUEUED:
-          state.queuedFeedbackItems = state.queuedFeedbackItems.filter((i) => i.id !== id);
+          state.queuedFeedbackItems = state.queuedFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
         case FEEDBACK_STATUS.PROCESSING:
-          state.processingFeedbackItems = state.processingFeedbackItems.filter((i) => i.id !== id);
+          state.processingFeedbackItems = state.processingFeedbackItems.filter(
+            (i) => i.conversation_id !== conversation_id,
+          );
           break;
         case FEEDBACK_STATUS.APPLIED:
-          state.successFeedbackItems = state.successFeedbackItems.filter((i) => i.id !== id);
+          state.successFeedbackItems = state.successFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
       }
 
