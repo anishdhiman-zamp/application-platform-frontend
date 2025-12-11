@@ -1,3 +1,4 @@
+import type { FormSchema } from '@zamp-platform/form-builder';
 import type { MapAny } from 'types/commonTypes';
 import type {
   ARTIFACT_TYPE,
@@ -209,6 +210,7 @@ export type LogsContentType = {
     sender_id: string;
     sender_name: string;
   };
+  form_builder_config: FormSchema;
   message: string;
   thought_steps: string[];
   ctas: CtasType[];

@@ -5,13 +5,11 @@ import {
   type FormBuilderAnimationConfig,
   type FormBuilderClassNames,
   type FormBuilderRef,
-  type FormSchema,
-  type RadioOption,
 } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
-import LogCta from 'modules/process/activity-logs/components/LogCta';
+import LogCta, { type LogCtaRef } from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
@@ -37,37 +35,6 @@ type LogProps = {
   activityId: string;
 };
 
-const feedbackSchema: FormSchema = {
-  id: 'feedback-form',
-  type: 'feedback',
-  sections: [
-    {
-      id: 'feedback_section',
-      sections: [
-        {
-          id: 'feedback_options',
-          layout: [[{ col_span: 12, field: 'feedback' }]],
-        },
-      ],
-    },
-  ],
-  fields: {
-    feedback: {
-      id: 'feedback',
-      type: 'radio',
-      options: [
-        { label: 'Everything looks good', value: 'approved' },
-        {
-          label: '',
-          value: 'note',
-          has_input: true,
-          input_placeholder: 'Add a note ',
-        } as RadioOption,
-      ],
-    },
-  },
-};
-
 const feedbackFormClassNames: FormBuilderClassNames = {
   form: 'gap-2 pb-0 mt-2',
   radioGroup: 'gap-3',
@@ -91,7 +58,7 @@ const Log: FC<LogProps> = ({
   activityId,
 }) => {
   const {
-    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment },
+    content: { message, thought_steps, ctas, sender_type, sender_details, action_comment, form_builder_config },
     status,
     content_type,
     updated_at,
@@ -106,12 +73,8 @@ const Log: FC<LogProps> = ({
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const formBuilderRef = useRef<FormBuilderRef>(null);
+  const logCtaRef = useRef<LogCtaRef>(null);
   const isFeedbackEnabled = useIsFeedbackEnabled();
-
-  const handleFeedbackSubmit = useCallback((data: Record<string, unknown>) => {
-    console.log('Feedback submitted:', data);
-    // TODO: Handle the feedback submission
-  }, []);
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -163,6 +126,14 @@ const Log: FC<LogProps> = ({
   const handleLineHeightUpdate = () => {
     setLineHeight((prev) => prev + 1);
   };
+
+  const handleFeedbackSubmit = useCallback((data: Record<string, unknown>) => {
+    logCtaRef.current?.submitFormData(data);
+  }, []);
+
+  const handleSubmitForm = useCallback(() => {
+    formBuilderRef.current?.submit();
+  }, []);
 
   useEffect(() => {
     const stopStrokeShimmerSequenceLoopRef = { current: false };
@@ -282,22 +253,26 @@ const Log: FC<LogProps> = ({
             />
           )}
 
-          <FormBuilder
-            schema={feedbackSchema}
-            onSubmit={handleFeedbackSubmit}
-            ref={formBuilderRef}
-            classNames={feedbackFormClassNames}
-            animationConfig={feedbackFormAnimationConfig}
-          />
+          {form_builder_config && (
+            <FormBuilder
+              schema={form_builder_config}
+              onSubmit={handleFeedbackSubmit}
+              ref={formBuilderRef}
+              classNames={feedbackFormClassNames}
+              animationConfig={feedbackFormAnimationConfig}
+            />
+          )}
 
           {!!ctas?.length && (
             <LogCta
+              ref={logCtaRef}
               ctas={ctas}
               logGroupId={log_group_id}
               processId={processId}
               activityId={activityId}
               handleShowArtifacts={handleShowArtifacts}
               isLastLog={isLastLog}
+              onSubmitForm={handleSubmitForm}
             />
           )}
           {action_comment?.comment && (

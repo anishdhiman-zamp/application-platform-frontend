@@ -8,7 +8,7 @@ import { ARTIFACT_ICON_MAPPING, N_A_VALUE } from 'modules/process/process.consta
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
-import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+import type { CtasType, EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 /**
  * Formats date string to include day and time
@@ -230,3 +230,55 @@ export const shouldPerformChatbotDatasetNavigation = (
 
   return params !== null && params.datasetId === currentDatasetId;
 };
+
+/**
+ * Generates a unique loading ID for a CTA
+ * @param {CtasType} cta - The CTA object
+ * @returns {string} A unique loading ID
+ */
+export const getCtaLoadingId = (cta: CtasType): string => `${cta?.id}-${cta?.display_name}`;
+
+/**
+ * Serializes form data to a string array for HITL submission
+ * @param {Record<string, unknown>} formData - The form data to serialize
+ * @returns {string[]} Array of serialized values
+ */
+export const serializeFormData = (formData: Record<string, unknown>): string[] =>
+  Object.entries(formData)
+    .map(([, value]) => {
+      // Handle string values directly
+      if (typeof value === 'string') {
+        return value;
+      }
+
+      // Handle radio input with nested input value (e.g., { value: 'note', input: 'gggg' })
+      if (typeof value === 'object' && value !== null && 'input' in value) {
+        const inputValue = (value as { input?: string }).input;
+
+        return typeof inputValue === 'string' ? inputValue : null;
+      }
+
+      return null;
+    })
+    .filter((value): value is string => value !== null && value !== '');
+
+/**
+ * Builds the HITL action payload
+ * @param {CtasType} cta - The CTA object
+ * @param {string} logGroupId - The log group ID
+ * @param {string} userId - The user ID
+ * @param {string[]} customValues - Optional custom values to include
+ * @returns {Object} The HITL payload object
+ */
+export const buildHITLPayload = (cta: CtasType, logGroupId: string, userId: string, customValues?: string[]) => ({
+  hitl_request_id: cta.hitl_request_id,
+  log_group_id: logGroupId,
+  submitted_by: userId,
+  responses: [
+    {
+      action_id: cta.cta_action_id,
+      values: [...(customValues ?? []), ...(cta.cta_value ? [cta.cta_value] : [])],
+      cta_component_type: cta.cta_component_type,
+    },
+  ],
+});

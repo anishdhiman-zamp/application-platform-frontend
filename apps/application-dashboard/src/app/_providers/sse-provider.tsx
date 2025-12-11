@@ -48,6 +48,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
     }
   };
 
+  const handleSSEError = (error: Event) => {
+    captureException(error);
+  };
+
   const sseHook = useSSE({
     reconnectIntervalMs: 30000,
     maxReconnectAttempts: 5,
@@ -56,6 +60,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, sseEventBus 
       update: handleSSEEvent,
       message: handleSSEEvent,
     },
+    onError: handleSSEError,
   });
 
   const value: SSEContextType = {
