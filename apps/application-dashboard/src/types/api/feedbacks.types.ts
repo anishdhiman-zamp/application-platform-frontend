@@ -10,6 +10,7 @@ export interface FeedbackItemType {
   organization_id: string;
   process_id: string;
   conversation_id: string;
+  feedback_id: string;
   status: FEEDBACK_STATUS;
   title: string;
   summary: FeedbackSummary;

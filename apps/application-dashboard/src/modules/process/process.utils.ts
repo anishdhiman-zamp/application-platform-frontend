@@ -7,7 +7,6 @@ import { formatArrayValue } from 'modules/data/data.utils';
 import { ARTIFACT_ICON_MAPPING, N_A_VALUE } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
-import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import type { CtasType, EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 /**
@@ -30,24 +29,16 @@ export const getEmailDate = (date: string) => {
  * Retrieves the icon source URL for a given artifact type and icon identifier.
  * @param {ARTIFACT_TYPE} artifactType - The type of the artifact.
  * @param {string} iconIdentifier - The identifier for the icon.
- * @returns {string | undefined} The URL of the icon or undefined if not found.
+ * @returns {React.ReactNode | undefined} The icon or undefined if not found.
  */
-export const getArtifactPrefixIconSrc = (
-  artifactType: ARTIFACT_TYPE,
-  iconIdentifier?: string,
-  ctaAction?: CTA_ACTION,
-) => {
-  if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
-    return iconIdentifier ? `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}` : LINK;
-  }
-
+export const getArtifactPrefixIconSrc = (artifactType: ARTIFACT_TYPE, ctaAction?: CTA_ACTION) => {
   if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
     const type = ctaAction === CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST ? ARTIFACT_TYPE.PDF : ARTIFACT_TYPE.DATASET;
 
-    return ARTIFACT_ICON_MAPPING[type]?.icon_url;
+    return ARTIFACT_ICON_MAPPING[type]?.icon;
   }
 
-  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url;
+  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon;
 };
 
 /**

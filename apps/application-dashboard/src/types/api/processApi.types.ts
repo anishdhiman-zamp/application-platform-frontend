@@ -131,6 +131,16 @@ export type OtherArtifactsResponseType = {
   url: string;
 };
 
+export type ImageArtifactsResponseType = {
+  display_name: string;
+  status: string;
+  icon_identifier: string;
+  file: {
+    file_id: string;
+    file_display_name: string;
+  };
+};
+
 export type ActivityArtifactsItemType = {
   id: string;
   activity_id: string;
@@ -142,7 +152,8 @@ export type ActivityArtifactsItemType = {
     | DatasetArtifactsResponseType
     | EmailArtifactsResponseType
     | BrowserArtifactsResponseType
-    | OtherArtifactsResponseType;
+    | OtherArtifactsResponseType
+    | ImageArtifactsResponseType;
   created_at: string;
   updated_at: string;
   is_deleted: boolean;

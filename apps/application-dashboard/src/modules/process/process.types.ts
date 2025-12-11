@@ -28,6 +28,7 @@ export enum ARTIFACT_TYPE {
   EXTERNAL_LINK = 'EXTERNAL_LINK',
   PDF = 'PDF',
   DATASET = 'DATASET',
+  IMAGE = 'IMAGE',
 }
 
 export enum LOG_STATUS {
