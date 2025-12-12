@@ -8,8 +8,8 @@
     "@tanstack/react-virtual": "^3.13.12"
   },
   "peerDependencies": {
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "exports": {
     ".": "./index.tsx"
