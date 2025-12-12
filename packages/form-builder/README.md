@@ -11,7 +11,6 @@ A powerful, schema-driven form builder package built with React Hook Form, featu
 - 📝 **Multiple Field Types** - Text, Select, Radio, Header Text, and more
 - 🔌 **Data Source Integration** - Fetch options from APIs dynamically
 - 🎛️ **Flexible Layout** - Grid-based layout with configurable column spans
-- 🎭 **External Styling** - Control component styles via `classNames` prop
 - ⚡ **Animation Control** - Enable, disable, or customize animations via `animationConfig` prop
 
 ## Installation
@@ -199,8 +198,6 @@ Dropdown selection with support for static options or dynamic data fetching.
 
 Radio button group for single selection from visible options.
 
-#### Simple Radio
-
 ```typescript
 {
   id: 'notification_preference',
@@ -218,180 +215,12 @@ Radio button group for single selection from visible options.
 }
 ```
 
-#### Radio with "Other" Input Option
-
-When a user selects an option with `has_input: true`, a text input appears below for additional details.
-
-```typescript
-import { RadioOption } from '@zamp-platform/form-builder';
-
-{
-  id: 'cancellation_reason',
-  type: 'radio',
-  label: 'Why are you canceling?',
-  options: [
-    { label: 'Too expensive', value: 'expensive' },
-    { label: 'Missing features', value: 'features' },
-    { label: 'Technical issues', value: 'technical' },
-    {
-      label: 'Other',
-      value: 'other',
-      has_input: true,
-      input_placeholder: 'Please tell us more...',
-    } as RadioOption,
-  ],
-}
-```
-
-#### Radio with Inline Input (No Label)
-
-When `has_input: true` and `label` is empty, the input appears **inline** next to the radio button. Clicking/focusing the input auto-selects the radio option.
-
-```typescript
-import { RadioOption } from '@zamp-platform/form-builder';
-
-{
-  id: 'feedback',
-  type: 'radio',
-  options: [
-    { label: 'Everything looks good', value: 'approved' },
-    {
-      label: '',  // Empty label = inline input
-      value: 'note',
-      has_input: true,
-      input_placeholder: 'Add a note',
-    } as RadioOption,
-  ],
-}
-```
-
-**Renders as:**
-
-```
-○ Everything looks good
-● [Add a note________________]
-```
-
 **Form Value Output:**
 
 ```typescript
-// Regular option selected
-{ cancellation_reason: 'expensive' }
-
-// "Other" with input selected
-{ cancellation_reason: { value: 'other', input: 'The onboarding was confusing' } }
-```
-
-#### Radio Input Validations
-
-When a radio option has `has_input: true`, you can add specific validations for the input field using `input_validations`. This allows you to validate the input separately from the radio selection itself.
-
-```typescript
-import { RadioOption } from '@zamp-platform/form-builder';
-
 {
-  id: 'feedback',
-  type: 'radio',
-  options: [
-    { label: 'Everything looks good', value: 'approved' },
-    {
-      label: '',
-      value: 'note',
-      has_input: true,
-      input_placeholder: 'Add a note',
-    } as RadioOption,
-  ],
-  validations: [
-    {
-      type: 'required',
-      config: {
-        message: 'Please select a feedback option',
-      },
-    },
-  ],
-  input_validations: [
-    {
-      type: 'required',
-      config: {
-        message: 'Please add a note',
-      },
-    },
-    {
-      type: 'minLength',
-      config: {
-        value: 10,
-        message: 'Note must be at least 10 characters',
-      },
-    },
-    {
-      type: 'maxLength',
-      config: {
-        value: 500,
-        message: 'Note must not exceed 500 characters',
-      },
-    },
-    {
-      type: 'regex',
-      config: {
-        value: '^[a-zA-Z0-9\\s]+$',
-        message: 'Note can only contain letters, numbers, and spaces',
-      },
-    },
-  ],
+  notification_preference: 'email';
 }
-```
-
-**How it works:**
-
-- `validations` apply to the radio selection itself (whether an option is selected)
-- `input_validations` apply only to the input value when a radio option with `has_input: true` is selected
-- All validation types are supported: `required`, `minLength`, `maxLength`, `regex`, `enums`, etc.
-- If a radio option without `has_input` is selected, `input_validations` are not applied
-
----
-
-## External Styling (`classNames`)
-
-Control the styling of form components without modifying the schema. This is useful when the schema comes from a backend.
-
-### FormBuilderClassNames Interface
-
-```typescript
-interface FormBuilderClassNames {
-  form?: string; // Form container
-  section?: string; // Section wrapper
-  sectionTitle?: string; // Section title label
-  fieldWrapper?: string; // Field container
-  label?: string; // Field labels
-  // Radio specific
-  radioGroup?: string; // RadioGroup container
-  radioItem?: string; // Individual radio item wrapper
-  radio?: string; // Radio button itself
-  radioInput?: string; // Input/textarea in radio options
-  // Input specific
-  input?: string; // Text inputs
-  // Select specific
-  select?: string; // Select dropdowns
-  // Error message
-  errorMessage?: string; // Validation error messages
-}
-```
-
-### Usage
-
-```tsx
-import { FormBuilder, FormBuilderClassNames } from '@zamp-platform/form-builder';
-
-const formClassNames: FormBuilderClassNames = {
-  form: 'gap-2 pb-2',
-  radioGroup: 'gap-3',
-  radioItem: 'space-y-0',
-  radio: 'border-gray-500',
-  radioInput: 'h-8 border-gray-400 bg-white rounded-lg',
-  label: 'text-sm font-medium text-gray-900',
-};
-
-<FormBuilder schema={mySchema} onSubmit={handleSubmit} classNames={formClassNames} />;
 ```
 
 ---
@@ -672,7 +501,6 @@ layout: [
 | `schema`          | `FormSchema`                      | The form schema definition           |
 | `onSubmit`        | `(data: any) => void`             | Callback when form is submitted      |
 | `ref`             | `React.RefObject<FormBuilderRef>` | Ref to access form methods           |
-| `classNames`      | `FormBuilderClassNames`           | Custom class names for styling       |
 | `animationConfig` | `FormBuilderAnimationConfig`      | Animation configuration (or disable) |
 
 ### FormBuilderRef Methods
@@ -705,14 +533,10 @@ export {
   SelectOption,
   Condition,
   Expression,
-  FormBuilderClassNames,
   FormBuilderAnimationConfig,
   AnimationTargetConfig,
   AnimationTransitionConfig,
 } from './types';
-
-// Context hooks (for custom field components)
-export { useFormBuilderClassNames, useFormBuilderAnimationConfig } from './utils/classNamesContext';
 
 // Utilities
 export { validateField, createCustomResolver } from './utils/validation';

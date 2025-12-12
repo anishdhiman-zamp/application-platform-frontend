@@ -1,4 +1,4 @@
-import { FieldType, FormField, FormSchema, FormValues, Validation, ValidationDependency } from '../types';
+import { FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
 // Function to validate a single value against validations
@@ -54,7 +54,6 @@ export const validateField = (
   formValues: FormValues,
   validations?: Validation[],
   dependentValidations?: ValidationDependency[],
-  field?: FormField,
 ): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
@@ -64,33 +63,9 @@ export const validateField = (
     ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
   ];
 
-  // For radio fields with has_input, handle validation differently
-  if (field?.type === FieldType.RADIO) {
-    // Check if this is a radio field with an object value (has_input option selected)
-    if (typeof value === 'object' && value !== null && 'value' in value) {
-      // This is a radio field with an object value (has_input option selected)
-      const radioValue = value.value;
-      const inputValue = value.input || '';
-
-      // First, validate the radio selection itself (value.value)
-      const radioValidationResult = validateValue(radioValue, allValidations);
-      errors.push(...radioValidationResult.errors);
-
-      // Then, if input_validations exist, validate the input value
-      if (field.input_validations && field.input_validations.length > 0) {
-        const inputValidationResult = validateValue(inputValue, field.input_validations);
-        errors.push(...inputValidationResult.errors);
-      }
-    } else {
-      // Radio field with string value (non-has_input option selected or no option selected)
-      const validationResult = validateValue(value, allValidations);
-      errors.push(...validationResult.errors);
-    }
-  } else {
-    // For all other field types, validate normally
-    const validationResult = validateValue(value, allValidations);
-    errors.push(...validationResult.errors);
-  }
+  // Validate the value
+  const validationResult = validateValue(value, allValidations);
+  errors.push(...validationResult.errors);
 
   return {
     isValid: errors.length === 0,
@@ -109,7 +84,6 @@ export const createCustomResolver = (schema: FormSchema) => {
         values,
         field.validations,
         field.validation_dependencies,
-        field, // Pass field to check for radio with has_input
       );
 
       if (!isValid) {
