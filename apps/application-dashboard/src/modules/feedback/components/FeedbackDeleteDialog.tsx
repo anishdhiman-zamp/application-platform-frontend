@@ -11,9 +11,8 @@ import {
   DialogHeaderTitle,
 } from '@zamp-platform/ui';
 import { findTimeDifference } from 'modules/data/data.utils';
-import { useDeleteFeedbackMutation } from '@/apis/feedback';
-import { feedbackContextActions, useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
-import { removeFeedbackItem } from '@/store/slices/feedbacks';
+import { useDeleteConversationFeedbackMutation, useDeleteFeedbackMutation } from '@/apis/feedback';
+import { removeFeedbackItem, removeOpenFeedbackConversation } from '@/store/slices/feedback.slice';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackDeleteDialogProps {
@@ -22,6 +21,7 @@ interface FeedbackDeleteDialogProps {
   processId?: string;
   feedback: FeedbackItemType;
   onDeleteSuccess?: () => void;
+  isDraftFeedback?: boolean;
 }
 
 const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
@@ -30,30 +30,44 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
   processId = '',
   feedback,
   onDeleteSuccess,
+  isDraftFeedback = false,
 }) => {
   const [deleteFeedback, { isLoading: isDeleting }] = useDeleteFeedbackMutation();
-  const { dispatch: feedbackContextDispatch } = useFeedbackContextStore();
+  const [deleteConversationFeedback, { isLoading: isDeletingConversation }] = useDeleteConversationFeedbackMutation();
   const dispatch = useDispatch();
 
   const handleDelete = () => {
-    if (!processId || !feedback?.id) return;
-    deleteFeedback({
-      process_id: processId as string,
-      feedback_ids: [feedback?.id as string],
-    })
-      .unwrap()
-      .then(() => {
-        feedbackContextDispatch({
-          type: feedbackContextActions.REMOVE_FEEDBACK_ITEM,
-          payload: { id: feedback.id, status: feedback.status },
-        });
-        dispatch(removeFeedbackItem(feedback.id));
-        onOpenChange(false);
-        onDeleteSuccess?.();
+    if (isDraftFeedback) {
+      deleteConversationFeedback({
+        conversationId: feedback.id,
+        resourceType: feedback.resource_type ?? '',
+        resourceId: feedback.resource_id ?? '',
       })
-      .catch(() => {
-        onOpenChange(false);
-      });
+        .unwrap()
+        .then(() => {
+          dispatch(removeOpenFeedbackConversation(feedback.id));
+          onOpenChange(false);
+          onDeleteSuccess?.();
+        })
+        .catch(() => {
+          onOpenChange(false);
+        });
+    } else {
+      if (!processId || !feedback?.id) return;
+      deleteFeedback({
+        process_id: processId as string,
+        feedback_ids: [feedback.feedback_id || (feedback?.id as string)],
+      })
+        .unwrap()
+        .then(() => {
+          dispatch(removeFeedbackItem({ status: feedback.status, conversation_id: feedback.conversation_id }));
+          onOpenChange(false);
+          onDeleteSuccess?.();
+        })
+        .catch(() => {
+          onOpenChange(false);
+        });
+    }
   };
 
   return (
@@ -81,7 +95,12 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
               Cancel
             </Button>
           </DialogClose>
-          <Button size='medium' className='w-14' onClick={handleDelete} isLoading={isDeleting}>
+          <Button
+            size='medium'
+            className='w-14'
+            onClick={handleDelete}
+            isLoading={isDeleting || isDeletingConversation}
+          >
             Delete
           </Button>
         </DialogFooter>

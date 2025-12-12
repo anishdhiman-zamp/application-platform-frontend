@@ -9,6 +9,7 @@ export enum INPUT_FILE_FORMATS {
   XLSX = '.xlsx',
   XLS = '.xls',
   BAI2 = '.bai2',
+  TXT = '.txt',
 }
 
 export enum FILE_EXTENSION {

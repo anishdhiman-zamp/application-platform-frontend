@@ -344,7 +344,7 @@ const handleAction = async (action, payload) => {
 - `MarkdownBlockType` - Markdown block type
 - `SingleSelectBlockType` - Single select block type
 - `ButtonBlockType` - Button block type
-- `BlockType` - Enum of block type values (`PLAIN_TEXT`, `MARKDOWN`, `SINGLE_SELECT`, `BUTTON`)
+- `BLOCK_TYPE` - Enum of block type values (`PLAIN_TEXT`, `MARKDOWN`, `SINGLE_SELECT`, `BUTTON`)
 - `ActionType` - Enum of action type values (`STATE_UPDATE`, `INTERNAL_API`, `REDIRECT`)
 - `BlockAction` - Action configuration interface
 - `SingleSelectOption` - Single select option interface

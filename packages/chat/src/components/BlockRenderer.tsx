@@ -3,9 +3,16 @@
 import { cn } from '@zamp-platform/ui/utils';
 import React, { useState } from 'react';
 
-import { Block, BlockMessage, BlockType, ButtonBlockType } from '../types/block.types';
+import { Block, BLOCK_TYPE, BlockMessage, ButtonBlockType } from '../types/block.types';
 import { extractInitialValues } from './block.utils';
-import { ButtonBlock, MarkdownBlock, PlainTextBlock, QuestionGroupBlock, SingleSelectBlock } from './blocks';
+import {
+  AttachmentsBlock,
+  ButtonBlock,
+  MarkdownBlock,
+  PlainTextBlock,
+  QuestionGroupBlock,
+  SingleSelectBlock,
+} from './blocks';
 
 interface BlockRendererProps {
   message: BlockMessage;
@@ -57,13 +64,13 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   const renderBlock = (block: Block) => {
     switch (block.type) {
-      case BlockType.PLAIN_TEXT:
+      case BLOCK_TYPE.PLAIN_TEXT:
         return <PlainTextBlock key={block?.id} payload={block?.payload} />;
 
-      case BlockType.MARKDOWN:
+      case BLOCK_TYPE.MARKDOWN:
         return <MarkdownBlock key={block?.id} payload={block?.payload} />;
 
-      case BlockType.SINGLE_SELECT:
+      case BLOCK_TYPE.SINGLE_SELECT:
         return (
           <SingleSelectBlock
             key={block?.id}
@@ -80,7 +87,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           />
         );
 
-      case BlockType.BUTTON:
+      case BLOCK_TYPE.BUTTON:
         return (
           <ButtonBlock
             key={block?.id}
@@ -93,8 +100,11 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           />
         );
 
-      case BlockType.QUESTION_GROUP:
+      case BLOCK_TYPE.QUESTION_GROUP:
         return <QuestionGroupBlock key={block?.id} payload={block?.payload} />;
+
+      case BLOCK_TYPE.ATTACHMENTS:
+        return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
 
       default:
         return null;

@@ -25,6 +25,7 @@ import {
   type DatasetUrlDataType,
   FormatColumnsParamsType,
 } from 'modules/data/data.types';
+import { N_A_VALUE } from 'modules/process/process.constant';
 import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
@@ -60,6 +61,10 @@ export const findTimeDifference = (updated_at: string): string => {
   const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
 
   if (differenceInMinutesValue < 60) {
+    if (differenceInMinutesValue === 0) {
+      return 'just now';
+    }
+
     return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
   }
 
@@ -961,6 +966,10 @@ export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) =>
  */
 export const formatArrayValue = (value: MapAny[]): string => {
   // Check if it's an array of objects with same single key
+  if (value?.length === 0) {
+    return N_A_VALUE;
+  }
+
   if (
     value?.length > 0 &&
     value?.every((item) => typeof item === 'object' && item !== null) &&
@@ -1148,8 +1157,10 @@ export const prepareExportQuery = (
     alias: capitalizeWords(column.getColDef()?.headerName || column.getColId()),
   }));
 
+  const { pagination, ...baseQueryWithoutPagination } = baseQueryObject;
+
   const finalQuery = {
-    ...baseQueryObject,
+    ...baseQueryWithoutPagination,
     filters: updatedFilters,
     export_columns: exportColumns,
   };

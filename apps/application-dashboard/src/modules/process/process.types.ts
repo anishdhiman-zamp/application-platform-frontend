@@ -28,6 +28,7 @@ export enum ARTIFACT_TYPE {
   EXTERNAL_LINK = 'EXTERNAL_LINK',
   PDF = 'PDF',
   DATASET = 'DATASET',
+  IMAGE = 'IMAGE',
 }
 
 export enum LOG_STATUS {
@@ -172,4 +173,32 @@ export interface FieldRequirementType {
   rowId: string;
   columnId: string;
   isRequired: boolean;
+}
+
+export const enum DatasetTabsTypes {
+  PREVIEW = 'preview',
+  BLUEPRINT = 'blueprint',
+}
+
+export const enum DatasetColumnHeaderTypes {
+  COLUMN_NAME = 'column_name',
+  COLUMN_TYPE = 'column_type',
+  REQUIRED = 'required',
+  ACTIONS = 'actions',
+}
+
+export const enum DatasetColumnTypes {
+  TEXT = 'text',
+  FILE = 'file',
+  LINK = 'link',
+  DATE = 'date',
+  NUMBER = 'number',
+  EMAIL = 'email',
+}
+
+export interface ColumnDataType {
+  id: string;
+  column_name: string;
+  column_type: string;
+  required: boolean;
 }

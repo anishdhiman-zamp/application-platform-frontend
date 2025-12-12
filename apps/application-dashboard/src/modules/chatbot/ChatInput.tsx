@@ -1,32 +1,38 @@
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
-import { useChat } from '@zamp-platform/chat';
+import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowUp, Check, CircleX, FileText, Loader, Mic, X } from 'lucide-react';
+import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import AudioVisualizer from 'modules/chatbot/AudioVisualiser';
 import useChatInput from 'modules/chatbot/useChatInput';
 import { MicrophoneState } from '@/hooks/useMicrophoneRecorder';
 import { useTranscription } from '@/hooks/useTranscription';
-import { LocationData } from '@/types/api/feedbacks.types';
+import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 interface ChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
   header: string;
+  scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  autoFocus?: boolean;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
   annotationLocation,
-  setIsLoading,
   conversationId,
   setHeader,
   isDisabled,
   header,
+  scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
+  autoFocus = false,
 }) => {
   const {
     value,
@@ -42,9 +48,11 @@ export const ChatInput: FC<ChatInputProps> = ({
   } = useChatInput({
     chat,
     annotationLocation,
-    setIsLoading,
     conversationId,
     setHeader,
+    scope,
+    externalInputValue,
+    setExternalInputValue,
   });
 
   const {
@@ -60,9 +68,9 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // const handleAttachClick = () => {
-  //   fileInputRef.current?.click();
-  // };
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFileSelect(e.target.files);
@@ -70,19 +78,6 @@ export const ChatInput: FC<ChatInputProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-
-    console.log('extension', extension);
-
-    // You can customize icons based on file type
-    return (
-      <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100'>
-        <FileText className='size-3.5' />
-      </div>
-    );
   };
 
   const handleContainerClick = () => {
@@ -130,10 +125,21 @@ export const ChatInput: FC<ChatInputProps> = ({
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
 
+  useEffect(() => {
+    if (autoFocus && !isDisabled && !shouldShowRecorder) {
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFocus, isDisabled, shouldShowRecorder]);
+
   return (
     <div
       className={cn('w-full border-t p-3', {
         'border-none p-0': !(firstMessage || header),
+        'pt-1.5': attachments.length > 0,
       })}
     >
       {/* Hidden file input */}
@@ -144,40 +150,9 @@ export const ChatInput: FC<ChatInputProps> = ({
         onChange={handleFileChange}
         className='hidden'
         aria-label='File input'
+        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
       />
-
-      {/* Attachments display */}
-      {attachments.length > 0 && (
-        <div className='mb-2 flex flex-wrap gap-2'>
-          {attachments.map((attachment) => (
-            <div
-              key={attachment.file_id}
-              className='rounded-2.5 shadow-table-filter-menu relative flex w-[148px] items-center gap-2 border border-gray-400 bg-white p-1'
-            >
-              <div className='flex items-center gap-1'>
-                {getFileIcon(attachment.file_name)}
-                <span className='f-12-500 max-w-[104px] truncate'>{attachment.file_name}</span>
-              </div>
-              <Button
-                className='absolute -top-2 -right-2 size-4 rounded-full bg-white p-[1px] [&_svg]:size-3.5'
-                variant='ghost'
-                size='icon'
-                onClick={() => removeAttachment(attachment.file_id)}
-              >
-                <CircleX className='size-3.5 text-gray-700' />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Upload progress indicator */}
-      {isUploading && (
-        <div className='mb-2 text-sm text-gray-600'>
-          <span>Uploading files...</span>
-        </div>
-      )}
-
+      <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
       <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
         {/* Middle - Textarea and button wrapper */}
         <div className='relative'>
@@ -186,7 +161,7 @@ export const ChatInput: FC<ChatInputProps> = ({
               <Button
                 variant='ghost'
                 size='icon'
-                className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 [&_svg]:size-3'
+                className='bg-GRAY_200 hover:bg-GRAY_200 !size-5 rounded-full [&_svg]:size-3'
                 aria-label='Reject recording'
                 onClick={handleReject}
               >
@@ -198,7 +173,7 @@ export const ChatInput: FC<ChatInputProps> = ({
 
               <Button
                 size='icon'
-                className='!size-5 [&_svg]:size-3'
+                className='!size-5 rounded-full [&_svg]:size-3'
                 aria-label='Accept recording'
                 onClick={handleAccept}
                 disabled={isCommitting}
@@ -208,7 +183,7 @@ export const ChatInput: FC<ChatInputProps> = ({
               </Button>
             </div>
           ) : (
-            <div className='rounded-xl border' onClick={handleContainerClick}>
+            <div className='shadow-side-drawer-inner rounded-xl border' onClick={handleContainerClick}>
               <Textarea
                 ref={textareaRef}
                 value={value}
@@ -232,24 +207,25 @@ export const ChatInput: FC<ChatInputProps> = ({
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='!size-4 [&_svg]:size-3'
+                      className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
                       aria-label='Start recording'
                       onClick={handleStartRecording}
                       disabled={microphoneState === MicrophoneState.SettingUp || isDisabled}
                     >
-                      <Mic className='text-gray-900' />
+                      <Mic />
                     </Button>
                   )}
-                  {/* <Button
+                  {/* TODO: Add back when PACE is ready to handle attachments */}
+                  <Button
                     variant='ghost'
                     size='icon'
-                    className='!size-4 [&_svg]:size-3'
+                    className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
                     aria-label='Attach file'
                     onClick={handleAttachClick}
-                    disabled={isUploading}
+                    disabled={isUploading || isDisabled}
                   >
-                    <Paperclip className='text-gray-900' />
-                  </Button> */}
+                    <Paperclip />
+                  </Button>
                 </div>
                 <Button
                   onClick={handleSubmit}

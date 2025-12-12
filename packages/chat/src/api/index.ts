@@ -8,6 +8,10 @@ import {
   CreateConversationResponseType,
   GetConversationByIdRequestType,
   GetConversationByIdResponseType,
+  GetFileDownloadUrlRequestType,
+  GetFileDownloadUrlResponseType,
+  GetFilesByIdsRequestType,
+  GetFilesByIdsResponseType,
   PostMessagePayloadType,
   PostMessageResponseType,
 } from '../types/chat.types';
@@ -27,6 +31,8 @@ export const API_ENDPOINTS = {
   POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
   GET_CONVERSATION_BY_ID: 'v2/conversations/{{conversationId}}',
   CREATE_CONVERSATION_V2: 'v2/conversations',
+  GET_FILES_BY_IDS: '/file-imports',
+  GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -70,6 +76,17 @@ const ConversationService = chatApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
+    getFilesByIds: builder.query<GetFilesByIdsResponseType, GetFilesByIdsRequestType>({
+      query: (params) => ({
+        url: API_ENDPOINTS.GET_FILES_BY_IDS,
+        params,
+      }),
+    }),
+    getFileDownloadUrl: builder.query<GetFileDownloadUrlResponseType, GetFileDownloadUrlRequestType>({
+      query: ({ file_upload_id }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.GET_FILE_DOWNLOAD_URL, { file_upload_id }),
+      }),
+    }),
   }),
 });
 
@@ -79,4 +96,7 @@ export const {
   useGetConversationByIdQuery,
   useCreateConversationV2Mutation,
   useSendMessageV2Mutation,
+  useGetFilesByIdsQuery,
+  useLazyGetFileDownloadUrlQuery,
+  useLazyGetConversationByIdQuery,
 } = ConversationService;

@@ -6,11 +6,11 @@ exports[`DropdownMenu Components matches full menu structure snapshot 1`] = `
   data-aria-hidden="true"
 >
   <button
-    aria-controls="radix-«rn»"
+    aria-controls="radix-_r_n_"
     aria-expanded="true"
     aria-haspopup="menu"
     data-state="open"
-    id="radix-«rm»"
+    id="radix-_r_m_"
     type="button"
   >
     Menu

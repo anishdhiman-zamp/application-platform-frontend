@@ -32,7 +32,13 @@ const TabsV2: FC<TabsV2Props> = ({
       {!hideTabs && (
         <TabsList tabIndex={tabIndex} className={listClassName}>
           {tabsList.map((tab, idx) => (
-            <TabsTrigger tabIndex={tabIndex} key={idx} value={tab?.value as string} className={triggerClassName}>
+            <TabsTrigger
+              tabIndex={tabIndex}
+              key={idx}
+              data-testid={`tabs-v2-trigger-${tab?.value}`}
+              value={tab?.value as string}
+              className={triggerClassName}
+            >
               {tab?.label}
             </TabsTrigger>
           ))}

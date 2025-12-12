@@ -1,10 +1,13 @@
-export const enum BlockType {
+import { MessageAttachmentType } from '../..';
+
+export const enum BLOCK_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
   SINGLE_SELECT = 'single_select',
   BUTTON = 'button',
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
+  ATTACHMENTS = 'attachments',
 }
 
 export const enum ActionType {
@@ -49,11 +52,12 @@ export interface BlockPayload {
   is_disabled: boolean;
   label: string;
   value: string;
+  is_display?: boolean;
 }
 
 export interface PlainTextBlockType {
   id: string;
-  type: BlockType.PLAIN_TEXT;
+  type: BLOCK_TYPE.PLAIN_TEXT;
   order: number;
   payload: {
     text: string;
@@ -62,7 +66,7 @@ export interface PlainTextBlockType {
 
 export interface MarkdownBlockType {
   id: string;
-  type: BlockType.MARKDOWN;
+  type: BLOCK_TYPE.MARKDOWN;
   order: number;
   payload: {
     text: string;
@@ -71,7 +75,7 @@ export interface MarkdownBlockType {
 
 export interface SingleSelectBlockType {
   id: string;
-  type: BlockType.SINGLE_SELECT;
+  type: BLOCK_TYPE.SINGLE_SELECT;
   order: number;
   payload: {
     options: SingleSelectOption[];
@@ -82,7 +86,7 @@ export interface SingleSelectBlockType {
 
 export interface ButtonBlockType {
   id: string;
-  type: BlockType.BUTTON;
+  type: BLOCK_TYPE.BUTTON;
   order: number;
   payload: BlockPayload;
   action: BlockAction;
@@ -91,7 +95,7 @@ export interface ButtonBlockType {
 
 export interface QuestionBlockType {
   id: string;
-  type: BlockType.QUESTION;
+  type: BLOCK_TYPE.QUESTION;
   order: number;
   payload: {
     type: TEXT_TYPE;
@@ -101,10 +105,19 @@ export interface QuestionBlockType {
 
 export interface QuestionGroupBlockType {
   id: string;
-  type: BlockType.QUESTION_GROUP;
+  type: BLOCK_TYPE.QUESTION_GROUP;
   order: number;
   payload: {
     questions: QuestionBlockType[];
+  };
+}
+
+export interface AttachmentsBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.ATTACHMENTS;
+  payload: {
+    attachments: MessageAttachmentType[];
   };
 }
 
@@ -119,8 +132,16 @@ export type Block =
   | SingleSelectBlockType
   | ButtonBlockType
   | QuestionGroupBlockType
-  | QuestionBlockType;
+  | QuestionBlockType
+  | AttachmentsBlockType;
 
 export interface BlockMessage {
   block: Block[];
+}
+
+export interface UploadedFileType {
+  file_id: string;
+  file_name: string;
+  file_type?: string;
+  file?: File;
 }

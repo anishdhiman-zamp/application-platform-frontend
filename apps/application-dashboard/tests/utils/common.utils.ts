@@ -56,8 +56,9 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
   console.log('Polling for org-switcher-trigger to be visible...');
   let orgSwitcherVisible = false;
   let attempts = 0;
+  const maxInitialAttempts = 20; // 20 attempts * 2 seconds = 40 seconds max
 
-  while (!orgSwitcherVisible) {
+  while (!orgSwitcherVisible && attempts < maxInitialAttempts) {
     attempts++;
     try {
       const orgSwitcher = page.getByTestId('org-switcher-trigger');
@@ -69,57 +70,103 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
         break;
       }
     } catch (error) {
-      console.log(`Error checking org switcher trigger:`, error);
+      console.log(`Error checking org switcher trigger (attempt ${attempts}/${maxInitialAttempts}):`, error);
     }
 
-    console.log(`Attempt ${attempts}: Org switcher trigger not visible yet, waiting 2 seconds...`);
+    console.log(
+      `⏳ Attempt ${attempts}/${maxInitialAttempts}: Org switcher trigger not visible yet, waiting 2 seconds...`,
+    );
     await page.waitForTimeout(2000);
   }
 
-  // Step 2: Wait a bit for DOM to stabilize, then click org switcher to open dropdown
-  await page.waitForTimeout(500);
+  if (!orgSwitcherVisible) {
+    throw new Error(
+      `Org switcher trigger not visible after ${maxInitialAttempts} attempts (${maxInitialAttempts * 2} seconds)`,
+    );
+  }
+
+  // Step 2: Wait for DOM to stabilize and element to be fully ready
+  console.log('[chooseOrganization] Waiting for org switcher to be ready...');
+  await page.waitForTimeout(1000);
+
   const orgSwitcher = page.getByTestId('org-switcher-trigger');
 
-  // Wait for element to be stable and attached to DOM
+  // Wait for element to be attached, visible, and stable
   await orgSwitcher.waitFor({ state: 'attached', timeout: 5000 });
+  await orgSwitcher.waitFor({ state: 'visible', timeout: 5000 });
+
+  // Wait for element to be stable (no animations)
+  await page.waitForTimeout(500);
 
   try {
     await orgSwitcher.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
   } catch {
     console.log('[chooseOrganization] Could not scroll, element might already be in view');
   }
 
   console.log('[chooseOrganization] Clicking org switcher trigger...');
 
-  // Force click to ensure it registers
-  await orgSwitcher.click({ force: true });
-  console.log('[chooseOrganization] Clicked org switcher trigger');
-
-  // Verify the dropdown actually opened by checking data-state
-  console.log('[chooseOrganization] Verifying dropdown opened...');
+  // Try multiple methods to open the dropdown
   let dropdownOpen = false;
 
   attempts = 0;
+  const maxAttempts = 10;
 
-  while (!dropdownOpen) {
+  while (!dropdownOpen && attempts < maxAttempts) {
     attempts++;
 
-    const dataState = await orgSwitcher.getAttribute('data-state');
+    try {
+      console.log(`> Attempt ${attempts}/${maxAttempts}: Trying to click org switcher...`);
 
-    console.log(`> Attempt ${attempts}: data-state = "${dataState}"`);
+      // Try clicking with different methods
+      if (attempts === 1) {
+        console.log('  Method: regular click');
+        await orgSwitcher.click({ timeout: 3000 });
+      } else if (attempts === 2) {
+        console.log('  Method: force click');
+        await orgSwitcher.click({ force: true, timeout: 3000 });
+      } else if (attempts === 3) {
+        console.log('  Method: click with delay');
+        await orgSwitcher.click({ delay: 100, timeout: 3000 });
+      } else if (attempts === 4) {
+        console.log('  Method: focus and Enter key');
+        await orgSwitcher.focus();
+        await page.keyboard.press('Enter');
+      } else {
+        console.log('  Method: force click (retry)');
+        await orgSwitcher.click({ force: true, timeout: 3000 });
+      }
 
-    if (dataState === 'open') {
-      dropdownOpen = true;
-      console.log('> Dropdown opened successfully');
-      break;
-    }
+      // Wait for animation/transition
+      await page.waitForTimeout(1000);
 
-    if (attempts >= 5) {
-      console.log('> Dropdown not opening, trying again...');
-      await orgSwitcher.click({ force: true });
+      // Check if dropdown opened
+      const dataState = await orgSwitcher.getAttribute('data-state');
+
+      console.log(`  Result: data-state = "${dataState}"`);
+
+      if (dataState === 'open') {
+        dropdownOpen = true;
+        console.log('Dropdown opened successfully!');
+        break;
+      } else {
+        console.log(`Dropdown still closed, will retry...`);
+      }
+    } catch {
+      console.log(`❌ Click failed`);
     }
 
     await page.waitForTimeout(500);
+  }
+
+  if (!dropdownOpen) {
+    // Take screenshot for debugging
+    await page.screenshot({
+      path: 'tests/test-results/screenshots/org-switcher-failed-to-open.png',
+      fullPage: true,
+    });
+    throw new Error(`Failed to open org switcher dropdown after ${maxAttempts} attempts`);
   }
 
   // Step 3: Poll until organizations are loaded in the dropdown
@@ -127,8 +174,9 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
   let availableOrgs: string[] = [];
 
   attempts = 0;
+  const maxOrgLoadAttempts = 15; // 15 attempts * 2 seconds = 30 seconds max
 
-  while (availableOrgs.length === 0) {
+  while (availableOrgs.length === 0 && attempts < maxOrgLoadAttempts) {
     attempts++;
 
     const allOrgItems = await page.locator('[data-testid*="org-switcher-item-"]').all();
@@ -151,10 +199,14 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
       break;
     }
 
-    if (attempts % 3 === 0) {
-      console.log(`⏳ Attempt ${attempts}: No organizations loaded yet, waiting 2 seconds...`);
-    }
+    console.log(`⏳ Attempt ${attempts}/${maxOrgLoadAttempts}: No organizations loaded yet, waiting 2 seconds...`);
     await page.waitForTimeout(2000);
+  }
+
+  if (availableOrgs.length === 0) {
+    throw new Error(
+      `No organizations found in dropdown after ${maxOrgLoadAttempts} attempts (${maxOrgLoadAttempts * 2} seconds)`,
+    );
   }
 
   console.log('Available organizations:', availableOrgs);
@@ -171,7 +223,7 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
     finalOrgTestId = orgTestId;
     finalOrgName = orgName;
   } else {
-    console.log(`❌ Org "${orgName}" not found, falling back to "Stripe"`);
+    console.log(`Org "${orgName}" not found, falling back to "Stripe"`);
     finalOrgTestId = 'org-switcher-item-stripe';
     finalOrgName = 'Stripe';
 
@@ -207,7 +259,7 @@ export async function chooseOrganization(page: Page, orgName: string): Promise<s
   // Step 7: Click the org item
   console.log(`> Clicking org item: ${finalOrgName}`);
   await orgItem.click();
-  console.log(`✅ Selected org: ${finalOrgName}`);
+  console.log(`Selected org: ${finalOrgName}`);
 
   return finalOrgName;
 }

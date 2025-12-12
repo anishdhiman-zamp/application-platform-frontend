@@ -6,8 +6,8 @@ import { PRIVILEGES_LIST, USER_APPROVAL_ACTION_TYPES } from 'modules/team/people
 import { GetTeamPendingApprovalsResponse } from 'types/api/people.types';
 import { useApprovalActionMutation } from '@/apis/people';
 import { toast } from '@/components/common/toast/Toast';
-import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/modules/payments/payments.types';
-import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/modules/policies/constants';
+import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/constants/payments.constants';
+import { APPROVAL_FAILED_TOAST, APPROVAL_POLICY_TOAST } from '@/constants/policies.constants';
 
 type TeamMemberApprovalCardProps = {
   name: string;

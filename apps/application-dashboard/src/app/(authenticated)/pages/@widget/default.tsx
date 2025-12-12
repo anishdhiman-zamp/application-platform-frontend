@@ -1,21 +1,12 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
-import WidgetPlayground from '@/modules/widgets/create/WidgetPlayground';
+import { Suspense } from 'react';
+import WidgetPageContent from 'app/(authenticated)/pages/@widget/WidgetPageContent';
 
 const WidgetPage = () => {
-  const searchParams = useSearchParams();
-  const isWidget = searchParams?.get('isWidget');
-
-  if (isWidget === 'true') {
-    return (
-      <div className='absolute inset-0 z-[1001] rounded-tl-xl backdrop-blur-[30px]'>
-        <WidgetPlayground />
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <Suspense>
+      <WidgetPageContent />
+    </Suspense>
+  );
 };
 
 export default WidgetPage;

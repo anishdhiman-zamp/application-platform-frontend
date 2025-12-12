@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { useGetPagesQuery } from '@/apis/pages';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { usePersistedPageNavigation } from '@/hooks/useLastVisitedPage';
 
 export default function Page() {
@@ -18,5 +19,5 @@ export default function Page() {
     }
   }, [pages]);
 
-  return <ZampLogoWebpLoader />;
+  return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />;
 }

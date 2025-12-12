@@ -5,13 +5,13 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
-  // Skip type checking and linting during build to reduce memory usage
-  // These will be run separately in CI
+  // Skip type checking and linting ONLY in CI (they run separately there)
+  // Enable them for local development for immediate feedback
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.CI === 'true',
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.CI === 'true',
   },
   experimental: {
     serverActions: {},
@@ -20,6 +20,7 @@ const nextConfig = {
   },
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+    NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
   },
   webpack: (config, { isServer }) => {
     config.resolve.fallback = {
@@ -48,6 +49,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'ik.imagekit.io',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'd2zmqfd18ltqnx.cloudfront.net',
         pathname: '/**',
       },
@@ -64,6 +70,26 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'd2hx62c6x4ihoz.cloudfront.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-dev-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-me-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-stg-us-pantheon.s3.amazonaws.com',
         pathname: '/**',
       },
     ],

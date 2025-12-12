@@ -11,7 +11,6 @@ import {
   DialogHeaderTitle,
 } from '@zamp-platform/ui';
 import { findTimeDifference } from 'modules/data/data.utils';
-import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { RootState } from '@/store';
 import { defaultFnType } from '@/types/commonTypes';
 import { formatPlural } from '@/utils/common';
@@ -23,9 +22,7 @@ interface StopProcessingFeedbackProps {
 }
 
 const StopProcessingFeedback: FC<StopProcessingFeedbackProps> = ({ isOpen, onOpenChange, onStopProcessing }) => {
-  const processingFeedbackItems = useSelector((state: RootState) =>
-    state?.feedbacks?.feedbackItems.filter((item) => item.status === FEEDBACK_STATUS.PROCESSING),
-  );
+  const { processingFeedbackItems } = useSelector((state: RootState) => state?.feedbacks);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

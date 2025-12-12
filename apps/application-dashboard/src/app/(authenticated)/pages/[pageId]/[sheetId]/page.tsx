@@ -4,8 +4,9 @@ import { useGetPagesQuery } from 'apis/pages';
 import { persistLastVisitedPage, persistLastVisitedSheet } from 'hooks/useLastVisitedPage';
 import Sheets from 'modules/sheets';
 import { useParams, useRouter } from 'next/navigation';
-import ZampLogoWebpLoader from '@/components/common/loader/ZampLogoWebpLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import CommonWrapper from 'components/commonWrapper';
 
@@ -19,6 +20,7 @@ const Page = () => {
   const {
     data: pages,
     isFetching,
+    isLoading,
     refetch,
     isError,
   } = useGetPagesQuery(undefined, {
@@ -48,8 +50,8 @@ const Page = () => {
 
   return (
     <CommonWrapper
-      isLoading={isFetching}
-      loader={<ZampLogoWebpLoader />}
+      isLoading={isLoading}
+      loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />}
       skeletonType={SkeletonTypes.CUSTOM}
       isError={isError}
       refetchFunction={refetch}

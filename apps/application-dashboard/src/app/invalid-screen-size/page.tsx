@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { SCREEN_SUPPORT, ZAMP_LOGO } from '@/constants/icons';
+import { SCREEN_SUPPORT, ZAMP_FULL_LOGO } from '@/constants/icons';
 
 export default function InvalidScreenSize() {
   return (
@@ -9,7 +9,7 @@ export default function InvalidScreenSize() {
         height={28}
         alt={'zamp logo'}
         className='absolute top-8 left-8'
-        src={ZAMP_LOGO}
+        src={ZAMP_FULL_LOGO}
         draggable='false'
         priority
       />

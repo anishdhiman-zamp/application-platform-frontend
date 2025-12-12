@@ -56,11 +56,6 @@ jest.mock('@zamp-platform/utils', () => ({
   },
 }));
 
-jest.mock('components/DynamicLottiePlayer', () => ({
-  __esModule: true,
-  default: () => <div data-testid='mocked-lottie-player' />,
-}));
-
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
@@ -91,7 +86,7 @@ describe('HandleInvitations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (usePathname as jest.Mock).mockReturnValue('/test-path');
+    (usePathname as jest.Mock).mockReturnValue(ROUTES_PATH.INVITATIONS);
     (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
     (useGetMyInvitationsQuery as jest.Mock).mockReturnValue({
       data: null,

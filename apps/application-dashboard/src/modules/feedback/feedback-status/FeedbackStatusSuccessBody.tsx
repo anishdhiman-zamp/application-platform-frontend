@@ -1,11 +1,11 @@
 import { type FC } from 'react';
+import { useSelector } from 'react-redux';
 import { Check } from 'lucide-react';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
-import { useFeedbackContextStore } from '@/modules/feedback/feedback-status/feedback.context';
+import { RootState } from '@/store';
 
 const FeedbackStatusSuccessBody: FC = () => {
-  const { state } = useFeedbackContextStore();
-  const { successFeedbackItems: items } = state;
+  const { successFeedbackItems: items } = useSelector((state: RootState) => state?.feedbacks);
 
   return (
     <div>
@@ -20,9 +20,9 @@ const FeedbackStatusSuccessBody: FC = () => {
             />
           ))}
         </div>
-        <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
-          <div>These feedback have been applied</div>
-        </div>
+      </div>
+      <div className='border-GRAY_400 f-11-400 flex w-full items-center justify-between gap-2 border-t p-4'>
+        <div>These feedback have been applied</div>
       </div>
     </div>
   );

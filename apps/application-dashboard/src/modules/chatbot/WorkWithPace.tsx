@@ -1,58 +1,76 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { LocationType } from '@zamp-platform/chat';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { FUNCTION_KEYS_ICON, KEYBOARD_KEYS } from '@/constants/shortcuts';
+import useKeyDown from '@/hooks/useKeyDown';
 import ChatbotWrapper from '@/modules/chatbot';
 
 const WorkWithPace = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
   const openChatbotRef = useRef<(() => void) | null>(null);
+  const [chatbotKey, setChatbotKey] = useState(0);
 
   const handleChatbotTrigger = useCallback((openChatbot: () => void) => {
     openChatbotRef.current = openChatbot;
   }, []);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Command/Meta + P
-      if ((event.metaKey || event.ctrlKey) && event.code === KEYBOARD_KEYS.P) {
-        // Prevent the default browser print dialog
-        event.preventDefault();
-        event.stopPropagation();
+  const handleOpenChatbot = () => {
+    if (openChatbotRef.current) {
+      openChatbotRef.current();
+    }
+  };
 
-        if (openChatbotRef.current) {
-          openChatbotRef.current();
+  const handleChatbotStateChange = useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen) {
+        const hasChatbotParams = Array.from(searchParams?.keys() || []).some((key) => key.startsWith('chatbot_'));
+
+        if (!hasChatbotParams) {
+          setChatbotKey((prev) => prev + 1);
         }
       }
+    },
+    [searchParams],
+  );
+
+  useKeyDown(handleOpenChatbot, [KEYBOARD_KEYS.META, KEYBOARD_KEYS.K]);
+
+  const annotationLocation = useMemo(() => {
+    if (activityRunId)
+      return {
+        type: LocationType.ACTIVITY_RUN as const,
+        data: {
+          process_id: processId,
+          activity_run_id: activityRunId,
+        },
+      };
+
+    return {
+      type: LocationType.PROCESS as const,
+      data: {
+        process_id: processId,
+      },
     };
+  }, [activityRunId, processId]);
 
-    // Use capture phase to ensure we intercept the event before other handlers
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown, { capture: true });
-    };
-  }, []);
-
-  if (!processId || !activityRunId) {
+  if (!processId) {
     return null;
   }
 
   return (
     <ChatbotWrapper
-      annotationLocation={{
-        type: LocationType.ACTIVITY_RUN,
-        data: {
-          process_id: processId,
-          activity_run_id: activityRunId,
-        },
-      }}
+      key={chatbotKey}
+      annotationLocation={annotationLocation}
+      scope={activityRunId ? ScopeType.ACTIVITY_RUN : ScopeType.PROCESS}
       hideFeedbackCount
       onChatbotTrigger={handleChatbotTrigger}
+      onChatbotStateChange={handleChatbotStateChange}
+      clearInputOnClose
     >
       <Button
         variant='outline'
@@ -68,7 +86,7 @@ const WorkWithPace = () => {
             {FUNCTION_KEYS_ICON.META_KEY}
           </span>
           <span className='shadow-keyboard-keys-shadow flex h-4 w-4 items-center justify-center rounded-sm border'>
-            P
+            K
           </span>
         </div>
       </Button>

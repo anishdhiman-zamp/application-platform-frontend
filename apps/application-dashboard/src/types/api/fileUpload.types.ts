@@ -19,5 +19,6 @@ export type SignedUrlBodyType = {
   payload: {
     file_name: string;
     file_type: string;
+    organization_id: string;
   };
 };

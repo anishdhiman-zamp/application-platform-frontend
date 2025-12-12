@@ -1,15 +1,15 @@
 import { cloneElement, FC, isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { LocationData, ScopeType } from '@zamp-platform/chat';
 import Chatbot from 'modules/chatbot/Chatbot';
+import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import FeedbackList from 'modules/chatbot/FeedbackList';
 import { getFeedbackItems } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import useIsFeedbackEnabled from 'modules/feedback/useIsFeedbackEnabled';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { FEATURE_FLAGS } from '@/constants/featureFlags';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { RootState } from '@/store';
-import { removeFeedbackItem } from '@/store/slices/feedbacks';
-import { FeedbackItemType, LocationData } from '@/types/api/feedbacks.types';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatbotProps {
   children: React.ReactNode;
@@ -18,6 +18,8 @@ interface ChatbotProps {
   onChatbotTrigger?: (openChatbot: () => void) => void;
   className?: string;
   onChatbotStateChange?: (isOpen: boolean) => void;
+  scope?: ScopeType;
+  clearInputOnClose?: boolean;
 }
 
 const ChatbotWrapper: FC<ChatbotProps> = ({
@@ -27,37 +29,38 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   onChatbotTrigger,
   className,
   onChatbotStateChange,
-}) => {
+  scope = ScopeType.ACTIVITY_RUN,
+  clearInputOnClose = false,
+}: ChatbotProps & { scope?: ScopeType }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
-  const allFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.feedbackItems);
-  const matchingFeedbackItems = getFeedbackItems(allFeedbackItems, annotationLocation);
+
+  const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
+  const feedbackIdParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_FEEDBACK_ID);
+  const mergedFeedbackItems = useSelector((state: RootState) => state?.feedbacks?.mergedFeedbackItems);
+
+  const matchingFeedbackItems = useMemo(
+    () => getFeedbackItems(mergedFeedbackItems, annotationLocation),
+    [mergedFeedbackItems, annotationLocation],
+  );
 
   const [currentFeedbackItem, setCurrentFeedbackItem] = useState<FeedbackItemType>();
   const [showChatbot, setShowChatbot] = useState(false);
   const [isNewConversation, setIsNewConversation] = useState(false);
-  const [isFeedbackEnabled, setIsFeedbackEnabled] = useState(false);
 
-  const { evaluate, ldClient } = useFeatureFlags();
+  const isFeedbackEnabled = useIsFeedbackEnabled();
 
   const showFeedbackList = useMemo(
     () =>
-      matchingFeedbackItems.length > 1 ||
-      (matchingFeedbackItems.length === 1 &&
+      !hideFeedbackCount &&
+      matchingFeedbackItems.length > 0 &&
+      (!conversationIdFromParam ||
         [FEEDBACK_STATUS.PROCESSING, FEEDBACK_STATUS.APPLIED].includes(
-          matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
+          matchingFeedbackItems.find((item) => item?.conversation_id === conversationIdFromParam)
+            ?.status as FEEDBACK_STATUS,
         )),
-    [matchingFeedbackItems],
-  );
-
-  const disableAddMoreFeedback = useMemo(
-    () =>
-      matchingFeedbackItems.find((item) =>
-        [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(item?.status as FEEDBACK_STATUS),
-      ) !== undefined,
-    [matchingFeedbackItems],
+    [matchingFeedbackItems, hideFeedbackCount, conversationIdFromParam],
   );
 
   const handleOpenChatbot = useCallback(
@@ -73,12 +76,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     },
     [onChatbotStateChange],
   );
-
-  const handleDeleteSuccess = (feedbackId?: string) => {
-    if (feedbackId) {
-      dispatch(removeFeedbackItem(feedbackId));
-    }
-  };
 
   const handleRemoveChatbotParams = () => {
     // Remove all query params with chatbot prefix if any exist
@@ -111,36 +108,24 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   };
 
   useEffect(() => {
-    if (currentFeedbackItem) return;
+    if (currentFeedbackItem || hideFeedbackCount || isNewConversation) return;
     if (
       matchingFeedbackItems.length === 1 &&
-      [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED].includes(matchingFeedbackItems[0]?.status as FEEDBACK_STATUS)
+      [FEEDBACK_STATUS.OPEN, FEEDBACK_STATUS.QUEUED, FEEDBACK_STATUS.DRAFT].includes(
+        matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
+      )
     ) {
       setCurrentFeedbackItem(matchingFeedbackItems[0]);
     } else if (matchingFeedbackItems.length > 1) {
-      const firstOpenFeedbackItem = matchingFeedbackItems.find((item) => item?.status === FEEDBACK_STATUS.OPEN);
+      const firstOpenFeedbackItem = matchingFeedbackItems.find(
+        (item) => item?.status === FEEDBACK_STATUS.OPEN || item?.status === FEEDBACK_STATUS.DRAFT,
+      );
 
       if (firstOpenFeedbackItem) {
         setCurrentFeedbackItem(firstOpenFeedbackItem);
       }
     }
-  }, [matchingFeedbackItems]);
-
-  useEffect(() => {
-    if (ldClient) {
-      evaluate(FEATURE_FLAGS.ENABLE_FEEDBACK)
-        .then((res: string[]) => {
-          if (res?.includes(annotationLocation.data.process_id ?? '')) {
-            setIsFeedbackEnabled(true);
-          } else {
-            setIsFeedbackEnabled(false);
-          }
-        })
-        .catch(() => {
-          setIsFeedbackEnabled(false);
-        });
-    }
-  }, [evaluate, ldClient, annotationLocation.data.process_id]);
+  }, [matchingFeedbackItems, hideFeedbackCount, isNewConversation]);
 
   // Expose the openChatbot function to parent components
   useEffect(() => {
@@ -160,6 +145,17 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
     return children;
   }, [children, handleOpenChatbot]);
 
+  useEffect(() => {
+    if (conversationIdFromParam && feedbackIdParam) {
+      const feedbackItem = matchingFeedbackItems.find(
+        (item) => item?.conversation_id === conversationIdFromParam && item?.id === feedbackIdParam,
+      );
+
+      if (feedbackItem?.status !== FEEDBACK_STATUS.PROCESSING && feedbackItem?.status !== FEEDBACK_STATUS.APPLIED)
+        setCurrentFeedbackItem(feedbackItem);
+    }
+  }, [conversationIdFromParam, feedbackIdParam, hideFeedbackCount, matchingFeedbackItems, setCurrentFeedbackItem]);
+
   return (
     <>
       {isFeedbackEnabled ? (
@@ -171,8 +167,6 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               onOpenChatbot={handleOpenChatbot}
               hideFeedbackCount={hideFeedbackCount}
               annotationLocation={annotationLocation}
-              onDeleteSuccess={handleDeleteSuccess}
-              disableAddMoreFeedback={disableAddMoreFeedback}
               onCloseFeedbackList={handleRemoveChatbotParams}
               className={className}
             >
@@ -186,10 +180,14 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
               showChatbot={showChatbot}
               feedbackItemsLength={matchingFeedbackItems.length}
               onCloseChatbot={handleCloseChatbot}
-              isNewConversation={isNewConversation || !showFeedbackList}
+              isNewConversation={
+                (isNewConversation || !showFeedbackList) && !(hideFeedbackCount && conversationIdFromParam)
+              }
               setCurrentFeedbackItem={setCurrentFeedbackItem}
               className={className}
               onOpenChatbot={handleOpenChatbot}
+              scope={scope}
+              clearInputOnClose={clearInputOnClose}
             >
               {enhancedChildren}
             </Chatbot>

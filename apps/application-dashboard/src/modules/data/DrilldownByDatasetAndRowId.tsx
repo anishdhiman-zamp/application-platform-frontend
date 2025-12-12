@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import DatasetById from 'modules/data/Dataset';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
 import { useGetDatasetDrilldownQuery } from '@/apis/dataset';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 
 const DrilldownByDatasetAndRowId = () => {
   const params = useParams();
@@ -58,9 +58,7 @@ const DrilldownByDatasetAndRowId = () => {
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={
-        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
-        </div>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-50 h-[calc(100vh-200px)]' />
       }
     >
       <div className='h-full'>

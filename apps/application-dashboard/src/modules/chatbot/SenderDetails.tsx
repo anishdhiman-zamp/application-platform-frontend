@@ -23,7 +23,7 @@ const SenderDetails: FC<SenderDetailsProps> = ({ message }) => {
           className='f-10-500 text-gray-1000 flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md'
         />
       )}
-      <span className='f-12-550'>{senderName}</span>
+      <span className='f-12-550 capitalize'>{senderName}</span>
     </div>
   );
 };

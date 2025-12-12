@@ -26,37 +26,31 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
 
     // Navigate to processes page
     console.log('Navigating to processes page...');
-    await page.goto(`${baseUrl}/processes`);
+    await page.goto(`${baseUrl}/processes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Poll until org switcher is visible (no timeout, keep checking)
-    console.log('Polling for org-switcher-trigger to be visible...');
-    let orgSwitcherVisible = false;
-    let attempts = 0;
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
+      console.log('⚠️ Network idle timeout, continuing anyway...');
+    });
 
-    while (!orgSwitcherVisible) {
-      attempts++;
-      try {
-        const orgSwitcher = page.getByTestId('org-switcher-trigger');
-
-        orgSwitcherVisible = await orgSwitcher.isVisible();
-
-        if (orgSwitcherVisible) {
-          console.log(`✅ Org switcher visible after ${attempts} attempts`);
-          break;
-        }
-      } catch {
-        console.log('Error checking org switcher trigger:');
-      }
-
-      console.log(`⏳ Attempt ${attempts}: Org switcher not visible yet, waiting 500ms...`);
-      await page.waitForTimeout(500);
-    }
+    console.log('Page loaded, waiting for content to render...');
+    await page.waitForTimeout(2000); // Give time for React to render
 
     await test.step('Open org switcher and select an available org', async () => {
-      // select Org
+      // select Org - chooseOrganization handles polling and will fallback to Stripe if Anonymous is not available
       await chooseOrganization(page, 'Anonymous');
 
+      // Wait for page navigation to complete after org selection
+      console.log('Waiting for page to load after org selection...');
+      await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {
+        console.log('DOM content loaded timeout, continuing...');
+      });
+
+      // Give time for data to load
+      await page.waitForTimeout(3000);
+
       // Wait for activity runs status tabs to be visible after org switch
+      console.log('Waiting for activity runs status tabs to be visible...');
       await waitForCondition(
         async () => {
           const statusTabs = page.getByTestId('activity-runs-status-tabs-group');
@@ -64,23 +58,23 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
           return await statusTabs.isVisible();
         },
         {
-          maxAttempts: 10,
+          maxAttempts: 20,
           pollingInterval: 1000,
           description: 'activity runs status tabs to be visible',
         },
       );
+      console.log('Activity runs status tabs are visible');
     });
 
     await test.step('Filter - test column filter', async () => {
-      // Navigate to processes page
-      console.log('Navigating to processes page...');
-      await page.goto(`${baseUrl}/processes`);
+      // We're already on the processes page from org selection
+      console.log('Already on processes page, switching to DONE tab...');
 
       // Go to "DONE" tab
       await switchToTab(page, 'DONE');
 
-      // Click the filter button to open menu (use nth(3) since there are multiple)
-      await page.getByTestId('filter-control-button-add-filters').nth(3).click();
+      // Click the filter button for the DONE tab (using tab-specific test ID)
+      await page.getByTestId('filter-control-button-add-filters-DONE').click();
       await page.waitForTimeout(1000);
 
       // Test column data
@@ -92,11 +86,12 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         },
       ];
 
-      await page.getByTestId(`filter-menu-item-${testColumnData[0].colId}`).nth(3).click();
+      // Select the filter column (filter menu items are in the dropdown, use last for now)
+      await page.getByTestId(`filter-menu-item-${testColumnData[0].colId}`).last().click();
       await page.waitForTimeout(1000);
 
       // Wait for filter input to appear and type the value
-      const filterInput = page.locator('input[placeholder="type a value..."]').nth(3);
+      const filterInput = page.locator('input[placeholder="type a value..."]').last();
 
       // Wait for the input to be visible
       await filterInput.waitFor({ state: 'visible', timeout: 5000 });
@@ -112,17 +107,17 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         throw new Error(`Expected input value to be "EUR" but got "${inputValue}"`);
       }
 
-      // Apply the filter by clicking on the specific filter menu item
-      await page.getByTestId(`filter-menu-item-${testColumnData[0].value}`).nth(3).click();
+      // Apply the filter by clicking on the specific filter menu item - use last() for DONE tab
+      await page.getByTestId(`filter-menu-item-${testColumnData[0].value}`).last().click();
 
-      // Wait for data to load using skeleton detection
-      await waitForDataLoad(page, 3);
+      // Wait for data to load using skeleton detection - use last for DONE tab
+      await waitForDataLoad(page, 'last');
 
       // Validate all cells in the column contain the expected value
       await validateColumnValues(page, testColumnData[0].colId, testColumnData[0].value);
 
-      // Clear filter
-      await page.getByTestId('filter-control-button-clear-all-filters').nth(3).click();
+      // Clear filter - use tab-specific test ID for DONE tab
+      await page.getByTestId('filter-control-button-clear-all-filters-DONE').click();
       await page.waitForTimeout(1000);
       await page.getByTestId('clear-filters-confirmation-popup-yes').click();
     });
@@ -131,13 +126,60 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       // Go to "NEEDS_ATTENTION" tab
       await switchToTab(page, 'NEEDS_ATTENTION');
 
+      // Wait for tab content to load
+      console.log('Waiting for NEEDS_ATTENTION tab content to load...');
+      await page.waitForTimeout(2000);
+
       // Open display options popup
-      await page.getByTestId('display-options-icon').locator('button').first().click();
+      console.log('Opening display options for NEEDS_ATTENTION tab...');
+      const displayOptionsButton = page.getByTestId('display-options-icon-NEEDS_ATTENTION').locator('button');
+
+      // Wait for button to be visible
+      await displayOptionsButton.waitFor({ state: 'visible', timeout: 10000 });
+      console.log('Display options button is visible');
+
+      // Click with retry
+      const maxAttempts = 4;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          console.log(`Clicking display options button (attempt ${attempt}/${maxAttempts})...`);
+          await displayOptionsButton.click({ timeout: 5000 });
+          console.log('Display options button clicked');
+          break;
+        } catch (error) {
+          console.error(`Click failed (attempt ${attempt}):`, error);
+          if (attempt === maxAttempts) throw error;
+          await page.waitForTimeout(1000);
+        }
+      }
+
+      await page.waitForTimeout(500);
+
+      console.log('Clicking Columns item...');
       await page.getByTestId('display-options-item-Columns').click();
+      console.log('Columns item clicked');
       await page.waitForTimeout(1000);
 
+      // Wait for at least one column item to be visible
+      console.log('Waiting for column options to load...');
+      try {
+        await page.locator('[data-testid^="display-options-item-"]').first().waitFor({
+          state: 'visible',
+          timeout: 10000,
+        });
+        console.log('Column options loaded');
+      } catch {
+        console.error('❌ Column options not loaded after 10s');
+        throw new Error('Column options did not load');
+      }
+
       // Get initial order of columns
+      console.log('Getting initial column order...');
       const initialColumnOrder = await page.locator('[data-testid^="display-options-item-"]').all();
+
+      console.log(`Found ${initialColumnOrder.length} column items`);
+
       const initialOrder = [];
 
       for (const column of initialColumnOrder) {
@@ -148,12 +190,16 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         }
       }
 
+      console.log('Initial column order:', initialOrder);
+
       // Perform drag and drop operation using utility function
+      console.log('Starting drag operation: invoice_currency -> after invoice_amount...');
       await dragColumnAfter(page, 'invoice_currency', 'invoice_amount');
+      console.log('Drag operation completed');
 
       // Click outside to close the display options popup
       await page.click('body', { position: { x: 500, y: 100 } });
-      await page.getByTestId('display-options-icon').locator('button').first().click();
+      await page.getByTestId('display-options-icon-NEEDS_ATTENTION').locator('button').click();
       await page.getByTestId('display-options-item-Columns').click();
       await page.waitForTimeout(1000);
 
@@ -216,7 +262,7 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       await switchToTab(page, 'NEEDS_ATTENTION');
 
       // Open display options popup
-      await page.getByTestId('display-options-icon').locator('button').first().click();
+      await page.getByTestId('display-options-icon-NEEDS_ATTENTION').locator('button').first().click();
       await page.getByTestId('display-options-item-Columns').click();
       await page.waitForTimeout(1000);
 
@@ -269,6 +315,10 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       await page.reload();
       await page.waitForTimeout(2000); // Wait for page to load
 
+      // After reload, we need to switch back to IN_PROGRESS tab
+      console.log('Switching back to IN_PROGRESS tab after reload...');
+      await switchToTab(page, 'IN_PROGRESS', 2000);
+
       const checkResults3 = await checkColumnsHidden(page, columnsToTest, 'after page reload');
 
       for (const result of checkResults3) {
@@ -277,9 +327,39 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
         }
       }
 
-      // Open display options popup
-      await page.getByTestId('display-options-icon').locator('button').nth(2).click();
+      console.log('Column visibility persistence verified');
+
+      // Open display options popup for IN_PROGRESS tab
+      console.log('Opening display options for IN_PROGRESS tab...');
+      const displayOptionsButton = page.getByTestId('display-options-icon-IN_PROGRESS').locator('button');
+
+      // Wait for the button to be visible and clickable
+      await displayOptionsButton.waitFor({ state: 'visible', timeout: 10000 });
+      console.log('Display options button is visible');
+
+      // Click with retry logic
+      const maxAttempts = 4;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          console.log(`Attempting to click display options button (attempt ${attempt}/${maxAttempts})...`);
+          await displayOptionsButton.click({ timeout: 5000 });
+          console.log('Display options button clicked');
+          break;
+        } catch (error) {
+          console.error(`Failed to click (attempt ${attempt}):`, error);
+          if (attempt === maxAttempts) throw error;
+          await page.waitForTimeout(1000);
+        }
+      }
+
+      // Wait for the popup menu to appear
+      await page.waitForTimeout(500);
+
+      // Click on Columns item
+      console.log('Clicking on Columns item in display options...');
       await page.getByTestId('display-options-item-Columns').click();
+      console.log('Columns item clicked');
       await page.waitForTimeout(1000);
 
       // Check back the unchecked columns using utility function
@@ -345,27 +425,54 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
       console.log('Reloading page to verify column persistence...');
       await page.reload({ waitUntil: 'domcontentloaded' });
 
-      // Wait for the table to be visible (more reliable than networkidle)
-      await page.waitForSelector('[data-testid^="tanstack-table-header-"]', {
-        timeout: 10000,
-        state: 'visible',
-      });
-      console.log('Page reloaded, table headers visible...');
+      // Wait for page to be ready after reload
+      await page.waitForTimeout(2000);
+
+      // Poll until table headers are visible
+      console.log('⏳ Waiting for table headers to be visible after reload...');
+      let headersVisible = false;
+      let visibilityAttempts = 0;
+      const maxVisibilityAttempts = 20; // 20 attempts * 1 second = 20 seconds max
+
+      while (!headersVisible && visibilityAttempts < maxVisibilityAttempts) {
+        visibilityAttempts++;
+        try {
+          const headerLocator = page.locator('[data-testid^="tanstack-table-header-"]').first();
+
+          headersVisible = await headerLocator.isVisible().catch(() => false);
+
+          if (headersVisible) {
+            console.log(`Table headers visible after ${visibilityAttempts} attempts`);
+            break;
+          }
+        } catch {
+          console.log(`⏳ Attempt ${visibilityAttempts}/${maxVisibilityAttempts}: Headers not visible yet...`);
+        }
+
+        await page.waitForTimeout(1000);
+      }
+
+      if (!headersVisible) {
+        throw new Error(
+          `Table headers not visible after ${maxVisibilityAttempts} attempts (${maxVisibilityAttempts} seconds)`,
+        );
+      }
 
       // Wait for table data to load
-      await waitForDataLoad(page, 3);
+      await waitForDataLoad(page, 'last');
 
-      // Poll until table headers exist (same as we did for cells)
-      console.log('⏳ Waiting for table headers to render after reload...');
+      // Poll until table headers exist (to get all headers)
+      console.log('⏳ Waiting for all table headers to render after reload...');
       let headers: any[] = [];
       let attempts = 0;
+      const maxHeaderAttempts = 15;
 
-      while (headers.length === 0) {
+      while (headers.length === 0 && attempts < maxHeaderAttempts) {
         attempts++;
         headers = await page.locator('[data-testid^="tanstack-table-header-"]').all();
 
         if (headers.length > 0) {
-          console.log(`✅ Found ${headers.length} table headers after ${attempts} attempts`);
+          console.log(`Found ${headers.length} table headers after ${attempts} attempts`);
           break;
         }
 
@@ -383,6 +490,9 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
           throw new Error(`${result.columnId} should be visible but is missing after page reload`);
         }
       }
+
+      // Final confirmation - only log success after all verifications pass
+      console.log('✅ Activity runs table filter and display options test done');
     });
   });
 });

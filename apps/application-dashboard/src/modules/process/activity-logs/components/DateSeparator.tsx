@@ -3,13 +3,14 @@ import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format, isToday, isYesterday } from 'date-fns';
 import { DATE_SEPARATOR } from 'modules/process/process.types';
 import { DATE_SEPARATOR_MAPPING } from '@/modules/process/process.constant';
+import { ensureUTCTimestamp } from '@/utils/common';
 
 interface DateSeparatorProps {
   date: string;
 }
 
 const DateSeparator = ({ date }: DateSeparatorProps) => {
-  const dateObj = new Date(date);
+  const dateObj = new Date(ensureUTCTimestamp(date));
 
   const displayText = useMemo(() => {
     if (isToday(dateObj)) {

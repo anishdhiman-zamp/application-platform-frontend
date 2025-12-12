@@ -1,36 +1,8 @@
-import { LocationType } from '@zamp-platform/chat';
+import { AnnotationData } from '@zamp-platform/chat';
 import { FEEDBACK_STATUS, SCOPE_TYPE } from '@/modules/feedback/feedback.constants';
 
 export interface FeedbackSummary {
   feedback_points: string[];
-}
-
-export interface DatasetFieldLocationData {
-  process_id: string;
-  activity_run_id: string;
-  dataset_id: string;
-  dataset_row_id: string;
-  dataset_field_id: string;
-}
-
-export interface LogLocationData {
-  process_id: string;
-  activity_run_id: string;
-  log_id: string;
-}
-
-export interface ActivityRunLocationData {
-  process_id: string;
-  activity_run_id: string;
-}
-
-export type LocationData =
-  | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
-  | ({ type: LocationType.LOG } & { data: LogLocationData })
-  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData });
-
-export interface AnnotationData {
-  location: LocationData;
 }
 
 export interface FeedbackItemType {
@@ -38,6 +10,7 @@ export interface FeedbackItemType {
   organization_id: string;
   process_id: string;
   conversation_id: string;
+  feedback_id: string;
   status: FEEDBACK_STATUS;
   title: string;
   summary: FeedbackSummary;
@@ -45,6 +18,8 @@ export interface FeedbackItemType {
   updated_at: string;
   scope_type: SCOPE_TYPE;
   scope_id: string;
+  resource_type?: string;
+  resource_id?: string;
   annotation_data: AnnotationData;
   initiated_by: string;
 }
@@ -58,6 +33,18 @@ export interface ArchiveFeedbackPayloadType {
   feedback_ids: string[];
 }
 
+export interface DeleteConversationFeedbackPayloadType {
+  conversationId: string;
+  resourceType: string;
+  resourceId: string;
+}
+
 export interface StopProcessingFeedbackPayloadType {
   process_id: string;
+}
+
+export interface OpenFeedbackResponseType {
+  conversations: FeedbackItemType[];
+  total_pages: number;
+  count: number;
 }

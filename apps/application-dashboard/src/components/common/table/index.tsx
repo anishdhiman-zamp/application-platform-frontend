@@ -60,6 +60,7 @@ import { COLORS } from 'constants/colors';
 import { MissingFieldItemType } from 'types/api/processApi.types';
 import { MapAny } from 'types/commonTypes';
 import { formatArrayValue } from '@/modules/data/data.utils';
+import { N_A_VALUE } from '@/modules/process/process.constant';
 import { isValueEmpty } from '@/modules/widgets/TreeTable/utils';
 import { cn } from '@/utils/common';
 import CustomContextMenuItem from 'components/common/table/CustomContextMenuItem';
@@ -238,6 +239,7 @@ const Table: FC<TableProps> = ({
   const formatCellValue = useCallback(
     (params: ValueFormatterParams) => {
       const { value } = params;
+
       const isMissingField = checkIsMissingField(params);
       const isEmpty = isValueEmpty(value);
 
@@ -248,7 +250,7 @@ const Table: FC<TableProps> = ({
 
       // Handle empty values with N/A display
       if (shouldShowNA && isEmpty) {
-        return 'N/A';
+        return N_A_VALUE;
       }
 
       // Handle array values
@@ -256,8 +258,12 @@ const Table: FC<TableProps> = ({
         return formatArrayValue(value);
       }
 
+      if (typeof value === 'object' && value !== null) {
+        return JSON.stringify(value);
+      }
+
       // Return original value for all other cases
-      return value;
+      return value?.toString();
     },
     [checkIsMissingField, shouldShowNA, isValueEmpty],
   );

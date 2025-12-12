@@ -8,8 +8,8 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
 >
   <label
     cmdk-label=""
-    for="radix-«r1s»"
-    id="radix-«r1r»"
+    for="radix-_r_1s_"
+    id="radix-_r_1r_"
     style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
   />
   <div
@@ -18,14 +18,14 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
   >
     <input
       aria-autocomplete="list"
-      aria-controls="radix-«r1q»"
+      aria-controls="radix-_r_1q_"
       aria-expanded="true"
-      aria-labelledby="radix-«r1r»"
+      aria-labelledby="radix-_r_1r_"
       autocomplete="off"
       autocorrect="off"
       class="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
       cmdk-input=""
-      id="radix-«r1s»"
+      id="radix-_r_1s_"
       placeholder="Snapshot..."
       role="combobox"
       spellcheck="false"
@@ -37,7 +37,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
     aria-label="Suggestions"
     class="max-h-[300px] overflow-x-hidden overflow-y-auto"
     cmdk-list=""
-    id="radix-«r1q»"
+    id="radix-_r_1q_"
     role="listbox"
     tabindex="-1"
   >
@@ -52,7 +52,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
         data-disabled="false"
         data-selected="true"
         data-value="Snap 1"
-        id="radix-«r1t»"
+        id="radix-_r_1t_"
         role="option"
       >
         Snap 1
@@ -65,7 +65,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for basic co
         data-disabled="false"
         data-selected="false"
         data-value="Snap 2"
-        id="radix-«r1u»"
+        id="radix-_r_1u_"
         role="option"
       >
         Snap 2
@@ -85,15 +85,15 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 >
   <label
     cmdk-label=""
-    for="radix-«r2f»"
-    id="radix-«r2e»"
+    for="radix-_r_2f_"
+    id="radix-_r_2e_"
     style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
   />
   <div
     aria-label="Suggestions"
     class="max-h-[300px] overflow-x-hidden overflow-y-auto"
     cmdk-list=""
-    id="radix-«r2d»"
+    id="radix-_r_2d_"
     role="listbox"
     tabindex="-1"
   >
@@ -108,7 +108,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
         data-disabled="false"
         data-selected="true"
         data-value="New File⌘N"
-        id="radix-«r2g»"
+        id="radix-_r_2g_"
         role="option"
       >
         New File
@@ -131,8 +131,8 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 >
   <label
     cmdk-label=""
-    for="radix-«r2m»"
-    id="radix-«r2l»"
+    for="radix-_r_2m_"
+    id="radix-_r_2l_"
     style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
   />
   <div
@@ -153,15 +153,15 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 >
   <label
     cmdk-label=""
-    for="radix-«r28»"
-    id="radix-«r27»"
+    for="radix-_r_28_"
+    id="radix-_r_27_"
     style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
   />
   <div
     aria-label="Suggestions"
     class="max-h-[300px] overflow-x-hidden overflow-y-auto"
     cmdk-list=""
-    id="radix-«r26»"
+    id="radix-_r_26_"
     role="listbox"
     tabindex="-1"
   >
@@ -177,12 +177,12 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
         <div
           aria-hidden="true"
           cmdk-group-heading=""
-          id="radix-«r2a»"
+          id="radix-_r_2a_"
         >
           Group
         </div>
         <div
-          aria-labelledby="radix-«r2a»"
+          aria-labelledby="radix-_r_2a_"
           cmdk-group-items=""
           role="group"
         >
@@ -194,7 +194,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
             data-disabled="false"
             data-selected="true"
             data-value="Item 1"
-            id="radix-«r2b»"
+            id="radix-_r_2b_"
             role="option"
           >
             Item 1
@@ -214,7 +214,7 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
         data-disabled="false"
         data-selected="false"
         data-value="Item 2"
-        id="radix-«r2c»"
+        id="radix-_r_2c_"
         role="option"
       >
         Item 2
@@ -232,15 +232,15 @@ exports[`Command Component - Core Functional Tests matches snapshot for command 
 >
   <label
     cmdk-label=""
-    for="radix-«r2j»"
-    id="radix-«r2i»"
+    for="radix-_r_2j_"
+    id="radix-_r_2i_"
     style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
   />
   <div
     aria-label="Suggestions"
     class="max-h-[300px] overflow-x-hidden overflow-y-auto"
     cmdk-list=""
-    id="radix-«r2h»"
+    id="radix-_r_2h_"
     role="listbox"
     tabindex="-1"
   >

@@ -1,4 +1,7 @@
-import { Block, BlockType } from '../types/block.types';
+import { captureException } from '@sentry/browser';
+
+import { toast } from '../../../ui/src/components/ui/toast';
+import { Block, BLOCK_TYPE } from '../types/block.types';
 import { ChatMessage, ChatMessageType, GetConversationByIdResponseType, SenderType } from '../types/chat.types';
 
 /**
@@ -16,7 +19,7 @@ export const extractInitialValues = (blocks: Block[]): Record<string, { label: s
 
   blocks.forEach((block) => {
     switch (block.type) {
-      case BlockType.SINGLE_SELECT:
+      case BLOCK_TYPE.SINGLE_SELECT:
         if (block.payload.initial_value) {
           initialValues[block.id] = { label: block.payload.initial_value, value: block.payload.initial_value };
         }
@@ -43,4 +46,27 @@ export const getHistoryFormattedMessages = (conversationHistory: GetConversation
     id: message.id,
     conversation_id: message.conversation_id,
   }));
+};
+
+/**
+ * Downloads a file from a given URL
+ * @param downloadUrl - The URL to download the file from
+ * @param fileName - The name to save the file as
+ */
+export const downloadFile = async (downloadUrl: string, fileName: string): Promise<void> => {
+  try {
+    const response = await fetch(downloadUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'download';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    captureException(error);
+    toast.error('Failed to download file');
+  }
 };

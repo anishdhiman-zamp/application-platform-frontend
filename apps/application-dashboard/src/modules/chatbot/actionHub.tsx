@@ -2,11 +2,16 @@ import { useCallback } from 'react';
 import { captureException } from '@sentry/browser';
 import { ActionType, ButtonBlockType, ResourceType, useChat } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
-import { getInteractionPayload, getMessagePayload, updateMessageInArray } from 'modules/chatbot/utils';
+import {
+  getInteractionPayload,
+  getMessagePayload,
+  updateButtonElementsDisplay,
+  updateMessageInArray,
+} from 'modules/chatbot/utils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePostInteractionMutation } from '@/apis/interaction';
 
-const useActionHub = (setIsLoading: (isLoading: boolean) => void) => {
+const useActionHub = () => {
   const [postInteraction] = usePostInteractionMutation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,8 +22,10 @@ const useActionHub = (setIsLoading: (isLoading: boolean) => void) => {
 
       switch (actionType) {
         case ActionType.INTERNAL_API:
-          setIsLoading(true);
           if (blockConfig.action?.display_layer_action) {
+            const lastMessage = chat.messages[chat.messages.length - 1];
+
+            updateButtonElementsDisplay(lastMessage, chat.setMessages);
             try {
               chat.sendMessage(getMessagePayload(blockConfig, payload), true);
             } catch (error) {
@@ -32,11 +39,6 @@ const useActionHub = (setIsLoading: (isLoading: boolean) => void) => {
               chat.setMessages((prevMessages) =>
                 updateMessageInArray(response, prevMessages, payload.resourceType as ResourceType, payload.resourceId),
               );
-            })
-            .finally(() => {
-              if (!blockConfig.action?.display_layer_action) {
-                setIsLoading(false);
-              }
             });
           break;
         case ActionType.INTERNAL_REDIRECT:

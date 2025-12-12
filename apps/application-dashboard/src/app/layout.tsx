@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 // Import global styles
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@zamp-platform/ui';
@@ -42,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpeedInsights />
         <NetworkStatus />
         <Toaster />
-        <Suspense>{children}</Suspense>
+        {children}
       </body>
     </html>
   );

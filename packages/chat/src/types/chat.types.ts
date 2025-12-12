@@ -1,5 +1,3 @@
-import { AnnotationData } from '@/types/api/feedbacks.types';
-
 import { Block } from '../..';
 
 export interface PostMessagePayloadType {
@@ -29,6 +27,7 @@ export const enum AnnotationType {
 
 export const enum ScopeType {
   ACTIVITY_RUN = 'activity_run',
+  PROCESS = 'process',
 }
 
 export const enum LocationType {
@@ -61,6 +60,7 @@ export const enum SSEEventType {
   SYSTEM = 'system',
   ERROR = 'error',
   NEW_CHAT_MESSAGE = 'new_chat_message',
+  CONVERSATION_UPDATED = 'conversation_updated',
 }
 
 export const enum ChatMessageType {
@@ -93,9 +93,7 @@ export interface ChatMessage {
     elements?: Block[];
     text?: string;
     text_type?: string;
-    attachments?: {
-      file_id: string;
-    }[];
+    attachments?: MessageAttachmentType[];
   };
   message_type: ChatMessageType;
   sender_type: SenderType;
@@ -128,6 +126,7 @@ export type ChatFramework = ChatState & ChatActions;
 
 export interface MessageAttachmentType {
   file_id: string;
+  file_name?: string;
 }
 export interface MessageContentType {
   text: string;
@@ -135,6 +134,40 @@ export interface MessageContentType {
   elements?: Block[];
   attachments?: MessageAttachmentType[];
 }
+
+export interface DatasetFieldLocationData {
+  process_id: string;
+  activity_run_id: string;
+  dataset_id: string;
+  dataset_row_id: string;
+  dataset_field_id: string;
+}
+
+export interface LogLocationData {
+  process_id: string;
+  activity_run_id: string;
+  log_id: string;
+}
+
+export interface ActivityRunLocationData {
+  process_id: string;
+  activity_run_id: string;
+}
+
+export interface ProcessLocationData {
+  process_id: string;
+}
+
+export type LocationData =
+  | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
+  | ({ type: LocationType.LOG } & { data: LogLocationData })
+  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
+
+export interface AnnotationData {
+  location: LocationData;
+}
+
 export interface CreateConversationPayloadTypeV2 {
   resource_id: string;
   resource_type: ResourceType;
@@ -151,6 +184,7 @@ export interface AnnotationLocationDataType {
   dataset_id?: string;
   dataset_row_id?: string;
   dataset_field_id?: string;
+  log_id?: string;
 }
 
 export interface ConversationType {
@@ -196,4 +230,38 @@ export interface GetConversationByIdRequestType {
   conversationId: string;
   resourceId?: string;
   resourceType?: ResourceType;
+}
+
+export interface GetFilesByIdsRequestType {
+  ids: string[];
+}
+
+export interface GetFilesByIdsResponseType {
+  file_uploads: FileUploadType[];
+}
+
+export interface FileUploadType {
+  file_upload_id: string;
+  organization_id: string;
+  uploaded_by_user_id: string;
+  name: string;
+  file_type: string;
+  storage_provider: string;
+  storage_bucket: string;
+  storage_file_path: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+}
+
+export interface GetFileDownloadUrlRequestType {
+  file_upload_id: string;
+}
+
+export interface GetFileDownloadUrlResponseType {
+  download_url: string;
+  file_upload_id: string;
+  file_name: string;
+  expiry: string;
 }
