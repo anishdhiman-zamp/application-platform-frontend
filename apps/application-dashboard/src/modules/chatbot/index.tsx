@@ -54,12 +54,13 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   const showFeedbackList = useMemo(
     () =>
       !hideFeedbackCount &&
-      (matchingFeedbackItems.length > 1 ||
-        (matchingFeedbackItems.length === 1 &&
-          [FEEDBACK_STATUS.PROCESSING, FEEDBACK_STATUS.APPLIED].includes(
-            matchingFeedbackItems[0]?.status as FEEDBACK_STATUS,
-          ))),
-    [matchingFeedbackItems, hideFeedbackCount],
+      matchingFeedbackItems.length > 0 &&
+      (!conversationIdFromParam ||
+        [FEEDBACK_STATUS.PROCESSING, FEEDBACK_STATUS.APPLIED].includes(
+          matchingFeedbackItems.find((item) => item?.conversation_id === conversationIdFromParam)
+            ?.status as FEEDBACK_STATUS,
+        )),
+    [matchingFeedbackItems, hideFeedbackCount, conversationIdFromParam],
   );
 
   const handleOpenChatbot = useCallback(
@@ -145,14 +146,13 @@ const ChatbotWrapper: FC<ChatbotProps> = ({
   }, [children, handleOpenChatbot]);
 
   useEffect(() => {
-    if (!hideFeedbackCount) return;
-
     if (conversationIdFromParam && feedbackIdParam) {
       const feedbackItem = matchingFeedbackItems.find(
         (item) => item?.conversation_id === conversationIdFromParam && item?.id === feedbackIdParam,
       );
 
-      setCurrentFeedbackItem(feedbackItem);
+      if (feedbackItem?.status !== FEEDBACK_STATUS.PROCESSING && feedbackItem?.status !== FEEDBACK_STATUS.APPLIED)
+        setCurrentFeedbackItem(feedbackItem);
     }
   }, [conversationIdFromParam, feedbackIdParam, hideFeedbackCount, matchingFeedbackItems, setCurrentFeedbackItem]);
 
