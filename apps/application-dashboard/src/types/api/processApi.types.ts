@@ -297,7 +297,7 @@ export type EmitHITLActionRequestType = {
     submitted_by: string;
     responses: {
       action_id: string;
-      values: Array<string | object>;
+      values: Array<string>;
       cta_component_type?: CTA_COMPONENT_TYPE;
     }[];
   };

@@ -47,7 +47,7 @@ const LogCtaComponent = (
   const isMultipleButtons = buttonTypeCtas.length > 1;
 
   const handleEmitHITLAction = useCallback(
-    (cta: CtasType, customValues?: Array<string | object>) => {
+    (cta: CtasType, customValues?: Array<string>) => {
       const payload = buildHITLPayload(cta, logGroupId, userId ?? '', customValues);
       const loadingId = getCtaLoadingId(cta);
 

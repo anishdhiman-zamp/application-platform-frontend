@@ -232,25 +232,34 @@ export const getCtaLoadingId = (cta: CtasType): string => `${cta?.id}-${cta?.dis
 /**
  * Serializes form data to an array for HITL submission
  * @param {Record<string, unknown>} formData - The form data to serialize
- * @returns {Array<string | object>} Array of serialized values (strings or objects)
+ * @returns {Array<string>} Array of serialized values (strings)
  */
-export const serializeFormData = (formData: Record<string, unknown>): Array<string | object> => {
-  const result: Array<string | object> = [];
+export const serializeFormData = (formData: Record<string, unknown>): Array<string> => {
+  const result: Array<string> = [];
 
   Object.entries(formData).forEach(([, value]) => {
     // Handle string values directly
     if (typeof value === 'string') {
-      result.push({
-        value,
-        input: '',
-      });
+      result.push(
+        JSON.stringify({
+          value,
+          input: '',
+        }),
+      );
 
       return;
     }
 
-    // Handle object values directly (non-null objects)
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      result.push(value);
+    // Handle object values by stringifying them
+    if (typeof value === 'object' && value !== null) {
+      result.push(JSON.stringify(value));
+
+      return;
+    }
+
+    // Handle other primitive types (number, boolean, etc.)
+    if (value !== null && value !== undefined) {
+      result.push(String(value));
     }
   });
 
@@ -262,15 +271,10 @@ export const serializeFormData = (formData: Record<string, unknown>): Array<stri
  * @param {CtasType} cta - The CTA object
  * @param {string} logGroupId - The log group ID
  * @param {string} userId - The user ID
- * @param {Array<string | object>} customValues - Optional custom values to include (strings or objects)
+ * @param {Array<string>} customValues - Optional custom values to include (strings)
  * @returns {Object} The HITL payload object
  */
-export const buildHITLPayload = (
-  cta: CtasType,
-  logGroupId: string,
-  userId: string,
-  customValues?: Array<string | object>,
-) => ({
+export const buildHITLPayload = (cta: CtasType, logGroupId: string, userId: string, customValues?: Array<string>) => ({
   hitl_request_id: cta.hitl_request_id,
   log_group_id: logGroupId,
   submitted_by: userId,
