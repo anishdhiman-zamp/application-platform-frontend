@@ -1,11 +1,8 @@
 import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
 
-// Extended SelectOption with radio input support
-export interface RadioOption extends BaseSelectOption {
-  has_input?: boolean;
-  input_placeholder?: string;
-}
+// Radio option type (same as base select option)
+export type RadioOption = BaseSelectOption;
 
 // Re-export for backward compatibility
 export type SelectOption = BaseSelectOption;
@@ -36,7 +33,7 @@ export interface DataSource {
   endpoint: string;
   method: 'GET' | 'POST';
   params?: null | Record<string, string>;
-  body?: null | Record<string, unknown>;
+  body?: null | Record<string, any>;
   triggers?: Array<{
     field: string;
   }>;
@@ -98,8 +95,6 @@ export interface FormField {
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
-  /** Validations specifically for radio input fields (when has_input is true) */
-  input_validations?: Validation[];
   options?: SelectOption[] | RadioOption[];
   data_source?: DataSource;
   display_dependencies?: DisplayDependency[];
@@ -130,26 +125,6 @@ export interface FormSchema {
 }
 
 export type FormValues = Record<string, any>;
-
-// ClassNames for external styling control
-export interface FormBuilderClassNames {
-  form?: string;
-  section?: string;
-  sectionTitle?: string;
-  fieldWrapper?: string;
-  label?: string;
-  // Radio specific
-  radioGroup?: string;
-  radioItem?: string;
-  radio?: string;
-  radioInput?: string;
-  // Input specific
-  input?: string;
-  // Select specific
-  select?: string;
-  // Error message
-  errorMessage?: string;
-}
 
 // Animation configuration for external control
 export interface AnimationTransitionConfig {
@@ -224,7 +199,6 @@ export const formFieldSchema = z.object({
   placeholder: z.string().optional(),
   defaultValue: z.any().optional(),
   validations: z.array(validationSchema).optional(),
-  input_validations: z.array(validationSchema).optional(),
   data_source: dataSourceSchema.optional(),
 });
 
