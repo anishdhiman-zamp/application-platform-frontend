@@ -4,7 +4,6 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { FormField as FormFieldType, RadioOption } from '../types';
-import { useFormBuilderClassNames } from '../utils/classNamesContext';
 
 interface RadioFieldProps {
   field: FormFieldType;
@@ -19,7 +18,6 @@ export interface RadioFieldValue {
 
 export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }) => {
   const { control } = useFormContext();
-  const formClassNames = useFormBuilderClassNames();
 
   const radioOptions = field.options as RadioOption[] | undefined;
 
@@ -33,11 +31,10 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }
         const currentInput = typeof value === 'object' ? value?.input : '';
 
         return (
-          <div className={cn('space-y-3', className, formClassNames.fieldWrapper)}>
-            {field.label && <Label className={formClassNames.label}>{field.label}</Label>}
+          <div className={cn('space-y-3', className)}>
+            {field.label && <Label>{field.label}</Label>}
 
             <RadioGroup
-              className={formClassNames.radioGroup}
               value={currentValue ? String(currentValue) : undefined}
               onValueChange={(newValue) => {
                 const option = radioOptions?.find((opt) => String(opt.value) === newValue);
@@ -55,13 +52,13 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }
                 const hasInlineInput = option.has_input && !option.label;
 
                 return (
-                  <div key={optionValue} className={cn('space-y-2', formClassNames.radioItem)}>
+                  <div key={optionValue} className='space-y-2'>
                     <div className='flex w-full items-center gap-2'>
-                      <Radio value={optionValue} id={`${name}-${optionValue}`} className={formClassNames.radio} />
+                      <Radio value={optionValue} id={`${name}-${optionValue}`} />
                       {/* Inline input when has_input and no label */}
                       {hasInlineInput ? (
                         <Input
-                          className={cn('flex-1', formClassNames.radioInput)}
+                          className='flex-1'
                           placeholder={option.input_placeholder || 'Please specify...'}
                           value={isSelected ? currentInput || '' : ''}
                           onChange={(e) => {
@@ -74,10 +71,7 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }
                           }}
                         />
                       ) : (
-                        <Label
-                          htmlFor={`${name}-${optionValue}`}
-                          className={cn('cursor-pointer font-normal', formClassNames.label)}
-                        >
+                        <Label htmlFor={`${name}-${optionValue}`} className='cursor-pointer font-normal'>
                           {option.label}
                         </Label>
                       )}
@@ -86,7 +80,7 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }
                     {/* Show input below when this option is selected AND has_input is true AND has label */}
                     {option.has_input && option.label && isSelected && (
                       <Input
-                        className={cn('ml-6', formClassNames.radioInput)}
+                        className='ml-6'
                         placeholder={option.input_placeholder || 'Please specify...'}
                         value={currentInput || ''}
                         onChange={(e) => {
@@ -100,10 +94,7 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className }
             </RadioGroup>
 
             {error?.message && (
-              <span
-                className={cn('f-11-400 transition-all duration-200 ease-in-out', formClassNames.errorMessage)}
-                style={{ color: 'var(--RED_700)' }}
-              >
+              <span className='f-11-400 transition-all duration-200 ease-in-out' style={{ color: 'var(--RED_700)' }}>
                 {error.message}
               </span>
             )}

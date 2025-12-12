@@ -3,6 +3,5 @@ export * from './constants';
 export * from './hooks/useFormAnimation';
 export * from './sample-schema';
 export * from './types';
-export * from './utils/classNamesContext';
 export * from './utils/dataSource';
 export * from './utils/validation';

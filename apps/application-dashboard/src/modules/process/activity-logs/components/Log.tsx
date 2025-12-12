@@ -1,12 +1,6 @@
 import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
-import {
-  FormBuilder,
-  type FormBuilderAnimationConfig,
-  type FormBuilderClassNames,
-  type FormBuilderRef,
-  type FormSchema,
-} from '@zamp-platform/form-builder';
+import { FormBuilder, type FormBuilderRef, type FormSchema } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
@@ -42,19 +36,14 @@ type LogProps = {
   activityId: string;
 };
 
-const feedbackFormClassNames: FormBuilderClassNames = {
-  form: 'gap-2 pb-0 mt-2',
-  radioGroup: 'gap-3',
-  radioItem: 'space-y-0',
-  radio: 'h-3 w-3 border-GRAY_1000',
-  radioInput: 'h-8 border-GRAY_400 bg-white rounded-lg placeholder:text-GRAY_500 f-12-450 rounded-md p-3 w-[300px]',
-  label: 'f-12-450 text-GRAY_1000',
-};
-
-// Disable animations for this form
-const feedbackFormAnimationConfig: FormBuilderAnimationConfig = {
-  disabled: true,
-};
+// const feedbackFormClassNames: FormBuilderClassNames = {
+//   form: 'gap-2 pb-0 mt-2',
+//   radioGroup: 'gap-3',
+//   radioItem: 'space-y-0',
+//   radio: 'h-3 w-3 border-GRAY_1000',
+//   radioInput: 'h-8 border-GRAY_400 bg-white rounded-lg placeholder:text-GRAY_500 f-12-450 rounded-md p-3 w-[300px]',
+//   label: 'f-12-450 text-GRAY_1000',
+// };
 
 const Log: FC<LogProps> = ({
   isLastLogOfDate = false,
@@ -267,8 +256,9 @@ const Log: FC<LogProps> = ({
               schema={submitFormCta.form_builder_config as FormSchema}
               onSubmit={handleFeedbackSubmit}
               ref={formBuilderRef}
-              classNames={feedbackFormClassNames}
-              animationConfig={feedbackFormAnimationConfig}
+              animationConfig={{
+                disabled: true,
+              }}
             />
           )}
 

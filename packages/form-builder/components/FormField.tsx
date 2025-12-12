@@ -3,8 +3,7 @@ import React from 'react';
 
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { useFormAnimation } from '../hooks/useFormAnimation';
-import { FormField as FormFieldType } from '../types';
-import { useFormBuilderAnimationConfig } from '../utils/classNamesContext';
+import { FormBuilderAnimationConfig, FormField as FormFieldType } from '../types';
 import { HeaderTextField } from './HeaderTextField';
 import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
@@ -14,11 +13,11 @@ interface FormFieldProps {
   field: FormFieldType;
   name: string;
   className?: string;
+  animationConfig?: FormBuilderAnimationConfig;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animationConfig }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
-  const animationConfig = useFormBuilderAnimationConfig();
   const { fieldAnimation } = useFormAnimation(animationConfig);
 
   if (!shouldShow) {
