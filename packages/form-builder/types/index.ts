@@ -91,6 +91,8 @@ export interface FormField {
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
+  /** Validations specifically for radio input fields (when has_input is true) */
+  input_validations?: Validation[];
   options?: SelectOption[] | RadioOption[];
   data_source?: DataSource;
   display_dependencies?: DisplayDependency[];
@@ -215,6 +217,7 @@ export const formFieldSchema = z.object({
   placeholder: z.string().optional(),
   defaultValue: z.any().optional(),
   validations: z.array(validationSchema).optional(),
+  input_validations: z.array(validationSchema).optional(),
   data_source: dataSourceSchema.optional(),
 });
 

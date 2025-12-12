@@ -1,23 +1,11 @@
-import { FormSchema, FormValues, Validation, ValidationDependency } from '../types';
+import { FormField, FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
-// Function to validate a field with its dependencies
-export const validateField = (
-  value: any,
-  formValues: FormValues,
-  validations?: Validation[],
-  dependentValidations?: ValidationDependency[],
-): { isValid: boolean; errors: string[] } => {
+// Function to validate a single value against validations
+const validateValue = (value: any, validations: Validation[]): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
-  // Get all validations including those from dependencies
-  const allValidations = [
-    ...(validations || []),
-    ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
-  ];
-
-  // Apply all validations
-  allValidations.forEach((validation) => {
+  validations.forEach((validation) => {
     switch (validation.type) {
       case 'required':
         if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
@@ -60,6 +48,56 @@ export const validateField = (
   };
 };
 
+// Function to validate a field with its dependencies
+export const validateField = (
+  value: any,
+  formValues: FormValues,
+  validations?: Validation[],
+  dependentValidations?: ValidationDependency[],
+  field?: FormField,
+): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  // Get all validations including those from dependencies
+  const allValidations = [
+    ...(validations || []),
+    ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
+  ];
+
+  // For radio fields with has_input, handle validation differently
+  if (field?.type === 'radio') {
+    // Check if this is a radio field with an object value (has_input option selected)
+    if (typeof value === 'object' && value !== null && 'value' in value) {
+      // This is a radio field with an object value (has_input option selected)
+      const radioValue = value.value;
+      const inputValue = value.input || '';
+
+      // First, validate the radio selection itself (value.value)
+      const radioValidationResult = validateValue(radioValue, allValidations);
+      errors.push(...radioValidationResult.errors);
+
+      // Then, if input_validations exist, validate the input value
+      if (field.input_validations && field.input_validations.length > 0) {
+        const inputValidationResult = validateValue(inputValue, field.input_validations);
+        errors.push(...inputValidationResult.errors);
+      }
+    } else {
+      // Radio field with string value (non-has_input option selected or no option selected)
+      const validationResult = validateValue(value, allValidations);
+      errors.push(...validationResult.errors);
+    }
+  } else {
+    // For all other field types, validate normally
+    const validationResult = validateValue(value, allValidations);
+    errors.push(...validationResult.errors);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
 // Create a custom resolver for react-hook-form
 export const createCustomResolver = (schema: FormSchema) => {
   return async (values: FormValues) => {
@@ -71,6 +109,7 @@ export const createCustomResolver = (schema: FormSchema) => {
         values,
         field.validations,
         field.validation_dependencies,
+        field, // Pass field to check for radio with has_input
       );
 
       if (!isValid) {

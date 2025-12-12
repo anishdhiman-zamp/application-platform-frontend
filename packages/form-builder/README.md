@@ -282,6 +282,72 @@ import { RadioOption } from '@zamp-platform/form-builder';
 { cancellation_reason: { value: 'other', input: 'The onboarding was confusing' } }
 ```
 
+#### Radio Input Validations
+
+When a radio option has `has_input: true`, you can add specific validations for the input field using `input_validations`. This allows you to validate the input separately from the radio selection itself.
+
+```typescript
+import { RadioOption } from '@zamp-platform/form-builder';
+
+{
+  id: 'feedback',
+  type: 'radio',
+  options: [
+    { label: 'Everything looks good', value: 'approved' },
+    {
+      label: '',
+      value: 'note',
+      has_input: true,
+      input_placeholder: 'Add a note',
+    } as RadioOption,
+  ],
+  validations: [
+    {
+      type: 'required',
+      config: {
+        message: 'Please select a feedback option',
+      },
+    },
+  ],
+  input_validations: [
+    {
+      type: 'required',
+      config: {
+        message: 'Please add a note',
+      },
+    },
+    {
+      type: 'minLength',
+      config: {
+        value: 10,
+        message: 'Note must be at least 10 characters',
+      },
+    },
+    {
+      type: 'maxLength',
+      config: {
+        value: 500,
+        message: 'Note must not exceed 500 characters',
+      },
+    },
+    {
+      type: 'regex',
+      config: {
+        value: '^[a-zA-Z0-9\\s]+$',
+        message: 'Note can only contain letters, numbers, and spaces',
+      },
+    },
+  ],
+}
+```
+
+**How it works:**
+
+- `validations` apply to the radio selection itself (whether an option is selected)
+- `input_validations` apply only to the input value when a radio option with `has_input: true` is selected
+- All validation types are supported: `required`, `minLength`, `maxLength`, `regex`, `enums`, etc.
+- If a radio option without `has_input` is selected, `input_validations` are not applied
+
 ---
 
 ## External Styling (`classNames`)
