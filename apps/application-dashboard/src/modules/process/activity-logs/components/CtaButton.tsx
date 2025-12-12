@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import type { CtasType } from '@/types/api/processApi.types';
+import type { defaultFnType } from '@/types/commonTypes';
 import { capitalizeFirstLetter } from '@/utils/common';
 
 interface CtaButtonProps {
@@ -9,7 +10,7 @@ interface CtaButtonProps {
   isMultiple: boolean;
   isLoading: boolean;
   isCtaLoading: boolean;
-  onClick: () => void;
+  onClick: defaultFnType;
 }
 
 const CtaButton = memo(({ cta, isMultiple, isLoading, isCtaLoading, onClick }: CtaButtonProps) => (

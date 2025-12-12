@@ -1,4 +1,4 @@
-import { FormField, FormSchema, FormValues, Validation, ValidationDependency } from '../types';
+import { FieldType, FormField, FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
 // Function to validate a single value against validations
@@ -65,7 +65,7 @@ export const validateField = (
   ];
 
   // For radio fields with has_input, handle validation differently
-  if (field?.type === 'radio') {
+  if (field?.type === FieldType.RADIO) {
     // Check if this is a radio field with an object value (has_input option selected)
     if (typeof value === 'object' && value !== null && 'value' in value) {
       // This is a radio field with an object value (has_input option selected)

@@ -78,7 +78,14 @@ export interface DisplayDependency {
   expressions: Array<{ expression: Expression; config: FieldConfig }>;
 }
 
-export type FieldType = 'text' | 'select' | 'input' | 'multi-select' | 'header-text' | 'radio';
+export enum FieldType {
+  TEXT = 'text',
+  SELECT = 'select',
+  INPUT = 'input',
+  MULTI_SELECT = 'multi-select',
+  HEADER_TEXT = 'header-text',
+  RADIO = 'radio',
+}
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
 
@@ -211,7 +218,7 @@ export const dataSourceSchema = z.object({
 });
 
 export const formFieldSchema = z.object({
-  type: z.enum(['text', 'select', 'input', 'multi-select', 'header-text', 'radio']),
+  type: z.nativeEnum(FieldType),
   label: z.string(),
   name: z.string().optional(),
   placeholder: z.string().optional(),

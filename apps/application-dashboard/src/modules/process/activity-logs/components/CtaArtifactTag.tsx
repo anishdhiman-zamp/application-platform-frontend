@@ -1,10 +1,11 @@
 import { memo } from 'react';
 import ArtifactTag from 'modules/process/common/ArtifactTag';
 import type { CtasType } from '@/types/api/processApi.types';
+import type { defaultFnType } from '@/types/commonTypes';
 
 interface CtaArtifactTagProps {
   cta: CtasType;
-  onShowArtifacts: () => void;
+  onShowArtifacts: defaultFnType;
 }
 
 const CtaArtifactTag = memo(({ cta, onShowArtifacts }: CtaArtifactTagProps) => (
