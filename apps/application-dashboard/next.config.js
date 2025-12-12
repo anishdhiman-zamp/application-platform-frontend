@@ -14,7 +14,14 @@ const nextConfig = {
     ignoreDuringBuilds: process.env.CI === 'true',
   },
   experimental: {
-    serverActions: {},
+    serverActions: {
+      // Multi-zone: Allow requests from the chat zone
+      allowedOrigins: [
+        'localhost:2000',
+        'localhost:2001',
+        process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'local.zamp.ai:2000',
+      ].filter(Boolean),
+    },
     // Optimize memory usage during builds
     optimizePackageImports: ['lucide-react', '@zamp-platform/ui'],
   },
@@ -108,6 +115,24 @@ const nextConfig = {
             value: 'public, max-age=0, must-revalidate',
           },
         ],
+      },
+    ];
+  },
+  // Multi-zone configuration: Route /pace/* requests to the pace zone
+  async rewrites() {
+    const paceDomain = process.env.PACE_DOMAIN || 'http://localhost:2001';
+    return [
+      {
+        source: '/pace-static/_next/:path*',
+        destination: `${paceDomain}/pace-static/_next/:path*`,
+      },
+      {
+        source: '/pace',
+        destination: `${paceDomain}/pace`,
+      },
+      {
+        source: '/pace/:path*',
+        destination: `${paceDomain}/pace/:path*`,
       },
     ];
   },
