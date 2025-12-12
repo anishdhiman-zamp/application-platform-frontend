@@ -47,7 +47,7 @@ const LogCtaComponent = (
   const isMultipleButtons = buttonTypeCtas.length > 1;
 
   const handleEmitHITLAction = useCallback(
-    (cta: CtasType, customValues?: string[]) => {
+    (cta: CtasType, customValues?: Array<string | object>) => {
       const payload = buildHITLPayload(cta, logGroupId, userId ?? '', customValues);
       const loadingId = getCtaLoadingId(cta);
 
@@ -67,8 +67,6 @@ const LogCtaComponent = (
   const submitFormData = useCallback(
     (formData: Record<string, unknown>) => {
       const targetCta = buttonTypeCtas.find((cta) => cta?.cta_action === CTA_ACTION.SUBMIT_FORM);
-
-      console.log('formData', serializeFormData(formData));
 
       if (!targetCta) {
         toast.error('No CTA available for form submission');

@@ -230,38 +230,47 @@ export const shouldPerformChatbotDatasetNavigation = (
 export const getCtaLoadingId = (cta: CtasType): string => `${cta?.id}-${cta?.display_name}`;
 
 /**
- * Serializes form data to a string array for HITL submission
+ * Serializes form data to an array for HITL submission
  * @param {Record<string, unknown>} formData - The form data to serialize
- * @returns {string[]} Array of serialized values
+ * @returns {Array<string | object>} Array of serialized values (strings or objects)
  */
-export const serializeFormData = (formData: Record<string, unknown>): string[] =>
-  Object.entries(formData)
-    .map(([, value]) => {
-      // Handle string values directly
-      if (typeof value === 'string') {
-        return value;
-      }
+export const serializeFormData = (formData: Record<string, unknown>): Array<string | object> => {
+  const result: Array<string | object> = [];
 
-      // Handle radio input with nested input value (e.g., { value: 'note', input: 'gggg' })
-      if (typeof value === 'object' && value !== null && 'input' in value) {
-        const inputValue = (value as { input?: string }).input;
+  Object.entries(formData).forEach(([, value]) => {
+    // Handle string values directly
+    if (typeof value === 'string') {
+      result.push({
+        value,
+        input: '',
+      });
 
-        return typeof inputValue === 'string' ? inputValue : null;
-      }
+      return;
+    }
 
-      return null;
-    })
-    .filter((value): value is string => value !== null && value !== '');
+    // Handle object values directly (non-null objects)
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      result.push(value);
+    }
+  });
+
+  return result;
+};
 
 /**
  * Builds the HITL action payload
  * @param {CtasType} cta - The CTA object
  * @param {string} logGroupId - The log group ID
  * @param {string} userId - The user ID
- * @param {string[]} customValues - Optional custom values to include
+ * @param {Array<string | object>} customValues - Optional custom values to include (strings or objects)
  * @returns {Object} The HITL payload object
  */
-export const buildHITLPayload = (cta: CtasType, logGroupId: string, userId: string, customValues?: string[]) => ({
+export const buildHITLPayload = (
+  cta: CtasType,
+  logGroupId: string,
+  userId: string,
+  customValues?: Array<string | object>,
+) => ({
   hitl_request_id: cta.hitl_request_id,
   log_group_id: logGroupId,
   submitted_by: userId,
