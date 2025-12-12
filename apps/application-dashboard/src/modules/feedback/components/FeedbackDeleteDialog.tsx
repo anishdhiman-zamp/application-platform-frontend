@@ -60,7 +60,7 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
       })
         .unwrap()
         .then(() => {
-          dispatch(removeFeedbackItem({ id: feedback.id, status: feedback.status }));
+          dispatch(removeFeedbackItem({ status: feedback.status, conversation_id: feedback.conversation_id }));
           onOpenChange(false);
           onDeleteSuccess?.();
         })
