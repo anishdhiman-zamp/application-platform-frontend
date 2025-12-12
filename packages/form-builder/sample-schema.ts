@@ -1,6 +1,6 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
-import { FieldType, FormSchema, RadioOption } from './types';
+import { FieldType, FormSchema } from './types';
 
 export const schema: FormSchema = {
   id: 'recipient-with-account',
@@ -1360,7 +1360,7 @@ export const schema: FormSchema = {
         ],
       },
     },
-    // Radio field examples demonstrating "Other" option with input
+    // Radio field examples
     transfer_frequency: {
       id: 'transfer_frequency',
       type: FieldType.RADIO,
@@ -1370,12 +1370,7 @@ export const schema: FormSchema = {
         { label: 'Weekly', value: 'weekly' },
         { label: 'Monthly', value: 'monthly' },
         { label: 'Quarterly', value: 'quarterly' },
-        {
-          label: 'Other',
-          value: 'other',
-          has_input: true,
-          input_placeholder: 'Please specify frequency...',
-        } as RadioOption,
+        { label: 'Other', value: 'other' },
       ],
       validations: [
         {
@@ -1413,12 +1408,7 @@ export const schema: FormSchema = {
         { label: 'No special requirements', value: 'none' },
         { label: 'Urgent transfer needed', value: 'urgent' },
         { label: 'Recurring schedule', value: 'recurring' },
-        {
-          label: 'Other requirements',
-          value: 'other',
-          has_input: true,
-          input_placeholder: 'Please describe your requirements...',
-        } as RadioOption,
+        { label: 'Other requirements', value: 'other' },
       ],
     },
   },
