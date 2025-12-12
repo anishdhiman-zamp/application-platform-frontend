@@ -1,11 +1,23 @@
 import { FormSchema, FormValues, Validation, ValidationDependency } from '../types';
 import { evaluateValidationDependencies } from './expressionEvaluator';
 
-// Function to validate a single value against validations
-const validateValue = (value: any, validations: Validation[]): { isValid: boolean; errors: string[] } => {
+// Function to validate a field with its dependencies
+export const validateField = (
+  value: any,
+  formValues: FormValues,
+  validations?: Validation[],
+  dependentValidations?: ValidationDependency[],
+): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
-  validations.forEach((validation) => {
+  // Get all validations including those from dependencies
+  const allValidations = [
+    ...(validations || []),
+    ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
+  ];
+
+  // Apply all validations
+  allValidations.forEach((validation) => {
     switch (validation.type) {
       case 'required':
         if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
@@ -41,31 +53,6 @@ const validateValue = (value: any, validations: Validation[]): { isValid: boolea
         break;
     }
   });
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
-};
-
-// Function to validate a field with its dependencies
-export const validateField = (
-  value: any,
-  formValues: FormValues,
-  validations?: Validation[],
-  dependentValidations?: ValidationDependency[],
-): { isValid: boolean; errors: string[] } => {
-  const errors: string[] = [];
-
-  // Get all validations including those from dependencies
-  const allValidations = [
-    ...(validations || []),
-    ...(dependentValidations?.flatMap((dependency) => evaluateValidationDependencies(dependency, formValues)) || []),
-  ];
-
-  // Validate the value
-  const validationResult = validateValue(value, allValidations);
-  errors.push(...validationResult.errors);
 
   return {
     isValid: errors.length === 0,
