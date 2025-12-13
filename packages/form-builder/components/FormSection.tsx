@@ -28,7 +28,13 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields, anima
                     }}
                     className='flex-1'
                   >
-                    <FormField className='mb-2' field={fields[field]} name={field} animationConfig={animationConfig} />
+                    <FormField
+                      className='mb-2'
+                      field={fields[field]}
+                      name={field}
+                      animationConfig={animationConfig}
+                      schemaFields={fields}
+                    />
                   </div>
                 ) : null,
               )}

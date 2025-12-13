@@ -14,9 +14,10 @@ interface FormFieldProps {
   name: string;
   className?: string;
   animationConfig?: FormBuilderAnimationConfig;
+  schemaFields?: Record<string, FormFieldType>;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animationConfig }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animationConfig, schemaFields }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
   const { fieldAnimation } = useFormAnimation(animationConfig);
 
@@ -46,7 +47,9 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className, an
             case 'select':
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
             case 'radio':
-              return <RadioField className={className} field={fieldWithConfig} name={name} />;
+              return (
+                <RadioField className={className} field={fieldWithConfig} name={name} schemaFields={schemaFields} />
+              );
             default:
               return null;
           }

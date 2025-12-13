@@ -1,11 +1,30 @@
 import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
 
-// Radio option type (same as base select option)
-export type RadioOption = BaseSelectOption;
+export enum InlineFieldDisplayMode {
+  REPLACE = 'replace',
+  BELOW = 'below',
+  AFTER = 'after',
+}
 
-// Re-export for backward compatibility
-export type SelectOption = BaseSelectOption;
+export enum InlineFieldShowWhen {
+  SELECTED = 'selected',
+  ALWAYS = 'always',
+}
+
+// Configuration for inline field - references an existing field defined in the schema
+export interface InlineFieldConfig {
+  field: string;
+  display_mode: InlineFieldDisplayMode;
+  show_when?: InlineFieldShowWhen;
+}
+
+export interface ExtendedSelectOption extends BaseSelectOption {
+  inline_field?: InlineFieldConfig;
+}
+
+export type RadioOption = ExtendedSelectOption;
+export type SelectOption = ExtendedSelectOption;
 
 export type ValidationType =
   | 'required'

@@ -1,6 +1,6 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
-import { FieldType, FormSchema } from './types';
+import { FieldType, FormSchema, InlineFieldDisplayMode, InlineFieldShowWhen } from './types';
 
 export const schema: FormSchema = {
   id: 'recipient-with-account',
@@ -729,19 +729,16 @@ export const schema: FormSchema = {
           label: 'EUR',
           value: 'EUR',
         },
+        {
+          label: 'Other Currency',
+          value: 'other',
+        },
       ],
       validations: [
         {
           type: 'required',
           config: {
             message: 'Account currency is required',
-          },
-        },
-        {
-          type: 'enums',
-          config: {
-            values: ['USD', 'EUR'],
-            message: 'Currency must be either USD or EUR',
           },
         },
       ],
@@ -1360,7 +1357,43 @@ export const schema: FormSchema = {
         ],
       },
     },
-    // Radio field examples
+
+    custom_frequency: {
+      id: 'custom_frequency',
+      type: FieldType.TEXT,
+      label: 'Custom Frequency',
+      placeholder: 'Enter custom frequency (e.g., Bi-weekly)',
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please specify your custom frequency',
+          },
+        },
+      ],
+    },
+    additional_notes_text: {
+      id: 'additional_notes_text',
+      type: FieldType.TEXT,
+      label: 'Note',
+      placeholder: 'Add a note',
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please enter your requirements',
+          },
+        },
+        {
+          type: 'maxLength',
+          config: {
+            value: 500,
+            message: 'Note must not exceed 500 characters',
+          },
+        },
+      ],
+    },
+
     transfer_frequency: {
       id: 'transfer_frequency',
       type: FieldType.RADIO,
@@ -1370,7 +1403,15 @@ export const schema: FormSchema = {
         { label: 'Weekly', value: 'weekly' },
         { label: 'Monthly', value: 'monthly' },
         { label: 'Quarterly', value: 'quarterly' },
-        { label: 'Other', value: 'other' },
+        {
+          label: 'Other',
+          value: 'other',
+          inline_field: {
+            field: 'custom_frequency',
+            display_mode: InlineFieldDisplayMode.BELOW,
+            show_when: InlineFieldShowWhen.SELECTED,
+          },
+        },
       ],
       validations: [
         {
@@ -1408,7 +1449,15 @@ export const schema: FormSchema = {
         { label: 'No special requirements', value: 'none' },
         { label: 'Urgent transfer needed', value: 'urgent' },
         { label: 'Recurring schedule', value: 'recurring' },
-        { label: 'Other requirements', value: 'other' },
+        {
+          label: 'Add a note',
+          value: 'other',
+          inline_field: {
+            field: 'additional_notes_text',
+            display_mode: InlineFieldDisplayMode.REPLACE,
+            show_when: InlineFieldShowWhen.SELECTED,
+          },
+        },
       ],
     },
   },
