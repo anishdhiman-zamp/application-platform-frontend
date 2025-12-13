@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { LAUNCH_DARKLY_CLIENT_SIDE_ID } from 'constants/featureFlags';
 import { LDProvider } from 'launchdarkly-react-client-sdk';
 import { RootState } from 'store';
+import { ENVIRONMENT } from '@/constants/common.constants';
 
 type Props = {
   children: ReactNode;
@@ -24,6 +25,10 @@ export const FeatureFlagsProvider = ({ children }: Props) => {
     }),
     [user?.user_id, user?.user_email, user?.orgs],
   );
+
+  if (ENVIRONMENT === 'local') {
+    return children;
+  }
 
   // Always render LDProvider to maintain consistent tree structure
   // This prevents children from remounting when user state changes
