@@ -1,6 +1,5 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-
-import { FieldType, FormSchema, InlineFieldDisplayMode, InlineFieldShowWhen } from './types';
+import { FieldType, FormSchema } from './types';
 
 export const schema: FormSchema = {
   id: 'recipient-with-account',
@@ -226,20 +225,20 @@ export const schema: FormSchema = {
       sections: [
         {
           id: 'transfer_preferences',
-          title: 'Transfer Preferences',
+          // title: 'Transfer Preferences',
           layout: [
-            [
-              {
-                col_span: 8,
-                field: 'transfer_frequency',
-              },
-            ],
-            [
-              {
-                col_span: 8,
-                field: 'notification_preference',
-              },
-            ],
+            // [
+            //   {
+            //     col_span: 8,
+            //     field: 'transfer_frequency',
+            //   },
+            // ],
+            // [
+            //   {
+            //     col_span: 8,
+            //     field: 'notification_preference',
+            //   },
+            // ],
             [
               {
                 col_span: 8,
@@ -1357,43 +1356,6 @@ export const schema: FormSchema = {
         ],
       },
     },
-
-    custom_frequency: {
-      id: 'custom_frequency',
-      type: FieldType.TEXT,
-      label: 'Custom Frequency',
-      placeholder: 'Enter custom frequency (e.g., Bi-weekly)',
-      validations: [
-        {
-          type: 'required',
-          config: {
-            message: 'Please specify your custom frequency',
-          },
-        },
-      ],
-    },
-    additional_notes_text: {
-      id: 'additional_notes_text',
-      type: FieldType.TEXT,
-      label: 'Note',
-      placeholder: 'Add a note',
-      validations: [
-        {
-          type: 'required',
-          config: {
-            message: 'Please enter your requirements',
-          },
-        },
-        {
-          type: 'maxLength',
-          config: {
-            value: 500,
-            message: 'Note must not exceed 500 characters',
-          },
-        },
-      ],
-    },
-
     transfer_frequency: {
       id: 'transfer_frequency',
       type: FieldType.RADIO,
@@ -1403,15 +1365,6 @@ export const schema: FormSchema = {
         { label: 'Weekly', value: 'weekly' },
         { label: 'Monthly', value: 'monthly' },
         { label: 'Quarterly', value: 'quarterly' },
-        {
-          label: 'Other',
-          value: 'other',
-          inline_field: {
-            field: 'custom_frequency',
-            display_mode: InlineFieldDisplayMode.BELOW,
-            show_when: InlineFieldShowWhen.SELECTED,
-          },
-        },
       ],
       validations: [
         {
@@ -1454,9 +1407,50 @@ export const schema: FormSchema = {
           value: 'other',
           inline_field: {
             field: 'additional_notes_text',
-            display_mode: InlineFieldDisplayMode.REPLACE,
-            show_when: InlineFieldShowWhen.SELECTED,
           },
+        },
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a note',
+          },
+        },
+      ],
+    },
+    additional_notes_text: {
+      id: 'additional_notes_text',
+      type: FieldType.TEXT,
+      label: 'Additional Notes',
+      placeholder: 'Add a note',
+      validation_dependencies: [
+        {
+          fields: ['additional_notes'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'additional_notes',
+                    operator: 'eq',
+                    value: 'other',
+                    conditions: null,
+                  },
+                ],
+              },
+              validations: [
+                {
+                  type: 'required',
+                  config: {
+                    message: 'Please enter your requirements',
+                  },
+                },
+              ],
+            },
+          ],
         },
       ],
     },

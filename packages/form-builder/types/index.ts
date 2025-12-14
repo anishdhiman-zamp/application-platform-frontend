@@ -12,11 +12,8 @@ export enum InlineFieldShowWhen {
   ALWAYS = 'always',
 }
 
-// Configuration for inline field - references an existing field defined in the schema
 export interface InlineFieldConfig {
   field: string;
-  display_mode: InlineFieldDisplayMode;
-  show_when?: InlineFieldShowWhen;
 }
 
 export interface ExtendedSelectOption extends BaseSelectOption {

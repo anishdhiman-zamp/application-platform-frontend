@@ -3,8 +3,8 @@ import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { getInlineFieldDisplayClass, getOptionWrapperClass, useInlineField } from '../hooks/useInlineField';
-import { FormField as FormFieldType, InlineFieldDisplayMode, RadioOption } from '../types';
+import { useInlineField } from '../hooks/useInlineField';
+import { FormField as FormFieldType, RadioOption } from '../types';
 import { InlineField } from './InlineField';
 
 interface RadioFieldProps {
@@ -20,7 +20,7 @@ export interface RadioFieldValue {
 
 export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, schemaFields = {} }) => {
   const { control } = useFormContext();
-  const { isInlineFieldVisible, hasInlineField, handleOptionChange } = useInlineField({
+  const { hasInlineField, handleOptionChange } = useInlineField({
     clearOnDeselect: true,
   });
 
@@ -45,46 +45,26 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, 
                 const optionValue = String(option.value);
                 const optionHasInlineField = hasInlineField(option);
                 const inlineFieldConfig = option.inline_field;
-                const isSelected = value === optionValue;
-                const showInlineField = optionHasInlineField && isInlineFieldVisible(option, value);
-                const displayMode = inlineFieldConfig?.display_mode;
-
-                const shouldShowLabel = !showInlineField || displayMode !== InlineFieldDisplayMode.REPLACE;
 
                 return (
-                  <div key={optionValue} className={cn(getOptionWrapperClass(optionHasInlineField, displayMode))}>
-                    <div className='flex items-center gap-2'>
-                      <Radio value={optionValue} id={`${name}-${optionValue}`} />
+                  <div key={optionValue}>
+                    <div className={cn('flex gap-2', optionHasInlineField ? 'items-start' : 'items-center')}>
+                      <Radio
+                        value={optionValue}
+                        id={`${name}-${optionValue}`}
+                        className={optionHasInlineField ? 'mt-2' : ''}
+                      />
 
-                      {shouldShowLabel && (
+                      {!optionHasInlineField && (
                         <Label htmlFor={`${name}-${optionValue}`} className='cursor-pointer font-normal'>
                           {option.label}
                         </Label>
                       )}
 
-                      {showInlineField &&
-                        (displayMode === InlineFieldDisplayMode.REPLACE ||
-                          displayMode === InlineFieldDisplayMode.AFTER) &&
-                        inlineFieldConfig && (
-                          <div className={getInlineFieldDisplayClass(displayMode)}>
-                            <InlineField
-                              inlineConfig={inlineFieldConfig}
-                              schemaFields={schemaFields}
-                              isSelected={isSelected}
-                            />
-                          </div>
-                        )}
+                      {optionHasInlineField && inlineFieldConfig && (
+                        <InlineField inlineConfig={inlineFieldConfig} schemaFields={schemaFields} />
+                      )}
                     </div>
-
-                    {showInlineField && displayMode === InlineFieldDisplayMode.BELOW && inlineFieldConfig && (
-                      <div className={getInlineFieldDisplayClass(displayMode)}>
-                        <InlineField
-                          inlineConfig={inlineFieldConfig}
-                          schemaFields={schemaFields}
-                          isSelected={isSelected}
-                        />
-                      </div>
-                    )}
                   </div>
                 );
               })}

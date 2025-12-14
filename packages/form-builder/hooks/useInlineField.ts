@@ -1,13 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import {
-  ExtendedSelectOption,
-  FormField as FormFieldType,
-  InlineFieldConfig,
-  InlineFieldDisplayMode,
-  InlineFieldShowWhen,
-} from '../types';
+import { ExtendedSelectOption, FormField as FormFieldType, InlineFieldConfig } from '../types';
 
 interface UseInlineFieldOptions {
   clearOnDeselect?: boolean;
@@ -44,14 +38,7 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
       const config = option.inline_field;
       if (!config) return false;
 
-      const showWhen = config.show_when || InlineFieldShowWhen.SELECTED;
-      const optionValue = String(option.value);
-
-      if (showWhen === InlineFieldShowWhen.ALWAYS) {
-        return true;
-      }
-
-      return currentValue === optionValue;
+      return currentValue === String(option.value);
     },
     [],
   );
@@ -98,33 +85,6 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
   };
 };
 
-export const getInlineFieldDisplayClass = (displayMode: InlineFieldConfig['display_mode']): string => {
-  switch (displayMode) {
-    case InlineFieldDisplayMode.REPLACE:
-      return 'flex-1';
-    case InlineFieldDisplayMode.BELOW:
-      return 'mt-2 ml-6 w-full';
-    case InlineFieldDisplayMode.AFTER:
-      return 'ml-2 flex-1';
-    default:
-      return '';
-  }
-};
-
-export const getOptionWrapperClass = (
-  hasInlineField: boolean,
-  displayMode?: InlineFieldConfig['display_mode'],
-): string => {
-  if (!hasInlineField) return 'flex items-center gap-2';
-
-  switch (displayMode) {
-    case InlineFieldDisplayMode.REPLACE:
-      return 'flex items-center gap-2 w-full';
-    case InlineFieldDisplayMode.BELOW:
-      return 'flex flex-col w-full';
-    case InlineFieldDisplayMode.AFTER:
-      return 'flex items-center gap-2 w-full';
-    default:
-      return 'flex items-center gap-2';
-  }
+export const getOptionWrapperClass = (hasInlineField: boolean): string => {
+  return hasInlineField ? 'flex items-center gap-2' : 'flex items-center gap-2';
 };
