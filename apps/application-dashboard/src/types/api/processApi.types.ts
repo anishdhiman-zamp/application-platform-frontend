@@ -190,7 +190,7 @@ export type CtasType = {
   cta_action_id: string;
   hitl_request_id: string;
   cta_value: string;
-  form_builder_config: FormSchema;
+  form_builder_config?: FormSchema;
   cta_config: {
     icon_identifier: string;
     variant: string;

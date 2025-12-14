@@ -84,7 +84,3 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
     handleOptionChange,
   };
 };
-
-export const getOptionWrapperClass = (hasInlineField: boolean): string => {
-  return hasInlineField ? 'flex items-center gap-2' : 'flex items-center gap-2';
-};
