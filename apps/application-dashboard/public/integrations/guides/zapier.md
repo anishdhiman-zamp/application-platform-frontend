@@ -64,4 +64,3 @@ Connect Zamp with 5,000+ apps through Zapier to automate your workflows and elim
 - Ensure field types match
 - Use Zapier's formatter for data transformation
 - Check for null or empty values
-

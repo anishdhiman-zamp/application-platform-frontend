@@ -76,12 +76,12 @@ Records processed: 1,247
 
 Use these commands in any channel:
 
-| Command | Description |
-|---------|-------------|
-| `/zamp status` | Check connection status |
-| `/zamp report [name]` | Generate a quick report |
-| `/zamp search [query]` | Search your data |
-| `/zamp help` | View all commands |
+| Command                | Description             |
+| ---------------------- | ----------------------- |
+| `/zamp status`         | Check connection status |
+| `/zamp report [name]`  | Generate a quick report |
+| `/zamp search [query]` | Search your data        |
+| `/zamp help`           | View all commands       |
 
 ## Channel Settings
 
@@ -114,4 +114,3 @@ Customize notifications for each channel:
 - Check notification settings in Zamp
 - Verify channel is selected
 - Review Slack's notification preferences
-

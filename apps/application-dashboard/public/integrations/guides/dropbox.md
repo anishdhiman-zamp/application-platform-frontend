@@ -51,12 +51,12 @@ Select the appropriate access:
 
 ## Supported File Types
 
-| Type | Extensions | Auto-Parse |
-|------|------------|------------|
-| Spreadsheets | .xlsx, .csv | ✅ Yes |
-| Documents | .pdf, .docx | ✅ Yes |
-| Images | .png, .jpg | ❌ No |
-| Archives | .zip | ❌ No |
+| Type         | Extensions  | Auto-Parse |
+| ------------ | ----------- | ---------- |
+| Spreadsheets | .xlsx, .csv | ✅ Yes     |
+| Documents    | .pdf, .docx | ✅ Yes     |
+| Images       | .png, .jpg  | ❌ No      |
+| Archives     | .zip        | ❌ No      |
 
 ## Best Practices
 
@@ -68,4 +68,3 @@ Select the appropriate access:
 ## Storage Considerations
 
 > ⚠️ Large file syncs may take time. Consider syncing during off-peak hours for better performance.
-

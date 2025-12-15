@@ -29,11 +29,11 @@ Connect your Mercury banking account to automatically sync transactions, track b
 
 Choose your sync preferences:
 
-| Setting | Options |
-|---------|----------|
-| Sync Frequency | Real-time, Hourly, Daily |
+| Setting         | Options                       |
+| --------------- | ----------------------------- |
+| Sync Frequency  | Real-time, Hourly, Daily      |
 | Historical Data | Last 30, 90, 365 days, or All |
-| Account Types | Checking, Savings, All |
+| Account Types   | Checking, Savings, All        |
 
 ## Available Data
 
@@ -115,4 +115,3 @@ Mercury transactions may take up to 24 hours to appear. For faster updates:
 - Ensure the date range includes the transaction
 - Check if the account is selected for sync
 - Verify the transaction is not pending
-

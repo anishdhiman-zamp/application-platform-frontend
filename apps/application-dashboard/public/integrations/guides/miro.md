@@ -61,4 +61,3 @@ Create visual representations of your data:
 ## Tips
 
 > 💡 **Pro Tip**: Use Miro's frames to organize different data views and create presentation-ready boards.
-

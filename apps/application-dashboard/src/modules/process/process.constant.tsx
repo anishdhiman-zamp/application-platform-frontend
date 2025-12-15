@@ -279,3 +279,17 @@ export const DATASET_COLUMN_TYPES_LIST = [
   { label: 'Number', value: DatasetColumnTypes.NUMBER, icon: Hash },
   { label: 'Email', value: DatasetColumnTypes.EMAIL, icon: Mail },
 ];
+
+// CTA Button type components for filtering
+export const BUTTON_TYPE_CTA_COMPONENTS: CTA_COMPONENT_TYPE[] = [
+  CTA_COMPONENT_TYPE.BUTTON,
+  CTA_COMPONENT_TYPE.OVERRIDE_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
+];
+
+// CTA types that should show artifacts instead of emitting HITL action
+export const ARTIFACT_SHOW_CTA_TYPES: CTA_COMPONENT_TYPE[] = [
+  CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
+];
