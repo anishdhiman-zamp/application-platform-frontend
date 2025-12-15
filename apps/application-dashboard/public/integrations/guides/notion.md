@@ -31,18 +31,18 @@ Connect Notion to sync databases, import pages, and create a seamless workflow b
 Map Notion properties to Zamp columns:
 
 | Notion Property | Zamp Column Type |
-|----------------|------------------|
-| Title | Text |
-| Number | Number |
-| Select | Single Select |
-| Multi-select | Tags |
-| Date | Date |
-| Checkbox | Boolean |
-| URL | Link |
-| Email | Email |
-| Phone | Phone |
-| Formula | Computed |
-| Relation | Reference |
+| --------------- | ---------------- |
+| Title           | Text             |
+| Number          | Number           |
+| Select          | Single Select    |
+| Multi-select    | Tags             |
+| Date            | Date             |
+| Checkbox        | Boolean          |
+| URL             | Link             |
+| Email           | Email            |
+| Phone           | Phone            |
+| Formula         | Computed         |
+| Relation        | Reference        |
 
 ## Sync Options
 
@@ -120,4 +120,3 @@ Notion Database ←→ Zamp Dataset
 2. **Start small** - Begin with one database
 3. **Set sync direction carefully** - Avoid accidental overwrites
 4. **Regular cleanup** - Archive unused connections
-
