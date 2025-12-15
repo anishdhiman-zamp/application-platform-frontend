@@ -17,7 +17,7 @@ import {
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import type { IRowNode } from 'ag-grid-community';
-import { DISPLAY_CONFIG_HEADERS } from '@/modules/admin/admin.types';
+import { DISPLAY_CONFIG_HEADERS } from '@/types/api/admin.types';
 import type { ValueFormatType } from '@/types/api/dataset.types';
 import type { MapAny } from '@/types/commonTypes';
 import { VALUE_FORMAT_TYPE } from 'components/common/table/table.types';

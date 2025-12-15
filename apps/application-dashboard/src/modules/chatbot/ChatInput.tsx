@@ -1,9 +1,9 @@
-import { FC, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { SOCKET_STATES } from '@deepgram/sdk';
-import { AttachmentsList, LocationData, useChat } from '@zamp-platform/chat';
+import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { ArrowUp, Check, Loader, Mic, X } from 'lucide-react';
+import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import AudioVisualizer from 'modules/chatbot/AudioVisualiser';
 import useChatInput from 'modules/chatbot/useChatInput';
 import { MicrophoneState } from '@/hooks/useMicrophoneRecorder';
@@ -13,20 +13,26 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 interface ChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
   header: string;
+  scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  autoFocus?: boolean;
 }
 export const ChatInput: FC<ChatInputProps> = ({
   chat,
   annotationLocation,
-  setIsLoading,
   conversationId,
   setHeader,
   isDisabled,
   header,
+  scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
+  autoFocus = false,
 }) => {
   const {
     value,
@@ -42,9 +48,11 @@ export const ChatInput: FC<ChatInputProps> = ({
   } = useChatInput({
     chat,
     annotationLocation,
-    setIsLoading,
     conversationId,
     setHeader,
+    scope,
+    externalInputValue,
+    setExternalInputValue,
   });
 
   const {
@@ -60,9 +68,9 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // const handleAttachClick = () => {
-  //   fileInputRef.current?.click();
-  // };
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleFileSelect(e.target.files);
@@ -117,6 +125,16 @@ export const ChatInput: FC<ChatInputProps> = ({
     setValue((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, [transcript, setValue]);
 
+  useEffect(() => {
+    if (autoFocus && !isDisabled && !shouldShowRecorder) {
+      const timeoutId = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoFocus, isDisabled, shouldShowRecorder]);
+
   return (
     <div
       className={cn('w-full border-t p-3', {
@@ -132,7 +150,7 @@ export const ChatInput: FC<ChatInputProps> = ({
         onChange={handleFileChange}
         className='hidden'
         aria-label='File input'
-        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX}`}
+        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
       />
       <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
       <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
@@ -198,7 +216,7 @@ export const ChatInput: FC<ChatInputProps> = ({
                     </Button>
                   )}
                   {/* TODO: Add back when PACE is ready to handle attachments */}
-                  {/* <Button
+                  <Button
                     variant='ghost'
                     size='icon'
                     className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
@@ -207,7 +225,7 @@ export const ChatInput: FC<ChatInputProps> = ({
                     disabled={isUploading || isDisabled}
                   >
                     <Paperclip />
-                  </Button> */}
+                  </Button>
                 </div>
                 <Button
                   onClick={handleSubmit}

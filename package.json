@@ -33,9 +33,10 @@
     ]
   },
   "dependencies": {
-    "next": "^15",
-    "react": "^19",
-    "react-dom": "^19"
+    "@imagekit/next": "^2.1.3",
+    "next": "^15.5.7",
+    "react": "^19.1.2",
+    "react-dom": "^19.1.2"
   },
   "devDependencies": {
     "husky": "^9.1.7",

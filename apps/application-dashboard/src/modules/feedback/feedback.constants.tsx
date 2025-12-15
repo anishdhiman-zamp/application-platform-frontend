@@ -14,6 +14,7 @@ export enum FEEDBACK_STATUS {
   APPLIED = 'applied',
   PROCESSING = 'processing',
   ARCHIVED = 'archived',
+  DRAFT = 'draft',
 }
 
 export enum SCOPE_TYPE {
@@ -110,3 +111,20 @@ export function createTabsConfig({
     },
   ];
 }
+
+export const FEEDBACK_APPLIED_MESSAGE = 'This feedback has been applied. Work with Pace to give more feedback.';
+export const FEEDBACK_PROCESSING_MESSAGE = 'This feedback is processing. Work with Pace to give more feedback.';
+
+export const FEEDBACK_STATUS_MESSAGES: Record<FEEDBACK_STATUS, string> = {
+  [FEEDBACK_STATUS.APPLIED]: FEEDBACK_APPLIED_MESSAGE,
+  [FEEDBACK_STATUS.PROCESSING]: FEEDBACK_PROCESSING_MESSAGE,
+  [FEEDBACK_STATUS.OPEN]: '',
+  [FEEDBACK_STATUS.QUEUED]: '',
+  [FEEDBACK_STATUS.ARCHIVED]: '',
+  [FEEDBACK_STATUS.DRAFT]: '',
+} as const;
+
+export const CONVERSATION_EVENT_TYPE = {
+  MOVED_TO_FEEDBACK: 'conversation_moved_to_feedback',
+  NEW_CREATED: 'new_conversation_created',
+} as const;

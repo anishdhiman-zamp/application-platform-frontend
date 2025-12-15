@@ -15,7 +15,7 @@ export const defaultFormData: WidgetCreationFormData = {
   title: '',
   datasetId: '',
   visualizationType: WIDGET_TYPES.BAR_CHART,
-  size: 'half',
+  size: 'full',
   chartSpecificFields: {},
 };
 

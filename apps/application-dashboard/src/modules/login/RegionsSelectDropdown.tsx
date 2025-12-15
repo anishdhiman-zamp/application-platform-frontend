@@ -1,6 +1,6 @@
 import { type FC, useMemo, useState } from 'react';
 import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
-import DropdownToggle from 'modules/payments/move-money/components/DropdownToggle';
+import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import type { MenuItem } from '@/types/common/components';
 
 interface RegionsSelectDropdownProps {

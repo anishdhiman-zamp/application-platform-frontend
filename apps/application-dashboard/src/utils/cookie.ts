@@ -24,3 +24,9 @@ export const getCookie = (name: string) => {
 
   return cookie ? cookie.split('=')[1] : null;
 };
+
+export const clearCookie = (name: string) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
+  }
+};

@@ -1,10 +1,9 @@
 import { DATE_FORMATS } from '@zamp-platform/utils';
+import { format } from 'date-fns';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
-import { snakeCaseToSentenceCase } from 'utils/common';
-import { VALUE_FORMAT_TYPE } from '@/components/common/table/table.types';
+import { ensureUTCTimestamp, snakeCaseToSentenceCase } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { getFormattedDate } from '@/modules/data/data.utils';
 import TabStatusIcon from '@/modules/process/common/TabStatusIcon';
 import type { MapAny } from '@/types/commonTypes';
 
@@ -18,6 +17,12 @@ type ActivityCurrentStatusProps = {
 
 const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
   const message = value?.message;
+
+  const getFormattedDate = (timestamp: string) => {
+    if (!timestamp) return '';
+
+    return format(new Date(ensureUTCTimestamp(timestamp)), DATE_FORMATS.DD_MMM);
+  };
 
   return (
     <div className='flex w-full items-center justify-between'>
@@ -33,12 +38,7 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
         </TooltipV2>
       </div>
       <div className='flex items-center gap-2'>
-        <p className='f-13-450 text-GRAY_900'>
-          {getFormattedDate(
-            { type: VALUE_FORMAT_TYPE.DATE_TIME, value: DATE_FORMATS.DD_MMM },
-            data?.activity_updated_at ?? data?.updated_at,
-          )}
-        </p>
+        <p className='f-13-450 text-GRAY_900'>{getFormattedDate(data?.activity_updated_at ?? data?.updated_at)}</p>
       </div>
     </div>
   );

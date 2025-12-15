@@ -1,6 +1,5 @@
-import React, { FC, useRef, useState } from 'react';
-import { useOnClickOutside } from 'hooks';
-import { POSITION_TYPES } from 'types/common/components';
+import React, { FC, useState } from 'react';
+import { Popover, PopoverTrigger } from '@zamp-platform/ui';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { FilterConfigType } from 'components/filter/filter.types';
 import FilterControlButton from 'components/filter/FilterControlButton';
@@ -22,54 +21,40 @@ const FiltersMenu: FC<FiltersMenuProps> = ({ onAddFilter, label, tooltipText, cu
   } = useFiltersContextStore();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const controlRef = useRef<HTMLDivElement>(null);
-
-  useOnClickOutside(menuRef, () => {
-    setIsOpen(false);
-  }, [controlRef]);
-
-  const toggleMenu = () => {
-    setIsOpen((prev) => !prev);
-  };
-
-  const getMenuPlacement = () => {
-    if (menuRef.current) {
-      const { left } = menuRef.current.getBoundingClientRect();
-      const isMenuCutOff = left + 200 > window.innerWidth;
-
-      return isMenuCutOff ? POSITION_TYPES.LEFT : POSITION_TYPES.RIGHT;
-    }
-
-    return POSITION_TYPES.RIGHT;
-  };
 
   const onAddfilter = (filterKey: string) => {
     onAddFilter(filterKey);
-    toggleMenu();
+    setIsOpen(false);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
   };
 
   return (
     <div className='relative'>
-      <div ref={controlRef}>
-        <FilterControlButton
-          onClick={toggleMenu}
-          tooltipPosition={SIDE_OPTIONS.TOP}
-          tooltipText={tooltipText}
-          id='add-filters'
-          testIdSuffix={testIdSuffix}
-        >
-          {label}
-        </FilterControlButton>
-      </div>
-      <SelectFilterMenuItem
-        menuRef={menuRef}
-        isOpen={isOpen}
-        getMenuPlacement={getMenuPlacement}
-        filtersConfig={filtersConfig ?? []}
-        onAddFilter={onAddfilter}
-        currentPageFilters={currentPageFilters ?? []}
-      />
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <div>
+            <FilterControlButton
+              onClick={() => setIsOpen((prev) => !prev)}
+              tooltipPosition={SIDE_OPTIONS.TOP}
+              tooltipText={tooltipText}
+              id='add-filters'
+              testIdSuffix={testIdSuffix}
+            >
+              {label}
+            </FilterControlButton>
+          </div>
+        </PopoverTrigger>
+        <SelectFilterMenuItem
+          filtersConfig={filtersConfig ?? []}
+          onAddFilter={onAddfilter}
+          position='start'
+          currentPageFilters={currentPageFilters ?? []}
+          onClose={handleClose}
+        />
+      </Popover>
     </div>
   );
 };

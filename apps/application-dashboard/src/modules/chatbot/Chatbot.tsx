@@ -6,6 +6,7 @@ import {
   DisplayLayerActionType,
   LocationData,
   ResourceType,
+  ScopeType,
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
@@ -14,10 +15,12 @@ import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
 import ChatHeader from 'modules/chatbot/ChatHeader';
 import { ChatInput } from 'modules/chatbot/ChatInput';
+import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
 import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
+import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useSearchParams } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -38,6 +41,8 @@ interface ChatbotProps {
   setCurrentFeedbackItem: (feedbackItem?: FeedbackItemType) => void;
   className?: string;
   onOpenChatbot?: () => void;
+  scope?: ScopeType;
+  clearInputOnClose?: boolean;
 }
 
 const Chatbot = ({
@@ -52,12 +57,18 @@ const Chatbot = ({
   setCurrentFeedbackItem,
   className,
   onOpenChatbot,
-}: ChatbotProps) => {
+  scope = ScopeType.ACTIVITY_RUN,
+  clearInputOnClose = false,
+}: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
+  const feedbackState = useSelector((state: RootState) => state?.feedbacks);
+  const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
+  const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const urlBasedOpenHandled = useRef(false);
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
@@ -67,20 +78,31 @@ const Chatbot = ({
   const [popoverSide, setPopoverSide] = useState<'top' | 'bottom'>('bottom');
 
   const chatbotInstanceId = useMemo(() => generateChatbotInstanceId(annotationLocation), [annotationLocation]);
+  const isUrlMatching = useMemo(
+    () => searchParams && doesUrlMatchLocation(searchParams, annotationLocation),
+    [searchParams, annotationLocation],
+  );
 
-  const { runAction } = useActionHub(setIsLoading);
+  const { runAction } = useActionHub();
 
   const chat = useChat({
-    onNewMessage: () => {
-      setIsLoading(false);
-    },
     resourceId: annotationLocation.data.process_id,
     resourceType: ResourceType.PROCESS,
-    conversationId: feedbackItem?.conversation_id,
+    conversationId: (hideFeedbackCount && isUrlMatching && conversationIdFromParam) || feedbackItem?.conversation_id,
     setHeader,
+    refetchConversationHistory: hideFeedbackCount,
   });
 
-  const isAnalysing = isLoading || chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
+  const isAnalysing = chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
+
+  const handleDeleteFeedbackSuccess = useCallback(() => {
+    setIsOpen(false);
+    setCurrentFeedbackItem(undefined);
+    setHeader('');
+    onCloseChatbot?.();
+    chat.clearMessages();
+    chat.setConversationId(null);
+  }, [setCurrentFeedbackItem, onCloseChatbot, chat]);
 
   // Handle chatbot open/close state changes
   const handleOpenChange = useCallback(
@@ -88,9 +110,13 @@ const Chatbot = ({
       setIsOpen(open);
       if (!open) {
         onCloseChatbot?.();
+        if (hideFeedbackCount) handleDeleteFeedbackSuccess();
+        if (clearInputOnClose) {
+          setInputValue('');
+        }
       } else onOpenChatbot?.();
     },
-    [onCloseChatbot],
+    [onCloseChatbot, onOpenChatbot, hideFeedbackCount, handleDeleteFeedbackSuccess, clearInputOnClose],
   );
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -127,15 +153,6 @@ const Chatbot = ({
     }
   };
 
-  const handleDeleteFeedbackSuccess = () => {
-    setIsOpen(false);
-    setCurrentFeedbackItem(undefined);
-    setHeader('');
-    onCloseChatbot?.();
-    chat.clearMessages();
-    chat.setConversationId(null);
-  };
-
   const handleOpenChangeForStopProcessing = (open: boolean) => {
     if (!open) {
       setStopProcessingConfig(undefined);
@@ -143,26 +160,58 @@ const Chatbot = ({
     }
   };
 
-  // Check URL params on mount to determine if chatbot should be open
-  useEffect(() => {
-    if (searchParams && doesUrlMatchLocation(searchParams, annotationLocation)) {
-      setIsOpen(true);
+  const renderFeedbackStatusMessageOrInput = () => {
+    if (feedbackItem?.status && [FEEDBACK_STATUS.APPLIED, FEEDBACK_STATUS.PROCESSING].includes(feedbackItem.status)) {
+      return (
+        <div className='f-13-450 bg-BG_GRAY_2 rounded-b-2xl p-3 text-gray-900'>
+          {FEEDBACK_STATUS_MESSAGES[feedbackItem.status]}
+        </div>
+      );
     }
-  }, [searchParams, annotationLocation]);
 
-  // Sync isOpen state with showChatbot prop changes
+    return (
+      <div className='flex flex-shrink-0'>
+        <ChatInput
+          chat={chat}
+          annotationLocation={annotationLocation}
+          conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
+          setHeader={setHeader}
+          isDisabled={isAnalysing}
+          header={header}
+          scope={scope}
+          externalInputValue={inputValue}
+          setExternalInputValue={setInputValue}
+          autoFocus={isOpen}
+        />
+      </div>
+    );
+  };
+
+  // Check URL params to determine if chatbot should be open (takes precedence over prop)
   useEffect(() => {
-    if (showChatbot !== undefined) {
-      setIsOpen(showChatbot);
+    if (isUrlMatching) {
+      // URL params match - always keep open, regardless of prop
+      if (!urlBasedOpenHandled.current) {
+        urlBasedOpenHandled.current = true;
+      }
+      setIsOpen(true);
+    } else {
+      // URL params don't match - sync with prop
+      if (urlBasedOpenHandled.current) {
+        urlBasedOpenHandled.current = false;
+      }
+      if (showChatbot !== undefined) {
+        setIsOpen(showChatbot);
+      }
     }
-  }, [showChatbot]);
+  }, [isUrlMatching, showChatbot]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
-    if (chat.messages.length > 0) {
+    if (chat?.messages?.length > 0) {
       scrollToBottom('smooth');
     }
-  }, [chat.messages.length]);
+  }, [chat?.messages?.length]);
 
   // Calculate optimal popover position based on available space
   useEffect(() => {
@@ -189,7 +238,7 @@ const Chatbot = ({
 
   // Scroll to last message when popover opens with existing messages
   useEffect(() => {
-    if (isOpen && chat.messages.length > 0) {
+    if (isOpen && chat?.messages?.length > 0) {
       // Small delay to ensure DOM is fully rendered
       setTimeout(() => {
         scrollToBottom('smooth');
@@ -197,27 +246,35 @@ const Chatbot = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const isFeedbackItemExists = mergedFeedbackItems.find((item: FeedbackItemType) => item?.id === feedbackItem?.id);
+
+    if (feedbackItem && !isFeedbackItemExists) {
+      handleDeleteFeedbackSuccess();
+    }
+  }, [mergedFeedbackItems, feedbackItem]);
+
   return (
     <>
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger
-          className={cn(className, {
-            '[&_button[data-comment-button]]:bg-accent [&_button[data-comment-button]]:text-accent-foreground [&_button[data-comment-button]]:opacity-100':
-              isOpen,
-          })}
-          data-testid={chatbotInstanceId}
-        >
+        <PopoverTrigger asChild data-testid={chatbotInstanceId}>
           {(feedbackItem || feedbackItemsLength > 0) && !hideFeedbackCount ? (
             <Button
               variant='outline'
               size='icon'
-              className='bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3'
+              className={cn(
+                'bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3',
+                isOpen && 'opacity-100',
+              )}
+              data-comment-button
             >
               <MessageSquare />
               <span>{feedbackItemsLength || 1}</span>
             </Button>
           ) : (
-            children
+            <span className={className} data-testid={chatbotInstanceId}>
+              {children}
+            </span>
           )}
         </PopoverTrigger>
         <PopoverPortal>
@@ -236,7 +293,8 @@ const Chatbot = ({
                 'rounded-[20px]': !header,
               })}
             >
-              {chat.isLoadingConversationHistory && !isNewConversation ? (
+              {(chat.isLoadingConversationHistory && !isNewConversation) ||
+              (hideFeedbackCount && isUrlMatching && conversationIdFromParam && chat?.messages?.length === 0) ? (
                 <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />
               ) : (
                 <>
@@ -255,7 +313,7 @@ const Chatbot = ({
                       },
                     )}
                   >
-                    {chat.messages.length > 0 && (
+                    {chat?.messages?.length > 0 && (
                       <div
                         ref={messagesContainerRef}
                         className='min-h-0 flex-1 space-y-6 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden'
@@ -281,17 +339,7 @@ const Chatbot = ({
                         )}
                       </div>
                     )}
-                    <div className='flex flex-shrink-0'>
-                      <ChatInput
-                        chat={chat}
-                        annotationLocation={annotationLocation}
-                        setIsLoading={setIsLoading}
-                        conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
-                        setHeader={setHeader}
-                        isDisabled={isAnalysing}
-                        header={header}
-                      />
-                    </div>
+                    {renderFeedbackStatusMessageOrInput()}
                   </div>
                 </>
               )}

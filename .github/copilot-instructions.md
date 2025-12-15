@@ -33,15 +33,16 @@ type UserProps = {
 **Verify:**
 - ✅ Const enums for better tree-shaking
 - ✅ String enums for API-facing values
-- ✅ SCREAMING_SNAKE_CASE for enum values
+- ✅ PascalCase for enum type names
+- ✅ snake_case for enum values
 
 **Example of good enum:**
 ```typescript
 // ✅ Good
 const enum WIDGET_TYPES {
-  BAR_CHART = 'bar_chart',
-  LINE_CHART = 'line_chart',
-  PIE_CHART = 'pie_chart',
+  BarChart = 'bar_chart',
+  LineChart = 'line_chart',
+  PieChar = 'pie_chart',
 }
 ```
 
@@ -244,7 +245,9 @@ import './styles.css';
 - ✅ PascalCase for component files and class names
 - ✅ camelCase for function names and variables
 - ✅ kebab-case for CSS classes and style files
-- ✅ SCREAMING_SNAKE_CASE for constants and enum values
+- ✅ SCREAMING_SNAKE_CASE for constants
+- ✅ PascalCase for enum type names
+- ✅ snake_case for enum values
 
 ### Directory Organization
 

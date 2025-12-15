@@ -141,7 +141,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       return response;
     }
     case ROUTES_PATH.MEMBERSHIP_PENDING: {
-      const { session } = await getUserSession(request);
+      const { session } = await getUserSession(request, false);
 
       const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
 

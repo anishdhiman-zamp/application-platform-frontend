@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
-import { ActionType, BlockType, LocationData, ResourceType, useChat } from '@zamp-platform/chat';
+import { ActionType, BLOCK_TYPE, LocationData, ResourceType, ScopeType, useChat } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
 import {
   createConversationPayload,
@@ -22,18 +22,42 @@ import { RootState } from '@/store';
 interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
-  setIsLoading: (isLoading: boolean) => void;
   conversationId?: string;
   setHeader?: (header: string) => void;
+  scope?: ScopeType;
+  externalInputValue?: string;
+  setExternalInputValue?: Dispatch<SetStateAction<string>>;
 }
 
-const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, setHeader }: UseChatInputProps) => {
+const useChatInput = ({
+  chat,
+  annotationLocation,
+  conversationId,
+  setHeader,
+  scope = ScopeType.ACTIVITY_RUN,
+  externalInputValue,
+  setExternalInputValue,
+}: UseChatInputProps) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
 
-  const [value, setValue] = useState('');
+  const [internalValue, setInternalValue] = useState('');
+
+  const hasExternalControl = externalInputValue !== undefined && setExternalInputValue !== undefined;
+  const value = hasExternalControl ? externalInputValue : internalValue;
+
+  const setValue = useCallback(
+    (newValue: SetStateAction<string>) => {
+      if (hasExternalControl && setExternalInputValue) {
+        setExternalInputValue(newValue);
+      } else {
+        setInternalValue(newValue);
+      }
+    },
+    [hasExternalControl, setExternalInputValue],
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [attachments, setAttachments] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -53,12 +77,11 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
+      scope,
     );
 
     setAttachments([]);
     const response = await chat.createConversationV2(payload);
-
-    setIsLoading(true);
 
     if (!response?.conversation_id) {
       throw new Error('Failed to create conversation');
@@ -123,7 +146,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
   };
 
   const handleSubmit = () => {
-    setIsLoading(true);
     if (value.trim()) {
       setValue('');
     }
@@ -138,9 +160,6 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
   const handleSendMessage = async (inputValue: string) => {
     if (!inputValue.trim()) return;
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 500);
 
     const messagePayload = createUserMessagePayload(
       inputValue,
@@ -159,7 +178,7 @@ const useChatInput = ({ chat, annotationLocation, setIsLoading, conversationId, 
 
     if (lastMessage?.message_content?.elements) {
       for (const element of lastMessage.message_content.elements) {
-        if (element?.type === BlockType.BUTTON && element?.action?.type === ActionType.INTERNAL_API) {
+        if (element?.type === BLOCK_TYPE.BUTTON && element?.action?.type === ActionType.INTERNAL_API) {
           messageId = lastMessage.id || '';
         }
       }

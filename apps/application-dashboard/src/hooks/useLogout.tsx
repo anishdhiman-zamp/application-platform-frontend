@@ -2,10 +2,10 @@
 
 import { useCallback, useMemo } from 'react';
 import { useInitiateLogoutFlowQuery, useLazyLogoutQuery, useLazyWhoAmIQuery } from 'apis/auth';
-import { ROUTES_PATH } from 'constants/routeConfig';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { resetPostHog } from 'utils/postHog';
-import { PREV_ROUTE_COOKIE, setCookie } from '@/utils/cookie';
+import { ROUTES_PATH } from '@/constants/routeConfig';
+import { clearCookie, PREV_ROUTE_COOKIE, setCookie, USER_SESSION_COOKIE } from '@/utils/cookie';
+import { resetPostHog } from '@/utils/postHog';
 
 export const useLogout = () => {
   const router = useRouter();
@@ -28,6 +28,9 @@ export const useLogout = () => {
     if (fullPath && fullPath !== '/') {
       setCookie(PREV_ROUTE_COOKIE, encodeURIComponent(fullPath));
     }
+
+    // Clear USER_SESSION_COOKIE on client side
+    clearCookie(USER_SESSION_COOKIE);
 
     logOut(logoutFlow?.logout_url ?? '')
       .then(() => {

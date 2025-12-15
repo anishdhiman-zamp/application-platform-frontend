@@ -17,6 +17,8 @@ export interface FeedbackItemType {
   updated_at: string;
   scope_type: SCOPE_TYPE;
   scope_id: string;
+  resource_type?: string;
+  resource_id?: string;
   annotation_data: AnnotationData;
   initiated_by: string;
 }
@@ -30,6 +32,18 @@ export interface ArchiveFeedbackPayloadType {
   feedback_ids: string[];
 }
 
+export interface DeleteConversationFeedbackPayloadType {
+  conversationId: string;
+  resourceType: string;
+  resourceId: string;
+}
+
 export interface StopProcessingFeedbackPayloadType {
   process_id: string;
+}
+
+export interface OpenFeedbackResponseType {
+  conversations: FeedbackItemType[];
+  total_pages: number;
+  count: number;
 }

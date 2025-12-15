@@ -26,7 +26,9 @@ export const API_ENDPOINTS = {
   // feedback
   FEEDBACKS_GET: `feedbacks`,
   FEEDBACKS_ARCHIVE_POST: `feedbacks/archive`,
+  FEEDBACKS_OPEN_GET: `v2/conversations/open/{{processId}}`,
   FEEDBACKS_DELETE_POST: `feedbacks/delete`,
+  FEEDBACKS_CONVERSATION_DELETE: `conversations/{{conversationId}}/{{resourceType}}/{{resourceId}}`,
   FEEDBACKS_UN_ARCHIVE_POST: `feedbacks/unarchive`,
   FEEDBACKS_APPLY_POST: `feedbacks/apply`,
   FEEDBACKS_STOP_PROCESSING_POST: `feedbacks/stop-processing`,

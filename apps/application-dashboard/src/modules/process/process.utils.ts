@@ -1,9 +1,12 @@
 import { MutableRefObject } from 'react';
+import { LocationType } from '@zamp-platform/chat';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
+import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import { formatArrayValue } from 'modules/data/data.utils';
 import { ARTIFACT_ICON_MAPPING, N_A_VALUE } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
@@ -130,6 +133,10 @@ export const formatRowValue = (value: unknown): string => {
     return formatArrayValue(value);
   }
 
+  if (typeof value === 'object' && value !== null) {
+    return JSON.stringify(value);
+  }
+
   // For non-array values, convert to string
   return value.toString();
 };
@@ -159,4 +166,67 @@ export const base64Encode = (str: string) => {
   bytes.forEach((b) => (binary += String.fromCharCode(b)));
 
   return btoa(binary);
+};
+
+/**
+ * Extracts chatbot dataset field navigation params from URL search params
+ * @param {ReadonlyURLSearchParams | null} searchParams - The URL search params
+ * @returns {Object | null} Object containing chatbot navigation data or null if not valid
+ */
+export const getChatbotDatasetFieldParams = (
+  searchParams: ReadonlyURLSearchParams | null,
+): {
+  datasetId: string;
+  rowId: string;
+  fieldId: string;
+} | null => {
+  if (!searchParams) return null;
+
+  const chatbotType = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE);
+  const chatbotDatasetId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ID);
+  const chatbotRowId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ROW_ID);
+  const chatbotFieldId = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_FIELD_ID);
+
+  if (chatbotType === LocationType.DATASET_FIELD && chatbotDatasetId && chatbotRowId && chatbotFieldId) {
+    return {
+      datasetId: chatbotDatasetId,
+      rowId: chatbotRowId,
+      fieldId: chatbotFieldId,
+    };
+  }
+
+  return null;
+};
+
+/**
+ * Checks if chatbot params indicate navigation to a specific dataset tab
+ * @param {ReadonlyURLSearchParams | null} searchParams - The URL search params
+ * @returns {string | null} The dataset ID to navigate to, or null if not specified
+ */
+export const getChatbotDatasetTabId = (searchParams: ReadonlyURLSearchParams | null): string | null => {
+  if (!searchParams) return null;
+
+  const chatbotType = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE);
+  const datasetIdFromUrl = searchParams.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ID);
+
+  if (chatbotType === LocationType.DATASET_FIELD && datasetIdFromUrl) {
+    return datasetIdFromUrl;
+  }
+
+  return null;
+};
+
+/**
+ * Checks if chatbot dataset field navigation should be performed
+ * @param {ReadonlyURLSearchParams | null} searchParams - The URL search params
+ * @param {string} currentDatasetId - The current dataset ID
+ * @returns {boolean} True if navigation should be performed
+ */
+export const shouldPerformChatbotDatasetNavigation = (
+  searchParams: ReadonlyURLSearchParams | null,
+  currentDatasetId: string,
+): boolean => {
+  const params = getChatbotDatasetFieldParams(searchParams);
+
+  return params !== null && params.datasetId === currentDatasetId;
 };

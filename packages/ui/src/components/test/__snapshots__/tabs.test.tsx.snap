@@ -14,13 +14,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
     tabindex="0"
   >
     <button
-      aria-controls="radix-«r9»-content-tab1"
+      aria-controls="radix-_r_9_-content-tab1"
       aria-selected="true"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
-      id="radix-«r9»-trigger-tab1"
+      id="radix-_r_9_-trigger-tab1"
       role="tab"
       tabindex="-1"
       type="button"
@@ -28,13 +28,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
       Tab 1
     </button>
     <button
-      aria-controls="radix-«r9»-content-tab2"
+      aria-controls="radix-_r_9_-content-tab2"
       aria-selected="false"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
-      id="radix-«r9»-trigger-tab2"
+      id="radix-_r_9_-trigger-tab2"
       role="tab"
       tabindex="-1"
       type="button"
@@ -43,11 +43,11 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
     </button>
   </div>
   <div
-    aria-labelledby="radix-«r9»-trigger-tab1"
+    aria-labelledby="radix-_r_9_-trigger-tab1"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="active"
-    id="radix-«r9»-content-tab1"
+    id="radix-_r_9_-content-tab1"
     role="tabpanel"
     style="animation-duration: 0s;"
     tabindex="0"
@@ -55,12 +55,12 @@ exports[`Tabs Component - Functional Tests matches snapshot for basic tabs 1`] =
     Content 1
   </div>
   <div
-    aria-labelledby="radix-«r9»-trigger-tab2"
+    aria-labelledby="radix-_r_9_-trigger-tab2"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="inactive"
     hidden=""
-    id="radix-«r9»-content-tab2"
+    id="radix-_r_9_-content-tab2"
     role="tabpanel"
     tabindex="0"
   />
@@ -82,13 +82,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with custom
     tabindex="0"
   >
     <button
-      aria-controls="radix-«rc»-content-tab1"
+      aria-controls="radix-_r_c_-content-tab1"
       aria-selected="true"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border custom-trigger"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
-      id="radix-«rc»-trigger-tab1"
+      id="radix-_r_c_-trigger-tab1"
       role="tab"
       tabindex="-1"
       type="button"
@@ -97,11 +97,11 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with custom
     </button>
   </div>
   <div
-    aria-labelledby="radix-«rc»-trigger-tab1"
+    aria-labelledby="radix-_r_c_-trigger-tab1"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden custom-content"
     data-orientation="horizontal"
     data-state="active"
-    id="radix-«rc»-content-tab1"
+    id="radix-_r_c_-content-tab1"
     role="tabpanel"
     style="animation-duration: 0s;"
     tabindex="0"
@@ -125,13 +125,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     tabindex="0"
   >
     <button
-      aria-controls="radix-«re»-content-tab1"
+      aria-controls="radix-_r_e_-content-tab1"
       aria-selected="true"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="active"
-      id="radix-«re»-trigger-tab1"
+      id="radix-_r_e_-trigger-tab1"
       role="tab"
       tabindex="-1"
       type="button"
@@ -139,13 +139,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
       First
     </button>
     <button
-      aria-controls="radix-«re»-content-tab2"
+      aria-controls="radix-_r_e_-content-tab2"
       aria-selected="false"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
-      id="radix-«re»-trigger-tab2"
+      id="radix-_r_e_-trigger-tab2"
       role="tab"
       tabindex="-1"
       type="button"
@@ -153,13 +153,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
       Second
     </button>
     <button
-      aria-controls="radix-«re»-content-tab3"
+      aria-controls="radix-_r_e_-content-tab3"
       aria-selected="false"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
-      id="radix-«re»-trigger-tab3"
+      id="radix-_r_e_-trigger-tab3"
       role="tab"
       tabindex="-1"
       type="button"
@@ -167,13 +167,13 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
       Third
     </button>
     <button
-      aria-controls="radix-«re»-content-tab4"
+      aria-controls="radix-_r_e_-content-tab4"
       aria-selected="false"
       class="ring-offset-background focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-GRAY_400 inline-flex h-6 cursor-pointer items-center justify-center rounded px-3 py-1 text-sm font-medium whitespace-nowrap transition-all hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border"
       data-orientation="horizontal"
       data-radix-collection-item=""
       data-state="inactive"
-      id="radix-«re»-trigger-tab4"
+      id="radix-_r_e_-trigger-tab4"
       role="tab"
       tabindex="-1"
       type="button"
@@ -182,11 +182,11 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     </button>
   </div>
   <div
-    aria-labelledby="radix-«re»-trigger-tab1"
+    aria-labelledby="radix-_r_e_-trigger-tab1"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="active"
-    id="radix-«re»-content-tab1"
+    id="radix-_r_e_-content-tab1"
     role="tabpanel"
     style="animation-duration: 0s;"
     tabindex="0"
@@ -194,32 +194,32 @@ exports[`Tabs Component - Functional Tests matches snapshot for tabs with multip
     First Content
   </div>
   <div
-    aria-labelledby="radix-«re»-trigger-tab2"
+    aria-labelledby="radix-_r_e_-trigger-tab2"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="inactive"
     hidden=""
-    id="radix-«re»-content-tab2"
+    id="radix-_r_e_-content-tab2"
     role="tabpanel"
     tabindex="0"
   />
   <div
-    aria-labelledby="radix-«re»-trigger-tab3"
+    aria-labelledby="radix-_r_e_-trigger-tab3"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="inactive"
     hidden=""
-    id="radix-«re»-content-tab3"
+    id="radix-_r_e_-content-tab3"
     role="tabpanel"
     tabindex="0"
   />
   <div
-    aria-labelledby="radix-«re»-trigger-tab4"
+    aria-labelledby="radix-_r_e_-trigger-tab4"
     class="ring-offset-background focus-visible:ring-ring mt-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     data-orientation="horizontal"
     data-state="inactive"
     hidden=""
-    id="radix-«re»-content-tab4"
+    id="radix-_r_e_-content-tab4"
     role="tabpanel"
     tabindex="0"
   />

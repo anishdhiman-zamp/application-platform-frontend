@@ -2,7 +2,7 @@
 
 exports[`Combobox Component - Snapshot matches snapshot for open state with options 1`] = `
 <button
-  aria-controls="radix-«r2b»"
+  aria-controls="radix-_r_2b_"
   aria-expanded="true"
   aria-haspopup="dialog"
   class=""

@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery, useLazyGetArtifactsByArtifactIdQuery } from '@/apis/processes';
 import { toast } from '@/components/common/toast/Toast';
 import { useAppDispatch } from '@/hooks/toolkit';
+import { CHATBOT_LOCATION_PARAMS } from '@/modules/chatbot/constants';
 import Logs from '@/modules/process/activity-logs/ActivityLogs';
 import { useActivitySSE } from '@/modules/process/activity-logs/hooks/useActivitySSE';
 import Summary from '@/modules/process/activity-summary/SummarySection';
@@ -62,8 +63,8 @@ const Activity = () => {
 
   // Handle chatbot URL params to auto-open artifacts
   useEffect(() => {
-    const chatbotType = searchParams?.get('chatbot_annotation_location_type');
-    const datasetId = searchParams?.get('chatbot_dataset_id');
+    const chatbotType = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE);
+    const datasetId = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_DATASET_ID);
 
     // Only auto-open for dataset field chatbots
     if (chatbotType === LocationType.DATASET_FIELD && datasetId && allArtifacts?.artifacts) {
