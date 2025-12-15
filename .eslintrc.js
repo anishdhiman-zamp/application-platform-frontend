@@ -20,7 +20,7 @@ module.exports = {
     'jsx-a11y/role-supports-aria-props': 'off',
     '@next/next/no-img-element': 'off',
   },
-  ignorePatterns: ['packages/config/**'],
+  ignorePatterns: ['packages/config/**', 'packages/form-builder/**'],
   settings: {
     next: {
       rootDir: ['apps/*/', 'packages/*/'],
