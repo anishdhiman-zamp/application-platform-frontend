@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import {
+  API_ENDPOINTS as CHAT_API_ENDPOINTS,
   ButtonBlockType,
   ConnectedChatInput,
   DisplayLayerActionType,
@@ -13,6 +14,10 @@ import {
   SpeechToTextProvider,
   useChat,
   useChatAdapters,
+  useGetSignedUrlMutation,
+  useLazyGetSpeechToTextAccessTokenQuery,
+  usePostFormsSignedUploadAckMutation,
+  usePostInteractionDisableMutation,
 } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText, toast } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
@@ -25,11 +30,6 @@ import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot
 import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useParams, useSearchParams } from 'next/navigation';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
-import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
-import { useGetSignedUrlMutation } from '@/apis/fileUpload';
-import { usePostInteractionDisableMutation } from '@/apis/interaction';
-import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 import Avatar from '@/components/common/avatar';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { COLORS } from '@/constants/colors';
@@ -197,7 +197,7 @@ const Chatbot = ({
     getOrganizationId: () => organizationId,
     getSignedUrlMutation: getSignedUrl,
     postUploadAckMutation: postFormsSignedUploadAck,
-    uploadPath: API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
+    uploadPath: CHAT_API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
     getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
     disableInteractionMutation: postInteractionDisable,
     getElevenLabsToken,
