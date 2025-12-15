@@ -1,13 +1,31 @@
-import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
-import { SOCKET_STATES } from '@deepgram/sdk';
-import { AttachmentsList, LocationData, ScopeType, useChat } from '@zamp-platform/chat';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { captureException } from '@sentry/nextjs';
+import {
+  AttachmentsList,
+  AudioVisualizer,
+  ChatInputAdapter,
+  LocationData,
+  MicrophoneState,
+  ResourceType,
+  ScopeType,
+  SOCKET_STATES,
+  SpeechToTextProvider,
+  useChat,
+  useChatInput,
+  useTranscription,
+} from '@zamp-platform/chat';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
-import AudioVisualizer from 'modules/chatbot/AudioVisualiser';
-import useChatInput from 'modules/chatbot/useChatInput';
-import { MicrophoneState } from '@/hooks/useMicrophoneRecorder';
-import { useTranscription } from '@/hooks/useTranscription';
+import { handleFileUploadsWithMutation, wrapPostFormsSignedUploadAck } from 'modules/chatbot/utils';
+import { useParams } from 'next/navigation';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
+import { useGetSignedUrlMutation } from '@/apis/fileUpload';
+import { usePostInteractionDisableMutation } from '@/apis/interaction';
+import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
+import { RootState } from '@/store';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 interface ChatInputProps {
@@ -34,6 +52,51 @@ export const ChatInput: FC<ChatInputProps> = ({
   setExternalInputValue,
   autoFocus = false,
 }) => {
+  const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
+  const params = useParams();
+  const processId = params?.processId as string;
+  const activityRunId = params?.activityId as string;
+
+  const [getSignedUrl] = useGetSignedUrlMutation();
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
+  const [postInteractionDisable] = usePostInteractionDisableMutation();
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
+
+  // Create adapter for useChatInput
+  const chatInputAdapter: ChatInputAdapter = useMemo(
+    () => ({
+      getCurrentUserName: () => currentUserName || '',
+      getProcessId: () => processId,
+      getActivityRunId: () => activityRunId,
+      uploadFiles: async (files: FileList) => {
+        return handleFileUploadsWithMutation(
+          files,
+          getSignedUrl,
+          API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
+          wrapPostFormsSignedUploadAck(postFormsSignedUploadAck),
+        );
+      },
+      disableInteraction: async (interactionParams) => {
+        await postInteractionDisable({
+          conversationId: interactionParams.conversationId,
+          messageId: interactionParams.messageId,
+          params: {
+            resource_id: interactionParams.resourceId,
+            resource_type: interactionParams.resourceType as ResourceType,
+          },
+        });
+      },
+      onError: (error) => {
+        captureException(error);
+        toast.error('An error occurred');
+      },
+      onSuccess: (message) => {
+        toast.success(message);
+      },
+    }),
+    [currentUserName, processId, activityRunId, getSignedUrl, postFormsSignedUploadAck, postInteractionDisable],
+  );
+
   const {
     value,
     setValue,
@@ -53,7 +116,15 @@ export const ChatInput: FC<ChatInputProps> = ({
     scope,
     externalInputValue,
     setExternalInputValue,
+    adapter: chatInputAdapter,
   });
+
+  // Create adapter for useTranscription
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
 
   const {
     transcript,
@@ -64,7 +135,15 @@ export const ChatInput: FC<ChatInputProps> = ({
     connectionState,
     microphone,
     isCommitting,
-  } = useTranscription();
+  } = useTranscription({
+    provider: SpeechToTextProvider.ELEVENLABS,
+    adapter: {
+      getElevenLabsToken,
+      onError: (error) => {
+        captureException(error);
+      },
+    },
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
