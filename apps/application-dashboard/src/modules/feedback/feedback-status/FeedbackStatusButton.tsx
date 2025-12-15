@@ -3,12 +3,9 @@ import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import { ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
 import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
-import { type BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
 import { useFeedbacksProvider } from 'modules/feedback/feedback-status/useFeedbacks';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useGetFeedbacksQuery } from '@/apis/feedback';
-import { useEventBus } from '@/app/_providers/sse-provider';
 import { FEEDBACK_BADGE_CONFIG, FEEDBACK_STATUS } from '@/modules/feedback/feedback.constants';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
@@ -28,9 +25,6 @@ const FeedbackStatusButtonContent: FC = () => {
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { isLoading, processId, hasFeedback, openFeedbackItems = [], queuedFeedbackItems = [] } = feedbackState;
 
-  const { sseEventBus } = useEventBus();
-
-  const { refetch: refetchFeedbacks } = useGetFeedbacksQuery({ process_id: processId }, { skip: !processId });
   const [getConversationById] = useLazyGetConversationByIdQuery();
 
   const handlePopoverOpenChange = (open: boolean) => {
@@ -79,14 +73,6 @@ const FeedbackStatusButtonContent: FC = () => {
       setActiveTab(defaultTab);
     }
   }, [defaultTab]);
-
-  useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.FEEDBACK, (data: BaseEventPayload) => {
-      if (data?.source_id === processId) refetchFeedbacks();
-    });
-
-    return () => sub.unsubscribe();
-  }, [sseEventBus, refetchFeedbacks, processId]);
 
   useEffect(() => {
     prefetchAllOpenAndQueuedFeedbackConversations();

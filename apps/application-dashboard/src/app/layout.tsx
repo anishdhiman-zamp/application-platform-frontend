@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpeedInsights />
         <NetworkStatus />
         <Toaster />
-        <Suspense>{children}</Suspense>
+        {children}
       </body>
     </html>
   );

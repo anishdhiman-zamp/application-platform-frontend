@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { convertOpenFeedbackToFeedbackItem } from '@/modules/chatbot/utils';
 import { FEEDBACK_STATUS } from '@/modules/feedback/feedback.constants';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -34,6 +35,8 @@ interface FeedbacksState {
   processingFeedbackItems: FeedbackItemType[];
   successFeedbackItems: FeedbackItemType[];
   feedbackItems: FeedbackItemType[];
+  mergedFeedbackItems: FeedbackItemType[];
+  openFeedbackConversations: FeedbackItemType[];
   isLoading: boolean;
   processId: string;
   hasFeedback: boolean;
@@ -45,6 +48,8 @@ const initialState: FeedbacksState = {
   processingFeedbackItems: [],
   successFeedbackItems: [],
   feedbackItems: [],
+  mergedFeedbackItems: [],
+  openFeedbackConversations: [],
   isLoading: false,
   processId: '',
   hasFeedback: false,
@@ -70,32 +75,83 @@ export const feedbacksSlice = createSlice({
     setProcessId: (state, action: PayloadAction<string>) => {
       state.processId = action.payload;
     },
-    removeFeedbackItem: (state, action: PayloadAction<{ id: string; status: FEEDBACK_STATUS }>) => {
-      const { id, status } = action.payload;
+    removeFeedbackItem: (state, action: PayloadAction<{ status: FEEDBACK_STATUS; conversation_id: string }>) => {
+      const { status, conversation_id } = action.payload;
 
-      state.feedbackItems = state.feedbackItems.filter((item) => item.id !== id);
+      state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== conversation_id);
 
       switch (status) {
         case FEEDBACK_STATUS.OPEN:
-          state.openFeedbackItems = state.openFeedbackItems.filter((i) => i.id !== id);
+          state.openFeedbackItems = state.openFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
         case FEEDBACK_STATUS.QUEUED:
-          state.queuedFeedbackItems = state.queuedFeedbackItems.filter((i) => i.id !== id);
+          state.queuedFeedbackItems = state.queuedFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
         case FEEDBACK_STATUS.PROCESSING:
-          state.processingFeedbackItems = state.processingFeedbackItems.filter((i) => i.id !== id);
+          state.processingFeedbackItems = state.processingFeedbackItems.filter(
+            (i) => i.conversation_id !== conversation_id,
+          );
           break;
         case FEEDBACK_STATUS.APPLIED:
-          state.successFeedbackItems = state.successFeedbackItems.filter((i) => i.id !== id);
+          state.successFeedbackItems = state.successFeedbackItems.filter((i) => i.conversation_id !== conversation_id);
           break;
       }
 
       // Recalculate hasFeedback
       state.hasFeedback = state.feedbackItems.length > 0;
     },
+    setMergedFeedbackItems: (state, action: PayloadAction<FeedbackItemType[]>) => {
+      state.mergedFeedbackItems = action.payload;
+    },
+    setOpenFeedbackConversations: (state, action: PayloadAction<FeedbackItemType[]>) => {
+      state.openFeedbackConversations = action.payload;
+    },
+    removeOpenFeedbackConversation: (state, action: PayloadAction<string>) => {
+      state.openFeedbackConversations = state.openFeedbackConversations.filter((item) => item.id !== action.payload);
+      state.mergedFeedbackItems = state.mergedFeedbackItems.filter((item) => item.conversation_id !== action.payload);
+    },
+    addFeedbackItem: (state, action: PayloadAction<FeedbackItemType>) => {
+      const feedbackFromOpenFeedback = state.mergedFeedbackItems.find(
+        (item) => item.id === action.payload.conversation_id,
+      );
+
+      if (feedbackFromOpenFeedback) {
+        state.mergedFeedbackItems = state.mergedFeedbackItems.map((item) =>
+          item.id === action.payload.conversation_id
+            ? { ...item, status: FEEDBACK_STATUS.OPEN, feedback_id: action.payload.id }
+            : item,
+        );
+        state.openFeedbackItems = [action.payload, ...state.openFeedbackItems];
+        state.openFeedbackConversations = state.openFeedbackConversations.filter(
+          (item) => item.id !== action.payload.conversation_id,
+        );
+      } else {
+        state.mergedFeedbackItems = [...state.mergedFeedbackItems, action.payload];
+        state.feedbackItems = [action.payload, ...state.feedbackItems];
+        state.openFeedbackItems = [action.payload, ...state.openFeedbackItems];
+      }
+    },
+    addOpenFeedbackConversation: (state, action: PayloadAction<FeedbackItemType>) => {
+      const exists = state.openFeedbackConversations.some((item) => item.id === action.payload.id);
+
+      if (!exists) {
+        state.openFeedbackConversations = [action.payload, ...state.openFeedbackConversations];
+        state.mergedFeedbackItems = [...state.mergedFeedbackItems, convertOpenFeedbackToFeedbackItem(action.payload)];
+      }
+    },
   },
 });
 
-export const { setFeedbackItems, setLoading, setProcessId, removeFeedbackItem } = feedbacksSlice.actions;
+export const {
+  setFeedbackItems,
+  setLoading,
+  setProcessId,
+  removeFeedbackItem,
+  setMergedFeedbackItems,
+  setOpenFeedbackConversations,
+  removeOpenFeedbackConversation,
+  addOpenFeedbackConversation,
+  addFeedbackItem,
+} = feedbacksSlice.actions;
 
 export default feedbacksSlice.reducer;

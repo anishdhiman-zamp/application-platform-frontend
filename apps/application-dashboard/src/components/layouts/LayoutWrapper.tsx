@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, Suspense } from 'react';
 import { useSettingsRouteTracking } from '@/hooks/useSettingsRouteTracking';
 import { cn } from '@/utils/common';
 import SettingsSidebar from 'components/layouts/dashboard-layout/SettingsSidebar';
@@ -13,13 +13,17 @@ const LayoutWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <div className='bg-BACKGROUND_GRAY_1 relative'>
-      {!isSettingsPage && <Topbar />}
+      {!isSettingsPage && (
+        <Suspense>
+          <Topbar />
+        </Suspense>
+      )}
       <div
         className={cn('relative flex h-full w-full min-w-[768px]', {
           'h-[calc(100vh-48px)]': !isSettingsPage,
         })}
       >
-        {isSettingsPage ? <SettingsSidebar /> : <Sidebar />}
+        <Suspense>{isSettingsPage ? <SettingsSidebar /> : <Sidebar />}</Suspense>
         <LayoutChildren>{children}</LayoutChildren>
       </div>
     </div>

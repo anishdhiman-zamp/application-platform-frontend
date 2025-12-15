@@ -4,6 +4,7 @@ import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '
 import { MessageSquare, Plus } from 'lucide-react';
 import { doesUrlMatchLocation, getFeedbackItemConfig } from 'modules/chatbot/utils';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { useSearchParams } from 'next/navigation';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -24,7 +25,6 @@ const FeedbackList: FC<FeedbackListProps> = ({
   items = [],
   processId,
   onOpenChatbot,
-  disableAddMoreFeedback = false,
   hideFeedbackCount = false,
   annotationLocation,
   onCloseFeedbackList,
@@ -71,17 +71,18 @@ const FeedbackList: FC<FeedbackListProps> = ({
         <PopoverContent className='shadow-chatbot-shadow w-[380px] space-y-1.5 rounded-xl border-none bg-transparent p-0 backdrop-blur-lg'>
           <div className='rounded-xl border bg-white px-4 pt-3 pb-4'>
             <div className='f-12-450 flex items-center gap-1 text-gray-700'>
-              <span>Feedback on this field</span>
+              <span>Chats on this field</span>
               <span>{items.length}</span>
             </div>
             <div className='mt-2 mb-3 space-y-1.5'>
               {items?.map((item) => (
                 <FeedbackListCard
-                  key={item?.id}
+                  key={item?.conversation_id}
                   feedback={item}
                   initiatedBy={item?.initiated_by}
                   processId={processId}
                   withoutLinkWrapper
+                  isDraftFeedback={item?.status === FEEDBACK_STATUS.DRAFT}
                   {...getFeedbackItemConfig(item as FeedbackItemType, onOpenChatbot)}
                 />
               ))}
@@ -91,9 +92,8 @@ const FeedbackList: FC<FeedbackListProps> = ({
               size='xsmall'
               className='flex items-center gap-1.5 [&_svg]:size-3'
               onClick={() => onOpenChatbot()}
-              disabled={disableAddMoreFeedback}
             >
-              <Plus /> <span>Add more feedback</span>
+              <Plus /> <span>New chat</span>
             </Button>
           </div>
         </PopoverContent>

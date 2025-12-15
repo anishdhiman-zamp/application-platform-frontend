@@ -3,25 +3,27 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@z
 import { ChevronDown } from 'lucide-react';
 import FeedbackCard from 'modules/feedback/components/FeedbackCard';
 import FeedbackDeleteDialog from 'modules/feedback/components/FeedbackDeleteDialog';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import Link from 'next/link';
 import { createChatbotUrl } from '@/modules/chatbot/utils';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface FeedbackListCardProps {
   feedback: FeedbackItemType;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   initiatedBy: string;
   timePrefix?: string;
   processId?: string;
   onCheck?: () => void;
   allowDelete?: boolean;
   withoutLinkWrapper?: boolean;
+  isDraftFeedback?: boolean;
 }
 
 const selectors = ['#delete-feedback', '#check-feedback'];
 
 const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
-  const { feedback, processId, allowDelete, withoutLinkWrapper = false } = props;
+  const { feedback, processId, allowDelete, withoutLinkWrapper = false, isDraftFeedback = false } = props;
   const [confirmItem, setConfirmItem] = useState<boolean>(false);
 
   const handleFeedbackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -64,7 +66,7 @@ const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
     }
 
     return (
-      <Link href={createChatbotUrl(feedback)} onClick={handleFeedbackClick} prefetch>
+      <Link href={createChatbotUrl(feedback)} onClick={handleFeedbackClick} prefetch={false}>
         {feedbackCard}
       </Link>
     );
@@ -79,6 +81,7 @@ const FeedbackListCard: FC<FeedbackListCardProps> = (props) => {
           onOpenChange={(open) => !open && setConfirmItem(false)}
           feedback={feedback}
           processId={processId}
+          isDraftFeedback={feedback?.status === FEEDBACK_STATUS.DRAFT || isDraftFeedback}
         />
       )}
     </>
