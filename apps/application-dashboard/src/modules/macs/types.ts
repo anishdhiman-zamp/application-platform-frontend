@@ -26,9 +26,6 @@ export type MacsContextType = {
   // Active tab
   activeTabId: string | null;
 
-  // Full page section (when section is opened full-screen, not as tab)
-  fullPageSection: SectionType | null;
-
   // Computed - all tabs (sections + additional)
   allTabs: Tab[];
 
@@ -42,7 +39,6 @@ export type MacsContextType = {
   setActiveTab: (tabId: string | null) => void;
   closeSection: (section: SectionType) => void;
   resetToDefault: () => void;
-  setFullPageSection: (section: SectionType | null) => void;
 
   // Chat state
   chatTitle: string;

@@ -14,7 +14,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [openSections, setOpenSections] = useState<SectionType[]>([]);
   const [additionalTabs, setAdditionalTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [fullPageSection, setFullPageSectionState] = useState<SectionType | null>(null);
   const [chatTitle, setChatTitle] = useState<string>('');
   const [chatPanelSize, setChatPanelSize] = useState<number>(40);
 
@@ -111,11 +110,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setOpenSections([]);
     setAdditionalTabs([]);
     setActiveTabId(null);
-    setFullPageSectionState(null);
-  }, []);
-
-  const setFullPageSection = useCallback((section: SectionType | null) => {
-    setFullPageSectionState(section);
   }, []);
 
   // Convert open sections to Tab format and combine with additional tabs
@@ -137,7 +131,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       openSections,
       additionalTabs,
       activeTabId,
-      fullPageSection,
       allTabs,
       hasTabs,
       toggleSection,
@@ -146,7 +139,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       setActiveTab,
       closeSection,
       resetToDefault,
-      setFullPageSection,
       chatTitle,
       setChatTitle,
       chatPanelSize,
@@ -156,7 +148,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       openSections,
       additionalTabs,
       activeTabId,
-      fullPageSection,
       allTabs,
       hasTabs,
       toggleSection,
@@ -165,7 +156,6 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       setActiveTab,
       closeSection,
       resetToDefault,
-      setFullPageSection,
       chatTitle,
       setChatTitle,
       chatPanelSize,
