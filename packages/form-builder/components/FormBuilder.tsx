@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import React, { useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { useFormAnimation } from '../hooks/useFormAnimation';
+import { DEFAULT_NESTED_ANIMATION, DEFAULT_SECTION_ANIMATION, DEFAULT_STAGGER_CHILDREN } from '../constants';
 import { FormSchema } from '../types';
 import { createCustomResolver } from '../utils/validation';
 import { FormSection } from './FormSection';
@@ -46,19 +46,17 @@ export const FormBuilder = ({
     },
   }));
 
-  const { sectionAnimation, nestedAnimation, getStaggerDelay } = useFormAnimation(animated);
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className='main-form flex flex-col gap-5 pb-5'>
         {schema.sections.map((section, index) => (
           <motion.div
             key={section.id || index}
-            initial={sectionAnimation.initial}
-            animate={sectionAnimation.animate}
+            initial={animated ? DEFAULT_SECTION_ANIMATION.initial : undefined}
+            animate={animated ? DEFAULT_SECTION_ANIMATION.animate : undefined}
             transition={{
-              ...sectionAnimation.transition,
-              delay: getStaggerDelay(index),
+              ...DEFAULT_SECTION_ANIMATION.transition,
+              delay: animated ? index * DEFAULT_STAGGER_CHILDREN : 0,
             }}
             className='form-section flex flex-col'
           >
@@ -66,9 +64,9 @@ export const FormBuilder = ({
             {section.sections && (
               <motion.div
                 className='nested-sections flex flex-col gap-5'
-                initial={nestedAnimation.initial}
-                animate={nestedAnimation.animate}
-                transition={nestedAnimation.transition}
+                initial={animated ? DEFAULT_NESTED_ANIMATION.initial : undefined}
+                animate={animated ? DEFAULT_NESTED_ANIMATION.animate : undefined}
+                transition={DEFAULT_NESTED_ANIMATION.transition}
               >
                 {section.sections.map((nestedSection) => (
                   <FormSection
