@@ -6,16 +6,41 @@ import ChatTopbar from '@/modules/macs/components/ChatTopbar';
 import MacsChat from '@/modules/macs/components/MacsChat';
 import MacsTopbar from '@/modules/macs/components/MacsTopbar';
 import SectionPanel from '@/modules/macs/components/SectionPanel';
+import CapabilitiesSection from '@/modules/macs/components/sections/CapabilitiesSection';
+import ComponentsSection from '@/modules/macs/components/sections/ComponentsSection';
 import { MacsProvider, useMacsContext } from '@/modules/macs/context/MacsContext';
 
+const FullPageSectionContent = ({ section }: { section: 'capabilities' | 'components' }) => {
+  switch (section) {
+    case 'capabilities':
+      return <CapabilitiesSection />;
+    case 'components':
+      return <ComponentsSection />;
+    default:
+      return null;
+  }
+};
+
 const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
-  const { hasTabs, chatPanelSize, setChatPanelSize } = useMacsContext();
+  const { hasTabs, chatPanelSize, setChatPanelSize, fullPageSection } = useMacsContext();
 
   const handlePanelResize = (sizes: number[]) => {
     if (sizes[0] !== undefined) {
       setChatPanelSize(sizes[0]);
     }
   };
+
+  if (fullPageSection) {
+    return (
+      <div className='flex h-full w-full flex-col'>
+        <MacsTopbar className='w-full' />
+        <div className='flex-1'>
+          <FullPageSectionContent section={fullPageSection} />
+        </div>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className='flex h-full w-full flex-col'>

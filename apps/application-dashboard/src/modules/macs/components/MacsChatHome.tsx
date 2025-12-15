@@ -1,7 +1,7 @@
 'use client';
 
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { useAppSelector } from '@/hooks/toolkit';
-import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 
 const getGreeting = (): string => {
   const hour = new Date().getHours();
@@ -20,8 +20,8 @@ const MacsChatHome = () => {
   return (
     <div className='flex flex-col items-center justify-center'>
       <div className='flex flex-col items-center gap-4'>
-        <PaceIcon height={40} width={40} />
-        <h1 className='f-20-550 text-gray-900'>
+        <NewPaceIcons width={40} height={40} />
+        <h1 className='f-16-550 text-GARY_1000'>
           {greeting}, {userName}!
         </h1>
       </div>

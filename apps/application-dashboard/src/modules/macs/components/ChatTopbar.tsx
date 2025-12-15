@@ -44,19 +44,19 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
           variant='ghost'
           size='icon'
           className='h-7 w-7 text-gray-600 hover:text-gray-900'
-          onClick={handleNewChat}
-          title='New chat'
+          onClick={handleHistory}
+          title='Chat history'
         >
-          <Plus size={16} />
+          <Clock size={16} />
         </Button>
         <Button
           variant='ghost'
           size='icon'
           className='h-7 w-7 text-gray-600 hover:text-gray-900'
-          onClick={handleHistory}
-          title='Chat history'
+          onClick={handleNewChat}
+          title='New chat'
         >
-          <Clock size={16} />
+          <Plus size={16} />
         </Button>
         {showExpandMinimize && (
           <>

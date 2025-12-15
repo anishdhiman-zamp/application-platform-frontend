@@ -15,23 +15,18 @@ const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; cl
 };
 
 const SectionIconButton = ({ section }: SectionIconButtonProps) => {
-  const { toggleSection, openSections } = useMacsContext();
+  const { setFullPageSection, fullPageSection } = useMacsContext();
   const Icon = SECTION_ICONS[section];
-  const isOpen = openSections.includes(section);
-
-  // Don't render if section is already open as a tab
-  if (isOpen) {
-    return null;
-  }
+  const isActive = fullPageSection === section;
 
   return (
     <Button
       variant='ghost'
       size='icon'
-      className='h-8 w-8 text-gray-600 hover:text-gray-900'
-      onClick={() => toggleSection(section)}
+      className={`h-8 w-8 text-gray-600 hover:text-gray-900 ${isActive ? 'bg-gray-200' : ''}`}
+      onClick={() => setFullPageSection(isActive ? null : section)}
     >
-      <Icon size={20} />
+      <Icon size={12} />
     </Button>
   );
 };

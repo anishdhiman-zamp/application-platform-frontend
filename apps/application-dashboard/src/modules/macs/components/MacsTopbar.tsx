@@ -1,6 +1,8 @@
 'use client';
 
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import AddTabMenu from '@/modules/macs/components/AddTabMenu';
 import MacsTab from '@/modules/macs/components/MacsTab';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
@@ -12,19 +14,27 @@ interface MacsTopbarProps {
 }
 
 const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
-  const { allTabs, openSections } = useMacsContext();
+  const { allTabs, openSections, resetToDefault } = useMacsContext();
 
   const showCapabilitiesIcon = !openSections.includes('capabilities');
   const showComponentsIcon = !openSections.includes('components');
 
   return (
-    <div className={cn('flex h-12 items-center gap-2 border-b border-gray-400 px-4', className)} style={style}>
+    <div
+      className={cn('bg-BG_GRAY_1 border-GRAY_400 flex h-12 items-center gap-x-1.5 border-b px-3', className)}
+      style={style}
+    >
       {/* Section icon buttons - only show if not open as tabs */}
+      <Button
+        variant='ghost'
+        size='icon'
+        className='text-GRAY_700 h-8 w-8 px-2 py-1 hover:text-gray-900'
+        onClick={resetToDefault}
+      >
+        <NewPaceIcons width={16} height={16} />
+      </Button>
       {showCapabilitiesIcon && <SectionIconButton section='capabilities' />}
       {showComponentsIcon && <SectionIconButton section='components' />}
-
-      {/* Divider if we have tabs */}
-      {allTabs.length > 0 && <div className='h-5 w-px bg-gray-400' />}
 
       {/* Tab bar */}
       <div className='flex items-center gap-2 overflow-x-auto'>
