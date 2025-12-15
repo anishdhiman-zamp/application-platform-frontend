@@ -1,17 +1,6 @@
 import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
 
-export enum InlineFieldDisplayMode {
-  REPLACE = 'replace',
-  BELOW = 'below',
-  AFTER = 'after',
-}
-
-export enum InlineFieldShowWhen {
-  SELECTED = 'selected',
-  ALWAYS = 'always',
-}
-
 export interface InlineFieldConfig {
   field: string;
 }
