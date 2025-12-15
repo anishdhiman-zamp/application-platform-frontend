@@ -38,12 +38,15 @@ export interface DataSource {
   endpoint: string;
   method: 'GET' | 'POST';
   params?: null | Record<string, string>;
-  body?: null | Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body?: null | Record<string, any>;
   triggers?: Array<{
     field: string;
   }>;
-  valueFormatter?: (value: unknown) => SelectOption[];
-  useCustomHook?: (...args: unknown[]) => unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  valueFormatter?: (value: any) => SelectOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useCustomHook?: (...args: any[]) => any;
 }
 
 export interface Condition {
@@ -96,7 +99,8 @@ export interface FormField {
   type: FieldType;
   label?: string;
   placeholder?: string;
-  default_value?: string | number | boolean | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default_value?: any;
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
@@ -129,7 +133,8 @@ export interface FormSchema {
   fields: Record<string, FormField>;
 }
 
-export type FormValues = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type FormValues = Record<string, any>;
 
 // Zod schemas for runtime validation
 export const validationConfigSchema = z.object({
