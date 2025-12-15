@@ -1,4 +1,5 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+
 import { FieldType, FormSchema } from './types';
 
 export const schema: FormSchema = {
@@ -225,20 +226,20 @@ export const schema: FormSchema = {
       sections: [
         {
           id: 'transfer_preferences',
-          // title: 'Transfer Preferences',
+          title: 'Transfer Preferences',
           layout: [
-            // [
-            //   {
-            //     col_span: 8,
-            //     field: 'transfer_frequency',
-            //   },
-            // ],
-            // [
-            //   {
-            //     col_span: 8,
-            //     field: 'notification_preference',
-            //   },
-            // ],
+            [
+              {
+                col_span: 8,
+                field: 'transfer_frequency',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'notification_preference',
+              },
+            ],
             [
               {
                 col_span: 8,
