@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import {
   ButtonBlockType,
-  ChatInputAdapter,
   ConnectedChatInput,
   DisplayLayerActionType,
   LocationData,
@@ -13,6 +12,7 @@ import {
   SenderType,
   SpeechToTextProvider,
   useChat,
+  useChatAdapters,
 } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText, toast } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
@@ -21,12 +21,8 @@ import ChatHeader from 'modules/chatbot/ChatHeader';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
-import {
-  doesUrlMatchLocation,
-  generateChatbotInstanceId,
-  handleFileUploadsWithMutation,
-  wrapPostFormsSignedUploadAck,
-} from 'modules/chatbot/utils';
+import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
+import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useParams, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
@@ -77,6 +73,7 @@ const Chatbot = ({
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
+  const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
@@ -185,57 +182,33 @@ const Chatbot = ({
     }
   };
 
-  // Create adapter for useChatInput
-  const chatInputAdapter: ChatInputAdapter = useMemo(
-    () => ({
-      getCurrentUserName: () => currentUserName || '',
-      getProcessId: () => processId,
-      getActivityRunId: () => activityRunId,
-      uploadFiles: async (files: FileList) => {
-        return handleFileUploadsWithMutation(
-          files,
-          getSignedUrl,
-          API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
-          wrapPostFormsSignedUploadAck(postFormsSignedUploadAck),
-        );
-      },
-      disableInteraction: async (interactionParams) => {
-        await postInteractionDisable({
-          conversationId: interactionParams.conversationId,
-          messageId: interactionParams.messageId,
-          params: {
-            resource_id: interactionParams.resourceId,
-            resource_type: interactionParams.resourceType as ResourceType,
-          },
-        });
-      },
-      onError: (error) => {
-        captureException(error);
-        toast.error('An error occurred');
-      },
-      onSuccess: (message) => {
-        toast.success(message);
-      },
-    }),
-    [currentUserName, processId, activityRunId, getSignedUrl, postFormsSignedUploadAck, postInteractionDisable],
-  );
-
-  // Create adapter for useTranscription
+  // Get ElevenLabs token callback
   const getElevenLabsToken = useCallback(async () => {
     const result = await getSpeechToTextAccessToken({}).unwrap();
 
     return result.access_token;
   }, [getSpeechToTextAccessToken]);
 
-  const transcriptionAdapter = useMemo(
-    () => ({
-      getElevenLabsToken,
-      onError: (error: unknown) => {
-        captureException(error);
-      },
-    }),
-    [getElevenLabsToken],
-  );
+  // Create adapters using the reusable hook from packages/chat
+  const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
+    getCurrentUserName: () => currentUserName || '',
+    getProcessId: () => processId,
+    getActivityRunId: () => activityRunId,
+    getOrganizationId: () => organizationId,
+    getSignedUrlMutation: getSignedUrl,
+    postUploadAckMutation: postFormsSignedUploadAck,
+    uploadPath: API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
+    getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
+    disableInteractionMutation: postInteractionDisable,
+    getElevenLabsToken,
+    onError: (error) => {
+      captureException(error);
+      toast.error('An error occurred');
+    },
+    onSuccess: (message) => {
+      toast.success(message);
+    },
+  });
 
   const acceptedFileTypes = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 
