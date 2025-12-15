@@ -1,15 +1,17 @@
 import { Label } from '@zamp-platform/ui';
 import React from 'react';
 
-import { FormBuilderAnimationConfig, FormField as FormFieldType, FormSection as FormSectionType } from '../types';
+import { FormField as FormFieldType, FormSection as FormSectionType } from '../types';
+import { getInlineFields } from '../utils/fieldUtils';
 import { FormField } from './FormField';
+
 interface FormSectionProps {
   section: FormSectionType;
   fields: Record<string, FormFieldType>;
-  animationConfig?: FormBuilderAnimationConfig;
+  animated?: boolean;
 }
 
-export const FormSection: React.FC<FormSectionProps> = ({ section, fields, animationConfig }) => {
+export const FormSection: React.FC<FormSectionProps> = ({ section, fields, animated }) => {
   return (
     <div className='form-section flex flex-col gap-5'>
       <div className='flex flex-col gap-2'>
@@ -32,8 +34,8 @@ export const FormSection: React.FC<FormSectionProps> = ({ section, fields, anima
                       className='mb-2'
                       field={fields[field]}
                       name={field}
-                      animationConfig={animationConfig}
-                      schemaFields={fields}
+                      animated={animated}
+                      inlineFields={getInlineFields(fields[field]?.options, fields)}
                     />
                   </div>
                 ) : null,

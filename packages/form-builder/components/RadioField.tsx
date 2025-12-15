@@ -5,20 +5,20 @@ import { Controller, useFormContext } from 'react-hook-form';
 
 import { useInlineField } from '../hooks/useInlineField';
 import { FormField as FormFieldType, RadioOption } from '../types';
-import { InlineField } from './InlineField';
+import { FormField } from './FormField';
 
 interface RadioFieldProps {
   field: FormFieldType;
   name: string;
   className?: string;
-  schemaFields?: Record<string, FormFieldType>;
+  inlineFields?: Record<string, FormFieldType>;
 }
 
 export interface RadioFieldValue {
   value: string;
 }
 
-export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, schemaFields = {} }) => {
+export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, inlineFields = {} }) => {
   const { control } = useFormContext();
   const { hasInlineField, handleOptionChange } = useInlineField({
     clearOnDeselect: true,
@@ -32,7 +32,7 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, 
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         const handleChange = (newValue: string) => {
-          handleOptionChange(newValue, radioOptions, schemaFields);
+          handleOptionChange(newValue, radioOptions, inlineFields);
           onChange(newValue);
         };
 
@@ -61,8 +61,12 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, 
                         </Label>
                       )}
 
-                      {optionHasInlineField && inlineFieldConfig && (
-                        <InlineField inlineConfig={inlineFieldConfig} schemaFields={schemaFields} />
+                      {optionHasInlineField && inlineFieldConfig && inlineFields[inlineFieldConfig.field] && (
+                        <FormField
+                          field={inlineFields[inlineFieldConfig.field]}
+                          name={inlineFieldConfig.field}
+                          inlineFields={inlineFields}
+                        />
                       )}
                     </div>
                   </div>

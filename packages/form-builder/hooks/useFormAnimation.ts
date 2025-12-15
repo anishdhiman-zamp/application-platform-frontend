@@ -7,7 +7,6 @@ import {
   DEFAULT_SECTION_ANIMATION,
   DEFAULT_STAGGER_CHILDREN,
 } from '../constants';
-import { FormBuilderAnimationConfig } from '../types';
 
 export interface AnimationState {
   initial: TargetAndTransition | undefined;
@@ -17,83 +16,57 @@ export interface AnimationState {
 }
 
 interface UseFormAnimationReturn {
-  isAnimationDisabled: boolean;
   sectionAnimation: AnimationState;
   nestedAnimation: AnimationState;
   fieldAnimation: AnimationState;
   getStaggerDelay: (index: number) => number;
 }
 
-/**
- * Hook to manage FormBuilder animations based on animationConfig
- * Provides computed animation states for sections, nested sections, and fields
- */
-export const useFormAnimation = (animationConfig?: FormBuilderAnimationConfig): UseFormAnimationReturn => {
-  const isAnimationDisabled = animationConfig?.disabled ?? false;
+const DISABLED_ANIMATION: AnimationState = {
+  initial: undefined,
+  animate: undefined,
+  exit: undefined,
+  transition: { duration: 0 },
+};
 
+/**
+ * Hook to manage FormBuilder animations
+ * @param animated - Whether animations are enabled (default: true)
+ */
+export const useFormAnimation = (animated = true): UseFormAnimationReturn => {
   const sectionAnimation = useMemo((): AnimationState => {
-    if (isAnimationDisabled) {
-      return {
-        initial: undefined,
-        animate: undefined,
-        transition: { duration: 0 },
-      };
-    }
+    if (!animated) return DISABLED_ANIMATION;
     return {
-      initial: (animationConfig?.section?.initial ?? DEFAULT_SECTION_ANIMATION.initial) as TargetAndTransition,
-      animate: (animationConfig?.section?.animate ?? DEFAULT_SECTION_ANIMATION.animate) as TargetAndTransition,
-      transition: {
-        ...DEFAULT_SECTION_ANIMATION.transition,
-        ...animationConfig?.section?.transition,
-      },
+      initial: DEFAULT_SECTION_ANIMATION.initial as TargetAndTransition,
+      animate: DEFAULT_SECTION_ANIMATION.animate as TargetAndTransition,
+      transition: DEFAULT_SECTION_ANIMATION.transition,
     };
-  }, [animationConfig?.section, isAnimationDisabled]);
+  }, [animated]);
 
   const nestedAnimation = useMemo((): AnimationState => {
-    if (isAnimationDisabled) {
-      return {
-        initial: undefined,
-        animate: undefined,
-        transition: { duration: 0 },
-      };
-    }
+    if (!animated) return DISABLED_ANIMATION;
     return {
-      initial: (animationConfig?.section?.initial ?? DEFAULT_NESTED_ANIMATION.initial) as TargetAndTransition,
-      animate: (animationConfig?.section?.animate ?? DEFAULT_NESTED_ANIMATION.animate) as TargetAndTransition,
-      transition: {
-        ...DEFAULT_NESTED_ANIMATION.transition,
-        ...animationConfig?.section?.transition,
-      },
+      initial: DEFAULT_NESTED_ANIMATION.initial as TargetAndTransition,
+      animate: DEFAULT_NESTED_ANIMATION.animate as TargetAndTransition,
+      transition: DEFAULT_NESTED_ANIMATION.transition,
     };
-  }, [animationConfig?.section, isAnimationDisabled]);
+  }, [animated]);
 
   const fieldAnimation = useMemo((): AnimationState => {
-    if (isAnimationDisabled) {
-      return {
-        initial: undefined,
-        animate: undefined,
-        exit: undefined,
-        transition: { duration: 0 },
-      };
-    }
+    if (!animated) return DISABLED_ANIMATION;
     return {
-      initial: (animationConfig?.field?.initial ?? DEFAULT_FIELD_ANIMATION.initial) as TargetAndTransition,
-      animate: (animationConfig?.field?.animate ?? DEFAULT_FIELD_ANIMATION.animate) as TargetAndTransition,
-      exit: (animationConfig?.field?.exit ?? DEFAULT_FIELD_ANIMATION.exit) as TargetAndTransition,
-      transition: {
-        ...DEFAULT_FIELD_ANIMATION.transition,
-        ...animationConfig?.field?.transition,
-      },
+      initial: DEFAULT_FIELD_ANIMATION.initial as TargetAndTransition,
+      animate: DEFAULT_FIELD_ANIMATION.animate as TargetAndTransition,
+      exit: DEFAULT_FIELD_ANIMATION.exit as TargetAndTransition,
+      transition: DEFAULT_FIELD_ANIMATION.transition,
     };
-  }, [animationConfig?.field, isAnimationDisabled]);
+  }, [animated]);
 
   const getStaggerDelay = useMemo(() => {
-    const staggerDelay = animationConfig?.section?.transition?.staggerChildren ?? DEFAULT_STAGGER_CHILDREN;
-    return (index: number) => (isAnimationDisabled ? 0 : index * staggerDelay);
-  }, [animationConfig?.section?.transition?.staggerChildren, isAnimationDisabled]);
+    return (index: number) => (animated ? index * DEFAULT_STAGGER_CHILDREN : 0);
+  }, [animated]);
 
   return {
-    isAnimationDisabled,
     sectionAnimation,
     nestedAnimation,
     fieldAnimation,
