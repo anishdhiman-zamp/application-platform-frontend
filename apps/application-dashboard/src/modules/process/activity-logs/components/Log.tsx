@@ -25,6 +25,7 @@ import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { cn, ensureUTCTimestamp } from '@/utils/common';
+import 'modules/process/activity-logs/components/log-form.css';
 
 type LogProps = {
   isLastLogOfDate?: boolean;
@@ -35,15 +36,6 @@ type LogProps = {
   processId: string;
   activityId: string;
 };
-
-// const feedbackFormClassNames: FormBuilderClassNames = {
-//   form: 'gap-2 pb-0 mt-2',
-//   radioGroup: 'gap-3',
-//   radioItem: 'space-y-0',
-//   radio: 'h-3 w-3 border-GRAY_1000',
-//   radioInput: 'h-8 border-GRAY_400 bg-white rounded-lg placeholder:text-GRAY_500 f-12-450 rounded-md p-3 w-[300px]',
-//   label: 'f-12-450 text-GRAY_1000',
-// };
 
 const Log: FC<LogProps> = ({
   isLastLogOfDate = false,
@@ -253,10 +245,11 @@ const Log: FC<LogProps> = ({
 
           {submitFormCta?.form_builder_config && (
             <FormBuilder
-              schema={submitFormCta.form_builder_config}
+              schema={submitFormCta?.form_builder_config}
               onSubmit={handleFeedbackSubmit}
               ref={formBuilderRef}
               animated={false}
+              formId='log-form'
             />
           )}
 

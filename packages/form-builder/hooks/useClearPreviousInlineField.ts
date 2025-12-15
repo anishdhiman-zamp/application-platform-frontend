@@ -3,25 +3,32 @@ import { useFormContext } from 'react-hook-form';
 
 import { ExtendedSelectOption, FormField as FormFieldType } from '../types';
 
-interface UseInlineFieldOptions {
+interface UseClearPreviousInlineFieldOptions {
   clearOnDeselect?: boolean;
 }
 
-interface UseInlineFieldResult {
-  handleOptionChange: (
+interface UseClearPreviousInlineFieldResult {
+  handleClearPreviousField: (
     newValue: string,
     options: ExtendedSelectOption[],
     schemaFields: Record<string, FormFieldType>,
   ) => void;
 }
 
-export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFieldResult => {
+/**
+ * Clears the inline field value of the previously selected option when a new option is selected.
+ * Used to reset inline field values when switching between radio/select options.
+ */
+
+export const useClearPreviousInlineField = (
+  options: UseClearPreviousInlineFieldOptions = {},
+): UseClearPreviousInlineFieldResult => {
   const { clearOnDeselect = true } = options;
   const { setValue, getValues } = useFormContext();
 
   const previousValueRef = useRef<string | undefined>(undefined);
 
-  const handleOptionChange = useCallback(
+  const handleClearPreviousField = useCallback(
     (newValue: string, allOptions: ExtendedSelectOption[], schemaFields: Record<string, FormFieldType>) => {
       if (!clearOnDeselect) return;
 
@@ -48,6 +55,6 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
   );
 
   return {
-    handleOptionChange,
+    handleClearPreviousField,
   };
 };

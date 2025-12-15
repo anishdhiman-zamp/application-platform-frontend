@@ -12,6 +12,7 @@ interface FormBuilderProps {
   schema: FormSchema;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
+  formId?: string;
   animated?: boolean;
 }
 
@@ -23,6 +24,7 @@ export const FormBuilder = ({
   ref,
   schema,
   onSubmit,
+  formId,
   animated = true,
 }: FormBuilderProps & {
   ref: React.RefObject<FormBuilderRef | null>;
@@ -48,7 +50,7 @@ export const FormBuilder = ({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className='main-form flex flex-col gap-5 pb-5'>
+      <form onSubmit={methods.handleSubmit(onSubmit)} className={`main-form ${formId} flex flex-col gap-5 pb-5`}>
         {schema.sections.map((section, index) => (
           <motion.div
             key={section.id || index}

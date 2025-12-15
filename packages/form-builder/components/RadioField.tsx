@@ -2,8 +2,7 @@ import { Label, Radio, RadioGroup } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-
-import { useInlineField } from '../hooks/useInlineField';
+import { useClearPreviousInlineField } from '../hooks/useClearPreviousInlineField';
 import { FormField as FormFieldType, RadioOption } from '../types';
 import { FormField } from './FormField';
 
@@ -20,7 +19,7 @@ export interface RadioFieldValue {
 
 export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, inlineFields = {} }) => {
   const { control } = useFormContext();
-  const { handleOptionChange } = useInlineField({
+  const { handleClearPreviousField } = useClearPreviousInlineField({
     clearOnDeselect: true,
   });
 
@@ -32,7 +31,7 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, 
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => {
         const handleChange = (newValue: string) => {
-          handleOptionChange(newValue, radioOptions, inlineFields);
+          handleClearPreviousField(newValue, radioOptions, inlineFields);
           onChange(newValue);
         };
 
