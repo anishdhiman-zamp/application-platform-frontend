@@ -162,7 +162,7 @@ export const useElevenlabsConnection = (options: UseElevenlabsConnectionOptions)
       // Commit any pending transcript before disconnecting
       if (scribe.partialTranscript) {
         setIsCommitting(true);
-        scribe.commit();
+        await scribe.commit();
         // Wait a bit for the commit callback to fire
         await new Promise((resolve) => setTimeout(resolve, 500));
       }

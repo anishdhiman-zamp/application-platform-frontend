@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export enum MicrophoneEvents {
   DataAvailable = 'dataavailable',
@@ -41,6 +41,10 @@ export const useMicrophoneRecorder = (options?: UseMicrophoneRecorderOptions): U
   const [microphoneState, setMicrophoneState] = useState<MicrophoneState>(MicrophoneState.NotSetup);
   const [microphone, setMicrophone] = useState<MediaRecorder | null>(null);
 
+  // Store onError in a ref to avoid dependency issues
+  const onErrorRef = useRef(options?.onError);
+  onErrorRef.current = options?.onError;
+
   // Initialize microphone with user media permissions and audio constraints
   const setupMicrophone = useCallback(async () => {
     if (microphoneState === MicrophoneState.Ready || microphone) return;
@@ -54,11 +58,11 @@ export const useMicrophoneRecorder = (options?: UseMicrophoneRecorderOptions): U
       setMicrophone(mic);
       setMicrophoneState(MicrophoneState.Ready);
     } catch (error) {
-      options?.onError?.(error);
+      onErrorRef.current?.(error);
       setMicrophoneState(MicrophoneState.Error);
       throw error;
     }
-  }, [microphone, microphoneState, options]);
+  }, [microphone, microphoneState]);
 
   // Start recording audio in 250ms chunks
   const startMicrophone = useCallback(() => {
@@ -80,12 +84,12 @@ export const useMicrophoneRecorder = (options?: UseMicrophoneRecorderOptions): U
       // Release all media tracks
       microphone.stream.getTracks().forEach((t) => t.stop());
     } catch (error) {
-      options?.onError?.(error);
+      onErrorRef.current?.(error);
     } finally {
       setMicrophone(null);
       setMicrophoneState(MicrophoneState.NotSetup);
     }
-  }, [microphone, options]);
+  }, [microphone]);
 
   return { microphone, startMicrophone, stopMicrophone, setupMicrophone, microphoneState };
 };
