@@ -1,5 +1,4 @@
 // Import global styles
-import { Suspense } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@zamp-platform/ui';
 import { FAVICON } from 'constants/icons';
