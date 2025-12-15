@@ -1,102 +1,56 @@
-import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { captureException } from '@sentry/nextjs';
-import {
-  AttachmentsList,
-  AudioVisualizer,
-  ChatInputAdapter,
-  LocationData,
-  MicrophoneState,
-  ResourceType,
-  ScopeType,
-  SOCKET_STATES,
-  SpeechToTextProvider,
-  useChat,
-  useChatInput,
-  useTranscription,
-} from '@zamp-platform/chat';
-import { Button, Textarea, toast } from '@zamp-platform/ui';
+'use client';
+
+import { Button, Textarea } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
-import { handleFileUploadsWithMutation, wrapPostFormsSignedUploadAck } from 'modules/chatbot/utils';
-import { useParams } from 'next/navigation';
-import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
-import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
-import { useGetSignedUrlMutation } from '@/apis/fileUpload';
-import { usePostInteractionDisableMutation } from '@/apis/interaction';
-import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
-import { RootState } from '@/store';
-import { INPUT_FILE_FORMATS } from '@/types/common/mime';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 
-interface ChatInputProps {
+import { useChat } from '../hooks/useChat';
+import { ChatInputAdapter, useChatInput } from '../hooks/useChatInput';
+import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
+import { useTranscription } from '../hooks/useTranscription';
+import { LocationData, ScopeType } from '../types/chat.types';
+import { SOCKET_STATES, SpeechToTextProvider, TranscriptionAdapter } from '../types/transcription.types';
+import { AudioVisualizer } from './AudioVisualizer';
+import { AttachmentsList } from './blocks';
+
+export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
   annotationLocation: LocationData;
   conversationId?: string;
-  setHeader: (header: string) => void;
-  isDisabled: boolean;
-  header: string;
+  setHeader?: (header: string) => void;
+  isDisabled?: boolean;
+  header?: string;
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   autoFocus?: boolean;
+  chatInputAdapter: ChatInputAdapter;
+  transcriptionAdapter: TranscriptionAdapter;
+  speechToTextProvider?: SpeechToTextProvider;
+  acceptedFileTypes?: string;
+  onMicrophoneError?: () => void;
+  onRecordingError?: () => void;
 }
-export const ChatInput: FC<ChatInputProps> = ({
+
+export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   chat,
   annotationLocation,
   conversationId,
   setHeader,
-  isDisabled,
-  header,
+  isDisabled = false,
+  header = '',
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
   autoFocus = false,
+  chatInputAdapter,
+  transcriptionAdapter,
+  speechToTextProvider = SpeechToTextProvider.ELEVENLABS,
+  acceptedFileTypes,
+  onMicrophoneError,
+  onRecordingError,
 }) => {
-  const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
-  const params = useParams();
-  const processId = params?.processId as string;
-  const activityRunId = params?.activityId as string;
-
-  const [getSignedUrl] = useGetSignedUrlMutation();
-  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
-  const [postInteractionDisable] = usePostInteractionDisableMutation();
-  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
-
-  // Create adapter for useChatInput
-  const chatInputAdapter: ChatInputAdapter = useMemo(
-    () => ({
-      getCurrentUserName: () => currentUserName || '',
-      getProcessId: () => processId,
-      getActivityRunId: () => activityRunId,
-      uploadFiles: async (files: FileList) => {
-        return handleFileUploadsWithMutation(
-          files,
-          getSignedUrl,
-          API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
-          wrapPostFormsSignedUploadAck(postFormsSignedUploadAck),
-        );
-      },
-      disableInteraction: async (interactionParams) => {
-        await postInteractionDisable({
-          conversationId: interactionParams.conversationId,
-          messageId: interactionParams.messageId,
-          params: {
-            resource_id: interactionParams.resourceId,
-            resource_type: interactionParams.resourceType as ResourceType,
-          },
-        });
-      },
-      onError: (error) => {
-        captureException(error);
-        toast.error('An error occurred');
-      },
-      onSuccess: (message) => {
-        toast.success(message);
-      },
-    }),
-    [currentUserName, processId, activityRunId, getSignedUrl, postFormsSignedUploadAck, postInteractionDisable],
-  );
-
   const {
     value,
     setValue,
@@ -119,13 +73,6 @@ export const ChatInput: FC<ChatInputProps> = ({
     adapter: chatInputAdapter,
   });
 
-  // Create adapter for useTranscription
-  const getElevenLabsToken = useCallback(async () => {
-    const result = await getSpeechToTextAccessToken({}).unwrap();
-
-    return result.access_token;
-  }, [getSpeechToTextAccessToken]);
-
   const {
     transcript,
     isRecording,
@@ -136,13 +83,8 @@ export const ChatInput: FC<ChatInputProps> = ({
     microphone,
     isCommitting,
   } = useTranscription({
-    provider: SpeechToTextProvider.ELEVENLABS,
-    adapter: {
-      getElevenLabsToken,
-      onError: (error) => {
-        captureException(error);
-      },
-    },
+    provider: speechToTextProvider,
+    adapter: transcriptionAdapter,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -167,8 +109,7 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   const handleStartRecording = async () => {
     if (microphoneState === MicrophoneState.Error) {
-      toast.error('Microphone unavailable. Please check browser permissions and try again.');
-
+      onMicrophoneError?.();
       return;
     }
 
@@ -179,7 +120,7 @@ export const ChatInput: FC<ChatInputProps> = ({
     try {
       stopRecording();
     } catch {
-      toast.error('Failed to stop recording. Please try again.');
+      onRecordingError?.();
     }
   };
 
@@ -187,7 +128,7 @@ export const ChatInput: FC<ChatInputProps> = ({
     try {
       stopRecording();
     } catch {
-      toast.error('Failed to stop recording. Please try again.');
+      onRecordingError?.();
     }
   };
 
@@ -229,7 +170,7 @@ export const ChatInput: FC<ChatInputProps> = ({
         onChange={handleFileChange}
         className='hidden'
         aria-label='File input'
-        accept={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
+        accept={acceptedFileTypes}
       />
       <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
       <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
@@ -294,7 +235,6 @@ export const ChatInput: FC<ChatInputProps> = ({
                       <Mic />
                     </Button>
                   )}
-                  {/* TODO: Add back when PACE is ready to handle attachments */}
                   <Button
                     variant='ghost'
                     size='icon'
@@ -323,3 +263,5 @@ export const ChatInput: FC<ChatInputProps> = ({
     </div>
   );
 };
+
+export default ConnectedChatInput;

@@ -1,32 +1,46 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { captureException } from '@sentry/nextjs';
 import {
   ButtonBlockType,
+  ChatInputAdapter,
+  ConnectedChatInput,
   DisplayLayerActionType,
   LocationData,
   Message,
   ResourceType,
   ScopeType,
   SenderType,
+  SpeechToTextProvider,
   useChat,
 } from '@zamp-platform/chat';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText, toast } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
 import ChatHeader from 'modules/chatbot/ChatHeader';
-import { ChatInput } from 'modules/chatbot/ChatInput';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
-import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
+import {
+  doesUrlMatchLocation,
+  generateChatbotInstanceId,
+  handleFileUploadsWithMutation,
+  wrapPostFormsSignedUploadAck,
+} from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import { usePostFormsSignedUploadAckMutation } from '@/apis/dataset';
+import { useGetSignedUrlMutation } from '@/apis/fileUpload';
+import { usePostInteractionDisableMutation } from '@/apis/interaction';
+import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 import Avatar from '@/components/common/avatar';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { COLORS } from '@/constants/colors';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
+import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 import { MapAny } from '@/types/commonTypes';
 import { cn, getUserNameFromEmail } from '@/utils/common';
 
@@ -62,14 +76,24 @@ const Chatbot = ({
   clearInputOnClose = false,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
+  const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
+  const params = useParams();
+  const processId = params?.processId as string;
+  const activityRunId = params?.activityId as string;
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
   const [inputValue, setInputValue] = useState('');
   const urlBasedOpenHandled = useRef(false);
+
+  // RTK Query mutations for adapters
+  const [getSignedUrl] = useGetSignedUrlMutation();
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
+  const [postInteractionDisable] = usePostInteractionDisableMutation();
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
@@ -161,6 +185,60 @@ const Chatbot = ({
     }
   };
 
+  // Create adapter for useChatInput
+  const chatInputAdapter: ChatInputAdapter = useMemo(
+    () => ({
+      getCurrentUserName: () => currentUserName || '',
+      getProcessId: () => processId,
+      getActivityRunId: () => activityRunId,
+      uploadFiles: async (files: FileList) => {
+        return handleFileUploadsWithMutation(
+          files,
+          getSignedUrl,
+          API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
+          wrapPostFormsSignedUploadAck(postFormsSignedUploadAck),
+        );
+      },
+      disableInteraction: async (interactionParams) => {
+        await postInteractionDisable({
+          conversationId: interactionParams.conversationId,
+          messageId: interactionParams.messageId,
+          params: {
+            resource_id: interactionParams.resourceId,
+            resource_type: interactionParams.resourceType as ResourceType,
+          },
+        });
+      },
+      onError: (error) => {
+        captureException(error);
+        toast.error('An error occurred');
+      },
+      onSuccess: (message) => {
+        toast.success(message);
+      },
+    }),
+    [currentUserName, processId, activityRunId, getSignedUrl, postFormsSignedUploadAck, postInteractionDisable],
+  );
+
+  // Create adapter for useTranscription
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
+
+  const transcriptionAdapter = useMemo(
+    () => ({
+      getElevenLabsToken,
+      onError: (error: unknown) => {
+        captureException(error);
+      },
+    }),
+    [getElevenLabsToken],
+  );
+
+  const acceptedFileTypes = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
+
   const renderFeedbackStatusMessageOrInput = () => {
     if (feedbackItem?.status && [FEEDBACK_STATUS.APPLIED, FEEDBACK_STATUS.PROCESSING].includes(feedbackItem.status)) {
       return (
@@ -172,7 +250,7 @@ const Chatbot = ({
 
     return (
       <div className='flex flex-shrink-0'>
-        <ChatInput
+        <ConnectedChatInput
           chat={chat}
           annotationLocation={annotationLocation}
           conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
@@ -183,6 +261,14 @@ const Chatbot = ({
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
           autoFocus={isOpen}
+          chatInputAdapter={chatInputAdapter}
+          transcriptionAdapter={transcriptionAdapter}
+          speechToTextProvider={SpeechToTextProvider.ELEVENLABS}
+          acceptedFileTypes={acceptedFileTypes}
+          onMicrophoneError={() =>
+            toast.error('Microphone unavailable. Please check browser permissions and try again.')
+          }
+          onRecordingError={() => toast.error('Failed to stop recording. Please try again.')}
         />
       </div>
     );
