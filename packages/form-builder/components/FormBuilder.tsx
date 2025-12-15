@@ -4,7 +4,7 @@ import React, { useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { useFormAnimation } from '../hooks/useFormAnimation';
-import { FormBuilderAnimationConfig, FormSchema } from '../types';
+import { FormSchema } from '../types';
 import { createCustomResolver } from '../utils/validation';
 import { FormSection } from './FormSection';
 
@@ -12,7 +12,7 @@ interface FormBuilderProps {
   schema: FormSchema;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
-  animationConfig?: FormBuilderAnimationConfig;
+  animated?: boolean;
 }
 
 export interface FormBuilderRef {
@@ -23,7 +23,7 @@ export const FormBuilder = ({
   ref,
   schema,
   onSubmit,
-  animationConfig,
+  animated = true,
 }: FormBuilderProps & {
   ref: React.RefObject<FormBuilderRef | null>;
 }) => {
@@ -46,7 +46,7 @@ export const FormBuilder = ({
     },
   }));
 
-  const { sectionAnimation, nestedAnimation, getStaggerDelay } = useFormAnimation(animationConfig);
+  const { sectionAnimation, nestedAnimation, getStaggerDelay } = useFormAnimation(animated);
 
   return (
     <FormProvider {...methods}>
@@ -75,7 +75,7 @@ export const FormBuilder = ({
                     key={nestedSection.id}
                     section={nestedSection}
                     fields={schema.fields}
-                    animationConfig={animationConfig}
+                    animated={animated}
                   />
                 ))}
               </motion.div>

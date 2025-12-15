@@ -73,7 +73,6 @@ const LogCtaComponent = (
 
         return;
       }
-
       handleEmitHITLAction(targetCta, serializeFormData(formData));
     },
     [buttonTypeCtas, handleEmitHITLAction],

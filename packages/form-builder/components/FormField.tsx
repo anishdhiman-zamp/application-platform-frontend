@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { useFormAnimation } from '../hooks/useFormAnimation';
-import { FormBuilderAnimationConfig, FormField as FormFieldType } from '../types';
+import { FormField as FormFieldType } from '../types';
 import { HeaderTextField } from './HeaderTextField';
 import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
@@ -13,13 +13,13 @@ interface FormFieldProps {
   field: FormFieldType;
   name: string;
   className?: string;
-  animationConfig?: FormBuilderAnimationConfig;
-  schemaFields?: Record<string, FormFieldType>;
+  animated?: boolean;
+  inlineFields?: Record<string, FormFieldType>;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animationConfig, schemaFields }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated, inlineFields }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
-  const { fieldAnimation } = useFormAnimation(animationConfig);
+  const { fieldAnimation } = useFormAnimation(animated);
 
   if (!shouldShow) {
     return null;
@@ -48,7 +48,7 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className, an
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
             case 'radio':
               return (
-                <RadioField className={className} field={fieldWithConfig} name={name} schemaFields={schemaFields} />
+                <RadioField className={className} field={fieldWithConfig} name={name} inlineFields={inlineFields} />
               );
             default:
               return null;

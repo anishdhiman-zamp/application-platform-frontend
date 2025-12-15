@@ -236,14 +236,27 @@ export const getCtaLoadingId = (cta: CtasType): string => `${cta?.id}-${cta?.dis
  */
 export const serializeFormData = (formData: Record<string, unknown>): Array<string> => {
   const result: Array<string> = [];
+  const processedKeys = new Set<string>();
 
-  Object.entries(formData).forEach(([, value]) => {
-    // Handle string values directly
+  Object.entries(formData).forEach(([key, value]) => {
+    // Skip if already processed (e.g., _text fields merged with their parent)
+    if (processedKeys.has(key)) return;
+
+    const textFieldKey = `${key}_text`;
+    const hasTextField = textFieldKey in formData;
+
+    // Handle string values - check for corresponding _text field
     if (typeof value === 'string') {
+      const inputValue = hasTextField ? String(formData[textFieldKey] ?? '') : '';
+
+      if (hasTextField) {
+        processedKeys.add(textFieldKey);
+      }
+
       result.push(
         JSON.stringify({
           value,
-          input: '',
+          input: inputValue,
         }),
       );
 
