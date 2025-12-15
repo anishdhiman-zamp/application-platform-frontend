@@ -26,7 +26,7 @@ const SettingsSidebar = () => {
           <div className='px-2 py-5'>
             <div className='text-GRAY_700 flex w-full items-center gap-2.5'>
               <Link prefetch href={lastVisitedRouteBeforeSettings || ROUTES_PATH.PROCESSES} className='cursor-pointer'>
-                <ArrowLeft width={16} height={16} />
+                <ArrowLeft size={16} />
               </Link>
               <span className='f-13-500 select-none'>Settings</span>
             </div>
@@ -57,7 +57,7 @@ const SettingsSidebar = () => {
                 'cursor-not-allowed': isLoggingOut,
               })}
             >
-              <LogOut width={14} height={14} />
+              <LogOut size={14} />
               <span className='f-13-500 flex-1 text-left select-none'>Logout</span>
               {isLoggingOut && <Loader2 className='w-4 animate-spin' />}
             </Button>

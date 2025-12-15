@@ -1,6 +1,6 @@
 import type { FC } from 'react';
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import RightArrow from '@/assets/Icons/RightArrow';
 import { IMAGE_PREFIX } from '@/constants/icons';
 
 interface IntegrationCardContentProps {
@@ -28,7 +28,7 @@ const IntegrationCardContent: FC<IntegrationCardContentProps> = ({ logo, display
           <span className='f-14-550 text-GRAY_1000'>{displayName}</span>
         </div>
 
-        <RightArrow width={14} height={14} className='text-GRAY_700 hidden group-hover:block' />
+        <ArrowRight size={14} className='text-GRAY_700 hidden group-hover:block' />
       </div>
 
       {/* Description */}

@@ -1,5 +1,4 @@
-import { Link2, RefreshCcw, RotateCcw, Unlink } from 'lucide-react';
-import ArchiveIcon from '@/assets/Icons/ArchiveIcon';
+import { Archive, Link2, RefreshCcw, RotateCcw, Unlink } from 'lucide-react';
 import {
   ACCOUNT_STATUS,
   type AccountStatus,
@@ -76,17 +75,17 @@ export const PILL_STYLE_MAP = {
 export const PILLS_CONFIG: PillConfig[] = [
   {
     type: CONNECTION_PILLS_TYPE.SYNCED,
-    icon: <Link2 width={14} height={14} className='-rotate-45 p-[2px]' />,
+    icon: <Link2 size={14} className='-rotate-45 p-[2px]' />,
     tooltipWidth: 'w-30',
   },
   {
     type: CONNECTION_PILLS_TYPE.REAUTH,
-    icon: <RefreshCcw width={14} height={14} className='text-ORANGE_800 p-[2px]' />,
+    icon: <RefreshCcw size={14} className='text-ORANGE_800 p-[2px]' />,
     tooltipWidth: 'w-32',
   },
   {
     type: CONNECTION_PILLS_TYPE.DISCONNECTED,
-    icon: <Unlink width={14} height={14} className='text-RED_800 p-[2px]' />,
+    icon: <Unlink size={14} className='text-RED_800 p-[2px]' />,
     tooltipWidth: 'w-30',
   },
 ];
@@ -96,23 +95,23 @@ export const STATUS_CONFIG: Record<AccountStatus, StatusConfig> = {
     labelClassName: 'text-GRAY_700',
     icon: null,
     actionLabel: 'Archive',
-    actionIcon: <ArchiveIcon height={14} width={14} />,
+    actionIcon: <Archive size={14} />,
   },
   [ACCOUNT_STATUS.ARCHIVED]: {
     labelClassName: 'text-GRAY_700',
-    icon: <ArchiveIcon height={14} width={14} />,
+    icon: <Archive size={14} />,
     actionLabel: 'Restore',
-    actionIcon: <RotateCcw height={14} width={14} />,
+    actionIcon: <RotateCcw size={14} />,
   },
   [ACCOUNT_STATUS.NEEDS_REAUTH]: {
     labelClassName: 'text-ORANGE_800',
-    icon: <RefreshCcw height={14} width={14} />,
+    icon: <RefreshCcw size={14} />,
     actionLabel: 'Re-Auth',
     actionIcon: null,
   },
   [ACCOUNT_STATUS.DISCONNECTED]: {
     labelClassName: 'text-RED_800',
-    icon: <Unlink height={14} width={14} />,
+    icon: <Unlink size={14} />,
     actionLabel: 'Reconnect',
     actionIcon: null,
   },

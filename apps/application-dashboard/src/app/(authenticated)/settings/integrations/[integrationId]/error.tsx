@@ -14,7 +14,7 @@ export default function IntegrationDetailsError({ reset }: ErrorProps) {
       <ErrorCard
         type={ErrorCardTypes.GENERAL_API_FAIL}
         title='Failed to load integration'
-        subtitle={'Unable to fetch integration details. Please try again later.'}
+        subtitle='Unable to fetch integration details. Please try again later.'
         onClose={reset}
       />
     </div>

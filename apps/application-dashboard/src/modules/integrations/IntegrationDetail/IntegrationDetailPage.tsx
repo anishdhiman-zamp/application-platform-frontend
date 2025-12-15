@@ -1,9 +1,9 @@
 'use client';
 
 import { type FC, useRef, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import LeftArrow from '@/assets/Icons/LeftArrow';
 import { COLORS } from '@/constants/colors';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
@@ -54,7 +54,7 @@ const IntegrationDetailPage: FC<IntegrationDetailPageProps> = ({ integration }) 
             className={cn('flex w-full items-center justify-start py-5', isScrolled && 'border-GRAY_400 border-b')}
             aria-label='Go back'
           >
-            <LeftArrow width={14} height={14} color={COLORS.GRAY_900} />
+            <ArrowLeft size={14} color={COLORS.GRAY_900} />
           </Link>
           <div
             ref={scrollContainerRef}
