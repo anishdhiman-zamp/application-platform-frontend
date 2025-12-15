@@ -1,6 +1,7 @@
-import { ZAMP_LOGO } from 'constants/icons';
+import { ZAMP_FULL_LOGO } from 'constants/icons';
 import Image from 'next/image';
 
+// downtime banner
 const DashboardDowntime = () => {
   return (
     <div className='fixed z-1000 flex h-screen w-screen items-center justify-center bg-white p-6'>
@@ -9,7 +10,7 @@ const DashboardDowntime = () => {
         height={28}
         alt={'zamp logo'}
         className='absolute top-8 left-8'
-        src={ZAMP_LOGO}
+        src={ZAMP_FULL_LOGO}
         draggable='false'
         priority
       />

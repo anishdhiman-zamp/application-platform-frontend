@@ -6,6 +6,7 @@ import sheetFiltersSliceReducer from 'store/slices/sheet-filters';
 import tableStateSliceReducer from 'store/slices/table-state';
 import userSliceReducer from 'store/slices/user';
 import { baseApi } from '@/services/baseApi';
+import feedbacksSliceReducer from '@/store/slices/feedback.slice';
 
 const reducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
@@ -14,6 +15,7 @@ const reducer = combineReducers({
   layoutConfig: layoutConfigsSliceReducer,
   sheetFilters: sheetFiltersSliceReducer,
   tableState: tableStateSliceReducer,
+  feedbacks: feedbacksSliceReducer,
 });
 
 export const store = configureStore({

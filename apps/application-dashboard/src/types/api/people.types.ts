@@ -1,7 +1,7 @@
 import { PostAddTeamToAudiencePayload, PostTeamsByOrganizationIdPayload } from 'modules/team/people.types';
 import type { ResourceAudienceType } from 'types/api/auth.types';
-import { PolicyResultStatus } from 'types/api/policies.types';
 import { ResourceType } from '@/modules/shareResource/shareResource.types';
+import { PolicyResultStatus } from '@/types/api/policies.types';
 import type { FilterModelType } from '@/types/components/table.type';
 
 export type AudiencesByOrganisationIdRequest = {

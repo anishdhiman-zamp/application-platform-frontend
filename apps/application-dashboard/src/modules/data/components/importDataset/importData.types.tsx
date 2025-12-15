@@ -36,14 +36,17 @@ export enum FILE_MIME {
   IMAGE_PNG = 'image/png',
   IMAGE_BMP = 'image/bmp',
   TEXT_CSV = 'text/csv',
+  TEXT_PLAIN = 'text/plain',
   XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   XLS = 'application/vnd.ms-excel',
   BAI2 = 'application/x-bai',
+  DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 }
 
 export type HistoryListPropsType = {
   fileImportHistoryData: FileHistoryDataType[];
   isHoveredLoaders: boolean;
+  isHistoryLoading: boolean;
 };
 
 export type HistoryBulkLoadersPropsType = {

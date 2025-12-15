@@ -24,9 +24,10 @@ export const COLORS = {
   RED_200: '#FFDADA',
   RED_250: '#F9DADA',
   RED_300: '#D25656',
-
   RED_700: '#FF1515',
   RED_800: '#E10909',
+  RED_900: '#A40000',
+
   RED_PRIMARY: '#B12424',
   RED_SECONDARY: '#D64141',
   ORANGE_SECONDARY: '#EF7A2C',
@@ -68,6 +69,7 @@ export const COLORS = {
 
   BACKGROUND_GRAY_1: '#FBFBFB',
   BACKGROUND_GRAY_2: '#FAFAFA',
+  YELLOW_300: '#F5D7AA',
 };
 
 export const CHART_PALETTE_COLORS = [

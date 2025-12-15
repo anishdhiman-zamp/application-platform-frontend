@@ -574,3 +574,14 @@ export const capitalizeWords = (str: string) => {
 export const preventAutoFocus = (e: Event) => {
   e.preventDefault();
 };
+
+/**
+ * Ensures a timestamp string is treated as UTC by appending 'Z' if not present
+ * @param timestamp - ISO timestamp string
+ * @returns timestamp with 'Z' suffix for UTC
+ */
+export const ensureUTCTimestamp = (timestamp: string): string => {
+  if (!timestamp) return timestamp;
+
+  return timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`;
+};

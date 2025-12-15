@@ -2,15 +2,18 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { captureException } from '@sentry/browser';
+import { toast } from '@zamp-platform/ui';
 import { useAppDispatch } from 'hooks/toolkit';
 import { useParams } from 'next/navigation';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import DynamicLottiePlayer from '@/components/DynamicLottiePlayer';
-import { ZAMP_LOGO_LOADER } from '@/constants/lottie/zamp-logo-loader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import KnowledgeBaseNavigation from '@/modules/knowledge-based/KnowledgeBaseNavigation';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { extractHeadersFromMarkdown, type HeaderItem } from '@/utils/markdownUtils';
@@ -41,11 +44,28 @@ const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: Markdown
 
   const getMarkdownContent = useCallback(async () => {
     if (!data || !data?.content_signed_url) return;
-    const response = await fetch(data?.content_signed_url);
-    const content = await response.text();
 
-    setMarkdownContent(content);
-    setHeaders(extractHeadersFromMarkdown(content));
+    try {
+      const response = await fetch(data?.content_signed_url);
+
+      if (!response.ok) {
+        setMarkdownContent('');
+        setHeaders([]);
+        toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+
+        return;
+      }
+
+      const content = await response.text();
+
+      setMarkdownContent(content);
+      setHeaders(extractHeadersFromMarkdown(content));
+    } catch (error) {
+      setMarkdownContent('');
+      setHeaders([]);
+      captureException(error);
+      toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+    }
   }, [data]);
 
   useEffect(() => {
@@ -119,11 +139,7 @@ const MarkdownRendererWithNavigation = ({ hideNav = false, scrollRef }: Markdown
       refetchFunction={refetch}
       skeletonType={SkeletonTypes.CUSTOM}
       className='w-full'
-      loader={
-        <div className='z-1000 flex h-full w-full items-center justify-center bg-white'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
-        </div>
-      }
+      loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-1000' />}
     >
       <div className='flex'>
         <div className='markdown-body w-full overflow-y-auto p-6'>

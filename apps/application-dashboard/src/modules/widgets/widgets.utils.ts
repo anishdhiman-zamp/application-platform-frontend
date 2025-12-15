@@ -100,6 +100,7 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
 
           switch (column_type) {
             case WidgetDataValueType.STRING:
+            case WidgetDataValueType.VARCHAR:
               formattedRow[column_name] = String(value);
               break;
             case WidgetDataValueType.DATE:
@@ -113,6 +114,7 @@ export function getDataWithDataType(responses: WidgetDataType[]) {
             case WidgetDataValueType.INT:
             case WidgetDataValueType.SMALLINT:
             case WidgetDataValueType.TINYINT:
+            case WidgetDataValueType.INT8:
               {
                 formattedRow[column_name] = parseFloat(value as string) ?? 0;
               }
@@ -188,6 +190,37 @@ export const getTransformedData = (data: WidgetDataType[], widgetDetails: Widget
   }
 };
 
+/**
+ * Checks if a given data value type is a timestamp-related type.
+ * @param type - The data value type to check
+ * @returns true if the type is a timestamp type, false otherwise
+ */
+export const isTimestampType = (type: string): boolean => {
+  return [
+    WidgetDataValueType.TIMESTAMP,
+    WidgetDataValueType.TIMESTAMP_NTZ,
+    WidgetDataValueType.DATETIME,
+    WidgetDataValueType.DATE,
+    WidgetDataValueType.TIME,
+  ].includes(type as WidgetDataValueType);
+};
+
+/**
+ * Checks if the x-axis of a bar or line chart widget is a timestamp type.
+ * @param widgetDetails - The widget instance details
+ * @returns true if the x-axis is a timestamp type, false otherwise
+ */
+export const isXAxisTimestamp = (widgetDetails: WidgetInstanceType): boolean => {
+  const isBarOrLineChart =
+    widgetDetails.widget_type === WIDGET_TYPES.BAR_CHART || widgetDetails.widget_type === WIDGET_TYPES.LINE_CHART;
+  const fields = isBarOrLineChart ? widgetDetails?.data_mappings?.mappings?.[0]?.fields : undefined;
+
+  const xAxisType =
+    isBarOrLineChart && fields && 'x_axis' in fields && (fields as FieldsMappingType)?.x_axis?.[0]?.type?.toUpperCase();
+
+  return isTimestampType(`${xAxisType}`);
+};
+
 export const getChartOptions = (
   widgetDetails: WidgetInstanceType,
   onNodeClick: (params: WidgetNodeClickParams) => void,
@@ -200,7 +233,9 @@ export const getChartOptions = (
   stacked?: boolean,
 ) => {
   const chartType = AG_CHART_TYPES[widgetDetails.widget_type as unknown as keyof typeof AG_CHART_TYPES];
-  const categoryAxis = getCategoryAxis(periodicity);
+  const isXaxisTimestamp = isXAxisTimestamp(widgetDetails);
+
+  const categoryAxis = getCategoryAxis(periodicity, isXaxisTimestamp);
   const currencySymbol = CURRENCY_SYMBOLS[currency as keyof typeof CURRENCY_SYMBOLS] ?? currency;
   const currencyDecimalPlaces = 2;
 
@@ -528,7 +563,7 @@ export const getGroupedDonutChartData = (data: MapAny[], mappings: PieDonutChart
 
   slicedData.push({
     [sliceKey as string]: CHART_SLICE_TYPES.OTHERS,
-    [valueKey as string]: Number(remainingTotal.toFixed(2)),
+    [valueKey as string]: Number.isFinite(remainingTotal) ? Number(remainingTotal.toFixed(2)) : 0,
   });
 
   return { slicedData, remainingData };
@@ -727,7 +762,9 @@ export const getTimeColumns = (widgetDetails: WidgetInstanceType) => {
   const { data_mappings } = widgetDetails;
   const { mappings } = data_mappings;
   const timeColumns = mappings?.map((mapping) =>
-    mapping?.fields?.x_axis?.map((axis) => ({ dataset_id: mapping?.dataset_id, column: axis?.column })),
+    mapping?.fields?.x_axis
+      ?.filter((axis) => isTimestampType(axis?.type?.toUpperCase() ?? ''))
+      ?.map((axis) => ({ dataset_id: mapping?.dataset_id, column: axis?.column })),
   );
 
   return JSON.stringify(timeColumns.flat());

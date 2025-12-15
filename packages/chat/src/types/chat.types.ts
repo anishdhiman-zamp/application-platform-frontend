@@ -1,3 +1,5 @@
+import { Block } from '../..';
+
 export interface PostMessagePayloadType {
   conversationId: string;
   body: ChatMessage;
@@ -23,6 +25,18 @@ export const enum AnnotationType {
   FEEDBACK = 'FEEDBACK',
 }
 
+export const enum ScopeType {
+  ACTIVITY_RUN = 'activity_run',
+  PROCESS = 'process',
+}
+
+export const enum LocationType {
+  DATASET_FIELD = 'dataset_field',
+  LOG = 'log',
+  ACTIVITY_RUN = 'activity_run',
+  PROCESS = 'process',
+}
+
 export interface CreateConversationPayloadType {
   resource_id: string;
   resource_type: ResourceType;
@@ -35,6 +49,7 @@ export interface CreateConversationPayloadType {
 export interface CreateConversationResponseType {
   conversation_id: string;
   status_message: string;
+  title: string;
 }
 
 export const enum SSEEventType {
@@ -44,6 +59,8 @@ export const enum SSEEventType {
   USER_LEAVE = 'user_leave',
   SYSTEM = 'system',
   ERROR = 'error',
+  NEW_CHAT_MESSAGE = 'new_chat_message',
+  CONVERSATION_UPDATED = 'conversation_updated',
 }
 
 export const enum ChatMessageType {
@@ -72,12 +89,19 @@ export interface ChatMessage {
   resource_type: ResourceType;
   resource_id: string;
   message_content: {
-    message: string;
+    message?: string;
+    elements?: Block[];
+    text?: string;
+    text_type?: string;
+    attachments?: MessageAttachmentType[];
   };
   message_type: ChatMessageType;
   sender_type: SenderType;
   metadata: Record<string, unknown>;
   timestamp: string;
+  sender_name?: string;
+  id?: string;
+  conversation_id?: string;
 }
 
 export interface ChatState {
@@ -99,3 +123,145 @@ export interface ChatActions {
 }
 
 export type ChatFramework = ChatState & ChatActions;
+
+export interface MessageAttachmentType {
+  file_id: string;
+  file_name?: string;
+}
+export interface MessageContentType {
+  text: string;
+  text_type: string;
+  elements?: Block[];
+  attachments?: MessageAttachmentType[];
+}
+
+export interface DatasetFieldLocationData {
+  process_id: string;
+  activity_run_id: string;
+  dataset_id: string;
+  dataset_row_id: string;
+  dataset_field_id: string;
+}
+
+export interface LogLocationData {
+  process_id: string;
+  activity_run_id: string;
+  log_id: string;
+}
+
+export interface ActivityRunLocationData {
+  process_id: string;
+  activity_run_id: string;
+}
+
+export interface ProcessLocationData {
+  process_id: string;
+}
+
+export type LocationData =
+  | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
+  | ({ type: LocationType.LOG } & { data: LogLocationData })
+  | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
+
+export interface AnnotationData {
+  location: LocationData;
+}
+
+export interface CreateConversationPayloadTypeV2 {
+  resource_id: string;
+  resource_type: ResourceType;
+  scope_type: string;
+  scope_id: string;
+  annotation_data?: AnnotationData;
+  message_content: MessageContentType;
+  sender_name?: string;
+}
+
+export interface AnnotationLocationDataType {
+  process_id: string;
+  activity_run_id: string;
+  dataset_id?: string;
+  dataset_row_id?: string;
+  dataset_field_id?: string;
+  log_id?: string;
+}
+
+export interface ConversationType {
+  id: string;
+  organization_id: string;
+  workflow_run_ids: string[];
+  active_workflow_run_id: string;
+  annotation_type: AnnotationType;
+  conversation_configuration_id: string;
+  initiator_id: string;
+  initiator_type: SenderType;
+  status: string;
+  metadata: Record<string, unknown>;
+  scope_type: ScopeType;
+  scope_id: string;
+  channel: string;
+  resource_id: string;
+  resource_type: ResourceType;
+  title: string;
+}
+
+export interface ConversationMessageContentType {
+  elements: Block[];
+}
+export interface ConversationMessageType {
+  id: string;
+  organization_id: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_type: SenderType;
+  sender_name: string;
+  intent: string | null;
+  content: ConversationMessageContentType;
+  created_at: string;
+  deleted_at: string | null;
+}
+export interface GetConversationByIdResponseType {
+  conversation: ConversationType;
+  messages: ConversationMessageType[];
+}
+
+export interface GetConversationByIdRequestType {
+  conversationId: string;
+  resourceId?: string;
+  resourceType?: ResourceType;
+}
+
+export interface GetFilesByIdsRequestType {
+  ids: string[];
+}
+
+export interface GetFilesByIdsResponseType {
+  file_uploads: FileUploadType[];
+}
+
+export interface FileUploadType {
+  file_upload_id: string;
+  organization_id: string;
+  uploaded_by_user_id: string;
+  name: string;
+  file_type: string;
+  storage_provider: string;
+  storage_bucket: string;
+  storage_file_path: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+}
+
+export interface GetFileDownloadUrlRequestType {
+  file_upload_id: string;
+}
+
+export interface GetFileDownloadUrlResponseType {
+  download_url: string;
+  file_upload_id: string;
+  file_name: string;
+  expiry: string;
+}

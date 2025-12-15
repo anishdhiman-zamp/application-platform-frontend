@@ -10,6 +10,7 @@ const config = {
     './node_modules/destiny/dist/components/**/*.{js,ts}',
     '../../packages/ui/src/**/*.{ts,tsx}',
     '../../packages/tanstack-table/**/*.{ts,tsx}',
+    '../../packages/chat/src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -260,6 +261,10 @@ const config = {
         'select-account-dropdown': '1px 2px 10px 0px #a6a6a61a',
         'menu-shadow': 'var(--menu-shadow)',
         'chart-highlight': '0px 0px 0px 3px var(--GRAY_200)',
+        'chatbot-shadow': '0px 2px 9.5px 1px #4141411F',
+        smooth:
+          '0 15px 80px 0 rgba(0, 0, 0, 0.05), 0 6.267px 33.422px 0 rgba(0, 0, 0, 0.04), 0 3.35px 17.869px 0 rgba(0, 0, 0, 0.03), 0 1.878px 10.017px 0 rgba(0, 0, 0, 0.03), 0 0.998px 5.32px 0 rgba(0, 0, 0, 0.02), 0 0.415px 2.214px 0 rgba(0, 0, 0, 0.01)',
+        'keyboard-keys-shadow': '-1px -1px 0.25px 0px #00000017 inset',
       },
       fontSize: {
         '8': [
@@ -536,6 +541,7 @@ const config = {
           'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.8) 5%, white 10%, white 80%, white 90%, rgba(255,255,255,0.8) 95%, transparent 100%)',
         'gradient-to-white': 'linear-gradient(90deg, rgba(255,255,255,0) 0%, #FFF 100%)',
         'gradient-to-transparent': 'linear-gradient(0deg, #FFF 50%, rgba(255,255,255,0) 100%)',
+        'chatbot-gradient': 'repeating-linear-gradient(135deg, #e5e5e5 0, #e5e5e5 1px, white 1px, white 6px)',
       },
       keyframes: {
         'accordion-down': {

@@ -5,6 +5,7 @@ import DateSeparator from 'modules/process/activity-logs/components/DateSeparato
 import Log from 'modules/process/activity-logs/components/Log';
 import { type HandleShowArtifactsProps } from 'modules/process/process.types';
 import type { ActivityLogsResponseType } from '@/types/api/processApi.types';
+import { ensureUTCTimestamp } from '@/utils/common';
 
 interface LogsListProps {
   logs: ActivityLogsResponseType;
@@ -15,17 +16,19 @@ interface LogsListProps {
 
 const LogsList: FC<LogsListProps> = ({ logs, handleShowArtifacts, processId, activityId }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
   const logsWithSeparators = useMemo(() => {
     let currentDate = '';
 
     return logs?.activity_logs?.map((log, index) => {
-      const logDate = format(new Date(log.updated_at), DATE_FORMATS.YYYYMMDD);
+      const logDate = format(new Date(ensureUTCTimestamp(log.updated_at)), DATE_FORMATS.YYYYMMDD);
       const showDateSeparator = logDate !== currentDate;
 
       const isLastLog = index === logs?.activity_logs?.length - 1;
       const isLastLogOfDate =
         index === logs?.activity_logs?.length - 1 ||
-        format(new Date(logs?.activity_logs[index + 1]?.updated_at), DATE_FORMATS.YYYYMMDD) !== logDate;
+        format(new Date(ensureUTCTimestamp(logs?.activity_logs[index + 1]?.updated_at)), DATE_FORMATS.YYYYMMDD) !==
+          logDate;
 
       currentDate = showDateSeparator ? logDate : currentDate;
 

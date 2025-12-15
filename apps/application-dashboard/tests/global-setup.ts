@@ -5,6 +5,12 @@ import { PLAYWRIGHT_ENV_CREDENTIALS } from '../playwright.config';
 import { getOrCreateCDPConnection } from '../tests/session_management/selenium-session-manager';
 import { waitForVisible } from '../tests/utils';
 
+// Authentication method enum
+enum AuthMethod {
+  EMAIL_PASSWORD = 'EMAIL_PASSWORD',
+  GOOGLE_SSO = 'GOOGLE_SSO',
+}
+
 // Generate TOTP token using totp-generator package
 function generateTOTP(secret: string): string {
   const { otp } = TOTP.generate(secret);
@@ -65,11 +71,14 @@ async function globalSetup(config: FullConfig) {
     await page.getByRole('button', { name: 'Next' }).click();
   }
 
-  // authentication method
-  const authMethod = isSeleniumLocalBrowser ? 'GOOGLE_SSO' : 'EMAIL_PASSWORD';
+  // Authentication method based on URL
+  const isLocalhost = baseUrl.includes('local.zamp.ai');
+  const authMethod: AuthMethod = isLocalhost ? AuthMethod.GOOGLE_SSO : AuthMethod.EMAIL_PASSWORD;
+
+  // const authMethod = isSeleniumLocalBrowser ? AuthMethod.GOOGLE_SSO : AuthMethod.EMAIL_PASSWORD;
 
   switch (authMethod) {
-    case 'EMAIL_PASSWORD':
+    case AuthMethod.EMAIL_PASSWORD:
       console.log('Using email-password authentication...');
       await page.getByTestId('login-email').fill(adminEmail);
       await page.getByRole('button', { name: 'Login' }).click();
@@ -84,7 +93,7 @@ async function globalSetup(config: FullConfig) {
       await page.getByTestId('btn-login').click();
       break;
 
-    case 'GOOGLE_SSO':
+    case AuthMethod.GOOGLE_SSO:
       console.log('Using Google SSO authentication...');
       await page.getByTestId('login-email').fill(adminEmail);
       await page.getByRole('button', { name: 'Login' }).click();
@@ -122,7 +131,15 @@ async function globalSetup(config: FullConfig) {
     const currentURL = page.url();
 
     console.log(`🌐 Currently at: ${currentURL}`);
-    if (currentURL.includes(isSeleniumLocalBrowser ? 'app-dev-aws.zamp.ai' : 'app-stg-aws.zamp.ai')) {
+    if (
+      currentURL.includes(
+        isSeleniumLocalBrowser && !isLocalhost
+          ? 'coder-live.zamp.dev'
+          : isSeleniumLocalBrowser
+            ? 'app-dev.zamp.ai'
+            : 'app-stg.zamp.ai',
+      )
+    ) {
       console.log(`Redirected to ${baseUrl}`);
       break;
     }

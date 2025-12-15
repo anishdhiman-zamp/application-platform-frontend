@@ -23,6 +23,16 @@ export const API_ENDPOINTS = {
   TEAMS_BY_ORGANIZATION_ID_PATCH: `organizations/{{organizationId}}/teams/{{teamId}}`,
   TEAMS_BY_ORGANIZATION_ID_DELETE: `organizations/{{organizationId}}/teams/{{teamId}}`,
 
+  // feedback
+  FEEDBACKS_GET: `feedbacks`,
+  FEEDBACKS_ARCHIVE_POST: `feedbacks/archive`,
+  FEEDBACKS_OPEN_GET: `v2/conversations/open/{{processId}}`,
+  FEEDBACKS_DELETE_POST: `feedbacks/delete`,
+  FEEDBACKS_CONVERSATION_DELETE: `conversations/{{conversationId}}/{{resourceType}}/{{resourceId}}`,
+  FEEDBACKS_UN_ARCHIVE_POST: `feedbacks/unarchive`,
+  FEEDBACKS_APPLY_POST: `feedbacks/apply`,
+  FEEDBACKS_STOP_PROCESSING_POST: `feedbacks/stop-processing`,
+
   TEAM_PENDING_APPROVALS_GET: `access-control/pending/users-access-approvals`,
   TEAM_PENDING_APPROVALS_BY_RESOURCE_ID_GET: `access-control/pending/resource-audience-policy`,
 
@@ -97,9 +107,9 @@ export const API_ENDPOINTS = {
   PAYMENTS_CONFIG_GET: `payments/config`,
   PAYMENTS_APPROVALS_INFO_GET: `payments/{{paymentId}}/approvals-info`,
   PAYMENTS_TEMPLATE_APPROVALS_INFO_GET: `payments/templates/{{templateId}}/approvals-info`,
-  FORMS_SIGNED_UPLOAD_URL_POST: `v1/forms/file-upload/init`,
-  FORMS_SIGNED_UPLOAD_ACK_POST: `v1/forms/file-upload/{{fileImportId}}/ack`,
-  DOWNLOAD_FILE_GET: `v1/forms/file-upload/{{fileImportId}}/download`,
+  FORMS_SIGNED_UPLOAD_URL_POST: `file-imports/initiate`,
+  FORMS_SIGNED_UPLOAD_ACK_POST: `file-imports/{{fileImportId}}/acknowledge`,
+  DOWNLOAD_FILE_GET: `file-imports/{{fileImportId}}/download-url`,
   PAYMENTS_AUDIENCES_GET: `payments/audiences`,
 
   DUAL_ADMIN_POLICY_GET: `/dual-admin-policy`,
@@ -153,4 +163,10 @@ export const API_ENDPOINTS = {
   EMIT_HITL_ACTION_POST: `processes/{{processId}}/activity-runs/{{activityRunId}}/hitl/actions`,
   PROCESSES_EVENTS_GET: `processes/events/{{activityId}}`,
   UNIFIED_SSE: `events`,
+
+  //Voice Agents
+  SPEECH_TO_TEXT_ACCESS_TOKEN_GET: `/speech-to-text/generate-access-token`,
+
+  INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
+  INTERACTION_DISABLE_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable`,
 };

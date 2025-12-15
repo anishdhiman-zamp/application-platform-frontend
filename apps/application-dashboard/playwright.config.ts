@@ -4,19 +4,39 @@ const isCI = !!process.env.GITHUB_ACTIONS; // check if running in CI
 const USE_LOCAL_SELENIUM_BROWSER = process.env.USE_LOCAL_SELENIUM === 'true'; // make this "!==" to run remote selenium-gird locally
 const STORAGE_STATE = 'tests/session-secrets/session-state.json'; // session data storage path
 
+const GOOGLE_SSO_CONFIG = {
+  adminEmail: process.env.ADMIN_EMAIL || '',
+  adminPassword: process.env.ADMIN_PASSWORD || '',
+  email: process.env.GOOGLE_SSO_EMAIL || '',
+  password: process.env.GOOGLE_SSO_PASSWORD || '',
+  totpSecret: process.env.GOOGLE_SSO_TOTP_SECRET || '',
+};
+
+const CODER_USERNAME = process.env.CODER_USERNAME || '';
+
+const URL_CONFIG = {
+  DEV: process.env.URL_DEV || '',
+  STG: process.env.URL_STG || '',
+  LOCAL_FE: CODER_USERNAME ? process.env.URL_CODER || '' : process.env.URL_LOCAL || '',
+  LOCAL_BROWSER: process.env.URL_LOCAL_BROWSER_CDP || '',
+  CODER_USERNAME: CODER_USERNAME,
+};
+
+const API_CONFIG = {
+  DEV: process.env.API_DEV || '',
+  STG: process.env.API_STG || '',
+  CODER_LOCAL: CODER_USERNAME ? process.env.API_CODER || '' : '',
+};
+
 export const PLAYWRIGHT_ENV_CREDENTIALS = {
-  googleSSOConfig: {
-    adminEmail: 'admin@zamp.ai',
-    adminPassword: 'Zamp@123Zamp@!@#',
-    email: '', // use your google sso email
-    password: '', // use your google sso password
-    totpSecret: '', // generate your totp secret => https://zxing.org/w/decode.jspx
-  },
-  localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || 'ws://localhost:9222',
-  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://local.zamp.ai:2000' : 'https://app-stg-aws.zamp.ai', // run on stg = 'https://app-stg-aws.zamp.ai'
+  googleSSOConfig: GOOGLE_SSO_CONFIG,
+  urlConfig: URL_CONFIG,
+  apiConfig: API_CONFIG,
+  localSeleniumBrowserCDPUrl: process.env.SELENIUM_CDP_URL || URL_CONFIG.LOCAL_BROWSER,
+  baseUrl: USE_LOCAL_SELENIUM_BROWSER ? URL_CONFIG.LOCAL_FE : URL_CONFIG.STG,
   isSeleniumLocalBrowser: USE_LOCAL_SELENIUM_BROWSER,
   storageState: STORAGE_STATE,
-  baseBEUrl: USE_LOCAL_SELENIUM_BROWSER ? 'https://api-dev-aws-us.zamp.ai' : 'https://api-stg-aws-us.zamp.ai', // run on stg = 'https://api-stg-aws-us.zamp.ai'
+  baseBEUrl: USE_LOCAL_SELENIUM_BROWSER ? API_CONFIG.DEV : API_CONFIG.STG, // run on stg = 'https://api-stg.zamp.ai'
 };
 
 export default defineConfig({

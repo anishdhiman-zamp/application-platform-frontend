@@ -1,6 +1,8 @@
+import type { UserSessionCache } from '@/types/api/auth.types';
+
 export const PREV_ROUTE_COOKIE = 'zamp_prev_route';
 export const ORY_KRATOS_SESSION_COOKIE = 'ory_kratos_session';
-export const USER_SESSION_COOKIE = 'zamp_user_session';
+export const USER_SESSION_COOKIE = 'zamp_user_session_v2';
 export const SESSION_CACHE_MAX_AGE = 60 * 5;
 export const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
@@ -23,4 +25,22 @@ export const getCookie = (name: string) => {
   const cookie = document.cookie.split(';').find((c) => c.trim().startsWith(`${name}=`));
 
   return cookie ? cookie.split('=')[1] : null;
+};
+
+export const clearCookie = (name: string) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
+  }
+};
+
+export const getUserSession = (): UserSessionCache | null => {
+  const cookieValue = getCookie(USER_SESSION_COOKIE);
+
+  if (!cookieValue) return null;
+
+  try {
+    return JSON.parse(decodeURIComponent(cookieValue)) as UserSessionCache;
+  } catch {
+    return null;
+  }
 };

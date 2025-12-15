@@ -5,9 +5,11 @@ import { cn } from '@zamp-platform/ui/utils';
 import { PERIODICITY_TYPES } from '@zamp-platform/utils';
 import AGChartsWidgets from 'modules/widgets/AgChartWidgets';
 import WidgetInfo from 'modules/widgets/create/components/WidgetInfo';
+import { SIZE_OPTIONS_VALUES } from 'modules/widgets/create/constants';
 import { useWidgetCreationContext } from 'modules/widgets/create/context/WidgetCreationContext';
 import { WIDGET_TYPES, WidgetInstanceTypeWrapper } from 'types/api/widgets.types';
-import ZampLogoLoader from '@/components/common/loader/ZampLogoLoader';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import useMockData from '@/modules/widgets/create/hooks/useMockData';
 import usePreviewData from '@/modules/widgets/create/hooks/usePreviewData';
 import { getCommaSeparatedNumber } from '@/utils/common';
@@ -81,19 +83,25 @@ const WidgetPreview = () => {
   const isKpiWidget = useMemo(() => formData.visualizationType === WIDGET_TYPES.KPI, [formData.visualizationType]);
 
   return (
-    <div className='space-y-2.5'>
-      <CommonWrapper
-        isLoading={isFetching}
-        skeletonType={SkeletonTypes.CUSTOM}
-        className={cn('h-100 overflow-hidden rounded-xl border border-gray-200', {
-          'bg-white': !(isKpiWidget && formData?.datasetId),
-          'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
+    <div className='flex justify-center'>
+      <div
+        className={cn('w-full space-y-2.5 transition-all duration-300', {
+          'w-[558px]': !isKpiWidget && formData?.size === SIZE_OPTIONS_VALUES.HALF,
         })}
-        loader={<ZampLogoLoader className='bg-transparent' />}
       >
-        {renderPreviewWidget()}
-      </CommonWrapper>
-      {!isKpiWidget && formData?.datasetId && mockWidgetDetails && previewData.length > 0 && <WidgetInfo />}
+        <CommonWrapper
+          isLoading={isFetching}
+          skeletonType={SkeletonTypes.CUSTOM}
+          className={cn('h-100 w-full overflow-hidden rounded-xl border border-gray-200', {
+            'bg-white': !(isKpiWidget && formData?.datasetId),
+            'flex items-center justify-center border-none': isKpiWidget && formData?.datasetId,
+          })}
+          loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />}
+        >
+          {renderPreviewWidget()}
+        </CommonWrapper>
+        {!isKpiWidget && formData?.datasetId && mockWidgetDetails && previewData.length > 0 && <WidgetInfo />}
+      </div>
     </div>
   );
 };

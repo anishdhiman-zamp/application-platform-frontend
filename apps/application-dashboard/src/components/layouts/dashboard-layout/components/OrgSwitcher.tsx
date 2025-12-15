@@ -3,13 +3,13 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useGetBaseUrlQuery, useWhoAmIQuery } from '@/apis/auth';
+import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
+import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
@@ -17,7 +17,6 @@ import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { useLogout } from '@/hooks/useLogout';
-import DropdownToggle from '@/modules/payments/move-money/components/DropdownToggle';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
@@ -35,10 +34,9 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const [isOrgSwitcherMenuOpen, setIsOrgSwitcherMenuOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization>();
 
-  const { data: session } = useWhoAmIQuery(undefined, { refetchOnMountOrArgChange: false });
   const { data: baseUrlData } = useGetBaseUrlQuery(
     { email: user?.user_email ?? '' },
-    { refetchOnMountOrArgChange: false },
+    { refetchOnMountOrArgChange: false, skip: !user?.user_email },
   );
   const { logout, isLoggingOut } = useLogout();
 
@@ -53,7 +51,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     refetchOnMountOrArgChange: false,
   });
 
-  const defaultOrgName = useMemo(() => session?.orgs?.[0]?.name ?? '', [session]);
+  const defaultOrgName = useMemo(() => user?.orgs?.[0]?.name ?? '', [user]);
 
   const handleOrgChange = (org: Organization) => {
     if (org.organization_id === selectedOrg?.organization_id) return;
@@ -96,7 +94,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
       <DropdownMenu onOpenChange={setIsOrgSwitcherMenuOpen}>
         <DropdownMenuTrigger asChild>
           <div
-            className='border-GRAY_400 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
+            className='border-GRAY_400 bg-BG_GRAY_1 absolute bottom-0 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
             data-testid='org-switcher-trigger'
           >
             <CommonWrapper
@@ -110,10 +108,14 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
                   selectedOrgColor,
                   'f-10-500 flex h-6 w-6 items-center justify-center rounded-sm border-white',
                 )}
+                data-testid='dummy'
               >
                 {selectedOrg?.name?.[0] || defaultOrgName[0]}
               </div>
-              <div className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
+              <div
+                className='f-12-450 flex-1 overflow-hidden text-ellipsis whitespace-nowrap'
+                data-testid={`select-org-${selectedOrg?.name?.toLowerCase()}`}
+              >
                 {selectedOrg?.name || defaultOrgName}
               </div>
               {isSidebarOpen && (
@@ -131,7 +133,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
           className='z-9999 mr-1 flex w-[229px] flex-col gap-[2px] overflow-y-auto p-1'
           sideOffset={5}
         >
-          <div className='flex max-h-[300px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
+          <div className='flex max-h-[150px] flex-col gap-1 overflow-y-auto [scrollbar-width:none]'>
             <CommonWrapper
               loader={<SkeletonLoaderSidebarPages />}
               skeletonType={SkeletonTypes.CUSTOM}
@@ -177,7 +179,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
               })}
             >
               <div className='flex h-6 w-6 items-center justify-center'>
-                <SvgSpriteLoader id='log-out-02' size={14} />
+                <LogOut width={14} height={14} />
               </div>
               <div className='f-12-450 flex-1'>Logout</div>
               {isLoggingOut && <Loader2 className='w-4 animate-spin' />}

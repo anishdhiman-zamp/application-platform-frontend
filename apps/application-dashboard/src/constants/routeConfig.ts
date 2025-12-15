@@ -1,6 +1,3 @@
-import { COINS_STACKED_04, USERS_02 } from 'constants/icons';
-import { NavigationItemSchema } from 'types/config';
-
 export const ROUTES_PATH = {
   HOME: '/',
   LOGIN: '/login',
@@ -13,24 +10,26 @@ export const ROUTES_PATH = {
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   PAGE_SHEET: '/pages/:pageId/:sheetId',
   NO_ACCESS: '/no-access',
-  ADMIN: '/admin',
   PAYMENTS: '/payments',
   INVITATIONS: '/invitations',
   MONEY_TRANSFER: '/payments/money-transfer',
   ADMIN_DATASETS: '/admin/datasets',
   ADMIN_DATASET: '/admin/datasets/:datasetId',
-  ADMIN_ASSETS: '/admin/assets',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
   PROCESS: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
-  SETTINGS: '/settings',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
+
+  SETTINGS: '/settings',
+  INTEGRATIONS: '/settings/integrations',
+  INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
+  SETTINGS_TEAM: '/settings/team',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -94,33 +93,8 @@ export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
   return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
 };
 
-export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
+export const getIntegrationDetailRoute = (integrationId: string) => {
+  return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
+};
 
-export const SETTING_SIDEBAR_ITEMS = [
-  {
-    label: 'People',
-    id: 'people',
-    iconId: 'users-02',
-    path: ROUTES_PATH.TEAM,
-  },
-  {
-    label: 'Policies',
-    id: 'policies',
-    iconId: 'shield-zap',
-    path: ROUTES_PATH.POLICIES,
-  },
-];
-export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
-  {
-    label: 'Data',
-    id: 'data',
-    iconUrl: COINS_STACKED_04,
-    path: ROUTES_PATH.DATA,
-  },
-  {
-    label: 'People',
-    id: 'people',
-    iconUrl: USERS_02,
-    path: ROUTES_PATH.TEAM,
-  },
-];
+export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

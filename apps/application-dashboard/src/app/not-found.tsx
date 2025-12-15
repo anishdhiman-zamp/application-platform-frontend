@@ -1,6 +1,7 @@
 import { Button } from '@zamp-platform/ui';
 import Link from 'next/link';
 
+//not found page
 export default function NotFound() {
   return (
     <div className='flex min-h-screen flex-col items-center justify-center p-4'>

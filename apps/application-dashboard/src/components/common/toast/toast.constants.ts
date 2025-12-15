@@ -104,3 +104,8 @@ export const UpdateMissingFieldsMessages = {
   ERROR: TOAST_MESSAGES.ERROR_UPDATE_MISSING_FIELD,
   IN_PROGRESS: TOAST_MESSAGES.IN_PROGRESS_UPDATE_MISSING_FIELD,
 };
+
+export const KB_TOAST_MESSAGES = {
+  FAILED_CONVERSATION_CREATION: 'Failed to create conversation',
+  FAILED_FETCHING_KNOWLEDGE_BASE: 'Failed to fetch knowledge base content',
+};

@@ -1,20 +1,37 @@
-export const ASSET_PREFIX = process.env.NEXT_PUBLIC_ASSET_PREFIX ?? '';
-const IMAGE_PREFIX = ASSET_PREFIX ? `${ASSET_PREFIX}/public` : '';
+// ImageKit.io configuration
+export const IMAGEKIT_URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? '';
+
+// For backward compatibility and fallback to local assets
+export const IMAGE_PREFIX = IMAGEKIT_URL_ENDPOINT || '';
 
 // Utility function for CSS background images
 export const getBackgroundImageUrl = (path: string): string => {
-  // Automatically prepend /public if not already present
+  // Remove leading slash and /public prefix for ImageKit
+  const cleanPath = path.replace(/^\/public/, '').replace(/^\//, '');
+
+  if (IMAGEKIT_URL_ENDPOINT) {
+    return `url(${IMAGEKIT_URL_ENDPOINT}/${cleanPath})`;
+  }
+
+  // Fallback to local assets
   const publicPath = path.startsWith('/public') ? path : `/public${path}`;
 
-  return `url(${ASSET_PREFIX}${publicPath})`;
+  return `url(${publicPath})`;
 };
 
 // Utility function for getting asset URLs (for src attributes, etc.)
 export const getAssetUrl = (path: string): string => {
-  // Automatically prepend /public if not already present
+  // Remove leading slash and /public prefix for ImageKit
+  const cleanPath = path.replace(/^\/public/, '').replace(/^\//, '');
+
+  if (IMAGEKIT_URL_ENDPOINT) {
+    return `${IMAGEKIT_URL_ENDPOINT}/${cleanPath}`;
+  }
+
+  // Fallback to local assets
   const publicPath = path.startsWith('/public') ? path : `/public${path}`;
 
-  return `${ASSET_PREFIX}${publicPath}`;
+  return publicPath;
 };
 
 export const ZAMP_ICON = IMAGE_PREFIX + '/icons/zamp-icon.svg';
@@ -37,7 +54,6 @@ export const CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/chevron-right.svg';
 export const DISABLED_CHEVRON_RIGHT = IMAGE_PREFIX + '/icons/disabled-chevron-right.svg';
 export const RED_ALERT_ICON = IMAGE_PREFIX + '/icons/red-alert-circle.svg';
 export const GREEN_CHECK_ICON = IMAGE_PREFIX + '/icons/green-check-circle.svg';
-export const ZAMP_LOGO = IMAGE_PREFIX + '/icons/zampBlack.svg';
 export const SCREEN_SUPPORT = IMAGE_PREFIX + '/images/screen-support.svg';
 export const DATASET_ICON = IMAGE_PREFIX + '/icons/dataset.svg';
 export const GROUP_EXPAND_ICON = IMAGE_PREFIX + '/icons/group-expand.svg';
@@ -144,9 +160,10 @@ export const SPRINKLR = IMAGE_PREFIX + '/icons/agents/artifacts/sprinklr.svg';
 export const REDIRECT = IMAGE_PREFIX + '/icons/agents/artifacts/redirect.svg';
 export const LINK = IMAGE_PREFIX + '/icons/agents/artifacts/link.svg';
 
-export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.png';
-export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.png';
-export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.png';
+export const NEEDS_ATTENTION_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/needs-attention.webp';
+export const DONE_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/done.webp';
+export const IN_PROGRESS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/in-progress.webp';
+export const TEAM_MEMBERS_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/team-members.webp';
 
 export const SHEET_EMPTY_STATE = IMAGE_PREFIX + '/images/empty-state/sheet.png';
 
@@ -158,12 +175,17 @@ export const PAUSED = IMAGE_PREFIX + '/icons/agents/video-artifact/paused.svg';
 // knowledge based
 export const KNOWLEDGE_BASED_ICON = IMAGE_PREFIX + '/images/kb-background.svg';
 
-export const COINS_STACKED_04 = IMAGE_PREFIX + '/icons/coins-stacked-04.svg';
-export const USERS_02 = IMAGE_PREFIX + '/icons/users-02.svg';
-export const FLEX_ALIGN_RIGHT = IMAGE_PREFIX + '/icons/flex-align-right.svg';
+// feedback
+export const QUEUED_ICON = IMAGE_PREFIX + '/icons/feedback/status/queued.svg';
+export const FEEDBACK_SUCCESS_ICON = IMAGE_PREFIX + '/icons/feedback/status/feedback-success.svg';
+export const LOADER_02 = IMAGE_PREFIX + '/icons/feedback/status/loader-02.svg';
+export const MESSAGE_ICON = IMAGE_PREFIX + '/icons/feedback/message.svg';
+export const PLAY_ICON = IMAGE_PREFIX + '/icons/feedback/play.svg';
+export const FEEDBACK_OPEN_ICON = IMAGE_PREFIX + '/icons/feedback/feedback-open.svg';
 
-//GIF
-export const ZAMP_LOGO_LOADER_WEBP = IMAGE_PREFIX + '/loaders/zamp-logo-loader.webp';
+//Loaders
+export const ZAMP_LOGO_LOADER_SVG = '/loaders/zamp-logo-loader.svg';
+export const WIDGET_LOADER_SVG = '/loaders/widget-loader.svg';
 
 export const VERCEL_BLOB_BASE_URL = process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL;
 export const VERCEL_BLOB_ICON_URL = `${VERCEL_BLOB_BASE_URL}/icons`;

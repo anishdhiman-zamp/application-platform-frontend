@@ -296,9 +296,9 @@ export const getFilterContext = (
 
 /**
  * Checks if a value is empty, null, or undefined.
- * @param {string | null | undefined} value - The value to check.
+ * @param {string | number | null | undefined} value - The value to check.
  * @returns {boolean} True if the value is empty.
  */
-export const isValueEmpty = (value: string | null | undefined) => {
+export const isValueEmpty = (value: string | number | null | undefined) => {
   return value === '' || value === null || value === undefined;
 };

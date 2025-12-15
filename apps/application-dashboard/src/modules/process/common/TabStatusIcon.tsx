@@ -11,6 +11,7 @@ const TabStatusIcon = ({ fillColor, strokeColor, status }: TabStatusIconProps) =
   switch (status) {
     case ACTIVITY_RUN_STATUS.NEEDS_ATTENTION:
     case ACTIVITY_RUN_STATUS.IN_PROGRESS:
+    case ACTIVITY_RUN_STATUS.NEEDS_REVIEW:
     case ACTIVITY_RUN_STATUS.VOID:
     case ACTIVITY_RUN_STATUS.DONE:
     case ACTIVITY_RUN_STATUS.FAILED:

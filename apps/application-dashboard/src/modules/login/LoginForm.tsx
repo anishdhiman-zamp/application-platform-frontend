@@ -1,13 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
-import {
-  BASE_API_URL,
-  DEFAULT_REGION,
-  getApiDomainAndRegions,
-  reinitializeApiDomain,
-  REQUEST_TYPES,
-} from '@zamp-platform/api';
+import { BASE_API_URL, getApiDomainAndRegions, reinitializeApiDomain, REQUEST_TYPES } from '@zamp-platform/api';
 import {
   getFromLocalStorage,
   LOCAL_STORAGE_KEYS,
@@ -19,7 +13,6 @@ import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import LocaldevEmailPasswordLogin from 'modules/login/LocaldevEmailPasswordLogin';
 import { LOGIN_GROUPS, VALID_SESSION_DETECTED_ERROR_MSG } from 'modules/login/login.constants';
 import LoginButton from 'modules/login/LoginButton';
-import RegionsSelectDropdown from 'modules/login/RegionsSelectDropdown';
 import { LoginFlow } from 'types/api/auth.types';
 import { SIZE_TYPES } from 'types/common/components';
 import { getDomainFromEmail, isValidEmail } from 'utils/common';
@@ -35,15 +28,11 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [providerLogo, setProviderLogo] = useState<string>('');
-  const [allRegions, setAllRegions] = useState<{ region: string; url: string }[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<{ region: string; url: string }>({
-    region: DEFAULT_REGION,
-    url: BASE_API_URL,
-  });
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e?.target?.value !== undefined) {
       setEmail(e.target.value);
+      setError(null);
     }
   };
 
@@ -58,6 +47,7 @@ export const LoginForm = () => {
       const urlObj = new URL(redirectUrl);
 
       urlObj.searchParams.set('hd', emailDomain);
+      urlObj.searchParams.set('login_hint', email);
 
       setHasError(false);
       window.location.href = urlObj.toString();
@@ -141,7 +131,7 @@ export const LoginForm = () => {
       setHasError(false);
 
       if (response.status !== API_STATUS_CODES.OK) {
-        setError(respJson.error);
+        setError(respJson.error || respJson?.detail);
         removeFromLocalStorage(LOCAL_STORAGE_KEYS.LAST_LOGGED_IN_OIDC_EMAIL);
         setHasError(true);
         setLoading(false);
@@ -183,16 +173,7 @@ export const LoginForm = () => {
     }
     const allRegionsResponse = await getApiDomainAndRegions(email);
 
-    if (allRegionsResponse.length > 1 && allRegions.length === 0) {
-      setAllRegions(allRegionsResponse);
-      setLoading(false);
-
-      return;
-    } else if (allRegionsResponse.length === 1) {
-      doLogin(allRegionsResponse[0].url);
-    } else {
-      doLogin(selectedRegion.url);
-    }
+    doLogin(allRegionsResponse?.length > 0 ? allRegionsResponse[0]?.url : BASE_API_URL);
   };
 
   const inputDisabled = loading;
@@ -217,13 +198,6 @@ export const LoginForm = () => {
           disabled={inputDisabled}
           size={SIZE_TYPES.LARGE}
         />
-        {allRegions.length > 1 && (
-          <RegionsSelectDropdown
-            selectedRegion={selectedRegion}
-            setSelectedRegion={setSelectedRegion}
-            regions={allRegions}
-          />
-        )}
       </div>
       <LoginButton loading={loading} onClick={() => handleSubmit} providerLogo={providerLogo} />
     </form>

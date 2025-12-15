@@ -2,13 +2,14 @@
 
 import { memo, useEffect, useMemo } from 'react';
 import { useGetPagesQuery, useGetProcessesQuery } from 'apis/pages';
-import { getProcessRouteById, SIDEBAR_ITEMS } from 'constants/routeConfig';
+import { getProcessRouteById, ROUTES_PATH } from 'constants/routeConfig';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePersistedPageNavigation } from 'hooks/useLastVisitedPage';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
+import { SETTINGS_ID, SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -19,16 +20,24 @@ import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTa
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
 const Sidebar = () => {
-  const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
+  const { isSidebarOpen, lastVisitedSettingsRoute } = useAppSelector((state: RootState) => state.layoutConfig);
   const params = useParams();
   const pathTrim = usePathname();
   const hash = useHash();
   const pathname = pathTrim + hash;
 
-  const { data: pages, isLoading: isLoadingPages } = useGetPagesQuery(undefined, {
+  const {
+    data: pages,
+    isLoading: isLoadingPages,
+    isSuccess: isSuccessPages,
+  } = useGetPagesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
+  const {
+    data: processes,
+    isLoading: isLoadingProcesses,
+    isSuccess: isSuccessProcesses,
+  } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
   const { pushToMostRelevantPage, pushToMostRelevantProcess } = usePersistedPageNavigation({
@@ -45,12 +54,14 @@ const Sidebar = () => {
   }, [pages]);
 
   useEffect(() => {
-    if (processes) {
-      pushToMostRelevantProcess();
-    } else if (pages) {
-      pushToMostRelevantPage();
+    if (isSuccessPages && isSuccessProcesses) {
+      if (processes && processes?.length > 0) {
+        pushToMostRelevantProcess();
+      } else if (pages && pages?.length > 0) {
+        pushToMostRelevantPage();
+      }
     }
-  }, [pages, processes]);
+  }, [pages, processes, isSuccessPages, isSuccessProcesses]);
 
   const isLoading = isLoadingProcesses || isLoadingPages;
 
@@ -60,16 +71,20 @@ const Sidebar = () => {
         <div className='w-60'>
           <div className='h-full'>
             <div className='border-GRAY_400 border-b px-2 pb-4'>
-              {SIDEBAR_ITEMS.map((item) => (
-                <Link prefetch href={item.path} key={item.label} className='cursor-pointer'>
-                  <SidebarTab
-                    key={item.label}
-                    name={item.label}
-                    iconUrl={item.iconUrl}
-                    isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
-                  />
-                </Link>
-              ))}
+              {SIDEBAR_ITEMS.map((item) => {
+                const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
+
+                return (
+                  <Link prefetch href={itemPath} key={item.label} className='cursor-pointer'>
+                    <SidebarTab
+                      key={item.label}
+                      name={item.label}
+                      iconComponent={item.iconComponent}
+                      isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
+                    />
+                  </Link>
+                );
+              })}
             </div>
 
             <CommonWrapper

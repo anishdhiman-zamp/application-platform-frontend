@@ -11,7 +11,11 @@ import { RootState } from 'store';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
-const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoadingInvitedTeamMembersData }) => {
+const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({
+  data,
+  isLoadingInvitedTeamMembersData,
+  search,
+}) => {
   const reversedData = useMemo(() => data?.slice().reverse(), [data]);
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { data: invitedTeamMembersData } = useGetInvitedAudiencesByOrganisationIdQuery(
@@ -20,6 +24,10 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
   );
 
   const hasData = (invitedTeamMembersData?.length ?? 0) > 0;
+
+  if (search && reversedData?.length === 0) {
+    return <EmptyStateListing title='No pending invitations found' />;
+  }
 
   return hasData || isLoadingInvitedTeamMembersData ? (
     <>
@@ -35,7 +43,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({ data, isLoa
           <CommonWrapper
             isLoading={isLoadingInvitedTeamMembersData}
             skeletonType={SkeletonTypes.CUSTOM}
-            loader={<SkeletonLoaderListing />}
+            loader={<SkeletonLoaderListing columns={3} length={12} />}
             className='h-[calc(100vh-270px)] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden'
           >
             {reversedData?.map((row, index) => (

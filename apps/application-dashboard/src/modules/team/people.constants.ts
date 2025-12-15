@@ -1,10 +1,10 @@
-import { TEMPLATE_APPROVAL_ACTION_TYPES } from 'modules/payments/payments.types';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
 import MembersRole from 'modules/team/components/members/MembersRole';
 import { TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
 import { MapAny } from 'types/commonTypes';
 import { capitalizeFirstLetter } from 'utils/common';
+import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/constants/payments.constants';
 
 export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   {

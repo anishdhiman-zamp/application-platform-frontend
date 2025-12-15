@@ -147,16 +147,21 @@ const getBarLineChartFields = (
   mapping: BarLineChartWidgetMapping,
   widgetType: WIDGET_TYPES.BAR_CHART | WIDGET_TYPES.LINE_CHART,
 ): ChartSpecificFields => {
+  // Defensive check: Ensure required fields exist
+  if (!mapping?.fields?.x_axis?.[0] || !mapping?.fields?.y_axis?.[0]) {
+    return {};
+  }
+
   const chartFields = {
     xAxis: {
-      column: mapping.fields.x_axis[0].column,
-      column_type: mapping.fields.x_axis[0].type,
+      column: mapping.fields.x_axis[0].column || '',
+      column_type: mapping.fields.x_axis[0].type || '',
       filter_type: mapping.fields.x_axis[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     yAxis: {
-      column: mapping.fields.y_axis[0].column,
+      column: mapping.fields.y_axis[0].column || '',
       aggregation: mapping.fields.y_axis[0].aggregation || AGGREGATION_TYPES.SUM,
-      column_type: mapping.fields.y_axis[0].type,
+      column_type: mapping.fields.y_axis[0].type || '',
       filter_type: mapping.fields.y_axis[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     ...(mapping.fields.group_by?.[0]?.column
@@ -175,17 +180,22 @@ const getBarLineChartFields = (
 };
 
 const getDonutChartFields = (mapping: PieDonutChartWidgetMapping): ChartSpecificFields => {
+  // Defensive check: Ensure required fields exist
+  if (!mapping?.fields?.values?.[0] || !mapping?.fields?.slices?.[0]) {
+    return {};
+  }
+
   const donutChartFields = {
     field: {
-      column: mapping.fields.values?.[0]?.column || '',
-      aggregation: mapping.fields.values?.[0]?.aggregation || AGGREGATION_TYPES.SUM,
-      column_type: mapping.fields.values?.[0]?.type || '',
-      filter_type: mapping.fields.values?.[0]?.drilldown_filter_type || FILTER_TYPES.SEARCH,
+      column: mapping.fields.values[0].column || '',
+      aggregation: mapping.fields.values[0].aggregation || AGGREGATION_TYPES.SUM,
+      column_type: mapping.fields.values[0].type || '',
+      filter_type: mapping.fields.values[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     groupBy: {
-      column: mapping.fields.slices?.[0]?.column || '',
-      column_type: mapping.fields.slices?.[0]?.type || '',
-      filter_type: mapping.fields.slices?.[0]?.drilldown_filter_type || FILTER_TYPES.SEARCH,
+      column: mapping.fields.slices[0].column || '',
+      column_type: mapping.fields.slices[0].type || '',
+      filter_type: mapping.fields.slices[0].drilldown_filter_type || FILTER_TYPES.SEARCH,
     },
     dataFormat: 'value' as const,
   };
@@ -258,15 +268,16 @@ export const generateMockWidgetDetails = (
 ): WidgetInstanceType | null => {
   if (!formData.datasetId || !formData.chartSpecificFields) return null;
   let mockWidgetDetailsGenerated = null;
+  const timestamp = new Date().toISOString();
 
   const baseWidget = {
-    widget_instance_id: 'preview-widget',
+    widget_instance_id: `preview-widget-${timestamp}`,
     widget_id: 'preview',
     sheet_id: 'preview-sheet',
     title: formData.title || 'New Widget',
     dataset_id: formData.datasetId,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: timestamp,
+    updated_at: timestamp,
   };
 
   switch (formData.visualizationType) {
@@ -455,24 +466,35 @@ export const updateGroupStats = (group: GroupStats, value: number): void => {
   group.max = Math.max(group.max, value);
 };
 
-export const sortByXAxis = (data: MapAny[], xKey: string): void => {
+export const sortByXAxis = (data: MapAny[], xKey: string, isXaxisTimestamp: boolean): void => {
   data.sort((a, b) => {
-    const aValue = new Date(a[xKey]);
-    const bValue = new Date(b[xKey]);
+    if (isXaxisTimestamp) {
+      const aValue = new Date(a[xKey]);
+      const bValue = new Date(b[xKey]);
 
-    return compareAsc(aValue, bValue);
+      const aIsValid = isValid(aValue);
+      const bIsValid = isValid(bValue);
+
+      if (aIsValid && bIsValid) {
+        return compareAsc(aValue, bValue);
+      }
+    }
+
+    // If one or both dates are invalid, fallback to string comparison
+    return String(a[xKey]).localeCompare(String(b[xKey]));
   });
 };
 
-const getXValue = (row: MapAny, xKey: string) => {
+const getXValue = (row: MapAny, xKey: string, isXaxisTimestamp: boolean) => {
   const xValue = row?.[xKey];
-  let formattedXValue = xValue ? new Date(xValue) : xValue;
-  const isValidDate = isValid(formattedXValue);
 
-  if (isValidDate) {
+  let formattedXValue: Date | string = xValue && isXaxisTimestamp ? new Date(xValue) : `${xValue}`;
+  const isValidDate = isXaxisTimestamp && isValid(formattedXValue);
+
+  if (isValidDate && formattedXValue instanceof Date) {
     formattedXValue.setHours(0, 0, 0, 0);
     formattedXValue = formattedXValue.toString();
-  }
+  } else formattedXValue = `${xValue}`;
 
   return formattedXValue;
 };
@@ -483,10 +505,11 @@ export const processGroupedChartData = (
   yKey: string,
   groupBy: string,
   aggregation: AGGREGATION_TYPES,
+  isXaxisTimestamp: boolean,
 ) => {
   const groupDistinctValues = new Set<string>();
   const groupedData = mockData.reduce<Record<string, Record<string, GroupStats>>>((acc, row) => {
-    const xValue = getXValue(row, xKey);
+    const xValue = getXValue(row, xKey, isXaxisTimestamp);
     const yValue = row?.[yKey] ?? 0;
     const groupByValue = row?.[groupBy];
 
@@ -534,9 +557,10 @@ export const processNonGroupedChartData = (
   xKey: string,
   yKey: string,
   aggregation: AGGREGATION_TYPES,
+  isXaxisTimestamp: boolean,
 ) => {
   const aggregatedData = mockData.reduce<Record<string, GroupStats>>((acc, row) => {
-    const xValue = getXValue(row, xKey);
+    const xValue = getXValue(row, xKey, isXaxisTimestamp);
     const yValue = row?.[yKey] ?? 0;
 
     if (xValue) {

@@ -26,9 +26,17 @@ export const getFromLocalStorage = (key: string) => {
 };
 
 export const setToLocalStorage = (key: LOCAL_STORAGE_KEYS, value: string) => {
-  localStorage.setItem(key, value);
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(key, value);
 };
 
 export const removeFromLocalStorage = (key: LOCAL_STORAGE_KEYS) => {
-  localStorage.removeItem(key);
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(key);
 };

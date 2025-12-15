@@ -1,8 +1,26 @@
-import { DatasetType, ProviderType } from 'modules/admin/admin.types';
 import { ValueFormatType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { APITags } from '@/constants/api.constants';
+
+export enum DatasetType {
+  SOURCE = 'source',
+  STAGED = 'staged',
+}
+
+export enum ProviderType {
+  DATABRICKS = 'databricks',
+  PINOT = 'pinot',
+}
+
+export enum DISPLAY_CONFIG_HEADERS {
+  COLUMN = 'column',
+  ALIAS = 'alias',
+  IS_HIDDEN = 'is_hidden',
+  IS_EDITABLE = 'is_editable',
+  TYPE = 'type',
+  CONFIG = 'config',
+}
 
 export type GetDatasetDisplayConfigRequestType = {
   datasetId: string;

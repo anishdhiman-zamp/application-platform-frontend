@@ -139,7 +139,6 @@ const DocumentPreviewDialog = ({ isOpen, onClose, selectedFile, availableFiles }
                 processId={currentFile?.artifacts_details?.process_id}
                 artifactId={currentFile?.artifacts_details?.artifact_id}
                 fileId={currentFile?.artifacts_details?.file_id}
-                isArtifactLoading={false}
                 className='h-full'
                 toolBarClassName='bottom-5'
               />

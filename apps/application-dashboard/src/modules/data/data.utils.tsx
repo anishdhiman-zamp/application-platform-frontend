@@ -25,6 +25,7 @@ import {
   type DatasetUrlDataType,
   FormatColumnsParamsType,
 } from 'modules/data/data.types';
+import { N_A_VALUE } from 'modules/process/process.constant';
 import { DatasetFilterConfigResponseType, DatasetType, RuleFilters, ValueFormatType } from 'types/api/dataset.types';
 import { MapAny } from 'types/commonTypes';
 import { AggregationFunctionType, FilterModelType, FilterType, LogicalOperatorType } from 'types/components/table.type';
@@ -38,6 +39,7 @@ import {
 } from 'utils/common';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
 import ActivityLinkWrapper from '@/components/common/table/CustomCellWrapper/ActivityLinkWrapper';
+import ChatbotCellWrapper from '@/components/common/table/CustomCellWrapper/ChatbotCellWrapper';
 import { withLinkCellWrapper } from '@/components/common/table/CustomCellWrapper/withLinkCellWrapper';
 import CustomHeaderTk from '@/components/common/tanstackTable/customHeader';
 import { toast } from '@/components/common/toast/Toast';
@@ -54,11 +56,15 @@ import { AG_GRID_FILTER_TYPES, CONDITION_OPERATOR_TYPE } from 'components/filter
 
 export const findTimeDifference = (updated_at: string): string => {
   const currentTime = new Date();
-  const lastUpdatedTime = createDateObjectFromUTCString(updated_at);
+  const lastUpdatedTime = new Date(updated_at);
 
   const differenceInMinutesValue = differenceInMinutes(currentTime, lastUpdatedTime);
 
   if (differenceInMinutesValue < 60) {
+    if (differenceInMinutesValue === 0) {
+      return 'just now';
+    }
+
     return `${formatPlural(differenceInMinutesValue, 'minute')} ago`;
   }
 
@@ -106,7 +112,7 @@ const checkIsCellEditable = (params: MapAny, missingFields: MissingFieldItemType
 
   const rowId = params.data?.id;
 
-  return missingFields.some((field) => field.id === rowId && field.column === params.column.id);
+  return missingFields.some((field) => field?.id === rowId && field?.column === params?.column?.colId);
 };
 
 export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
@@ -123,6 +129,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
   missingFields,
   wrapLink,
   isSelfServe,
+  isArtifact,
 }) => {
   const columns: ColDef[] = [];
 
@@ -139,7 +146,7 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
     let formattedColumn: ColDef = {
       field: column?.column,
       hide: column?.metadata?.is_hidden,
-      cellRendererParams: column?.metadata,
+      cellRendererParams: { ...column?.metadata, datasetId },
       editable: (params: MapAny) =>
         !!(
           column?.metadata?.is_editable &&
@@ -173,7 +180,12 @@ export const formatColumns: (params: FormatColumnsParamsType) => ColDef[] = ({
           ActivityLinkWrapper,
           CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column],
         )
-      : CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
+      : isArtifact
+        ? withLinkCellWrapper(
+            ChatbotCellWrapper,
+            CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column],
+          )
+        : CustomColumnsMapping[(column.metadata?.custom_type as CUSTOM_COLUMNS_TYPE) ?? column?.column];
     formattedColumn = { ...formattedColumn, ...getCellEditorConfig(column) };
 
     formattedColumn.headerComponentParams = {
@@ -954,6 +966,10 @@ export const handleColumnMoved = (event: ColumnMovedEvent, datasetId: string) =>
  */
 export const formatArrayValue = (value: MapAny[]): string => {
   // Check if it's an array of objects with same single key
+  if (value?.length === 0) {
+    return N_A_VALUE;
+  }
+
   if (
     value?.length > 0 &&
     value?.every((item) => typeof item === 'object' && item !== null) &&
@@ -1141,8 +1157,10 @@ export const prepareExportQuery = (
     alias: capitalizeWords(column.getColDef()?.headerName || column.getColId()),
   }));
 
+  const { pagination, ...baseQueryWithoutPagination } = baseQueryObject;
+
   const finalQuery = {
-    ...baseQueryObject,
+    ...baseQueryWithoutPagination,
     filters: updatedFilters,
     export_columns: exportColumns,
   };

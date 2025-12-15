@@ -38,3 +38,11 @@ export const VIRTUALIZATION_DEFAULTS = {
   FETCH_MORE_SKELETON_COUNT: 10, // number of skeleton rows to show when fetching more
   SCROLL_THRESHOLD: 500, // pixels from bottom to trigger infinite scroll
 };
+
+/**
+ * Header cell styling constants
+ */
+export const HEADER_CELL_STYLES = {
+  FLEX_FIXED: '0 0 auto', // For fixed width columns (e.g., status column)
+  FLEX_GROW: '1 0 auto', // For flexible width columns
+} as const;

@@ -85,6 +85,7 @@ export type Session = {
   workspaces: Workspace[];
   organization_id: Workspace;
   user_email: string;
+  user_name: string;
   orgs: Organization[];
 };
 
@@ -96,3 +97,11 @@ export type loginPayloadType = {
 export enum UserRoleIdType {
   USER = 'user',
 }
+
+export type UserSessionCache = {
+  user_id: string;
+  user_email: string;
+  org_count: number;
+  default_org_id: string;
+  cached_at: number;
+};

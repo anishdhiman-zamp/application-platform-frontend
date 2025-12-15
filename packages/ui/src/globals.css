@@ -223,7 +223,7 @@
     --ORANGE_700: #f97d0b;
     --ORANGE_800: #ed6704;
     --ORANGE_900: #842106;
-    --ORANGE_1000: #331302;
+    --ORANGE_1000: #bc5910;
 
     --RED_100: #ffe6e6;
     --RED_200: #ffdada;
@@ -772,6 +772,12 @@
 
 .f-14-500 {
   font-weight: 500;
+  line-height: 1.125rem;
+  font-size: 0.875rem;
+}
+
+.f-14-550 {
+  font-weight: 550;
   line-height: 1.125rem;
   font-size: 0.875rem;
 }

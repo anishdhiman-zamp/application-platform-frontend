@@ -10,6 +10,8 @@ import {
   sortByXAxis,
   updateGroupStats,
 } from 'modules/widgets/create/utils';
+import { WidgetDataValueType } from 'modules/widgets/widgets.constant';
+import { isTimestampType } from 'modules/widgets/widgets.utils';
 import { useFiltersContextStore } from '@/components/filter/filters.context';
 import { AGGREGATION_TYPES, WIDGET_TYPES, WidgetDataType } from '@/types/api/widgets.types';
 import { MapAny } from '@/types/commonTypes';
@@ -41,14 +43,15 @@ const processChartData = (
   yKey: string,
   groupByColumn: string,
   aggregation: AGGREGATION_TYPES,
+  isXaxisTimestamp: boolean,
 ): MapAny[] => {
   if (!mockData?.length) return [];
 
   const formattedData = groupByColumn
-    ? processGroupedChartData(mockData, xKey, yKey, groupByColumn, aggregation)
-    : processNonGroupedChartData(mockData, xKey, yKey, aggregation);
+    ? processGroupedChartData(mockData, xKey, yKey, groupByColumn, aggregation, isXaxisTimestamp)
+    : processNonGroupedChartData(mockData, xKey, yKey, aggregation, isXaxisTimestamp);
 
-  sortByXAxis(formattedData, xKey);
+  sortByXAxis(formattedData, xKey, isXaxisTimestamp);
 
   return formattedData;
 };
@@ -68,8 +71,9 @@ const setupBarChart = ({
   const xKey = xAxis?.column ?? '';
   const yKey = yAxis?.column ?? '';
   const groupByColumn = groupBy?.column ?? '';
+  const isXaxisTimestamp = isTimestampType(`${xAxis?.column_type}`);
 
-  const formattedData = processChartData(mockData, xKey, yKey, groupByColumn, yAxis.aggregation!);
+  const formattedData = processChartData(mockData, xKey, yKey, groupByColumn, yAxis.aggregation!, isXaxisTimestamp);
 
   const columns = [
     createColumnDefinition(xAxis),
@@ -98,8 +102,8 @@ const setupLineChart = ({
   const xKey = xAxis?.column ?? '';
   const yKey = yAxis?.column ?? '';
   const groupByColumn = groupBy?.column ?? '';
-
-  const formattedData = processChartData(mockData, xKey, yKey, groupByColumn, yAxis.aggregation!);
+  const isXaxisTimestamp = xAxis?.column_type === WidgetDataValueType.TIMESTAMP;
+  const formattedData = processChartData(mockData, xKey, yKey, groupByColumn, yAxis.aggregation!, isXaxisTimestamp);
 
   const columns = [
     createColumnDefinition(xAxis),

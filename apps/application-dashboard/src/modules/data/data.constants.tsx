@@ -4,6 +4,7 @@ import { COLORS } from 'constants/colors';
 import { DATASET_ICON } from 'constants/icons';
 import { DATASET_ACTION_TYPE } from 'modules/data/data.types';
 import Image from 'next/image';
+import Link from 'next/link';
 import { cn } from 'utils/common';
 import BankNameCell from '@/components/common/table/CustomCellRenderers/BankNameCell';
 import CustomChipRenderer from '@/components/common/table/CustomCellRenderers/CustomChipsRenderer';
@@ -17,6 +18,7 @@ import {
   TaggingMessages,
   UpdateMissingFieldsMessages,
 } from '@/components/common/toast/toast.constants';
+import { getDatasetRouteById } from '@/constants/routeConfig';
 import ActivityCurrentStatus from '@/modules/process/activity-runs/components/ActivityCurrentStatus';
 import ActivityDocument from '@/modules/process/activity-runs/components/ActivityDocument';
 import ActivityStatus from '@/modules/process/activity-runs/components/ActivityStatus';
@@ -29,35 +31,57 @@ export const LISTING_COLUMNS: ColDef[] = [
   {
     field: 'title',
     headerName: 'Datasets',
+    headerClass: 'px-6!',
     cellRenderer: (params: ICellRendererParams) => {
       return (
-        <div className='f-13-500 flex items-center gap-2.5'>
-          <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
-          {params.value}
-        </div>
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
+          <div className='f-13-500 flex items-center gap-2.5'>
+            <Image src={DATASET_ICON} alt='dataset' width={20} height={20} />
+            {params.value}
+          </div>
+        </Link>
       );
     },
   },
   {
     field: 'description',
     headerName: 'Description',
-    cellRenderer: DescriptionWithTooltip,
+    headerClass: 'px-7.5!',
+    cellRenderer: (params: ICellRendererParams) => {
+      return (
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
+          <DescriptionWithTooltip {...params} />
+        </Link>
+      );
+    },
   },
   {
     field: '',
     headerName: '',
-    cellRenderer: EditNameDescription,
+    headerClass: 'px-6!',
+    cellRenderer: (params: ICellRendererParams) => {
+      return (
+        <div className='flex h-full w-full items-center'>
+          <EditNameDescription {...params} />
+        </div>
+      );
+    },
     width: 108,
     flex: 0,
     minWidth: 108,
-    cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell'),
+    cellClass: cn(DATA_TABLE_CONFIG.cellClass, 'hidden-cell px-6!'),
     sortable: false,
   },
   {
     field: '',
     headerName: '',
-    cellRenderer: () => {
-      return <SvgSpriteLoader id='arrow-narrow-right' width={14} height={14} color={COLORS.GRAY_900} />;
+    headerClass: 'px-6!',
+    cellRenderer: (params: ICellRendererParams) => {
+      return (
+        <Link href={getDatasetRouteById(params.data.id)} className='flex h-full w-full items-center px-6!'>
+          <SvgSpriteLoader id='arrow-narrow-right' width={14} height={14} color={COLORS.GRAY_900} />
+        </Link>
+      );
     },
     width: 108,
     flex: 0,
@@ -135,3 +159,13 @@ export const COLUMN_TYPE_WIDTH_MAP = {
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_STATUS]: COLUMN_WIDTHS.ACTIVITY_STATUS,
   [CUSTOM_COLUMNS_TYPE.ACTIVITY_DOCUMENT]: COLUMN_WIDTHS.ACTIVITY_DOCUMENT,
 } as const;
+
+export const enum ColumnType {
+  ID = 'id',
+  _ZAMP_ID = '_zamp_id',
+}
+
+export const enum SourceType {
+  EDIT = 'edit',
+  API = 'api',
+}

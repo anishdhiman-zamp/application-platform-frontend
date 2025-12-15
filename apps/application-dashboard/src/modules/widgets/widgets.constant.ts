@@ -38,6 +38,8 @@ export enum WidgetDataValueType {
   DATETIME = 'DATETIME',
   INTEGER = 'INTEGER',
   TIMESTAMP_NTZ = 'TIMESTAMP_NTZ',
+  INT8 = 'INT8',
+  VARCHAR = 'VARCHAR',
 }
 
 export const AG_CHART_TYPES = {
@@ -73,7 +75,7 @@ export const getFormattedDateWithPeriodicity = (periodicity: PERIODICITY_TYPES, 
   }
 };
 
-export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
+export const getCategoryAxis = (periodicity: PERIODICITY_TYPES, isXaxisTimestamp?: boolean) => {
   return {
     type: 'category' as const,
     position: 'bottom',
@@ -84,7 +86,7 @@ export const getCategoryAxis = (periodicity: PERIODICITY_TYPES) => {
       minSpacing: 20,
       autoRotate: false,
       formatter: function (params: MapAny) {
-        if (isValidDate(params.value)) {
+        if (isXaxisTimestamp && isValidDate(params.value)) {
           return getFormattedDateWithPeriodicity(periodicity, params.value);
         }
 
@@ -192,3 +194,5 @@ export const DEFAULT_TRANSFORMED_DATA = {
   maxValueLength: 0,
   showCurrency: false,
 };
+
+export const WIO_PRD_ORG_ID = '41a93df3-3652-4f3e-9984-dca250721da1';

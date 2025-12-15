@@ -5,17 +5,36 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+  // Skip type checking and linting ONLY in CI (they run separately there)
+  // Enable them for local development for immediate feedback
+  typescript: {
+    ignoreBuildErrors: process.env.CI === 'true',
+  },
+  eslint: {
+    ignoreDuringBuilds: process.env.CI === 'true',
+  },
   experimental: {
     serverActions: {},
+    // Optimize memory usage during builds
+    optimizePackageImports: ['lucide-react', '@zamp-platform/ui'],
   },
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
+    NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
     };
+
+    // Optimize build performance and memory usage
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+      };
+    }
 
     return config;
   },
@@ -26,6 +45,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL?.replace('https://', '') || '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
         pathname: '/**',
       },
       {
@@ -46,6 +70,26 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'd2hx62c6x4ihoz.cloudfront.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-dev-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-me-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-stg-us-pantheon.s3.amazonaws.com',
         pathname: '/**',
       },
     ],

@@ -1,0 +1,105 @@
+import { FC, useCallback, useEffect, useState } from 'react';
+import { LocationData } from '@zamp-platform/chat';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
+import { MessageSquare, Plus } from 'lucide-react';
+import { doesUrlMatchLocation, getFeedbackItemConfig } from 'modules/chatbot/utils';
+import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
+import { useSearchParams } from 'next/navigation';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
+
+interface FeedbackListProps {
+  children: React.ReactNode;
+  items: FeedbackItemType[];
+  processId: string;
+  onOpenChatbot: (feedbackItem?: FeedbackItemType) => void;
+  disableAddMoreFeedback?: boolean;
+  hideFeedbackCount?: boolean;
+  annotationLocation: LocationData;
+  onCloseFeedbackList: () => void;
+  className?: string;
+}
+
+const FeedbackList: FC<FeedbackListProps> = ({
+  children,
+  items = [],
+  processId,
+  onOpenChatbot,
+  hideFeedbackCount = false,
+  annotationLocation,
+  onCloseFeedbackList,
+  className,
+}) => {
+  const searchParams = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Handle chatbot open/close state changes
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        onCloseFeedbackList?.();
+      }
+    },
+    [onCloseFeedbackList],
+  );
+
+  // Check URL params on mount to determine if chatbot should be open
+  useEffect(() => {
+    if (searchParams && doesUrlMatchLocation(searchParams, annotationLocation)) {
+      setIsOpen(true);
+    }
+  }, [searchParams, annotationLocation]);
+
+  return (
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+      <PopoverTrigger className={className}>
+        {!hideFeedbackCount ? (
+          <Button
+            variant='outline'
+            size='icon'
+            className='bg-accent text-accent-foreground f-11-500 flex h-5 items-center gap-1 [&_svg]:size-3'
+          >
+            <MessageSquare />
+            <span>{items.length}</span>
+          </Button>
+        ) : (
+          children
+        )}
+      </PopoverTrigger>
+      <PopoverPortal>
+        <PopoverContent className='shadow-chatbot-shadow w-[380px] space-y-1.5 rounded-xl border-none bg-transparent p-0 backdrop-blur-lg'>
+          <div className='rounded-xl border bg-white px-4 pt-3 pb-4'>
+            <div className='f-12-450 flex items-center gap-1 text-gray-700'>
+              <span>Chats on this field</span>
+              <span>{items.length}</span>
+            </div>
+            <div className='mt-2 mb-3 space-y-1.5'>
+              {items?.map((item) => (
+                <FeedbackListCard
+                  key={item?.conversation_id}
+                  feedback={item}
+                  initiatedBy={item?.initiated_by}
+                  processId={processId}
+                  withoutLinkWrapper
+                  isDraftFeedback={item?.status === FEEDBACK_STATUS.DRAFT}
+                  {...getFeedbackItemConfig(item as FeedbackItemType, onOpenChatbot)}
+                />
+              ))}
+            </div>
+            <Button
+              variant='outline'
+              size='xsmall'
+              className='flex items-center gap-1.5 [&_svg]:size-3'
+              onClick={() => onOpenChatbot()}
+            >
+              <Plus /> <span>New chat</span>
+            </Button>
+          </div>
+        </PopoverContent>
+      </PopoverPortal>
+    </Popover>
+  );
+};
+
+export default FeedbackList;

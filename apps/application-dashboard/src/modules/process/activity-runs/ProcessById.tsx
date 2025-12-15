@@ -1,13 +1,14 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
-import { ZAMP_LOGO_LOADER } from 'constants/lottie/zamp-logo-loader';
 import { STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS } from 'modules/process/process.types';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn, getCommaSeparatedNumber, snakeCaseToSentenceCase } from 'utils/common';
 import { useGetActivityRunsSummaryQuery, useGetFilterConfigByProcessIdQuery } from '@/apis/processes';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { CUSTOM_COLUMNS_TYPE } from '@/components/common/table/table.types';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { PERSISTENT_FILTER_ID } from '@/hooks/usePersistFilters';
 import { ColumnOrderingVisibilityType } from '@/modules/data/data.types';
@@ -19,7 +20,6 @@ import NoWidgetData from '@/modules/widgets/components/NoWidgetData';
 import type { MapAny } from '@/types/commonTypes';
 import { getEncodedRequest } from 'components/common/table/table.utils';
 import CommonWrapper from 'components/commonWrapper';
-import DynamicLottiePlayer from 'components/DynamicLottiePlayer';
 import { filtersContextActions, useFiltersContextStore, withFiltersContext } from 'components/filter/filters.context';
 
 interface ProcessByIdProps {
@@ -41,8 +41,8 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
   const {
     data: activityRunsSummaryData,
-    isError,
-    isLoading,
+    isError: isActivityRunsSummaryError,
+    isLoading: isActivityRunsSummaryLoading,
     refetch: refetchActivityRunsSummary,
   } = useGetActivityRunsSummaryQuery(
     {
@@ -62,7 +62,12 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
     },
   );
 
-  const { data: filterConfigData, isLoading: isFilterConfigLoading } = useGetFilterConfigByProcessIdQuery(
+  const {
+    data: filterConfigData,
+    isLoading: isFilterConfigLoading,
+    isError: isFilterConfigError,
+    refetch: refetchFilterConfig,
+  } = useGetFilterConfigByProcessIdQuery(
     {
       processId: processId as string,
     },
@@ -104,6 +109,14 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
 
     return visibility;
   }, [initialColumnPreferences]);
+
+  const refetchConditionalSummaryOrFilterConfigApi = () => {
+    if (isActivityRunsSummaryError) {
+      refetchActivityRunsSummary();
+    } else if (isFilterConfigError) {
+      refetchFilterConfig();
+    }
+  };
 
   useEffect(() => {
     if (activityRunsSummaryData) {
@@ -165,18 +178,16 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
   return (
     <CommonWrapper
       className={cn('h-full', {
-        'flex flex-col items-center justify-center': isLoading || activityRunsSummaryData?.status_summary?.length === 0,
+        'flex flex-col items-center justify-center': isActivityRunsSummaryLoading || isFilterConfigLoading,
       })}
-      isError={isError}
-      refetchFunction={refetchActivityRunsSummary}
-      isLoading={isLoading}
+      isError={isActivityRunsSummaryError || isFilterConfigError}
+      refetchFunction={refetchConditionalSummaryOrFilterConfigApi}
+      isLoading={isActivityRunsSummaryLoading || isFilterConfigLoading}
       skeletonType={SkeletonTypes.CUSTOM}
       isNoData={activityRunsSummaryData?.status_summary?.length === 0}
       noDataBanner={<NoWidgetData className='h-[400px]' text='No activity runs found' />}
       loader={
-        <div className='z-50 flex h-[calc(100vh-200px)] w-full items-center justify-center bg-white'>
-          <DynamicLottiePlayer src={ZAMP_LOGO_LOADER} className='lottie-player h-[140px]' autoplay loop keepLastFrame />
-        </div>
+        <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='z-50 h-[calc(100vh-200px)]' />
       }
     >
       <DisplayOptionProvider
@@ -207,7 +218,11 @@ const ProcessById: FC<ProcessByIdProps> = ({ processId, status }) => {
                     STATUS_ICON_COLOR_MAPPING[item?.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor
                   }
                 />
-                <span className={cn('f-12-500 text-GRAY_900', { 'text-GRAY_1000': activeTab === item?.status })}>
+                <span
+                  className={cn('f-12-500 text-GRAY_900 whitespace-nowrap', {
+                    'text-GRAY_1000': activeTab === item?.status,
+                  })}
+                >
                   {snakeCaseToSentenceCase(item?.status?.toLowerCase())}
                 </span>
                 <span className={cn('f-12-500 text-GRAY_600', { 'text-GRAY_1000': activeTab === item?.status })}>
