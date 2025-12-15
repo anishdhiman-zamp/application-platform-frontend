@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import {
-  API_ENDPOINTS as CHAT_API_ENDPOINTS,
   ButtonBlockType,
   ConnectedChatInput,
   DisplayLayerActionType,
@@ -14,10 +13,6 @@ import {
   SpeechToTextProvider,
   useChat,
   useChatAdapters,
-  useGetSignedUrlMutation,
-  useLazyGetSpeechToTextAccessTokenQuery,
-  usePostFormsSignedUploadAckMutation,
-  usePostInteractionDisableMutation,
 } from '@zamp-platform/chat';
 import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText, toast } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
@@ -85,12 +80,6 @@ const Chatbot = ({
   const [header, setHeader] = useState('');
   const [inputValue, setInputValue] = useState('');
   const urlBasedOpenHandled = useRef(false);
-
-  // RTK Query mutations for adapters
-  const [getSignedUrl] = useGetSignedUrlMutation();
-  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
-  const [postInteractionDisable] = usePostInteractionDisableMutation();
-  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
 
   const [stopProcessingConfig, setStopProcessingConfig] = useState<{
     blockConfig: ButtonBlockType;
@@ -182,25 +171,12 @@ const Chatbot = ({
     }
   };
 
-  // Get ElevenLabs token callback
-  const getElevenLabsToken = useCallback(async () => {
-    const result = await getSpeechToTextAccessToken({}).unwrap();
-
-    return result.access_token;
-  }, [getSpeechToTextAccessToken]);
-
-  // Create adapters using the reusable hook from packages/chat
   const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
     getCurrentUserName: () => currentUserName || '',
     getProcessId: () => processId,
     getActivityRunId: () => activityRunId,
     getOrganizationId: () => organizationId,
-    getSignedUrlMutation: getSignedUrl,
-    postUploadAckMutation: postFormsSignedUploadAck,
-    uploadPath: CHAT_API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
     getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
-    disableInteractionMutation: postInteractionDisable,
-    getElevenLabsToken,
     onError: (error) => {
       captureException(error);
       toast.error('An error occurred');

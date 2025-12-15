@@ -2,46 +2,27 @@
 
 import { useCallback, useMemo } from 'react';
 
+import {
+  API_ENDPOINTS,
+  useGetSignedUrlMutation,
+  useLazyGetSpeechToTextAccessTokenQuery,
+  usePostFormsSignedUploadAckMutation,
+  usePostInteractionDisableMutation,
+} from '../api';
 import { ResourceType } from '../types/chat.types';
 import { TranscriptionAdapter } from '../types/transcription.types';
-import { handleFileUploads, SignedUrlParams, SignedUrlResponse } from '../utils/fileUpload';
+import { handleFileUploads } from '../utils/fileUpload';
 import { ChatInputAdapter, UploadedFile } from './useChatInput';
 
 /**
  * Configuration for creating chat adapters
  */
 export interface ChatAdaptersConfig {
-  // User context
   getCurrentUserName: () => string;
   getProcessId: () => string;
   getActivityRunId: () => string;
   getOrganizationId: () => string;
-
-  // File upload mutations
-  getSignedUrlMutation: (
-    params: SignedUrlParams,
-  ) => Promise<{ data: SignedUrlResponse; error?: undefined } | { data?: undefined; error: unknown }>;
-  postUploadAckMutation?: (params: {
-    fileImportId: string;
-  }) => Promise<{ data: void; error?: undefined } | { data?: undefined; error: unknown }>;
-  uploadPath: string;
   getMimeType?: (fileType: string) => string;
-
-  // Interaction disable mutation
-  disableInteractionMutation?: (params: {
-    conversationId: string;
-    messageId: string;
-    params: {
-      resource_id: string;
-      resource_type: ResourceType;
-    };
-  }) => Promise<unknown>;
-
-  // Transcription token getters
-  getDeepgramToken?: () => Promise<string>;
-  getElevenLabsToken?: () => Promise<string>;
-
-  // Error/success handlers
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
 }
@@ -55,10 +36,10 @@ export interface ChatAdaptersResult {
 }
 
 /**
- * Hook that creates chat adapters from provided configuration
- * This centralizes adapter creation logic so it can be reused across different layouts
+ * Hook that creates chat adapters with all API hooks called internally.
+ * This is a plug-and-play hook - just provide context getters and callbacks.
  *
- * @param config - Configuration object with mutations and context getters
+ * @param config - Configuration object with context getters and callbacks
  * @returns Object containing chatInputAdapter and transcriptionAdapter
  *
  * @example
@@ -68,14 +49,7 @@ export interface ChatAdaptersResult {
  *   getProcessId: () => processId,
  *   getActivityRunId: () => activityRunId,
  *   getOrganizationId: () => organizationId,
- *   getSignedUrlMutation: getSignedUrl,
- *   postUploadAckMutation: postFormsSignedUploadAck,
- *   uploadPath: API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
- *   disableInteractionMutation: postInteractionDisable,
- *   getElevenLabsToken: async () => {
- *     const result = await getSpeechToTextAccessToken({}).unwrap();
- *     return result.access_token;
- *   },
+ *   getMimeType: (fileType) => FileMimeType[fileType] ?? fileType,
  *   onError: (error) => {
  *     captureException(error);
  *     toast.error('An error occurred');
@@ -85,38 +59,28 @@ export interface ChatAdaptersResult {
  * ```
  */
 export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult {
-  const {
-    getCurrentUserName,
-    getProcessId,
-    getActivityRunId,
-    getOrganizationId,
-    getSignedUrlMutation,
-    postUploadAckMutation,
-    uploadPath,
-    getMimeType,
-    disableInteractionMutation,
-    getDeepgramToken,
-    getElevenLabsToken,
-    onError,
-    onSuccess,
-  } = config;
+  const { getCurrentUserName, getProcessId, getActivityRunId, getOrganizationId, getMimeType, onError, onSuccess } =
+    config;
 
-  // Create upload files function
+  const [getSignedUrl] = useGetSignedUrlMutation();
+  const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
+  const [postInteractionDisable] = usePostInteractionDisableMutation();
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
+
   const uploadFiles = useCallback(
     async (files: FileList): Promise<UploadedFile[]> => {
       return handleFileUploads(
         files,
-        getSignedUrlMutation,
-        uploadPath,
+        getSignedUrl,
+        API_ENDPOINTS.FORMS_SIGNED_UPLOAD_URL_POST,
         getOrganizationId(),
-        postUploadAckMutation,
+        postFormsSignedUploadAck,
         getMimeType,
       );
     },
-    [getSignedUrlMutation, uploadPath, getOrganizationId, postUploadAckMutation, getMimeType],
+    [getSignedUrl, getOrganizationId, postFormsSignedUploadAck, getMimeType],
   );
 
-  // Create disable interaction function
   const disableInteraction = useCallback(
     async (interactionParams: {
       conversationId: string;
@@ -124,51 +88,43 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
       resourceId: string;
       resourceType: string;
     }) => {
-      if (disableInteractionMutation) {
-        await disableInteractionMutation({
-          conversationId: interactionParams.conversationId,
-          messageId: interactionParams.messageId,
-          params: {
-            resource_id: interactionParams.resourceId,
-            resource_type: interactionParams.resourceType as ResourceType,
-          },
-        });
-      }
+      await postInteractionDisable({
+        conversationId: interactionParams.conversationId,
+        messageId: interactionParams.messageId,
+        params: {
+          resource_id: interactionParams.resourceId,
+          resource_type: interactionParams.resourceType as ResourceType,
+        },
+      });
     },
-    [disableInteractionMutation],
+    [postInteractionDisable],
   );
 
-  // Create chat input adapter
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
+
   const chatInputAdapter: ChatInputAdapter = useMemo(
     () => ({
       getCurrentUserName,
       getProcessId,
       getActivityRunId,
       uploadFiles,
-      disableInteraction: disableInteractionMutation ? disableInteraction : undefined,
+      disableInteraction,
       onError,
       onSuccess,
     }),
-    [
-      getCurrentUserName,
-      getProcessId,
-      getActivityRunId,
-      uploadFiles,
-      disableInteraction,
-      disableInteractionMutation,
-      onError,
-      onSuccess,
-    ],
+    [getCurrentUserName, getProcessId, getActivityRunId, uploadFiles, disableInteraction, onError, onSuccess],
   );
 
-  // Create transcription adapter
   const transcriptionAdapter: TranscriptionAdapter = useMemo(
     () => ({
-      getDeepgramToken,
       getElevenLabsToken,
       onError,
     }),
-    [getDeepgramToken, getElevenLabsToken, onError],
+    [getElevenLabsToken, onError],
   );
 
   return {
