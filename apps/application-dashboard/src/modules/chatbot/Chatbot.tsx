@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import {
   ButtonBlockType,
-  ConnectedChatInput,
+  ConnectedChatInputProps,
   DisplayLayerActionType,
   LocationData,
   Message,
@@ -24,6 +24,7 @@ import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
+import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 import Avatar from '@/components/common/avatar';
@@ -35,6 +36,13 @@ import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 import { MapAny } from '@/types/commonTypes';
 import { cn, getUserNameFromEmail } from '@/utils/common';
+
+// Dynamically import ConnectedChatInput with SSR disabled to avoid hydration mismatch
+// caused by @elevenlabs/react's useScribe hook which uses browser-only APIs
+const ConnectedChatInput = dynamic<ConnectedChatInputProps>(
+  () => import('@zamp-platform/chat').then((mod) => mod.ConnectedChatInput),
+  { ssr: false },
+);
 
 interface ChatbotProps {
   children: React.ReactNode;
