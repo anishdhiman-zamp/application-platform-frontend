@@ -25,6 +25,7 @@ import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot
 import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 import Avatar from '@/components/common/avatar';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { COLORS } from '@/constants/colors';
@@ -171,12 +172,22 @@ const Chatbot = ({
     }
   };
 
+  // Use the app's baseApi for speech-to-text token fetching
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
+
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
+
   const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
     getCurrentUserName: () => currentUserName || '',
     getProcessId: () => processId,
     getActivityRunId: () => activityRunId,
     getOrganizationId: () => organizationId,
     getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
+    getElevenLabsToken,
     onError: (error) => {
       captureException(error);
       toast.error('An error occurred');

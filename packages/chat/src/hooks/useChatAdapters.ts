@@ -25,6 +25,12 @@ export interface ChatAdaptersConfig {
   getMimeType?: (fileType: string) => string;
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
+  /**
+   * Optional custom token getter for ElevenLabs speech-to-text.
+   * If not provided, the default implementation using chatApi will be used.
+   * Use this if you need to use a different API slice (e.g., baseApi) for token fetching.
+   */
+  getElevenLabsToken?: () => Promise<string>;
 }
 
 /**
@@ -59,12 +65,21 @@ export interface ChatAdaptersResult {
  * ```
  */
 export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult {
-  const { getCurrentUserName, getProcessId, getActivityRunId, getOrganizationId, getMimeType, onError, onSuccess } =
-    config;
+  const {
+    getCurrentUserName,
+    getProcessId,
+    getActivityRunId,
+    getOrganizationId,
+    getMimeType,
+    onError,
+    onSuccess,
+    getElevenLabsToken: customGetElevenLabsToken,
+  } = config;
 
   const [getSignedUrl] = useGetSignedUrlMutation();
   const [postFormsSignedUploadAck] = usePostFormsSignedUploadAckMutation();
   const [postInteractionDisable] = usePostInteractionDisableMutation();
+  // Always call the hook unconditionally to satisfy rules of hooks
   const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
 
   const uploadFiles = useCallback(
@@ -100,11 +115,19 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
     [postInteractionDisable],
   );
 
-  const getElevenLabsToken = useCallback(async () => {
-    const result = await getSpeechToTextAccessToken({}).unwrap();
+  // Default implementation using chatApi
+  const defaultGetElevenLabsToken = useCallback(async () => {
+    try {
+      const result = await getSpeechToTextAccessToken({}).unwrap();
+      return result.access_token;
+    } catch (error) {
+      onError?.(error);
+      throw error;
+    }
+  }, [getSpeechToTextAccessToken, onError]);
 
-    return result.access_token;
-  }, [getSpeechToTextAccessToken]);
+  // Use custom token getter if provided, otherwise use default
+  const getElevenLabsToken = customGetElevenLabsToken || defaultGetElevenLabsToken;
 
   const chatInputAdapter: ChatInputAdapter = useMemo(
     () => ({
