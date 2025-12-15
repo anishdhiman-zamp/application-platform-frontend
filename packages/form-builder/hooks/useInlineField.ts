@@ -1,17 +1,13 @@
 import { useCallback, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { ExtendedSelectOption, FormField as FormFieldType, InlineFieldConfig } from '../types';
+import { ExtendedSelectOption, FormField as FormFieldType } from '../types';
 
 interface UseInlineFieldOptions {
   clearOnDeselect?: boolean;
 }
 
 interface UseInlineFieldResult {
-  isInlineFieldVisible: (option: ExtendedSelectOption, currentValue: string | undefined) => boolean;
-  getInlineFieldConfig: (option: ExtendedSelectOption) => InlineFieldConfig | undefined;
-  hasInlineField: (option: ExtendedSelectOption) => boolean;
-  getOptionsWithInlineFields: (options: ExtendedSelectOption[]) => ExtendedSelectOption[];
   handleOptionChange: (
     newValue: string,
     options: ExtendedSelectOption[],
@@ -24,31 +20,6 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
   const { setValue, getValues } = useFormContext();
 
   const previousValueRef = useRef<string | undefined>(undefined);
-
-  const hasInlineField = useCallback((option: ExtendedSelectOption): boolean => {
-    return !!option.inline_field;
-  }, []);
-
-  const getInlineFieldConfig = useCallback((option: ExtendedSelectOption): InlineFieldConfig | undefined => {
-    return option.inline_field;
-  }, []);
-
-  const isInlineFieldVisible = useCallback(
-    (option: ExtendedSelectOption, currentValue: string | undefined): boolean => {
-      const config = option.inline_field;
-      if (!config) return false;
-
-      return currentValue === String(option.value);
-    },
-    [],
-  );
-
-  const getOptionsWithInlineFields = useCallback(
-    (allOptions: ExtendedSelectOption[]): ExtendedSelectOption[] => {
-      return allOptions.filter(hasInlineField);
-    },
-    [hasInlineField],
-  );
 
   const handleOptionChange = useCallback(
     (newValue: string, allOptions: ExtendedSelectOption[], schemaFields: Record<string, FormFieldType>) => {
@@ -77,10 +48,6 @@ export const useInlineField = (options: UseInlineFieldOptions = {}): UseInlineFi
   );
 
   return {
-    isInlineFieldVisible,
-    getInlineFieldConfig,
-    hasInlineField,
-    getOptionsWithInlineFields,
     handleOptionChange,
   };
 };

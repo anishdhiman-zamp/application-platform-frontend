@@ -20,7 +20,7 @@ export interface RadioFieldValue {
 
 export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, inlineFields = {} }) => {
   const { control } = useFormContext();
-  const { hasInlineField, handleOptionChange } = useInlineField({
+  const { handleOptionChange } = useInlineField({
     clearOnDeselect: true,
   });
 
@@ -43,30 +43,25 @@ export const RadioField: React.FC<RadioFieldProps> = ({ field, name, className, 
             <RadioGroup value={value ? String(value) : undefined} onValueChange={handleChange}>
               {radioOptions.map((option) => {
                 const optionValue = String(option.value);
-                const optionHasInlineField = hasInlineField(option);
                 const inlineFieldConfig = option.inline_field;
 
                 return (
                   <div key={optionValue}>
-                    <div className={cn('flex gap-2', optionHasInlineField ? 'items-start' : 'items-center')}>
+                    <div className={cn('flex gap-2', inlineFieldConfig ? 'items-start' : 'items-center')}>
                       <Radio
                         value={optionValue}
                         id={`${name}-${optionValue}`}
-                        className={optionHasInlineField ? 'mt-2' : ''}
+                        className={inlineFieldConfig ? 'mt-2' : ''}
                       />
 
-                      {!optionHasInlineField && (
+                      {!inlineFieldConfig && (
                         <Label htmlFor={`${name}-${optionValue}`} className='cursor-pointer font-normal'>
                           {option.label}
                         </Label>
                       )}
 
-                      {optionHasInlineField && inlineFieldConfig && inlineFields[inlineFieldConfig.field] && (
-                        <FormField
-                          field={inlineFields[inlineFieldConfig.field]}
-                          name={inlineFieldConfig.field}
-                          inlineFields={inlineFields}
-                        />
+                      {inlineFieldConfig && inlineFields[inlineFieldConfig.field] && (
+                        <FormField field={inlineFields[inlineFieldConfig.field]} name={inlineFieldConfig.field} />
                       )}
                     </div>
                   </div>
