@@ -14,9 +14,10 @@ interface FormFieldProps {
   name: string;
   className?: string;
   animated?: boolean;
+  inlineFields?: Record<string, FormFieldType>;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated = true }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated = true, inlineFields = {} }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
 
   if (!shouldShow) {
@@ -45,7 +46,9 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className, an
             case 'select':
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
             case 'radio':
-              return <RadioField className={className} field={fieldWithConfig} name={name} />;
+              return (
+                <RadioField className={className} field={fieldWithConfig} name={name} inlineFields={inlineFields} />
+              );
             default:
               return null;
           }
