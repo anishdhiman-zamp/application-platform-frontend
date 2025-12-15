@@ -2,16 +2,8 @@
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  Block,
-  BLOCK_TYPE,
-  ChatMessage,
-  ChatMessageType,
-  LocationData,
-  ResourceType,
-  ScopeType,
-  SenderType,
-} from '../types/chat.types';
+import { Block, BLOCK_TYPE } from '../types/block.types';
+import { ChatMessage, ChatMessageType, LocationData, ResourceType, ScopeType, SenderType } from '../types/chat.types';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
