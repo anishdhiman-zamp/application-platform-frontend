@@ -5,6 +5,7 @@
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {
+    "@elevenlabs/react": "^0.11.0",
     "@zamp-platform/utils": "*",
     "react": "^19.2.3",
     "react-markdown": "^10.1.0",
