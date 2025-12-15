@@ -1,6 +1,4 @@
-import type { FormSchema } from '@zamp-platform/form-builder';
-
-export const connectionSchema: FormSchema = {
+export const connectionSchema = {
   id: 'connection-config',
   type: 'connection',
   sections: [
