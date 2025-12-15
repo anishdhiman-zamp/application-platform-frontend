@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 
+import { DEFAULT_FIELD_ANIMATION } from '../constants';
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
-import { useFormAnimation } from '../hooks/useFormAnimation';
 import { FormField as FormFieldType } from '../types';
 import { HeaderTextField } from './HeaderTextField';
 import { RadioField } from './RadioField';
@@ -17,9 +17,8 @@ interface FormFieldProps {
   inlineFields?: Record<string, FormFieldType>;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated, inlineFields }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated = true, inlineFields }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
-  const { fieldAnimation } = useFormAnimation(animated);
 
   if (!shouldShow) {
     return null;
@@ -33,10 +32,10 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className, an
   return (
     <AnimatePresence>
       <motion.div
-        initial={fieldAnimation.initial}
-        animate={fieldAnimation.animate}
-        exit={fieldAnimation.exit}
-        transition={fieldAnimation.transition}
+        initial={animated ? DEFAULT_FIELD_ANIMATION.initial : undefined}
+        animate={animated ? DEFAULT_FIELD_ANIMATION.animate : undefined}
+        exit={animated ? DEFAULT_FIELD_ANIMATION.exit : undefined}
+        transition={animated ? DEFAULT_FIELD_ANIMATION.transition : { duration: 0 }}
       >
         {(() => {
           switch (fieldWithConfig.type) {
