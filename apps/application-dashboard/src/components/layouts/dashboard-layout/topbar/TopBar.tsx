@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { KNOWLEDGE_BASED } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
+import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -12,7 +13,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
-import { cn } from 'utils/common';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
@@ -110,7 +110,17 @@ const Topbar = () => {
   }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled, openFeedbackConversations]);
 
   return (
-    <div className={cn('flex h-12 w-full items-center', !isSidebarOpen && 'pl-12')}>
+    <motion.div
+      initial={false}
+      animate={{
+        paddingLeft: isSidebarOpen ? 0 : 48,
+      }}
+      transition={{
+        duration: 0.15,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      className='flex h-12 w-full items-center'
+    >
       <div className='min-w-0 flex-1'>
         <BreadCrumb isSidebarOpen={isSidebarOpen} />
       </div>
@@ -118,7 +128,7 @@ const Topbar = () => {
         <WorkWithPace />
       </div>
       <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -57,6 +57,7 @@
     "ag-grid-react": "^34.0.0",
     "clsx": "^2.1.1",
     "date-fns": "2.30.0",
+    "framer-motion": "^12.23.26",
     "immer": "^10.1.1",
     "launchdarkly-react-client-sdk": "^3.6.1",
     "lucide-react": "^0.503.0",
