@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  BlockRenderer,
   ButtonBlockType,
   DisplayLayerActionType,
   LocationData,
+  Message,
   ResourceType,
   ScopeType,
   SenderType,
@@ -17,12 +17,13 @@ import ChatHeader from 'modules/chatbot/ChatHeader';
 import { ChatInput } from 'modules/chatbot/ChatInput';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
-import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import { useSearchParams } from 'next/navigation';
+import Avatar from '@/components/common/avatar';
 import ImageLoader from '@/components/common/loader/ImageLoader';
+import { COLORS } from '@/constants/colors';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
@@ -319,17 +320,20 @@ const Chatbot = ({
                         className='min-h-0 flex-1 space-y-6 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden'
                       >
                         {chat?.messages?.map((message) => (
-                          <div key={message.timestamp} className='space-y-2'>
-                            <SenderDetails message={message} />
-                            <BlockRenderer
-                              message={{ block: message?.message_content?.elements ?? [] }}
-                              onAction={handleAction}
-                              className='border-none shadow-none'
-                              key={message?.timestamp}
-                              conversationId={message?.conversation_id}
-                              messageId={message?.id}
-                            />
-                          </div>
+                          <Message
+                            key={message.timestamp}
+                            message={message}
+                            onAction={handleAction}
+                            assistantName='Pace'
+                            assistantAvatar={<PaceAvatar />}
+                            userAvatar={(senderName) => (
+                              <Avatar
+                                name={senderName}
+                                backgroundColor={COLORS.YELLOW_300}
+                                className='f-10-500 text-gray-1000 flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md'
+                              />
+                            )}
+                          />
                         ))}
                         {isAnalysing && (
                           <div className='flex w-full items-center gap-1.5 text-gray-700'>
