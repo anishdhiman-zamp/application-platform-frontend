@@ -1,6 +1,6 @@
 import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
-import { FormBuilder, type FormBuilderRef, type FormSchema } from '@zamp-platform/form-builder';
+import { FormBuilder, type FormBuilderRef } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
@@ -253,12 +253,10 @@ const Log: FC<LogProps> = ({
 
           {submitFormCta?.form_builder_config && (
             <FormBuilder
-              schema={submitFormCta.form_builder_config as FormSchema}
+              schema={submitFormCta.form_builder_config}
               onSubmit={handleFeedbackSubmit}
               ref={formBuilderRef}
-              animationConfig={{
-                disabled: true,
-              }}
+              animated={false}
             />
           )}
 
