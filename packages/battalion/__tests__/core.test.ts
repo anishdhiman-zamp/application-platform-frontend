@@ -1,129 +1,104 @@
 import { z } from 'zod';
 
-import { defineResource, defineView, getResourceRegistry, getViewRegistry } from '../src';
+import { defineResource, getQueryGraph, getResourceRegistry, resetQueryGraph } from '../src';
 
 describe('Battalion Core', () => {
   beforeEach(() => {
-    // Reset registries before each test
-    const resourceRegistry = getResourceRegistry();
-    const viewRegistry = getViewRegistry();
-    resourceRegistry.clear();
-    viewRegistry.clear();
+    getResourceRegistry().clear();
+    resetQueryGraph();
   });
 
   describe('Resource Definition', () => {
     it('should create a resource with correct configuration', () => {
       const PageResource = defineResource({
         name: 'Page',
-        schema: z.object({
-          id: z.string(),
-          title: z.string(),
-        }),
-        endpoints: {
-          list: '/api/pages',
-          create: '/api/pages',
-        },
-        behaviors: {
-          optimistic: {
-            create: 'append',
-          },
-          liveSync: true,
+        schema: z.object({ id: z.string(), title: z.string() }),
+        endpoints: { list: '/api/pages' },
+        transactions: {
+          create: 'create_page',
+          update: 'update_page',
+          delete: 'delete_page',
+          resourceType: 'page',
+          optimistic: { create: 'append', update: 'merge', delete: 'remove' },
         },
       });
 
       expect(PageResource.name).toBe('Page');
-      expect(PageResource.behaviors.optimistic?.create).toBe('append');
-      expect(PageResource.behaviors.liveSync).toBe(true);
+      expect(PageResource.transactions?.create).toBe('create_page');
+      expect(PageResource.transactions?.optimistic?.create).toBe('append');
     });
 
     it('should register resource in global registry', () => {
       const PageResource = defineResource({
         name: 'Page',
-        schema: z.object({
-          id: z.string(),
-          title: z.string(),
-        }),
-        endpoints: {
-          list: '/api/pages',
-        },
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
       });
 
-      const registry = getResourceRegistry();
-      expect(registry.has('Page')).toBe(true);
-      expect(registry.get('Page')).toBe(PageResource);
+      expect(getResourceRegistry().has('Page')).toBe(true);
+      expect(getResourceRegistry().get('Page')).toBe(PageResource);
     });
-  });
 
-  describe('View Definition', () => {
-    it('should create a view with dependencies', () => {
-      const DashboardView = defineView({
-        name: 'Dashboard',
-        uses: [
-          { entity: 'Page', alias: 'pages' },
-          { entity: 'Sheet', alias: 'sheets', dependsOn: ['pages'] },
-        ],
+    it('should create a resource with live sync config', () => {
+      const PageResource = defineResource({
+        name: 'Page',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
+        liveSync: { enabled: true, strategy: 'polling', interval: 30000 },
       });
 
-      expect(DashboardView.name).toBe('Dashboard');
-      expect(DashboardView.uses).toHaveLength(2);
-      expect(DashboardView.uses[0].entity).toBe('Page');
-      expect(DashboardView.uses[1].dependsOn).toEqual(['pages']);
+      expect(PageResource.liveSync?.enabled).toBe(true);
+      expect(PageResource.liveSync?.strategy).toBe('polling');
     });
 
-    it('should register view in global registry', () => {
-      const DashboardView = defineView({
-        name: 'Dashboard',
-        uses: [{ entity: 'Page', alias: 'pages' }],
-      });
-
-      const registry = getViewRegistry();
-      expect(registry.has('Dashboard')).toBe(true);
-      expect(registry.get('Dashboard')).toBe(DashboardView);
-    });
-
-    it('should validate view dependencies', () => {
-      expect(() => {
-        defineView({
-          name: 'CircularView',
-          uses: [
-            { entity: 'Page', alias: 'pages', dependsOn: ['sheets'] },
-            { entity: 'Sheet', alias: 'sheets', dependsOn: ['pages'] },
-          ],
-        });
-      }).toThrow('Circular dependency detected');
-    });
-  });
-
-  describe('Registry Management', () => {
-    it('should manage resources correctly', () => {
-      const registry = getResourceRegistry();
-
+    it('should create a resource with dependencies', () => {
       defineResource({
         name: 'Page',
         schema: z.object({ id: z.string() }),
         endpoints: { list: '/api/pages' },
       });
 
-      expect(registry.getAll()).toHaveLength(1);
-      expect(registry.getNames()).toEqual(['Page']);
-
-      registry.unregister('Page');
-      expect(registry.has('Page')).toBe(false);
-    });
-
-    it('should manage views correctly', () => {
-      const registry = getViewRegistry();
-
-      defineView({
-        name: 'Dashboard',
-        uses: [{ entity: 'Page', alias: 'pages' }],
+      const WidgetResource = defineResource({
+        name: 'Widget',
+        schema: z.object({ id: z.string(), pageId: z.string() }),
+        endpoints: { list: '/api/widgets' },
+        dependsOn: [
+          { resource: 'Page', extractParams: (pages) => ({ pageIds: (pages as { id: string }[]).map((p) => p.id) }) },
+        ],
       });
 
-      expect(registry.getAll()).toHaveLength(1);
-      expect(registry.getNames()).toEqual(['Dashboard']);
+      expect(WidgetResource.dependsOn).toHaveLength(1);
+      expect(WidgetResource.dependsOn?.[0].resource).toBe('Page');
+    });
+  });
 
-      registry.unregister('Dashboard');
-      expect(registry.has('Dashboard')).toBe(false);
+  describe('Query Graph', () => {
+    it('should add resource to query graph', () => {
+      defineResource({
+        name: 'Page',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
+      });
+
+      expect(getQueryGraph().has('Page')).toBe(true);
+    });
+
+    it('should build dependency order', () => {
+      defineResource({
+        name: 'Page',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/pages' },
+      });
+
+      defineResource({
+        name: 'Widget',
+        schema: z.object({ id: z.string() }),
+        endpoints: { list: '/api/widgets' },
+        relations: { belongsTo: ['Page'] },
+      });
+
+      const order = getQueryGraph().buildDependencyOrder();
+      expect(order.indexOf('Page')).toBeLessThan(order.indexOf('Widget'));
     });
   });
 });

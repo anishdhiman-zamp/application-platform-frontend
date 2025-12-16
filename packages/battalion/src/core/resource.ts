@@ -1,170 +1,146 @@
+import { API_DOMAIN } from '@zamp-platform/api';
 import { z } from 'zod';
 
-import { Resource, ResourceBehaviors, ResourceConfig, ResourceEndpoints } from '../types';
+import { CacheConfig, Resource, ResourceConfig, ResourceEndpoints } from '../types';
+import { getQueryGraph } from './query-graph';
 import { getResourceRegistry } from './registry';
 
-// Default behaviors
-const DEFAULT_BEHAVIORS: ResourceBehaviors = {
-  optimistic: {
-    create: 'append',
-    update: 'merge',
-    delete: 'remove',
-  },
-  liveSync: false,
-  cache: {
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  },
+const DEFAULT_CACHE: CacheConfig = {
+  staleTime: 5 * 60 * 1000,
+  gcTime: 10 * 60 * 1000,
 };
 
-// API client factory
+const DEFAULT_RETRY = {
+  maxAttempts: 5,
+  initialDelay: 1000,
+  maxDelay: 30000,
+  backoffMultiplier: 2,
+};
+
+/**
+ * Get the base URL - uses API_DOMAIN from @zamp-platform/api
+ * which handles multi-region support
+ */
+function getBaseUrl(): string {
+  return API_DOMAIN;
+}
+
+/**
+ * Build full URL from base and endpoint
+ */
+function buildUrl(endpoint: string): string {
+  const baseUrl = getBaseUrl();
+  // If endpoint already starts with http or /, use as-is
+  if (endpoint.startsWith('http') || endpoint.startsWith('/')) {
+    return endpoint;
+  }
+  // Otherwise, prepend baseUrl
+  return `${baseUrl}/${endpoint}`;
+}
+
+/**
+ * Handle fetch response - throws on error
+ */
+async function handleResponse(response: Response) {
+  if (!response.ok) {
+    const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+    (error as Error & { status: number }).status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
 function createApiClient(endpoints: ResourceEndpoints) {
   return {
     list: async () => {
       if (typeof endpoints.list === 'string') {
-        const response = await fetch(endpoints.list);
-        return response.json();
+        const response = await fetch(buildUrl(endpoints.list), {
+          credentials: 'include',
+        });
+        return handleResponse(response);
       }
       return endpoints.list?.(fetch);
     },
-
     get: async (id: string) => {
       if (typeof endpoints.get === 'string') {
-        const url = endpoints.get.replace(':id', id);
-        const response = await fetch(url);
-        return response.json();
+        const url = buildUrl(endpoints.get).replace(':id', id);
+        const response = await fetch(url, {
+          credentials: 'include',
+        });
+        return handleResponse(response);
       }
       return endpoints.get?.(fetch, id);
     },
-
     create: async (data: unknown) => {
       if (typeof endpoints.create === 'string') {
-        const response = await fetch(endpoints.create, {
+        const response = await fetch(buildUrl(endpoints.create), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(data),
         });
-        return response.json();
+        return handleResponse(response);
       }
       return endpoints.create?.(fetch, data);
     },
-
     update: async (id: string, data: unknown) => {
       if (typeof endpoints.update === 'string') {
-        const url = endpoints.update.replace(':id', id);
+        const url = buildUrl(endpoints.update).replace(':id', id);
         const response = await fetch(url, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(data),
         });
-        return response.json();
+        return handleResponse(response);
       }
       return endpoints.update?.(fetch, id, data);
     },
-
     delete: async (id: string) => {
       if (typeof endpoints.delete === 'string') {
-        const url = endpoints.delete.replace(':id', id);
-        const response = await fetch(url, { method: 'DELETE' });
-        return response.json();
+        const url = buildUrl(endpoints.delete).replace(':id', id);
+        const response = await fetch(url, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        return handleResponse(response);
       }
       return endpoints.delete?.(fetch, id);
     },
   };
 }
 
-/**
- * Define a resource with schema, endpoints, and behaviors
- */
 export function defineResource<T extends z.ZodTypeAny>(config: ResourceConfig<T>): Resource {
-  const { name, schema, endpoints, behaviors = {}, relations = {} } = config;
+  const { name, schema, endpoints, relations = {} } = config;
 
-  // Merge with default behaviors
-  const mergedBehaviors = {
-    ...DEFAULT_BEHAVIORS,
-    ...behaviors,
-    optimistic: {
-      ...DEFAULT_BEHAVIORS.optimistic,
-      ...behaviors.optimistic,
-    },
-    cache: {
-      ...DEFAULT_BEHAVIORS.cache,
-      ...behaviors.cache,
-    },
-  };
+  const transactionConfig = config.transactions
+    ? {
+        ...config.transactions,
+        retry: { ...DEFAULT_RETRY, ...config.transactions.retry },
+      }
+    : undefined;
 
-  // Create API client
-  const api = createApiClient(endpoints);
-
-  // Create resource instance
   const resource: Resource = {
     name,
     schema,
     endpoints,
-    behaviors: mergedBehaviors,
     relations: {
       hasMany: relations.hasMany || [],
       belongsTo: relations.belongsTo || [],
     },
-    api,
+    dependsOn: config.dependsOn,
+    transactions: transactionConfig,
+    liveSync: config.liveSync,
+    cache: config.cache || DEFAULT_CACHE,
+    api: createApiClient(endpoints),
   };
 
-  // Register the resource
-  const registry = getResourceRegistry();
-  registry.register(resource);
+  getResourceRegistry().register(resource);
+  getQueryGraph().addResource(resource);
 
   return resource;
 }
 
-/**
- * Validate data against resource schema
- */
-export function validateResourceData<T>(resource: Resource, data: unknown): T {
-  return resource.schema.parse(data) as T;
-}
-
-/**
- * Create optimistic update for resource
- */
-export function createOptimisticUpdate<T extends { id: string }>(
-  resource: Resource,
-  action: 'create' | 'update' | 'delete',
-  data: Partial<T> & { id?: string },
-  existingData: T[],
-): T[] {
-  const { optimistic } = resource.behaviors;
-
-  if (!optimistic) return existingData;
-
-  switch (action) {
-    case 'create':
-      if (optimistic.create === 'append') {
-        return [...existingData, { ...data, id: `temp-${Date.now()}` } as T];
-      }
-      if (optimistic.create === 'prepend') {
-        return [{ ...data, id: `temp-${Date.now()}` } as T, ...existingData];
-      }
-      return existingData;
-
-    case 'update':
-      if (optimistic.update === 'merge') {
-        return existingData.map((item) => (item.id === data.id ? ({ ...item, ...data } as T) : item));
-      }
-      if (optimistic.update === 'replace') {
-        return existingData.map((item) => (item.id === data.id ? (data as T) : item));
-      }
-      return existingData;
-
-    case 'delete':
-      if (optimistic.delete === 'remove') {
-        return existingData.filter((item) => item.id !== data.id);
-      }
-      if (optimistic.delete === 'hide') {
-        return existingData.map((item) => (item.id === data.id ? { ...item, _deleted: true } : item));
-      }
-      return existingData;
-
-    default:
-      return existingData;
-  }
+export function getResource(name: string): Resource | undefined {
+  return getResourceRegistry().get(name);
 }

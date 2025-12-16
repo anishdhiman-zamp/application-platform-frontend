@@ -3,11 +3,9 @@ import { z } from 'zod';
 
 // Base types
 export type ResourceName = string;
-export type ViewName = string;
 export type QueryKey = string[];
-export type MutationKey = string[];
 
-// Resource types
+// Resource endpoints
 export interface ResourceEndpoints {
   list?: string | ((client: typeof fetch) => Promise<unknown>);
   get?: string | ((client: typeof fetch, id: string) => Promise<unknown>);
@@ -16,39 +14,108 @@ export interface ResourceEndpoints {
   delete?: string | ((client: typeof fetch, id: string) => Promise<unknown>);
 }
 
-export interface ResourceBehaviors {
-  optimistic?: {
-    create?: 'append' | 'prepend' | 'replace';
-    update?: 'merge' | 'replace';
-    delete?: 'remove' | 'hide';
+// Resource dependency
+export interface ResourceDependency {
+  resource: ResourceName;
+  alias?: string;
+  lazy?: boolean;
+  extractParams?: (parentData: unknown) => Record<string, unknown>;
+}
+
+// Optimistic update config
+export interface OptimisticConfig<T = unknown> {
+  create?: 'append' | 'prepend';
+  update?: 'merge' | 'replace';
+  delete?: 'remove' | 'hide';
+  /**
+   * Function to create a full optimistic item from partial data.
+   * This ensures the optimistic item matches the resource schema.
+   * @param data - Partial data provided by the user
+   * @returns Full item matching the resource schema
+   */
+  getOptimisticItem?: (data: Partial<T>) => T;
+}
+
+// Transaction configuration
+export interface TransactionConfig<T = unknown> {
+  create?: string;
+  update?: string;
+  delete?: string;
+  resourceType: string;
+  /**
+   * The field name used as the unique identifier for items.
+   * Defaults to 'id' if not specified.
+   */
+  idField?: string;
+  optimistic?: OptimisticConfig<T>;
+  retry?: {
+    maxAttempts?: number;
+    initialDelay?: number;
+    maxDelay?: number;
+    backoffMultiplier?: number;
   };
-  liveSync?: boolean;
-  cache?: {
-    staleTime?: number;
-    gcTime?: number;
+  onRollback?: {
+    create?: (data: unknown, error: Error) => void;
+    update?: (id: string, data: unknown, error: Error) => void;
+    delete?: (id: string, error: Error) => void;
+  };
+  transformPayload?: {
+    create?: (data: unknown) => Record<string, unknown>;
+    update?: (data: unknown) => Record<string, unknown>;
+    delete?: (data: unknown) => Record<string, unknown>;
   };
 }
 
+// Live sync configuration
+export interface LiveSyncConfig {
+  enabled: boolean;
+  strategy: 'polling' | 'sse';
+  interval?: number;
+  endpoint?: string;
+  /**
+   * Enable OPFS persistence for instant loading
+   */
+  persist?: boolean;
+  /**
+   * Max age for persisted data (ms)
+   */
+  persistMaxAge?: number;
+}
+
+// Cache configuration
+export interface CacheConfig {
+  staleTime?: number;
+  gcTime?: number;
+}
+
+// Resource configuration
 export interface ResourceConfig<T extends z.ZodTypeAny> {
   name: ResourceName;
   schema: T;
   endpoints: ResourceEndpoints;
-  behaviors?: ResourceBehaviors;
   relations?: {
     hasMany?: ResourceName[];
     belongsTo?: ResourceName[];
   };
+  dependsOn?: ResourceDependency[];
+  transactions?: TransactionConfig<z.infer<T>>;
+  liveSync?: LiveSyncConfig;
+  cache?: CacheConfig;
 }
 
+// Resource instance
 export interface Resource<T = unknown> {
   name: ResourceName;
   schema: z.ZodTypeAny;
   endpoints: ResourceEndpoints;
-  behaviors: ResourceBehaviors;
   relations: {
     hasMany: ResourceName[];
     belongsTo: ResourceName[];
   };
+  dependsOn?: ResourceDependency[];
+  transactions?: TransactionConfig<T>;
+  liveSync?: LiveSyncConfig;
+  cache?: CacheConfig;
   api: {
     list: () => Promise<T[]>;
     get: (id: string) => Promise<T>;
@@ -58,79 +125,90 @@ export interface Resource<T = unknown> {
   };
 }
 
-// View types
-export interface ViewDependency {
-  entity: ResourceName;
-  alias?: string;
-  dependsOn?: string[]; // Array of aliases (strings) - converted to QueryKey[] internally
-  lazy?: boolean;
-  params?: Record<string, unknown>;
+// Batch operation
+export interface BatchOperation {
+  action: 'create' | 'update' | 'delete';
+  data: Record<string, unknown>;
+  id?: string;
 }
 
-export interface ViewConfig {
-  name: ViewName;
-  uses: ViewDependency[];
+// Failed transaction
+export interface FailedTransaction {
+  id: string;
+  action: 'create' | 'update' | 'delete';
+  data: unknown;
+  error: Error;
+  timestamp: Date;
+  resourceName: string;
 }
 
-export interface View {
-  name: ViewName;
-  uses: ViewDependency[];
+// Transaction state
+export interface TransactionState {
+  pending: number;
+  pendingIds: string[];
+  hasPending: boolean;
+  retrying: number;
+  failed: number;
 }
 
-// Query Graph types
-export interface QueryNode {
-  key: QueryKey;
-  entity: ResourceName;
-  dependsOn: string[];
-  dependents: QueryKey[];
-  state: 'idle' | 'fetching' | 'success' | 'error';
-  data?: unknown;
+// Error state
+export interface ErrorState {
+  lastError: Error | null;
+  failedTransactions: FailedTransaction[];
+}
+
+// Live sync state
+export interface LiveSyncState {
+  isConnected: boolean;
+  lastSyncAt: Date | null;
   error?: Error;
-  enabled: boolean;
+  /**
+   * Whether data was loaded from cache
+   */
+  loadedFromCache?: boolean;
+  /**
+   * Whether background sync is in progress
+   */
+  isSyncing?: boolean;
 }
 
-export interface QueryGraph {
-  nodes: Map<string, QueryNode>;
-  executionOrder: QueryKey[];
+// Resource hook options
+export interface ResourceOptions {
+  enabled?: boolean;
+  staleTime?: number;
+  gcTime?: number;
+  queryClient?: QueryClient;
 }
 
-// MetaState types
+// Resource hook return type
+export interface ResourceHookReturn<T> {
+  data: T[] | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+  isStale: boolean;
+  error: Error | null;
+  create: (data: Partial<T>) => void;
+  update: (id: string, data: Partial<T>) => void;
+  delete: (id: string) => void;
+  batch: (operations: BatchOperation[]) => void;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  getDependency: <D>(resourceName: string) => D | undefined;
+  sync: LiveSyncState;
+  transactions: TransactionState;
+  errors: ErrorState;
+  refetch: () => void;
+  invalidate: () => void;
+}
+
+// Meta state
 export interface MetaState {
   isLoading: boolean;
   hasError: boolean;
   isStale: boolean;
   isOptimistic: boolean;
   errors: Error[];
-}
-
-// Hook types
-export interface ResourceOptions {
-  enabled?: boolean;
-  staleTime?: number;
-  gcTime?: number;
-}
-
-export interface ViewOptions {
-  queryClient?: QueryClient;
-  enabled?: boolean;
-}
-
-export interface ResourceHookReturn<T> {
-  data: T[] | undefined;
-  isLoading: boolean;
-  error: Error | null;
-  create: (data: Partial<T>) => void;
-  update: (id: string, data: Partial<T>) => void;
-  delete: (id: string) => void;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
-}
-
-export interface ViewHookReturn {
-  data: Record<string, unknown>;
-  actions: Record<string, (...args: unknown[]) => void>;
-  uiState: MetaState;
 }
 
 // Registry types
@@ -145,44 +223,4 @@ export interface ResourceRegistry {
   getByRelation(relationType: 'hasMany' | 'belongsTo', targetResource: ResourceName): Resource[];
   buildDependencyGraph(): Map<ResourceName, ResourceName[]>;
   validateDependencies(): { valid: boolean; errors: string[] };
-}
-
-export interface ViewRegistry {
-  register(config: ViewConfig): View;
-  get(name: ViewName): View | undefined;
-  getAll(): View[];
-  has(name: ViewName): boolean;
-  unregister(name: ViewName): boolean;
-  clear(): void;
-  getNames(): ViewName[];
-  getViewsUsingResource(resourceName: string): View[];
-  getViewsWithDependency(dependencyPattern: {
-    entity?: string;
-    alias?: string;
-    dependsOn?: string[];
-    lazy?: boolean;
-  }): View[];
-  validateViews(): { valid: boolean; errors: string[] };
-}
-
-// Orchestrator types
-export interface Orchestrator {
-  runView(viewName: ViewName): ViewHookReturn;
-  activateNode(nodeId: string): void;
-  mutate(entity: ResourceName, action: string, args: unknown): Promise<unknown>;
-  aggregateState(): MetaState;
-}
-
-// Sync types
-export interface SyncOptions {
-  interval?: number;
-  enabled?: boolean;
-}
-
-export interface SyncUpdate {
-  entity: ResourceName;
-  id: string;
-  data: unknown;
-  timestamp: number;
-  type: 'create' | 'update' | 'delete';
 }

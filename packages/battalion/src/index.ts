@@ -1,34 +1,43 @@
 // Core exports
-export { createOrchestrator } from './core/orchestrator';
-export { createResourceRegistry, getResourceRegistry, resetResourceRegistry } from './core/registry';
-export { createOptimisticUpdate, defineResource, validateResourceData } from './core/resource';
-export { buildExecutionOrder, defineView } from './core/view';
-export { createViewRegistry, getViewRegistry, resetViewRegistry } from './core/view-registry';
+export { getLiveSyncManager, resetLiveSyncManager } from './core/live-sync';
+export { getOPFSStorage, resetOPFSStorage } from './core/opfs-storage';
+export { getQueryGraph, resetQueryGraph } from './core/query-graph';
+export { getResourceRegistry, resetResourceRegistry } from './core/registry';
+export { defineResource, getResource } from './core/resource';
 
 // Hook exports
-export { useMetaState, useResource, useView } from './hooks';
+export { useMetaState, useResource } from './hooks';
+
+// Transaction exports
+export { transactionStore } from './transactions/store';
+// TransactionProvider is optional - only needed for custom config
+export { TransactionProvider, type TransactionProviderProps } from './transactions/provider';
 
 // Type exports
 export type {
+  BatchOperation,
+  CacheConfig,
+  ErrorState,
+  FailedTransaction,
+  LiveSyncConfig,
+  LiveSyncState,
   MetaState,
-  Orchestrator,
-  QueryGraph,
-  QueryNode,
+  OptimisticConfig,
+  QueryKey,
   Resource,
-  ResourceBehaviors,
   ResourceConfig,
+  ResourceDependency,
   ResourceEndpoints,
   ResourceHookReturn,
   ResourceName,
   ResourceOptions,
   ResourceRegistry,
-  SyncOptions,
-  SyncUpdate,
-  View,
-  ViewConfig,
-  ViewDependency,
-  ViewHookReturn,
-  ViewName,
-  ViewOptions,
-  ViewRegistry,
+  TransactionConfig,
+  TransactionState,
 } from './types';
+
+// Client config type for custom configuration
+export type { TransactionClientConfig } from './transactions/client';
+
+// OPFS storage config type
+export type { OPFSStorageConfig } from './core/opfs-storage';
