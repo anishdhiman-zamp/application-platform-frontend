@@ -3,29 +3,36 @@
 import { type ReactNode } from 'react';
 import ChatTopbar from '@/modules/macs/components/ChatTopbar';
 import MacsTopbar from '@/modules/macs/components/MacsTopbar';
-import { MacsProvider, useMacsContext } from '@/modules/macs/context/MacsContext';
+import { MacsProvider } from '@/modules/macs/context/MacsContext';
+import { useTopbarLayout } from '@/modules/macs/hooks/useTopbarLayout';
+import { TopbarLayoutType } from '@/modules/macs/types';
 
 const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
-  const { hasTabs, chatPanelSize } = useMacsContext();
+  const topbarLayout = useTopbarLayout();
 
-  return (
-    <div className='flex h-full w-full flex-col'>
-      {/* Topbar row */}
-      <div className='flex w-full'>
-        {hasTabs ? (
+  const renderTopbar = () => {
+    switch (topbarLayout.type) {
+      case TopbarLayoutType.ChatOnly:
+        return <ChatTopbar className='w-full' showExpandMinimize />;
+      case TopbarLayoutType.MacsOnly:
+        return <MacsTopbar className='w-full' />;
+      case TopbarLayoutType.Split:
+        return (
           <>
             <ChatTopbar
               className='border-r border-gray-400'
-              style={{ width: `${chatPanelSize}%` }}
+              style={{ width: topbarLayout.chatWidth }}
               showExpandMinimize
             />
-            <MacsTopbar style={{ width: `${100 - chatPanelSize}%` }} />
+            <MacsTopbar style={{ width: topbarLayout.macsWidth }} />
           </>
-        ) : (
-          <MacsTopbar className='w-full' />
-        )}
-      </div>
+        );
+    }
+  };
 
+  return (
+    <div className='flex h-full w-full flex-col'>
+      <div className='flex w-full'>{renderTopbar()}</div>
       {children}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { FileBarChart, FileText, LayoutDashboard, Puzzle, Shapes, X } from 'lucide-react';
+import { FileBarChart, FileText, LayoutDashboard, X } from 'lucide-react';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { Tab, TabType } from '@/modules/macs/types';
 
@@ -11,8 +11,6 @@ interface MacsTabProps {
 }
 
 const TAB_ICONS: Record<TabType, React.ComponentType<{ size?: number; className?: string }>> = {
-  capabilities: Puzzle,
-  components: Shapes,
   report: FileBarChart,
   dashboard: LayoutDashboard,
   page: FileText,
@@ -35,9 +33,9 @@ const MacsTab = ({ tab }: MacsTabProps) => {
   return (
     <div
       className={cn(
-        'flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2 transition-colors',
+        'flex h-full cursor-pointer items-center gap-1.5 px-2 transition-colors',
         isActive
-          ? 'border-gray-400 bg-white text-gray-900'
+          ? '-mb-px border-x border-gray-400 border-b-white bg-white text-gray-900'
           : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-100',
       )}
       onClick={handleClick}

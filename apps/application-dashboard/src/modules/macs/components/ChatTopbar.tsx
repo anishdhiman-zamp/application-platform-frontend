@@ -12,7 +12,7 @@ interface ChatTopbarProps {
 }
 
 const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbarProps) => {
-  const { chatTitle } = useMacsContext();
+  const { chatTitle, setIsChatPanelExpanded } = useMacsContext();
 
   const displayTitle = chatTitle || 'Chat title goes here';
 
@@ -28,12 +28,12 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
 
   const handleExpand = () => {
     // TODO: Implement expand functionality
-    console.log('Expand clicked');
+    setIsChatPanelExpanded(true);
   };
 
   const handleMinimize = () => {
     // TODO: Implement minimize functionality
-    console.log('Minimize clicked');
+    setIsChatPanelExpanded(false);
   };
 
   return (

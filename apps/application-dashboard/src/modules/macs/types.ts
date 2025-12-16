@@ -1,6 +1,13 @@
-export type SectionType = 'capabilities' | 'components';
+export enum SectionType {
+  Capabilities = 'capabilities',
+  Components = 'components',
+}
 
-export type TabType = SectionType | 'report' | 'dashboard' | 'page';
+export enum TabType {
+  Report = 'report',
+  Dashboard = 'dashboard',
+  Page = 'page',
+}
 
 export type Tab = {
   id: string;
@@ -17,22 +24,13 @@ export type RecentItem = {
 };
 
 export type MacsContextType = {
-  // Section icons state (which are currently open as tabs)
   openSections: SectionType[];
-
-  // Additional tabs (from + button)
   additionalTabs: Tab[];
 
-  // Active tab
   activeTabId: string | null;
-
-  // Computed - all tabs (sections + additional)
   allTabs: Tab[];
 
-  // Whether any tabs are open
   hasTabs: boolean;
-
-  // Actions
   toggleSection: (section: SectionType) => void;
   addTab: (tab: Tab) => void;
   removeTab: (tabId: string) => void;
@@ -40,11 +38,17 @@ export type MacsContextType = {
   closeSection: (section: SectionType) => void;
   resetToDefault: () => void;
 
-  // Chat state
   chatTitle: string;
   setChatTitle: (title: string) => void;
 
-  // Panel sizing
-  chatPanelSize: number;
-  setChatPanelSize: (size: number) => void;
+  isChatPanelExpanded: boolean;
+  setIsChatPanelExpanded: (expanded: boolean) => void;
+  isSectionPanelExpanded: boolean;
+  setIsSectionPanelExpanded: (expanded: boolean) => void;
 };
+
+export enum TopbarLayoutType {
+  ChatOnly = 'chat-only',
+  MacsOnly = 'macs-only',
+  Split = 'split',
+}

@@ -5,68 +5,65 @@ import type { MacsContextType, SectionType, Tab } from '@/modules/macs/types';
 
 const MacsContext = createContext<MacsContextType | null>(null);
 
-const SECTION_CONFIG: Record<SectionType, { title: string; icon: string }> = {
-  capabilities: { title: 'Capabilities', icon: 'puzzle' },
-  components: { title: 'Components', icon: 'shapes' },
-};
-
 export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [openSections, setOpenSections] = useState<SectionType[]>([]);
   const [additionalTabs, setAdditionalTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [chatTitle, setChatTitle] = useState<string>('');
-  const [chatPanelSize, setChatPanelSize] = useState<number>(40);
+  const [isChatPanelExpanded, setIsChatPanelExpanded] = useState<boolean>(false);
+  const [isSectionPanelExpanded, setIsSectionPanelExpanded] = useState<boolean>(false);
 
   const toggleSection = useCallback(
     (section: SectionType) => {
       setOpenSections((prev) => {
+        // If section is already open, close it
         if (prev.includes(section)) {
-          // Section is already open, close it
-          const newSections = prev.filter((s) => s !== section);
-
-          // If this was the active tab, switch to another
-          if (activeTabId === section) {
-            const remainingSectionIds = newSections as string[];
-            const remainingTabIds = additionalTabs.map((t) => t.id);
-            const allRemainingIds = [...remainingSectionIds, ...remainingTabIds];
-
-            setActiveTabId(allRemainingIds.length > 0 ? allRemainingIds[0] : null);
+          if (additionalTabs.length === 0) {
+            setIsSectionPanelExpanded(false);
+          } else {
+            // Auto-select first tab when closing section, show split view
+            setActiveTabId(additionalTabs[0].id);
+            setIsSectionPanelExpanded(false);
           }
 
-          return newSections;
-        } else {
-          // Open the section and make it active
-          setActiveTabId(section);
-
-          return [...prev, section];
+          return [];
         }
+        // Open the section (closes any other open section and deselects active tab)
+        setActiveTabId(null);
+        setIsSectionPanelExpanded(true);
+
+        return [section];
       });
     },
-    [activeTabId, additionalTabs],
+    [additionalTabs],
   );
 
   const closeSection = useCallback(
     (section: SectionType) => {
       setOpenSections((prev) => {
-        const newSections = prev.filter((s) => s !== section);
+        if (!prev.includes(section)) return prev;
 
-        if (activeTabId === section) {
-          const remainingSectionIds = newSections as string[];
-          const remainingTabIds = additionalTabs.map((t) => t.id);
-          const allRemainingIds = [...remainingSectionIds, ...remainingTabIds];
-
-          setActiveTabId(allRemainingIds.length > 0 ? allRemainingIds[0] : null);
+        if (additionalTabs.length === 0) {
+          setIsSectionPanelExpanded(false);
+        } else {
+          // Auto-select first tab when closing section, show split view
+          setActiveTabId(additionalTabs[0].id);
+          setIsSectionPanelExpanded(false);
         }
 
-        return newSections;
+        return [];
       });
     },
-    [activeTabId, additionalTabs],
+    [additionalTabs],
   );
 
   const addTab = useCallback((tab: Tab) => {
+    // Close any open section when adding/switching to a tab
+    setOpenSections([]);
+    // Keep section panel in split view (not expanded)
+    setIsSectionPanelExpanded(false);
+
     setAdditionalTabs((prev) => {
-      // Don't add if already exists
       if (prev.some((t) => t.id === tab.id)) {
         setActiveTabId(tab.id);
 
@@ -80,29 +77,28 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
 
   const removeTab = useCallback(
     (tabId: string) => {
-      // Check if it's a section
-      if (tabId === 'capabilities' || tabId === 'components') {
-        closeSection(tabId as SectionType);
-
-        return;
-      }
-
       setAdditionalTabs((prev) => {
         const newTabs = prev.filter((t) => t.id !== tabId);
 
         if (activeTabId === tabId) {
-          const allRemaining = [...openSections, ...newTabs.map((t) => t.id)];
+          setActiveTabId(newTabs.length > 0 ? newTabs[0].id : null);
+        }
 
-          setActiveTabId(allRemaining.length > 0 ? allRemaining[0] : null);
+        if (newTabs.length === 0 && openSections.length === 0) {
+          setIsSectionPanelExpanded(false);
         }
 
         return newTabs;
       });
     },
-    [activeTabId, openSections, closeSection],
+    [activeTabId, openSections.length],
   );
 
   const setActiveTab = useCallback((tabId: string | null) => {
+    // Close any open section when switching to a tab
+    if (tabId) {
+      setOpenSections([]);
+    }
     setActiveTabId(tabId);
   }, []);
 
@@ -110,21 +106,13 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setOpenSections([]);
     setAdditionalTabs([]);
     setActiveTabId(null);
-  }, []);
+    setIsSectionPanelExpanded(false);
+    setIsChatPanelExpanded(false);
+  }, [setIsSectionPanelExpanded, setIsChatPanelExpanded]);
 
-  // Convert open sections to Tab format and combine with additional tabs
-  const allTabs = useMemo(() => {
-    const sectionTabs: Tab[] = openSections.map((section) => ({
-      id: section,
-      title: SECTION_CONFIG[section].title,
-      type: section,
-      icon: SECTION_CONFIG[section].icon,
-    }));
+  const allTabs = useMemo(() => additionalTabs, [additionalTabs]);
 
-    return [...sectionTabs, ...additionalTabs];
-  }, [openSections, additionalTabs]);
-
-  const hasTabs = allTabs.length > 0;
+  const hasTabs = openSections.length > 0 || additionalTabs.length > 0;
 
   const value: MacsContextType = useMemo(
     () => ({
@@ -141,8 +129,10 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       resetToDefault,
       chatTitle,
       setChatTitle,
-      chatPanelSize,
-      setChatPanelSize,
+      isChatPanelExpanded,
+      setIsChatPanelExpanded,
+      isSectionPanelExpanded,
+      setIsSectionPanelExpanded,
     }),
     [
       openSections,
@@ -158,8 +148,10 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       resetToDefault,
       chatTitle,
       setChatTitle,
-      chatPanelSize,
-      setChatPanelSize,
+      isChatPanelExpanded,
+      setIsChatPanelExpanded,
+      isSectionPanelExpanded,
+      setIsSectionPanelExpanded,
     ],
   );
 
