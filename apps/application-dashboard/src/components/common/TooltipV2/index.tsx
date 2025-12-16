@@ -25,6 +25,9 @@ type TooltipV2Props = {
   scrollableBody?: boolean;
   isDisabledBody?: boolean;
   showOnlyWhenTruncated?: boolean;
+  delayDuration?: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const TooltipV2: FC<TooltipV2Props> = ({
@@ -38,6 +41,9 @@ const TooltipV2: FC<TooltipV2Props> = ({
   scrollableBody = false,
   isDisabledBody = false,
   showOnlyWhenTruncated = false,
+  delayDuration = 100,
+  open,
+  onOpenChange,
 }) => {
   const triggerRef = useRef<HTMLElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -96,8 +102,8 @@ const TooltipV2: FC<TooltipV2Props> = ({
   }, [showOnlyWhenTruncated, checkOverflow]);
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
+    <TooltipProvider delayDuration={delayDuration}>
+      <Tooltip open={open} onOpenChange={onOpenChange}>
         <TooltipTrigger
           className={className}
           asChild={asChildTrigger}
