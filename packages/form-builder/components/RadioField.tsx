@@ -2,7 +2,6 @@ import { Label, Radio, RadioGroup } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-
 import { useClearPreviousInlineField } from '../hooks/useClearPreviousInlineField';
 import { FormField as FormFieldType, RadioOption } from '../types';
 import { FormField } from './FormField';

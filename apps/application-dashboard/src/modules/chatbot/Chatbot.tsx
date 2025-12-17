@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
+  BlockRenderer,
   ButtonBlockType,
-  ConnectedChatInputProps,
   DisplayLayerActionType,
   LocationData,
-  Message,
   ResourceType,
   ScopeType,
   SenderType,
@@ -15,30 +14,20 @@ import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, Shimmer
 import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
 import ChatHeader from 'modules/chatbot/ChatHeader';
+import { ChatInput } from 'modules/chatbot/ChatInput';
 import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
+import SenderDetails from 'modules/chatbot/SenderDetails';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
-import dynamic from 'next/dynamic';
-import { useParams, useSearchParams } from 'next/navigation';
-import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
-import Avatar from '@/components/common/avatar';
+import { useSearchParams } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
-import { COLORS } from '@/constants/colors';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { RootState } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
-import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 import { MapAny } from '@/types/commonTypes';
 import { cn, getUserNameFromEmail } from '@/utils/common';
-
-// Dynamically import ConnectedChatInput with SSR disabled to avoid hydration mismatch
-// caused by @elevenlabs/react's useScribe hook which uses browser-only APIs
-const ConnectedChatInput = dynamic<ConnectedChatInputProps>(
-  () => import('@zamp-platform/chat').then((mod) => mod.ConnectedChatInput),
-  { ssr: false },
-);
 
 interface ChatbotProps {
   children: React.ReactNode;
@@ -54,8 +43,6 @@ interface ChatbotProps {
   onOpenChatbot?: () => void;
   scope?: ScopeType;
   clearInputOnClose?: boolean;
-  onError?: (error: unknown) => void;
-  onSuccess?: (message: string) => void;
 }
 
 const Chatbot = ({
@@ -72,18 +59,11 @@ const Chatbot = ({
   onOpenChatbot,
   scope = ScopeType.ACTIVITY_RUN,
   clearInputOnClose = false,
-  onError,
-  onSuccess,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
-  const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
-  const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
   const feedbackState = useSelector((state: RootState) => state?.feedbacks);
   const { mergedFeedbackItems = [] } = feedbackState;
   const searchParams = useSearchParams();
-  const params = useParams();
-  const processId = params?.processId as string;
-  const activityRunId = params?.activityId as string;
   const conversationIdFromParam = searchParams?.get(CHATBOT_LOCATION_PARAMS.CHATBOT_CONVERSATION_ID);
   const [isOpen, setIsOpen] = useState(showChatbot);
   const [header, setHeader] = useState('');
@@ -180,17 +160,6 @@ const Chatbot = ({
     }
   };
 
-  // Use the app's baseApi for speech-to-text token fetching
-  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
-
-  const getElevenLabsToken = useCallback(async () => {
-    const result = await getSpeechToTextAccessToken({}).unwrap();
-
-    return result.access_token;
-  }, [getSpeechToTextAccessToken]);
-
-  const acceptedFileTypes = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
-
   const renderFeedbackStatusMessageOrInput = () => {
     if (feedbackItem?.status && [FEEDBACK_STATUS.APPLIED, FEEDBACK_STATUS.PROCESSING].includes(feedbackItem.status)) {
       return (
@@ -202,7 +171,7 @@ const Chatbot = ({
 
     return (
       <div className='flex flex-shrink-0'>
-        <ConnectedChatInput
+        <ChatInput
           chat={chat}
           annotationLocation={annotationLocation}
           conversationId={feedbackItem?.conversation_id || chat.conversationId || ''}
@@ -213,14 +182,6 @@ const Chatbot = ({
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
           autoFocus={isOpen}
-          currentUserName={currentUserName || ''}
-          resourceId={processId}
-          scopeId={scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId}
-          organizationId={organizationId}
-          getElevenLabsToken={getElevenLabsToken}
-          acceptedFileTypes={acceptedFileTypes}
-          onError={onError}
-          onSuccess={onSuccess}
         />
       </div>
     );
@@ -358,20 +319,17 @@ const Chatbot = ({
                         className='min-h-0 flex-1 space-y-6 overflow-y-auto p-4 [&::-webkit-scrollbar]:hidden'
                       >
                         {chat?.messages?.map((message) => (
-                          <Message
-                            key={message.timestamp}
-                            message={message}
-                            onAction={handleAction}
-                            assistantName='Pace'
-                            assistantAvatar={<PaceAvatar />}
-                            userAvatar={(senderName) => (
-                              <Avatar
-                                name={senderName}
-                                backgroundColor={COLORS.YELLOW_300}
-                                className='f-10-500 text-gray-1000 flex h-4 min-h-4 w-4 min-w-4 items-center justify-center rounded-md'
-                              />
-                            )}
-                          />
+                          <div key={message.timestamp} className='space-y-2'>
+                            <SenderDetails message={message} />
+                            <BlockRenderer
+                              message={{ block: message?.message_content?.elements ?? [] }}
+                              onAction={handleAction}
+                              className='border-none shadow-none'
+                              key={message?.timestamp}
+                              conversationId={message?.conversation_id}
+                              messageId={message?.id}
+                            />
+                          </div>
                         ))}
                         {isAnalysing && (
                           <div className='flex w-full items-center gap-1.5 text-gray-700'>
