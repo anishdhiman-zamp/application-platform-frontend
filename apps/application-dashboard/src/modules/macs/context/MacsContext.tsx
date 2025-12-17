@@ -2,156 +2,138 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import type { MacsContextType, SectionType, Tab } from '@/modules/macs/types';
+import { ViewMode } from '@/modules/macs/types';
 
 const MacsContext = createContext<MacsContextType | null>(null);
 
 export const MacsProvider = ({ children }: { children: ReactNode }) => {
-  const [openSections, setOpenSections] = useState<SectionType[]>([]);
-  const [additionalTabs, setAdditionalTabs] = useState<Tab[]>([]);
+  const [activeSection, setActiveSection] = useState<SectionType | null>(null);
+  const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [chatTitle, setChatTitle] = useState<string>('');
-  const [isChatPanelExpanded, setIsChatPanelExpanded] = useState<boolean>(false);
-  const [isSectionPanelExpanded, setIsSectionPanelExpanded] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Default);
+  const [isAddTabMenuOpen, setIsAddTabMenuOpen] = useState(false);
+  const [chatTitle, setChatTitle] = useState('');
 
-  const toggleSection = useCallback(
-    (section: SectionType) => {
-      setOpenSections((prev) => {
-        // If section is already open, close it
-        if (prev.includes(section)) {
-          if (additionalTabs.length === 0) {
-            setIsSectionPanelExpanded(false);
+  const hasContent = activeSection !== null || tabs.length > 0;
+
+  const toggleSection = useCallback((section: SectionType) => {
+    setActiveSection((prev) => {
+      if (prev === section) {
+        // Closing section - show add tab menu if no tabs
+        setTabs((currentTabs) => {
+          if (currentTabs.length === 0) {
+            setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
+            setIsAddTabMenuOpen(true);
           } else {
-            // Auto-select first tab when closing section, show split view
-            setActiveTabId(additionalTabs[0].id);
-            setIsSectionPanelExpanded(false);
+            setActiveTabId(currentTabs[0].id);
           }
 
-          return [];
-        }
-        // Open the section (closes any other open section and deselects active tab)
-        setActiveTabId(null);
-        setIsSectionPanelExpanded(true);
+          return currentTabs;
+        });
 
-        return [section];
-      });
-    },
-    [additionalTabs],
-  );
-
-  const closeSection = useCallback(
-    (section: SectionType) => {
-      setOpenSections((prev) => {
-        if (!prev.includes(section)) return prev;
-
-        if (additionalTabs.length === 0) {
-          setIsSectionPanelExpanded(false);
-        } else {
-          // Auto-select first tab when closing section, show split view
-          setActiveTabId(additionalTabs[0].id);
-          setIsSectionPanelExpanded(false);
-        }
-
-        return [];
-      });
-    },
-    [additionalTabs],
-  );
-
-  const addTab = useCallback((tab: Tab) => {
-    // Close any open section when adding/switching to a tab
-    setOpenSections([]);
-    // Keep section panel in split view (not expanded)
-    setIsSectionPanelExpanded(false);
-
-    setAdditionalTabs((prev) => {
-      if (prev.some((t) => t.id === tab.id)) {
-        setActiveTabId(tab.id);
-
-        return prev;
+        return null;
       }
-      setActiveTabId(tab.id);
 
-      return [...prev, tab];
+      // Opening section - preserve view mode if already expanded, otherwise go to split
+      setActiveTabId(null);
+      setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
+
+      return section;
     });
   }, []);
 
-  const removeTab = useCallback(
-    (tabId: string) => {
-      setAdditionalTabs((prev) => {
-        const newTabs = prev.filter((t) => t.id !== tabId);
+  const addTab = useCallback((tab: Tab) => {
+    setActiveSection(null);
+    setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
 
-        if (activeTabId === tabId) {
-          setActiveTabId(newTabs.length > 0 ? newTabs[0].id : null);
+    setTabs((prev) => {
+      const exists = prev.some((t) => t.id === tab.id);
+
+      setActiveTabId(tab.id);
+
+      return exists ? prev : [...prev, tab];
+    });
+  }, []);
+
+  const removeTab = useCallback((tabId: string) => {
+    setTabs((prev) => {
+      const newTabs = prev.filter((t) => t.id !== tabId);
+
+      setActiveTabId((currentActiveId) => {
+        if (currentActiveId === tabId) {
+          return newTabs.length > 0 ? newTabs[0].id : null;
         }
 
-        if (newTabs.length === 0 && openSections.length === 0) {
-          setIsSectionPanelExpanded(false);
-        }
-
-        return newTabs;
+        return currentActiveId;
       });
-    },
-    [activeTabId, openSections.length],
-  );
+
+      setActiveSection((currentSection) => {
+        if (newTabs.length === 0 && currentSection === null) {
+          setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
+          setIsAddTabMenuOpen(true);
+        }
+
+        return currentSection;
+      });
+
+      return newTabs;
+    });
+  }, []);
 
   const setActiveTab = useCallback((tabId: string | null) => {
-    // Close any open section when switching to a tab
     if (tabId) {
-      setOpenSections([]);
+      setActiveSection(null);
+      setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
     }
     setActiveTabId(tabId);
   }, []);
 
   const resetToDefault = useCallback(() => {
-    setOpenSections([]);
-    setAdditionalTabs([]);
+    setActiveSection(null);
+    setTabs([]);
     setActiveTabId(null);
-    setIsSectionPanelExpanded(false);
-    setIsChatPanelExpanded(false);
-  }, [setIsSectionPanelExpanded, setIsChatPanelExpanded]);
+    setViewMode(ViewMode.Default);
+    setIsAddTabMenuOpen(false);
+  }, []);
 
-  const allTabs = useMemo(() => additionalTabs, [additionalTabs]);
-
-  const hasTabs = openSections.length > 0 || additionalTabs.length > 0;
+  const openSplitViewWithMenu = useCallback(() => {
+    setViewMode(ViewMode.Split);
+    setIsAddTabMenuOpen(true);
+  }, []);
 
   const value: MacsContextType = useMemo(
     () => ({
-      openSections,
-      additionalTabs,
-      activeTabId,
-      allTabs,
-      hasTabs,
+      activeSection,
       toggleSection,
+      tabs,
+      activeTabId,
       addTab,
       removeTab,
       setActiveTab,
-      closeSection,
+      hasContent,
+      viewMode,
+      setViewMode,
+      openSplitViewWithMenu,
       resetToDefault,
+      isAddTabMenuOpen,
+      setIsAddTabMenuOpen,
       chatTitle,
       setChatTitle,
-      isChatPanelExpanded,
-      setIsChatPanelExpanded,
-      isSectionPanelExpanded,
-      setIsSectionPanelExpanded,
     }),
     [
-      openSections,
-      additionalTabs,
-      activeTabId,
-      allTabs,
-      hasTabs,
+      activeSection,
       toggleSection,
+      tabs,
+      activeTabId,
       addTab,
       removeTab,
       setActiveTab,
-      closeSection,
+      hasContent,
+      viewMode,
+      openSplitViewWithMenu,
       resetToDefault,
+      isAddTabMenuOpen,
       chatTitle,
-      setChatTitle,
-      isChatPanelExpanded,
-      setIsChatPanelExpanded,
-      isSectionPanelExpanded,
-      setIsSectionPanelExpanded,
     ],
   );
 

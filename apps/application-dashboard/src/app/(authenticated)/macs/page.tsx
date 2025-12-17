@@ -15,7 +15,7 @@ const MacsPage = () => {
     <div className='flex h-full w-full'>
       <ResizablePanelGroup direction='horizontal' className='flex-1'>
         <ResizablePanel defaultSize={panelSizes.chat} minSize={panelSizes.chat} maxSize={panelSizes.chat} order={1}>
-          <MacsChat showTopbar={!hasTabs} className={cn(hasTabs || isChatPanelExpanded ? 'w-full' : 'w-[600px]')} />
+          <MacsChat className={cn(hasTabs || isChatPanelExpanded ? 'w-full' : 'w-[700px]')} />
         </ResizablePanel>
         <ResizableHandle withHandle className='bg-gray-200' />
         <ResizablePanel

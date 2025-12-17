@@ -2,12 +2,12 @@
 
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { SectionType } from 'modules/macs/types';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import AddTabMenu from '@/modules/macs/components/AddTabMenu';
 import MacsTab from '@/modules/macs/components/MacsTab';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { SectionType } from '@/modules/macs/types';
 
 interface MacsTopbarProps {
   className?: string;
@@ -15,7 +15,7 @@ interface MacsTopbarProps {
 }
 
 const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
-  const { allTabs, resetToDefault } = useMacsContext();
+  const { tabs, resetToDefault } = useMacsContext();
 
   return (
     <div
@@ -25,7 +25,6 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
       )}
       style={style}
     >
-      {/* Section toggle buttons */}
       <Button
         variant='ghost'
         size='icon'
@@ -34,17 +33,15 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
       >
         <NewPaceIcons width={16} height={16} />
       </Button>
-      <SectionIconButton section={SectionType.Capabilities} />
+      <SectionIconButton section={SectionType.Skills} />
       <SectionIconButton section={SectionType.Components} />
 
-      {/* Tab bar */}
       <div className='flex h-full items-end gap-2 overflow-visible'>
-        {allTabs.map((tab) => (
+        {tabs.map((tab) => (
           <MacsTab key={tab.id} tab={tab} />
         ))}
       </div>
 
-      {/* Add button - always at the end */}
       <AddTabMenu />
     </div>
   );

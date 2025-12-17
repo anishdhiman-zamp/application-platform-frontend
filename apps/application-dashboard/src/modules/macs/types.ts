@@ -1,5 +1,5 @@
 export enum SectionType {
-  Capabilities = 'capabilities',
+  Skills = 'skills',
   Components = 'components',
 }
 
@@ -7,6 +7,12 @@ export enum TabType {
   Report = 'report',
   Dashboard = 'dashboard',
   Page = 'page',
+}
+
+export enum ViewMode {
+  Default = 'default', // Chat takes full width (stacked topbars)
+  Split = 'split', // Both panels visible (side-by-side)
+  SectionExpanded = 'section-expanded', // Section takes full width
 }
 
 export type Tab = {
@@ -24,31 +30,46 @@ export type RecentItem = {
 };
 
 export type MacsContextType = {
-  openSections: SectionType[];
-  additionalTabs: Tab[];
-
-  activeTabId: string | null;
-  allTabs: Tab[];
-
-  hasTabs: boolean;
+  // Section state
+  activeSection: SectionType | null;
   toggleSection: (section: SectionType) => void;
+
+  // Tab state
+  tabs: Tab[];
+  activeTabId: string | null;
   addTab: (tab: Tab) => void;
   removeTab: (tabId: string) => void;
   setActiveTab: (tabId: string | null) => void;
-  closeSection: (section: SectionType) => void;
+
+  // Derived
+  hasContent: boolean;
+
+  // View mode
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  openSplitViewWithMenu: () => void;
   resetToDefault: () => void;
 
+  // Add tab menu
+  isAddTabMenuOpen: boolean;
+  setIsAddTabMenuOpen: (open: boolean) => void;
+
+  // Chat
   chatTitle: string;
   setChatTitle: (title: string) => void;
-
-  isChatPanelExpanded: boolean;
-  setIsChatPanelExpanded: (expanded: boolean) => void;
-  isSectionPanelExpanded: boolean;
-  setIsSectionPanelExpanded: (expanded: boolean) => void;
 };
 
 export enum TopbarLayoutType {
-  ChatOnly = 'chat-only',
-  MacsOnly = 'macs-only',
-  Split = 'split',
+  Stacked = 'stacked', // Both topbars one above another (default/chat expanded)
+  MacsOnly = 'macs-only', // Section expanded
+  Split = 'split', // Both topbars side by side
 }
+
+export type Skill = {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  addedBy: 'you' | 'anthropic';
+  createdAt: string;
+};

@@ -2,8 +2,9 @@
 
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Clock, Maximize2, Minus, Plus } from 'lucide-react';
+import { Clock, Maximize2, Minus, PanelLeftClose, Plus } from 'lucide-react';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 
 interface ChatTopbarProps {
   className?: string;
@@ -12,7 +13,7 @@ interface ChatTopbarProps {
 }
 
 const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbarProps) => {
-  const { chatTitle, setIsChatPanelExpanded } = useMacsContext();
+  const { chatTitle, setViewMode, openSplitViewWithMenu, resetToDefault } = useMacsContext();
 
   const displayTitle = chatTitle || 'Chat title goes here';
 
@@ -26,18 +27,31 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
     console.log('History clicked');
   };
 
+  const handlePanelLeftClose = () => {
+    openSplitViewWithMenu();
+  };
+
   const handleExpand = () => {
-    // TODO: Implement expand functionality
-    setIsChatPanelExpanded(true);
+    resetToDefault();
   };
 
   const handleMinimize = () => {
-    // TODO: Implement minimize functionality
-    setIsChatPanelExpanded(false);
+    setViewMode(ViewMode.SectionExpanded);
   };
 
   return (
     <div className={cn('flex h-12 items-center justify-between px-4', className)} style={style}>
+      {!showExpandMinimize && (
+        <Button
+          variant='ghost'
+          size='icon'
+          className='h-7 w-7 text-gray-600 hover:text-gray-900'
+          onClick={handlePanelLeftClose}
+          title='Show split view'
+        >
+          <PanelLeftClose size={16} />
+        </Button>
+      )}
       <div className='f-13-500 truncate text-gray-900'>{displayTitle}</div>
       <div className='flex items-center gap-1'>
         <Button

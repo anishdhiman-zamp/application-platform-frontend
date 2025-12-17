@@ -1,23 +1,23 @@
 'use client';
 
-import CapabilitiesSection from '@/modules/macs/components/sections/CapabilitiesSection';
 import ComponentsSection from '@/modules/macs/components/sections/ComponentsSection';
 import GenericSection from '@/modules/macs/components/sections/GenericSection';
+import SkillsSection from '@/modules/macs/components/sections/SkillsSection';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { SectionType } from '@/modules/macs/types';
 
 const SectionPanel = () => {
-  const { openSections, activeTabId, allTabs } = useMacsContext();
+  const { activeSection, activeTabId, tabs } = useMacsContext();
 
-  if (openSections.includes(SectionType.Capabilities)) {
-    return <CapabilitiesSection />;
+  if (activeSection === SectionType.Skills) {
+    return <SkillsSection />;
   }
 
-  if (openSections.includes(SectionType.Components)) {
+  if (activeSection === SectionType.Components) {
     return <ComponentsSection />;
   }
 
-  const activeTab = allTabs.find((tab) => tab.id === activeTabId);
+  const activeTab = tabs.find((tab) => tab.id === activeTabId);
 
   if (activeTab) {
     return <GenericSection tab={activeTab} />;

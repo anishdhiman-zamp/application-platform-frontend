@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@zamp-platform/ui';
-import { Puzzle, Shapes } from 'lucide-react';
+import { Brain, Shapes } from 'lucide-react';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { SectionType } from '@/modules/macs/types';
 
@@ -10,14 +10,14 @@ interface SectionIconButtonProps {
 }
 
 const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
-  capabilities: Puzzle,
+  skills: Brain,
   components: Shapes,
 };
 
 const SectionIconButton = ({ section }: SectionIconButtonProps) => {
-  const { toggleSection, openSections } = useMacsContext();
+  const { toggleSection, activeSection } = useMacsContext();
   const Icon = SECTION_ICONS[section];
-  const isActive = openSections.includes(section);
+  const isActive = activeSection === section;
 
   return (
     <Button

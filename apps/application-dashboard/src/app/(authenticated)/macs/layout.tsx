@@ -12,11 +12,19 @@ const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
 
   const renderTopbar = () => {
     switch (topbarLayout.type) {
-      case TopbarLayoutType.ChatOnly:
-        return <ChatTopbar className='w-full' showExpandMinimize />;
+      case TopbarLayoutType.Stacked:
+        // Both topbars stacked vertically (default/chat expanded view)
+        return (
+          <div className='flex w-full flex-col items-center justify-center'>
+            <MacsTopbar className='w-full' />
+            <ChatTopbar className='w-[700px]' />
+          </div>
+        );
       case TopbarLayoutType.MacsOnly:
+        // Section expanded - only MacsTopbar
         return <MacsTopbar className='w-full' />;
       case TopbarLayoutType.Split:
+        // Split view - both topbars side by side
         return (
           <>
             <ChatTopbar

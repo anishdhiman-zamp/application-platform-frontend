@@ -1,32 +1,24 @@
 import { useMemo } from 'react';
-import { TopbarLayoutType } from 'modules/macs/types';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { TopbarLayoutType, ViewMode } from '@/modules/macs/types';
 
 type TopbarLayout =
-  | { type: TopbarLayoutType.ChatOnly }
+  | { type: TopbarLayoutType.Stacked }
   | { type: TopbarLayoutType.MacsOnly }
   | { type: TopbarLayoutType.Split; chatWidth: string; macsWidth: string };
 
 export const useTopbarLayout = (): TopbarLayout => {
-  const { hasTabs, isSectionPanelExpanded, isChatPanelExpanded } = useMacsContext();
+  const { viewMode } = useMacsContext();
 
   return useMemo(() => {
-    // Chat panel expanded - show only chat topbar
-    if (isChatPanelExpanded) {
-      return { type: TopbarLayoutType.ChatOnly };
+    switch (viewMode) {
+      case ViewMode.SectionExpanded:
+        return { type: TopbarLayoutType.MacsOnly };
+      case ViewMode.Split:
+        return { type: TopbarLayoutType.Split, chatWidth: '40%', macsWidth: '60%' };
+      case ViewMode.Default:
+      default:
+        return { type: TopbarLayoutType.Stacked };
     }
-
-    // Section panel expanded - show only macs topbar
-    if (hasTabs && isSectionPanelExpanded) {
-      return { type: TopbarLayoutType.MacsOnly };
-    }
-
-    // Both panels visible - show split topbars
-    if (hasTabs) {
-      return { type: TopbarLayoutType.Split, chatWidth: '40%', macsWidth: '60%' };
-    }
-
-    // Default - show only macs topbar
-    return { type: TopbarLayoutType.MacsOnly };
-  }, [hasTabs, isSectionPanelExpanded, isChatPanelExpanded]);
+  }, [viewMode]);
 };
