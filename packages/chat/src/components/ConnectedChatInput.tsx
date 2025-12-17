@@ -1,16 +1,20 @@
 'use client';
 
-import { Button, Textarea } from '@zamp-platform/ui';
+import { captureException } from '@sentry/nextjs';
+import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
 
+import { FileMimeType } from '@/modules/data/components/importDataset/importData.constants';
+
 import { useChat } from '../hooks/useChat';
-import { ChatInputAdapter, useChatInput } from '../hooks/useChatInput';
+import useChatAdapters from '../hooks/useChatAdapters';
+import { useChatInput } from '../hooks/useChatInput';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
-import { LocationData, ScopeType } from '../types/chat.types';
-import { SOCKET_STATES, SpeechToTextProvider, TranscriptionAdapter } from '../types/transcription.types';
+import { LocationData, ResourceType, ScopeType } from '../types/chat.types';
+import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
 
@@ -25,17 +29,23 @@ export interface ConnectedChatInputProps {
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   autoFocus?: boolean;
-  chatInputAdapter: ChatInputAdapter;
-  transcriptionAdapter: TranscriptionAdapter;
   speechToTextProvider?: SpeechToTextProvider;
   acceptedFileTypes?: string;
   onMicrophoneError?: () => void;
   onRecordingError?: () => void;
+  currentUserName: string;
+  resourceId: string;
+  scopeId: string;
+  organizationId: string;
+  getElevenLabsToken: () => Promise<string>;
+  onError?: (error: unknown) => void;
+  onSuccess?: (message: string) => void;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   chat,
   annotationLocation,
+  resourceType = ResourceType.PROCESS,
   conversationId,
   setHeader,
   isDisabled = false,
@@ -44,13 +54,36 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   externalInputValue,
   setExternalInputValue,
   autoFocus = false,
-  chatInputAdapter,
-  transcriptionAdapter,
   speechToTextProvider = SpeechToTextProvider.ELEVENLABS,
   acceptedFileTypes,
   onMicrophoneError,
   onRecordingError,
+  currentUserName,
+  resourceId,
+  scopeId,
+  organizationId,
+  getElevenLabsToken,
+  onError,
+  onSuccess,
 }) => {
+  const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
+    getCurrentUserName: () => currentUserName || '',
+    getResourceId: () => resourceId,
+    getScopeId: () => scopeId,
+    getOrganizationId: () => organizationId,
+    getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
+    getElevenLabsToken,
+    onError: (error) => {
+      captureException(error);
+      onError?.(error);
+      toast.error('An error occurred');
+    },
+    onSuccess: (message) => {
+      onSuccess?.(message);
+      toast.success(message);
+    },
+  });
+
   const {
     value,
     setValue,
@@ -71,6 +104,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     externalInputValue,
     setExternalInputValue,
     adapter: chatInputAdapter,
+    resourceType,
   });
 
   const {
@@ -110,6 +144,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   const handleStartRecording = async () => {
     if (microphoneState === MicrophoneState.Error) {
       onMicrophoneError?.();
+      toast.error('Microphone unavailable. Please check browser permissions and try again.');
       return;
     }
 
@@ -120,6 +155,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     try {
       stopRecording();
     } catch {
+      toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
   };
@@ -128,6 +164,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     try {
       stopRecording();
     } catch {
+      toast.error('Failed to stop recording. Please try again.');
       onRecordingError?.();
     }
   };

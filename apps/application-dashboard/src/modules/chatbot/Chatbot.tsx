@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { captureException } from '@sentry/nextjs';
 import {
   ButtonBlockType,
   ConnectedChatInputProps,
@@ -10,11 +9,9 @@ import {
   ResourceType,
   ScopeType,
   SenderType,
-  SpeechToTextProvider,
   useChat,
-  useChatAdapters,
 } from '@zamp-platform/chat';
-import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText, toast } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger, ShimmerText } from '@zamp-platform/ui';
 import { MessageSquare } from 'lucide-react';
 import useActionHub from 'modules/chatbot/actionHub';
 import ChatHeader from 'modules/chatbot/ChatHeader';
@@ -22,7 +19,6 @@ import { CHATBOT_LOCATION_PARAMS } from 'modules/chatbot/constants';
 import PaceAvatar from 'modules/chatbot/PaceAvatar';
 import StopProcessingFeedback from 'modules/chatbot/StopProcessingFeedback';
 import { doesUrlMatchLocation, generateChatbotInstanceId } from 'modules/chatbot/utils';
-import { FileMimeType } from 'modules/data/components/importDataset/importData.constants';
 import { FEEDBACK_STATUS, FEEDBACK_STATUS_MESSAGES } from 'modules/feedback/feedback.constants';
 import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -58,6 +54,8 @@ interface ChatbotProps {
   onOpenChatbot?: () => void;
   scope?: ScopeType;
   clearInputOnClose?: boolean;
+  onError?: (error: unknown) => void;
+  onSuccess?: (message: string) => void;
 }
 
 const Chatbot = ({
@@ -74,6 +72,8 @@ const Chatbot = ({
   onOpenChatbot,
   scope = ScopeType.ACTIVITY_RUN,
   clearInputOnClose = false,
+  onError,
+  onSuccess,
 }: ChatbotProps & { scope?: ScopeType }) => {
   const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
@@ -189,22 +189,6 @@ const Chatbot = ({
     return result.access_token;
   }, [getSpeechToTextAccessToken]);
 
-  const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
-    getCurrentUserName: () => currentUserName || '',
-    getProcessId: () => processId,
-    getActivityRunId: () => activityRunId,
-    getOrganizationId: () => organizationId,
-    getMimeType: (fileType: string) => FileMimeType[fileType] ?? fileType,
-    getElevenLabsToken,
-    onError: (error) => {
-      captureException(error);
-      toast.error('An error occurred');
-    },
-    onSuccess: (message) => {
-      toast.success(message);
-    },
-  });
-
   const acceptedFileTypes = `${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`;
 
   const renderFeedbackStatusMessageOrInput = () => {
@@ -229,14 +213,14 @@ const Chatbot = ({
           externalInputValue={inputValue}
           setExternalInputValue={setInputValue}
           autoFocus={isOpen}
-          chatInputAdapter={chatInputAdapter}
-          transcriptionAdapter={transcriptionAdapter}
-          speechToTextProvider={SpeechToTextProvider.ELEVENLABS}
+          currentUserName={currentUserName || ''}
+          resourceId={processId}
+          scopeId={scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId}
+          organizationId={organizationId}
+          getElevenLabsToken={getElevenLabsToken}
           acceptedFileTypes={acceptedFileTypes}
-          onMicrophoneError={() =>
-            toast.error('Microphone unavailable. Please check browser permissions and try again.')
-          }
-          onRecordingError={() => toast.error('Failed to stop recording. Please try again.')}
+          onError={onError}
+          onSuccess={onSuccess}
         />
       </div>
     );

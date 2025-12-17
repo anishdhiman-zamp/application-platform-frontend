@@ -19,8 +19,8 @@ import { ChatInputAdapter, UploadedFile } from './useChatInput';
  */
 export interface ChatAdaptersConfig {
   getCurrentUserName: () => string;
-  getProcessId: () => string;
-  getActivityRunId: () => string;
+  getResourceId: () => string;
+  getScopeId: () => string;
   getOrganizationId: () => string;
   getMimeType?: (fileType: string) => string;
   onError?: (error: unknown) => void;
@@ -52,8 +52,8 @@ export interface ChatAdaptersResult {
  * ```tsx
  * const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
  *   getCurrentUserName: () => currentUserName || '',
- *   getProcessId: () => processId,
- *   getActivityRunId: () => activityRunId,
+ *   getResourceId: () => processId,
+ *   getScopeId: () => activityRunId,
  *   getOrganizationId: () => organizationId,
  *   getMimeType: (fileType) => FileMimeType[fileType] ?? fileType,
  *   onError: (error) => {
@@ -67,8 +67,8 @@ export interface ChatAdaptersResult {
 export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult {
   const {
     getCurrentUserName,
-    getProcessId,
-    getActivityRunId,
+    getResourceId,
+    getScopeId,
     getOrganizationId,
     getMimeType,
     onError,
@@ -132,14 +132,14 @@ export function useChatAdapters(config: ChatAdaptersConfig): ChatAdaptersResult 
   const chatInputAdapter: ChatInputAdapter = useMemo(
     () => ({
       getCurrentUserName,
-      getProcessId,
-      getActivityRunId,
+      getResourceId,
+      getScopeId,
       uploadFiles,
       disableInteraction,
       onError,
       onSuccess,
     }),
-    [getCurrentUserName, getProcessId, getActivityRunId, uploadFiles, disableInteraction, onError, onSuccess],
+    [getCurrentUserName, getResourceId, getScopeId, uploadFiles, disableInteraction, onError, onSuccess],
   );
 
   const transcriptionAdapter: TranscriptionAdapter = useMemo(

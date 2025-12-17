@@ -22,9 +22,9 @@ export interface ChatInputAdapter {
   /** Get the current user's name */
   getCurrentUserName: () => string;
   /** Get the process ID */
-  getProcessId: () => string;
+  getResourceId: () => string;
   /** Get the activity run ID */
-  getActivityRunId: () => string;
+  getScopeId: () => string;
   /** Upload files and return uploaded file metadata */
   uploadFiles: (files: FileList) => Promise<UploadedFile[]>;
   /** Disable interaction for a message */
@@ -50,6 +50,7 @@ export interface UseChatInputProps {
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
   adapter: ChatInputAdapter;
   maxTextareaHeight?: number;
+  resourceType?: ResourceType;
 }
 
 export interface UseChatInputReturn {
@@ -105,8 +106,9 @@ export const createUserMessagePayload = (
  * Creates a conversation payload for initial conversation creation
  */
 export const createConversationPayload = (
-  processId: string,
-  activityRunId: string,
+  resourceId: string,
+  resourceType: ResourceType,
+  scopeId: string,
   messageText: string,
   annotationLocation: LocationData,
   senderName: string,
@@ -114,10 +116,10 @@ export const createConversationPayload = (
   scope = ScopeType.ACTIVITY_RUN,
 ) => {
   return {
-    resource_id: processId,
-    resource_type: ResourceType.PROCESS,
+    resource_id: resourceId,
+    resource_type: resourceType,
     scope_type: scope,
-    scope_id: scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId,
+    scope_id: scope === ScopeType.ACTIVITY_RUN ? scopeId : resourceId,
     message_content: {
       text: messageText,
       text_type: 'plain_text',
@@ -155,12 +157,13 @@ export const useChatInput = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  resourceType = ResourceType.PROCESS,
   adapter,
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
-  const processId = adapter.getProcessId();
-  const activityRunId = adapter.getActivityRunId();
+  const resourceId = adapter.getResourceId();
+  const scopeId = adapter.getScopeId();
 
   const [internalValue, setInternalValue] = useState('');
 
@@ -185,8 +188,9 @@ export const useChatInput = ({
 
   const init = async () => {
     const payload = createConversationPayload(
-      processId,
-      activityRunId,
+      resourceId,
+      resourceType,
+      scopeId,
       firstMessage || 'Hello, how are you?',
       annotationLocation,
       currentUserName || '',
