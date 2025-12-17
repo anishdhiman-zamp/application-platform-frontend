@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { ZAMP_ICON } from 'constants/icons';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,24 +34,40 @@ const Sidebar = () => {
   return (
     <>
       {/* Toggle button in top-left corner - only visible when sidebar is closed */}
-
-      {!isSidebarOpen && (
-        <button
-          onClick={handleSidebarToggle}
-          className='bg-BACKGROUND_GRAY_1 absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center transition-colors'
-          aria-label='Toggle sidebar'
-        >
-          <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} className='cursor-pointer' />
-        </button>
-      )}
-      <div
+      <AnimatePresence>
+        {!isSidebarOpen && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            onClick={handleSidebarToggle}
+            className='bg-BACKGROUND_GRAY_1 absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center'
+            aria-label='Toggle sidebar'
+          >
+            <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} className='cursor-pointer' />
+          </motion.button>
+        )}
+      </AnimatePresence>
+      <motion.aside
+        initial={false}
+        animate={{
+          x: isSidebarOpen ? 0 : -240,
+        }}
+        transition={{
+          duration: 0.15,
+          ease: [0.4, 0, 0.2, 1],
+        }}
+        style={{
+          willChange: 'transform',
+        }}
         className={cn(
-          'bg-BACKGROUND_GRAY_1 relative z-20 flex h-screen flex-col transition-all',
-          isSidebarOpen ? 'w-60' : 'invisible w-0 opacity-0',
+          'bg-BACKGROUND_GRAY_1 fixed top-0 left-0 z-20 flex h-screen w-60 flex-col overflow-hidden',
+          !isSidebarOpen && 'pointer-events-none',
         )}
       >
         <div className='text-GRAY_700 border-GRAY_400 flex h-12 items-center justify-between px-4 py-4'>
-          <div className={cn('flex-1 transition-all', isSidebarOpen ? 'w-[204px] opacity-100' : 'w-0 opacity-0')}>
+          <div className='flex-1'>
             <Image
               width={16}
               height={16}
@@ -92,7 +109,7 @@ const Sidebar = () => {
         <div className='mt-auto'>
           <OrgSwitcher isSidebarOpen={isSidebarOpen} />
         </div>
-      </div>
+      </motion.aside>
     </>
   );
 };

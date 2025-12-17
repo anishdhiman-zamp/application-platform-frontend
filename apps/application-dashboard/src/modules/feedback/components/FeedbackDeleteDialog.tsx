@@ -56,7 +56,7 @@ const FeedbackDeleteDialog: FC<FeedbackDeleteDialogProps> = ({
       if (!processId || !feedback?.id) return;
       deleteFeedback({
         process_id: processId as string,
-        feedback_ids: [feedback?.id as string],
+        feedback_ids: [feedback.feedback_id || (feedback?.id as string)],
       })
         .unwrap()
         .then(() => {

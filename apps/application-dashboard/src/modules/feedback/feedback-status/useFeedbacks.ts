@@ -4,9 +4,10 @@ import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/eve
 import { useGetFeedbacksQuery, useGetOpenFeedbackQuery } from '@/apis/feedback';
 import { useEventBus } from '@/app/_providers/sse-provider';
 import { mergeOpenFeedbackItems } from '@/modules/chatbot/utils';
-import { CONVERSATION_EVENT_TYPE } from '@/modules/feedback/feedback.constants';
+import { CONVERSATION_EVENT_TYPE, FEEDBACK_EVENT_TYPE } from '@/modules/feedback/feedback.constants';
 import { RootState } from '@/store';
 import {
+  addFeedbackItem,
   addOpenFeedbackConversation,
   removeOpenFeedbackConversation,
   setFeedbackItems,
@@ -15,6 +16,7 @@ import {
   setOpenFeedbackConversations,
   setProcessId,
 } from '@/store/slices/feedback.slice';
+import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { MapAny } from '@/types/commonTypes';
 
 /**
@@ -61,7 +63,20 @@ export const useFeedbacksProvider = (processId: string) => {
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.FEEDBACK, (data: BaseEventPayload) => {
-      if (data?.source_id === processId) refetchFeedbacks();
+      const payload = data?.payload as MapAny;
+
+      if (data?.source_id !== processId) return;
+
+      switch (payload?.type) {
+        case FEEDBACK_EVENT_TYPE.CREATED:
+          dispatch(addFeedbackItem(payload?.feedback as FeedbackItemType));
+
+          return;
+        default:
+          refetchFeedbacks();
+
+          return;
+      }
     });
 
     const conversationSub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
@@ -81,8 +96,6 @@ export const useFeedbacksProvider = (processId: string) => {
       sub.unsubscribe();
       conversationSub.unsubscribe();
     };
-
-    return () => sub.unsubscribe();
   }, [sseEventBus, refetchFeedbacks, processId]);
 
   // Update merged feedback items when feedbackItems or openFeedbackItems change
