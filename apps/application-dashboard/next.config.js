@@ -72,6 +72,26 @@ const nextConfig = {
         hostname: 'd2hx62c6x4ihoz.cloudfront.net',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'zamp-dev-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-prd-me-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'zamp-stg-us-pantheon.s3.amazonaws.com',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {

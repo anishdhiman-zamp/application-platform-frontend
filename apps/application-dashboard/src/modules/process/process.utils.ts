@@ -7,8 +7,7 @@ import { formatArrayValue } from 'modules/data/data.utils';
 import { ARTIFACT_ICON_MAPPING, N_A_VALUE } from 'modules/process/process.constant';
 import { ARTIFACT_TYPE, CTA_ACTION } from 'modules/process/process.types';
 import type { ReadonlyURLSearchParams } from 'next/navigation';
-import { LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
-import type { EmailArtifactsResponseType } from '@/types/api/processApi.types';
+import type { CtasType, EmailArtifactsResponseType } from '@/types/api/processApi.types';
 
 /**
  * Formats date string to include day and time
@@ -30,24 +29,16 @@ export const getEmailDate = (date: string) => {
  * Retrieves the icon source URL for a given artifact type and icon identifier.
  * @param {ARTIFACT_TYPE} artifactType - The type of the artifact.
  * @param {string} iconIdentifier - The identifier for the icon.
- * @returns {string | undefined} The URL of the icon or undefined if not found.
+ * @returns {React.ReactNode | undefined} The icon or undefined if not found.
  */
-export const getArtifactPrefixIconSrc = (
-  artifactType: ARTIFACT_TYPE,
-  iconIdentifier?: string,
-  ctaAction?: CTA_ACTION,
-) => {
-  if (artifactType === ARTIFACT_TYPE.EXTERNAL_LINK) {
-    return iconIdentifier ? `${VERCEL_BLOB_ICON_URL}/${iconIdentifier}` : LINK;
-  }
-
+export const getArtifactPrefixIconSrc = (artifactType: ARTIFACT_TYPE, ctaAction?: CTA_ACTION) => {
   if (artifactType === ARTIFACT_TYPE.PDF_DATASET) {
     const type = ctaAction === CTA_ACTION.VIEW_DATASET_PDF_PDF_FIRST ? ARTIFACT_TYPE.PDF : ARTIFACT_TYPE.DATASET;
 
-    return ARTIFACT_ICON_MAPPING[type]?.icon_url;
+    return ARTIFACT_ICON_MAPPING[type]?.icon;
   }
 
-  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon_url;
+  return ARTIFACT_ICON_MAPPING[artifactType as keyof typeof ARTIFACT_ICON_MAPPING]?.icon;
 };
 
 /**
@@ -230,3 +221,81 @@ export const shouldPerformChatbotDatasetNavigation = (
 
   return params !== null && params.datasetId === currentDatasetId;
 };
+
+/**
+ * Generates a unique loading ID for a CTA
+ * @param {CtasType} cta - The CTA object
+ * @returns {string} A unique loading ID
+ */
+export const getCtaLoadingId = (cta: CtasType): string => `${cta?.id}-${cta?.display_name}`;
+
+/**
+ * Serializes form data to an array for HITL submission
+ * @param {Record<string, unknown>} formData - The form data to serialize
+ * @returns {Array<string>} Array of serialized values (strings)
+ */
+export const serializeFormData = (formData: Record<string, unknown>): Array<string> => {
+  const result: Array<string> = [];
+  const processedKeys = new Set<string>();
+
+  Object.entries(formData).forEach(([key, value]) => {
+    // Skip if already processed (e.g., _text fields merged with their parent)
+    if (processedKeys.has(key)) return;
+
+    const textFieldKey = `${key}_text`;
+    const hasTextField = textFieldKey in formData;
+
+    // Handle string values - check for corresponding _text field
+    if (typeof value === 'string') {
+      const inputValue = hasTextField ? String(formData[textFieldKey] ?? '') : '';
+
+      if (hasTextField) {
+        processedKeys.add(textFieldKey);
+      }
+
+      result.push(
+        JSON.stringify({
+          value,
+          input: inputValue,
+        }),
+      );
+
+      return;
+    }
+
+    // Handle object values by stringifying them
+    if (typeof value === 'object' && value !== null) {
+      result.push(JSON.stringify(value));
+
+      return;
+    }
+
+    // Handle other primitive types (number, boolean, etc.)
+    if (value !== null && value !== undefined) {
+      result.push(String(value));
+    }
+  });
+
+  return result;
+};
+
+/**
+ * Builds the HITL action payload
+ * @param {CtasType} cta - The CTA object
+ * @param {string} logGroupId - The log group ID
+ * @param {string} userId - The user ID
+ * @param {Array<string>} customValues - Optional custom values to include (strings)
+ * @returns {Object} The HITL payload object
+ */
+export const buildHITLPayload = (cta: CtasType, logGroupId: string, userId: string, customValues?: Array<string>) => ({
+  hitl_request_id: cta.hitl_request_id,
+  log_group_id: logGroupId,
+  submitted_by: userId,
+  responses: [
+    {
+      action_id: cta.cta_action_id,
+      values: [...(customValues ?? []), ...(cta.cta_value ? [cta.cta_value] : [])],
+      cta_component_type: cta.cta_component_type,
+    },
+  ],
+});

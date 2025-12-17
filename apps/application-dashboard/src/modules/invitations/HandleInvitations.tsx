@@ -5,6 +5,7 @@ import { captureException } from '@sentry/browser';
 import { useLazyWhoAmIQuery } from 'apis/auth';
 import { useAcceptInvitationMutation, useGetMyInvitationsQuery } from 'apis/people';
 import { ROUTES_PATH } from 'constants/routeConfig';
+import { usePathname } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import CommonWrapper from 'components/commonWrapper';
@@ -12,8 +13,9 @@ import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
 export const HandleInvitations: FC = () => {
   const [handledInvitations, setHandledInvitations] = useState<string[]>([]);
+  const pathname = usePathname();
 
-  const isInvitationsPage = window.location.pathname === ROUTES_PATH.INVITATIONS;
+  const isInvitationsPage = pathname === ROUTES_PATH.INVITATIONS;
 
   const { data: invitationsData, isLoading: loadingInvitations } = useGetMyInvitationsQuery();
   const [whoAmI] = useLazyWhoAmIQuery();

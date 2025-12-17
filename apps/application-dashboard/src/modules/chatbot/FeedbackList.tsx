@@ -4,6 +4,7 @@ import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '
 import { MessageSquare, Plus } from 'lucide-react';
 import { doesUrlMatchLocation, getFeedbackItemConfig } from 'modules/chatbot/utils';
 import FeedbackListCard from 'modules/feedback/components/FeedbackListCard';
+import { FEEDBACK_STATUS } from 'modules/feedback/feedback.constants';
 import { useSearchParams } from 'next/navigation';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -76,11 +77,12 @@ const FeedbackList: FC<FeedbackListProps> = ({
             <div className='mt-2 mb-3 space-y-1.5'>
               {items?.map((item) => (
                 <FeedbackListCard
-                  key={item?.id}
+                  key={item?.conversation_id}
                   feedback={item}
                   initiatedBy={item?.initiated_by}
                   processId={processId}
                   withoutLinkWrapper
+                  isDraftFeedback={item?.status === FEEDBACK_STATUS.DRAFT}
                   {...getFeedbackItemConfig(item as FeedbackItemType, onOpenChatbot)}
                 />
               ))}

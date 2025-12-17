@@ -1,3 +1,4 @@
+import type { FormSchema } from '@zamp-platform/form-builder';
 import type { MapAny } from 'types/commonTypes';
 import type {
   ARTIFACT_TYPE,
@@ -130,6 +131,16 @@ export type OtherArtifactsResponseType = {
   url: string;
 };
 
+export type ImageArtifactsResponseType = {
+  display_name: string;
+  status: string;
+  icon_identifier: string;
+  file: {
+    file_id: string;
+    file_display_name: string;
+  };
+};
+
 export type ActivityArtifactsItemType = {
   id: string;
   activity_id: string;
@@ -141,7 +152,8 @@ export type ActivityArtifactsItemType = {
     | DatasetArtifactsResponseType
     | EmailArtifactsResponseType
     | BrowserArtifactsResponseType
-    | OtherArtifactsResponseType;
+    | OtherArtifactsResponseType
+    | ImageArtifactsResponseType;
   created_at: string;
   updated_at: string;
   is_deleted: boolean;
@@ -178,6 +190,7 @@ export type CtasType = {
   cta_action_id: string;
   hitl_request_id: string;
   cta_value: string;
+  form_builder_config?: FormSchema;
   cta_config: {
     icon_identifier: string;
     variant: string;
@@ -284,7 +297,7 @@ export type EmitHITLActionRequestType = {
     submitted_by: string;
     responses: {
       action_id: string;
-      values: string[];
+      values: Array<string>;
       cta_component_type?: CTA_COMPONENT_TYPE;
     }[];
   };

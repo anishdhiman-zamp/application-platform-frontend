@@ -39,16 +39,16 @@ Select data to import:
 
 ### Transaction Data
 
-| Field | Description |
-|-------|-------------|
-| Amount | Transaction amount |
-| Merchant | Vendor name |
-| Category | Expense category |
-| Date | Transaction date |
-| Cardholder | Employee name |
-| Department | Team/department |
-| Memo | Notes and descriptions |
-| Receipt | Attached receipt images |
+| Field      | Description             |
+| ---------- | ----------------------- |
+| Amount     | Transaction amount      |
+| Merchant   | Vendor name             |
+| Category   | Expense category        |
+| Date       | Transaction date        |
+| Cardholder | Employee name           |
+| Department | Team/department         |
+| Memo       | Notes and descriptions  |
+| Receipt    | Attached receipt images |
 
 ### Spending Analytics
 
@@ -145,4 +145,3 @@ Prepare data for accounting:
 - Ensure receipts are uploaded in Ramp
 - Check image format compatibility
 - Verify sync is enabled for receipts
-

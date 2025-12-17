@@ -1,8 +1,9 @@
 'use client';
 
-import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
+import { X } from 'lucide-react';
 import { ARTIFACT_TYPE, type HandleShowArtifactsProps } from 'modules/process/process.types';
 import { getArtifactPrefixIconSrc } from 'modules/process/process.utils';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useGetActivityArtifactsQuery } from '@/apis/processes';
 import ImageWithFallback from '@/components/common/ImageWithFallback';
@@ -10,7 +11,7 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { COLORS } from '@/constants/colors';
-import { DATASET, LINK } from '@/constants/icons';
+import { GMAIL, LINK, VERCEL_BLOB_ICON_URL } from '@/constants/icons';
 import { ActivityArtifactsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 
@@ -43,14 +44,15 @@ const AllArtifactsDialog = ({ onClose, onArtifactClick }: AllArtifactsDialogProp
   };
 
   return (
-    <div className='absolute z-50 flex h-full w-full items-start justify-start bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'>
-      <div className='animate-opacity relative h-full w-full overflow-y-auto rounded-xl'>
-        <div onClick={onClose} className='absolute top-5 left-4 cursor-pointer' aria-label='Close'>
-          <SvgSpriteLoader id='x-close' color={COLORS.GRAY_1000} size={16} />
+    <div className='absolute inset-0 z-50 flex h-full w-full bg-[rgba(250,250,250,0.8)] backdrop-blur-sm'>
+      <div className='animate-opacity flex h-full w-full gap-x-4 overflow-y-auto p-5'>
+        {/* Close button */}
+        <div onClick={onClose} className='mb-4 cursor-pointer self-start' aria-label='Close'>
+          <X size={16} color={COLORS.GRAY_900} strokeWidth={1.8} />
         </div>
 
         <CommonWrapper
-          className='absolute left-8 flex h-full flex-col items-start justify-start gap-y-2 overflow-y-auto p-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+          className='flex flex-1 flex-col items-start justify-start gap-y-2 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
           isLoading={isLoadingArtifacts}
           isError={isErrorArtifacts}
           skeletonType={SkeletonTypes.CUSTOM}
@@ -89,7 +91,30 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
     artifact_data: { display_name, icon_identifier },
   } = artifact;
 
-  const iconSrc = getArtifactPrefixIconSrc(artifact_type, icon_identifier);
+  const isExternalLink = artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK;
+  const isEmail = artifact_type === ARTIFACT_TYPE.EMAIL;
+  const Icon = getArtifactPrefixIconSrc(artifact_type);
+
+  const renderIcon = () => {
+    if (isExternalLink) {
+      return (
+        <ImageWithFallback
+          src={`${VERCEL_BLOB_ICON_URL}/${icon_identifier}`}
+          fallback={LINK}
+          alt={display_name}
+          width={14}
+          height={14}
+          priority
+        />
+      );
+    }
+
+    if (isEmail) {
+      return <Image src={GMAIL} alt={display_name} width={14} height={14} priority />;
+    }
+
+    return Icon ? <Icon size={14} className='text-GRAY_900 shrink-0' /> : null;
+  };
 
   return (
     <div
@@ -98,14 +123,7 @@ const ArtifactItem = ({ artifact, onClick }: { artifact: ActivityArtifactsItemTy
       aria-label={`${artifact_type} artifact`}
       role='button'
     >
-      <ImageWithFallback
-        fallback={artifact_type === ARTIFACT_TYPE.EXTERNAL_LINK ? LINK : DATASET}
-        src={iconSrc}
-        alt={display_name}
-        width={14}
-        height={14}
-        priority
-      />
+      {renderIcon()}
       <p className='text-GRAY_1000 f-14-500 w-full break-words'>{display_name}</p>
     </div>
   );

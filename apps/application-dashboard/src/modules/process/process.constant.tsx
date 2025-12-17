@@ -1,5 +1,4 @@
-import React from 'react';
-import { Calendar, FileText, Hash, Link, Mail, Type } from 'lucide-react';
+import { Calendar, Database, FileText, Hash, Image, Link, Mail, SquareMousePointer, Type } from 'lucide-react';
 import BluePrintDataset from 'modules/process/dataset-create-edit/components/BluePrintDataset';
 import PreviewDataset from 'modules/process/dataset-create-edit/components/PreviewDataset';
 import {
@@ -15,15 +14,7 @@ import {
   PDF_DATASET_TAB,
 } from 'modules/process/process.types';
 import { COLORS } from '@/constants/colors';
-import {
-  BROWSER,
-  DATASET,
-  DONE_EMPTY_STATE,
-  FILE,
-  GMAIL,
-  IN_PROGRESS_EMPTY_STATE,
-  NEEDS_ATTENTION_EMPTY_STATE,
-} from '@/constants/icons';
+import { DONE_EMPTY_STATE, IN_PROGRESS_EMPTY_STATE, NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 
 export const STATUS_ICON_COLOR_MAPPING = {
   [ACTIVITY_RUN_STATUS.NEEDS_ATTENTION]: {
@@ -100,19 +91,19 @@ export const STATUS_ICON_COLOR_MAPPING = {
 
 export const ARTIFACT_ICON_MAPPING = {
   [ARTIFACT_TYPE.PDF_DATASET]: {
-    icon_url: DATASET,
-  },
-  [ARTIFACT_TYPE.EMAIL]: {
-    icon_url: GMAIL,
+    icon: Database,
   },
   [ARTIFACT_TYPE.BROWSER]: {
-    icon_url: BROWSER,
+    icon: SquareMousePointer,
   },
   [ARTIFACT_TYPE.PDF]: {
-    icon_url: FILE,
+    icon: FileText,
   },
   [ARTIFACT_TYPE.DATASET]: {
-    icon_url: DATASET,
+    icon: Database,
+  },
+  [ARTIFACT_TYPE.IMAGE]: {
+    icon: Image,
   },
 };
 
@@ -287,4 +278,18 @@ export const DATASET_COLUMN_TYPES_LIST = [
   { label: 'Date', value: DatasetColumnTypes.DATE, icon: Calendar },
   { label: 'Number', value: DatasetColumnTypes.NUMBER, icon: Hash },
   { label: 'Email', value: DatasetColumnTypes.EMAIL, icon: Mail },
+];
+
+// CTA Button type components for filtering
+export const BUTTON_TYPE_CTA_COMPONENTS: CTA_COMPONENT_TYPE[] = [
+  CTA_COMPONENT_TYPE.BUTTON,
+  CTA_COMPONENT_TYPE.OVERRIDE_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
+];
+
+// CTA types that should show artifacts instead of emitting HITL action
+export const ARTIFACT_SHOW_CTA_TYPES: CTA_COMPONENT_TYPE[] = [
+  CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
+  CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
 ];
