@@ -169,4 +169,7 @@ export const API_ENDPOINTS = {
 
   INTERACTION_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions`,
   INTERACTION_DISABLE_POST: `/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable`,
+
+  // MACS
+  CONVERSATION_HISTORY_GET: `v3/conversations`,
 };

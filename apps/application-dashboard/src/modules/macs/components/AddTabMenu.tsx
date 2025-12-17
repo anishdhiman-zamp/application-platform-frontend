@@ -37,7 +37,7 @@ const AddTabMenu = () => {
   return (
     <Dialog open={isAddTabMenuOpen} onOpenChange={setIsAddTabMenuOpen}>
       <DialogTrigger asChild>
-        <Button variant='ghost' size='icon' className='h-8 w-8 text-gray-600 hover:text-gray-900'>
+        <Button variant='ghost' size='icon' className='h-6 w-6 text-gray-600 hover:text-gray-900'>
           <Plus size={20} />
         </Button>
       </DialogTrigger>

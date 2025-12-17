@@ -13,6 +13,7 @@ export const enum ResourceType {
   PROCESS = 'process',
   DATASET = 'dataset',
   DOCUMENT = 'document',
+  ORGANIZATION = 'organization',
 }
 
 export const enum SenderType {

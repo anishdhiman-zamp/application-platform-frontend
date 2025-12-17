@@ -7,7 +7,7 @@ import AddTabMenu from '@/modules/macs/components/AddTabMenu';
 import MacsTab from '@/modules/macs/components/MacsTab';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
-import { SectionType } from '@/modules/macs/types';
+import { SectionType, ViewMode } from '@/modules/macs/types';
 
 interface MacsTopbarProps {
   className?: string;
@@ -15,24 +15,26 @@ interface MacsTopbarProps {
 }
 
 const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
-  const { tabs, resetToDefault } = useMacsContext();
+  const { tabs, resetToDefault, viewMode } = useMacsContext();
 
   return (
     <div
       className={cn(
-        'bg-BG_GRAY_1 border-GRAY_400 flex h-12 items-center gap-x-1.5 overflow-visible border-b px-3',
+        'bg-BG_GRAY_1 border-GRAY_400 flex h-8 items-center gap-x-1.5 overflow-visible border-b px-3',
         className,
       )}
       style={style}
     >
-      <Button
-        variant='ghost'
-        size='icon'
-        className='text-GRAY_700 h-8 w-8 px-2 py-1 hover:text-gray-900'
-        onClick={resetToDefault}
-      >
-        <NewPaceIcons width={16} height={16} />
-      </Button>
+      {viewMode !== ViewMode.Split && (
+        <Button
+          variant='ghost'
+          size='icon'
+          className='text-GRAY_700 h-6 w-6 px-2 py-1 hover:text-gray-900'
+          onClick={resetToDefault}
+        >
+          <NewPaceIcons width={16} height={16} />
+        </Button>
+      )}
       <SectionIconButton section={SectionType.Skills} />
       <SectionIconButton section={SectionType.Components} />
 

@@ -23,7 +23,7 @@ const SectionIconButton = ({ section }: SectionIconButtonProps) => {
     <Button
       variant='ghost'
       size='icon'
-      className={`h-8 w-8 text-gray-600 hover:text-gray-900 ${isActive ? 'bg-gray-200' : ''}`}
+      className={`h-6 w-6 text-gray-600 hover:text-gray-900 ${isActive ? 'bg-gray-200' : ''}`}
       onClick={() => toggleSection(section)}
     >
       <Icon size={12} />

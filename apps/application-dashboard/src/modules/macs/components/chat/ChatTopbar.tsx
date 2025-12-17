@@ -40,24 +40,26 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
   };
 
   return (
-    <div className={cn('flex h-12 items-center justify-between px-4', className)} style={style}>
-      {!showExpandMinimize && (
-        <Button
-          variant='ghost'
-          size='icon'
-          className='h-7 w-7 text-gray-600 hover:text-gray-900'
-          onClick={handlePanelLeftClose}
-          title='Show split view'
-        >
-          <PanelLeftClose size={16} />
-        </Button>
-      )}
-      <div className='f-13-500 truncate text-gray-900'>{displayTitle}</div>
+    <div className={cn('flex h-8 items-center justify-between px-4', className)} style={style}>
+      <div className='flex items-center gap-x-3'>
+        {!showExpandMinimize && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-6 w-6 text-gray-600 hover:text-gray-900'
+            onClick={handlePanelLeftClose}
+            title='Show split view'
+          >
+            <PanelLeftClose size={16} />
+          </Button>
+        )}
+        <div className='f-13-500 truncate text-gray-900'>{displayTitle}</div>
+      </div>
       <div className='flex items-center gap-1'>
         <Button
           variant='ghost'
           size='icon'
-          className='h-7 w-7 text-gray-600 hover:text-gray-900'
+          className='h-6 w-6 text-gray-600 hover:text-gray-900'
           onClick={handleHistory}
           title='Chat history'
         >
@@ -66,7 +68,7 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
         <Button
           variant='ghost'
           size='icon'
-          className='h-7 w-7 text-gray-600 hover:text-gray-900'
+          className='h-6 w-6 text-gray-600 hover:text-gray-900'
           onClick={handleNewChat}
           title='New chat'
         >
@@ -77,7 +79,7 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
             <Button
               variant='ghost'
               size='icon'
-              className='h-7 w-7 text-gray-600 hover:text-gray-900'
+              className='h-6 w-6 text-gray-600 hover:text-gray-900'
               onClick={handleExpand}
               title='Expand'
             >
@@ -86,7 +88,7 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
             <Button
               variant='ghost'
               size='icon'
-              className='h-7 w-7 text-gray-600 hover:text-gray-900'
+              className='h-6 w-6 text-gray-600 hover:text-gray-900'
               onClick={handleMinimize}
               title='Minimize'
             >

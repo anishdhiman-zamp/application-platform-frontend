@@ -73,3 +73,10 @@ export type Skill = {
   addedBy: 'you' | 'anthropic';
   createdAt: string;
 };
+
+export type ChatHistoryItem = {
+  id: string;
+  title: string;
+  createdAt: string;
+  isLatest?: boolean;
+};

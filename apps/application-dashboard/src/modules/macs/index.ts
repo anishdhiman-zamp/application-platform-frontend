@@ -3,10 +3,10 @@ export { MacsProvider, useMacsContext } from './context/MacsContext';
 
 // Components
 export { default as AddTabMenu } from './components/AddTabMenu';
-export { default as ChatTopbar } from './components/ChatTopbar';
-export { default as MacsChat } from './components/MacsChat';
-export { default as MacsChatHome } from './components/MacsChatHome';
-export { default as MacsChatInput } from './components/MacsChatInput';
+export { default as ChatTopbar } from './components/chat/ChatTopbar';
+export { default as MacsChat } from './components/chat/MacsChat';
+export { default as MacsChatHome } from './components/chat/MacsChatHome';
+export { default as MacsChatInput } from './components/chat/MacsChatInput';
 export { default as MacsTab } from './components/MacsTab';
 export { default as MacsTopbar } from './components/MacsTopbar';
 export { default as SectionIconButton } from './components/SectionIconButton';

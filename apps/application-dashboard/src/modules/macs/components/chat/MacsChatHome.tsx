@@ -10,7 +10,7 @@ const MacsChatHome = () => {
   const greeting = getGreeting();
 
   return (
-    <div className='flex flex-col items-center justify-center'>
+    <div className='flex w-full flex-col items-center'>
       <div className='flex flex-col items-center gap-4'>
         <NewPaceIcons width={40} height={40} />
         <h1 className='f-16-550 text-GARY_1000'>
