@@ -36,15 +36,13 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
         </Button>
       )}
       <SectionIconButton section={SectionType.Skills} />
-      <SectionIconButton section={SectionType.Components} />
 
+      <AddTabMenu />
       <div className='flex h-full items-end gap-2 overflow-visible'>
         {tabs.map((tab) => (
           <MacsTab key={tab.id} tab={tab} />
         ))}
       </div>
-
-      <AddTabMenu />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 export enum SectionType {
   Skills = 'skills',
-  Components = 'components',
 }
 
 export enum TabType {

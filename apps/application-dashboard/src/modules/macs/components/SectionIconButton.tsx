@@ -1,18 +1,13 @@
 'use client';
 
 import { Button } from '@zamp-platform/ui';
-import { Brain, Shapes } from 'lucide-react';
+import { SECTION_ICONS } from 'modules/macs/constants';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
-import type { SectionType } from '@/modules/macs/types';
+import { SectionType } from '@/modules/macs/types';
 
 interface SectionIconButtonProps {
   section: SectionType;
 }
-
-const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
-  skills: Brain,
-  components: Shapes,
-};
 
 const SectionIconButton = ({ section }: SectionIconButtonProps) => {
   const { toggleSection, activeSection } = useMacsContext();

@@ -1,6 +1,5 @@
 'use client';
 
-import ComponentsSection from '@/modules/macs/components/sections/ComponentsSection';
 import GenericSection from '@/modules/macs/components/sections/GenericSection';
 import SkillsSection from '@/modules/macs/components/sections/SkillsSection';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
@@ -11,10 +10,6 @@ const SectionPanel = () => {
 
   if (activeSection === SectionType.Skills) {
     return <SkillsSection />;
-  }
-
-  if (activeSection === SectionType.Components) {
-    return <ComponentsSection />;
   }
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId);

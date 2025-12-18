@@ -1,4 +1,5 @@
-import type { RecentItem, Skill } from '@/modules/macs/types';
+import { Brain } from 'lucide-react';
+import { type RecentItem, SectionType, type Skill } from '@/modules/macs/types';
 
 // Mock recently visited items - replace with actual API data
 export const MOCK_RECENT_ITEMS: RecentItem[] = [
@@ -64,3 +65,7 @@ export const MOCK_SKILLS: Skill[] = [
     createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
+
+export const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {
+  [SectionType.Skills]: Brain,
+};

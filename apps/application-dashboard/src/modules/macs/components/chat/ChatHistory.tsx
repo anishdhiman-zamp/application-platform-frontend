@@ -1,11 +1,12 @@
 import { ResourceType } from '@zamp-platform/chat';
-import { Button, Skeleton } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { MessagesSquare, Trash2 } from 'lucide-react';
 import { findTimeDifference } from 'modules/data/data.utils';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
@@ -57,27 +58,6 @@ const ChatHistoryItem = ({ conversation, onClick, onDelete }: ChatHistoryItemPro
   );
 };
 
-const ChatHistoryItemSkeleton = () => (
-  <div className='flex items-start gap-2.5 px-3 py-2.5'>
-    <Skeleton className='mt-0.5 h-4 w-4 flex-shrink-0 rounded' />
-    <div className='min-w-0 flex-1'>
-      <Skeleton className='h-4 w-full max-w-full rounded' />
-      <Skeleton className='mt-1 h-3 w-1/4 rounded' />
-    </div>
-  </div>
-);
-
-const ChatHistoryLoader = () => (
-  <div className='w-full max-w-[700px]'>
-    <div className='f-11-550 text-GRAY_700 px-3 py-2'>Recent</div>
-    <div className='space-y-0.5'>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <ChatHistoryItemSkeleton key={index} />
-      ))}
-    </div>
-  </div>
-);
-
 const ChatHistory = () => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
 
@@ -117,7 +97,7 @@ const ChatHistory = () => {
     <CommonWrapper
       isLoading={isFetchingConversationHistory}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={<ChatHistoryLoader />}
+      loader={<ChatHistorySkeleton />}
       refetchFunction={refetchConversationHistory}
       isError={isErrorConversationHistory}
       className='w-full max-w-[700px]'

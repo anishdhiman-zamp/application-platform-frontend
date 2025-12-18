@@ -172,4 +172,12 @@ export const API_ENDPOINTS = {
 
   // MACS
   CONVERSATION_HISTORY_GET: `v3/conversations`,
+
+  // Skills
+  SKILLS_LIST_GET: `skills`,
+  SKILLS_UPLOAD_POST: `skills`,
+  SKILLS_GET_BY_ID: `skills/{{skillId}}`,
+  SKILLS_UPDATE_PUT: `skills/{{skillId}}`,
+  SKILLS_STATUS_PATCH: `skills/{{skillId}}/status`,
+  SKILLS_DELETE: `skills/{{skillId}}`,
 };
