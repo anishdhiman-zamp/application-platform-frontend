@@ -43,13 +43,10 @@ export const API_ENDPOINTS = {
   CREATE_CONVERSATION_V2: 'v2/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
-  // File upload endpoints
   FORMS_SIGNED_UPLOAD_URL_POST: 'file-imports/initiate',
   FORMS_SIGNED_UPLOAD_ACK_POST: 'file-imports/{{fileImportId}}/acknowledge',
-  // Interaction endpoints
   INTERACTION_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions',
   INTERACTION_DISABLE_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable',
-  // Speech-to-text endpoints
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
 };
 
@@ -105,7 +102,6 @@ const ConversationService = chatApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.GET_FILE_DOWNLOAD_URL, { file_upload_id }),
       }),
     }),
-    // File upload endpoints
     getSignedUrl: builder.mutation<SignedUrlResponseType, SignedUrlBodyType>({
       query: ({ path, payload }) => ({
         url: path,
@@ -119,7 +115,6 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
-    // Interaction endpoints
     postInteraction: builder.mutation<PostInteractionResponseType, PostInteractionPayloadType>({
       query: ({ conversationId, messageId, params, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.INTERACTION_POST, { conversationId, messageId }),
@@ -135,7 +130,6 @@ const ConversationService = chatApi.injectEndpoints({
         params,
       }),
     }),
-    // Speech-to-text endpoints
     getSpeechToTextAccessToken: builder.query<
       GenerateSpeechToTextAccessTokenResponse,
       GenerateSpeechToTextAccessTokenRequest
@@ -158,13 +152,10 @@ export const {
   useGetFilesByIdsQuery,
   useLazyGetFileDownloadUrlQuery,
   useLazyGetConversationByIdQuery,
-  // File upload hooks
   useGetSignedUrlMutation,
   usePostFormsSignedUploadAckMutation,
-  // Interaction hooks
   usePostInteractionMutation,
   usePostInteractionDisableMutation,
-  // Speech-to-text hooks
   useGetSpeechToTextAccessTokenQuery,
   useLazyGetSpeechToTextAccessTokenQuery,
 } = ConversationService;

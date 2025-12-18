@@ -19,24 +19,17 @@ export interface MessageAttachment {
 }
 
 export interface ChatInputAdapter {
-  /** Get the current user's name */
   getCurrentUserName: () => string;
-  /** Get the process ID */
   getResourceId: () => string;
-  /** Get the activity run ID */
   getScopeId: () => string;
-  /** Upload files and return uploaded file metadata */
   uploadFiles: (files: FileList) => Promise<UploadedFile[]>;
-  /** Disable interaction for a message */
   disableInteraction?: (params: {
     conversationId: string;
     messageId: string;
     resourceId: string;
     resourceType: ResourceType;
   }) => Promise<void>;
-  /** Called when an error occurs */
   onError?: (error: unknown) => void;
-  /** Called to show a success message */
   onSuccess?: (message: string) => void;
 }
 
