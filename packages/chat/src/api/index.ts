@@ -108,7 +108,6 @@ const ConversationService = chatApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.GET_FILE_DOWNLOAD_URL, { file_upload_id }),
       }),
     }),
-    // File upload endpoints
     getSignedUrl: builder.mutation<SignedUrlResponseType, SignedUrlBodyType>({
       query: ({ path, payload }) => ({
         url: path,
@@ -122,7 +121,6 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
       }),
     }),
-    // Interaction endpoints
     postInteraction: builder.mutation<PostInteractionResponseType, PostInteractionPayloadType>({
       query: ({ conversationId, messageId, params, body }) => ({
         url: formRequestUrlWithParams(API_ENDPOINTS.INTERACTION_POST, { conversationId, messageId }),
@@ -138,7 +136,6 @@ const ConversationService = chatApi.injectEndpoints({
         params,
       }),
     }),
-    // Speech-to-text endpoints
     getSpeechToTextAccessToken: builder.query<
       GenerateSpeechToTextAccessTokenResponse,
       GenerateSpeechToTextAccessTokenRequest
@@ -161,13 +158,10 @@ export const {
   useGetFilesByIdsQuery,
   useLazyGetFileDownloadUrlQuery,
   useLazyGetConversationByIdQuery,
-  // File upload hooks
   useGetSignedUrlMutation,
   usePostFormsSignedUploadAckMutation,
-  // Interaction hooks
   usePostInteractionMutation,
   usePostInteractionDisableMutation,
-  // Speech-to-text hooks
   useGetSpeechToTextAccessTokenQuery,
   useLazyGetSpeechToTextAccessTokenQuery,
 } = ConversationService;

@@ -2,7 +2,6 @@ export * from './src/api';
 export * from './src/components/AudioVisualizer';
 export * from './src/components/BlockRenderer';
 export * from './src/components/blocks';
-export * from './src/components/ChatInput';
 export * from './src/components/ConnectedChatInput';
 export * from './src/components/Message';
 export * from './src/components/MessageContainer';

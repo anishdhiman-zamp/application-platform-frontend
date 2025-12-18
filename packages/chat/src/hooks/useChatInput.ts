@@ -19,30 +19,23 @@ export interface MessageAttachment {
 }
 
 export interface ChatInputAdapter {
-  /** Get the current user's name */
   getCurrentUserName: () => string;
-  /** Get the process ID */
   getResourceId: () => string;
-  /** Get the activity run ID */
   getScopeId: () => string;
-  /** Upload files and return uploaded file metadata */
   uploadFiles: (files: FileList) => Promise<UploadedFile[]>;
-  /** Disable interaction for a message */
   disableInteraction?: (params: {
     conversationId: string;
     messageId: string;
     resourceId: string;
     resourceType: ResourceType;
   }) => Promise<void>;
-  /** Called when an error occurs */
   onError?: (error: unknown) => void;
-  /** Called to show a success message */
   onSuccess?: (message: string) => void;
 }
 
 export interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation?: LocationData;
+  annotationLocation: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   scope?: ScopeType;
@@ -110,10 +103,10 @@ export const createConversationPayload = (
   resourceType: ResourceType,
   scopeId: string,
   messageText: string,
+  annotationLocation: LocationData,
   senderName: string,
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
-  annotationLocation?: LocationData,
 ) => {
   return {
     resource_id: resourceId,
@@ -135,11 +128,9 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    ...(annotationLocation && {
-      annotation_data: {
-        location: annotationLocation,
-      },
-    }),
+    annotation_data: {
+      location: annotationLocation,
+    },
     sender_name: senderName,
   };
 };
@@ -194,12 +185,12 @@ export const useChatInput = ({
       resourceType,
       scopeId,
       firstMessage || 'Hello, how are you?',
+      annotationLocation,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
       scope,
-      annotationLocation,
     );
 
     setAttachments([]);
