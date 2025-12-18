@@ -42,7 +42,7 @@ export interface ChatInputAdapter {
 
 export interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   scope?: ScopeType;
@@ -110,10 +110,10 @@ export const createConversationPayload = (
   resourceType: ResourceType,
   scopeId: string,
   messageText: string,
-  annotationLocation: LocationData,
   senderName: string,
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
+  annotationLocation?: LocationData,
 ) => {
   return {
     resource_id: resourceId,
@@ -135,9 +135,11 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    annotation_data: {
-      location: annotationLocation,
-    },
+    ...(annotationLocation && {
+      annotation_data: {
+        location: annotationLocation,
+      },
+    }),
     sender_name: senderName,
   };
 };
@@ -192,12 +194,12 @@ export const useChatInput = ({
       resourceType,
       scopeId,
       firstMessage || 'Hello, how are you?',
-      annotationLocation,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
       scope,
+      annotationLocation,
     );
 
     setAttachments([]);

@@ -38,18 +38,18 @@ export const chatApi = baseApiProvider(APITags, 'chatApi');
 export const API_ENDPOINTS = {
   POST_MESSAGE: '/conversations/{{conversationId}}/messages',
   CREATE_CONVERSATION: '/conversations/',
+  CREATE_CONVERSATION_V3: 'v3/conversations/',
   POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
+  POST_MESSAGE_V3: 'v3/conversations/{{conversationId}}/messages',
   GET_CONVERSATION_BY_ID: 'v2/conversations/{{conversationId}}',
+  GET_CONVERSATION_BY_ID_V3: 'v3/conversations/{{conversationId}}',
   CREATE_CONVERSATION_V2: 'v2/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
-  // File upload endpoints
   FORMS_SIGNED_UPLOAD_URL_POST: 'file-imports/initiate',
   FORMS_SIGNED_UPLOAD_ACK_POST: 'file-imports/{{fileImportId}}/acknowledge',
-  // Interaction endpoints
   INTERACTION_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions',
   INTERACTION_DISABLE_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable',
-  // Speech-to-text endpoints
   SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
 };
 
@@ -70,8 +70,8 @@ const ConversationService = chatApi.injectEndpoints({
       }),
     }),
     getConversationById: builder.query<GetConversationByIdResponseType, GetConversationByIdRequestType>({
-      query: ({ conversationId, resourceId, resourceType }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.GET_CONVERSATION_BY_ID, { conversationId }),
+      query: ({ conversationId, resourceId, resourceType, url }) => ({
+        url: formRequestUrlWithParams(url || API_ENDPOINTS.GET_CONVERSATION_BY_ID, { conversationId }),
         params: {
           resource_id: resourceId,
           resource_type: resourceType,
@@ -79,16 +79,19 @@ const ConversationService = chatApi.injectEndpoints({
       }),
       providesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
-    createConversationV2: builder.mutation<CreateConversationResponseType, CreateConversationPayloadTypeV2>({
-      query: (body) => ({
-        url: API_ENDPOINTS.CREATE_CONVERSATION_V2,
+    createConversationV2: builder.mutation<
+      CreateConversationResponseType,
+      CreateConversationPayloadTypeV2 & { url?: string }
+    >({
+      query: ({ url, ...body }) => ({
+        url: url || API_ENDPOINTS.CREATE_CONVERSATION_V2,
         method: REQUEST_TYPES.POST,
         body,
       }),
     }),
-    sendMessageV2: builder.mutation<PostMessageResponseType, PostMessagePayloadType>({
-      query: ({ conversationId, body }) => ({
-        url: formRequestUrlWithParams(API_ENDPOINTS.POST_MESSAGE_V2, { conversationId }),
+    sendMessageV2: builder.mutation<PostMessageResponseType, PostMessagePayloadType & { url?: string }>({
+      query: ({ conversationId, body, url }) => ({
+        url: formRequestUrlWithParams(url || API_ENDPOINTS.POST_MESSAGE_V2, { conversationId }),
         method: REQUEST_TYPES.POST,
         body,
       }),

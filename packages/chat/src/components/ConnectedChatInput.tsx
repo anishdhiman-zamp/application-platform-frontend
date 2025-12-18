@@ -21,7 +21,7 @@ import { AttachmentsList } from './blocks';
 
 export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   resourceType?: ResourceType;
