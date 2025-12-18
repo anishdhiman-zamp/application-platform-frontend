@@ -29,6 +29,7 @@ export const enum AnnotationType {
 export const enum ScopeType {
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  ORGANIZATION = 'organization',
 }
 
 export const enum LocationType {

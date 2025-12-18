@@ -7,7 +7,6 @@ import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
-import { FileMimeType } from '@/modules/data/components/importDataset/importData.constants';
 
 import { useChat } from '../hooks/useChat';
 import useChatAdapters from '../hooks/useChatAdapters';
@@ -18,10 +17,11 @@ import { LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
+import { FileMimeType } from './chat.constants';
 
 export interface ConnectedChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   resourceType?: ResourceType;

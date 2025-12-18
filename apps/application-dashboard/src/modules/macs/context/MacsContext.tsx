@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { MacsContextType, SectionType, Tab } from '@/modules/macs/types';
 import { ViewMode } from '@/modules/macs/types';
 
@@ -13,6 +13,9 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Default);
   const [isAddTabMenuOpen, setIsAddTabMenuOpen] = useState(false);
   const [chatTitle, setChatTitle] = useState('');
+  const [hasChatMessages, setHasChatMessages] = useState(false);
+  const [showHistoryView, setShowHistoryView] = useState(false);
+  const clearMessagesRef = useRef<(() => void) | null>(null);
 
   const hasContent = activeSection !== null || tabs.length > 0;
 
@@ -101,6 +104,17 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setIsAddTabMenuOpen(true);
   }, []);
 
+  const registerClearMessages = useCallback((clearFn: () => void) => {
+    clearMessagesRef.current = clearFn;
+  }, []);
+
+  const startNewChat = useCallback(() => {
+    clearMessagesRef.current?.();
+    setChatTitle('');
+    setHasChatMessages(false);
+    setShowHistoryView(false);
+  }, []);
+
   const value: MacsContextType = useMemo(
     () => ({
       activeSection,
@@ -119,6 +133,12 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       setIsAddTabMenuOpen,
       chatTitle,
       setChatTitle,
+      hasChatMessages,
+      setHasChatMessages,
+      showHistoryView,
+      setShowHistoryView,
+      startNewChat,
+      registerClearMessages,
     }),
     [
       activeSection,
@@ -134,6 +154,10 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       resetToDefault,
       isAddTabMenuOpen,
       chatTitle,
+      hasChatMessages,
+      showHistoryView,
+      startNewChat,
+      registerClearMessages,
     ],
   );
 

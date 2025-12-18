@@ -3,12 +3,16 @@
 import { type ReactNode } from 'react';
 import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
 import MacsTopbar from '@/modules/macs/components/MacsTopbar';
-import { MacsProvider } from '@/modules/macs/context/MacsContext';
+import { MacsProvider, useMacsContext } from '@/modules/macs/context/MacsContext';
 import { useTopbarLayout } from '@/modules/macs/hooks/useTopbarLayout';
 import { TopbarLayoutType } from '@/modules/macs/types';
 
 const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
   const topbarLayout = useTopbarLayout();
+  const { hasChatMessages, showHistoryView } = useMacsContext();
+
+  // Show ChatTopbar when there are messages OR when viewing history
+  const showChatTopbar = hasChatMessages || showHistoryView;
 
   const renderTopbar = () => {
     switch (topbarLayout.type) {
@@ -16,7 +20,7 @@ const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
         return (
           <div className='flex w-full flex-col items-center justify-center'>
             <MacsTopbar className='w-full' />
-            <ChatTopbar className='w-[700px]' />
+            {showChatTopbar && <ChatTopbar className='w-[700px]' />}
           </div>
         );
       case TopbarLayoutType.MacsOnly:
@@ -24,7 +28,11 @@ const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
       case TopbarLayoutType.Split:
         return (
           <>
-            <ChatTopbar style={{ width: topbarLayout.chatWidth }} showExpandMinimize />
+            {showChatTopbar ? (
+              <ChatTopbar style={{ width: topbarLayout.chatWidth }} showExpandMinimize />
+            ) : (
+              <div style={{ width: topbarLayout.chatWidth }} />
+            )}
             <MacsTopbar className='border-l border-gray-400' style={{ width: topbarLayout.macsWidth }} />
           </>
         );

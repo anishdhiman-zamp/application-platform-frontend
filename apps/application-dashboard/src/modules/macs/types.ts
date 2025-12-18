@@ -56,6 +56,12 @@ export type MacsContextType = {
   // Chat
   chatTitle: string;
   setChatTitle: (title: string) => void;
+  hasChatMessages: boolean;
+  setHasChatMessages: (hasMessages: boolean) => void;
+  showHistoryView: boolean;
+  setShowHistoryView: (show: boolean) => void;
+  startNewChat: () => void;
+  registerClearMessages: (clearFn: () => void) => void;
 };
 
 export enum TopbarLayoutType {
