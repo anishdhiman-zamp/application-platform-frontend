@@ -4,8 +4,9 @@ import { captureException } from '@sentry/nextjs';
 import { Button, Textarea, toast } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowUp, Check, Loader, Mic, Paperclip, X } from 'lucide-react';
-import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useLazyGetSpeechToTextAccessTokenQuery } from '@/apis/voiceAgents';
 import { FileMimeType } from '@/modules/data/components/importDataset/importData.constants';
 
 import { useChat } from '../hooks/useChat';
@@ -23,6 +24,7 @@ export interface ConnectedChatInputProps {
   annotationLocation: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
+  resourceType?: ResourceType;
   isDisabled?: boolean;
   header?: string;
   scope?: ScopeType;
@@ -37,9 +39,9 @@ export interface ConnectedChatInputProps {
   resourceId: string;
   scopeId: string;
   organizationId: string;
-  getElevenLabsToken: () => Promise<string>;
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
+  placeholder?: string;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -62,10 +64,21 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   resourceId,
   scopeId,
   organizationId,
-  getElevenLabsToken,
   onError,
   onSuccess,
+  placeholder = 'Ask anything or give feedback...',
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Use the app's baseApi for speech-to-text token fetching
+  const [getSpeechToTextAccessToken] = useLazyGetSpeechToTextAccessTokenQuery({});
+
+  const getElevenLabsToken = useCallback(async () => {
+    const result = await getSpeechToTextAccessToken({}).unwrap();
+
+    return result.access_token;
+  }, [getSpeechToTextAccessToken]);
+
   const { chatInputAdapter, transcriptionAdapter } = useChatAdapters({
     getCurrentUserName: () => currentUserName || '',
     getResourceId: () => resourceId,
@@ -120,8 +133,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     provider: speechToTextProvider,
     adapter: transcriptionAdapter,
   });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAttachClick = () => {
     fileInputRef.current?.click();
@@ -246,7 +257,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder='Ask anything or give feedback...'
+                placeholder={placeholder}
                 className='f-13-450 placeholder:text-muted-foreground m-2.5 min-h-0 w-[316px] resize-none overflow-y-auto border-none bg-transparent p-0 pr-0 shadow-none outline-none'
                 style={{
                   height: '20px',
