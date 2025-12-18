@@ -5,6 +5,7 @@ export * from './src/components/blocks';
 export * from './src/components/ChatInput';
 export * from './src/components/ConnectedChatInput';
 export * from './src/components/Message';
+export * from './src/components/MessageContainer';
 export * from './src/components/SenderDetails';
 export * from './src/hooks/useChat';
 export * from './src/hooks/useChatAdapters';

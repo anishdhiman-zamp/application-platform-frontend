@@ -277,7 +277,7 @@ export const useChatInput = ({
 
     const messagePayload = createUserMessagePayload(
       inputValue,
-      processId,
+      resourceId,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
@@ -306,8 +306,8 @@ export const useChatInput = ({
         adapter.disableInteraction({
           conversationId: conversationId || '',
           messageId: messageId,
-          resourceId: processId,
-          resourceType: ResourceType.PROCESS,
+          resourceId: resourceId,
+          resourceType: resourceType,
         });
       }
       await chat.sendMessage(messagePayload, true);
