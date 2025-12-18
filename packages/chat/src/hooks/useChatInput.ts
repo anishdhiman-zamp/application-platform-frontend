@@ -35,7 +35,7 @@ export interface ChatInputAdapter {
 
 export interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   scope?: ScopeType;
@@ -103,7 +103,7 @@ export const createConversationPayload = (
   resourceType: ResourceType,
   scopeId: string,
   messageText: string,
-  annotationLocation: LocationData,
+  annotationLocation: LocationData | undefined,
   senderName: string,
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
@@ -128,9 +128,11 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    annotation_data: {
-      location: annotationLocation,
-    },
+    ...(annotationLocation && {
+      annotation_data: {
+        location: annotationLocation,
+      },
+    }),
     sender_name: senderName,
   };
 };
