@@ -10,7 +10,7 @@ import CustomChipsRenderer from '@/components/common/table/CustomCellRenderers/C
 import { Label } from 'components/common/Label';
 import TagChip from 'components/common/table/CustomCellEditors/CustomTagEditor/TagChip';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
-import { Tooltip } from 'components/common/tooltip';
+import TooltipV2 from 'components/common/TooltipV2';
 import { getTagLabel } from 'components/filter/filter.utils';
 
 type PropertyRowProps = {
@@ -54,7 +54,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
         }
 
         return (
-          <Tooltip
+          <TooltipV2
             tooltipBody={
               <Label
                 title={tooltipTitle}
@@ -63,7 +63,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
                 descriptionClassName='f-10-400 text-GRAY_700 text-wrap break-keep'
               />
             }
-            tooltipBodyClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-white w-[102px]'
+            tooltipClassName='f-12-300 px-3 py-2 rounded-md whitespace-nowrap z-999 bg-black text-white w-[102px]'
             className='z-1'
             disabled={!sourceValue?.source_type}
           >
@@ -80,7 +80,7 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
                 externalColor={column?.headerComponentParams?.filterComponentProps?.tagColorMap?.[value]}
               />
             </div>
-          </Tooltip>
+          </TooltipV2>
         );
       }
       if (column.headerComponentParams?.metadata?.custom_type === CUSTOM_COLUMNS_TYPE.CHIP) {
@@ -91,15 +91,15 @@ const PropertyRow: FC<PropertyRowProps> = ({ value, column, data, teamMembersDat
     }
 
     return (
-      <Tooltip
+      <TooltipV2
         tooltipBody={showCopyTooltip ? 'Copied' : 'Click to copy'}
-        tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+        tooltipClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
         className='z-1'
       >
         <div className='hover:bg-GRAY_100 rounded-md p-1' onClick={handleCopy}>
           {value}
         </div>
-      </Tooltip>
+      </TooltipV2>
     );
   };
 
