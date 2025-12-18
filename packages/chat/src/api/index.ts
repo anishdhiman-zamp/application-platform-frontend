@@ -6,20 +6,30 @@ import {
   CreateConversationPayloadType,
   CreateConversationPayloadTypeV2,
   CreateConversationResponseType,
+  GenerateSpeechToTextAccessTokenRequest,
+  GenerateSpeechToTextAccessTokenResponse,
   GetConversationByIdRequestType,
   GetConversationByIdResponseType,
   GetFileDownloadUrlRequestType,
   GetFileDownloadUrlResponseType,
   GetFilesByIdsRequestType,
   GetFilesByIdsResponseType,
+  PostInteractionDisablePayloadType,
+  PostInteractionPayloadType,
+  PostInteractionResponseType,
   PostMessagePayloadType,
   PostMessageResponseType,
+  SignedUrlBodyType,
+  SignedUrlResponseType,
 } from '../types/chat.types';
 
 export enum APITags {
   CREATE_CONVERSATION = 'CREATE_CONVERSATION',
   POST_MESSAGE = 'POST_MESSAGE',
   GET_CONVERSATION_BY_ID = 'GET_CONVERSATION_BY_ID',
+  INTERACTION = 'INTERACTION',
+  FILE_UPLOAD = 'FILE_UPLOAD',
+  SPEECH_TO_TEXT = 'SPEECH_TO_TEXT',
 }
 export const API_TAGS = Object.values(APITags);
 
@@ -33,6 +43,11 @@ export const API_ENDPOINTS = {
   CREATE_CONVERSATION_V2: 'v2/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
+  FORMS_SIGNED_UPLOAD_URL_POST: 'file-imports/initiate',
+  FORMS_SIGNED_UPLOAD_ACK_POST: 'file-imports/{{fileImportId}}/acknowledge',
+  INTERACTION_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions',
+  INTERACTION_DISABLE_POST: '/v2/conversations/{{conversationId}}/messages/{{messageId}}/interactions/disable',
+  SPEECH_TO_TEXT_ACCESS_TOKEN_GET: '/speech-to-text/generate-access-token',
 };
 
 const ConversationService = chatApi.injectEndpoints({
@@ -87,6 +102,44 @@ const ConversationService = chatApi.injectEndpoints({
         url: formRequestUrlWithParams(API_ENDPOINTS.GET_FILE_DOWNLOAD_URL, { file_upload_id }),
       }),
     }),
+    getSignedUrl: builder.mutation<SignedUrlResponseType, SignedUrlBodyType>({
+      query: ({ path, payload }) => ({
+        url: path,
+        method: REQUEST_TYPES.POST,
+        body: payload,
+      }),
+    }),
+    postFormsSignedUploadAck: builder.mutation<void, { fileImportId: string }>({
+      query: ({ fileImportId }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.FORMS_SIGNED_UPLOAD_ACK_POST, { fileImportId }),
+        method: REQUEST_TYPES.POST,
+      }),
+    }),
+    postInteraction: builder.mutation<PostInteractionResponseType, PostInteractionPayloadType>({
+      query: ({ conversationId, messageId, params, body }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.INTERACTION_POST, { conversationId, messageId }),
+        method: REQUEST_TYPES.POST,
+        params,
+        body,
+      }),
+    }),
+    postInteractionDisable: builder.mutation<PostInteractionResponseType, PostInteractionDisablePayloadType>({
+      query: ({ conversationId, messageId, params }) => ({
+        url: formRequestUrlWithParams(API_ENDPOINTS.INTERACTION_DISABLE_POST, { conversationId, messageId }),
+        method: REQUEST_TYPES.POST,
+        params,
+      }),
+    }),
+    getSpeechToTextAccessToken: builder.query<
+      GenerateSpeechToTextAccessTokenResponse,
+      GenerateSpeechToTextAccessTokenRequest
+    >({
+      query: (body) => ({
+        url: API_ENDPOINTS.SPEECH_TO_TEXT_ACCESS_TOKEN_GET,
+        method: REQUEST_TYPES.POST,
+        body,
+      }),
+    }),
   }),
 });
 
@@ -99,4 +152,10 @@ export const {
   useGetFilesByIdsQuery,
   useLazyGetFileDownloadUrlQuery,
   useLazyGetConversationByIdQuery,
+  useGetSignedUrlMutation,
+  usePostFormsSignedUploadAckMutation,
+  usePostInteractionMutation,
+  usePostInteractionDisableMutation,
+  useGetSpeechToTextAccessTokenQuery,
+  useLazyGetSpeechToTextAccessTokenQuery,
 } = ConversationService;
