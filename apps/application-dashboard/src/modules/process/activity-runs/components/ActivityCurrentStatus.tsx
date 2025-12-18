@@ -25,16 +25,16 @@ const ActivityCurrentStatus = ({ value, data }: ActivityCurrentStatusProps) => {
   };
 
   return (
-    <div className='flex w-full items-center justify-between'>
-      <div className='flex items-center gap-2'>
+    <div className='flex w-full items-center justify-between gap-x-2'>
+      <div className='flex min-w-0 items-center gap-2'>
         <TabStatusIcon
           status={data.status as ACTIVITY_RUN_STATUS}
           fillColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.fillColor}
           strokeColor={STATUS_ICON_COLOR_MAPPING[data.status as ACTIVITY_RUN_STATUS]?.tabStatusIcon?.strokeColor}
         />
-        <span className='bg-GRAY_400 h-px w-2 rounded-full' />
-        <TooltipV2 tooltipBody={message} asChildTrigger tooltipClassName='max-w-[400px]' showOnlyWhenTruncated>
-          <p className='f-13-500 text-GRAY_950 max-w-[400px] truncate'>{snakeCaseToSentenceCase(message)}</p>
+        <span className='bg-GRAY_400 h-px w-2 shrink-0 rounded-full' />
+        <TooltipV2 tooltipBody={message} asChildTrigger tooltipClassName='max-w-[600px]' showOnlyWhenTruncated>
+          <p className='f-13-500 text-GRAY_950 min-w-0 flex-1 truncate'>{snakeCaseToSentenceCase(message)}</p>
         </TooltipV2>
       </div>
       <div className='flex items-center gap-2'>

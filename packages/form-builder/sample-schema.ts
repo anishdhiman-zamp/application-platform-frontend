@@ -1,6 +1,6 @@
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 
-import { FormSchema } from './types';
+import { FieldType, FormSchema } from './types';
 
 export const schema: FormSchema = {
   id: 'recipient-with-account',
@@ -220,11 +220,41 @@ export const schema: FormSchema = {
         },
       ],
     },
+    {
+      id: 'recipient_preferences',
+      title: '',
+      sections: [
+        {
+          id: 'transfer_preferences',
+          title: 'Transfer Preferences',
+          layout: [
+            [
+              {
+                col_span: 8,
+                field: 'transfer_frequency',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'notification_preference',
+              },
+            ],
+            [
+              {
+                col_span: 8,
+                field: 'additional_notes',
+              },
+            ],
+          ],
+        },
+      ],
+    },
   ],
   fields: {
     account_holder_address_line_1: {
       id: 'account_holder_address_line_1',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Holder Address Line 1',
       validation_dependencies: [
         {
@@ -293,7 +323,7 @@ export const schema: FormSchema = {
     },
     account_holder_address_line_2: {
       id: 'account_holder_address_line_2',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Holder Address Line 2',
       display_dependencies: [
         {
@@ -333,7 +363,7 @@ export const schema: FormSchema = {
     },
     account_holder_city: {
       id: 'account_holder_city',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Holder City',
       validation_dependencies: [
         {
@@ -402,7 +432,7 @@ export const schema: FormSchema = {
     },
     account_holder_country: {
       id: 'account_holder_country',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Account Holder Country',
       data_source: {
         endpoint: 'v1/forms/countries',
@@ -470,7 +500,7 @@ export const schema: FormSchema = {
     },
     account_holder_name: {
       id: 'account_holder_name',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Holder Name',
       validations: [
         {
@@ -497,7 +527,7 @@ export const schema: FormSchema = {
     },
     account_holder_postal_code: {
       id: 'account_holder_postal_code',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Holder Postal Code',
       validation_dependencies: [
         {
@@ -564,7 +594,7 @@ export const schema: FormSchema = {
     },
     account_holder_state: {
       id: 'account_holder_state',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Account Holder State',
       data_source: {
         endpoint: 'v1/forms/states',
@@ -637,7 +667,7 @@ export const schema: FormSchema = {
     },
     recipient_account_bank_name: {
       id: 'recipient_account_bank_name',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Bank Name',
       validations: [
         {
@@ -657,7 +687,7 @@ export const schema: FormSchema = {
     },
     recipient_account_country_code: {
       id: 'recipient_account_country_code',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Account Country',
       data_source: {
         endpoint: 'v1/forms/countries',
@@ -678,7 +708,7 @@ export const schema: FormSchema = {
     },
     recipient_account_currency: {
       id: 'recipient_account_currency',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Account Currency',
       options: [
         {
@@ -699,6 +729,10 @@ export const schema: FormSchema = {
           label: 'EUR',
           value: 'EUR',
         },
+        {
+          label: 'Other Currency',
+          value: 'other',
+        },
       ],
       validations: [
         {
@@ -707,18 +741,11 @@ export const schema: FormSchema = {
             message: 'Account currency is required',
           },
         },
-        {
-          type: 'enums',
-          config: {
-            values: ['USD', 'EUR'],
-            message: 'Currency must be either USD or EUR',
-          },
-        },
       ],
     },
     recipient_account_number: {
       id: 'recipient_account_number',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Account Number',
       validation_dependencies: [
         {
@@ -784,7 +811,7 @@ export const schema: FormSchema = {
     },
     recipient_account_routing_code_type_1: {
       id: 'recipient_account_routing_code_type_1',
-      type: 'select',
+      type: FieldType.SELECT,
       label: '',
       validation_dependencies: [
         {
@@ -907,7 +934,7 @@ export const schema: FormSchema = {
     },
     recipient_account_routing_code_type_2: {
       id: 'recipient_account_routing_code_type_2',
-      type: 'select',
+      type: FieldType.SELECT,
       label: '',
       validation_dependencies: [
         {
@@ -974,7 +1001,7 @@ export const schema: FormSchema = {
     },
     recipient_account_routing_code_value_1: {
       id: 'recipient_account_routing_code_value_1',
-      type: 'text',
+      type: FieldType.TEXT,
       label: '',
       validation_dependencies: [
         {
@@ -1085,7 +1112,7 @@ export const schema: FormSchema = {
     },
     recipient_account_routing_code_value_2: {
       id: 'recipient_account_routing_code_value_2',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Routing Code Value 2',
       validation_dependencies: [
         {
@@ -1152,7 +1179,7 @@ export const schema: FormSchema = {
     },
     recipient_address_line_1: {
       id: 'recipient_address_line_1',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Address Line 1',
       validations: [
         {
@@ -1166,7 +1193,7 @@ export const schema: FormSchema = {
     },
     recipient_address_line_2: {
       id: 'recipient_address_line_2',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Address Line 2',
       validations: [
         {
@@ -1180,7 +1207,7 @@ export const schema: FormSchema = {
     },
     recipient_city: {
       id: 'recipient_city',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'City',
       validations: [
         {
@@ -1194,7 +1221,7 @@ export const schema: FormSchema = {
     },
     recipient_contact_country_code: {
       id: 'recipient_contact_country_code',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Contact Country Code',
       data_source: {
         endpoint: 'v1/forms/contact-codes',
@@ -1205,7 +1232,7 @@ export const schema: FormSchema = {
     },
     recipient_contact_number: {
       id: 'recipient_contact_number',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Contact Number',
       validation_dependencies: [
         {
@@ -1248,7 +1275,7 @@ export const schema: FormSchema = {
     },
     recipient_country_code: {
       id: 'recipient_country_code',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'Country',
       data_source: {
         endpoint: 'v1/forms/countries',
@@ -1259,7 +1286,7 @@ export const schema: FormSchema = {
     },
     recipient_email: {
       id: 'recipient_email',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Recipient Email',
       validations: [
         {
@@ -1273,7 +1300,7 @@ export const schema: FormSchema = {
     },
     recipient_name: {
       id: 'recipient_name',
-      type: 'header-text',
+      type: FieldType.HEADER_TEXT,
       placeholder: 'Recipient Name',
       validations: [
         {
@@ -1300,7 +1327,7 @@ export const schema: FormSchema = {
     },
     recipient_postal_code: {
       id: 'recipient_postal_code',
-      type: 'text',
+      type: FieldType.TEXT,
       label: 'Postal Code',
       validations: [
         {
@@ -1314,7 +1341,7 @@ export const schema: FormSchema = {
     },
     recipient_state: {
       id: 'recipient_state',
-      type: 'select',
+      type: FieldType.SELECT,
       label: 'State/Province',
       data_source: {
         endpoint: 'v1/forms/states',
@@ -1329,6 +1356,104 @@ export const schema: FormSchema = {
           },
         ],
       },
+    },
+    transfer_frequency: {
+      id: 'transfer_frequency',
+      type: FieldType.RADIO,
+      label: 'How often do you plan to send transfers?',
+      options: [
+        { label: 'One-time transfer', value: 'one_time' },
+        { label: 'Weekly', value: 'weekly' },
+        { label: 'Monthly', value: 'monthly' },
+        { label: 'Quarterly', value: 'quarterly' },
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a transfer frequency',
+          },
+        },
+      ],
+    },
+    notification_preference: {
+      id: 'notification_preference',
+      type: FieldType.RADIO,
+      label: 'How would you like to be notified?',
+      options: [
+        { label: 'Email only', value: 'email' },
+        { label: 'SMS only', value: 'sms' },
+        { label: 'Both Email and SMS', value: 'both' },
+        { label: 'No notifications', value: 'none' },
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a notification preference',
+          },
+        },
+      ],
+    },
+    additional_notes: {
+      id: 'additional_notes',
+      type: FieldType.RADIO,
+      label: 'Do you have any special requirements?',
+      options: [
+        { label: 'No special requirements', value: 'none' },
+        { label: 'Urgent transfer needed', value: 'urgent' },
+        { label: 'Recurring schedule', value: 'recurring' },
+        {
+          label: 'Add a note',
+          value: 'other',
+          inline_field: {
+            field: 'additional_notes_text',
+          },
+        },
+      ],
+      validations: [
+        {
+          type: 'required',
+          config: {
+            message: 'Please select a note',
+          },
+        },
+      ],
+    },
+    additional_notes_text: {
+      id: 'additional_notes_text',
+      type: FieldType.TEXT,
+      label: 'Additional Notes',
+      placeholder: 'Add a note',
+      validation_dependencies: [
+        {
+          fields: ['additional_notes'],
+          expressions: [
+            {
+              expression: {
+                logical_operator: 'AND',
+                conditions: [
+                  {
+                    logical_operator: null,
+                    field: 'additional_notes',
+                    operator: 'eq',
+                    value: 'other',
+                    conditions: null,
+                  },
+                ],
+              },
+              validations: [
+                {
+                  type: 'required',
+                  config: {
+                    message: 'Please enter your requirements',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 };

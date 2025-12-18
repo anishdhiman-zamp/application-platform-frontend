@@ -1,8 +1,8 @@
 import { captureException } from '@sentry/nextjs';
 import { readFile } from 'fs/promises';
-import type { IntegrationsDataType, IntegrationType } from 'modules/integrations/integration.types';
 import { join } from 'path';
 import { IMAGE_PREFIX } from '@/constants/icons';
+import type { IntegrationsDataType, IntegrationType } from '@/modules/integrations/types/integrations.types';
 
 /**
  * Fetches integrations data from CDN if available, otherwise falls back to local file
@@ -47,3 +47,32 @@ export async function fetchIntegrations(): Promise<IntegrationType[]> {
     throw new Error('Failed to load integrations data');
   }
 }
+
+/**
+ * Filter integrations by search query
+ * This runs on the server for SSR
+ */
+export const filterIntegrations = (integrations: IntegrationType[], searchQuery: string): IntegrationType[] => {
+  if (!searchQuery.trim()) {
+    return integrations;
+  }
+
+  const query = searchQuery.toLowerCase();
+
+  return integrations.filter(
+    (integration) =>
+      integration.display_name.toLowerCase().includes(query) ||
+      integration.what_possible.some((action) => action.toLowerCase().includes(query)),
+  );
+};
+
+/**
+ * Split integrations into enabled and available
+ * For now, first 4 are considered enabled (placeholder logic)
+ */
+export const splitIntegrations = (integrations: IntegrationType[]) => {
+  return {
+    enabled: integrations.slice(0, 4),
+    available: integrations.slice(4),
+  };
+};

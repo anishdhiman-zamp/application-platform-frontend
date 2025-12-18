@@ -1,15 +1,22 @@
-import { type FC, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LocationType } from '@zamp-platform/chat';
+import { FormBuilder, type FormBuilderRef } from '@zamp-platform/form-builder';
 import { DATE_FORMATS } from '@zamp-platform/utils';
 import { format } from 'date-fns';
 import ActionComment from 'modules/process/activity-logs/components/ActionComment';
-import LogCta from 'modules/process/activity-logs/components/LogCta';
+import LogCta, { type LogCtaRef } from 'modules/process/activity-logs/components/LogCta';
 import LogMessageAnimation from 'modules/process/activity-logs/components/LogMessageAnimation';
 import LogStatusIndicator from 'modules/process/activity-logs/components/LogStatusIndicator';
 import ReasoningAccordion from 'modules/process/activity-logs/components/ReasoningAccordion';
 import SenderInfo from 'modules/process/activity-logs/components/SenderInfo';
 import { LINE_BODY_LOGS_ANIMATION_SEQUENCE, LOG_STATUS_ICON_COLOR_MAPPING } from 'modules/process/process.constant';
-import { CONTENT_TYPE, type HandleShowArtifactsProps, LOG_STATUS, SENDER_TYPE } from 'modules/process/process.types';
+import {
+  CONTENT_TYPE,
+  CTA_ACTION,
+  type HandleShowArtifactsProps,
+  LOG_STATUS,
+  SENDER_TYPE,
+} from 'modules/process/process.types';
 import { handleStrokeShimmerSequence } from 'modules/process/process.utils';
 import { motion } from 'motion/react';
 import ChatbotWrapper from '@/modules/chatbot';
@@ -18,6 +25,7 @@ import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import type { ActivityLogsItemType } from '@/types/api/processApi.types';
 import { defaultFnType } from '@/types/commonTypes';
 import { cn, ensureUTCTimestamp } from '@/utils/common';
+import 'modules/process/activity-logs/components/log-form.css';
 
 type LogProps = {
   isLastLogOfDate?: boolean;
@@ -52,8 +60,11 @@ const Log: FC<LogProps> = ({
   const [lineHeight, setLineHeight] = useState(0);
   const [staggerAnimationBegin, setStaggerAnimationBegin] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-
+  const formBuilderRef = useRef<FormBuilderRef>(null);
+  const logCtaRef = useRef<LogCtaRef>(null);
   const isFeedbackEnabled = useIsFeedbackEnabled();
+
+  const submitFormCta = useMemo(() => ctas?.find((cta) => cta?.cta_action === CTA_ACTION.SUBMIT_FORM), [ctas]);
 
   // sender info visibility
   const isSenderInfoVisible = useMemo(() => {
@@ -105,6 +116,14 @@ const Log: FC<LogProps> = ({
   const handleLineHeightUpdate = () => {
     setLineHeight((prev) => prev + 1);
   };
+
+  const handleFeedbackSubmit = useCallback((data: Record<string, unknown>) => {
+    logCtaRef.current?.submitFormData(data);
+  }, []);
+
+  const handleSubmitForm = useCallback(() => {
+    formBuilderRef.current?.submit();
+  }, []);
 
   useEffect(() => {
     const stopStrokeShimmerSequenceLoopRef = { current: false };
@@ -223,14 +242,27 @@ const Log: FC<LogProps> = ({
               status={statusIndicatorColor.status}
             />
           )}
+
+          {submitFormCta?.form_builder_config && (
+            <FormBuilder
+              schema={submitFormCta?.form_builder_config}
+              onSubmit={handleFeedbackSubmit}
+              ref={formBuilderRef}
+              animated={false}
+              formId='log-form'
+            />
+          )}
+
           {!!ctas?.length && (
             <LogCta
+              ref={logCtaRef}
               ctas={ctas}
               logGroupId={log_group_id}
               processId={processId}
               activityId={activityId}
               handleShowArtifacts={handleShowArtifacts}
               isLastLog={isLastLog}
+              onSubmitForm={handleSubmitForm}
             />
           )}
           {action_comment?.comment && (

@@ -1,5 +1,16 @@
-import { SelectOption } from '@zamp-platform/ui';
+import { SelectOption as BaseSelectOption } from '@zamp-platform/ui';
 import { z } from 'zod';
+
+export interface InlineFieldConfig {
+  field: string;
+}
+
+export interface ExtendedSelectOption extends BaseSelectOption {
+  inline_field?: InlineFieldConfig;
+}
+
+export type RadioOption = ExtendedSelectOption;
+export type SelectOption = ExtendedSelectOption;
 
 export type ValidationType =
   | 'required'
@@ -69,7 +80,14 @@ export interface DisplayDependency {
   expressions: Array<{ expression: Expression; config: FieldConfig }>;
 }
 
-export type FieldType = 'text' | 'select' | 'input' | 'multi-select' | 'header-text';
+export enum FieldType {
+  TEXT = 'text',
+  SELECT = 'select',
+  INPUT = 'input',
+  MULTI_SELECT = 'multi-select',
+  HEADER_TEXT = 'header-text',
+  RADIO = 'radio',
+}
 
 export type SelectOptionValue = string | boolean | { type: string; id: string };
 
@@ -82,7 +100,7 @@ export interface FormField {
   name?: string;
   validations?: Validation[];
   validation_dependencies?: ValidationDependency[];
-  options?: SelectOption[];
+  options?: SelectOption[] | RadioOption[];
   data_source?: DataSource;
   display_dependencies?: DisplayDependency[];
 }
@@ -134,7 +152,7 @@ export const dataSourceSchema = z.object({
 });
 
 export const formFieldSchema = z.object({
-  type: z.enum(['text', 'select']),
+  type: z.nativeEnum(FieldType),
   label: z.string(),
   name: z.string().optional(),
   placeholder: z.string().optional(),

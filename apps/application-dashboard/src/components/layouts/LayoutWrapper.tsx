@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
@@ -26,7 +27,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     <PagesAndProcessesProvider>
       <div className='bg-BACKGROUND_GRAY_1 relative'>
         <div className='relative flex h-full w-full min-w-[768px]'>
-          {isSettings ? <SettingsSidebar /> : <Sidebar />}
+          <Suspense>{isSettings ? <SettingsSidebar /> : <Sidebar />}</Suspense>
           <motion.div
             initial={false}
             animate={{
@@ -40,7 +41,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           >
             {showTopbar && (
               <nav className='sticky top-0 z-10'>
-                <Topbar />
+                <Suspense>
+                  <Topbar />
+                </Suspense>
               </nav>
             )}
             <LayoutChildren>{children}</LayoutChildren>

@@ -32,12 +32,12 @@ Connect your Linear workspace with Zamp to automatically sync issues, track proj
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| Issue Sync | Automatically sync issues between Linear and Zamp |
-| Status Updates | Real-time status synchronization |
-| Comments | Sync comments and discussions |
-| Attachments | Share files across platforms |
+| Feature        | Description                                       |
+| -------------- | ------------------------------------------------- |
+| Issue Sync     | Automatically sync issues between Linear and Zamp |
+| Status Updates | Real-time status synchronization                  |
+| Comments       | Sync comments and discussions                     |
+| Attachments    | Share files across platforms                      |
 
 ## Troubleshooting
 
@@ -56,4 +56,3 @@ Sync typically happens within 1-2 minutes. If delays persist, try:
 - Refreshing the connection
 - Checking your network connection
 - Contacting support
-

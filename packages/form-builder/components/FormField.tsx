@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 
+import { DEFAULT_FIELD_ANIMATION } from '../constants';
 import { useDisplayDependencies } from '../hooks/useDisplayDependencies';
 import { FormField as FormFieldType } from '../types';
 import { HeaderTextField } from './HeaderTextField';
+import { RadioField } from './RadioField';
 import { SelectField } from './SelectField';
 import { TextField } from './TextField';
 
@@ -11,9 +13,11 @@ interface FormFieldProps {
   field: FormFieldType;
   name: string;
   className?: string;
+  animated?: boolean;
+  inlineFields?: Record<string, FormFieldType>;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) => {
+export const FormField: React.FC<FormFieldProps> = ({ field, name, className, animated = true, inlineFields = {} }) => {
   const { shouldShow, fieldConfig } = useDisplayDependencies(field);
 
   if (!shouldShow) {
@@ -28,10 +32,10 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.2 }}
+        initial={animated ? DEFAULT_FIELD_ANIMATION.initial : undefined}
+        animate={animated ? DEFAULT_FIELD_ANIMATION.animate : undefined}
+        exit={animated ? DEFAULT_FIELD_ANIMATION.exit : undefined}
+        transition={animated ? DEFAULT_FIELD_ANIMATION.transition : { duration: 0 }}
       >
         {(() => {
           switch (fieldWithConfig.type) {
@@ -41,6 +45,10 @@ export const FormField: React.FC<FormFieldProps> = ({ field, name, className }) 
               return <TextField className={className} field={fieldWithConfig} name={name} />;
             case 'select':
               return <SelectField className={className} field={fieldWithConfig} name={name} />;
+            case 'radio':
+              return (
+                <RadioField className={className} field={fieldWithConfig} name={name} inlineFields={inlineFields} />
+              );
             default:
               return null;
           }
