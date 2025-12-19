@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 2000 --experimental-https -H local.zamp.ai",
-    "dev-coder": "next dev -p 2000 -H 0.0.0.0",
+    "dev": "next dev -p 2000 --turbopack --experimental-https -H local.zamp.ai",
+    "dev-coder": "next dev -p 2000 --turbopack -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "start-coder": "next start -H 0.0.0.0",
