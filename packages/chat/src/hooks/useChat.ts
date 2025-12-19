@@ -310,7 +310,6 @@ export const useChat = (config: ChatConfig) => {
               });
               config.onStreamStart?.(sourceId);
             } else if (eventType === 'message_stop') {
-              // Clear streaming state when the entire message stream is complete
               setStreamingState(null);
               config.onStreamEnd?.(sourceId);
             }

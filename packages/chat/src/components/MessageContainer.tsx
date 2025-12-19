@@ -1,4 +1,5 @@
 import { COLORS, ShimmerText } from '@zamp-platform/ui';
+import { cn } from '@zamp-platform/ui/utils';
 import { FC, ReactNode, useEffect, useRef } from 'react';
 
 import Avatar from '@/components/common/avatar';
@@ -16,6 +17,7 @@ interface MessageContainerProps {
   streamingState?: StreamingState | null;
   assistantName?: string;
   assistantAvatar?: ReactNode;
+  className?: string;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -25,6 +27,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   streamingState,
   assistantName = 'Pace',
   assistantAvatar,
+  className,
 }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
@@ -52,7 +55,10 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   }, [streamingState?.contentBlocks?.length, streamingState]);
 
   return (
-    <div className='flex w-full flex-grow flex-col gap-6 overflow-y-auto p-4' ref={messagesContainerRef}>
+    <div
+      className={cn('flex w-full flex-grow flex-col gap-6 overflow-y-auto p-4', className)}
+      ref={messagesContainerRef}
+    >
       {messages?.map((message) => (
         <Message
           key={message.timestamp}

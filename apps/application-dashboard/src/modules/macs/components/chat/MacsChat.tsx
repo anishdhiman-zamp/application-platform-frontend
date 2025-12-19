@@ -102,7 +102,12 @@ const MacsChat = ({ className }: MacsChatProps) => {
       {!hasMessages ? (
         <MacsChatHome />
       ) : (
-        <MessageContainer messages={chat.messages} isAnalysing={isAnalysing} streamingState={chat.streamingState} />
+        <MessageContainer
+          messages={chat.messages}
+          isAnalysing={isAnalysing}
+          streamingState={chat.streamingState}
+          className='[scrollbar-width:none]'
+        />
       )}
       <div className='mx-auto w-full flex-shrink-0 p-3'>
         <ConnectedChatInput
