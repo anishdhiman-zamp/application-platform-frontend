@@ -41,8 +41,8 @@ const MacsLayoutContent = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className='flex h-full w-full flex-col'>
-      <div className='flex w-full'>{renderTopbar()}</div>
-      {children}
+      <div className='flex w-full flex-shrink-0'>{renderTopbar()}</div>
+      <div className='min-h-0 flex-1'>{children}</div>
     </div>
   );
 };

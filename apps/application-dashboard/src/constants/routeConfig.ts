@@ -30,6 +30,8 @@ export const ROUTES_PATH = {
   INTEGRATIONS: '/settings/integrations',
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_TEAM: '/settings/team',
+
+  MACS: '/macs',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {

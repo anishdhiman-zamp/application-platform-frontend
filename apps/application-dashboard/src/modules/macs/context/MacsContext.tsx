@@ -16,6 +16,7 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [hasChatMessages, setHasChatMessages] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const clearMessagesRef = useRef<(() => void) | null>(null);
+  const [isNewChat, setIsNewChat] = useState(false);
 
   const hasContent = activeSection !== null || tabs.length > 0;
 
@@ -97,6 +98,7 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setActiveTabId(null);
     setViewMode(ViewMode.Default);
     setIsAddTabMenuOpen(false);
+    setShowHistoryView(false);
   }, []);
 
   const openSplitViewWithMenu = useCallback(() => {
@@ -113,6 +115,9 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setChatTitle('');
     setHasChatMessages(false);
     setShowHistoryView(false);
+    setChatTitle('');
+    setHasChatMessages(false);
+    setIsNewChat(true);
   }, []);
 
   const value: MacsContextType = useMemo(
@@ -139,6 +144,8 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       setShowHistoryView,
       startNewChat,
       registerClearMessages,
+      isNewChat,
+      setIsNewChat,
     }),
     [
       activeSection,
@@ -158,6 +165,8 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       showHistoryView,
       startNewChat,
       registerClearMessages,
+      isNewChat,
+      setIsNewChat,
     ],
   );
 

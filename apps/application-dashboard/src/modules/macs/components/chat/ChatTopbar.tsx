@@ -20,30 +20,11 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
     resetToDefault,
     setShowHistoryView,
     startNewChat,
+    setIsNewChat,
     showHistoryView,
   } = useMacsContext();
 
   const displayTitle = chatTitle || 'Chat';
-
-  const handleNewChat = () => {
-    startNewChat();
-  };
-
-  const handleHistory = () => {
-    setShowHistoryView(true);
-  };
-
-  const handlePanelLeftClose = () => {
-    openSplitViewWithMenu();
-  };
-
-  const handleExpand = () => {
-    resetToDefault();
-  };
-
-  const handleMinimize = () => {
-    setViewMode(ViewMode.SectionExpanded);
-  };
 
   return (
     <div className={cn('flex h-8 items-center justify-between px-3', className)} style={style}>
@@ -60,10 +41,10 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
                 variant='ghost'
                 size='icon'
                 className='h-6 w-6 text-gray-600 hover:text-gray-900'
-                onClick={handlePanelLeftClose}
+                onClick={openSplitViewWithMenu}
                 title='Show split view'
               >
-                <PanelLeftClose size={16} />
+                <PanelLeftClose size={12} />
               </Button>
             )}
             <div className='f-13-500 truncate text-gray-900'>{displayTitle}</div>
@@ -75,19 +56,22 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
           variant='ghost'
           size='icon'
           className='h-6 w-6 text-gray-600 hover:text-gray-900'
-          onClick={handleHistory}
+          onClick={() => setShowHistoryView(true)}
           title='Chat history'
         >
-          <Clock size={16} />
+          <Clock size={12} />
         </Button>
         <Button
           variant='ghost'
           size='icon'
           className='h-6 w-6 text-gray-600 hover:text-gray-900'
-          onClick={handleNewChat}
+          onClick={() => {
+            startNewChat();
+            setIsNewChat(true);
+          }}
           title='New chat'
         >
-          <Plus size={16} />
+          <Plus size={12} />
         </Button>
         {showExpandMinimize && (
           <>
@@ -95,19 +79,19 @@ const ChatTopbar = ({ className, style, showExpandMinimize = false }: ChatTopbar
               variant='ghost'
               size='icon'
               className='h-6 w-6 text-gray-600 hover:text-gray-900'
-              onClick={handleExpand}
+              onClick={resetToDefault}
               title='Expand'
             >
-              <Maximize2 size={16} />
+              <Maximize2 size={12} />
             </Button>
             <Button
               variant='ghost'
               size='icon'
               className='h-6 w-6 text-gray-600 hover:text-gray-900'
-              onClick={handleMinimize}
+              onClick={() => setViewMode(ViewMode.SectionExpanded)}
               title='Minimize'
             >
-              <Minus size={16} />
+              <Minus size={12} />
             </Button>
           </>
         )}

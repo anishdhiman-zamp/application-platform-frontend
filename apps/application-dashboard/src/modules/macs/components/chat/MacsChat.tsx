@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  ButtonBlockType,
   ConnectedChatInput,
   MessageContainer,
   ResourceType,
@@ -12,114 +11,105 @@ import {
 } from '@zamp-platform/chat';
 import { cn } from '@zamp-platform/ui/utils';
 import ChatHistoryView from 'modules/macs/components/chat/ChatHistoryView';
+import { useRouter, useSearchParams } from 'next/navigation';
+import ImageLoader from '@/components/common/loader/ImageLoader';
+import CommonWrapper from '@/components/commonWrapper';
+import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import MacsChatHome from '@/modules/macs/components/chat/MacsChatHome';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { useChatSync } from '@/modules/macs/hooks/useChatSync';
 import type { RootState } from '@/store';
+
 interface MacsChatProps {
   className?: string;
 }
 
 const MacsChat = ({ className }: MacsChatProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationIdFromParam = searchParams?.get('conversationId') ?? null;
+
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
-  const { setHasChatMessages, setChatTitle, showHistoryView, registerClearMessages } = useMacsContext();
+
+  const { showHistoryView, isNewChat, setIsNewChat } = useMacsContext();
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   const chat = useChat({
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
+    conversationId: selectedConversationId ?? conversationIdFromParam ?? undefined,
+    refetchConversationHistory: true,
+  });
+
+  const { hasMessages } = useChatSync({
+    messages: chat.messages,
+    clearMessages: chat.clearMessages,
   });
 
   const isAnalysing = useMemo(() => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
 
-  const hasMessages = useMemo(() => {
-    return chat.messages.length > 0;
-  }, [chat.messages]);
+  const isLoadingConversation =
+    chat.isFetchingConversationHistory ||
+    (!isNewChat && (!!conversationIdFromParam || !!selectedConversationId) && !hasMessages);
 
-  // Get the first user message for the chat title
-  const firstUserMessage = useMemo(() => {
-    const userMessage = chat.messages.find((msg) => msg.sender_type === SenderType.USER);
-
-    if (userMessage?.message_content) {
-      // Handle different message content structures
-      const content = userMessage.message_content;
-
-      if ('message' in content && typeof content.message === 'string') {
-        return content.message;
-      }
-      if ('text' in content && typeof content.text === 'string') {
-        return content.text;
-      }
+  useEffect(() => {
+    if (isNewChat) {
+      router.replace(ROUTES_PATH.MACS);
     }
+  }, [isNewChat, router]);
 
-    return null;
-  }, [chat.messages]);
-
-  // Register clearMessages function with context
   useEffect(() => {
-    registerClearMessages(chat.clearMessages);
-  }, [chat.clearMessages, registerClearMessages]);
-
-  // Sync hasMessages state with context for layout to access
-  useEffect(() => {
-    setHasChatMessages(hasMessages);
-  }, [hasMessages, setHasChatMessages]);
-
-  // Update chat title based on first user message
-  useEffect(() => {
-    if (firstUserMessage) {
-      // Truncate long messages for the title
-      const title = firstUserMessage.length > 50 ? `${firstUserMessage.substring(0, 50)}...` : firstUserMessage;
-
-      setChatTitle(title);
-    } else {
-      setChatTitle('');
+    if (isNewChat && !conversationIdFromParam && !selectedConversationId) {
+      setIsNewChat(false);
     }
-  }, [firstUserMessage, setChatTitle]);
+  }, [isNewChat, conversationIdFromParam, selectedConversationId, setIsNewChat]);
 
-  const handleAction = (blockConfig: ButtonBlockType, payload: Record<string, string>) => {
-    console.log('Action triggered:', blockConfig, payload);
-  };
+  useEffect(() => {
+    if (!isNewChat && chat.conversationId && !conversationIdFromParam && !selectedConversationId) {
+      router.replace(`${ROUTES_PATH.MACS}?conversationId=${chat.conversationId}`);
+    }
+  }, [isNewChat, chat.conversationId, conversationIdFromParam, selectedConversationId, router]);
 
-  // Show history view when toggled
   if (showHistoryView) {
-    return <ChatHistoryView className={className} />;
+    return (
+      <ChatHistoryView
+        className='max-w-[700px]'
+        onConversationClick={(conversationId) => setSelectedConversationId(conversationId)}
+      />
+    );
   }
 
   return (
-    <div className={cn('mx-auto flex h-full w-full flex-col bg-white', className)}>
-      <div className='flex h-full w-full flex-col'>
-        {!hasMessages ? (
-          <div className='mt-[116px] flex flex-col items-center gap-y-4 overflow-y-auto'>
-            <MacsChatHome />
-          </div>
-        ) : (
-          <div className='mx-auto flex w-full max-w-[700px] flex-1'>
-            <MessageContainer messages={chat.messages} handleAction={handleAction} isAnalysing={isAnalysing} />
-          </div>
-        )}
-        <div className='mx-auto w-full max-w-[700px] p-3'>
-          <ConnectedChatInput
-            chat={chat}
-            resourceType={ResourceType.ORGANIZATION}
-            resourceId={organizationId}
-            scope={ScopeType.ORGANIZATION}
-            scopeId={organizationId}
-            organizationId={organizationId}
-            currentUserName={currentUserName}
-            isDisabled={isAnalysing}
-            placeholder="Do your life's best work with Pace"
-          />
-        </div>
-        {!hasMessages && (
-          <div className='flex w-full items-center justify-center'>
-            <ChatHistoryView />
-          </div>
-        )}
+    <CommonWrapper
+      isLoading={isLoadingConversation}
+      skeletonType={SkeletonTypes.CUSTOM}
+      loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
+      className={cn('mx-auto flex h-full w-full max-w-[700px] flex-col bg-white', className)}
+    >
+      {!hasMessages ? <MacsChatHome /> : <MessageContainer messages={chat.messages} isAnalysing={isAnalysing} />}
+      <div className='mx-auto w-full flex-shrink-0 p-3'>
+        <ConnectedChatInput
+          chat={chat}
+          resourceType={ResourceType.ORGANIZATION}
+          resourceId={organizationId}
+          scope={ScopeType.ORGANIZATION}
+          scopeId={organizationId}
+          organizationId={organizationId}
+          currentUserName={currentUserName}
+          isDisabled={isAnalysing}
+          placeholder="Do your life's best work with Pace"
+        />
       </div>
-    </div>
+      {!hasMessages && (
+        <ChatHistoryView onConversationClick={(conversationId) => setSelectedConversationId(conversationId)} />
+      )}
+    </CommonWrapper>
   );
 };
 

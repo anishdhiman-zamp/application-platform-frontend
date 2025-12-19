@@ -125,6 +125,7 @@ export const useChat = (config: ChatConfig) => {
 
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setConversationId(null);
   }, []);
 
   const handleMessage = useCallback(
@@ -250,6 +251,7 @@ export const useChat = (config: ChatConfig) => {
     createConversationError,
     setMessages,
     isLoadingConversationHistory,
+    isFetchingConversationHistory,
     createConversationV2,
     conversationId: _conversationId,
     setConversationId,

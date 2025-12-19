@@ -62,6 +62,8 @@ export type MacsContextType = {
   setShowHistoryView: (show: boolean) => void;
   startNewChat: () => void;
   registerClearMessages: (clearFn: () => void) => void;
+  isNewChat: boolean;
+  setIsNewChat: (isNewChat: boolean) => void;
 };
 
 export enum TopbarLayoutType {

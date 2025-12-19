@@ -38,9 +38,9 @@ export const chatApi = baseApiProvider(APITags, 'chatApi');
 export const API_ENDPOINTS = {
   POST_MESSAGE: '/conversations/{{conversationId}}/messages',
   CREATE_CONVERSATION: '/conversations/',
-  POST_MESSAGE_V2: 'v2/conversations/{{conversationId}}/messages',
+  POST_MESSAGE_V2: 'v3/conversations/{{conversationId}}/messages',
   GET_CONVERSATION_BY_ID: 'v2/conversations/{{conversationId}}',
-  CREATE_CONVERSATION_V2: 'v2/conversations',
+  CREATE_CONVERSATION_V2: 'v3/conversations',
   GET_FILES_BY_IDS: '/file-imports',
   GET_FILE_DOWNLOAD_URL: '/file-imports/{{file_upload_id}}/download-url',
   FORMS_SIGNED_UPLOAD_URL_POST: 'file-imports/initiate',

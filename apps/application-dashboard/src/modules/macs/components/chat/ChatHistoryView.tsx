@@ -5,9 +5,11 @@ import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { MessagesSquare, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
@@ -42,18 +44,20 @@ const ChatHistoryItem = ({ conversation, onClick }: ChatHistoryItemProps) => {
 
 export interface ChatHistoryViewProps {
   className?: string;
-  onConversationClick?: (conversation: FeedbackItemType) => void;
+  contentClassName?: string;
+  onConversationClick?: (conversationId: string) => void;
 }
 
-const ChatHistoryView = ({ className, onConversationClick }: ChatHistoryViewProps) => {
+const ChatHistoryView = ({ className, contentClassName, onConversationClick }: ChatHistoryViewProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const { setShowHistoryView } = useMacsContext();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
   const {
     data: conversationHistory,
-    isFetching: isFetchingConversationHistory,
+    isLoading: isLoadingConversationHistory,
     isError: isErrorConversationHistory,
     refetch: refetchConversationHistory,
   } = useGetConversationHistoryQuery(
@@ -79,71 +83,57 @@ const ChatHistoryView = ({ className, onConversationClick }: ChatHistoryViewProp
   }, [conversations, searchQuery]);
 
   const handleConversationClick = (conversation: FeedbackItemType) => {
-    if (onConversationClick) {
-      onConversationClick(conversation);
-    } else {
-      // Default behavior: close history view
-      console.log('Navigate to conversation:', conversation.conversation_id);
-      setShowHistoryView(false);
-    }
+    onConversationClick?.(conversation?.id);
+    setShowHistoryView(false);
+    router.replace(`${ROUTES_PATH.MACS}?conversationId=${conversation?.id}`);
   };
 
-  if (conversations.length === 0 && !isFetchingConversationHistory && !isErrorConversationHistory) {
-    return null;
-  }
-
   return (
-    <div className={cn('mx-auto flex h-full w-full flex-col bg-white', className)}>
-      {/* Content */}
-      <div className='mx-auto w-full max-w-[700px] flex-1 overflow-y-auto pt-4'>
-        {/* Title and Search */}
-        <div className='mb-4 flex items-center justify-between p-3'>
-          <h1 className='f-14-550 text-gray-1000'>Chat History</h1>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-gray-1000 h-6 w-6 px-2 py-1'
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search size={12} />
-          </Button>
-        </div>
-        {/* Search Input */}
-        {showSearch && (
-          <div className='px-3 pb-4'>
-            <Input
-              placeholder='Search'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className='h-8'
-              autoFocus
-            />
-          </div>
-        )}
-
-        <CommonWrapper
-          isLoading={isFetchingConversationHistory}
-          skeletonType={SkeletonTypes.CUSTOM}
-          loader={<ChatHistorySkeleton />}
-          refetchFunction={refetchConversationHistory}
-          isError={isErrorConversationHistory}
-          className='w-full'
+    <div className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4', className)}>
+      <div className='flex items-center justify-between p-3'>
+        <p className='f-14-550 text-gray-1000'>Chat History</p>
+        <Button
+          variant='ghost'
+          size='icon'
+          className='text-gray-1000 h-6 w-6 px-2 py-1'
+          onClick={() => setShowSearch(!showSearch)}
         >
-          {filteredConversations.length === 0 ? (
-            <div className='flex flex-col items-center justify-center py-12 text-center'>
-              <MessagesSquare size={48} className='mb-4 text-gray-300' />
-              <p className='f-14-500 text-gray-600'>No conversations found</p>
-              <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
-            </div>
-          ) : (
-            <div className='space-y-0.5'>
-              {filteredConversations.map((conversation) => (
-                <ChatHistoryItem key={conversation.id} conversation={conversation} onClick={handleConversationClick} />
-              ))}
-            </div>
-          )}
-        </CommonWrapper>
+          <Search size={12} />
+        </Button>
       </div>
+      {showSearch && (
+        <div className='mt-4 px-3 pb-4'>
+          <Input
+            placeholder='Search'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='h-8'
+            autoFocus
+          />
+        </div>
+      )}
+      <CommonWrapper
+        isLoading={isLoadingConversationHistory}
+        skeletonType={SkeletonTypes.CUSTOM}
+        loader={<ChatHistorySkeleton />}
+        refetchFunction={refetchConversationHistory}
+        isError={isErrorConversationHistory}
+        isNoData={filteredConversations.length === 0}
+        noDataBanner={
+          <div className='flex flex-col items-center justify-center py-12 text-center'>
+            <MessagesSquare size={48} className='mb-4 text-gray-300' />
+            <p className='f-14-500 text-gray-600'>No conversations found</p>
+            <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
+          </div>
+        }
+        className={cn('h-full w-full overflow-y-auto pb-4 [scrollbar-width:none]', contentClassName)}
+      >
+        <div className='space-y-0.5'>
+          {filteredConversations.map((conversation) => (
+            <ChatHistoryItem key={conversation.id} conversation={conversation} onClick={handleConversationClick} />
+          ))}
+        </div>
+      </CommonWrapper>
     </div>
   );
 };

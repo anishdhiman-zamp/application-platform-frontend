@@ -1,5 +1,4 @@
-import { ShimmerText } from '@zamp-platform/ui';
-import { COLORS } from '@zamp-platform/ui';
+import { COLORS, ShimmerText } from '@zamp-platform/ui';
 import { FC, useEffect, useRef } from 'react';
 
 import Avatar from '@/components/common/avatar';
@@ -11,7 +10,7 @@ import Message from './Message';
 
 interface MessageContainerProps {
   messages: ChatMessage[];
-  handleAction: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
+  handleAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
   isAnalysing: boolean;
 }
 
