@@ -360,3 +360,127 @@ export interface GenerateSpeechToTextAccessTokenResponse {
   access_token: string;
   expires_in: number;
 }
+
+export const enum StreamingContentType {
+  THINKING = 'thinking',
+  TEXT = 'text',
+  TOOL_USE = 'tool_use',
+}
+
+export interface ThinkingContentBlock {
+  type: StreamingContentType.THINKING;
+  index: number;
+  content: string;
+  startTimestamp?: string;
+  stopTimestamp?: string;
+  isComplete: boolean;
+}
+
+export interface TextContentBlock {
+  type: StreamingContentType.TEXT;
+  index: number;
+  content: string;
+  startTimestamp?: string;
+  stopTimestamp?: string;
+  isComplete: boolean;
+}
+
+export interface ToolUseDisplayContent {
+  type: string;
+  json_block: string;
+}
+
+export interface ToolUseContentBlock {
+  type: StreamingContentType.TOOL_USE;
+  index: number;
+  id?: string;
+  name?: string;
+  partialJson: string;
+  displayContent?: ToolUseDisplayContent;
+  message?: string;
+  startTimestamp?: string;
+  stopTimestamp?: string;
+  isComplete: boolean;
+}
+
+export type StreamingContentBlock = ThinkingContentBlock | TextContentBlock | ToolUseContentBlock;
+
+export interface StreamingState {
+  sourceId: string;
+  contentBlocks: StreamingContentBlock[];
+  isActive: boolean;
+}
+
+export type StreamEventType =
+  | 'message_start'
+  | 'content_block_start'
+  | 'content_block_delta'
+  | 'content_block_stop'
+  | 'message_stop';
+
+export interface StreamEventContentBlockStart {
+  type: 'content_block_start';
+  index: number;
+  content_block: {
+    type: StreamingContentType;
+    id?: string;
+    name?: string;
+    start_timestamp?: string;
+  };
+}
+
+export interface StreamEventThinkingDelta {
+  type: 'thinking_delta';
+  thinking: string;
+}
+
+export interface StreamEventTextDelta {
+  type: 'text_delta';
+  text: string;
+}
+
+export interface StreamEventInputJsonDelta {
+  type: 'input_json_delta';
+  partial_json: string;
+}
+
+export interface StreamEventToolUseUpdateDelta {
+  type: 'tool_use_block_update_delta';
+  message?: string;
+  display_content?: ToolUseDisplayContent;
+}
+
+export type StreamEventDelta =
+  | StreamEventThinkingDelta
+  | StreamEventTextDelta
+  | StreamEventInputJsonDelta
+  | StreamEventToolUseUpdateDelta;
+
+export interface StreamEventContentBlockDelta {
+  type: 'content_block_delta';
+  index: number;
+  delta: StreamEventDelta;
+}
+
+export interface StreamEventContentBlockStop {
+  type: 'content_block_stop';
+  index: number;
+  content_block: {
+    type: StreamingContentType;
+  };
+  stop_timestamp?: string;
+}
+
+export interface StreamEventMessageStart {
+  type: 'message_start';
+}
+
+export interface StreamEventMessageStop {
+  type: 'message_stop';
+}
+
+export type StreamEventPayload =
+  | StreamEventContentBlockStart
+  | StreamEventContentBlockDelta
+  | StreamEventContentBlockStop
+  | StreamEventMessageStop;

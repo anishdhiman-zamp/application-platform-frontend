@@ -66,12 +66,13 @@ export interface UseChatInputReturn {
 export const createUserMessagePayload = (
   inputValue: string,
   resourceId: string,
+  resourceType: ResourceType,
   senderName: string,
   attachments?: MessageAttachment[],
 ): ChatMessage => {
   return {
     resource_id: resourceId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     message_content: {
       text: inputValue,
       text_type: 'plain_text',
@@ -273,6 +274,7 @@ export const useChatInput = ({
     const messagePayload = createUserMessagePayload(
       inputValue,
       resourceId,
+      resourceType,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))

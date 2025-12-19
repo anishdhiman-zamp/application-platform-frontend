@@ -3,8 +3,6 @@
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
-import AddTabMenu from '@/modules/macs/components/AddTabMenu';
-import MacsTab from '@/modules/macs/components/MacsTab';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { SectionType, ViewMode } from '@/modules/macs/types';
@@ -15,7 +13,7 @@ interface MacsTopbarProps {
 }
 
 const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
-  const { tabs, resetToDefault, viewMode } = useMacsContext();
+  const { resetToDefault, viewMode } = useMacsContext();
 
   return (
     <div
@@ -37,12 +35,13 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
       )}
       <SectionIconButton section={SectionType.Skills} />
 
-      <AddTabMenu />
-      <div className='flex h-full items-end gap-2 overflow-visible'>
+      {/* TODO: Add back AddTabMenu and MacsTab when we have a way to add tabs */}
+      {/* <AddTabMenu /> */}
+      {/* <div className='flex h-full items-end gap-2 overflow-visible'>
         {tabs.map((tab) => (
           <MacsTab key={tab.id} tab={tab} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

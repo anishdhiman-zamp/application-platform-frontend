@@ -43,6 +43,7 @@ const MacsChat = ({ className }: MacsChatProps) => {
     resourceType: ResourceType.ORGANIZATION,
     conversationId: selectedConversationId ?? conversationIdFromParam ?? undefined,
     refetchConversationHistory: true,
+    enableStreaming: true,
   });
 
   const { hasMessages } = useChatSync({
@@ -51,11 +52,17 @@ const MacsChat = ({ className }: MacsChatProps) => {
   });
 
   const isAnalysing = useMemo(() => {
+    if (chat.streamingState) return false;
+
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
-  }, [chat.messages]);
+  }, [chat.messages, chat.streamingState]);
+
+  const isInputDisabled = useMemo(() => {
+    return chat.isStreaming;
+  }, [chat.isStreaming]);
 
   const isLoadingConversation =
-    chat.isFetchingConversationHistory ||
+    chat.isLoadingConversationHistory ||
     (!isNewChat && (!!conversationIdFromParam || !!selectedConversationId) && !hasMessages);
 
   useEffect(() => {
@@ -79,7 +86,7 @@ const MacsChat = ({ className }: MacsChatProps) => {
   if (showHistoryView) {
     return (
       <ChatHistoryView
-        className='max-w-[700px]'
+        className='h-full max-w-[700px]'
         onConversationClick={(conversationId) => setSelectedConversationId(conversationId)}
       />
     );
@@ -92,17 +99,22 @@ const MacsChat = ({ className }: MacsChatProps) => {
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className={cn('mx-auto flex h-full w-full max-w-[700px] flex-col bg-white', className)}
     >
-      {!hasMessages ? <MacsChatHome /> : <MessageContainer messages={chat.messages} isAnalysing={isAnalysing} />}
+      {!hasMessages ? (
+        <MacsChatHome />
+      ) : (
+        <MessageContainer messages={chat.messages} isAnalysing={isAnalysing} streamingState={chat.streamingState} />
+      )}
       <div className='mx-auto w-full flex-shrink-0 p-3'>
         <ConnectedChatInput
           chat={chat}
+          conversationId={selectedConversationId ?? conversationIdFromParam ?? undefined}
           resourceType={ResourceType.ORGANIZATION}
           resourceId={organizationId}
           scope={ScopeType.ORGANIZATION}
           scopeId={organizationId}
           organizationId={organizationId}
           currentUserName={currentUserName}
-          isDisabled={isAnalysing}
+          isDisabled={isInputDisabled}
           placeholder="Do your life's best work with Pace"
         />
       </div>

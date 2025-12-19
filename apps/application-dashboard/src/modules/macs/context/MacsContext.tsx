@@ -46,17 +46,23 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const addTab = useCallback((tab: Tab) => {
-    setActiveSection(null);
-    setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
+  // TODO: v0 - Tab functionality commented out for now
+  // const addTab = useCallback((tab: Tab) => {
+  //   setActiveSection(null);
+  //   setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
 
-    setTabs((prev) => {
-      const exists = prev.some((t) => t.id === tab.id);
+  //   setTabs((prev) => {
+  //     const exists = prev.some((t) => t.id === tab.id);
 
-      setActiveTabId(tab.id);
+  //     setActiveTabId(tab.id);
 
-      return exists ? prev : [...prev, tab];
-    });
+  //     return exists ? prev : [...prev, tab];
+  //   });
+  // }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const addTab = useCallback((_tab: Tab) => {
+    // No-op for v0
   }, []);
 
   const removeTab = useCallback((tabId: string) => {
