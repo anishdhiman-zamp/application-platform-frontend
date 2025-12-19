@@ -51,7 +51,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   conversationId,
   setHeader,
   isDisabled = false,
-  header = '',
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
@@ -107,7 +106,6 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     handleFileSelect,
     removeAttachment,
     isUploading,
-    firstMessage,
   } = useChatInput({
     chat,
     annotationLocation,
@@ -205,8 +203,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
 
   return (
     <div
-      className={cn('w-full border-t p-3', {
-        'border-none p-0': !(firstMessage || header),
+      className={cn('w-full', {
         'pt-1.5': attachments.length > 0,
       })}
     >
