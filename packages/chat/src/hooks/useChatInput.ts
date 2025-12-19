@@ -104,6 +104,7 @@ export const createConversationPayload = (
   resourceType: ResourceType,
   scopeId: string,
   messageText: string,
+  annotationLocation: LocationData | undefined,
   senderName: string,
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
@@ -129,11 +130,11 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    annotation_data: annotationLocation
-      ? {
-          location: annotationLocation,
-        }
-      : undefined,
+    ...(annotationLocation && {
+      annotation_data: {
+        location: annotationLocation,
+      },
+    }),
     sender_name: senderName,
   };
 };

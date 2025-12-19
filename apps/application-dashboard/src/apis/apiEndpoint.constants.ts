@@ -181,6 +181,5 @@ export const API_ENDPOINTS = {
   SKILLS_DELETE: `skills/{{skillId}}`,
   // Conversations V3
   CREATE_CONVERSATION_V3: `v3/conversations`,
-  GET_CONVERSATION_BY_ID_V3: `v3/conversations/{{conversationId}}`,
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
 };

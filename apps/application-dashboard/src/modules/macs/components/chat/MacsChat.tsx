@@ -12,6 +12,7 @@ import {
 import { cn } from '@zamp-platform/ui/utils';
 import ChatHistoryView from 'modules/macs/components/chat/ChatHistoryView';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -44,6 +45,10 @@ const MacsChat = ({ className }: MacsChatProps) => {
     conversationId: selectedConversationId ?? conversationIdFromParam ?? undefined,
     refetchConversationHistory: true,
     enableStreaming: true,
+    apiConfig: {
+      sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
+      createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
+    },
   });
 
   const { hasMessages } = useChatSync({

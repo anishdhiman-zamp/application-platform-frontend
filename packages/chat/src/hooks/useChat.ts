@@ -45,6 +45,11 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
   resourceType?: ResourceType;
   setHeader?: (header: string) => void;
   refetchConversationHistory?: boolean;
+  apiConfig?: {
+    getConversationById?: string;
+    sendMessage?: string;
+    createConversation?: string;
+  };
   // Streaming config options (opt-in, all optional with defaults)
   enableStreaming?: boolean;
   showThinkingContent?: boolean;
@@ -89,6 +94,7 @@ export const useChat = (config: ChatConfig) => {
       conversationId: config.conversationId || '',
       resourceId: config.resourceId,
       resourceType: config.resourceType,
+      url: config.apiConfig?.getConversationById,
     },
     {
       skip: !config.resourceId || !config.resourceType || !config.conversationId,
@@ -137,7 +143,10 @@ export const useChat = (config: ChatConfig) => {
       ];
     }
     setMessages([messagePayload]);
-    const response = await createConversationV2Mutation(conversationPayload).unwrap();
+    const response = await createConversationV2Mutation({
+      ...conversationPayload,
+      url: config.apiConfig?.createConversation,
+    }).unwrap();
     setConversationId(response.conversation_id);
 
     // Update header with title from response
@@ -433,6 +442,7 @@ export const useChat = (config: ChatConfig) => {
           ? await sendMessageV2Mutation({
               conversationId: _conversationId,
               body: messagePayload,
+              url: config.apiConfig?.sendMessage,
             }).unwrap()
           : await sendMessageMutation({
               conversationId: _conversationId,

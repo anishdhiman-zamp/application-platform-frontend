@@ -232,6 +232,7 @@ export interface GetConversationByIdRequestType {
   conversationId: string;
   resourceId?: string;
   resourceType?: ResourceType;
+  url?: string;
 }
 
 export interface GetFilesByIdsRequestType {
