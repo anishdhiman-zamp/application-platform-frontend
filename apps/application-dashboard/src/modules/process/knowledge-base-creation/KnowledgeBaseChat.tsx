@@ -35,6 +35,7 @@ const KnowledgeBaseChat = () => {
 
   const handleAction = (blockConfig: ButtonBlockType, payload: MapAny) => {
     // TODO: Implement action handling
+    console.log('blockConfig', blockConfig, payload);
   };
 
   return (
