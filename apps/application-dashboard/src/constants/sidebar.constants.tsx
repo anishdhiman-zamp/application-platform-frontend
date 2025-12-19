@@ -1,5 +1,5 @@
 import { ROUTES_PATH } from 'constants/routeConfig';
-import { Link2 } from 'lucide-react';
+import { Link2, MessageCircle } from 'lucide-react';
 import CoinsStacked04 from '@/assets/Icons/CoinsStacked04';
 import Users02 from '@/assets/Icons/Users02';
 import type { NavigationItemSchema } from '@/types/config';
@@ -16,6 +16,12 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     label: 'People',
     iconComponent: <Users02 width={16} height={16} />,
     path: ROUTES_PATH.TEAM,
+  },
+  {
+    id: 'macs',
+    label: 'Macs',
+    iconComponent: <MessageCircle width={16} height={16} />,
+    path: ROUTES_PATH.MACS,
   },
   // {
   //   id: 'settings',

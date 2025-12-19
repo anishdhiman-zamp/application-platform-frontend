@@ -70,15 +70,12 @@ export const useChat = (config: ChatConfig) => {
   const [createConversationV2Mutation, { isLoading: isCreatingConversationV2, error: createConversationV2Error }] =
     useCreateConversationV2Mutation();
 
-  // Streaming state - only active when enableStreaming is true
   const [streamingState, setStreamingState] = useState<StreamingState | null>(null);
 
-  // Computed streaming flag - false when streaming is disabled
   const isStreaming = useMemo(() => {
     return config.enableStreaming ? (streamingState?.isActive ?? false) : false;
   }, [config.enableStreaming, streamingState?.isActive]);
 
-  // Clear streaming state - no-op when streaming is disabled
   const clearStreamingState = useCallback(() => {
     if (config.enableStreaming) {
       setStreamingState(null);
@@ -160,16 +157,11 @@ export const useChat = (config: ChatConfig) => {
   const clearMessages = useCallback(() => {
     setMessages([]);
     setConversationId(null);
-    // Also clear streaming state when messages are cleared
     if (config.enableStreaming) {
       setStreamingState(null);
     }
   }, [config.enableStreaming]);
 
-  /**
-   * Handle streaming events from agent_streams SSE
-   * Processes content_block_start, content_block_delta, and content_block_stop events
-   */
   const handleStreamEvent = useCallback(
     (data: BaseEventPayload) => {
       if (!config.enableStreaming) return;
@@ -183,7 +175,6 @@ export const useChat = (config: ChatConfig) => {
             const { index, content_block } = payload;
             const blockType = content_block.type;
 
-            // Initialize new content block based on type
             const newBlock: StreamingContentBlock =
               blockType === StreamingContentType.THINKING
                 ? {
@@ -265,7 +256,6 @@ export const useChat = (config: ChatConfig) => {
               return { ...prev, contentBlocks: updatedBlocks };
             });
 
-            // Find the updated block and call the callback
             setStreamingState((prev) => {
               if (prev) {
                 const updatedBlock = prev.contentBlocks.find((b) => b.index === index);
@@ -289,11 +279,9 @@ export const useChat = (config: ChatConfig) => {
                 return { ...block, isComplete: true, stopTimestamp: stop_timestamp };
               });
 
-              // Check if all blocks are complete
               const allComplete = updatedBlocks.every((block) => block.isComplete);
 
               if (allComplete) {
-                // Call onStreamEnd when all blocks are done
                 config.onStreamEnd?.(sourceId);
               }
 
@@ -307,11 +295,9 @@ export const useChat = (config: ChatConfig) => {
           }
 
           default: {
-            // Handle message_start and message_stop events
             const eventType = (payload as { type: string }).type;
 
             if (eventType === 'message_start') {
-              // Initialize streaming state when message starts
               setStreamingState({
                 sourceId,
                 contentBlocks: [],
@@ -340,11 +326,9 @@ export const useChat = (config: ChatConfig) => {
           case SSEEventType.NEW_CHAT_MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
-            // Clear streaming state when a new message arrives (the final message from the stream)
             if (config.enableStreaming) {
               setStreamingState(null);
             }
-            // invalidate the conversation by id cache
             if (newMessage.conversation_id) {
               dispatch(
                 chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
@@ -386,7 +370,6 @@ export const useChat = (config: ChatConfig) => {
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
 
-  // Subscribe to AGENT_STREAMS only when streaming is enabled
   useEffect(() => {
     if (!config.enableStreaming) return;
 
@@ -412,7 +395,6 @@ export const useChat = (config: ChatConfig) => {
       if (!_conversationId) {
         throw new Error('Conversation ID is required to send messages');
       }
-      clearStreamingState();
 
       try {
         if (messagePayload?.message_content?.attachments?.length) {
@@ -455,7 +437,7 @@ export const useChat = (config: ChatConfig) => {
         throw error;
       }
     },
-    [_conversationId, sendMessageMutation, clearStreamingState],
+    [_conversationId, sendMessageMutation],
   );
 
   return {
@@ -478,7 +460,6 @@ export const useChat = (config: ChatConfig) => {
     createConversationV2,
     conversationId: _conversationId,
     setConversationId,
-    // New streaming return values - safe to ignore when not using streaming
     streamingState,
     isStreaming,
     clearStreamingState,

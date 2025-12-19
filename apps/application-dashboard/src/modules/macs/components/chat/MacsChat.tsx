@@ -36,18 +36,20 @@ const MacsChat = ({ className }: MacsChatProps) => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
 
-  const { showHistoryView, isNewChat, setIsNewChat } = useMacsContext();
+  const { showHistoryView, isNewChat, setIsNewChat, setChatTitle } = useMacsContext();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   const chat = useChat({
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
     conversationId: selectedConversationId ?? conversationIdFromParam ?? undefined,
-    refetchConversationHistory: true,
     enableStreaming: true,
     apiConfig: {
       sendMessage: API_ENDPOINTS.POST_MESSAGE_V3,
       createConversation: API_ENDPOINTS.CREATE_CONVERSATION_V3,
+    },
+    setHeader: (header: string) => {
+      setChatTitle(header);
     },
   });
 
@@ -62,16 +64,12 @@ const MacsChat = ({ className }: MacsChatProps) => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages, chat.streamingState]);
 
-  const isInputDisabled = useMemo(() => {
-    return chat.isStreaming;
-  }, [chat.isStreaming]);
-
   const isLoadingConversation =
-    chat.isLoadingConversationHistory ||
-    (!isNewChat && (!!conversationIdFromParam || !!selectedConversationId) && !hasMessages);
+    chat.isLoadingConversationHistory || ((!!conversationIdFromParam || !!selectedConversationId) && !hasMessages);
 
   useEffect(() => {
     if (isNewChat) {
+      setSelectedConversationId(null);
       router.replace(ROUTES_PATH.MACS);
     }
   }, [isNewChat, router]);
@@ -97,9 +95,11 @@ const MacsChat = ({ className }: MacsChatProps) => {
     );
   }
 
+  console.log('isLoadingConversation', isLoadingConversation);
+
   return (
     <CommonWrapper
-      isLoading={isLoadingConversation}
+      isLoading={isLoadingConversation && !isNewChat}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
       className={cn('mx-auto flex h-full w-full max-w-[700px] flex-col bg-white', className)}
@@ -124,7 +124,7 @@ const MacsChat = ({ className }: MacsChatProps) => {
           scopeId={organizationId}
           organizationId={organizationId}
           currentUserName={currentUserName}
-          isDisabled={isInputDisabled}
+          isDisabled={chat.isStreaming}
           placeholder="Do your life's best work with Pace"
         />
       </div>

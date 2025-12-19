@@ -9,12 +9,11 @@ interface UseChatSyncOptions {
   messages: ChatMessage[];
   clearMessages: () => void;
 }
-
 /**
  * Custom hook to sync chat state with MacsContext.
  */
 export const useChatSync = ({ messages, clearMessages }: UseChatSyncOptions) => {
-  const { setHasChatMessages, setChatTitle, registerClearMessages } = useMacsContext();
+  const { setHasChatMessages, registerClearMessages } = useMacsContext();
 
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
 
@@ -42,16 +41,6 @@ export const useChatSync = ({ messages, clearMessages }: UseChatSyncOptions) => 
   useEffect(() => {
     setHasChatMessages(hasMessages);
   }, [hasMessages, setHasChatMessages]);
-
-  useEffect(() => {
-    if (firstUserMessage) {
-      const title = firstUserMessage.length > 50 ? `${firstUserMessage.substring(0, 50)}...` : firstUserMessage;
-
-      setChatTitle(title);
-    } else {
-      setChatTitle('');
-    }
-  }, [firstUserMessage, setChatTitle]);
 
   return {
     hasMessages,

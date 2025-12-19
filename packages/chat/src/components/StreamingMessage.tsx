@@ -78,7 +78,7 @@ const ThinkingBlock: FC<{
             )}
           </div>
         </AccordionTrigger>
-        <AccordionContent className='f-12-400 border-GRAY_100 text-GRAY_900 flex max-h-[160px] w-full overflow-y-auto border-t p-2 whitespace-pre-wrap [&::-webkit-scrollbar]:hidden'>
+        <AccordionContent className='f-12-400 border-GRAY_100 text-GRAY_900 flex w-full overflow-y-auto border-t px-2 py-2 whitespace-pre-wrap [&::-webkit-scrollbar]:hidden'>
           {block.content || 'Processing...'}
         </AccordionContent>
       </AccordionItem>
@@ -155,7 +155,7 @@ const ToolUseBlock: FC<{
         <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
           {block.displayContent && (
             <div className='space-y-2'>
-              <span className='text-GRAY_500 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {block.displayContent.json_block}
@@ -165,9 +165,9 @@ const ToolUseBlock: FC<{
           )}
           {!block.displayContent && block.partialJson && (
             <div className='space-y-2'>
-              <span className='text-GRAY_900 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_800 break-all whitespace-pre-wrap'>{block.partialJson}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{block.partialJson}</pre>
               </div>
             </div>
           )}
