@@ -1,8 +1,8 @@
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, ShimmerText } from '@zamp-platform/ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
-import { Check, ChevronRight, Loader2 } from 'lucide-react';
+import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { FC, ReactNode, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -62,35 +62,22 @@ const ThinkingBlock: FC<{
   const completedLabelWithDuration = thinkingDuration ? `${completedLabel} for ${thinkingDuration}` : completedLabel;
 
   return (
-    <div className='w-full overflow-hidden rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-white'>
-      <Accordion type='single' collapsible className='w-full'>
-        <AccordionItem value='thinking' className='border-none'>
-          <AccordionTrigger
-            className='flex w-full items-center justify-between px-4 py-3 hover:no-underline [&[data-state=open]>svg]:rotate-180'
-            iconRotation={180}
-          >
-            <div className='flex flex-1 flex-col gap-2'>
-              {!block.isComplete ? (
-                <ShimmerText text={`${thinkingLabel}...`} autoAnimate={true} />
-              ) : (
-                <span className='f-14-500 text-left text-blue-600'>{completedLabelWithDuration}</span>
-              )}
-              {!block.isComplete && (
-                <div className='h-1 w-full overflow-hidden rounded-full bg-blue-100'>
-                  <div className='h-full w-1/3 animate-pulse rounded-full bg-blue-500' />
-                </div>
-              )}
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className='px-4 pt-0 pb-4'>
-            <div className='f-12-400 max-h-60 overflow-y-auto rounded-md bg-white p-3 whitespace-pre-wrap text-gray-600 shadow-inner'>
-              {block.content || 'Processing...'}
-              {!block.isComplete && <span className='animate-pulse'>▊</span>}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
+      <AccordionItem value='thinking' className='border-none'>
+        <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
+          <div className='flex flex-1 flex-col gap-2'>
+            {!block.isComplete ? (
+              <ShimmerText text={`${thinkingLabel}...`} autoAnimate={true} />
+            ) : (
+              <span className='f-12-450 text-GRAY_700 text-left'>{completedLabelWithDuration}</span>
+            )}
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className='f-12-400 border-GRAY_100 text-GRAY_900 flex max-h-[160px] w-full overflow-y-auto border-t p-2 whitespace-pre-wrap [&::-webkit-scrollbar]:hidden'>
+          {block.content || 'Processing...'}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 
@@ -128,56 +115,58 @@ const TextBlock: FC<{
 const ToolUseBlock: FC<{
   block: ToolUseContentBlock;
   toolUseLabel?: string;
-}> = ({ block, toolUseLabel = 'Using tool' }) => {
-  const displayMessage = block.message || `${toolUseLabel}: ${block.name || 'Unknown'}`;
+}> = ({ block }) => {
+  const toolName = block.name || 'Unknown';
 
   return (
-    <div className='rounded-lg border border-gray-200 bg-gray-50'>
-      <Accordion type='single' collapsible className='w-full'>
-        <AccordionItem value='tool-use' className='border-none'>
-          <AccordionTrigger
-            className='flex-row-reverse justify-end gap-2 px-3 py-3 hover:no-underline [&[data-state=open]>svg]:rotate-90'
-            icon={ChevronRight}
-            iconRotation={90}
-          >
-            <div className='flex flex-1 items-center gap-2'>
-              {!block.isComplete ? (
-                <Loader2 className='h-4 w-4 animate-spin text-blue-500' />
-              ) : (
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='h-4 w-4 cursor-default rounded-full bg-green-500 p-0 hover:bg-green-500'
-                  asChild
-                >
-                  <span>
-                    <Check className='h-2.5 w-2.5 text-white' strokeWidth={3} />
-                  </span>
-                </Button>
-              )}
-              <span className='f-13-500 text-gray-700'>{displayMessage}</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className='px-3 pt-0 pb-3'>
-            {block.displayContent && (
-              <div className='overflow-x-auto rounded bg-gray-100 p-2'>
-                <pre className='f-11-400 break-all whitespace-pre-wrap text-gray-600'>
+    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
+      <AccordionItem value='tool-use' className='border-none'>
+        <AccordionTrigger
+          className='f-13-500 text-GRAY_900 w-full gap-x-2 px-3 py-2.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
+          icon={ChevronDown}
+          iconRotation={180}
+        >
+          <div className='flex flex-1 items-center gap-3'>
+            <Wrench className='text-GRAY_500 h-4 w-4' />
+            <span className='text-GRAY_900'>{toolName}</span>
+            {!block.isComplete ? (
+              <span className='bg-GRAY_100 text-GRAY_700 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
+                <Clock className='h-3.5 w-3.5' />
+                Running
+              </span>
+            ) : (
+              <span className='f-12-450 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-green-700'>
+                <CheckCircle className='h-3.5 w-3.5' />
+                Completed
+              </span>
+            )}
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
+          {block.displayContent && (
+            <div className='space-y-2'>
+              <span className='text-GRAY_500 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {block.displayContent.json_block}
                 </pre>
               </div>
-            )}
-            {!block.displayContent && block.partialJson && (
-              <div className='overflow-x-auto rounded bg-gray-100 p-2'>
-                <pre className='f-11-400 break-all whitespace-pre-wrap text-gray-600'>
+            </div>
+          )}
+          {!block.displayContent && block.partialJson && (
+            <div className='space-y-2'>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
                   {block.partialJson}
                   {!block.isComplete && <span className='animate-pulse'>▊</span>}
                 </pre>
               </div>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+            </div>
+          )}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 
