@@ -62,7 +62,12 @@ const ThinkingBlock: FC<{
   const completedLabelWithDuration = thinkingDuration ? `${completedLabel} for ${thinkingDuration}` : completedLabel;
 
   return (
-    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
+    <Accordion
+      type='single'
+      collapsible
+      defaultValue='thinking'
+      className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
+    >
       <AccordionItem value='thinking' className='border-none'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 flex-col gap-2'>
@@ -119,7 +124,12 @@ const ToolUseBlock: FC<{
   const toolName = block.name || 'Unknown';
 
   return (
-    <Accordion type='single' collapsible className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'>
+    <Accordion
+      type='single'
+      collapsible
+      defaultValue='tool-use'
+      className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
+    >
       <AccordionItem value='tool-use' className='border-none'>
         <AccordionTrigger
           className='f-13-500 text-GRAY_900 w-full gap-x-2 px-3 py-2.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
@@ -127,16 +137,16 @@ const ToolUseBlock: FC<{
           iconRotation={180}
         >
           <div className='flex flex-1 items-center gap-3'>
-            <Wrench className='text-GRAY_500 h-4 w-4' />
+            <Wrench className='text-GRAY_700 h-4 w-4' />
             <span className='text-GRAY_900'>{toolName}</span>
             {!block.isComplete ? (
-              <span className='bg-GRAY_100 text-GRAY_700 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
-                <Clock className='h-3.5 w-3.5' />
+              <span className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
+                <Clock className='text-GRAY_700 h-3.5 w-3.5' />
                 Running
               </span>
             ) : (
-              <span className='f-12-450 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-green-700'>
-                <CheckCircle className='h-3.5 w-3.5' />
+              <span className='f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
+                <CheckCircle className='h-3.5 w-3.5 text-green-700' />
                 Completed
               </span>
             )}
@@ -155,12 +165,9 @@ const ToolUseBlock: FC<{
           )}
           {!block.displayContent && block.partialJson && (
             <div className='space-y-2'>
-              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <span className='text-GRAY_900 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {block.partialJson}
-                  {!block.isComplete && <span className='animate-pulse'>▊</span>}
-                </pre>
+                <pre className='f-12-400 text-GRAY_800 break-all whitespace-pre-wrap'>{block.partialJson}</pre>
               </div>
             </div>
           )}

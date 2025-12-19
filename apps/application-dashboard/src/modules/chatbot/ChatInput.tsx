@@ -12,7 +12,7 @@ import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 interface ChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader: (header: string) => void;
   isDisabled: boolean;
