@@ -119,3 +119,126 @@
 .kb-viewer table tr:nth-child(even) {
   background-color: #fafafa;
 }
+
+/* kb-create styles */
+.kb-create h1,
+.kb-create h2,
+.kb-create h3,
+.kb-create h4,
+.kb-create h5,
+.kb-create h6 {
+  color: #000;
+}
+
+.kb-create h1 {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 48px;
+}
+
+.kb-create h1:first-child {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 32px;
+}
+
+.kb-create h2:first-child {
+  font-size: 16px;
+  font-weight: 500;
+  padding-top: 10px;
+}
+
+.kb-create h1 + h2 {
+  padding-top: 20px;
+}
+
+.kb-create h2 + h3 {
+  padding-top: 16px;
+}
+
+.kb-create h2 {
+  font-size: 16px;
+  font-weight: 500;
+  padding-top: 32px;
+}
+
+.kb-create h3 {
+  font-size: 14px;
+  font-weight: 500;
+  padding-top: 32px;
+}
+
+.kb-create h4 {
+  font-size: 14px;
+  font-weight: 500;
+  padding-top: 32px;
+}
+
+.kb-create p {
+  font-size: 14px;
+  font-weight: 450;
+  margin-top: 8px;
+}
+
+.kb-create hr {
+  margin: 20px 0;
+  border-color: #ebebeb;
+}
+
+.kb-create ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+}
+
+.kb-create ul ul {
+  list-style-type: circle;
+}
+
+.kb-create ul ul ul {
+  list-style-type: square;
+}
+
+.kb-create ol {
+  font-size: 13px;
+  margin-top: 16px;
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+}
+
+.kb-create ul p {
+  margin-top: 2px;
+}
+
+.kb-create ul li {
+  font-size: 14px;
+  font-weight: 450;
+  margin-top: 6px;
+}
+
+.kb-create strong {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.kb-create table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.kb-create table th {
+  background-color: #f5f5f5;
+  font-weight: 550;
+  text-align: left;
+}
+
+.kb-create table td,
+.kb-create table th {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.kb-create table tr:nth-child(even) {
+  background-color: #fafafa;
+}

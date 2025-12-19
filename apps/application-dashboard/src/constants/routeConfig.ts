@@ -22,6 +22,7 @@ export const ROUTES_PATH = {
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
+  CREATE_KNOWLEDGE_BASE: '/processes/:processId/create-knowledgebase',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
