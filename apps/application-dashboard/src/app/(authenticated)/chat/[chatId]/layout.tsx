@@ -4,12 +4,16 @@ import { type ReactNode, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
 import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
+import MacsTopbar from '@/modules/macs/components/MacsTopbar';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 
 const ChatIdLayout = ({ children }: { children: ReactNode }) => {
   const params = useParams();
   const chatId = params?.chatId as string;
-  const { showHistory, setShowHistory, setChatTitle } = useMacsContext();
+  const { showHistory, setShowHistory, setChatTitle, viewMode } = useMacsContext();
+
+  const isDefaultView = viewMode === ViewMode.Default;
 
   useEffect(() => {
     setShowHistory(false);
@@ -18,6 +22,7 @@ const ChatIdLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className='flex h-full w-full flex-col'>
+      {isDefaultView && <MacsTopbar />}
       <div className='flex w-full flex-shrink-0 items-center justify-center'>
         <ChatTopbar className='w-[700px]' />
       </div>

@@ -10,6 +10,17 @@ import { ChatMessage, StreamingState } from '../types/chat.types';
 import Message from './Message';
 import { StreamingMessage } from './StreamingMessage';
 
+/**
+ * Generates a unique key for a message, ensuring no duplicates
+ * Uses message.id if available, otherwise falls back to timestamp with index
+ */
+const getMessageKey = (message: ChatMessage, index: number): string => {
+  if (message.id) {
+    return message.id;
+  }
+  return `${message.timestamp || 'msg'}-${index}`;
+};
+
 interface MessageContainerProps {
   messages: ChatMessage[];
   handleAction?: (blockConfig: ButtonBlockType, payload: Record<string, string>) => void | Promise<void>;
@@ -60,9 +71,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
       className={cn('flex w-full flex-grow flex-col gap-6 overflow-y-auto p-4', className)}
       ref={messagesContainerRef}
     >
-      {messages?.map((message) => (
+      {messages?.map((message, index) => (
         <Message
-          key={message.id || message.timestamp}
+          key={getMessageKey(message, index)}
           message={message}
           onAction={handleAction}
           assistantName={assistantName}

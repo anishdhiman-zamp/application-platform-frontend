@@ -12,11 +12,10 @@ import {
 import { useChatSync } from 'modules/macs/hooks/useChatSync';
 import { useParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
-import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
+import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { RootState } from '@/store';
 
@@ -57,7 +56,7 @@ const ChatIdPage = () => {
       <CommonWrapper
         isLoading={isLoadingConversation}
         skeletonType={SkeletonTypes.CUSTOM}
-        loader={<ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />}
+        loader={<ChatMessagesSkeleton />}
         className='flex min-h-0 flex-1'
       >
         <MessageContainer

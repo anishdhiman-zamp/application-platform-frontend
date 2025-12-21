@@ -8,7 +8,9 @@ import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
 import MacsChatHome from '@/modules/macs/components/chat/MacsChatHome';
+import MacsTopbar from '@/modules/macs/components/MacsTopbar';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 import type { RootState } from '@/store';
 
 const ChatPage = () => {
@@ -17,7 +19,9 @@ const ChatPage = () => {
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
 
-  const { setChatTitle, resetToDefault } = useMacsContext();
+  const { setChatTitle, resetToDefault, viewMode } = useMacsContext();
+
+  const isDefaultView = viewMode === ViewMode.Default;
 
   // Reset state when landing on new chat page
   useEffect(() => {
@@ -44,23 +48,26 @@ const ChatPage = () => {
   }, [chat.conversationId, router]);
 
   return (
-    <div className='mx-auto flex h-full w-full max-w-[700px] flex-col bg-white'>
-      <MacsChatHome />
-      <div className='mx-auto w-full flex-shrink-0 p-3'>
-        <ConnectedChatInput
-          chat={chat}
-          conversationId={chat.conversationId ?? ''}
-          resourceType={ResourceType.ORGANIZATION}
-          resourceId={organizationId}
-          scope={ScopeType.ORGANIZATION}
-          scopeId={organizationId}
-          organizationId={organizationId}
-          currentUserName={currentUserName}
-          isDisabled={chat.isStreaming}
-          placeholder="Do your life's best work with Pace"
-        />
+    <div className='flex h-full w-full flex-col'>
+      {isDefaultView && <MacsTopbar />}
+      <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col bg-white'>
+        <MacsChatHome />
+        <div className='mx-auto w-full flex-shrink-0 p-3'>
+          <ConnectedChatInput
+            chat={chat}
+            conversationId={chat.conversationId ?? ''}
+            resourceType={ResourceType.ORGANIZATION}
+            resourceId={organizationId}
+            scope={ScopeType.ORGANIZATION}
+            scopeId={organizationId}
+            organizationId={organizationId}
+            currentUserName={currentUserName}
+            isDisabled={chat.isStreaming}
+            placeholder="Do your life's best work with Pace"
+          />
+        </div>
+        <ChatHistory />
       </div>
-      <ChatHistory />
     </div>
   );
 };

@@ -3,6 +3,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { FC, ReactNode, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -69,11 +70,23 @@ const ThinkingBlock: FC<{
       <AccordionItem value='thinking' className='border-none'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 flex-col gap-2'>
-            {!block.is_complete ? (
-              <ShimmerText text='Thinking...' autoAnimate={true} />
-            ) : (
-              <span className='f-12-450 text-GRAY_700 text-left'>{completedLabelWithDuration}</span>
-            )}
+            <AnimatePresence mode='wait' initial={false}>
+              {!block.is_complete ? (
+                <div key='thinking'>
+                  <ShimmerText text='Thinking...' autoAnimate={true} />
+                </div>
+              ) : (
+                <motion.span
+                  key='completed'
+                  className='f-12-450 text-GRAY_700 text-left'
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  {completedLabelWithDuration}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </AccordionTrigger>
         <AccordionContent className='f-12-400 border-GRAY_100 text-GRAY_900 flex w-full overflow-y-auto border-t px-2 py-2 whitespace-pre-wrap [&::-webkit-scrollbar]:hidden'>
@@ -136,17 +149,34 @@ const ToolUseBlock: FC<{
           <div className='flex flex-1 items-center gap-3'>
             <Wrench className='text-GRAY_700 h-4 w-4' />
             <span className='text-GRAY_900'>{toolName}</span>
-            {!block.is_complete ? (
-              <span className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
-                <Clock className='text-GRAY_700 h-3.5 w-3.5' />
-                Running
-              </span>
-            ) : (
-              <span className='f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
-                <CheckCircle className='h-3.5 w-3.5 text-green-700' />
-                Completed
-              </span>
-            )}
+            <AnimatePresence mode='wait' initial={false}>
+              {!block.is_complete ? (
+                <span
+                  key='running'
+                  className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
+                >
+                  <Clock className='text-GRAY_700 h-3.5 w-3.5' />
+                  Running
+                </span>
+              ) : (
+                <motion.span
+                  key='completed'
+                  className='f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
+                  >
+                    <CheckCircle className='h-3.5 w-3.5 text-green-700' />
+                  </motion.div>
+                  Completed
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </AccordionTrigger>
         <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
