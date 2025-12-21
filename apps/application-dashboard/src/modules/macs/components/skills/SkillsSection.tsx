@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
-import SkillCard from 'modules/macs/components/sections/SkillCard';
-import SkillsHeader from 'modules/macs/components/sections/SkillsHeader';
-import UploadSkillModal from 'modules/macs/components/sections/UploadSkillModal';
 import { useDeleteSkillMutation, useListSkillsQuery, useUpdateSkillStatusMutation } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { SkillCardSkeleton } from '@/modules/macs/components/loaders';
+import SkillCard from '@/modules/macs/components/skills/SkillCard';
+import SkillsHeader from '@/modules/macs/components/skills/SkillsHeader';
+import UploadSkillModal from '@/modules/macs/components/skills/UploadSkillModal';
 import { SkillStatus } from '@/types/api/skills.types';
 
 const SkillsSection = () => {

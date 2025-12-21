@@ -1,178 +1,73 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import type { MacsContextType, SectionType, Tab } from '@/modules/macs/types';
-import { ViewMode } from '@/modules/macs/types';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import type { MacsContextType } from '@/modules/macs/types';
+import { SectionType, ViewMode } from '@/modules/macs/types';
 
 const MacsContext = createContext<MacsContextType | null>(null);
 
 export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [activeSection, setActiveSection] = useState<SectionType | null>(null);
-  const [tabs, setTabs] = useState<Tab[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Default);
-  const [isAddTabMenuOpen, setIsAddTabMenuOpen] = useState(false);
   const [chatTitle, setChatTitle] = useState('');
   const [hasChatMessages, setHasChatMessages] = useState(false);
-  const [showHistoryView, setShowHistoryView] = useState(false);
-  const clearMessagesRef = useRef<(() => void) | null>(null);
-  const [isNewChat, setIsNewChat] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
-  const hasContent = activeSection !== null || tabs.length > 0;
+  const hasContent = activeSection !== null;
 
   const toggleSection = useCallback((section: SectionType) => {
     setActiveSection((prev) => {
       if (prev === section) {
-        // Closing section - show add tab menu if no tabs
-        setTabs((currentTabs) => {
-          if (currentTabs.length === 0) {
-            setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
-            setIsAddTabMenuOpen(true);
-          } else {
-            setActiveTabId(currentTabs[0].id);
-          }
-
-          return currentTabs;
-        });
+        setViewMode(ViewMode.Default);
 
         return null;
       }
 
-      // Opening section - preserve view mode if already expanded, otherwise go to split
-      setActiveTabId(null);
       setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
 
       return section;
     });
   }, []);
 
-  // TODO: v0 - Tab functionality commented out for now
-  // const addTab = useCallback((tab: Tab) => {
-  //   setActiveSection(null);
-  //   setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
-
-  //   setTabs((prev) => {
-  //     const exists = prev.some((t) => t.id === tab.id);
-
-  //     setActiveTabId(tab.id);
-
-  //     return exists ? prev : [...prev, tab];
-  //   });
-  // }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const addTab = useCallback((_tab: Tab) => {
-    // No-op for v0
-  }, []);
-
-  const removeTab = useCallback((tabId: string) => {
-    setTabs((prev) => {
-      const newTabs = prev.filter((t) => t.id !== tabId);
-
-      setActiveTabId((currentActiveId) => {
-        if (currentActiveId === tabId) {
-          return newTabs.length > 0 ? newTabs[0].id : null;
-        }
-
-        return currentActiveId;
-      });
-
-      setActiveSection((currentSection) => {
-        if (newTabs.length === 0 && currentSection === null) {
-          setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
-          setIsAddTabMenuOpen(true);
-        }
-
-        return currentSection;
-      });
-
-      return newTabs;
-    });
-  }, []);
-
-  const setActiveTab = useCallback((tabId: string | null) => {
-    if (tabId) {
-      setActiveSection(null);
-      setViewMode((currentMode) => (currentMode === ViewMode.Default ? ViewMode.Split : currentMode));
-    }
-    setActiveTabId(tabId);
-  }, []);
-
   const resetToDefault = useCallback(() => {
     setActiveSection(null);
-    setTabs([]);
-    setActiveTabId(null);
     setViewMode(ViewMode.Default);
-    setIsAddTabMenuOpen(false);
-    setShowHistoryView(false);
+    setChatTitle('');
+    setHasChatMessages(false);
+    setShowHistory(false);
   }, []);
 
   const openSplitViewWithMenu = useCallback(() => {
     setViewMode(ViewMode.Split);
-    setIsAddTabMenuOpen(true);
-  }, []);
-
-  const registerClearMessages = useCallback((clearFn: () => void) => {
-    clearMessagesRef.current = clearFn;
-  }, []);
-
-  const startNewChat = useCallback(() => {
-    clearMessagesRef.current?.();
-    setChatTitle('');
-    setHasChatMessages(false);
-    setShowHistoryView(false);
-    setChatTitle('');
-    setHasChatMessages(false);
-    setIsNewChat(true);
+    setActiveSection((prev) => prev ?? SectionType.Skills);
   }, []);
 
   const value: MacsContextType = useMemo(
     () => ({
       activeSection,
       toggleSection,
-      tabs,
-      activeTabId,
-      addTab,
-      removeTab,
-      setActiveTab,
       hasContent,
       viewMode,
       setViewMode,
       openSplitViewWithMenu,
       resetToDefault,
-      isAddTabMenuOpen,
-      setIsAddTabMenuOpen,
       chatTitle,
       setChatTitle,
       hasChatMessages,
       setHasChatMessages,
-      showHistoryView,
-      setShowHistoryView,
-      startNewChat,
-      registerClearMessages,
-      isNewChat,
-      setIsNewChat,
+      showHistory,
+      setShowHistory,
     }),
     [
       activeSection,
       toggleSection,
-      tabs,
-      activeTabId,
-      addTab,
-      removeTab,
-      setActiveTab,
       hasContent,
       viewMode,
       openSplitViewWithMenu,
       resetToDefault,
-      isAddTabMenuOpen,
       chatTitle,
       hasChatMessages,
-      showHistoryView,
-      startNewChat,
-      registerClearMessages,
-      isNewChat,
-      setIsNewChat,
+      showHistory,
     ],
   );
 

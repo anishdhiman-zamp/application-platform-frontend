@@ -2,10 +2,12 @@
 
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
+import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
-import { SectionType, ViewMode } from '@/modules/macs/types';
+import { SectionType } from '@/modules/macs/types';
 
 interface MacsTopbarProps {
   className?: string;
@@ -13,7 +15,8 @@ interface MacsTopbarProps {
 }
 
 const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
-  const { resetToDefault, viewMode } = useMacsContext();
+  const router = useRouter();
+  const { resetToDefault } = useMacsContext();
 
   return (
     <div
@@ -23,25 +26,20 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
       )}
       style={style}
     >
-      {viewMode !== ViewMode.Split && (
-        <Button
-          variant='ghost'
-          size='icon'
-          className='text-GRAY_700 h-6 w-6 px-2 py-1 hover:text-gray-900'
-          onClick={resetToDefault}
-        >
-          <NewPaceIcons width={16} height={16} />
-        </Button>
-      )}
-      <SectionIconButton section={SectionType.Skills} />
+      <Button
+        variant='ghost'
+        size='icon'
+        className='text-GRAY_700 h-6 w-6 px-2 py-1 hover:text-gray-900'
+        onClick={() => {
+          resetToDefault();
+          router.push(ROUTES_PATH.CHAT);
+        }}
+        title='Start new chat'
+      >
+        <NewPaceIcons width={16} height={16} />
+      </Button>
 
-      {/* TODO: Add back AddTabMenu and MacsTab when we have a way to add tabs */}
-      {/* <AddTabMenu /> */}
-      {/* <div className='flex h-full items-end gap-2 overflow-visible'>
-        {tabs.map((tab) => (
-          <MacsTab key={tab.id} tab={tab} />
-        ))}
-      </div> */}
+      <SectionIconButton section={SectionType.Skills} />
     </div>
   );
 };

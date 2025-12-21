@@ -3,33 +3,28 @@
 import { useMemo, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
-import { cn } from '@zamp-platform/ui/utils';
 import { MessagesSquare, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getChatRouteById } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
-import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { RootState } from '@/store';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
-  onClick?: (conversation: FeedbackItemType) => void;
 }
 
-const ChatHistoryItem = ({ conversation, onClick }: ChatHistoryItemProps) => {
-  const handleClick = () => {
-    onClick?.(conversation);
-  };
+const ChatHistoryItem = ({ conversation }: ChatHistoryItemProps) => {
+  const router = useRouter();
 
   return (
     <Button
       variant='ghost'
-      onClick={handleClick}
+      onClick={() => router.push(getChatRouteById(conversation?.id))}
       className='h-auto w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2.5 hover:bg-gray-50'
     >
       <div className='flex items-center gap-2.5'>
@@ -42,16 +37,8 @@ const ChatHistoryItem = ({ conversation, onClick }: ChatHistoryItemProps) => {
   );
 };
 
-export interface ChatHistoryViewProps {
-  className?: string;
-  contentClassName?: string;
-  onConversationClick?: (conversationId: string) => void;
-}
-
-const ChatHistoryView = ({ className, contentClassName, onConversationClick }: ChatHistoryViewProps) => {
+const ChatHistory = () => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { setShowHistoryView } = useMacsContext();
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
@@ -72,7 +59,6 @@ const ChatHistoryView = ({ className, contentClassName, onConversationClick }: C
 
   const conversations = conversationHistory?.conversations ?? [];
 
-  // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) return conversations;
     const query = searchQuery.toLowerCase();
@@ -82,14 +68,8 @@ const ChatHistoryView = ({ className, contentClassName, onConversationClick }: C
     );
   }, [conversations, searchQuery]);
 
-  const handleConversationClick = (conversation: FeedbackItemType) => {
-    onConversationClick?.(conversation?.id);
-    setShowHistoryView(false);
-    router.replace(`${ROUTES_PATH.MACS}?conversationId=${conversation?.id}`);
-  };
-
   return (
-    <div className={cn('mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4', className)}>
+    <div className='mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4'>
       <div className='flex items-center justify-between p-3'>
         <p className='f-14-550 text-gray-1000'>Chat History</p>
         <Button
@@ -126,11 +106,11 @@ const ChatHistoryView = ({ className, contentClassName, onConversationClick }: C
             <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
           </div>
         }
-        className={cn('h-full w-full overflow-y-auto pb-4 [scrollbar-width:none]', contentClassName)}
+        className='h-full w-full overflow-y-auto pb-4 [scrollbar-width:none]'
       >
         <div className='space-y-0.5'>
           {filteredConversations.map((conversation) => (
-            <ChatHistoryItem key={conversation.id} conversation={conversation} onClick={handleConversationClick} />
+            <ChatHistoryItem key={conversation.id} conversation={conversation} />
           ))}
         </div>
       </CommonWrapper>
@@ -138,4 +118,4 @@ const ChatHistoryView = ({ className, contentClassName, onConversationClick }: C
   );
 };
 
-export default ChatHistoryView;
+export default ChatHistory;

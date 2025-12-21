@@ -11,7 +11,7 @@ type RoutePattern = string;
 // Order matters: more specific routes should come first
 const LAYOUT_CONFIGS: [RoutePattern, LayoutConfig][] = [
   [ROUTES_PATH.SETTINGS, { showTopbar: false, showSidebar: true }],
-  [ROUTES_PATH.MACS, { showTopbar: false, showSidebar: false }],
+  [ROUTES_PATH.CHAT, { showTopbar: false, showSidebar: false }],
 ];
 
 const DEFAULT_CONFIG: LayoutConfig = {
