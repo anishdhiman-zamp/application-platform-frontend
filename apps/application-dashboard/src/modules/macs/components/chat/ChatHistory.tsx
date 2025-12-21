@@ -46,6 +46,7 @@ const ChatHistory = () => {
     data: conversationHistory,
     isLoading: isLoadingConversationHistory,
     isError: isErrorConversationHistory,
+    isUninitialized: isUninitializedConversationHistory,
     refetch: refetchConversationHistory,
   } = useGetConversationHistoryQuery(
     {
@@ -93,7 +94,7 @@ const ChatHistory = () => {
         </div>
       )}
       <CommonWrapper
-        isLoading={isLoadingConversationHistory}
+        isLoading={isLoadingConversationHistory || isUninitializedConversationHistory}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatHistorySkeleton />}
         refetchFunction={refetchConversationHistory}

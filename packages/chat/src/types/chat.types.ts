@@ -63,6 +63,11 @@ export const enum SSEEventType {
   ERROR = 'error',
   NEW_CHAT_MESSAGE = 'new_chat_message',
   CONVERSATION_UPDATED = 'conversation_updated',
+  MESSAGE_START = 'message_start',
+  MESSAGE_STOP = 'message_stop',
+  CONTENT_BLOCK_START = 'content_block_start',
+  CONTENT_BLOCK_DELTA = 'content_block_delta',
+  CONTENT_BLOCK_STOP = 'content_block_stop',
 }
 
 export const enum ChatMessageType {
@@ -93,6 +98,7 @@ export interface ChatMessage {
   message_content: {
     message?: string;
     elements?: Block[];
+    content_blocks?: StreamingContentBlock[];
     text?: string;
     text_type?: string;
     attachments?: MessageAttachmentType[];
@@ -210,6 +216,7 @@ export interface ConversationType {
 
 export interface ConversationMessageContentType {
   elements: Block[];
+  content_blocks?: StreamingContentBlock[];
 }
 export interface ConversationMessageType {
   id: string;
@@ -369,21 +376,29 @@ export const enum StreamingContentType {
 }
 
 export interface ThinkingContentBlock {
+  id?: string;
+  name?: string;
   type: StreamingContentType.THINKING;
   index: number;
   content: string;
-  startTimestamp?: string;
-  stopTimestamp?: string;
-  isComplete: boolean;
+  is_complete: boolean;
+  message?: string;
+  input_json?: string;
+  start_timestamp?: string;
+  stop_timestamp?: string;
 }
 
 export interface TextContentBlock {
+  id?: string;
+  name?: string;
   type: StreamingContentType.TEXT;
   index: number;
   content: string;
-  startTimestamp?: string;
-  stopTimestamp?: string;
-  isComplete: boolean;
+  message?: string;
+  input_json?: string;
+  is_complete: boolean;
+  stop_timestamp?: string;
+  start_timestamp?: string;
 }
 
 export interface ToolUseDisplayContent {
@@ -392,24 +407,41 @@ export interface ToolUseDisplayContent {
 }
 
 export interface ToolUseContentBlock {
-  type: StreamingContentType.TOOL_USE;
-  index: number;
   id?: string;
   name?: string;
-  partialJson: string;
-  displayContent?: ToolUseDisplayContent;
+  type: StreamingContentType.TOOL_USE;
+  index: number;
+  input_json?: string;
+  content?: string;
   message?: string;
-  startTimestamp?: string;
-  stopTimestamp?: string;
-  isComplete: boolean;
+  partial_json?: string;
+  display_content?: ToolUseDisplayContent;
+  start_timestamp?: string;
+  stop_timestamp?: string;
+  is_complete: boolean;
 }
 
 export type StreamingContentBlock = ThinkingContentBlock | TextContentBlock | ToolUseContentBlock;
 
 export interface StreamingState {
-  sourceId: string;
-  contentBlocks: StreamingContentBlock[];
-  isActive: boolean;
+  resource_type: ResourceType;
+  resource_id: string;
+  message_content: {
+    message?: string;
+    elements?: Block[];
+    content_blocks?: StreamingContentBlock[];
+    text?: string;
+    text_type?: string;
+    attachments?: MessageAttachmentType[];
+  };
+  message_type: ChatMessageType;
+  sender_type: SenderType;
+  metadata?: Record<string, unknown>;
+  timestamp: string;
+  sender_name?: string;
+  id?: string;
+  conversation_id?: string;
+  is_active: boolean;
 }
 
 export type StreamEventType =

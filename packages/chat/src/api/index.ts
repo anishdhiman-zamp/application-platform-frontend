@@ -92,7 +92,7 @@ const ConversationService = chatApi.injectEndpoints({
         method: REQUEST_TYPES.POST,
         body,
       }),
-      invalidatesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
+      // invalidatesTags: (_result, _error, arg) => [{ type: APITags.GET_CONVERSATION_BY_ID, id: arg.conversationId }],
     }),
     getFilesByIds: builder.query<GetFilesByIdsResponseType, GetFilesByIdsRequestType>({
       query: (params) => ({

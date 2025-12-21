@@ -53,9 +53,6 @@ export interface ChatConfig extends Omit<UseSSEOptions, 'url' | 'onMessage' | 'a
   // Streaming config options (opt-in, all optional with defaults)
   enableStreaming?: boolean;
   showThinkingContent?: boolean;
-  onStreamStart?: (sourceId: string) => void;
-  onStreamDelta?: (block: StreamingContentBlock) => void;
-  onStreamEnd?: (sourceId: string) => void;
 }
 
 export const useChat = (config: ChatConfig) => {
@@ -73,8 +70,8 @@ export const useChat = (config: ChatConfig) => {
   const [streamingState, setStreamingState] = useState<StreamingState | null>(null);
 
   const isStreaming = useMemo(() => {
-    return config.enableStreaming ? (streamingState?.isActive ?? false) : false;
-  }, [config.enableStreaming, streamingState?.isActive]);
+    return config.enableStreaming ? (streamingState?.is_active ?? false) : false;
+  }, [config.enableStreaming, streamingState?.is_active]);
 
   const clearStreamingState = useCallback(() => {
     if (config.enableStreaming) {
@@ -168,10 +165,9 @@ export const useChat = (config: ChatConfig) => {
 
       try {
         const payload = data.payload as StreamEventPayload;
-        const sourceId = data.source_id || '';
 
         switch (payload.type) {
-          case 'content_block_start': {
+          case SSEEventType.CONTENT_BLOCK_START: {
             const { index, content_block } = payload;
             const blockType = content_block.type;
 
@@ -181,47 +177,65 @@ export const useChat = (config: ChatConfig) => {
                     type: StreamingContentType.THINKING,
                     index,
                     content: '',
-                    startTimestamp: content_block.start_timestamp,
-                    isComplete: false,
+                    start_timestamp: content_block.start_timestamp,
+                    is_complete: false,
+                    input_json: '',
                   }
                 : blockType === StreamingContentType.TEXT
                   ? {
                       type: StreamingContentType.TEXT,
                       index,
                       content: '',
-                      startTimestamp: content_block.start_timestamp,
-                      isComplete: false,
+                      start_timestamp: content_block.start_timestamp,
+                      is_complete: false,
                     }
                   : {
                       type: StreamingContentType.TOOL_USE,
                       index,
                       id: content_block.id,
                       name: content_block.name,
-                      partialJson: '',
-                      startTimestamp: content_block.start_timestamp,
-                      isComplete: false,
+                      partial_json: '',
+                      start_timestamp: content_block.start_timestamp,
+                      is_complete: false,
                     };
 
             setStreamingState((prev) => {
-              const existingBlocks = prev?.contentBlocks ?? [];
+              if (!prev) {
+                // If no previous state, create a new one with defaults
+                return {
+                  resource_type: config.resourceType || ResourceType.ORGANIZATION,
+                  resource_id: config.resourceId || '',
+                  message_content: {
+                    content_blocks: [newBlock],
+                  },
+                  message_type: ChatMessageType.SYSTEM,
+                  sender_type: SenderType.ASSISTANT,
+                  timestamp: new Date().toISOString(),
+                  metadata: {},
+                  is_active: true,
+                };
+              }
+              const existingBlocks = prev.message_content?.content_blocks ?? [];
               return {
-                sourceId,
-                contentBlocks: [...existingBlocks, newBlock],
-                isActive: true,
+                ...prev,
+                message_content: {
+                  ...prev.message_content,
+                  content_blocks: [...existingBlocks, newBlock],
+                },
               };
             });
 
-            config.onStreamStart?.(sourceId);
             break;
           }
 
-          case 'content_block_delta': {
+          case SSEEventType.CONTENT_BLOCK_DELTA: {
             const { index, delta } = payload;
 
             setStreamingState((prev) => {
               if (!prev) return prev;
 
-              const updatedBlocks = prev.contentBlocks.map((block) => {
+              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const updatedBlocks = existingBlocks.map((block) => {
                 if (block.index !== index) return block;
 
                 switch (delta.type) {
@@ -237,7 +251,7 @@ export const useChat = (config: ChatConfig) => {
                     break;
                   case 'input_json_delta':
                     if (block.type === StreamingContentType.TOOL_USE) {
-                      return { ...block, partialJson: block.partialJson + delta.partial_json };
+                      return { ...block, partial_json: (block.partial_json || '') + delta.partial_json };
                     }
                     break;
                   case 'tool_use_block_update_delta':
@@ -245,7 +259,7 @@ export const useChat = (config: ChatConfig) => {
                       return {
                         ...block,
                         message: delta.message ?? block.message,
-                        displayContent: delta.display_content ?? block.displayContent,
+                        display_content: delta.display_content ?? block.display_content,
                       };
                     }
                     break;
@@ -253,61 +267,40 @@ export const useChat = (config: ChatConfig) => {
                 return block;
               });
 
-              return { ...prev, contentBlocks: updatedBlocks };
-            });
-
-            setStreamingState((prev) => {
-              if (prev) {
-                const updatedBlock = prev.contentBlocks.find((b) => b.index === index);
-                if (updatedBlock) {
-                  config.onStreamDelta?.(updatedBlock);
-                }
-              }
-              return prev;
-            });
-            break;
-          }
-
-          case 'content_block_stop': {
-            const { index, stop_timestamp } = payload;
-
-            setStreamingState((prev) => {
-              if (!prev) return prev;
-
-              const updatedBlocks = prev.contentBlocks.map((block) => {
-                if (block.index !== index) return block;
-                return { ...block, isComplete: true, stopTimestamp: stop_timestamp };
-              });
-
-              const allComplete = updatedBlocks.every((block) => block.isComplete);
-
-              if (allComplete) {
-                config.onStreamEnd?.(sourceId);
-              }
-
               return {
                 ...prev,
-                contentBlocks: updatedBlocks,
-                isActive: !allComplete,
+                message_content: {
+                  ...prev.message_content,
+                  content_blocks: updatedBlocks,
+                },
               };
             });
             break;
           }
 
-          default: {
-            const eventType = (payload as { type: string }).type;
+          case SSEEventType.CONTENT_BLOCK_STOP: {
+            const { index, stop_timestamp } = payload;
 
-            if (eventType === 'message_start') {
-              setStreamingState({
-                sourceId,
-                contentBlocks: [],
-                isActive: true,
+            setStreamingState((prev) => {
+              if (!prev) return prev;
+
+              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const updatedBlocks = existingBlocks.map((block) => {
+                if (block.index !== index) return block;
+                return { ...block, is_complete: true, stop_timestamp: stop_timestamp };
               });
-              config.onStreamStart?.(sourceId);
-            } else if (eventType === 'message_stop') {
-              setStreamingState(null);
-              config.onStreamEnd?.(sourceId);
-            }
+
+              const allComplete = updatedBlocks.every((block) => block.is_complete);
+
+              return {
+                ...prev,
+                message_content: {
+                  ...prev.message_content,
+                  content_blocks: updatedBlocks,
+                },
+                is_active: !allComplete,
+              };
+            });
             break;
           }
         }
@@ -326,9 +319,7 @@ export const useChat = (config: ChatConfig) => {
           case SSEEventType.NEW_CHAT_MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
-            if (config.enableStreaming) {
-              setStreamingState(null);
-            }
+
             if (newMessage.conversation_id) {
               dispatch(
                 chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: newMessage.conversation_id }]),
@@ -341,13 +332,72 @@ export const useChat = (config: ChatConfig) => {
               dispatch(chatApi.util.invalidateTags([{ type: APITags.GET_CONVERSATION_BY_ID, id: _conversationId }]));
             }
             break;
+          case SSEEventType.MESSAGE_START:
+            if (config.enableStreaming) {
+              const message = data.payload.message;
+
+              // Map sender_type string to enum
+              const senderType =
+                message.sender_type === 'ASSISTANT' || message.sender_type === SenderType.ASSISTANT
+                  ? SenderType.ASSISTANT
+                  : SenderType.USER;
+
+              setStreamingState({
+                resource_type: config.resourceType || ResourceType.ORGANIZATION,
+                resource_id: config.resourceId || message.organization_id || '',
+                conversation_id: message.conversation_id,
+                id: message.id,
+                message_content: {
+                  content_blocks: message.message_content?.content_blocks || [],
+                  elements: message.message_content?.elements || [],
+                },
+                message_type: ChatMessageType.SYSTEM,
+                sender_type: senderType,
+                sender_name: message.sender_name || 'assistant',
+                timestamp: message.created_at || new Date().toISOString(),
+                metadata: {
+                  sender_id: message.sender_id,
+                  intent: message.intent,
+                  deleted_at: message.deleted_at,
+                },
+                is_active: true,
+              });
+            }
+            break;
+          case SSEEventType.MESSAGE_STOP:
+            if (config.enableStreaming) {
+              setStreamingState((prev) => {
+                if (!prev) return null;
+
+                if (prev.message_content?.content_blocks && prev.message_content.content_blocks.length > 0) {
+                  const streamingMessagePayload: ChatMessage = {
+                    resource_type: prev.resource_type,
+                    resource_id: prev.resource_id,
+                    message_type: prev.message_type,
+                    metadata: prev.metadata || {},
+                    timestamp: prev.timestamp,
+                    sender_type: prev.sender_type,
+                    sender_name: prev.sender_name || 'assistant',
+                    message_content: {
+                      content_blocks: prev.message_content.content_blocks,
+                    },
+                  };
+
+                  setMessages((messagePrev) => [...messagePrev, streamingMessagePayload]);
+                }
+
+                // Set is_active to false to mark streaming as complete
+                return { ...prev, is_active: false };
+              });
+            }
+            break;
           default:
         }
       } catch (error) {
         captureException(error);
       }
     },
-    [dispatch, _conversationId, config.enableStreaming],
+    [dispatch, _conversationId, config],
   );
 
   useEffect(() => {
@@ -365,7 +415,9 @@ export const useChat = (config: ChatConfig) => {
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {
-      if (data?.source_id === _conversationId) handleMessage(data);
+      const payload = data?.payload as MapAny;
+      const conversationId = payload?.conversation_id as string;
+      if (data?.source_id === _conversationId || conversationId === _conversationId) handleMessage(data);
     });
     return () => sub.unsubscribe();
   }, [handleMessage, _conversationId]);
@@ -374,12 +426,12 @@ export const useChat = (config: ChatConfig) => {
     if (!config.enableStreaming) return;
 
     const sub = sseEventBus.subscribe(EVENT_TYPE.AGENT_STREAMS, (data: BaseEventPayload) => {
-      // if (data?.source_id === _conversationId) {
-      handleStreamEvent(data);
-      // }
+      const payload = data?.payload as MapAny;
+      const streamingId = payload?.streaming_id as string;
+      if (streamingId === _conversationId) handleStreamEvent(data);
     });
     return () => sub.unsubscribe();
-  }, [config.enableStreaming, handleStreamEvent, _conversationId, sseEventBus]);
+  }, [config.enableStreaming, _conversationId, handleStreamEvent]);
 
   useEffect(() => {
     if (!isFetchingConversationHistory && conversationHistory && conversationHistory?.messages?.length > 0) {
@@ -420,6 +472,7 @@ export const useChat = (config: ChatConfig) => {
         } else {
           setMessages((prev) => [...prev, messagePayload]);
         }
+
         const response = useV2Api
           ? await sendMessageV2Mutation({
               conversationId: _conversationId,
@@ -437,7 +490,7 @@ export const useChat = (config: ChatConfig) => {
         throw error;
       }
     },
-    [_conversationId, sendMessageMutation],
+    [_conversationId, sendMessageMutation, streamingState],
   );
 
   return {

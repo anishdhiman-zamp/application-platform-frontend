@@ -55,11 +55,9 @@ const formatThinkingDuration = (startTimestamp?: string, stopTimestamp?: string)
  */
 const ThinkingBlock: FC<{
   block: ThinkingContentBlock;
-  thinkingLabel?: string;
-  completedLabel?: string;
-}> = ({ block, thinkingLabel = 'Thinking', completedLabel = 'Thought' }) => {
-  const thinkingDuration = formatThinkingDuration(block.startTimestamp, block.stopTimestamp);
-  const completedLabelWithDuration = thinkingDuration ? `${completedLabel} for ${thinkingDuration}` : completedLabel;
+}> = ({ block }) => {
+  const thinkingDuration = formatThinkingDuration(block.start_timestamp, block.stop_timestamp);
+  const completedLabelWithDuration = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
 
   return (
     <Accordion
@@ -71,8 +69,8 @@ const ThinkingBlock: FC<{
       <AccordionItem value='thinking' className='border-none'>
         <AccordionTrigger className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 [&[data-state=closed]>svg]:rotate-90 [&[data-state=open]>svg]:-rotate-90'>
           <div className='flex flex-1 flex-col gap-2'>
-            {!block.isComplete ? (
-              <ShimmerText text={`${thinkingLabel}...`} autoAnimate={true} />
+            {!block.is_complete ? (
+              <ShimmerText text='Thinking...' autoAnimate={true} />
             ) : (
               <span className='f-12-450 text-GRAY_700 text-left'>{completedLabelWithDuration}</span>
             )}
@@ -119,7 +117,6 @@ const TextBlock: FC<{
  */
 const ToolUseBlock: FC<{
   block: ToolUseContentBlock;
-  toolUseLabel?: string;
 }> = ({ block }) => {
   const toolName = block.name || 'Unknown';
 
@@ -139,7 +136,7 @@ const ToolUseBlock: FC<{
           <div className='flex flex-1 items-center gap-3'>
             <Wrench className='text-GRAY_700 h-4 w-4' />
             <span className='text-GRAY_900'>{toolName}</span>
-            {!block.isComplete ? (
+            {!block.is_complete ? (
               <span className='bg-GRAY_100 text-GRAY_900 f-12-450 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5'>
                 <Clock className='text-GRAY_700 h-3.5 w-3.5' />
                 Running
@@ -153,21 +150,29 @@ const ToolUseBlock: FC<{
           </div>
         </AccordionTrigger>
         <AccordionContent className='border-GRAY_100 border-t px-3 pt-3 pb-3'>
-          {block.displayContent && (
+          {block.display_content && (
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {block.displayContent.json_block}
+                  {block.display_content.json_block}
                 </pre>
               </div>
             </div>
           )}
-          {!block.displayContent && block.partialJson && (
+          {!block.display_content && block.partial_json && (
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{block.partialJson}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{block.partial_json}</pre>
+              </div>
+            </div>
+          )}
+          {block.input_json && (
+            <div className='space-y-2'>
+              <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
+              <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{block.input_json}</pre>
               </div>
             </div>
           )}
@@ -180,18 +185,16 @@ const ToolUseBlock: FC<{
 /**
  * Renders a single content block based on its type
  */
-const ContentBlockRenderer: FC<{
+export const ContentBlockRenderer: FC<{
   block: StreamingContentBlock;
-  thinkingLabel?: string;
-  toolUseLabel?: string;
-}> = ({ block, thinkingLabel, toolUseLabel }) => {
+}> = ({ block }) => {
   switch (block.type) {
     case StreamingContentType.THINKING:
-      return <ThinkingBlock block={block} thinkingLabel={thinkingLabel} />;
+      return <ThinkingBlock block={block} />;
     case StreamingContentType.TEXT:
       return <TextBlock block={block} />;
     case StreamingContentType.TOOL_USE:
-      return <ToolUseBlock block={block} toolUseLabel={toolUseLabel} />;
+      return <ToolUseBlock block={block} />;
     default:
       return null;
   }
@@ -206,8 +209,6 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
   assistantName = 'Assistant',
   assistantAvatar,
   className,
-  thinkingLabel = 'Thinking',
-  toolUseLabel = 'Using tool',
 }) => {
   // Create a minimal assistant message for SenderDetails
   const assistantMessage = useMemo<ChatMessage>(
@@ -223,7 +224,9 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
     [],
   );
 
-  if (!streamingState || streamingState.contentBlocks.length === 0) {
+  const contentBlocks = streamingState?.message_content?.content_blocks || [];
+
+  if (!streamingState || contentBlocks.length === 0) {
     return null;
   }
 
@@ -234,17 +237,10 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
 
       {/* Content blocks */}
       <div className='space-y-3'>
-        {streamingState.contentBlocks.map((block) => (
-          <ContentBlockRenderer
-            key={`${block.type}-${block.index}`}
-            block={block}
-            thinkingLabel={thinkingLabel}
-            toolUseLabel={toolUseLabel}
-          />
+        {contentBlocks.map((block) => (
+          <ContentBlockRenderer key={`${block.type}-${block.index}-${block.start_timestamp}`} block={block} />
         ))}
       </div>
     </div>
   );
 };
-
-export default StreamingMessage;

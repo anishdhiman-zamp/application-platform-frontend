@@ -49,10 +49,11 @@ export const MessageContainer: FC<MessageContainerProps> = ({
 
   // Also scroll when streaming state updates
   useEffect(() => {
-    if (streamingState && streamingState.contentBlocks.length > 0) {
+    const contentBlocks = streamingState?.message_content?.content_blocks || [];
+    if (streamingState && contentBlocks.length > 0) {
       scrollToBottom('smooth');
     }
-  }, [streamingState?.contentBlocks?.length, streamingState]);
+  }, [streamingState?.message_content?.content_blocks?.length, streamingState]);
 
   return (
     <div
@@ -76,13 +77,15 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       ))}
 
-      {streamingState && streamingState.contentBlocks.length > 0 && (
-        <StreamingMessage
-          streamingState={streamingState}
-          assistantName={assistantName}
-          assistantAvatar={defaultAssistantAvatar}
-        />
-      )}
+      {streamingState &&
+        streamingState.message_content?.content_blocks &&
+        streamingState.message_content.content_blocks.length > 0 && (
+          <StreamingMessage
+            streamingState={streamingState}
+            assistantName={assistantName}
+            assistantAvatar={defaultAssistantAvatar}
+          />
+        )}
 
       {isAnalysing && !streamingState && (
         <div className='flex w-full items-center gap-1.5 text-gray-700'>
