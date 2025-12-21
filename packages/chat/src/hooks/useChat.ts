@@ -290,15 +290,13 @@ export const useChat = (config: ChatConfig) => {
                 return { ...block, is_complete: true, stop_timestamp: stop_timestamp };
               });
 
-              const allComplete = updatedBlocks.every((block) => block.is_complete);
-
               return {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
                   content_blocks: updatedBlocks,
                 },
-                is_active: !allComplete,
+                is_active: true,
               };
             });
             break;
@@ -318,6 +316,7 @@ export const useChat = (config: ChatConfig) => {
           case SSEEventType.MESSAGE:
           case SSEEventType.NEW_CHAT_MESSAGE:
             const newMessage: ChatMessage = data.payload.message;
+
             setMessages((prev) => [...prev, { ...newMessage, timestamp: new Date().toISOString() }]);
 
             if (newMessage.conversation_id) {
@@ -348,48 +347,50 @@ export const useChat = (config: ChatConfig) => {
                 conversation_id: message.conversation_id,
                 id: message.id,
                 message_content: {
-                  content_blocks: message.message_content?.content_blocks || [],
-                  elements: message.message_content?.elements || [],
+                  content_blocks: [],
+                  elements: [],
                 },
                 message_type: ChatMessageType.SYSTEM,
                 sender_type: senderType,
                 sender_name: message.sender_name || 'assistant',
                 timestamp: message.created_at || new Date().toISOString(),
-                metadata: {
-                  sender_id: message.sender_id,
-                  intent: message.intent,
-                  deleted_at: message.deleted_at,
-                },
+                metadata: {},
                 is_active: true,
               });
             }
             break;
           case SSEEventType.MESSAGE_STOP:
-            if (config.enableStreaming) {
-              setStreamingState((prev) => {
-                if (!prev) return null;
+            setStreamingState((prev) => {
+              if (!prev) return null;
 
-                if (prev.message_content?.content_blocks && prev.message_content.content_blocks.length > 0) {
-                  const streamingMessagePayload: ChatMessage = {
-                    resource_type: prev.resource_type,
-                    resource_id: prev.resource_id,
-                    message_type: prev.message_type,
-                    metadata: prev.metadata || {},
-                    timestamp: prev.timestamp,
-                    sender_type: prev.sender_type,
-                    sender_name: prev.sender_name || 'assistant',
-                    message_content: {
-                      content_blocks: prev.message_content.content_blocks,
-                    },
-                  };
+              if (prev.message_content?.content_blocks && prev.message_content.content_blocks.length > 0) {
+                const streamingMessagePayload: ChatMessage = {
+                  resource_type: prev.resource_type,
+                  resource_id: prev.resource_id,
+                  id: prev.id,
+                  conversation_id: prev.conversation_id,
+                  message_type: prev.message_type,
+                  metadata: prev.metadata || {},
+                  timestamp: prev.timestamp,
+                  sender_type: prev.sender_type,
+                  sender_name: prev.sender_name || 'assistant',
+                  message_content: {
+                    content_blocks: prev.message_content.content_blocks,
+                  },
+                };
 
-                  setMessages((messagePrev) => [...messagePrev, streamingMessagePayload]);
-                }
+                setMessages((messagePrev) => {
+                  // Check if message with same id already exists to prevent duplicates from StrictMode
+                  if (streamingMessagePayload.id && messagePrev.some((msg) => msg.id === streamingMessagePayload.id)) {
+                    return messagePrev;
+                  }
+                  return [...messagePrev, streamingMessagePayload];
+                });
+              }
 
-                // Set is_active to false to mark streaming as complete
-                return { ...prev, is_active: false };
-              });
-            }
+              return null;
+            });
+
             break;
           default:
         }
@@ -397,7 +398,7 @@ export const useChat = (config: ChatConfig) => {
         captureException(error);
       }
     },
-    [dispatch, _conversationId, config],
+    [dispatch, _conversationId],
   );
 
   useEffect(() => {
@@ -405,13 +406,6 @@ export const useChat = (config: ChatConfig) => {
       setConversationId(config.conversationId);
     }
   }, [config.conversationId]);
-
-  useEffect(() => {
-    const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION, (data: BaseEventPayload) => {
-      if (data?.source_id === _conversationId) handleMessage(data);
-    });
-    return () => sub.unsubscribe();
-  }, [handleMessage, _conversationId]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.CONVERSATION_V2, (data: BaseEventPayload) => {

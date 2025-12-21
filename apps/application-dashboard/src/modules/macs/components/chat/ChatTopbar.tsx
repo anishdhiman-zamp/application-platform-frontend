@@ -21,8 +21,8 @@ const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
   const displayTitle = chatTitle || 'Chat';
 
   return (
-    <div className={cn('flex h-8 items-center justify-between px-3', className)} style={style}>
-      <div className='flex items-center gap-x-3'>
+    <div className={cn('flex h-8 items-center justify-between gap-x-2 px-3', className)} style={style}>
+      <div className='flex min-w-0 flex-1 items-center gap-x-3'>
         {showHistory ? (
           <div className='flex items-center gap-x-3 text-gray-700'>
             <ArrowLeft size={12} onClick={() => setShowHistory(false)} className='cursor-pointer' />
@@ -41,7 +41,7 @@ const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
                 <PanelLeftClose size={12} />
               </Button>
             )}
-            <div className='f-13-500 truncate text-gray-900'>{displayTitle}</div>
+            <div className='f-13-500 min-w-0 flex-1 truncate text-gray-900'>{displayTitle}</div>
           </>
         )}
       </div>

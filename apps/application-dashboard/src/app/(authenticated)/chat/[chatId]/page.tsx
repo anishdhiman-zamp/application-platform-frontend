@@ -47,10 +47,8 @@ const ChatIdPage = () => {
   });
 
   const isAnalysing = useMemo(() => {
-    if (chat.streamingState) return false;
-
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
-  }, [chat.messages, chat.streamingState]);
+  }, [chat.messages]);
 
   const isLoadingConversation = chat.isLoadingConversationHistory && !hasMessages;
 

@@ -62,7 +62,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     >
       {messages?.map((message) => (
         <Message
-          key={message.timestamp}
+          key={message.id || message.timestamp}
           message={message}
           onAction={handleAction}
           assistantName={assistantName}
@@ -87,12 +87,13 @@ export const MessageContainer: FC<MessageContainerProps> = ({
           />
         )}
 
-      {isAnalysing && !streamingState && (
+      {(isAnalysing && !streamingState) ||
+      (streamingState && !streamingState.message_content?.content_blocks?.length) ? (
         <div className='flex w-full items-center gap-1.5 text-gray-700'>
           {defaultAssistantAvatar}
           <ShimmerText text='Analysing...' autoAnimate={true} />
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
