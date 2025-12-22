@@ -48,4 +48,7 @@ export const enum EVENT_TYPE {
   CONVERSATION_V2 = 'conversation_v2',
   FEEDBACK = 'feedback',
   AGENT_STREAMS = 'agent_streams',
+  TEST = 'test',
+  COMPONENT = 'component',
+  WEBHOOK = 'webhook',
 }
