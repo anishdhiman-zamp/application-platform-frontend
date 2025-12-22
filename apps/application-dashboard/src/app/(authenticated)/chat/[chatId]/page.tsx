@@ -15,6 +15,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
+import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { RootState } from '@/store';
@@ -64,6 +65,7 @@ const ChatIdPage = () => {
           isAnalysing={isAnalysing}
           streamingState={chat.streamingState}
           className='[scrollbar-width:none]'
+          assistantAvatar={<NewPaceAvatar />}
         />
       </CommonWrapper>
       <div className='mx-auto w-full flex-shrink-0 p-3'>

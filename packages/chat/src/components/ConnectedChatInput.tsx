@@ -42,6 +42,8 @@ export interface ConnectedChatInputProps {
   onError?: (error: unknown) => void;
   onSuccess?: (message: string) => void;
   placeholder?: string;
+  className?: string;
+  disableAttachments?: boolean;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -66,6 +68,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   onError,
   onSuccess,
   placeholder = 'Ask anything or give feedback...',
+
+  className,
+  disableAttachments = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -218,7 +223,9 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
         accept={acceptedFileTypes}
       />
       <AttachmentsList attachments={attachments} removeAttachment={removeAttachment} isLoading={isUploading} />
-      <div className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '')}>
+      <div
+        className={cn(shouldShowRecorder ? 'relative w-full rounded-xl border border-gray-600 p-1.5' : '', className)}
+      >
         {/* Middle - Textarea and button wrapper */}
         <div className='relative'>
           {shouldShowRecorder ? (
@@ -286,7 +293,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                     className='hover:text-gray-1000 !size-4 rounded-[2px] text-gray-900 hover:bg-gray-300 [&_svg]:size-3'
                     aria-label='Attach file'
                     onClick={handleAttachClick}
-                    disabled={isUploading || isDisabled}
+                    disabled={isUploading || isDisabled || disableAttachments}
                   >
                     <Paperclip />
                   </Button>

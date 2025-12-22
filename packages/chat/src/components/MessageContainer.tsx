@@ -2,6 +2,7 @@ import { COLORS, ShimmerText } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { FC, ReactNode, useEffect, useRef } from 'react';
 
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import Avatar from '@/components/common/avatar';
 import PaceAvatar from '@/modules/chatbot/PaceAvatar';
 
@@ -58,10 +59,9 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     }
   }, [messages?.length]);
 
-  // Also scroll when streaming state updates
   useEffect(() => {
     const contentBlocks = streamingState?.message_content?.content_blocks || [];
-    if (streamingState && contentBlocks.length > 0) {
+    if (streamingState && !!contentBlocks.length) {
       scrollToBottom('smooth');
     }
   }, [streamingState?.message_content?.content_blocks?.length, streamingState]);
@@ -88,15 +88,21 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       ))}
 
-      {streamingState &&
-        streamingState.message_content?.content_blocks &&
-        streamingState.message_content.content_blocks.length > 0 && (
-          <StreamingMessage
-            streamingState={streamingState}
-            assistantName={assistantName}
-            assistantAvatar={defaultAssistantAvatar}
-          />
-        )}
+      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+        <StreamingMessage
+          streamingState={streamingState}
+          assistantName={assistantName}
+          assistantAvatar={defaultAssistantAvatar}
+        />
+      )}
+
+      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+        <div className='flex w-full items-center'>
+          <div className='animate-spin'>
+            <NewPaceIcons height={24} width={24} />
+          </div>
+        </div>
+      )}
 
       {(isAnalysing && !streamingState) ||
       (streamingState && !streamingState.message_content?.content_blocks?.length) ? (

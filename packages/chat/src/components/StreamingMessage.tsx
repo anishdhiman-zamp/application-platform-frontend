@@ -142,13 +142,15 @@ const ToolUseBlock: FC<{
     >
       <AccordionItem value='tool-use' className='border-none'>
         <AccordionTrigger
-          className='f-13-500 text-GRAY_900 w-full gap-x-2 px-3 py-2.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
+          className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
           icon={ChevronDown}
           iconRotation={180}
         >
           <div className='flex flex-1 items-center gap-3'>
-            <Wrench className='text-GRAY_700 h-4 w-4' />
-            <span className='text-GRAY_900'>{toolName}</span>
+            <div className='flex items-center gap-2'>
+              <Wrench className='text-GRAY_700 h-4 w-4' />
+              <span className='text-GRAY_900'>{toolName}</span>
+            </div>
             <AnimatePresence mode='wait' initial={false}>
               {!block.is_complete ? (
                 <span
@@ -266,7 +268,7 @@ export const StreamingMessage: FC<StreamingMessageProps> = ({
       <SenderDetails message={assistantMessage} assistantName={assistantName} assistantAvatar={assistantAvatar} />
 
       {/* Content blocks */}
-      <div className='space-y-3'>
+      <div className='space-y-2'>
         {contentBlocks.map((block) => (
           <ContentBlockRenderer key={`${block.type}-${block.index}-${block.start_timestamp}`} block={block} />
         ))}
