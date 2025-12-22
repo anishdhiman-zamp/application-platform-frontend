@@ -20,7 +20,7 @@ const ChatShell = ({ children }: { children: ReactNode }) => {
         >
           {children}
         </ResizablePanel>
-        <ResizableHandle withHandle className='bg-gray-200' />
+        <ResizableHandle className='bg-gray-200' />
         <ResizablePanel
           id='macs-section-panel'
           defaultSize={panelSizes.section}

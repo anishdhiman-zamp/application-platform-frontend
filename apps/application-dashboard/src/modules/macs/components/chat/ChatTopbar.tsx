@@ -15,18 +15,26 @@ interface ChatTopbarProps {
 
 const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
   const router = useRouter();
-  const { chatTitle, setViewMode, viewMode, openSplitViewWithMenu, resetToDefault, setShowHistory, showHistory } =
+  const { chatTitle, setViewMode, viewMode, openSplitViewWithMenu, setShowHistory, showHistory, onChatExpandView } =
     useMacsContext();
 
   const displayTitle = chatTitle || 'Chat';
 
   return (
-    <div className={cn('flex h-8 items-center justify-between gap-x-2 px-3', className)} style={style}>
+    <div className={cn('flex h-[31px] items-center justify-between gap-x-2 px-3', className)} style={style}>
       <div className='flex min-w-0 flex-1 items-center gap-x-3'>
         {showHistory ? (
-          <div className='flex items-center gap-x-3 text-gray-700'>
-            <ArrowLeft size={12} onClick={() => setShowHistory(false)} className='cursor-pointer' />
-            <span className='f-11-450'>Back to chat</span>
+          <div className='flex items-center gap-x-3'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='text-GRAY_700 hover:text-GRAY_900 h-6 w-6'
+              onClick={() => setShowHistory(false)}
+              title='Back to chat'
+            >
+              <ArrowLeft size={12} />
+            </Button>
+            <span className='text-GRAY_700 f-12-500'>Back to chat</span>
           </div>
         ) : (
           <>
@@ -41,7 +49,7 @@ const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
                 <PanelLeftClose size={12} />
               </Button>
             )}
-            <div className='f-13-500 min-w-0 flex-1 truncate text-gray-900'>{displayTitle}</div>
+            <div className='f-12-550 min-w-0 flex-1 truncate'>{displayTitle}</div>
           </>
         )}
       </div>
@@ -70,7 +78,7 @@ const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
               variant='ghost'
               size='icon'
               className='h-6 w-6 text-gray-600 hover:text-gray-900'
-              onClick={resetToDefault}
+              onClick={onChatExpandView}
               title='Expand'
             >
               <Maximize2 size={12} />

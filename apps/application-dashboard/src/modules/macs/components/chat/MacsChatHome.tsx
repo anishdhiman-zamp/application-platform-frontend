@@ -19,7 +19,7 @@ const MacsChatHome = () => {
     <div className='mt-[116px] flex w-full flex-col items-center'>
       <div className='flex flex-col items-center gap-4'>
         <NewPaceIcons width={40} height={40} />
-        <h1 className='f-16-550 text-GARY_1000'>
+        <h1 className='f-16-550 text-GRAY_1000'>
           {greeting || 'Hello'}, {userName}!
         </h1>
       </div>

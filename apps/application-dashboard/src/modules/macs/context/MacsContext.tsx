@@ -10,9 +10,7 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
   const [activeSection, setActiveSection] = useState<SectionType | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Default);
   const [chatTitle, setChatTitle] = useState('');
-  const [hasChatMessages, setHasChatMessages] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-
   const hasContent = activeSection !== null;
 
   const toggleSection = useCallback((section: SectionType) => {
@@ -33,13 +31,17 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
     setActiveSection(null);
     setViewMode(ViewMode.Default);
     setChatTitle('');
-    setHasChatMessages(false);
     setShowHistory(false);
   }, []);
 
   const openSplitViewWithMenu = useCallback(() => {
     setViewMode(ViewMode.Split);
     setActiveSection((prev) => prev ?? SectionType.Skills);
+  }, []);
+
+  const onChatExpandView = useCallback(() => {
+    setViewMode(ViewMode.Default);
+    setActiveSection(null);
   }, []);
 
   const value: MacsContextType = useMemo(
@@ -53,10 +55,9 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       resetToDefault,
       chatTitle,
       setChatTitle,
-      hasChatMessages,
-      setHasChatMessages,
       showHistory,
       setShowHistory,
+      onChatExpandView,
     }),
     [
       activeSection,
@@ -66,8 +67,8 @@ export const MacsProvider = ({ children }: { children: ReactNode }) => {
       openSplitViewWithMenu,
       resetToDefault,
       chatTitle,
-      hasChatMessages,
       showHistory,
+      onChatExpandView,
     ],
   );
 

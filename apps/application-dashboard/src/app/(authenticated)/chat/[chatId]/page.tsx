@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ConnectedChatInput,
   MessageContainer,
@@ -9,7 +9,7 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
-import { useChatSync } from 'modules/macs/hooks/useChatSync';
+import { cn } from '@zamp-platform/ui/utils';
 import { useParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import CommonWrapper from '@/components/commonWrapper';
@@ -24,6 +24,7 @@ const ChatIdPage = () => {
   const params = useParams();
   const chatId = params?.chatId as string;
   const { setChatTitle } = useMacsContext();
+  const [isChatScrolled, setIsChatScrolled] = useState(false);
 
   const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
   const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
@@ -42,9 +43,7 @@ const ChatIdPage = () => {
     },
   });
 
-  const { hasMessages } = useChatSync({
-    messages: chat.messages,
-  });
+  const hasMessages = useMemo(() => chat.messages.length > 0, [chat.messages]);
 
   const isAnalysing = useMemo(() => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
@@ -52,8 +51,20 @@ const ChatIdPage = () => {
 
   const isLoadingConversation = chat.isLoadingConversationHistory && !hasMessages;
 
+  const handleScrollChange = useCallback(
+    (isScrolled: boolean) => {
+      setIsChatScrolled(isScrolled);
+    },
+    [setIsChatScrolled],
+  );
+
   return (
-    <div className='mx-auto flex h-full w-full max-w-[700px] flex-col'>
+    <div
+      className={cn(
+        'mx-auto flex h-full w-full max-w-[700px] flex-col',
+        isChatScrolled ? 'border-t border-gray-200' : 'border-b border-transparent',
+      )}
+    >
       <CommonWrapper
         isLoading={isLoadingConversation}
         skeletonType={SkeletonTypes.CUSTOM}
@@ -66,6 +77,7 @@ const ChatIdPage = () => {
           streamingState={chat.streamingState}
           className='[scrollbar-width:none]'
           assistantAvatar={<NewPaceAvatar />}
+          onScrollChange={handleScrollChange}
         />
       </CommonWrapper>
       <div className='mx-auto w-full flex-shrink-0 p-3'>

@@ -18,8 +18,7 @@ export type MacsContextType = {
   resetToDefault: () => void;
   chatTitle: string;
   setChatTitle: (title: string) => void;
-  hasChatMessages: boolean;
-  setHasChatMessages: (hasMessages: boolean) => void;
   showHistory: boolean;
   setShowHistory: (show: boolean) => void;
+  onChatExpandView: () => void;
 };

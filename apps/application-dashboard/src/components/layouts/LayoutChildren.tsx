@@ -61,9 +61,9 @@ const LayoutChildren: FC<LayoutChildrenProps> = ({ children, showTopbar, showSid
       })}
     >
       <div
-        className={cn('border-GRAY_400 relative mx-auto h-screen w-full border bg-white', {
-          'h-[calc(100vh-48px)]': showTopbar,
-          'rounded-tl-xl': isSidebarOpen && showSidebar && showTopbar,
+        className={cn('relative mx-auto h-screen w-full bg-white', {
+          'border-GRAY_400 h-[calc(100vh-48px)] border': showTopbar,
+          'border-GRAY_400 rounded-tl-xl border': isSidebarOpen && showSidebar && showTopbar,
         })}
       >
         {renderChildrenWithProps(children)}

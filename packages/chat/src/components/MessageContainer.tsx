@@ -30,6 +30,7 @@ interface MessageContainerProps {
   assistantName?: string;
   assistantAvatar?: ReactNode;
   className?: string;
+  onScrollChange?: (isScrolled: boolean) => void;
 }
 
 export const MessageContainer: FC<MessageContainerProps> = ({
@@ -40,9 +41,17 @@ export const MessageContainer: FC<MessageContainerProps> = ({
   assistantName = 'Pace',
   assistantAvatar,
   className,
+  onScrollChange,
 }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const defaultAssistantAvatar = assistantAvatar ?? <PaceAvatar />;
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current && onScrollChange) {
+      const isScrolled = messagesContainerRef.current.scrollTop > 0;
+      onScrollChange(isScrolled);
+    }
+  };
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
     if (messagesContainerRef.current) {
@@ -70,6 +79,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
     <div
       className={cn('flex w-full flex-grow flex-col gap-6 overflow-y-auto p-4', className)}
       ref={messagesContainerRef}
+      onScroll={handleScroll}
     >
       {messages?.map((message, index) => (
         <Message
