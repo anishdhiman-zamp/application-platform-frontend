@@ -179,15 +179,17 @@ const MultiSelectInput: FC<MultiSelectInputPropsType> = ({
         return;
       }
 
-      const updatedItems = inputArrayList?.filter((_, i) => i !== index);
+      setInputArrayList((prevItems) => {
+        const updatedItems = prevItems?.filter((_, i) => i !== index);
 
-      if (setShowValidationError) {
-        setShowValidationError(updatedItems?.some((item) => !item.valid));
-      }
+        if (setShowValidationError) {
+          setShowValidationError(updatedItems?.some((item) => !item.valid));
+        }
 
-      setInputArrayList(updatedItems);
+        return updatedItems;
+      });
     },
-    [inputArrayList, setInputArrayList, setShowValidationError],
+    [setInputArrayList, setShowValidationError, onCustomDeleteFn],
   );
 
   const handleClickOutside = useCallback(
