@@ -1,9 +1,36 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import type { NavigationItemSchema } from '@/types/config';
+
+/**
+ * Evaluate feature flags for a list of items
+ * @param items - The list of items to evaluate
+ * @param evaluate - The function to evaluate the feature flags
+ * @returns A record of feature flag states
+ */
+const evaluateFlags = async (
+  items: NavigationItemSchema[],
+  evaluate: (flag: FEATURE_FLAGS) => Promise<boolean>,
+): Promise<Record<string, boolean>> => {
+  const itemsWithFlags = items.filter((item) => item.featureFlag);
+  const flagResults: Record<string, boolean> = {};
+
+  await Promise.all(
+    itemsWithFlags.map(async (item) => {
+      if (item.featureFlag) {
+        const isEnabled = await evaluate(item.featureFlag);
+
+        flagResults[item.featureFlag] = Boolean(isEnabled);
+      }
+    }),
+  );
+
+  return flagResults;
+};
 
 /**
  * Hook to filter sidebar items based on feature flags
@@ -14,33 +41,21 @@ export const useFilteredSidebarItems = () => {
   const [featureFlagStates, setFeatureFlagStates] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchFlags = useCallback(async () => {
+    const flagResults = await evaluateFlags(SIDEBAR_ITEMS, evaluate);
+
+    setFeatureFlagStates(flagResults);
+    setIsLoading(false);
+  }, [evaluate]);
+
   useEffect(() => {
     if (!ldClient) return;
 
-    const evaluateFlags = async () => {
-      const itemsWithFlags = SIDEBAR_ITEMS.filter((item) => item.featureFlag);
-      const flagResults: Record<string, boolean> = {};
-
-      await Promise.all(
-        itemsWithFlags.map(async (item) => {
-          if (item.featureFlag) {
-            const isEnabled = await evaluate(item.featureFlag);
-
-            flagResults[item.featureFlag] = Boolean(isEnabled);
-          }
-        }),
-      );
-
-      setFeatureFlagStates(flagResults);
-      setIsLoading(false);
-    };
-
-    evaluateFlags();
-  }, [evaluate, ldClient]);
+    fetchFlags();
+  }, [fetchFlags, ldClient]);
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {
-      // While loading, show items without feature flags only
       return SIDEBAR_ITEMS.filter((item) => !item.featureFlag);
     }
 

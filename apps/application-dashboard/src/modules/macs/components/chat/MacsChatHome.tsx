@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getGreeting } from 'modules/macs/utils/utils';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { useAppSelector } from '@/hooks/toolkit';
+import { getGreeting } from '@/modules/macs/macs.utils';
 
 const MacsChatHome = () => {
   const user = useAppSelector((state) => state.user.user);

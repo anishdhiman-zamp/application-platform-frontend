@@ -23,11 +23,6 @@ const ChatPage = () => {
 
   const isDefaultView = viewMode === ViewMode.Default;
 
-  // Reset state when landing on new chat page
-  useEffect(() => {
-    resetToDefault();
-  }, [resetToDefault]);
-
   const chat = useChat({
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
@@ -46,6 +41,10 @@ const ChatPage = () => {
       router.replace(`${ROUTES_PATH.CHAT}/${chat.conversationId}`);
     }
   }, [chat.conversationId, router]);
+
+  useEffect(() => {
+    resetToDefault();
+  }, [resetToDefault]);
 
   return (
     <div className='flex h-full w-full flex-col'>

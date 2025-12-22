@@ -1,5 +1,6 @@
 'use client';
 
+import type { FC } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { ArrowLeft, Clock, Maximize2, Minus, PanelLeftClose, Plus } from 'lucide-react';
@@ -13,7 +14,7 @@ interface ChatTopbarProps {
   style?: React.CSSProperties;
 }
 
-const ChatTopbar = ({ className, style }: ChatTopbarProps) => {
+const ChatTopbar: FC<ChatTopbarProps> = ({ className, style }) => {
   const router = useRouter();
   const { chatTitle, setViewMode, viewMode, openSplitViewWithMenu, setShowHistory, showHistory, onChatExpandView } =
     useMacsContext();

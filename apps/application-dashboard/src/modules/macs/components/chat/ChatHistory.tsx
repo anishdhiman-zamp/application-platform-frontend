@@ -4,38 +4,13 @@ import { useMemo, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
 import { MessagesSquare, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import ChatHistoryItem from 'modules/macs/components/chat/ChatHistoryItem';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { getChatRouteById } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import type { RootState } from '@/store';
-import type { FeedbackItemType } from '@/types/api/feedbacks.types';
-
-interface ChatHistoryItemProps {
-  conversation: FeedbackItemType;
-}
-
-const ChatHistoryItem = ({ conversation }: ChatHistoryItemProps) => {
-  const router = useRouter();
-
-  return (
-    <Button
-      variant='ghost'
-      onClick={() => router.push(getChatRouteById(conversation?.id))}
-      className='h-auto w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2.5 hover:bg-gray-50'
-    >
-      <div className='flex items-center gap-2.5'>
-        <MessagesSquare size={16} className='flex-shrink-0 text-gray-500' />
-        <p className='f-13-500 text-gray-1000 line-clamp-1 text-left'>
-          {conversation?.title || 'Untitled conversation'}
-        </p>
-      </div>
-    </Button>
-  );
-};
 
 const ChatHistory = () => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
@@ -111,7 +86,7 @@ const ChatHistory = () => {
       >
         <div className='space-y-0.5'>
           {filteredConversations.map((conversation) => (
-            <ChatHistoryItem key={conversation.id} conversation={conversation} />
+            <ChatHistoryItem key={conversation?.id} conversation={conversation} />
           ))}
         </div>
       </CommonWrapper>
