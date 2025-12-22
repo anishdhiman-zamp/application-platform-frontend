@@ -61,7 +61,6 @@ src/modules/macs/
     ├── ChatTopbar.tsx           # Chat topbar with title and action buttons
     ├── MacsChat.tsx             # Main chat component container
     ├── MacsChatHome.tsx         # Welcome screen ("Afternoon, Razi!")
-    ├── MacsChatInput.tsx        # Chat input with mic, attachment, send
     ├── MacsTab.tsx              # Individual tab component
     ├── SectionIconButton.tsx    # Puzzle/Shapes icon buttons
     ├── AddTabMenu.tsx           # Dropdown menu for adding tabs
@@ -135,7 +134,6 @@ Displays when tabs are open. Contains:
 Container component that includes:
 
 - `MacsChatHome` - Welcome screen with greeting
-- `MacsChatInput` - Message input field
 
 ### AddTabMenu
 
