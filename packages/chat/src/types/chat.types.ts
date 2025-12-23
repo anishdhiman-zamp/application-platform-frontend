@@ -65,9 +65,6 @@ export const enum SSEEventType {
   CONVERSATION_UPDATED = 'conversation_updated',
   MESSAGE_START = 'message_start',
   MESSAGE_STOP = 'message_stop',
-  CONTENT_BLOCK_START = 'content_block_start',
-  CONTENT_BLOCK_DELTA = 'content_block_delta',
-  CONTENT_BLOCK_STOP = 'content_block_stop',
 }
 
 export const enum ChatMessageType {
@@ -369,36 +366,46 @@ export interface GenerateSpeechToTextAccessTokenResponse {
   expires_in: number;
 }
 
+/**
+ * Streaming content block types
+ */
+
 export const enum StreamingContentType {
   THINKING = 'thinking',
   TEXT = 'text',
   TOOL_USE = 'tool_use',
 }
 
-export interface ThinkingContentBlock {
-  id?: string;
-  name?: string;
-  type: StreamingContentType.THINKING;
-  index: number;
-  content: string;
-  is_complete: boolean;
-  message?: string;
-  input_json?: string;
-  start_timestamp?: string;
-  stop_timestamp?: string;
+export const enum StreamingContentBlockType {
+  CONTENT_BLOCK_START = 'content_block_start',
+  CONTENT_BLOCK_DELTA = 'content_block_delta',
+  CONTENT_BLOCK_STOP = 'content_block_stop',
 }
 
-export interface TextContentBlock {
+export const enum StreamingContentBlockDeltaType {
+  THINKING_DELTA = 'thinking_delta',
+  TEXT_DELTA = 'text_delta',
+  INPUT_JSON_DELTA = 'input_json_delta',
+  TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
+}
+
+export interface StreamingContentBlockBase {
   id?: string;
-  name?: string;
-  type: StreamingContentType.TEXT;
   index: number;
-  content: string;
-  message?: string;
-  input_json?: string;
-  is_complete: boolean;
-  stop_timestamp?: string;
+  name?: string;
   start_timestamp?: string;
+  stop_timestamp?: string;
+  is_complete: boolean;
+}
+
+export interface ThinkingContentBlock extends StreamingContentBlockBase {
+  type: StreamingContentType.THINKING;
+  content: string;
+}
+
+export interface TextContentBlock extends StreamingContentBlockBase {
+  type: StreamingContentType.TEXT;
+  content: string;
 }
 
 export interface ToolUseDisplayContent {
@@ -406,53 +413,23 @@ export interface ToolUseDisplayContent {
   json_block: string;
 }
 
-export interface ToolUseContentBlock {
-  id?: string;
-  name?: string;
+export interface ToolUseContentBlock extends StreamingContentBlockBase {
   type: StreamingContentType.TOOL_USE;
-  index: number;
   input_json?: string;
   content?: string;
   message?: string;
   partial_json?: string;
   display_content?: ToolUseDisplayContent;
-  start_timestamp?: string;
-  stop_timestamp?: string;
-  is_complete: boolean;
 }
 
 export type StreamingContentBlock = ThinkingContentBlock | TextContentBlock | ToolUseContentBlock;
 
-export interface StreamingState {
-  resource_type: ResourceType;
-  resource_id: string;
-  message_content: {
-    message?: string;
-    elements?: Block[];
-    content_blocks?: StreamingContentBlock[];
-    text?: string;
-    text_type?: string;
-    attachments?: MessageAttachmentType[];
-  };
-  message_type: ChatMessageType;
-  sender_type: SenderType;
-  metadata?: Record<string, unknown>;
-  timestamp: string;
-  sender_name?: string;
-  id?: string;
-  conversation_id?: string;
+export interface StreamingState extends ChatMessage {
   is_active: boolean;
 }
 
-export type StreamEventType =
-  | 'message_start'
-  | 'content_block_start'
-  | 'content_block_delta'
-  | 'content_block_stop'
-  | 'message_stop';
-
 export interface StreamEventContentBlockStart {
-  type: 'content_block_start';
+  type: StreamingContentBlockType.CONTENT_BLOCK_START;
   index: number;
   content_block: {
     type: StreamingContentType;
@@ -463,22 +440,22 @@ export interface StreamEventContentBlockStart {
 }
 
 export interface StreamEventThinkingDelta {
-  type: 'thinking_delta';
+  type: StreamingContentBlockDeltaType.THINKING_DELTA;
   thinking: string;
 }
 
 export interface StreamEventTextDelta {
-  type: 'text_delta';
+  type: StreamingContentBlockDeltaType.TEXT_DELTA;
   text: string;
 }
 
 export interface StreamEventInputJsonDelta {
-  type: 'input_json_delta';
+  type: StreamingContentBlockDeltaType.INPUT_JSON_DELTA;
   partial_json: string;
 }
 
 export interface StreamEventToolUseUpdateDelta {
-  type: 'tool_use_block_update_delta';
+  type: StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA;
   message?: string;
   display_content?: ToolUseDisplayContent;
 }
@@ -490,13 +467,13 @@ export type StreamEventDelta =
   | StreamEventToolUseUpdateDelta;
 
 export interface StreamEventContentBlockDelta {
-  type: 'content_block_delta';
+  type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;
   index: number;
   delta: StreamEventDelta;
 }
 
 export interface StreamEventContentBlockStop {
-  type: 'content_block_stop';
+  type: StreamingContentBlockType.CONTENT_BLOCK_STOP;
   index: number;
   content_block: {
     type: StreamingContentType;
@@ -504,16 +481,7 @@ export interface StreamEventContentBlockStop {
   stop_timestamp?: string;
 }
 
-export interface StreamEventMessageStart {
-  type: 'message_start';
-}
-
-export interface StreamEventMessageStop {
-  type: 'message_stop';
-}
-
 export type StreamEventPayload =
   | StreamEventContentBlockStart
   | StreamEventContentBlockDelta
-  | StreamEventContentBlockStop
-  | StreamEventMessageStop;
+  | StreamEventContentBlockStop;

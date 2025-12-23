@@ -30,6 +30,8 @@ import {
   SSEEventType,
   StreamEventPayload,
   StreamingContentBlock,
+  StreamingContentBlockDeltaType,
+  StreamingContentBlockType,
   StreamingContentType,
   StreamingState,
 } from '../types/chat.types';
@@ -170,7 +172,7 @@ export const useChat = (config: ChatConfig) => {
         const payload = data.payload as StreamEventPayload;
 
         switch (payload.type) {
-          case SSEEventType.CONTENT_BLOCK_START: {
+          case StreamingContentBlockType.CONTENT_BLOCK_START: {
             const { index, content_block } = payload;
             const blockType = content_block.type;
 
@@ -182,7 +184,6 @@ export const useChat = (config: ChatConfig) => {
                     content: '',
                     start_timestamp: content_block.start_timestamp,
                     is_complete: false,
-                    input_json: '',
                   }
                 : blockType === StreamingContentType.TEXT
                   ? {
@@ -237,7 +238,7 @@ export const useChat = (config: ChatConfig) => {
             break;
           }
 
-          case SSEEventType.CONTENT_BLOCK_DELTA: {
+          case StreamingContentBlockType.CONTENT_BLOCK_DELTA: {
             const { index, delta } = payload;
 
             setStreamingState((prev) => {
@@ -253,22 +254,22 @@ export const useChat = (config: ChatConfig) => {
                 if (block.index !== index) return block;
 
                 switch (delta.type) {
-                  case 'thinking_delta':
+                  case StreamingContentBlockDeltaType.THINKING_DELTA:
                     if (block.type === StreamingContentType.THINKING) {
                       return { ...block, content: block.content + delta.thinking };
                     }
                     break;
-                  case 'text_delta':
+                  case StreamingContentBlockDeltaType.TEXT_DELTA:
                     if (block.type === StreamingContentType.TEXT) {
                       return { ...block, content: block.content + delta.text };
                     }
                     break;
-                  case 'input_json_delta':
+                  case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
                     if (block.type === StreamingContentType.TOOL_USE) {
                       return { ...block, partial_json: (block.partial_json || '') + delta.partial_json };
                     }
                     break;
-                  case 'tool_use_block_update_delta':
+                  case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
                     if (block.type === StreamingContentType.TOOL_USE) {
                       return {
                         ...block,
@@ -292,7 +293,7 @@ export const useChat = (config: ChatConfig) => {
             break;
           }
 
-          case SSEEventType.CONTENT_BLOCK_STOP: {
+          case StreamingContentBlockType.CONTENT_BLOCK_STOP: {
             const { index, stop_timestamp } = payload;
 
             setStreamingState((prev) => {
