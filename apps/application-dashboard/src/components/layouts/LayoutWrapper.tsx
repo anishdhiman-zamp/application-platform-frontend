@@ -25,7 +25,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   return (
     <PagesAndProcessesProvider>
-      <div className='bg-BACKGROUND_GRAY_1 relative'>
+      <div className='relative'>
         <div className='relative flex h-full w-full min-w-[768px]'>
           <Suspense>{isSettings ? <SettingsSidebar /> : <Sidebar />}</Suspense>
           <motion.div
