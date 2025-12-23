@@ -44,8 +44,6 @@ export const useFilteredSidebarItems = () => {
   const fetchFlags = useCallback(async () => {
     const flagResults = await evaluateFlags(SIDEBAR_ITEMS, evaluate);
 
-    console.log(flagResults);
-
     setFeatureFlagStates(flagResults);
     setIsLoading(false);
   }, [evaluate]);
