@@ -6,6 +6,7 @@ export * from './src/components/ConnectedChatInput';
 export * from './src/components/Message';
 export * from './src/components/MessageContainer';
 export * from './src/components/SenderDetails';
+export * from './src/components/StreamingMessage';
 export * from './src/hooks/useChat';
 export * from './src/hooks/useChatAdapters';
 export * from './src/hooks/useChatInput';

@@ -66,12 +66,13 @@ export interface UseChatInputReturn {
 export const createUserMessagePayload = (
   inputValue: string,
   resourceId: string,
+  resourceType: ResourceType,
   senderName: string,
   attachments?: MessageAttachment[],
 ): ChatMessage => {
   return {
     resource_id: resourceId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     message_content: {
       text: inputValue,
       text_type: 'plain_text',
@@ -103,10 +104,10 @@ export const createConversationPayload = (
   resourceType: ResourceType,
   scopeId: string,
   messageText: string,
-  annotationLocation: LocationData | undefined,
   senderName: string,
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
+  annotationLocation?: LocationData,
 ) => {
   return {
     resource_id: resourceId,
@@ -187,12 +188,12 @@ export const useChatInput = ({
       resourceType,
       scopeId,
       firstMessage || 'Hello, how are you?',
-      annotationLocation,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
       scope,
+      annotationLocation,
     );
 
     setAttachments([]);
@@ -273,6 +274,7 @@ export const useChatInput = ({
     const messagePayload = createUserMessagePayload(
       inputValue,
       resourceId,
+      resourceType,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))

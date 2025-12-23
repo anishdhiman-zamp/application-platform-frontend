@@ -46,8 +46,9 @@ export const enum EVENT_TYPE {
   ACTIVITY_LOG = 'activity_log',
   CONVERSATION = 'conversation',
   CONVERSATION_V2 = 'conversation_v2',
-  WEBHOOK = 'webhook',
-  COMPONENT = 'component',
   FEEDBACK = 'feedback',
+  AGENT_STREAMS = 'agent_streams',
   TEST = 'test',
+  COMPONENT = 'component',
+  WEBHOOK = 'webhook',
 }

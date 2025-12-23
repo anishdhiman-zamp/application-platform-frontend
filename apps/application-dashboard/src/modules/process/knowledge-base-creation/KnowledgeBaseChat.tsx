@@ -40,7 +40,7 @@ const KnowledgeBaseChat = () => {
 
   return (
     <div className='flex h-full w-full flex-col'>
-      <div className='border-GRAY_400 flex hidden w-full items-center gap-3 border-b px-3.5 py-3'>
+      <div className='border-GRAY_400 flex w-full items-center gap-3 border-b px-3.5 py-3'>
         <div className='f-14-500 text-GRAY_1000 flex-grow'>Generated feedback title</div>
         <EllipsisVertical size={12} className='text-GRAY_700 cursor-pointer' />
         <CirclePlus size={12} className='text-GRAY_700 cursor-pointer' />
