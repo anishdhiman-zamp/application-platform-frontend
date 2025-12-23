@@ -19,9 +19,9 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     path: ROUTES_PATH.TEAM,
   },
   {
-    id: 'chat',
-    label: 'Chat',
-    iconComponent: <MessageCircle width={16} height={16} />,
+    id: 'macs',
+    label: 'MACS',
+    iconComponent: <MessageCircle width={16} height={16} strokeWidth={1.7} />,
     path: ROUTES_PATH.CHAT,
     featureFlag: FEATURE_FLAGS.MACS_CHAT,
   },
