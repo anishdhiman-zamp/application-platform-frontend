@@ -1,7 +1,10 @@
 'use client';
 
 import { cn } from '@zamp-platform/ui/utils';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
+import { ROUTES_PATH } from '@/constants/routeConfig';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { SectionType, ViewMode } from '@/modules/macs/types';
@@ -23,10 +26,15 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
       style={style}
     >
       {viewMode !== ViewMode.Split && (
-        <div className='text-GRAY_700 h-6 w-6 px-2 py-1'>
-          <NewPaceIcons width={16} height={16} />
-        </div>
+        <Link
+          href={ROUTES_PATH.PROCESSES}
+          className='hover:bg-GRAY_200 hover:text-GRAY_900 text-GRAY_700 flex h-6 w-6 items-center justify-center rounded-md transition-colors'
+          title='Back to Processes'
+        >
+          <ArrowLeft size={14} />
+        </Link>
       )}
+      {viewMode !== ViewMode.Split && <NewPaceIcons width={16} height={16} />}
 
       <SectionIconButton section={SectionType.Skills} />
     </div>
