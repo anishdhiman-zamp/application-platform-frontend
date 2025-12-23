@@ -44,6 +44,8 @@ export const useFilteredSidebarItems = () => {
   const fetchFlags = useCallback(async () => {
     const flagResults = await evaluateFlags(SIDEBAR_ITEMS, evaluate);
 
+    console.log(flagResults);
+
     setFeatureFlagStates(flagResults);
     setIsLoading(false);
   }, [evaluate]);
@@ -52,7 +54,7 @@ export const useFilteredSidebarItems = () => {
     if (!ldClient) return;
 
     fetchFlags();
-  }, [fetchFlags, ldClient]);
+  }, [ldClient]);
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {
