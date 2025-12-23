@@ -27,9 +27,9 @@ const MacsTopbar = ({ className, style }: MacsTopbarProps) => {
     >
       {viewMode !== ViewMode.Split && (
         <Link
-          href={ROUTES_PATH.PROCESSES}
+          href={ROUTES_PATH.HOME}
           className='hover:bg-GRAY_200 hover:text-GRAY_900 text-GRAY_700 flex h-6 w-6 items-center justify-center rounded-md transition-colors'
-          title='Back to Processes'
+          title='Back to Home'
         >
           <ArrowLeft size={14} />
         </Link>
