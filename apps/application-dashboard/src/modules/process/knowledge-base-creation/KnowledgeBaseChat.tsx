@@ -19,9 +19,9 @@ import { RootState } from '@/store';
 import { MapAny } from '@/types/commonTypes';
 
 const KnowledgeBaseChat = () => {
+  const params = useParams();
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
-  const params = useParams();
   const processId = params?.processId as string;
 
   const chat = useChat({

@@ -335,3 +335,9 @@ export type UpdateArtifactRequestType = {
     artifact_data: EmailUpdatePayloadType;
   };
 };
+
+export type FilterConversationsRequestType = {
+  resource_id: string;
+  resource_type: string;
+  annotation_types?: string;
+};
