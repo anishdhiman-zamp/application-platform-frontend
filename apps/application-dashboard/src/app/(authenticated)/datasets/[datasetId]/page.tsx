@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import DatasetById from 'modules/data/Dataset';
+import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
 import { PAGE_SIZE } from '@/components/common/table/table.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+const DatasetById = dynamic(() => import('modules/data/Dataset'));
 
 export default function DatasetPage() {
   const router = useRouter();
