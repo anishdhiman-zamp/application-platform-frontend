@@ -99,6 +99,10 @@ export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
   return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
 };
 
+export const getCreateKnowledgeBaseRouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.CREATE_KNOWLEDGE_BASE.replace(':processId', processId)}`;
+};
+
 export const getIntegrationDetailRoute = (integrationId: string) => {
   return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
 };

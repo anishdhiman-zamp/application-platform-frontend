@@ -24,6 +24,7 @@ export const enum SenderType {
 export const enum AnnotationType {
   KB = 'KB',
   FEEDBACK = 'FEEDBACK',
+  PROCESS_SOP = 'PROCESS_SOP',
 }
 
 export const enum ScopeType {
@@ -37,6 +38,7 @@ export const enum LocationType {
   LOG = 'log',
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  SOP = 'sop',
 }
 
 export interface CreateConversationPayloadType {
@@ -178,6 +180,7 @@ export interface CreateConversationPayloadTypeV2 {
   resource_type: ResourceType;
   scope_type: string;
   scope_id: string;
+  annotation_type?: AnnotationType;
   annotation_data?: AnnotationData;
   message_content: MessageContentType;
   sender_name?: string;

@@ -2,7 +2,6 @@ import { REQUEST_TYPES } from '@zamp-platform/api';
 import { API_ENDPOINTS } from 'apis/apiEndpoint.constants';
 import { baseApi } from '@/services/baseApi';
 import type { DatasetDataResponseType, DatasetFilterConfigResponseType } from '@/types/api/dataset.types';
-import { OpenFeedbackResponseType } from '@/types/api/feedbacks.types';
 import type {
   ActivityArtifactsByIdRequestType,
   ActivityArtifactsByIdResponseType,
@@ -15,6 +14,7 @@ import type {
   EmitActivityLogsRequestType,
   EmitHITLActionRequestType,
   FilterConversationsRequestType,
+  FilterConversationsResponseType,
   KnowledgeBaseRequestType,
   KnowledgeBaseResponseType,
   ProcessActivityRunsRequestType,
@@ -114,7 +114,7 @@ const Processes = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
-    filterConversations: builder.query<OpenFeedbackResponseType, FilterConversationsRequestType>({
+    filterConversations: builder.query<FilterConversationsResponseType, FilterConversationsRequestType>({
       query: (params) => ({
         url: API_ENDPOINTS.FILTER_CONVERSATIONS_V2_GET,
         params,

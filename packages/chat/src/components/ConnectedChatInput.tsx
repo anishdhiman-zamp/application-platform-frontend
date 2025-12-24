@@ -13,7 +13,7 @@ import useChatAdapters from '../hooks/useChatAdapters';
 import { useChatInput } from '../hooks/useChatInput';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
-import { LocationData, ResourceType, ScopeType } from '../types/chat.types';
+import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
@@ -44,6 +44,7 @@ export interface ConnectedChatInputProps {
   placeholder?: string;
   className?: string;
   disableAttachments?: boolean;
+  annotationType?: AnnotationType;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -68,7 +69,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   onError,
   onSuccess,
   placeholder = 'Ask anything or give feedback...',
-
+  annotationType,
   className,
   disableAttachments = false,
 }) => {
@@ -121,6 +122,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     setExternalInputValue,
     adapter: chatInputAdapter,
     resourceType,
+    annotationType,
   });
 
   const {

@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
-import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
+import {
+  getCreateKnowledgeBaseRouteByProcessId,
+  getKnowledgeBasedRouteByProcessId,
+  ROUTES_PATH,
+} from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
@@ -88,7 +92,7 @@ const Topbar = () => {
         <div className='flex items-center gap-3'>
           {isFeedbackEnabled ? (
             <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-              <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+              <Link prefetch href={getCreateKnowledgeBaseRouteByProcessId(processId ?? '')}>
                 <Button id='knowledge-base-btn' size='small' variant='secondary'>
                   <BookOpen size={12} className='' />
                 </Button>
