@@ -51,4 +51,5 @@ export const enum EVENT_TYPE {
   TEST = 'test',
   COMPONENT = 'component',
   WEBHOOK = 'webhook',
+  KNOWLEDGE_BASE = 'knowledge_base',
 }

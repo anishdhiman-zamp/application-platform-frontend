@@ -45,6 +45,7 @@ export interface ConnectedChatInputProps {
   className?: string;
   disableAttachments?: boolean;
   annotationType?: AnnotationType;
+  defaultMessage?: string;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -72,6 +73,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   annotationType,
   className,
   disableAttachments = false,
+  defaultMessage,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,6 +114,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     handleFileSelect,
     removeAttachment,
     isUploading,
+    setFirstMessage,
   } = useChatInput({
     chat,
     annotationLocation,
@@ -207,6 +210,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
       return () => clearTimeout(timeoutId);
     }
   }, [autoFocus, isDisabled, shouldShowRecorder]);
+
+  useEffect(() => {
+    if (setFirstMessage) {
+      setFirstMessage(defaultMessage || '');
+    }
+  }, [defaultMessage, setFirstMessage]);
 
   return (
     <div

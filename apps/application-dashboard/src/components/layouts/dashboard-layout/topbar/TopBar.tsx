@@ -18,6 +18,7 @@ import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
+import { useGetProcessesQuery } from '@/apis/pages';
 import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { COLORS } from '@/constants/colors';
@@ -28,6 +29,7 @@ import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButt
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import { ProcessStatus } from '@/types/api/processApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -53,10 +55,18 @@ const ShareButton = () => {
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
+  const { data: processes } = useGetProcessesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
+
+  const processStatus = useMemo(
+    () => processes?.find((process) => process?.id === processId)?.status,
+    [processes, processId],
+  );
 
   const dispatch = useAppDispatch();
 
@@ -152,7 +162,12 @@ const Topbar = () => {
       </div>
       <div className='flex w-full items-center'>
         <div className='min-w-0 flex-1'>
-          <BreadCrumb isSidebarOpen={isSidebarOpen} />
+          <div className='flex items-center gap-1'>
+            <BreadCrumb isSidebarOpen={isSidebarOpen} />
+            {processStatus === ProcessStatus.DRAFT && (
+              <div className='f-10-550 text-GRAY_900 border-GRAY_100 rounded-full border px-2 py-1'>DRAFT</div>
+            )}
+          </div>
         </div>
         <div className='-mi-6 flex-shrink-0'>
           <WorkWithPace />

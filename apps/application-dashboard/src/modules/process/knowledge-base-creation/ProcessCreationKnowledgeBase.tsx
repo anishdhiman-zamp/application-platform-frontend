@@ -4,15 +4,18 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
+import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import ProcessEmptyState from 'modules/process/activity-runs/components/ProcessEmptyState';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
+import { useEventBus } from '@/app/_providers/sse-provider';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { NEEDS_ATTENTION_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { MapAny } from '@/types/commonTypes';
 
 interface ProcessCreationKnowledgeBaseProps {
   processId: string;
@@ -22,42 +25,64 @@ interface ProcessCreationKnowledgeBaseProps {
 const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({ processId, processName }) => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const { sseEventBus } = useEventBus();
 
   const { data, isLoading: isLoadingKnowledgeBase } = useGetKnowledgeBaseQuery({ processId });
 
-  const getMarkdownContent = useCallback(async () => {
-    setIsLoading(true);
-    if (!data?.content_signed_url) {
-      setIsLoading(false);
-
-      return;
-    }
-
-    try {
+  const getMarkdownContent = useCallback(
+    async (url?: string) => {
       setIsLoading(true);
-      const response = await fetch(data.content_signed_url);
-
-      if (!response.ok) {
-        setMarkdownContent('');
-        toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+      if (!url && !data?.content_signed_url) {
+        setIsLoading(false);
 
         return;
       }
-      const content = await response.text();
 
-      setMarkdownContent(content);
-      setIsLoading(false);
-    } catch (error) {
-      setMarkdownContent('');
-      captureException(error);
-      toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
-      setIsLoading(false);
-    }
-  }, [data?.content_signed_url]);
+      try {
+        setIsLoading(true);
+        const response = await fetch(url || data?.content_signed_url || '');
+
+        if (!response.ok) {
+          setMarkdownContent('');
+          toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+
+          return;
+        }
+        const content = await response.text();
+
+        setMarkdownContent(content);
+        setIsLoading(false);
+      } catch (error) {
+        setMarkdownContent('');
+        captureException(error);
+        toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+        setIsLoading(false);
+      }
+    },
+    [data?.content_signed_url],
+  );
 
   useEffect(() => {
     getMarkdownContent();
   }, [data, getMarkdownContent]);
+
+  useEffect(() => {
+    const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {
+      const payload = data?.payload as MapAny;
+
+      if (data?.source_id !== processId) return;
+
+      if (payload?.type === 'knowledge_base_updated') {
+        const url = payload?.content_signed_url;
+
+        getMarkdownContent(url);
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [sseEventBus, processId]);
 
   return (
     <div>
