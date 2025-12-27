@@ -88,6 +88,9 @@ export const useChat = (config: ChatConfig) => {
     data: conversationHistory,
     isLoading: isLoadingConversationHistory,
     isFetching: isFetchingConversationHistory,
+    isUninitialized: isUninitializedConversationHistory,
+    isError: isErrorConversationHistory,
+    refetch: refetchConversationHistory,
   } = useGetConversationByIdQuery(
     {
       conversationId: config.conversationId || '',
@@ -552,5 +555,8 @@ export const useChat = (config: ChatConfig) => {
     streamingState,
     isStreaming,
     clearStreamingState,
+    isUninitializedConversationHistory,
+    isErrorConversationHistory,
+    refetchConversationHistory: refetchConversationHistory,
   };
 };
