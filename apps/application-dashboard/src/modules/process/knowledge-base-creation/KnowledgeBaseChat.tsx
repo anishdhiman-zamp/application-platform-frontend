@@ -43,6 +43,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
   const [header, setHeader] = useState('');
   const [isNewConversation, setIsNewConversation] = useState(false);
+  const [chatInputKey, setChatInputKey] = useState(0);
 
   const chat = useChat({
     resourceId: processId,
@@ -96,6 +97,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
             setConversationId?.('');
             setHeader('');
             setIsNewConversation(true);
+            setChatInputKey((prev) => prev + 1);
           }}
         />
       </div>
@@ -107,6 +109,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       <div className='border-GRAY_400 w-full border-t p-3'>
         <div className='flex flex-shrink-0'>
           <ConnectedChatInput
+            key={chatInputKey}
             chat={chat}
             placeholder='Ask anything or give feedback...'
             annotationLocation={{
