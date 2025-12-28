@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { AnnotationType, ResourceType } from '@zamp-platform/chat';
-import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useGetProcessesQuery } from '@/apis/pages';
-import { useLazyFilterConversationsQuery } from '@/apis/processes';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -13,20 +11,20 @@ import { useAppDispatch } from '@/hooks/toolkit';
 import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
 import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
-import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
+import { cn } from '@/utils/common';
 
-const CreateKnowledgebasePage = () => {
+const KnowledgeBaseV2Page = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
   const processId = params?.processId as string;
-  const [conversationId, setConversationId] = useState<string | undefined>(params?.conversationId as string);
+  const searchParams = useSearchParams();
+  const conversationId = searchParams?.get('chatbot_conversation_id') as string;
+  const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
 
   const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
-  const [filterConversations, { isFetching: isLoadingFilterConversations, isUninitialized }] =
-    useLazyFilterConversationsQuery();
 
   const currentProcess = useMemo(() => processes?.find((process) => process.id === processId), [processes, processId]);
 
@@ -40,26 +38,12 @@ const CreateKnowledgebasePage = () => {
     };
   }, [dispatch]);
 
-  useEffect(() => {
-    if (!conversationId && currentProcess?.status === ProcessStatus.DRAFT) {
-      filterConversations({
-        resource_id: processId,
-        resource_type: ResourceType.PROCESS,
-        annotation_types: AnnotationType.PROCESS_SOP,
-      })
-        .unwrap()
-        .then((res: FilterConversationsResponseType) => {
-          if (res.conversations.length > 0) {
-            setConversationId(res.conversations[0].id);
-          } else {
-            setDefaultMessage(`I want to automate ${currentProcess?.display_name}`);
-          }
-        })
-        .catch((err: unknown) => {
-          console.log(err);
-        });
+  const handleChatSubmit = useCallback((message: string) => {
+    if (message.trim()) {
+      setDefaultMessage(message);
+      setIsChatbotExpanded(true);
     }
-  }, [processId, conversationId, currentProcess, filterConversations]);
+  }, []);
 
   return (
     <CommonWrapper
@@ -73,22 +57,27 @@ const CreateKnowledgebasePage = () => {
       className='h-full'
     >
       <div className='flex h-full w-full'>
-        <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
-          <KnowledgeBaseChat
-            key={conversationId}
-            setConversationId={setConversationId}
-            conversationId={conversationId || ''}
-            processId={processId}
-            status={currentProcess?.status}
-            isLoadingFilterConversations={
-              currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
-            }
-            defaultMessage={defaultMessage}
-          />
+        <div
+          className={cn(
+            'overflow-hidden transition-all duration-300',
+            isChatbotExpanded || !!conversationId ? 'w-[444px] min-w-[444px]' : 'w-0 min-w-0',
+          )}
+        >
+          <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
+            <KnowledgeBaseChat
+              key={conversationId || 'new-conversation'}
+              conversationId={conversationId || ''}
+              processId={processId}
+              status={currentProcess?.status}
+              defaultMessage={defaultMessage}
+              onNewConversation={() => setDefaultMessage(undefined)}
+            />
+          </div>
         </div>
         <div className='w-full'>
           <ProcessCreationKnowledgeBase
-            isChatbotExpanded
+            onChatSubmit={handleChatSubmit}
+            isChatbotExpanded={isChatbotExpanded || !!conversationId}
             processId={processId}
             processName={currentProcess?.display_name ?? ''}
           />
@@ -98,4 +87,4 @@ const CreateKnowledgebasePage = () => {
   );
 };
 
-export default CreateKnowledgebasePage;
+export default KnowledgeBaseV2Page;

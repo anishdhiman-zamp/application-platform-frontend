@@ -169,7 +169,8 @@ export type LocationData =
   | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
   | ({ type: LocationType.LOG } & { data: LogLocationData })
   | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
-  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData })
+  | ({ type: LocationType.SOP } & { data: ProcessLocationData });
 
 export interface AnnotationData {
   location: LocationData;

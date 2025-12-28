@@ -62,9 +62,8 @@ const Topbar = () => {
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-
-  const processStatus = useMemo(
-    () => processes?.find((process) => process?.id === processId)?.status,
+  const isProcessDraft = useMemo(
+    () => processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
     [processes, processId],
   );
 
@@ -91,9 +90,9 @@ const Topbar = () => {
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
-    if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
-      return null;
-    }
+    // if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
+    //   return null;
+    // }
 
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
@@ -101,8 +100,15 @@ const Topbar = () => {
       return (
         <div className='flex items-center gap-3'>
           {isFeedbackEnabled ? (
-            <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-              <Link prefetch href={getCreateKnowledgeBaseRouteByProcessId(processId ?? '')}>
+            <TooltipV2 tooltipBody='knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+              <Link
+                prefetch
+                href={
+                  isProcessDraft
+                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
+                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
+                }
+              >
                 <Button id='knowledge-base-btn' size='small' variant='secondary'>
                   <BookOpen size={12} className='' />
                 </Button>
@@ -164,7 +170,7 @@ const Topbar = () => {
         <div className='min-w-0 flex-1'>
           <div className='flex items-center gap-1'>
             <BreadCrumb isSidebarOpen={isSidebarOpen} />
-            {processStatus === ProcessStatus.DRAFT && (
+            {isProcessDraft && (
               <div className='f-10-550 text-GRAY_900 border-GRAY_100 rounded-full border px-2 py-1'>DRAFT</div>
             )}
           </div>

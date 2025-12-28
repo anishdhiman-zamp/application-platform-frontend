@@ -15,17 +15,30 @@ import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { NEEDS_ATTENTION_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
-import { MapAny } from '@/types/commonTypes';
+import { useAppSelector } from '@/hooks/toolkit';
+import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
+import { defaultFn, MapAny } from '@/types/commonTypes';
+import { cn } from '@/utils/common';
 
 interface ProcessCreationKnowledgeBaseProps {
   processId: string;
   processName: string;
+  onChatSubmit?: (message: string) => void;
+  isChatbotExpanded?: boolean;
 }
 
-const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({ processId, processName }) => {
+const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
+  processId,
+  processName,
+  onChatSubmit = defaultFn,
+  isChatbotExpanded,
+}) => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const { sseEventBus } = useEventBus();
+  const { isSidebarOpen } = useAppSelector((state) => state.layoutConfig);
 
   const { data, isLoading: isLoadingKnowledgeBase } = useGetKnowledgeBaseQuery({ processId });
 
@@ -110,6 +123,32 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({ p
               {markdownContent}
             </ReactMarkdown>
           </CommonWrapper>
+          <div
+            className={cn('fixed right-0 bottom-0 z-1000 m-auto w-full transition-opacity duration-400', {
+              'opacity-100': !isChatbotExpanded,
+              'pointer-events-none opacity-0': isChatbotExpanded,
+              'w-[calc(100vw-241px)]': isSidebarOpen,
+              'w-full': !isSidebarOpen,
+            })}
+          >
+            <div className='bg-gradient-to-transparent w-full pb-6'>
+              <KbChatInput
+                onSubmit={onChatSubmit}
+                className={cn('mx-auto w-full transition-all duration-400', {
+                  'w-[672px]': isInputFocused || inputValue.length > 0,
+                  'w-[336px]': !isInputFocused && inputValue.length === 0,
+                })}
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                textWrapperClassName='flex pt-0 items-end'
+                textAreaClassName='!pt-4 pb-4 !min-h-[26px]'
+                placeholderClassName='!top-4'
+                sendButtonClassName='!p-3'
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

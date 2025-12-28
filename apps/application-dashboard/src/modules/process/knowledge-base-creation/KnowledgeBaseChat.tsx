@@ -23,21 +23,25 @@ import { MapAny } from '@/types/commonTypes';
 interface KnowledgeBaseChatProps {
   status?: ProcessStatus;
   processId: string;
-  conversationId: string;
-  isLoadingFilterConversations: boolean;
+  conversationId?: string;
+  isLoadingFilterConversations?: boolean;
   defaultMessage?: string;
+  onNewConversation?: () => void;
+  setConversationId?: (conversationId: string) => void;
 }
 
 const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   status,
   processId,
   conversationId,
-  isLoadingFilterConversations,
+  isLoadingFilterConversations = false,
   defaultMessage,
+  onNewConversation,
+  setConversationId,
 }) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
-  const [header, setHeader] = useState('Generated feedback title');
+  const [header, setHeader] = useState('');
   const [isNewConversation, setIsNewConversation] = useState(false);
 
   const chat = useChat({
@@ -63,6 +67,12 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     console.log('blockConfig', blockConfig, payload);
   };
 
+  useEffect(() => {
+    if (chat?.conversationId) {
+      setConversationId?.(chat?.conversationId);
+    }
+  }, [chat?.conversationId]);
+
   return (
     <div className='flex h-full w-full flex-col'>
       <div
@@ -71,14 +81,20 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           status === ProcessStatus.DRAFT ? 'hidden' : 'flex',
         )}
       >
-        <div className='f-14-500 text-GRAY_1000 flex-grow'>{header}</div>
-        <EllipsisVertical size={12} className='text-GRAY_700 cursor-pointer' />
+        {header ? (
+          <div className='f-14-500 text-GRAY_1000 flex-grow'>{header}</div>
+        ) : (
+          <div className='f-12-550 text-GRAY_700 flex-grow'>Ask or give feedback</div>
+        )}
+        <EllipsisVertical size={12} className='text-GRAY_700 hidden cursor-pointer' />
         <CirclePlus
           size={12}
           className='text-GRAY_700 cursor-pointer'
           onClick={() => {
             chat.clearMessages();
-            setHeader('Generated feedback title');
+            onNewConversation?.();
+            setConversationId?.('');
+            setHeader('');
             setIsNewConversation(true);
           }}
         />
@@ -94,7 +110,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
             chat={chat}
             placeholder='Ask anything or give feedback...'
             annotationLocation={{
-              type: LocationType.PROCESS,
+              type: LocationType.SOP,
               data: {
                 process_id: processId,
               },
