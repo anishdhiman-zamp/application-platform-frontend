@@ -3,7 +3,12 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { KNOWLEDGE_BASED } from 'constants/icons';
-import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
+import {
+  getCreateKnowledgeBaseRouteByProcessId,
+  getKnowledgeBasedRouteByProcessId,
+  getKnowledgeBasedV2RouteByProcessId,
+  ROUTES_PATH,
+} from 'constants/routeConfig';
 import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
@@ -13,6 +18,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
+import { useGetProcessesQuery } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
@@ -21,6 +27,7 @@ import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButt
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import { ProcessStatus } from '@/types/api/processApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -44,12 +51,22 @@ const ShareButton = () => {
 };
 
 const Topbar = () => {
+  const [isSopCreationEnabled, setIsSopCreationEnabled] = useState<boolean>(false);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
+  const { data: processes } = useGetProcessesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
+  const { isProcessDraft } = useMemo(() => {
+    return {
+      isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
+      isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
+    };
+  }, [processes, processId]);
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
@@ -57,6 +74,13 @@ const Topbar = () => {
 
   useEffect(() => {
     if (ldClient) {
+      evaluate(FEATURE_FLAGS.SOP_CREATION)
+        .then((res) => {
+          setIsSopCreationEnabled(res);
+        })
+        .catch(() => {
+          setIsSopCreationEnabled(false);
+        });
       evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
         .then((res: string[]) => {
           if (res?.includes(processId ?? '')) {
@@ -72,9 +96,9 @@ const Topbar = () => {
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
-    if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
-      return null;
-    }
+    // if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
+    //   return null;
+    // }
 
     if (pathname?.includes(ROUTES_PATH.PROCESS)) {
       const processId = params?.processId;
@@ -82,8 +106,17 @@ const Topbar = () => {
       return (
         <div className='flex items-center gap-3'>
           {isFeedbackEnabled ? (
-            <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-              <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
+            <TooltipV2 tooltipBody='knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+              <Link
+                prefetch
+                href={
+                  !isSopCreationEnabled
+                    ? getKnowledgeBasedRouteByProcessId(processId ?? '')
+                    : isProcessDraft
+                      ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
+                      : getKnowledgeBasedV2RouteByProcessId(processId ?? '')
+                }
+              >
                 <Button id='knowledge-base-btn' size='small' variant='secondary'>
                   <BookOpen size={12} className='' />
                 </Button>

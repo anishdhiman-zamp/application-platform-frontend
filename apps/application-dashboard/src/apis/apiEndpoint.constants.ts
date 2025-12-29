@@ -182,4 +182,6 @@ export const API_ENDPOINTS = {
   // Conversations V3
   CREATE_CONVERSATION_V3: `v3/conversations`,
   POST_MESSAGE_V3: `v3/conversations/{{conversationId}}/messages`,
+  // Conversations V2
+  FILTER_CONVERSATIONS_V2_GET: `v2/conversations/filter`,
 };

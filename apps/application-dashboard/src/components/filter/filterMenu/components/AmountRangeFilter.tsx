@@ -6,7 +6,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, OptionsType } from 'types/commonTypes';
 import { camelCaseToNormalText } from 'utils/common';
 import Input from 'components/common/input';
-import { Tooltip } from 'components/common/tooltip';
+import TooltipV2 from 'components/common/TooltipV2';
 import { AmountRangeFilterValue, FILTER_TYPES } from 'components/filter/filter.types';
 import ConfigureFilterButton from 'components/filter/filterMenu/ConfigureFilterButton';
 import { AMOUNT_RANGE_FILTER_OPTIONS, CONDITION_OPERATOR_TYPE } from 'components/filter/filters.constants';
@@ -155,9 +155,9 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
         </div>
       </div>
       <div className='flex flex-col gap-2'>
-        <Tooltip
-          tooltipBody={`condition set to “is blank”`}
-          tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+        <TooltipV2
+          tooltipBody={`condition set to "is blank"`}
+          tooltipClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
           className='z-1 cursor-not-allowed!'
           disabled={selectedOperator?.value !== CONDITION_OPERATOR_TYPE.IS_NULL}
         >
@@ -170,7 +170,7 @@ const AmountRangeFilter: FC<AmountRangeFilterProps> = ({
             disabled={selectedOperator?.value === CONDITION_OPERATOR_TYPE.IS_NULL || isDisabled}
             autoFocus
           />
-        </Tooltip>
+        </TooltipV2>
         {selectedOperator?.value === CONDITION_OPERATOR_TYPE.IN_BETWEEN && (
           <span className='f-11-400 text-GRAY_700 select-none'>and</span>
         )}
