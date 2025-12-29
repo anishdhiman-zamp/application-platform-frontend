@@ -1,20 +1,18 @@
 import { FC, ReactNode } from 'react';
 import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
-import { COLORS } from 'constants/colors';
 import { SIZE_TYPES } from 'types/common/components';
-import { defaultFnType } from 'types/commonTypes';
+import { defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { Button } from 'components/common/button/Button';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import TooltipV2 from 'components/common/TooltipV2';
 
 interface TooltipButtonPropsType {
   tooltipBodyClassName?: string;
   tooltipBodyOverrideClassName?: string;
   tooltipBody?: string;
   className?: string;
-  tooltipColor?: string;
-  tooltipPosition?: TooltipPositions;
+  tooltipPosition?: SIDE_OPTIONS;
   buttonIcon?: SvgSpriteLoaderProps;
   buttonType?: BUTTON_TYPES;
   buttonSize?: SIZE_TYPES;
@@ -32,8 +30,7 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   tooltipBodyOverrideClassName = 'f-12-300 tw-py-1 tw-px-2 tw-rounded-sm tw-whitespace-nowrap',
   tooltipBody = '',
   className = '',
-  tooltipColor = COLORS.BLACK,
-  tooltipPosition = TooltipPositions.BOTTOM,
+  tooltipPosition = SIDE_OPTIONS.BOTTOM,
   buttonIcon,
   buttonType = BUTTON_TYPES.SECONDARY,
   buttonSize = SIZE_TYPES.SMALL,
@@ -46,13 +43,12 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   children,
 }) => {
   return (
-    <Tooltip
+    <TooltipV2
       tooltipBody={tooltipBody}
-      position={tooltipPosition}
-      color={tooltipColor}
+      side={tooltipPosition}
       className={tooltipClassName}
       disabled={disabled}
-      tooltipBodyClassName={cn(tooltipBodyOverrideClassName, tooltipBodyClassName)}
+      tooltipClassName={cn(tooltipBodyOverrideClassName, tooltipBodyClassName)}
     >
       <Button
         type={buttonType}
@@ -66,7 +62,7 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
       >
         {children}
       </Button>
-    </Tooltip>
+    </TooltipV2>
   );
 };
 
