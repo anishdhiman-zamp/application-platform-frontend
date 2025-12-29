@@ -3,11 +3,12 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import type { DatasetUrlDataType } from 'modules/data/data.types';
 import { formatUrlFilters, parseDatasets } from 'modules/data/data.utils';
-import DatasetById from 'modules/data/Dataset';
 import type { FilterConfig } from 'modules/widgets/Pivot/pivot.types';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { TAB_TYPES } from 'types/common/components';
 import { Tabs } from 'components/common/tabs/Tabs';
+const DatasetById = dynamic(() => import('modules/data/Dataset'));
 
 interface Dataset {
   id: string;

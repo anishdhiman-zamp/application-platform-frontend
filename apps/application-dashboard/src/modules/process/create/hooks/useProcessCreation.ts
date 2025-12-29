@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ProcessCreationErrors, ProcessCreationFormData } from 'app/(authenticated)/processes/create/types';
+import { ProcessCreationErrors, ProcessCreationFormData } from '@/modules/process/create/types';
 
 export const useProcessCreation = () => {
   const [formData, setFormData] = useState<ProcessCreationFormData>({

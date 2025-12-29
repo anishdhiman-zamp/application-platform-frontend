@@ -53,7 +53,7 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
     processesList: processes ?? [],
   });
 
-  // Handle navigation logic - only for /processes route
+  // Handle navigation logic - only for /process route
   useEffect(() => {
     // Check for org switch in progress and reload if needed
     if (isOrgSwitchIsInProgress) {
@@ -62,9 +62,10 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
       return;
     }
 
-    // Only navigate on /processes route
-    if (pathname === ROUTES_PATH.PROCESSES && isSuccessPages && isSuccessProcesses) {
+    // Only navigate on /process route
+    if (pathname === ROUTES_PATH.PROCESS && isSuccessPages && isSuccessProcesses) {
       if (processes && processes.length > 0) {
+        console.log('pushing to most relevant process');
         pushToMostRelevantProcess();
       } else if (pages && pages.length > 0) {
         pushToMostRelevantPage();

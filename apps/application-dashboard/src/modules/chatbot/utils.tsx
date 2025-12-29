@@ -323,8 +323,8 @@ export const createChatbotUrl = (feedback: FeedbackItemType) => {
 
   let url =
     annotationLocation?.type === LocationType.PROCESS
-      ? `/processes/${annotationLocation?.data?.process_id}?${commonParams}`
-      : `/processes/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
+      ? `/process/${annotationLocation?.data?.process_id}?${commonParams}`
+      : `/process/${annotationLocation?.data?.process_id}/activity-logs/${annotationLocation?.data?.activity_run_id}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${annotationLocation?.data?.activity_run_id}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:
@@ -430,12 +430,13 @@ export const uploadFileToSignedUrl = async (uploadUrl: string, file: File, fileT
 export const createUserMessagePayload = (
   inputValue: string,
   resourceId: string,
+  resourceType: ResourceType,
   senderName: string,
   attachments?: MessageAttachmentType[],
 ): ChatMessage => {
   return {
     resource_id: resourceId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     message_content: {
       text: inputValue,
       text_type: 'plain_text',
@@ -621,15 +622,16 @@ export const isSubmitKeyPress = (event: React.KeyboardEvent): boolean => {
 export const createConversationPayload = (
   processId: string,
   activityRunId: string,
+  resourceType: ResourceType,
   messageText: string,
-  annotationLocation: LocationData,
   senderName: string,
   attachments?: MessageAttachmentType[],
   scope = ScopeType.ACTIVITY_RUN,
+  annotationLocation?: LocationData,
 ) => {
   return {
     resource_id: processId,
-    resource_type: ResourceType.PROCESS,
+    resource_type: resourceType,
     scope_type: scope,
     scope_id: scope === ScopeType.ACTIVITY_RUN ? activityRunId : processId,
     message_content: {
@@ -647,9 +649,11 @@ export const createConversationPayload = (
       ] as Block[],
       attachments: attachments && attachments.length > 0 ? attachments : undefined,
     },
-    annotation_data: {
-      location: annotationLocation,
-    },
+    ...(annotationLocation && {
+      annotation_data: {
+        location: annotationLocation,
+      },
+    }),
     sender_name: senderName,
   };
 };

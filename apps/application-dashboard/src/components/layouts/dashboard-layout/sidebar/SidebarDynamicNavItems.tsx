@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
@@ -9,7 +9,6 @@ import { getProcessRouteById } from '@/constants/routeConfig';
 import { usePagesAndProcesses } from '@/contexts/PagesAndProcessesContext';
 
 const SidebarDynamicNavItems = ({ params }: { params: { pageId?: string; processId?: string } }) => {
-  // Get pages/processes data from context (fetched once at layout level)
   const { pages, processes, isLoading: isLoadingPagesOrProcesses } = usePagesAndProcesses();
 
   const sortedPages = useMemo(() => {

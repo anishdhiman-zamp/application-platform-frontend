@@ -5,7 +5,7 @@ export const ROUTES_PATH = {
   DATASET_DRILLDOWN: '/datasets/drilldown/:datasetId/:rowId',
   DATASET: '/datasets/:datasetId',
   PAGES: '/pages',
-  PROCESSES: '/processes',
+  PROCESS: '/process',
   PAGE_DATASET: '/pages/:pageId/datasets/:datasetId',
   PAGE_DATASET_DRILLDOWN: '/pages/:pageId/drilldown/:datasetId/:rowId',
   PAGE_SHEET: '/pages/:pageId/:sheetId',
@@ -17,11 +17,13 @@ export const ROUTES_PATH = {
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
-  PROCESS: '/processes/:processId',
-  PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
+  PROCESS_CREATE: '/process/create',
+  PROCESS_ID: '/process/:processId',
+  PROCESS_ACTIVITY_LOGS: '/process/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
-  KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
+  KNOWLEDGE_BASE: '/process/:processId/knowledge-base',
+  CREATE_KNOWLEDGE_BASE: '/process/:processId/create-knowledgebase',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
@@ -30,6 +32,11 @@ export const ROUTES_PATH = {
   INTEGRATIONS: '/settings/integrations',
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_TEAM: '/settings/team',
+
+  MACS: '/macs',
+
+  CHAT: '/chat',
+  CHAT_ID: '/chat/:chatId',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -67,7 +74,7 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
 };
 
 export const getProcessRouteById = (processId: string, status?: string) => {
-  return `${ROUTES_PATH.PROCESS.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
+  return `${ROUTES_PATH.PROCESS_ID.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
 };
 
 export const getProcessActivityLogsRouteById = (
@@ -95,6 +102,10 @@ export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
 
 export const getIntegrationDetailRoute = (integrationId: string) => {
   return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
+};
+
+export const getChatRouteById = (chatId: string) => {
+  return `${ROUTES_PATH.CHAT_ID.replace(':chatId', chatId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

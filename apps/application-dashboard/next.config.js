@@ -1,5 +1,7 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 
+const isDev = process.env.NODE_ENV === 'development';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -15,8 +17,21 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {},
-    // Optimize memory usage during builds
-    optimizePackageImports: ['lucide-react', '@zamp-platform/ui'],
+    // Optimize memory usage during builds and hot reload
+    optimizePackageImports: [
+      'lucide-react',
+      '@zamp-platform/ui',
+      '@reduxjs/toolkit',
+      'react-redux',
+      'date-fns',
+      '@tiptap/core',
+      '@tiptap/react',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      'ag-grid-react',
+      'ag-charts-react',
+      'motion',
+    ],
   },
   env: {
     NEXT_PUBLIC_ASSET_PREFIX: process.env.NEXT_PUBLIC_ASSET_PREFIX || '',
@@ -39,7 +54,8 @@ const nextConfig = {
     return config;
   },
   transpilePackages: ['@zamp-platform/ui', '@zamp-platform/form-builder', '@zamp-platform/chat'],
-  productionBrowserSourceMaps: true,
+  // Only enable source maps in production builds, not during development
+  productionBrowserSourceMaps: !isDev,
   images: {
     remotePatterns: [
       {
@@ -113,24 +129,27 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(nextConfig, {
-  org: 'varni-labs-pte-ltd',
-  project: 'application-platform-dashboard',
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  urlPrefix: '~/_next/static/chunks/pages',
-  rewrite: true,
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: '/monitoring',
+// Skip Sentry wrapper in development for faster hot reload
+module.exports = isDev
+  ? nextConfig
+  : withSentryConfig(nextConfig, {
+      org: 'varni-labs-pte-ltd',
+      project: 'application-platform-dashboard',
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      urlPrefix: '~/_next/static/chunks/pages',
+      rewrite: true,
+      // Automatically tree-shake Sentry logger statements to reduce bundle size
+      disableLogger: true,
+      // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+      // This can increase your server load as well as your hosting bill.
+      // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+      // side errors will fail.
+      tunnelRoute: '/monitoring',
 
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true,
-});
+      // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+      // See the following for more information:
+      // https://docs.sentry.io/product/crons/
+      // https://vercel.com/docs/cron-jobs
+      automaticVercelMonitors: true,
+    });

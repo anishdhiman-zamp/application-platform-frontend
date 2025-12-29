@@ -20,4 +20,5 @@ export enum FEATURE_FLAGS {
   ENABLE_KNOWLEDGE_BASE = 'enable-knowledge-base',
   DISABLE_FEEDBACK = 'disable-feedback',
   DASHBOARD_DOWNTIME = 'dashboard-downtime-v2',
+  MACS_CHAT = 'macs-chat',
 }

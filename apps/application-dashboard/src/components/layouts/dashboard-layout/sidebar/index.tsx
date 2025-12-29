@@ -13,7 +13,8 @@ import { toggleSidebar } from 'store/slices/layout-configs';
 import { cn } from 'utils/common';
 import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import { COLORS } from '@/constants/colors';
-import { SETTINGS_ID, SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
+import { SETTINGS_ID } from '@/constants/sidebar.constants';
+import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
 import { useHash } from '@/hooks/useHash';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
@@ -26,6 +27,8 @@ const Sidebar = () => {
   const pathTrim = usePathname();
   const hash = useHash();
   const pathname = pathTrim + hash;
+
+  const { filteredItems: sidebarItems } = useFilteredSidebarItems();
 
   const handleSidebarToggle = () => {
     dispatch(toggleSidebar());
@@ -42,7 +45,7 @@ const Sidebar = () => {
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             onClick={handleSidebarToggle}
-            className='bg-BACKGROUND_GRAY_1 absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center'
+            className='absolute top-0 left-0 z-30 flex h-12 w-12 items-center justify-center bg-transparent'
             aria-label='Toggle sidebar'
           >
             <FlexAlignRight height={16} width={16} color={COLORS.GRAY_700} className='cursor-pointer' />
@@ -88,7 +91,7 @@ const Sidebar = () => {
           </div>
         </div>
         <div className='border-GRAY_400 border-b px-2 pb-4'>
-          {SIDEBAR_ITEMS.map((item) => {
+          {sidebarItems.map((item) => {
             const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
 
             return (

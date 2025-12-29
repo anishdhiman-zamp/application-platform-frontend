@@ -4,7 +4,7 @@ import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 
 /**
- * Processes page - navigation logic is handled by PagesAndProcessesProvider
+ * Process page - navigation logic is handled by PagesAndProcessesProvider
  * at the layout level, so no need for navigation logic here.
  */
 export default function Page() {

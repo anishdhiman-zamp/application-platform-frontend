@@ -425,12 +425,13 @@ export const getCellEditorConfig = (column: DatasetFilterConfigResponseType) => 
       return {
         cellEditor: 'agRichSelectCellEditor',
         cellEditorParams: {
-          values: column.options,
+          values: ['', ...(column.options ?? [])],
           allowTyping: true,
           filterList: true,
           highlightMatch: true,
           searchType: 'match',
           cellHeight: 32,
+          formatValue: (value: string) => value || '(None)',
         },
       };
     case FILTER_TYPES.SEARCH:

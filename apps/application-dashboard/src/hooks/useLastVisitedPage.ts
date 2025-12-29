@@ -58,7 +58,7 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
 
   const pushToMostRelevantPage = () => {
     // navigate to the most relevant page when the user visits the home page
-    if (pathname === ROUTES_PATH.HOME || pathname === ROUTES_PATH.PAGES || pathname === ROUTES_PATH.PROCESSES) {
+    if (pathname === ROUTES_PATH.HOME || pathname === ROUTES_PATH.PAGES || pathname === ROUTES_PATH.PROCESS) {
       // if the user has a last visited page, check if it exists in the pages list and navigate to it
       // if it doesn't exist, clear the last visited page
       const lastVisitedPageId = getLastVisitedPage();
@@ -83,7 +83,7 @@ export const usePersistedPageNavigation = ({ pagesList, processesList }: Persist
 
   const pushToMostRelevantProcess = () => {
     // navigate to the most relevant page when the user visits the home page
-    if (pathname === ROUTES_PATH.HOME || pathname === ROUTES_PATH.PROCESSES) {
+    if (pathname === ROUTES_PATH.HOME || pathname === ROUTES_PATH.PROCESS) {
       // if the user has a last visited page, check if it exists in the pages list and navigate to it
       // if it doesn't exist, clear the last visited page
       const lastVisitedProcessId = getLastVisitedProcess();

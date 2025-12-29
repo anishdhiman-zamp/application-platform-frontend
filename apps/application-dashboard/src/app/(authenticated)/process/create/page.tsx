@@ -1,15 +1,15 @@
 'use client';
 
 import { FC, useRef } from 'react';
-import { InteractiveBackground } from 'app/(authenticated)/processes/create/components/InteractiveBackground';
-import { PaceCursor } from 'app/(authenticated)/processes/create/components/PaceCursor';
-import ProcessIcon from 'app/(authenticated)/processes/create/components/ProcessIcon';
-import ProcessNameInput from 'app/(authenticated)/processes/create/components/ProcessNameInput';
-import ProcessSharingSection from 'app/(authenticated)/processes/create/components/ProcessSharingSection';
-import StartBuildingButton from 'app/(authenticated)/processes/create/components/StartBuildingButton';
-import { useAudienceSelection } from 'app/(authenticated)/processes/create/hooks/useAudienceSelection';
-import { usePaceCursor } from 'app/(authenticated)/processes/create/hooks/usePaceCursor';
-import { useProcessCreation } from 'app/(authenticated)/processes/create/hooks/useProcessCreation';
+import { InteractiveBackground } from '@/modules/process/create/components/InteractiveBackground';
+import { PaceCursor } from '@/modules/process/create/components/PaceCursor';
+import ProcessIcon from '@/modules/process/create/components/ProcessIcon';
+import ProcessNameInput from '@/modules/process/create/components/ProcessNameInput';
+import ProcessSharingSection from '@/modules/process/create/components/ProcessSharingSection';
+import StartBuildingButton from '@/modules/process/create/components/StartBuildingButton';
+import { useAudienceSelection } from '@/modules/process/create/hooks/useAudienceSelection';
+import { usePaceCursor } from '@/modules/process/create/hooks/usePaceCursor';
+import { useProcessCreation } from '@/modules/process/create/hooks/useProcessCreation';
 
 const ProcessCreatePage: FC = () => {
   const { formData, errors, updateProcessName, updateSelectedAudiences, handleStartBuilding } = useProcessCreation();
