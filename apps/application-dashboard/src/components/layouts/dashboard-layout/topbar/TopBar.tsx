@@ -79,16 +79,13 @@ const Topbar = () => {
 
   useEffect(() => {
     if (ldClient) {
-      if (ldClient) {
-        evaluate(FEATURE_FLAGS.SOP_CREATION)
-          .then((res) => {
-            console.log('isSopCreationEnabled', res);
-            setIsSopCreationEnabled(res);
-          })
-          .catch(() => {
-            setIsSopCreationEnabled(false);
-          });
-      }
+      evaluate(FEATURE_FLAGS.SOP_CREATION)
+        .then((res) => {
+          setIsSopCreationEnabled(res);
+        })
+        .catch(() => {
+          setIsSopCreationEnabled(false);
+        });
       evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
         .then((res: string[]) => {
           if (res?.includes(processId ?? '')) {
