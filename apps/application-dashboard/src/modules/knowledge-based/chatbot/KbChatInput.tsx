@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef } from 'react';
+import { type FC, ReactNode, useEffect, useRef } from 'react';
 import { Button, Textarea } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { MAX_TEXTAREA_HEIGHT } from 'modules/process/process.constant';
@@ -10,7 +10,7 @@ import { cn } from '@/utils/common';
 
 interface KbChatInputProps {
   className?: string;
-  placeholder?: string;
+  placeholder?: string | ReactNode;
   onSubmit: (inputValue: string) => void;
   inputValue: string;
   setInputValue: (inputValue: string) => void;

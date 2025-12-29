@@ -17,6 +17,7 @@ import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { NEEDS_ATTENTION_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
 import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
+import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import { defaultFn, MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
@@ -136,16 +137,23 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
                 onSubmit={onChatSubmit}
                 className={cn('mx-auto w-full transition-all duration-400', {
                   'w-[672px]': isInputFocused || inputValue.length > 0,
-                  'w-[336px]': !isInputFocused && inputValue.length === 0,
+                  'w-[436px]': !isInputFocused && inputValue.length === 0,
                 })}
                 inputValue={inputValue}
                 setInputValue={setInputValue}
                 textWrapperClassName='flex pt-0 items-end'
-                textAreaClassName='!pt-4 pb-4 !min-h-[26px]'
+                textAreaClassName='!pt-3 pb-3 !min-h-[26px]'
                 placeholderClassName='!top-4'
                 sendButtonClassName='!p-3'
                 onFocus={() => setIsInputFocused(true)}
                 onBlur={() => setIsInputFocused(false)}
+                placeholder={
+                  <div className='-mt-1 flex items-center gap-1'>
+                    Ask away or give feedback to
+                    <PaceIcon height={12} width={12} />
+                    Pace
+                  </div>
+                }
               />
             </div>
           </div>

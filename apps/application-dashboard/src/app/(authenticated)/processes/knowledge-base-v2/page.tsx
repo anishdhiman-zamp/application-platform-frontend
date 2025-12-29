@@ -10,7 +10,9 @@ import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppDispatch } from '@/hooks/toolkit';
 import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
 import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
+import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
+import { ProcessStatus } from '@/types/api/processApi.types';
 
 const KnowledgeBaseV2Page = () => {
   const dispatch = useAppDispatch();
@@ -32,6 +34,10 @@ const KnowledgeBaseV2Page = () => {
       dispatch(openSidebar());
     };
   }, [dispatch]);
+
+  if (![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus)) {
+    return <ProcessInProcessBanner />;
+  }
 
   return (
     <CommonWrapper
