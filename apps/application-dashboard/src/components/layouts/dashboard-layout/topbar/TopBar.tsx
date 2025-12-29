@@ -34,7 +34,7 @@ const ShareButton = () => {
       return <SharePagePopup pageId={params?.pageId || ''} />;
     case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.DATASETS):
       return <ShareDatasetPopup datasetId={params?.datasetId || ''} />;
-    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESSES):
+    case pathname?.includes(SHARE_BTN_ALLOWED_ROUTES.PROCESS):
       return <ShareProcessPopup processId={params?.processId || ''} />;
     case pathname === SHARE_BTN_ALLOWED_ROUTES.DATASET:
       return null;
@@ -76,7 +76,7 @@ const Topbar = () => {
       return null;
     }
 
-    if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
+    if (pathname?.includes(ROUTES_PATH.PROCESS)) {
       const processId = params?.processId;
 
       return (

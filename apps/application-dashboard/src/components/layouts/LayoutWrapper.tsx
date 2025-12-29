@@ -25,9 +25,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       <div className='relative'>
         <div className='relative flex h-full w-full min-w-[768px]'>
           {showSidebar && (
-            <Suspense>
-              <Sidebar />
-            </Suspense>
+            // <Suspense>
+            <Sidebar />
+            // </Suspense>
           )}
           <motion.div
             initial={false}

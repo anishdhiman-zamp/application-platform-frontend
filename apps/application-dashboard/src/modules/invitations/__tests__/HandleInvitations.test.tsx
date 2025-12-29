@@ -149,7 +149,7 @@ describe('HandleInvitations', () => {
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
             expect(mockWhoAmI).toHaveBeenCalled();
-            expect(mockLocationHref).toBe(ROUTES_PATH.PROCESSES);
+            expect(mockLocationHref).toBe(ROUTES_PATH.PROCESS);
           },
           { timeout: 5000 },
         );
@@ -174,7 +174,7 @@ describe('HandleInvitations', () => {
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv1' });
             expect(mockAcceptInvitation).toHaveBeenCalledWith({ invitationId: 'inv2' });
             expect(mockWhoAmI).toHaveBeenCalled();
-            expect(mockLocationHref).toBe(ROUTES_PATH.PROCESSES);
+            expect(mockLocationHref).toBe(ROUTES_PATH.PROCESS);
           },
           { timeout: 5000 },
         );

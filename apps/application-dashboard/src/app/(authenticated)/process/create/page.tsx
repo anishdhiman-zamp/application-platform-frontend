@@ -20,7 +20,6 @@ const ProcessCreatePage: FC = () => {
     search,
     setSearch,
     isOpen,
-    setIsOpen,
     handleValidateAndAdd,
     handleSelectOption,
   } = useAudienceSelection({
@@ -53,7 +52,6 @@ const ProcessCreatePage: FC = () => {
           search={search}
           setSearch={setSearch}
           isOpen={isOpen}
-          setIsOpen={setIsOpen}
           onValidateAndAdd={handleValidateAndAdd}
           onSelectOption={handleSelectOption}
         />
