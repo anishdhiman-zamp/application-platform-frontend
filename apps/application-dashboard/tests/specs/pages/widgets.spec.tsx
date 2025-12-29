@@ -22,7 +22,7 @@ test.describe.skip('Widgets', () => {
       widgetId = '';
 
     await test.step('Open org switcher and select an available org', async () => {
-      await page.goto(`${baseUrl}/processes`);
+      await page.goto(`${baseUrl}/process`);
       // select Org
       await chooseOrganization(page, 'Zamp');
 

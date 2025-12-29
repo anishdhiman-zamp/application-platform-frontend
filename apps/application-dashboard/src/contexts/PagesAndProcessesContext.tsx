@@ -35,7 +35,7 @@ interface PagesAndProcessesProviderProps {
 
 /**
  * Provider that fetches pages and processes data once at the layout level.
- * Also handles navigation logic for routes that need it (e.g., /processes page).
+ * Also handles navigation logic for routes that need it (e.g., /process page).
  * This ensures the API is only called once, even if multiple components need the data.
  */
 export function PagesAndProcessesProvider({ children }: PagesAndProcessesProviderProps) {
