@@ -11,7 +11,7 @@ const StartBuildingButton: FC<StartBuildingButtonProps> = ({ onClick, disabled }
     <div className='mt-8 w-1/2'>
       <Button
         onClick={onClick}
-        className='w-full'
+        className='disabled:bg-GRAY_100 disabled:text-GRAY_700 w-full disabled:opacity-100'
         variant='default'
         size='large'
         disabled={disabled}
