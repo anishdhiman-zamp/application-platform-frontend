@@ -100,7 +100,12 @@ const Topbar = () => {
             </Link>
           ) : null}
           {isFeedbackEnabled && <DraftFeedbackButton processId={processId} />}
-          {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
+          {isFeedbackEnabled && (
+            <Suspense>
+              <FeedbackStatusButton processId={processId} />
+            </Suspense>
+          )}
+
           <ShareButton />
         </div>
       );
@@ -127,7 +132,9 @@ const Topbar = () => {
         </Suspense>
       </div>
       <div className='-mi-6 flex-shrink-0'>
-        <WorkWithPace />
+        <Suspense>
+          <WorkWithPace />
+        </Suspense>
       </div>
       <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
     </motion.div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useAppSelector } from 'hooks/toolkit';
 import { usePathname } from 'next/navigation';
@@ -38,9 +37,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           >
             {showTopbar && (
               <nav className='sticky top-0 z-10'>
-                <Suspense>
-                  <Topbar />
-                </Suspense>
+                <Topbar />
               </nav>
             )}
             <LayoutChildren showTopbar={showTopbar}>{children}</LayoutChildren>
