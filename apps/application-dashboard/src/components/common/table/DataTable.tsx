@@ -1,9 +1,10 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { IServerSideDatasource, RowClickedEvent } from 'ag-grid-community';
+import dynamic from 'next/dynamic';
 import { MapAny } from 'types/commonTypes';
-import Table from 'components/common/table';
 import { DATA_TABLE_CONFIG, DATA_TABLE_THEME_PARAMS } from 'components/common/table/table.constants';
 import { getDataTableTheme } from 'components/common/table/table.utils';
+const Table = dynamic(() => import('components/common/table'));
 
 interface DataTableProps {
   columns: MapAny[];
