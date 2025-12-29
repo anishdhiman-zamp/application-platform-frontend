@@ -21,12 +21,13 @@ import { RootState } from '@/store';
 
 interface UseChatInputProps {
   chat: ReturnType<typeof useChat>;
-  annotationLocation: LocationData;
+  annotationLocation?: LocationData;
   conversationId?: string;
   setHeader?: (header: string) => void;
   scope?: ScopeType;
   externalInputValue?: string;
   setExternalInputValue?: Dispatch<SetStateAction<string>>;
+  resourceType?: ResourceType;
 }
 
 const useChatInput = ({
@@ -37,6 +38,7 @@ const useChatInput = ({
   scope = ScopeType.ACTIVITY_RUN,
   externalInputValue,
   setExternalInputValue,
+  resourceType = ResourceType.PROCESS,
 }: UseChatInputProps) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const params = useParams();
@@ -71,13 +73,14 @@ const useChatInput = ({
     const payload = createConversationPayload(
       processId,
       activityRunId,
+      resourceType,
       firstMessage || 'Hello, how are you?',
-      annotationLocation,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))
         : undefined,
       scope,
+      annotationLocation,
     );
 
     setAttachments([]);
@@ -164,6 +167,7 @@ const useChatInput = ({
     const messagePayload = createUserMessagePayload(
       inputValue,
       processId,
+      resourceType,
       currentUserName || '',
       attachments.length > 0
         ? attachments.map((att) => ({ file_id: att.file_id, file_name: att.file_name }))

@@ -22,6 +22,7 @@ export const ROUTES_PATH = {
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
+  CREATE_KNOWLEDGE_BASE: '/processes/:processId/create-knowledgebase',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
@@ -30,6 +31,11 @@ export const ROUTES_PATH = {
   INTEGRATIONS: '/settings/integrations',
   INTEGRATION_DETAIL: '/settings/integrations/:integrationId',
   SETTINGS_TEAM: '/settings/team',
+
+  MACS: '/macs',
+
+  CHAT: '/chat',
+  CHAT_ID: '/chat/:chatId',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -95,6 +101,10 @@ export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
 
 export const getIntegrationDetailRoute = (integrationId: string) => {
   return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
+};
+
+export const getChatRouteById = (chatId: string) => {
+  return `${ROUTES_PATH.CHAT_ID.replace(':chatId', chatId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];

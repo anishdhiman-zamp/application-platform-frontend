@@ -9,7 +9,8 @@ import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
-import { SETTINGS_ID, SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
+import { SETTINGS_ID } from '@/constants/sidebar.constants';
+import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
 import { useHash } from '@/hooks/useHash';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -25,6 +26,7 @@ const Sidebar = () => {
   const pathTrim = usePathname();
   const hash = useHash();
   const pathname = pathTrim + hash;
+  const { filteredItems: sidebarItems } = useFilteredSidebarItems();
 
   const {
     data: pages,
@@ -71,7 +73,7 @@ const Sidebar = () => {
         <div className='w-60'>
           <div className='h-full'>
             <div className='border-GRAY_400 border-b px-2 pb-4'>
-              {SIDEBAR_ITEMS.map((item) => {
+              {sidebarItems.map((item) => {
                 const itemPath = item.id === SETTINGS_ID ? lastVisitedSettingsRoute || ROUTES_PATH.SETTINGS : item.path;
 
                 return (
