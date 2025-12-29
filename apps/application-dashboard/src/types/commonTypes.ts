@@ -53,7 +53,7 @@ export enum SIDE_OPTIONS {
   RIGHT = 'right',
 }
 
-export enum ALIGN_OPTIONS {
+export const enum ALIGN_OPTIONS {
   START = 'start',
   CENTER = 'center',
   END = 'end',

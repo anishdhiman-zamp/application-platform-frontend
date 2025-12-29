@@ -12,13 +12,13 @@ import {
   useState,
 } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { ALIGN_OPTIONS, SIDE_OPTIONS } from '@/types/commonTypes';
 
 type TooltipV2Props = {
   children: ReactNode;
   tooltipBody: ReactNode;
   side?: SIDE_OPTIONS;
-  align?: 'start' | 'center' | 'end';
+  align?: ALIGN_OPTIONS;
   sideOffset?: number;
   alignOffset?: number;
   className?: string;
@@ -37,7 +37,7 @@ const TooltipV2: FC<TooltipV2Props> = ({
   children,
   tooltipBody,
   side = SIDE_OPTIONS.TOP,
-  align = 'center',
+  align = ALIGN_OPTIONS.CENTER,
   sideOffset = 10,
   alignOffset = 0,
   className,
