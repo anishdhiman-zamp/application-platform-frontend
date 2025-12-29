@@ -25,6 +25,29 @@ export const PaceCursor = ({ x, y }: PaceCursorProps) => {
   const [isHighFiving, setIsHighFiving] = useState(false);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
+  const handleMouseEnter = () => {
+    hoverTimer.current = setTimeout(() => {
+      setIsHighFiving(true);
+      setMessage('High Five!');
+    }, 300);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+    setIsHighFiving(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimer.current) {
+        clearTimeout(hoverTimer.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       // Only cycle messages if not high-fiving
@@ -45,21 +68,6 @@ export const PaceCursor = ({ x, y }: PaceCursorProps) => {
       setMessage(moveMessages[Math.floor(Math.random() * moveMessages.length)]);
     }
   }, [x, y, isHighFiving]);
-
-  const handleMouseEnter = () => {
-    hoverTimer.current = setTimeout(() => {
-      setIsHighFiving(true);
-      setMessage('High Five!');
-    }, 300);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimer.current) {
-      clearTimeout(hoverTimer.current);
-      hoverTimer.current = null;
-    }
-    setIsHighFiving(false);
-  };
 
   return (
     <motion.div
@@ -107,7 +115,9 @@ export const PaceCursor = ({ x, y }: PaceCursorProps) => {
           }
         >
           {isHighFiving ? (
-            <div className='-mt-1 -ml-1 text-[24px] select-none'>✋</div>
+            <div className='-mt-1 -ml-1 text-[24px] select-none' role='img' aria-label='High five hand'>
+              ✋
+            </div>
           ) : (
             <div className='h-full w-full rotate-[324deg]'>
               <div className='relative size-full'>

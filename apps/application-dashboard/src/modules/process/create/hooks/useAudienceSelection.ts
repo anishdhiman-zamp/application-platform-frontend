@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ArrayListOption } from '@/components/multiSelectInput/multiSelectInput.types';
 import { COLORS } from '@/constants/colors';
 import { PROCESS_ACCESS_PRIVILEGES } from '@/modules/shareResource/shareResource.types';
@@ -28,37 +28,30 @@ export const useAudienceSelection = ({ onAudiencesChange }: UseAudienceSelection
     [onAudiencesChange],
   );
 
-  const handleValidateAndAdd = useCallback(
-    ({ value, label, color, type, team_id }: AudienceOption) => {
-      const newItem: ArrayListOption = {
-        value,
-        label,
-        valid: true,
-        role: PROCESS_ACCESS_PRIVILEGES.EDITOR,
-        color: color || COLORS.WHITE,
-        team_id,
-        resource_audience_type: type,
-      };
+  const handleValidateAndAdd = useCallback(({ value, label, color, type, team_id }: AudienceOption) => {
+    const newItem: ArrayListOption = {
+      value,
+      label,
+      valid: true,
+      role: PROCESS_ACCESS_PRIVILEGES.EDITOR,
+      color: color || COLORS.WHITE,
+      team_id,
+      resource_audience_type: type,
+    };
 
-      setSelectedAudiences((prev) => {
-        // Check for duplicates
-        const isDuplicate = prev.some((item) => item.value === value);
+    setSelectedAudiences((prev) => {
+      // Check for duplicates
+      const isDuplicate = prev.some((item) => item.value === value);
 
-        if (isDuplicate) {
-          return prev;
-        }
+      if (isDuplicate) {
+        return prev;
+      }
 
-        const updated = [...prev, newItem];
+      return [...prev, newItem];
+    });
 
-        updateAudiences(updated);
-
-        return updated;
-      });
-
-      setSearch('');
-    },
-    [updateAudiences],
-  );
+    setSearch('');
+  }, []);
 
   const handleSelectOption = useCallback(
     (option: AudienceOption) => {
@@ -66,6 +59,10 @@ export const useAudienceSelection = ({ onAudiencesChange }: UseAudienceSelection
     },
     [handleValidateAndAdd],
   );
+
+  useEffect(() => {
+    onAudiencesChange?.(selectedAudiences);
+  }, [selectedAudiences, onAudiencesChange]);
 
   return {
     selectedAudiences,

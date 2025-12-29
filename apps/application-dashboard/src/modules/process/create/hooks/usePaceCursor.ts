@@ -95,7 +95,7 @@ export const usePaceCursor = (
       }
     };
 
-    // Move to random position every 4-8 seconds
+    // Move to random position every 5-10 seconds
     const scheduleNextMove = () => {
       const delay = 5000 + Math.random() * 5000; // 5-10 seconds
 

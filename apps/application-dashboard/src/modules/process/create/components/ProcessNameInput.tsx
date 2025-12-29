@@ -26,6 +26,7 @@ const ProcessNameInput: FC<ProcessNameInputProps> = ({ value, onChange }) => {
   return (
     <div className='mt-5 mb-10 w-full space-y-2'>
       <input
+        ref={inputRef}
         type='text'
         className={cn(
           'f-26-550 text-GRAY_1000 placeholder:text-GRAY_1000/30 w-full border-none bg-transparent shadow-none outline-none focus:border-none focus:shadow-none',

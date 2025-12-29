@@ -102,8 +102,6 @@ const ProcessSharingSection: FC<ProcessSharingSectionProps> = ({
 
   const isLoadingOptionsList = isLoadingOptions;
 
-  console.log('selectedAudiences', selectedAudiences);
-
   return (
     <div className='w-full'>
       <p className='f-14-500 text-GRAY_700 mb-3 text-left'>Share this process with others</p>

@@ -24,10 +24,6 @@ export const useProcessCreation = () => {
     setFormData((prev) => ({ ...prev, selectedAudiences: audiences }));
   }, []);
 
-  // const updateSelectedRole = useCallback((role: string) => {
-  //   setFormData((prev) => ({ ...prev, selectedRole: role }));
-  // }, []);
-
   const validateForm = useCallback((): boolean => {
     const newErrors: ProcessCreationErrors = {};
 

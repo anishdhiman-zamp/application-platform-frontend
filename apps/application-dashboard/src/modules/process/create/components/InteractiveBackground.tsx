@@ -170,6 +170,11 @@ export const InteractiveBackground = ({ clickEvent }: InteractiveBackgroundProps
   }, []);
 
   return (
-    <canvas ref={canvasRef} className='pointer-events-none absolute inset-0 z-0 h-full w-full mix-blend-multiply' />
+    <canvas
+      ref={canvasRef}
+      aria-hidden='true'
+      role='presentation'
+      className='pointer-events-none absolute inset-0 z-0 h-full w-full mix-blend-multiply'
+    />
   );
 };

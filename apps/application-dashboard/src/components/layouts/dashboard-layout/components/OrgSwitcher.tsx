@@ -11,15 +11,15 @@ import { useGetOrganizationsQuery } from '@/apis/people';
 import DropdownToggle from '@/components/common/dropdown/DropdownToggle';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import LogoutButton from '@/components/layouts/dashboard-layout/components/LogoutButton';
+import OrgCard from '@/components/layouts/dashboard-layout/components/OrgCard';
+import SkeletonLoaderSidebarPages from '@/components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
-import LogoutButton from 'components/layouts/dashboard-layout/components/LogoutButton';
-import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
-import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
 type OrgSwitcherProps = {
   isSidebarOpen: boolean;

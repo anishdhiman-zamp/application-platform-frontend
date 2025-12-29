@@ -19,12 +19,10 @@ const SidebarDynamicNavItems = ({ params }: { params: { pageId?: string; process
     return [];
   }, [pages]);
 
-  const isLoading = isLoadingPagesOrProcesses;
-
   return (
     <>
       <CommonWrapper
-        isLoading={isLoading}
+        isLoading={isLoadingPagesOrProcesses}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<SkeletonLoaderSidebarPages />}
         className='px-2 py-2.5'
@@ -45,7 +43,12 @@ const SidebarDynamicNavItems = ({ params }: { params: { pageId?: string; process
         )}
       </CommonWrapper>
 
-      <PagesNavigation pages={sortedPages} processes={processes} isLoading={isLoading} params={params} />
+      <PagesNavigation
+        pages={sortedPages}
+        processes={processes}
+        isLoading={isLoadingPagesOrProcesses}
+        params={params}
+      />
     </>
   );
 };

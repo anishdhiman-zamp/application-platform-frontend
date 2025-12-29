@@ -65,7 +65,6 @@ export function PagesAndProcessesProvider({ children }: PagesAndProcessesProvide
     // Only navigate on /process route
     if (pathname === ROUTES_PATH.PROCESS && isSuccessPages && isSuccessProcesses) {
       if (processes && processes.length > 0) {
-        console.log('pushing to most relevant process');
         pushToMostRelevantProcess();
       } else if (pages && pages.length > 0) {
         pushToMostRelevantPage();

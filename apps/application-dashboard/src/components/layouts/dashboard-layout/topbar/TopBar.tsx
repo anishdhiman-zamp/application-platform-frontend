@@ -61,7 +61,7 @@ const Topbar = () => {
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-  const { isProcessDraft } = useMemo(() => {
+  const { isProcessDraft, isProcessLive } = useMemo(() => {
     return {
       isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
       isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
@@ -166,7 +166,7 @@ const Topbar = () => {
       </div>
       <div className='-mi-6 flex-shrink-0'>
         <Suspense>
-          <WorkWithPace />
+          <WorkWithPace isProcessLive={isProcessLive} />
         </Suspense>
       </div>
       <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>

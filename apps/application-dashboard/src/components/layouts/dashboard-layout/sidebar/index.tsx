@@ -31,6 +31,14 @@ const Sidebar = () => {
     dispatch(toggleSidebar());
   };
 
+  const isSidebarItemSelected = (
+    itemPath: string,
+    pathname: string | null,
+    params: { pageId?: string; processId?: string },
+  ): boolean => {
+    return !params?.pageId && !params?.processId && (pathname?.includes(itemPath) ?? false);
+  };
+
   return (
     <>
       {/* Toggle button in top-left corner - only visible when sidebar is closed */}
@@ -97,7 +105,7 @@ const Sidebar = () => {
                   key={item.label}
                   name={item.label}
                   iconComponent={item.iconComponent}
-                  isSelected={!params?.pageId && !params?.processId && pathname?.includes(item?.path)}
+                  isSelected={isSidebarItemSelected(item.path, pathname, params)}
                 />
               </Link>
             );
