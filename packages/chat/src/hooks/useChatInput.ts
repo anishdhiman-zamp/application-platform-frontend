@@ -2,8 +2,16 @@
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Block, BLOCK_TYPE } from '../types/block.types';
-import { ChatMessage, ChatMessageType, LocationData, ResourceType, ScopeType, SenderType } from '../types/chat.types';
+import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
+import {
+  AnnotationType,
+  ChatMessage,
+  ChatMessageType,
+  LocationData,
+  ResourceType,
+  ScopeType,
+  SenderType,
+} from '../types/chat.types';
 import { useChat } from './useChat';
 
 export interface UploadedFile {
@@ -44,6 +52,7 @@ export interface UseChatInputProps {
   adapter: ChatInputAdapter;
   maxTextareaHeight?: number;
   resourceType?: ResourceType;
+  annotationType?: AnnotationType;
 }
 
 export interface UseChatInputReturn {
@@ -108,12 +117,14 @@ export const createConversationPayload = (
   attachments?: MessageAttachment[],
   scope = ScopeType.ACTIVITY_RUN,
   annotationLocation?: LocationData,
+  annotationType?: AnnotationType,
 ) => {
   return {
     resource_id: resourceId,
     resource_type: resourceType,
     scope_type: scope,
     scope_id: scope === ScopeType.ACTIVITY_RUN ? scopeId : resourceId,
+    annotation_type: annotationType,
     message_content: {
       text: messageText,
       text_type: 'plain_text',
@@ -156,6 +167,7 @@ export const useChatInput = ({
   resourceType = ResourceType.PROCESS,
   adapter,
   maxTextareaHeight = DEFAULT_MAX_TEXTAREA_HEIGHT,
+  annotationType,
 }: UseChatInputProps): UseChatInputReturn => {
   const currentUserName = adapter.getCurrentUserName();
   const resourceId = adapter.getResourceId();
@@ -194,6 +206,7 @@ export const useChatInput = ({
         : undefined,
       scope,
       annotationLocation,
+      annotationType,
     );
 
     setAttachments([]);
@@ -284,14 +297,14 @@ export const useChatInput = ({
     setValue('');
     setAttachments([]);
 
-    const lastMessage = chat.messages[chat.messages.length - 1];
+    const lastMessage = chat.messages[chat.messages.length - 3];
     let messageId = '';
 
     if (lastMessage?.message_content?.elements) {
       for (const element of lastMessage.message_content.elements) {
         if (
           element?.type === BLOCK_TYPE.BUTTON &&
-          (element as { action?: { type?: string } })?.action?.type === 'INTERNAL_API'
+          (element as ButtonBlockType)?.action?.type === ActionType.INTERNAL_API
         ) {
           messageId = lastMessage.id || '';
         }

@@ -1,34 +1,16 @@
-'use client';
+import CreateKnowledgebasePageHome from '@/modules/process/knowledge-base-creation/CreateKnowledgebasePageHome';
 
-import { useEffect } from 'react';
-import { useAppDispatch } from '@/hooks/toolkit';
-import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
-import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
-import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
+interface CreateKnowledgebasePageProps {
+  params: Promise<{ processId: string }>;
+  searchParams?: Promise<{ conversationId?: string }>;
+}
 
-const CreateKnowledgebasePage = () => {
-  const dispatch = useAppDispatch();
+const CreateKnowledgebasePage = async ({ params, searchParams }: CreateKnowledgebasePageProps) => {
+  const { processId } = await params;
+  const resolvedSearchParams = await searchParams;
+  const conversationId = resolvedSearchParams?.conversationId;
 
-  useEffect(() => {
-    setTimeout(() => {
-      dispatch(closeSidebar());
-    }, 300);
-
-    return () => {
-      dispatch(openSidebar());
-    };
-  }, [dispatch]);
-
-  return (
-    <div className='flex h-full w-full'>
-      <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
-        <KnowledgeBaseChat />
-      </div>
-      <div className='w-full'>
-        <ProcessCreationKnowledgeBase />
-      </div>
-    </div>
-  );
+  return <CreateKnowledgebasePageHome processId={processId} conversationId={conversationId} />;
 };
 
 export default CreateKnowledgebasePage;

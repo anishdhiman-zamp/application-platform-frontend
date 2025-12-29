@@ -11,7 +11,6 @@ import {
 } from '@zamp-platform/tanstack-table';
 import { useTableStateRedux } from 'hooks/useTableStateRedux';
 import { formatTanStackColumns } from 'modules/data/data.utils';
-import ActivityRunsEmptyState from 'modules/process/activity-runs/components/ActivityRunsEmptyState';
 import { ACTIVITY_RUNS_TABLE_COLUMNS_HEADER_WIDTH } from 'modules/process/process.constant';
 import type { ACTIVITY_RUN_STATUS, ActivityRunRowData } from 'modules/process/process.types';
 import { useRouter } from 'next/navigation';
@@ -24,6 +23,7 @@ import { getEncodedRequest } from '@/components/common/tanstackTable/table.utils
 import { FILTER_TYPES } from '@/components/filter/filter.types';
 import { CONDITION_OPERATOR_TYPE } from '@/components/filter/filters.constants';
 import { getProcessActivityLogsRouteById } from '@/constants/routeConfig';
+import ProcessEmptyState from '@/modules/process/activity-runs/components/ProcessEmptyState';
 import { useDisplayOptionContext } from '@/modules/process/activity-runs/contextWrapper/DisplayOptionContext';
 import CommonWrapper from 'components/commonWrapper';
 import FiltersWrapper from 'components/filter/filterMenu/FiltersWrapper';
@@ -265,7 +265,7 @@ const ActivityByStatus: FC<ActivityByStatusProps> = ({ processId, status, totalC
   if (shouldShowEmptyState) {
     return (
       <div className='h-full w-full'>
-        <ActivityRunsEmptyState status={status as ACTIVITY_RUN_STATUS} />
+        <ProcessEmptyState status={status as ACTIVITY_RUN_STATUS} />
       </div>
     );
   }
