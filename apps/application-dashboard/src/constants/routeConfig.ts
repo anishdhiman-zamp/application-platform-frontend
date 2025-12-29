@@ -97,6 +97,10 @@ export const getProcessActivityLogsRouteById = (
 };
 
 export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
+};
+
+export const getKnowledgeBasedV2RouteByProcessId = (processId: string) => {
   return `${ROUTES_PATH.KNOWLEDGE_BASE_V2.replace(':processId', processId)}`;
 };
 

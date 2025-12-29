@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { captureException } from '@sentry/browser';
 import { AnnotationType, ResourceType } from '@zamp-platform/chat';
+import { toast } from '@zamp-platform/ui';
 import { useParams } from 'next/navigation';
 import { useGetProcessesQuery } from '@/apis/pages';
 import { useLazyFilterConversationsQuery } from '@/apis/processes';
 import ImageLoader from '@/components/common/loader/ImageLoader';
+import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
@@ -21,7 +24,7 @@ const CreateKnowledgebasePage = () => {
   const params = useParams();
   const processId = params?.processId as string;
   const [conversationId, setConversationId] = useState<string | undefined>(params?.conversationId as string);
-  const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
+  const [defaultMessage, setDefaultMessage] = useState<string>();
 
   const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -50,14 +53,15 @@ const CreateKnowledgebasePage = () => {
       })
         .unwrap()
         .then((res: FilterConversationsResponseType) => {
-          if (res.conversations.length > 0) {
-            setConversationId(res.conversations[0].id);
+          if (res?.conversations?.length > 0) {
+            setConversationId(res?.conversations?.[0]?.id);
           } else {
             setDefaultMessage(`I want to automate ${currentProcess?.display_name}`);
           }
         })
         .catch((err: unknown) => {
-          console.log(err);
+          toast.error(KB_TOAST_MESSAGES.FAILED_CONVERSATION_CREATION);
+          captureException(err);
         });
     }
   }, [processId, conversationId, currentProcess, filterConversations]);
@@ -75,29 +79,27 @@ const CreateKnowledgebasePage = () => {
           <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={240} height={240} className='rounded-tl-xl' />
         </div>
       }
-      className='h-full'
+      className='flex h-full w-full'
     >
-      <div className='flex h-full w-full'>
-        <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
-          <KnowledgeBaseChat
-            key={conversationId}
-            setConversationId={setConversationId}
-            conversationId={conversationId || ''}
-            processId={processId}
-            status={currentProcess?.status}
-            isLoadingFilterConversations={
-              currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
-            }
-            defaultMessage={defaultMessage}
-          />
-        </div>
-        <div className='w-full'>
-          <ProcessCreationKnowledgeBase
-            isChatbotExpanded
-            processId={processId}
-            processName={currentProcess?.display_name ?? ''}
-          />
-        </div>
+      <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
+        <KnowledgeBaseChat
+          key={conversationId}
+          setConversationId={setConversationId}
+          conversationId={conversationId || ''}
+          processId={processId}
+          status={currentProcess?.status}
+          isLoadingFilterConversations={
+            currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
+          }
+          defaultMessage={defaultMessage}
+        />
+      </div>
+      <div className='w-full'>
+        <ProcessCreationKnowledgeBase
+          isChatbotExpanded
+          processId={processId}
+          processName={currentProcess?.display_name ?? ''}
+        />
       </div>
     </CommonWrapper>
   );

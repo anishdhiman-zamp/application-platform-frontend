@@ -28,6 +28,7 @@ interface KnowledgeBaseChatProps {
   defaultMessage?: string;
   onNewConversation?: () => void;
   setConversationId?: (conversationId: string) => void;
+  isDisabled?: boolean;
 }
 
 const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
@@ -38,6 +39,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
   defaultMessage,
   onNewConversation,
   setConversationId,
+  isDisabled,
 }) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
@@ -68,6 +70,17 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     console.log('blockConfig', blockConfig, payload);
   };
 
+  const handleNewConversation = () => {
+    if (isDisabled) return;
+
+    chat.clearMessages();
+    onNewConversation?.();
+    setConversationId?.('');
+    setHeader('');
+    setIsNewConversation(true);
+    setChatInputKey((prev) => prev + 1);
+  };
+
   useEffect(() => {
     if (chat?.conversationId) {
       setConversationId?.(chat?.conversationId);
@@ -90,15 +103,10 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
         <EllipsisVertical size={12} className='text-GRAY_700 hidden cursor-pointer' />
         <CirclePlus
           size={12}
-          className='text-GRAY_700 cursor-pointer'
-          onClick={() => {
-            chat.clearMessages();
-            onNewConversation?.();
-            setConversationId?.('');
-            setHeader('');
-            setIsNewConversation(true);
-            setChatInputKey((prev) => prev + 1);
-          }}
+          className={cn('text-GRAY_700 cursor-pointer', {
+            'cursor-not-allowed opacity-50': isDisabled,
+          })}
+          onClick={handleNewConversation}
         />
       </div>
       <MessageContainer messages={chat?.messages || []} handleAction={handleAction} isAnalysing={isAnalysing} />
@@ -119,7 +127,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
               },
             }}
             conversationId={chat?.conversationId || ''}
-            isDisabled={isAnalysing || isLoadingFilterConversations}
+            isDisabled={isAnalysing || isLoadingFilterConversations || isDisabled}
             scopeId={processId}
             annotationType={status === ProcessStatus.DRAFT ? AnnotationType.PROCESS_SOP : undefined}
             scope={ScopeType.PROCESS}

@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Block, BLOCK_TYPE } from '../types/block.types';
+import { ActionType, Block, BLOCK_TYPE, ButtonBlockType } from '../types/block.types';
 import {
   AnnotationType,
   ChatMessage,
@@ -297,14 +297,14 @@ export const useChatInput = ({
     setValue('');
     setAttachments([]);
 
-    const lastMessage = chat.messages[chat.messages.length - 1];
+    const lastMessage = chat.messages[chat.messages.length - 3];
     let messageId = '';
 
     if (lastMessage?.message_content?.elements) {
       for (const element of lastMessage.message_content.elements) {
         if (
           element?.type === BLOCK_TYPE.BUTTON &&
-          (element as { action?: { type?: string } })?.action?.type === 'INTERNAL_API'
+          (element as ButtonBlockType)?.action?.type === ActionType.INTERNAL_API
         ) {
           messageId = lastMessage.id || '';
         }

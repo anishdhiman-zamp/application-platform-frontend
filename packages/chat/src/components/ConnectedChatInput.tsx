@@ -271,7 +271,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 ref={textareaRef}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={isDisabled ? undefined : handleKeyDown}
                 placeholder={placeholder}
                 className='f-13-450 placeholder:text-muted-foreground m-2.5 min-h-0 w-[316px] resize-none overflow-y-auto border-none bg-transparent p-0 pr-0 shadow-none outline-none'
                 style={{

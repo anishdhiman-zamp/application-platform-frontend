@@ -6,6 +6,7 @@ import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
 import {
   getCreateKnowledgeBaseRouteByProcessId,
   getKnowledgeBasedRouteByProcessId,
+  getKnowledgeBasedV2RouteByProcessId,
   ROUTES_PATH,
 } from 'constants/routeConfig';
 import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
@@ -53,6 +54,7 @@ const ShareButton = () => {
 };
 
 const Topbar = () => {
+  const [isSopCreationEnabled, setIsSopCreationEnabled] = useState<boolean>(false);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
   const { data: processes } = useGetProcessesQuery(undefined, {
@@ -62,10 +64,12 @@ const Topbar = () => {
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-  const isProcessDraft = useMemo(
-    () => processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
-    [processes, processId],
-  );
+  const { isProcessDraft, isProcessLive } = useMemo(() => {
+    return {
+      isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
+      isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
+    };
+  }, [processes, processId]);
 
   const dispatch = useAppDispatch();
 
@@ -75,6 +79,16 @@ const Topbar = () => {
 
   useEffect(() => {
     if (ldClient) {
+      if (ldClient) {
+        evaluate(FEATURE_FLAGS.SOP_CREATION)
+          .then((res) => {
+            console.log('isSopCreationEnabled', res);
+            setIsSopCreationEnabled(res);
+          })
+          .catch(() => {
+            setIsSopCreationEnabled(false);
+          });
+      }
       evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
         .then((res: string[]) => {
           if (res?.includes(processId ?? '')) {
@@ -104,9 +118,11 @@ const Topbar = () => {
               <Link
                 prefetch
                 href={
-                  isProcessDraft
-                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
-                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
+                  !isSopCreationEnabled
+                    ? getKnowledgeBasedRouteByProcessId(processId ?? '')
+                    : isProcessDraft
+                      ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
+                      : getKnowledgeBasedV2RouteByProcessId(processId ?? '')
                 }
               >
                 <Button id='knowledge-base-btn' size='small' variant='secondary'>
@@ -176,7 +192,7 @@ const Topbar = () => {
           </div>
         </div>
         <div className='-mi-6 flex-shrink-0'>
-          <WorkWithPace />
+          <WorkWithPace isProcessLive={isProcessLive} />
         </div>
         <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
       </div>

@@ -11,6 +11,7 @@ import { useAppDispatch } from '@/hooks/toolkit';
 import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
 import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
+import { ProcessStatus } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
 
 const KnowledgeBaseV2Page = () => {
@@ -27,6 +28,10 @@ const KnowledgeBaseV2Page = () => {
   });
 
   const currentProcess = useMemo(() => processes?.find((process) => process.id === processId), [processes, processId]);
+  const disableChat = useMemo(
+    () => ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus),
+    [currentProcess],
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -39,7 +44,7 @@ const KnowledgeBaseV2Page = () => {
   }, [dispatch]);
 
   const handleChatSubmit = useCallback((message: string) => {
-    if (message.trim()) {
+    if (message?.trim()) {
       setDefaultMessage(message);
       setIsChatbotExpanded(true);
     }
@@ -71,6 +76,7 @@ const KnowledgeBaseV2Page = () => {
               status={currentProcess?.status}
               defaultMessage={defaultMessage}
               onNewConversation={() => setDefaultMessage(undefined)}
+              isDisabled={disableChat}
             />
           </div>
         </div>
@@ -80,6 +86,7 @@ const KnowledgeBaseV2Page = () => {
             isChatbotExpanded={isChatbotExpanded || !!conversationId}
             processId={processId}
             processName={currentProcess?.display_name ?? ''}
+            isDisabled={disableChat}
           />
         </div>
       </div>
