@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { KNOWLEDGE_BASED } from 'constants/icons';
 import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
@@ -122,7 +122,9 @@ const Topbar = () => {
       className='flex h-12 w-full items-center'
     >
       <div className='min-w-0 flex-1'>
-        <BreadCrumb isSidebarOpen={isSidebarOpen} />
+        <Suspense>
+          <BreadCrumb isSidebarOpen={isSidebarOpen} />
+        </Suspense>
       </div>
       <div className='-mi-6 flex-shrink-0'>
         <WorkWithPace />

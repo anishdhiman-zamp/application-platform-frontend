@@ -15,7 +15,6 @@ import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
 import { COLORS } from '@/constants/colors';
 import { SETTINGS_ID } from '@/constants/sidebar.constants';
 import { useFilteredSidebarItems } from '@/hooks/useFilteredSidebarItems';
-import { useHash } from '@/hooks/useHash';
 import OrgSwitcher from 'components/layouts/dashboard-layout/components/OrgSwitcher';
 import SidebarTab from 'components/layouts/dashboard-layout/components/SidebarTab';
 import SidebarDynamicNavItems from 'components/layouts/dashboard-layout/sidebar/SidebarDynamicNavItems';
@@ -24,9 +23,7 @@ const Sidebar = () => {
   const { isSidebarOpen, lastVisitedSettingsRoute } = useAppSelector((state: RootState) => state.layoutConfig);
   const dispatch = useAppDispatch();
   const params = useParams() as { pageId?: string; processId?: string };
-  const pathTrim = usePathname();
-  const hash = useHash();
-  const pathname = pathTrim + hash;
+  const pathname = usePathname();
 
   const { filteredItems: sidebarItems } = useFilteredSidebarItems();
 

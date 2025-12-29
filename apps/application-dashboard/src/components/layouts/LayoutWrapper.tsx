@@ -24,11 +24,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     <PagesAndProcessesProvider>
       <div className='relative'>
         <div className='relative flex h-full w-full min-w-[768px]'>
-          {showSidebar && (
-            // <Suspense>
-            <Sidebar />
-            // </Suspense>
-          )}
+          {showSidebar && <Sidebar />}
           <motion.div
             initial={false}
             animate={{

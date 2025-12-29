@@ -56,5 +56,5 @@ export enum SIDE_OPTIONS {
 export enum MODULE_TYPE {
   PAGES = 'pages',
   DATASETS = 'datasets',
-  PROCESSES = 'processes',
+  PROCESS = 'process',
 }

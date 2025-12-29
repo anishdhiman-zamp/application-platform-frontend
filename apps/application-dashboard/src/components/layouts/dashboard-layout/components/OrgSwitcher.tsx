@@ -5,7 +5,6 @@ import { DEFAULT_REGION } from '@zamp-platform/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from '@zamp-platform/utils';
-import { Loader2, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useGetBaseUrlQuery } from '@/apis/auth';
 import { useGetOrganizationsQuery } from '@/apis/people';
@@ -16,9 +15,9 @@ import SkeletonElement from '@/components/skeletons/SkeletonElement';
 import { ORG_COLORS } from '@/constants/common.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppDispatch, useAppSelector } from '@/hooks/toolkit';
-import { useLogout } from '@/hooks/useLogout';
 import { setIsOrgSwitchIsInProgress } from '@/store/slices/user';
 import type { Organization } from '@/types/api/auth.types';
+import LogoutButton from 'components/layouts/dashboard-layout/components/LogoutButton';
 import OrgCard from 'components/layouts/dashboard-layout/components/OrgCard';
 import SkeletonLoaderSidebarPages from 'components/layouts/dashboard-layout/components/SkeletonLoaderSidebarPages';
 
@@ -38,7 +37,6 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
     { email: user?.user_email ?? '' },
     { refetchOnMountOrArgChange: false, skip: !user?.user_email },
   );
-  const { logout, isLoggingOut } = useLogout();
 
   const regionList = useMemo(() => {
     return baseUrlData?.api_base_urls.filter((item) => item.region !== DEFAULT_REGION);
@@ -172,19 +170,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
                 : null}
             </CommonWrapper>
           </div>
-          <div className='border-GRAY_400 mt-0.5 border-t pt-0.5' onClick={logout}>
-            <div
-              className={cn('text-GRAY_700 hover:bg-GRAY_100 flex cursor-pointer items-center gap-2 rounded-md p-1', {
-                'cursor-not-allowed': isLoggingOut,
-              })}
-            >
-              <div className='flex h-6 w-6 items-center justify-center'>
-                <LogOut width={14} height={14} />
-              </div>
-              <div className='f-12-450 flex-1'>Logout</div>
-              {isLoggingOut && <Loader2 className='w-4 animate-spin' />}
-            </div>
-          </div>
+          <LogoutButton />
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
