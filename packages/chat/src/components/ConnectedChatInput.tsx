@@ -13,7 +13,7 @@ import useChatAdapters from '../hooks/useChatAdapters';
 import { useChatInput } from '../hooks/useChatInput';
 import { MicrophoneState } from '../hooks/useMicrophoneRecorder';
 import { useTranscription } from '../hooks/useTranscription';
-import { LocationData, ResourceType, ScopeType } from '../types/chat.types';
+import { AnnotationType, LocationData, ResourceType, ScopeType } from '../types/chat.types';
 import { SOCKET_STATES, SpeechToTextProvider } from '../types/transcription.types';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AttachmentsList } from './blocks';
@@ -44,6 +44,8 @@ export interface ConnectedChatInputProps {
   placeholder?: string;
   className?: string;
   disableAttachments?: boolean;
+  annotationType?: AnnotationType;
+  defaultMessage?: string;
 }
 
 export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
@@ -68,9 +70,10 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
   onError,
   onSuccess,
   placeholder = 'Ask anything or give feedback...',
-
+  annotationType,
   className,
   disableAttachments = false,
+  defaultMessage,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -111,6 +114,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     handleFileSelect,
     removeAttachment,
     isUploading,
+    setFirstMessage,
   } = useChatInput({
     chat,
     annotationLocation,
@@ -121,6 +125,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     setExternalInputValue,
     adapter: chatInputAdapter,
     resourceType,
+    annotationType,
   });
 
   const {
@@ -206,6 +211,12 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   }, [autoFocus, isDisabled, shouldShowRecorder]);
 
+  useEffect(() => {
+    if (setFirstMessage) {
+      setFirstMessage(defaultMessage || '');
+    }
+  }, [defaultMessage, setFirstMessage]);
+
   return (
     <div
       className={cn('w-full', {
@@ -260,7 +271,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                 ref={textareaRef}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={isDisabled ? undefined : handleKeyDown}
                 placeholder={placeholder}
                 className='f-13-450 placeholder:text-muted-foreground m-2.5 min-h-0 w-[316px] resize-none overflow-y-auto border-none bg-transparent p-0 pr-0 shadow-none outline-none'
                 style={{

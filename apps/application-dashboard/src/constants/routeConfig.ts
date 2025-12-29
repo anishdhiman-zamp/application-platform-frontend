@@ -23,6 +23,7 @@ export const ROUTES_PATH = {
   TEAM: '/team',
   KNOWLEDGE_BASE: '/processes/:processId/knowledge-base',
   CREATE_KNOWLEDGE_BASE: '/processes/:processId/create-knowledgebase',
+  KNOWLEDGE_BASE_V2: '/processes/:processId/knowledge-base-v2',
   WIDGET_CREATE: '/widgets/create',
   INVALID_SCREEN_SIZE: '/invalid-screen-size',
   MEMBERSHIP_PENDING: '/membership-pending',
@@ -97,6 +98,14 @@ export const getProcessActivityLogsRouteById = (
 
 export const getKnowledgeBasedRouteByProcessId = (processId: string) => {
   return `${ROUTES_PATH.KNOWLEDGE_BASE.replace(':processId', processId)}`;
+};
+
+export const getKnowledgeBasedV2RouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.KNOWLEDGE_BASE_V2.replace(':processId', processId)}`;
+};
+
+export const getCreateKnowledgeBaseRouteByProcessId = (processId: string) => {
+  return `${ROUTES_PATH.CREATE_KNOWLEDGE_BASE.replace(':processId', processId)}`;
 };
 
 export const getIntegrationDetailRoute = (integrationId: string) => {
