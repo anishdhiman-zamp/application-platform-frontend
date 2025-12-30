@@ -12,7 +12,7 @@ test.describe.skip('Pages', () => {
     let pageId = '';
 
     await test.step('Open org switcher and select an available org', async () => {
-      await page.goto(`${baseUrl}/process`);
+      await page.goto(`${baseUrl}/processes`);
       // select Org
       await chooseOrganization(page, 'Zamp');
 

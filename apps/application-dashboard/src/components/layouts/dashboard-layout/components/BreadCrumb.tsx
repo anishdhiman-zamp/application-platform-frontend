@@ -73,7 +73,7 @@ const BreadCrumb: FC<BreadCrumbProps> = ({ isSidebarOpen }) => {
           }
         }
         break;
-      case MODULE_TYPE.PROCESS:
+      case MODULE_TYPE.PROCESSES:
         {
           const activityId = params?.activityId;
           const processId = params?.processId as string;

@@ -62,5 +62,5 @@ export const enum ALIGN_OPTIONS {
 export enum MODULE_TYPE {
   PAGES = 'pages',
   DATASETS = 'datasets',
-  PROCESS = 'process',
+  PROCESSES = 'processes',
 }
