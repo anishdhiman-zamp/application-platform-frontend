@@ -215,6 +215,9 @@ export const useChatInput = ({
     if (!response?.conversation_id) {
       throw new Error('Failed to create conversation');
     }
+
+    // Clear input only after conversation is successfully created
+    setValue('');
   };
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -269,14 +272,14 @@ export const useChatInput = ({
   };
 
   const handleSubmit = () => {
-    if (value.trim()) {
-      setValue('');
-    }
     if (!firstMessage && !conversationId) {
       setFirstMessage(value);
       setHeader?.('Analysing...');
-
+      // Don't clear input here - it will be cleared after createConversationV2 succeeds
       return;
+    }
+    if (value.trim()) {
+      setValue('');
     }
     handleSendMessage(value);
   };

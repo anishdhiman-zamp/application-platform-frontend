@@ -12,12 +12,15 @@ import {
   useState,
 } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { ALIGN_OPTIONS, SIDE_OPTIONS } from '@/types/commonTypes';
 
 type TooltipV2Props = {
   children: ReactNode;
   tooltipBody: ReactNode;
   side?: SIDE_OPTIONS;
+  align?: ALIGN_OPTIONS;
+  sideOffset?: number;
+  alignOffset?: number;
   className?: string;
   tooltipClassName?: string;
   asChildTrigger?: boolean;
@@ -34,6 +37,9 @@ const TooltipV2: FC<TooltipV2Props> = ({
   children,
   tooltipBody,
   side = SIDE_OPTIONS.TOP,
+  align = ALIGN_OPTIONS.CENTER,
+  sideOffset = 10,
+  alignOffset = 0,
   className,
   tooltipClassName,
   asChildTrigger = false,
@@ -113,7 +119,14 @@ const TooltipV2: FC<TooltipV2Props> = ({
           {enhancedChildren}
         </TooltipTrigger>
         {shouldShowTooltip && (
-          <TooltipContent className={tooltipClassName} side={side} sideOffset={10} onWheel={handleWheel}>
+          <TooltipContent
+            className={tooltipClassName}
+            side={side}
+            sideOffset={sideOffset}
+            align={align}
+            alignOffset={alignOffset}
+            onWheel={handleWheel}
+          >
             {tooltipBody}
           </TooltipContent>
         )}

@@ -19,7 +19,7 @@ import { FileMimeType } from 'modules/data/components/importDataset/importData.c
 import { FEEDBACK_STATUS, SCOPE_TYPE } from 'modules/feedback/feedback.constants';
 import Image from 'next/image';
 import { FEEDBACK_OPEN_ICON } from '@/constants/icons';
-import { getKnowledgeBasedRouteByProcessId } from '@/constants/routeConfig';
+import { getKnowledgeBasedV2RouteByProcessId } from '@/constants/routeConfig';
 import { store } from '@/store';
 import { FeedbackItemType } from '@/types/api/feedbacks.types';
 import { SignedUrlBodyType, SignedUrlResponseType } from '@/types/api/fileUpload.types';
@@ -346,7 +346,7 @@ export const createChatbotUrl = (feedback: FeedbackItemType) => {
       url += `&${CHATBOT_LOCATION_PARAMS.CHATBOT_ANNOTATION_LOCATION_TYPE}=${LocationType.PROCESS}`;
       break;
     case LocationType.SOP:
-      url = getKnowledgeBasedRouteByProcessId(annotationLocation?.data?.process_id ?? '') + `?${commonParams}`;
+      url = getKnowledgeBasedV2RouteByProcessId(annotationLocation?.data?.process_id ?? '') + `?${commonParams}`;
       break;
   }
 
