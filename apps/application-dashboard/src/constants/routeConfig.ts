@@ -17,7 +17,8 @@ export const ROUTES_PATH = {
   ADMIN_DATASET: '/admin/datasets/:datasetId',
   PAGE_DRILLDOWN_MULTI: '/pages/:pageId/multi-dataset',
   ADMIN_DATASETS_DAG: '/admin/datasets/dag',
-  PROCESS: '/processes/:processId',
+  PROCESS_CREATE: '/processes/create',
+  PROCESS_ID: '/processes/:processId',
   PROCESS_ACTIVITY_LOGS: '/processes/:processId/activity-logs/:activityId',
   POLICIES: '/settings#dual-admin',
   TEAM: '/team',
@@ -74,7 +75,7 @@ export const getAdminDatasetRouteById = (datasetId: string) => {
 };
 
 export const getProcessRouteById = (processId: string, status?: string) => {
-  return `${ROUTES_PATH.PROCESS.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
+  return `${ROUTES_PATH.PROCESS_ID.replace(':processId', processId)}${status ? `?status=${status}` : ''}`;
 };
 
 export const getProcessActivityLogsRouteById = (

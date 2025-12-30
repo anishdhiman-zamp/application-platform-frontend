@@ -25,12 +25,6 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     path: ROUTES_PATH.CHAT,
     featureFlag: FEATURE_FLAGS.MACS_CHAT,
   },
-  // {
-  //   id: 'settings',
-  //   label: 'Settings',
-  //   iconComponent: <Settings width={16} height={16} />,
-  //   path: ROUTES_PATH.SETTINGS_TEAM,
-  // },
 ];
 
 export const SETTINGS_TABS = [

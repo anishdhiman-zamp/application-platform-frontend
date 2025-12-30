@@ -17,13 +17,7 @@ import { RootState } from 'store';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
 
-interface LayoutChildrenProps {
-  children: ReactNode;
-  showTopbar: boolean;
-  showSidebar: boolean;
-}
-
-const LayoutChildren: FC<LayoutChildrenProps> = ({ children, showTopbar, showSidebar }) => {
+const LayoutChildren: FC<{ children: ReactNode; showTopbar: boolean }> = ({ children, showTopbar }) => {
   const pathname = usePathname() || '/';
   const containerRef = useRef<HTMLDivElement>(null);
   const [previousRoute, setPreviousRoute] = useState<string>(pathname);
@@ -61,10 +55,11 @@ const LayoutChildren: FC<LayoutChildrenProps> = ({ children, showTopbar, showSid
       })}
     >
       <div
-        className={cn('relative mx-auto h-screen w-full bg-white', {
-          'border-GRAY_400 h-[calc(100vh-48px)] border': showTopbar,
-          'border-GRAY_400 rounded-tl-xl border': isSidebarOpen && showSidebar && showTopbar,
-        })}
+        className={cn(
+          'border-GRAY_400 relative mx-auto w-full border bg-white',
+          showTopbar ? 'h-[calc(100vh-48px)]' : 'h-screen',
+          isSidebarOpen && showTopbar && 'rounded-tl-xl',
+        )}
       >
         {renderChildrenWithProps(children)}
       </div>
