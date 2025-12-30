@@ -100,7 +100,7 @@ const Topbar = () => {
     //   return null;
     // }
 
-    if (pathname?.includes(ROUTES_PATH.PROCESS)) {
+    if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
       return (

@@ -131,7 +131,7 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
         const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
 
         return NextResponse.redirect(
-          new URL(hasOrgs ? ROUTES_PATH.PROCESS : ROUTES_PATH.MEMBERSHIP_PENDING, request.url),
+          new URL(hasOrgs ? ROUTES_PATH.PROCESSES : ROUTES_PATH.MEMBERSHIP_PENDING, request.url),
         );
       }
 
@@ -146,13 +146,13 @@ const handleAuthenticatedRoutes = async (request: NextRequest) => {
       const hasOrgs = !!(session && Array.isArray(session.orgs) && session.orgs.length > 0);
 
       if (hasOrgs) {
-        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESS, request.url));
+        return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
       }
 
       return NextResponse.next();
     }
     case ROUTES_PATH.HOME: {
-      return NextResponse.redirect(new URL(ROUTES_PATH.PROCESS, request.url));
+      return NextResponse.redirect(new URL(ROUTES_PATH.PROCESSES, request.url));
     }
     default:
       return NextResponse.next();

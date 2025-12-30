@@ -277,7 +277,7 @@ export async function extractProcessIdFromUrl(page: Page, regex?: string): Promi
   console.log('Current URL:', currentUrl);
 
   // Use provided regex or default pattern
-  const pattern = regex || /\/process\/([^?]+)/;
+  const pattern = regex || /\/processes\/([^?]+)/;
   const processIdMatch = currentUrl.match(pattern);
   const processId = processIdMatch ? processIdMatch[1] : null;
 

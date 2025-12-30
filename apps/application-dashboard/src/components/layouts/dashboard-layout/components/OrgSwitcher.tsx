@@ -58,7 +58,7 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
 
     setSelectedOrg(org);
     setToLocalStorage(LOCAL_STORAGE_KEYS.XZAMP_ORGANIZATION_ID, org.organization_id);
-    router.push(ROUTES_PATH.PROCESS);
+    router.push(ROUTES_PATH.PROCESSES);
   };
 
   const handleRegionChange = (region: { region: string; url: string }) => {

@@ -329,8 +329,8 @@ export const createChatbotUrl = (feedback: FeedbackItemType) => {
 
   let url =
     annotationLocation?.type === LocationType.PROCESS || !activityRunId
-      ? `/process/${annotationLocation?.data?.process_id}?${commonParams}`
-      : `/process/${annotationLocation?.data?.process_id}/activity-logs/${activityRunId}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${activityRunId}`;
+      ? `/processes/${annotationLocation?.data?.process_id}?${commonParams}`
+      : `/processes/${annotationLocation?.data?.process_id}/activity-logs/${activityRunId}?${commonParams}&${CHATBOT_LOCATION_PARAMS.CHATBOT_ACTIVITY_RUN_ID}=${activityRunId}`;
 
   switch (annotationLocation?.type) {
     case LocationType.DATASET_FIELD:

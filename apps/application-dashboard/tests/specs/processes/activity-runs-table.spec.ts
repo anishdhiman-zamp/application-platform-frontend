@@ -26,7 +26,7 @@ test.describe('Activity-Runs Table and Filters Flow', () => {
 
     // Navigate to processes page
     console.log('Navigating to processes page...');
-    await page.goto(`${baseUrl}/process`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.goto(`${baseUrl}/processes`, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {

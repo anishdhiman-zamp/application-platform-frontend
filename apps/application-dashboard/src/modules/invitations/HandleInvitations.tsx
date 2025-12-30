@@ -52,13 +52,13 @@ export const HandleInvitations: FC = () => {
         ).finally(() => {
           whoAmI().finally(() => {
             if (isInvitationsPage || invitationsData.invitations.length > 0) {
-              window.location.href = ROUTES_PATH.PROCESS;
+              window.location.href = ROUTES_PATH.PROCESSES;
             }
           });
         });
       } else {
         if (isInvitationsPage) {
-          window.location.href = ROUTES_PATH.PROCESS;
+          window.location.href = ROUTES_PATH.PROCESSES;
         }
       }
     }
