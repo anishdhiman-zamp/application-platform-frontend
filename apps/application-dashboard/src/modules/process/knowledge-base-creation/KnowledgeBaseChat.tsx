@@ -69,11 +69,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     return chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
   }, [chat?.messages?.length]);
 
-  // const handleAction = (blockConfig: ButtonBlockType, payload: MapAny) => {
-  //   // TODO: Implement action handling
-  //   console.log('blockConfig', blockConfig, payload);
-  // };
-
   const handleStopProcessing = () => {
     if (stopProcessingConfig) {
       runAction(stopProcessingConfig.blockConfig, stopProcessingConfig.payload, chat);
