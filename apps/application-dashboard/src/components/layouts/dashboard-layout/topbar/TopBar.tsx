@@ -6,7 +6,6 @@ import { KNOWLEDGE_BASED } from 'constants/icons';
 import {
   getCreateKnowledgeBaseRouteByProcessId,
   getKnowledgeBasedRouteByProcessId,
-  getKnowledgeBasedV2RouteByProcessId,
   ROUTES_PATH,
 } from 'constants/routeConfig';
 import { motion } from 'framer-motion';
@@ -51,7 +50,6 @@ const ShareButton = () => {
 };
 
 const Topbar = () => {
-  const [isSopCreationEnabled, setIsSopCreationEnabled] = useState<boolean>(false);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
   const { data: processes } = useGetProcessesQuery(undefined, {
@@ -74,13 +72,6 @@ const Topbar = () => {
 
   useEffect(() => {
     if (ldClient) {
-      evaluate(FEATURE_FLAGS.SOP_CREATION)
-        .then((res) => {
-          setIsSopCreationEnabled(res);
-        })
-        .catch(() => {
-          setIsSopCreationEnabled(false);
-        });
       evaluate(FEATURE_FLAGS.ENABLE_KNOWLEDGE_BASE)
         .then((res: string[]) => {
           if (res?.includes(processId ?? '')) {
@@ -96,10 +87,6 @@ const Topbar = () => {
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
-    // if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
-    //   return null;
-    // }
-
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
@@ -110,11 +97,9 @@ const Topbar = () => {
               <Link
                 prefetch
                 href={
-                  !isSopCreationEnabled
-                    ? getKnowledgeBasedRouteByProcessId(processId ?? '')
-                    : isProcessDraft
-                      ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
-                      : getKnowledgeBasedV2RouteByProcessId(processId ?? '')
+                  isProcessDraft
+                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
+                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
                 }
               >
                 <Button id='knowledge-base-btn' size='small' variant='secondary'>

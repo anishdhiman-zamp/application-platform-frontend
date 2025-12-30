@@ -5,6 +5,7 @@ import {
   AnnotationType,
   ButtonBlockType,
   ConnectedChatInput,
+  DisplayLayerActionType,
   LocationType,
   MessageContainer,
   ResourceType,
@@ -16,9 +17,12 @@ import { cn } from '@zamp-platform/ui/utils';
 import { CirclePlus, EllipsisVertical } from 'lucide-react';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import useActionHub from '@/modules/chatbot/actionHub';
+import StopProcessingFeedback from '@/modules/chatbot/StopProcessingFeedback';
 import { RootState } from '@/store';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { MapAny } from '@/types/commonTypes';
+import { getUserNameFromEmail } from '@/utils/common';
 
 interface KnowledgeBaseChatProps {
   status?: ProcessStatus;
@@ -43,9 +47,16 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
 }) => {
   const currentUserName = useSelector((state: RootState) => state?.user?.user?.user_name);
   const organizationId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
+  const currentUserEmail = useSelector((state: RootState) => state?.user?.user?.user_email);
   const [header, setHeader] = useState('');
   const [isNewConversation, setIsNewConversation] = useState(false);
   const [chatInputKey, setChatInputKey] = useState(0);
+  const [stopProcessingConfig, setStopProcessingConfig] = useState<{
+    blockConfig: ButtonBlockType;
+    payload: MapAny;
+  }>();
+
+  const { runAction } = useActionHub();
 
   const chat = useChat({
     resourceId: processId,
@@ -54,20 +65,37 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     setHeader: setHeader,
   });
 
-  // Reset isNewConversation when switching to a different conversation
-  useEffect(() => {
-    if (conversationId) {
-      setIsNewConversation(false);
-    }
-  }, [conversationId]);
-
   const isAnalysing = useMemo(() => {
     return chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
   }, [chat?.messages?.length]);
 
+  const handleStopProcessing = () => {
+    if (stopProcessingConfig) {
+      runAction(stopProcessingConfig.blockConfig, stopProcessingConfig.payload, chat);
+      setStopProcessingConfig(undefined);
+    }
+  };
+
   const handleAction = (blockConfig: ButtonBlockType, payload: MapAny) => {
-    // TODO: Implement action handling
-    console.log('blockConfig', blockConfig, payload);
+    const updatedPayload = {
+      ...payload,
+      resourceId: processId,
+      resourceType: ResourceType.PROCESS,
+      senderName: currentUserName || getUserNameFromEmail(currentUserEmail || '') || '',
+    };
+
+    if (blockConfig.action?.display_layer_action === DisplayLayerActionType.SEND_BUTTON_TEXT_WITH_STOP_PROCESSING) {
+      setStopProcessingConfig({ blockConfig, payload: updatedPayload });
+
+      return;
+    }
+    runAction(blockConfig, updatedPayload, chat);
+  };
+
+  const handleOpenChangeForStopProcessing = (open: boolean) => {
+    if (!open) {
+      setStopProcessingConfig(undefined);
+    }
   };
 
   const handleNewConversation = () => {
@@ -86,6 +114,13 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       setConversationId?.(chat?.conversationId);
     }
   }, [chat?.conversationId]);
+
+  // Reset isNewConversation when switching to a different conversation
+  useEffect(() => {
+    if (conversationId) {
+      setIsNewConversation(false);
+    }
+  }, [conversationId]);
 
   return (
     <div className='flex h-full w-full flex-col'>
@@ -140,6 +175,11 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
           />
         </div>
       </div>
+      <StopProcessingFeedback
+        isOpen={!!stopProcessingConfig}
+        onOpenChange={handleOpenChangeForStopProcessing}
+        onStopProcessing={handleStopProcessing}
+      />
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
 import { useParams, usePathname, useSearchParams } from 'next/navigation';
-import { ROUTES_PATH } from '@/constants/routeConfig';
+import { getKnowledgeBasedRouteByProcessId } from '@/constants/routeConfig';
 import { FUNCTION_KEYS_ICON, KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useKeyDown from '@/hooks/useKeyDown';
 import ChatbotWrapper from '@/modules/chatbot';
@@ -21,8 +21,7 @@ const WorkWithPace: FC<WorkWithPaceProps> = ({ isProcessLive = false }) => {
   const openChatbotRef = useRef<(() => void) | null>(null);
   const [chatbotKey, setChatbotKey] = useState(0);
 
-  const isSopCreation =
-    !pathname?.includes(ROUTES_PATH.KNOWLEDGE_BASE_V2) && !pathname?.includes(ROUTES_PATH.CREATE_KNOWLEDGE_BASE);
+  const isSopCreation = pathname?.includes(getKnowledgeBasedRouteByProcessId(processId));
 
   const handleChatbotTrigger = useCallback((openChatbot: () => void) => {
     openChatbotRef.current = openChatbot;
@@ -67,7 +66,7 @@ const WorkWithPace: FC<WorkWithPaceProps> = ({ isProcessLive = false }) => {
     };
   }, [activityRunId, processId]);
 
-  if (!processId || !isSopCreation || !isProcessLive) {
+  if (!processId || isSopCreation || !isProcessLive) {
     return null;
   }
 
