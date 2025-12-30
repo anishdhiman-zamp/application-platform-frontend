@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { PACE_MESSAGES, PACE_MOVE_MESSAGES } from 'modules/process/process.constant';
 import { motion } from 'motion/react';
 
 interface PaceCursorProps {
@@ -8,20 +9,8 @@ interface PaceCursorProps {
   y: number;
 }
 
-const MESSAGES = [
-  'Hey! Pace here.',
-  "Let's create a process",
-  "I'm following your instructions",
-  "What's this?",
-  'Show me more!',
-  'Interesting...',
-  'Analyzing...',
-  'Awaiting input',
-  'Scanning pattern',
-];
-
 export const PaceCursor = ({ x, y }: PaceCursorProps) => {
-  const [message, setMessage] = useState(MESSAGES[0]);
+  const [message, setMessage] = useState(PACE_MESSAGES[0]);
   const [isHighFiving, setIsHighFiving] = useState(false);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -52,7 +41,7 @@ export const PaceCursor = ({ x, y }: PaceCursorProps) => {
     const interval = setInterval(() => {
       // Only cycle messages if not high-fiving
       if (!isHighFiving && Math.random() > 0.7) {
-        setMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+        setMessage(PACE_MESSAGES[Math.floor(Math.random() * PACE_MESSAGES.length)]);
       }
     }, 3000);
 
@@ -62,10 +51,8 @@ export const PaceCursor = ({ x, y }: PaceCursorProps) => {
   useEffect(() => {
     if (isHighFiving) return;
 
-    const moveMessages = ['Oh!', 'Here?', 'Checking...', 'On my way'];
-
     if (Math.random() > 0.8) {
-      setMessage(moveMessages[Math.floor(Math.random() * moveMessages.length)]);
+      setMessage(PACE_MOVE_MESSAGES[Math.floor(Math.random() * PACE_MOVE_MESSAGES.length)]);
     }
   }, [x, y, isHighFiving]);
 
