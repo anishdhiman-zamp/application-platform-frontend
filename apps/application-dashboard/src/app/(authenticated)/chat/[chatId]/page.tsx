@@ -49,7 +49,8 @@ const ChatIdPage = () => {
     return chat.messages.length > 0 && chat.messages[chat.messages.length - 1]?.sender_type === SenderType.USER;
   }, [chat.messages]);
 
-  const isLoadingConversation = chat.isLoadingConversationHistory && !hasMessages;
+  const isLoadingConversation =
+    (chat.isLoadingConversationHistory && !hasMessages) || chat.isUninitializedConversationHistory;
 
   const handleScrollChange = useCallback(
     (isScrolled: boolean) => {
@@ -67,6 +68,8 @@ const ChatIdPage = () => {
     >
       <CommonWrapper
         isLoading={isLoadingConversation}
+        isError={chat.isErrorConversationHistory}
+        refetchFunction={chat.refetchConversationHistory}
         skeletonType={SkeletonTypes.CUSTOM}
         loader={<ChatMessagesSkeleton />}
         className='flex min-h-0 flex-1'
@@ -78,6 +81,7 @@ const ChatIdPage = () => {
           className='[scrollbar-width:none]'
           assistantAvatar={<NewPaceAvatar />}
           onScrollChange={handleScrollChange}
+          streamingEnabled
         />
       </CommonWrapper>
       <div className='mx-auto w-full flex-shrink-0 p-3'>
