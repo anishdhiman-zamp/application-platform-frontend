@@ -53,6 +53,12 @@ export enum SIDE_OPTIONS {
   RIGHT = 'right',
 }
 
+export const enum ALIGN_OPTIONS {
+  START = 'start',
+  CENTER = 'center',
+  END = 'end',
+}
+
 export enum MODULE_TYPE {
   PAGES = 'pages',
   DATASETS = 'datasets',
