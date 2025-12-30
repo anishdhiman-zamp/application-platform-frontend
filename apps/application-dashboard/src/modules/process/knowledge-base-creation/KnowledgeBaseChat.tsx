@@ -65,13 +65,6 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
     setHeader: setHeader,
   });
 
-  // Reset isNewConversation when switching to a different conversation
-  useEffect(() => {
-    if (conversationId) {
-      setIsNewConversation(false);
-    }
-  }, [conversationId]);
-
   const isAnalysing = useMemo(() => {
     return chat?.messages[chat?.messages?.length - 1]?.sender_type === SenderType.USER;
   }, [chat?.messages?.length]);
@@ -93,7 +86,7 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       ...payload,
       resourceId: processId,
       resourceType: ResourceType.PROCESS,
-      senderName: getUserNameFromEmail(currentUserEmail || '') || '',
+      senderName: currentUserName || getUserNameFromEmail(currentUserEmail || '') || '',
     };
 
     if (blockConfig.action?.display_layer_action === DisplayLayerActionType.SEND_BUTTON_TEXT_WITH_STOP_PROCESSING) {
@@ -126,6 +119,13 @@ const KnowledgeBaseChat: FC<KnowledgeBaseChatProps> = ({
       setConversationId?.(chat?.conversationId);
     }
   }, [chat?.conversationId]);
+
+  // Reset isNewConversation when switching to a different conversation
+  useEffect(() => {
+    if (conversationId) {
+      setIsNewConversation(false);
+    }
+  }, [conversationId]);
 
   return (
     <div className='flex h-full w-full flex-col'>

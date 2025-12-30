@@ -297,7 +297,7 @@ export const useChatInput = ({
     setValue('');
     setAttachments([]);
 
-    const lastMessage = chat.messages[chat.messages.length - 3];
+    const lastMessage = chat.messages[chat.messages.length - 1];
     let messageId = '';
 
     if (lastMessage?.message_content?.elements) {

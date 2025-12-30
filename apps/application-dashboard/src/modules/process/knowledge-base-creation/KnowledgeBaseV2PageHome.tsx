@@ -5,8 +5,11 @@ import { useGetProcessesQuery } from '@/apis/pages';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppDispatch } from '@/hooks/toolkit';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import KnowledgeBaseHome from '@/modules/knowledge-based/KnowledgeBaseHome';
 import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
 import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
@@ -20,8 +23,10 @@ interface KnowledgeBaseV2PageHomeProps {
 
 const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, conversationId }) => {
   const dispatch = useAppDispatch();
+  const { evaluate, ldClient } = useFeatureFlags();
   const [isChatbotExpanded, setIsChatbotExpanded] = useState(false);
   const [defaultMessage, setDefaultMessage] = useState<string | undefined>(undefined);
+  const [isSopCreationEnabled, setIsSopCreationEnabled] = useState<boolean>(false);
 
   const { data: processes, isLoading: isLoadingProcesses } = useGetProcessesQuery(undefined, {
     refetchOnMountOrArgChange: false,
@@ -49,6 +54,22 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
       setIsChatbotExpanded(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.SOP_CREATION)
+        .then((res) => {
+          setIsSopCreationEnabled(res);
+        })
+        .catch(() => {
+          setIsSopCreationEnabled(false);
+        });
+    }
+  }, [evaluate, ldClient, processId]);
+
+  if (!isSopCreationEnabled) {
+    return <KnowledgeBaseHome />;
+  }
 
   return (
     <CommonWrapper
