@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { captureException } from '@sentry/nextjs';
 import { ResourceType, useLazyGetConversationByIdQuery } from '@zamp-platform/chat';
-import { Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import FeedbacksStatusTabs from 'modules/feedback/feedback-status/FeedbacksStatusTabs';
 import { useFeedbacksProvider } from 'modules/feedback/feedback-status/useFeedbacks';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -122,9 +122,11 @@ const FeedbackStatusButtonContent: FC = () => {
             {FEEDBACK_BADGE_CONFIG.map(renderBadge)}
           </div>
         </PopoverTrigger>
-        <PopoverContent align='end' className='w-[466px] max-w-[90vw] border-none bg-transparent p-0 shadow-none'>
-          <FeedbacksStatusTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        </PopoverContent>
+        <PopoverPortal>
+          <PopoverContent align='end' className='w-[466px] max-w-[90vw] border-none bg-transparent p-0 shadow-none'>
+            <FeedbacksStatusTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );
