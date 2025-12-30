@@ -267,20 +267,22 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
             </div>
           ) : (
             <div className='shadow-side-drawer-inner rounded-xl border' onClick={handleContainerClick}>
-              <Textarea
-                ref={textareaRef}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={isDisabled ? undefined : handleKeyDown}
-                placeholder={placeholder}
-                className='f-13-450 placeholder:text-muted-foreground m-2.5 min-h-0 w-[316px] resize-none overflow-y-auto border-none bg-transparent p-0 pr-0 shadow-none outline-none'
-                style={{
-                  height: '20px',
-                  maxHeight: '200px',
-                  lineHeight: '18px',
-                }}
-                disabled={isDisabled}
-              />
+              <div className='p-2.5'>
+                <Textarea
+                  ref={textareaRef}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  onKeyDown={isDisabled ? undefined : handleKeyDown}
+                  placeholder={placeholder}
+                  className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none'
+                  style={{
+                    height: '20px',
+                    maxHeight: '200px',
+                    lineHeight: '18px',
+                  }}
+                  disabled={isDisabled}
+                />
+              </div>
 
               <div className='flex items-center justify-between py-2.5 pr-2.5 pl-1.5'>
                 <div className='flex items-center gap-1'>
