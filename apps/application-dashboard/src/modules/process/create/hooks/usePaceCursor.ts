@@ -11,6 +11,13 @@ type ClickEvent = {
   timestamp: number;
 };
 
+/**
+ * Custom hook to manage the pace cursor movement and interactions
+ * @param containerRef - Reference to the container element
+ * @param contentContainerRef - Reference to the content container element
+ * @returns An object containing the cursor position, click event, and handleContainerClick function
+ */
+
 export const usePaceCursor = (
   containerRef: React.RefObject<HTMLDivElement | null>,
   contentContainerRef?: React.RefObject<HTMLDivElement | null>,
