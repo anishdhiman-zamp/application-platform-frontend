@@ -1,8 +1,6 @@
 'use client';
 
-import { FC, useMemo, useState } from 'react';
-import InvitedMembersListing from 'modules/team/components/members/InvitedMembersListing';
-import TeamMembersListing from 'modules/team/components/members/TeamMembersListing';
+import { FC, lazy, useMemo, useState } from 'react';
 import { TEAM_TABS_TYPES, TeamTabsList } from 'modules/team/people.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
@@ -11,6 +9,9 @@ import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { cn } from '@/utils/common';
 import TabsV2 from 'components/common/tabs/TabsV2';
+
+const TeamMembersListing = lazy(() => import('modules/team/components/members/TeamMembersListing'));
+const InvitedMembersListing = lazy(() => import('modules/team/components/members/InvitedMembersListing'));
 
 type PeopleTabsPropsType = {
   filteredTeamMembers: AudiencesByOrganisationIdResponse[];

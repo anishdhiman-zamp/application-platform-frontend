@@ -1,12 +1,12 @@
-import React, { FC, useRef, useState } from 'react';
+import { FC, lazy, useRef, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import InviteMembersPopup from 'modules/team/InviteMembersPopup';
+import { useCurrentUser } from 'hooks/useUserPrivilege';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
-import { getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import Input from 'components/common/input';
+
+const InviteMembersPopup = lazy(() => import('modules/team/InviteMembersPopup'));
 
 type PeopleHeaderPropsType = {
   search: string;
@@ -17,8 +17,7 @@ type PeopleHeaderPropsType = {
 const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMembersData }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
-  const userPrivilege = getUserPrivilege();
-  const checkIfMember = userPrivilege === PERMISSION_ROLES.MEMBER;
+  const { isMember } = useCurrentUser();
 
   const handleOpenInviteMembersPopup = () => {
     setIsInviteMembersPopupOpen(true);
@@ -48,15 +47,17 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
           className='f-12-500 bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 flex h-7 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px] text-white hover:text-white active:text-white disabled:cursor-not-allowed'
           data-testid='invite-user-btn'
           onClick={handleOpenInviteMembersPopup}
-          disabled={checkIfMember}
+          disabled={isMember}
         >
           Invite members
         </Button>
-        <InviteMembersPopup
-          isOpen={isInviteMembersPopupOpen}
-          onClose={handleCloseInviteMembersPopup}
-          teamMembersData={teamMembersData}
-        />
+        {isInviteMembersPopupOpen && (
+          <InviteMembersPopup
+            isOpen={isInviteMembersPopupOpen}
+            onClose={handleCloseInviteMembersPopup}
+            teamMembersData={teamMembersData}
+          />
+        )}
       </div>
     </>
   );

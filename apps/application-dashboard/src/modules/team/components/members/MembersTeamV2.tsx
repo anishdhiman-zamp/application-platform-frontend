@@ -1,6 +1,5 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, Tag, toast } from '@zamp-platform/ui';
-import DeleteTeamDialog from 'modules/team/components/members/DeleteTeamDialog';
 import TeamItem from 'modules/team/components/members/TeamItem';
 import {
   MembersTeamPropsType,
@@ -13,6 +12,8 @@ import { useAppSelector } from '@/hooks/toolkit';
 import { RootState } from '@/store';
 import { checkIfCurrentUserIsSystemAdmin } from '@/utils/accessPermission/accessPermission.utils';
 import { capitalizeWords } from '@/utils/common';
+
+const DeleteTeamDialog = lazy(() => import('modules/team/components/members/DeleteTeamDialog'));
 
 const MembersTeamV2: FC<MembersTeamPropsType> = ({
   teamsData,
@@ -218,13 +219,15 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
           )}
         </PopoverContent>
       </Popover>
-      <DeleteTeamDialog
-        organizationId={organizationId}
-        team={selectedTeamToBeDeleted}
-        isOpen={!!selectedTeamToBeDeleted}
-        onOpenChange={handleOpenChange}
-        onRemoveUserFromTeam={handleRemoveUserFromTeam}
-      />
+      {selectedTeamToBeDeleted && (
+        <DeleteTeamDialog
+          organizationId={organizationId}
+          team={selectedTeamToBeDeleted}
+          isOpen={!!selectedTeamToBeDeleted}
+          onOpenChange={handleOpenChange}
+          onRemoveUserFromTeam={handleRemoveUserFromTeam}
+        />
+      )}
     </>
   );
 };

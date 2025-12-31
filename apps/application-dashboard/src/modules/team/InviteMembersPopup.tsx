@@ -6,6 +6,7 @@ import {
 } from 'apis/people';
 import { COLORS } from 'constants/colors';
 import { useAppSelector } from 'hooks/toolkit';
+import { useCurrentUser } from 'hooks/useUserPrivilege';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
 import { RootState } from 'store';
@@ -13,8 +14,7 @@ import { SIZE_TYPES } from 'types/common/components';
 import { BUTTON_TYPES } from 'types/components/button.type';
 import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { PERMISSION_ROLES, PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
-import { getUserEmail, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
+import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { validateEmail } from 'utils/common';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
@@ -24,8 +24,7 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, teamMembersData }) => {
-  const user_email = getUserEmail();
-  const userPrivilege = getUserPrivilege();
+  const { userEmail: user_email, isMember } = useCurrentUser();
   const checkPermission = accessPermissionForPeople();
   const placeholderText = 'Share with people and teams';
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
@@ -47,11 +46,11 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
     [selectedItemsByInstance],
   );
   const isInvitable = useMemo(() => {
-    if (showValidationError || userPrivilege === PERMISSION_ROLES.MEMBER) return false;
+    if (showValidationError || isMember) return false;
     const hasValidSearch = !hasEmptySearchValue || hasNonEmptySelectedItems;
 
     return hasValidSearch && multiSelectInstances?.length > 0;
-  }, [showValidationError, userPrivilege, hasEmptySearchValue, hasNonEmptySelectedItems, multiSelectInstances]);
+  }, [showValidationError, isMember, hasEmptySearchValue, hasNonEmptySelectedItems, multiSelectInstances]);
   const [postInviteAudiences, { isLoading: postInviteAudiencesIsLoading }] =
     usePostInviteAudiencesByOrganisationIdMutation();
   const { data: invitedTeamMembersData, refetch: refetchAudiencesByOrganizationId } =
