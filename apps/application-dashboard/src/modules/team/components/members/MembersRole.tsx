@@ -2,8 +2,11 @@ import { FC, useRef, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, usePatchChangeAudienceRoleInOrganizationMutation } from 'apis/people';
 import { useOnClickOutside } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
-import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
-import { MembersRolePropsType, TeamMemberAccessPrivilegesType } from 'modules/team/people.types';
+import {
+  MembersRolePropsType,
+  TEAM_MEMBERS_PRIVILEGES_LIST,
+  TeamMemberAccessPrivilegesType,
+} from 'modules/team/people.types';
 import { RootState } from 'store';
 import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';

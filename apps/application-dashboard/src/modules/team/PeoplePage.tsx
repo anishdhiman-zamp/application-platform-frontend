@@ -1,15 +1,13 @@
 'use client';
 
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
 import { useAppSelector } from 'hooks/toolkit';
 import PeopleHeader from 'modules/team/components/PeopleHeader';
+import PeopleTabs from 'modules/team/components/PeopleTabs';
 import { RootState } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
-
-// const PeopleHeader = lazy(() => import('modules/team/components/PeopleHeader'));
-const PeopleTabs = lazy(() => import('modules/team/components/PeopleTabs'));
 
 const PeoplePage = () => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
@@ -68,7 +66,6 @@ const PeoplePage = () => {
   return (
     <div className='h-full w-full p-10'>
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
-
       <Suspense>
         <PeopleTabs
           filteredTeamMembers={filteredTeamMembers ?? []}

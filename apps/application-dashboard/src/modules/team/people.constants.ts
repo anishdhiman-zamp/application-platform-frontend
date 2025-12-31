@@ -1,75 +1,11 @@
-import MembersEmail from 'modules/team/components/members/MembersEmail';
-import MembersName from 'modules/team/components/members/MembersName';
-import MembersRole from 'modules/team/components/members/MembersRole';
 import { TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
-import { MapAny } from 'types/commonTypes';
 import { capitalizeFirstLetter } from 'utils/common';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/constants/payments.constants';
 
-export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
-  {
-    headerName: 'Name',
-    field: 'user',
-    valueFormatter: ({ value }: MapAny) => value.name || value?.email,
-    cellRenderer: MembersName,
-  },
-  {
-    headerName: 'Email',
-    field: 'user',
-    valueFormatter: ({ value }: MapAny) => value.email,
-    cellRenderer: MembersEmail,
-  },
-  {
-    headerName: 'Role',
-    valueGetter: ({ data }: MapAny) => ({
-      user_id: data?.user?.user_id,
-      privilege: data?.privilege,
-    }),
-    cellRenderer: MembersRole,
-  },
-  {
-    headerName: 'Team',
-    field: 'team',
-  },
-];
+// TEAM_MEMBERS_PRIVILEGES_LIST is defined in people.types.ts
+export { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.types';
 
-export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
-  {
-    headerName: 'Name',
-    field: 'email',
-    cellRenderer: MembersName,
-    className: 'col-span-3',
-  },
-  {
-    headerName: 'Email',
-    field: 'email',
-    cellRenderer: MembersEmail,
-    className: 'col-span-3',
-  },
-  {
-    headerName: 'Invited as',
-    field: 'privilege',
-    cellRenderer: MembersRole,
-    className: 'col-span-3',
-  },
-];
-
-export const TEAM_MEMBERS_LISTING_TABLE_THEME = {
-  rowHeight: 44,
-  rowHoverColor: 'transparent',
-  cellHorizontalPadding: 8,
-};
-
-export const TEAM_MEMBERS_PRIVILEGES_LIST = [
-  {
-    label: 'System Admin',
-    value: TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN,
-  },
-  {
-    label: 'Member',
-    value: TEAM_MEMBERS_PRIVILEGES.MEMBER,
-  },
-];
+// Column definitions are in people.columnDefs.ts to avoid circular dependency with components
 
 export const PRIVILEGES_LIST = [
   {
