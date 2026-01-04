@@ -14,10 +14,10 @@ import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types'
  * @returns {boolean} isMember - Whether the user has 'member' role
  * @returns {boolean} isAdmin - Whether the user has 'admin' role
  * @returns {boolean} isSystemAdmin - Whether the user has 'system_admin' role
- * @returns {function} isCurrentUser - (email: string) => boolean - Checks if the given email matches the current user
+ * @returns {function} isCurrentUserEmail - (email: string) => boolean - Checks if the given email matches the current user
  * @returns {string} organizationId - The user's current organization ID
  */
-export const useCurrentUser = () => {
+export const useUserIdentity = () => {
   const userRole = useAppSelector(
     (state) => state?.user?.roles?.find((role) => role.id === UserRoleIdType.USER)?.name ?? '',
   );
@@ -32,7 +32,7 @@ export const useCurrentUser = () => {
     isMember: userRole === PERMISSION_ROLES.MEMBER,
     isAdmin: userRole === PERMISSION_ROLES.ADMIN,
     isSystemAdmin: userRole === PERMISSION_ROLES.SYSTEM_ADMIN,
-    isCurrentUser: (email: string) => (email === '' ? false : userEmail === email),
+    isCurrentUserEmail: (email: string) => (email === '' ? false : userEmail === email),
     organizationId,
   };
 };

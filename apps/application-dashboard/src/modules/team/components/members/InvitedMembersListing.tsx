@@ -5,7 +5,7 @@ import InvitedMemberCard from 'modules/team/components/members/InvitedMemberCard
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.columnDefs';
 import { InvitedMembersListingPropsType } from 'modules/team/people.types';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 
@@ -15,7 +15,7 @@ const InvitedMembersListing: FC<InvitedMembersListingPropsType> = ({
   search,
 }) => {
   const reversedData = useMemo(() => data?.slice().reverse(), [data]);
-  const { organizationId } = useCurrentUser();
+  const { organizationId } = useUserIdentity();
   const { data: invitedTeamMembersData } = useGetInvitedAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId, refetchOnMountOrArgChange: false },

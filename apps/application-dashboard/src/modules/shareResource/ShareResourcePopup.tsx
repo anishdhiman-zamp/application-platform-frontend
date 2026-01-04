@@ -9,7 +9,7 @@ import {
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { useAppSelector } from 'hooks/toolkit';
-import { useCurrentUser } from 'hooks/useUserPrivilege';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
@@ -95,7 +95,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
   const placeholderText = 'Share with people and teams';
-  const { userEmail: user_email, userId: user_id, userRole: user_role } = useCurrentUser();
+  const { userEmail: user_email, userId: user_id, userRole: user_role } = useUserIdentity();
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const currentUserHasAdminAccess = useMemo(() => {

@@ -1,7 +1,7 @@
 import { FC, lazy, useRef, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
-import { useCurrentUser } from 'hooks/useUserPrivilege';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import Input from 'components/common/input';
@@ -17,7 +17,7 @@ type PeopleHeaderPropsType = {
 const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMembersData }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
-  const { isMember } = useCurrentUser();
+  const { isMember } = useUserIdentity();
 
   const handleOpenInviteMembersPopup = () => {
     setIsInviteMembersPopupOpen(true);

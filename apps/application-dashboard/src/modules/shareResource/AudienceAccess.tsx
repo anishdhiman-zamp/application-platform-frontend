@@ -3,7 +3,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
-import { useCurrentUser } from 'hooks/useUserPrivilege';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import ShareResourceAccessDetails from 'modules/shareResource/components/ShareResourceAccessDetails';
 import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
 import {
@@ -84,7 +84,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
-  const { isCurrentUser } = useCurrentUser();
+  const { isCurrentUserEmail } = useUserIdentity();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
@@ -93,7 +93,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const [selectedRole, setSelectedRole] = useState<ResourcePrivilege>(role as ResourcePrivilege);
   const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
 
-  const checkIfUser = isCurrentUser(user?.email ?? '');
+  const checkIfUser = isCurrentUserEmail(user?.email ?? '');
   const checkIfResourceTypeOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
   const checkIfResourceTypeTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const userName = checkIfResourceTypeOrg

@@ -9,7 +9,7 @@ import {
 } from 'modules/team/people.types';
 import { usePostAddTeamToAudienceMutation, usePostAddTeamToOrganizationMutation } from '@/apis/people';
 import { useAppSelector } from '@/hooks/toolkit';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { RootState } from '@/store';
 import { capitalizeWords } from '@/utils/common';
 
@@ -31,7 +31,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const { isSystemAdmin } = useCurrentUser();
+  const { isSystemAdmin } = useUserIdentity();
 
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();

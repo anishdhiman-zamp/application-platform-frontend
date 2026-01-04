@@ -2,11 +2,11 @@ import { FC } from 'react';
 import { COLORS } from 'constants/colors';
 import { MembersNamePropsType } from 'modules/team/people.types';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import Avatar from 'components/common/avatar';
 
 const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member = false }) => {
-  const { userEmail } = useCurrentUser();
+  const { userEmail } = useUserIdentity();
   const isCurrentUser = userEmail === value;
   const showCurrentUser = isCurrentUser && member;
 

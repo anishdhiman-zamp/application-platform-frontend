@@ -6,7 +6,7 @@ import {
 } from 'apis/people';
 import { COLORS, TEAMS_COLORS } from 'constants/colors';
 import { useOnClickOutside } from 'hooks';
-import { useCurrentUser } from 'hooks/useUserPrivilege';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import CustomTeamsDropdown from 'modules/team/components/members/CustomTeamsDropdown';
 import { TEAM_PERMISSION_TOAST_MSG } from 'modules/team/people.constants';
 import {
@@ -29,7 +29,7 @@ const MembersTeam: FC<MembersTeamPropsType> = ({
   userMappedTeams,
   hasPeoplePolicy,
 }) => {
-  const { isMember } = useCurrentUser();
+  const { isMember } = useUserIdentity();
   const teamsRowRef = useRef<HTMLDivElement>(null);
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();

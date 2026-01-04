@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { AudiencesByOrganisationIdResponse, InvitedAudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { useGetDualAdminPolicyQuery } from '@/apis/people';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { cn } from '@/utils/common';
 
 interface PeopleTabsPropsType {
@@ -32,7 +32,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   const router = useRouter();
   const defaultTab = (tab as TEAM_TABS_TYPES) ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
 
-  const { isSystemAdmin } = useCurrentUser();
+  const { isSystemAdmin } = useUserIdentity();
   const { data: dualAdminPolicy } = useGetDualAdminPolicyQuery();
 
   const hasPeoplePolicy = useMemo(() => {

@@ -9,7 +9,7 @@ import { UserMappedTeamType } from 'modules/team/people.types';
 import { useDeleteAudienceFromOrganizationAccessMutation, useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { toast } from '@/components/common/toast/Toast';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import { PERMISSION_MESSAGES } from '@/utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from '@/utils/accessPermission/accessPermission.types';
@@ -47,7 +47,7 @@ const TeamMemberCard = ({
   teamsRandomColorRef,
 }: TeamMemberCardProps) => {
   const { user_id, userEmail } = value;
-  const { isSystemAdmin } = useCurrentUser();
+  const { isSystemAdmin } = useUserIdentity();
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const userName = useMemo(() => convertEmailUsernameToName(getUserNameFromEmail(userEmail ?? '')), [userEmail]);
   const checkPermission = isSystemAdmin && member;

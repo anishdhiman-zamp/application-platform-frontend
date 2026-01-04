@@ -4,7 +4,7 @@ import { captureException } from '@sentry/browser';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON, ZAMP_LOGO_LOADER_SVG } from 'constants/icons';
-import { useCurrentUser } from 'hooks/useUserPrivilege';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import { DatasetColumnRequest } from 'modules/data/data.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
@@ -44,7 +44,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
   columnLabel,
   tagColorMap,
 }) => {
-  const { userId } = useCurrentUser();
+  const { userId } = useUserIdentity();
   const [searchTerm, setSearchTerm] = useState('');
   const [rules, setRules] = useState<RuleCardProps[]>([]);
   const [prioritySorting, setPrioritySorting] = useState<OrderType>(OrderType.DESC);

@@ -1,11 +1,10 @@
-import React from 'react';
 import { Tag } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
 import { COLORS } from '@/constants/colors';
 import { JOINED_DATASET_ICON } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { TeamInfoType } from '@/modules/shareResource';
 import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
@@ -38,8 +37,8 @@ const AudienceMember = ({
   tagClassName,
 }: AudienceMemberProps) => {
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
-  const { isCurrentUser } = useCurrentUser();
-  const checkIfUser = isCurrentUser(user?.email ?? '');
+  const { isCurrentUserEmail } = useUserIdentity();
+  const checkIfUser = isCurrentUserEmail(user?.email ?? '');
   const isTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const isOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
   const customAvatarWord = isOrg ? customerName || orgName || '' : (user?.email ?? '');

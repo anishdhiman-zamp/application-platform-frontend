@@ -8,7 +8,7 @@ import {
 } from 'modules/team/people.types';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -22,7 +22,7 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
     role as TeamMemberAccessPrivilegesType,
   );
   const [changeRole] = usePatchChangeAudienceRoleInOrganizationMutation();
-  const { organizationId, isSystemAdmin } = useCurrentUser();
+  const { organizationId, isSystemAdmin } = useUserIdentity();
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId, refetchOnMountOrArgChange: false },

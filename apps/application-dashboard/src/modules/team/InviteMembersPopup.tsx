@@ -12,7 +12,7 @@ import { BUTTON_TYPES } from 'types/components/button.type';
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { validateEmail } from 'utils/common';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { Button } from 'components/common/button/Button';
 import Popup from 'components/common/popup/Popup';
 import { toast } from 'components/common/toast/Toast';
@@ -21,7 +21,7 @@ import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
 import { ArrayListOption } from 'components/multiSelectInput/multiSelectInput.types';
 
 const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, teamMembersData }) => {
-  const { userEmail: user_email, isMember, organizationId, isSystemAdmin } = useCurrentUser();
+  const { userEmail: user_email, isMember, organizationId, isSystemAdmin } = useUserIdentity();
   const placeholderText = 'Share with people and teams';
   const [validationErrorText, setValidationErrorText] = useState<string>('');
   const [showValidationError, setShowValidationError] = useState<boolean>(true);

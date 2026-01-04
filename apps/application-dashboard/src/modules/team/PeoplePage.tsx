@@ -7,14 +7,14 @@ import PeopleHeader from 'modules/team/components/PeopleHeader';
 import PeopleTabs from 'modules/team/components/PeopleTabs';
 import type { TEAM_TABS_TYPES } from 'modules/team/people.types';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
-import { useCurrentUser } from '@/hooks/useUserPrivilege';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 
 interface PeoplePageProps {
   tab?: TEAM_TABS_TYPES;
 }
 
 const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
-  const { organizationId } = useCurrentUser();
+  const { organizationId } = useUserIdentity();
 
   const {
     data: teamMembersData,
