@@ -56,7 +56,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   }
 
   return (
-    <Tabs defaultValue={defaultTab} onValueChange={handleTabSelect} className='w-full'>
+    <Tabs value={defaultTab} onValueChange={handleTabSelect} className='w-full'>
       <TabsList className='mt-4 mb-2 gap-x-5 bg-transparent'>
         {TeamTabsList.map((tab) => (
           <TabsTrigger
@@ -66,7 +66,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
             className={cn(
               'f-12-500 rounded-none !p-0 !px-1 !py-3',
               'box-border border-0 border-b-2 border-transparent',
-              'data-[state=active]:!border-GRAY_1000 data-[state=active]:text-GRAY_1000 data-[state=active]:!border-b-2',
+              'data-[state=active]:!border-GRAY_1000 data-[state=active]:text-GRAY_1000 data-[state=active]:!border-0 data-[state=active]:!border-b-2',
             )}
           >
             {tab.label}

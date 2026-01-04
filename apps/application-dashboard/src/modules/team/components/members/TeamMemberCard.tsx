@@ -1,10 +1,11 @@
-import React, { lazy, RefObject, useMemo, useState } from 'react';
+import { RefObject, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
 import MembersRole from 'modules/team/components/members/MembersRole';
 import MembersTeamV2 from 'modules/team/components/members/MembersTeamV2';
+import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import { UserMappedTeamType } from 'modules/team/people.types';
 import { useDeleteAudienceFromOrganizationAccessMutation, useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { toast } from '@/components/common/toast/Toast';
@@ -14,8 +15,6 @@ import { GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
 import { PERMISSION_MESSAGES } from '@/utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from '@/utils/accessPermission/accessPermission.types';
 import { convertEmailUsernameToName, getUserNameFromEmail } from '@/utils/common';
-
-const RemoveFromTeamPopup = lazy(() => import('modules/team/components/RemoveFromTeamPopup'));
 
 interface TeamMemberCardProps {
   member: boolean;

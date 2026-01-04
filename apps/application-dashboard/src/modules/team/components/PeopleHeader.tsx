@@ -1,12 +1,11 @@
-import { FC, lazy, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { useUserIdentity } from 'hooks/useUserIdentity';
+import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
 import Input from 'components/common/input';
-
-const InviteMembersPopup = lazy(() => import('modules/team/InviteMembersPopup'));
 
 type PeopleHeaderPropsType = {
   search: string;

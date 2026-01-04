@@ -1,5 +1,6 @@
-import { FC, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Popover, PopoverContent, PopoverTrigger, Tag, toast } from '@zamp-platform/ui';
+import DeleteTeamDialog from 'modules/team/components/members/DeleteTeamDialog';
 import TeamItem from 'modules/team/components/members/TeamItem';
 import {
   MembersTeamPropsType,
@@ -12,8 +13,6 @@ import { useAppSelector } from '@/hooks/toolkit';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { RootState } from '@/store';
 import { capitalizeWords } from '@/utils/common';
-
-const DeleteTeamDialog = lazy(() => import('modules/team/components/members/DeleteTeamDialog'));
 
 const MembersTeamV2: FC<MembersTeamPropsType> = ({
   teamsData,
