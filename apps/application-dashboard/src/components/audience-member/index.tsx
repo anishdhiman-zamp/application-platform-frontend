@@ -5,10 +5,10 @@ import Image from 'next/image';
 import { COLORS } from '@/constants/colors';
 import { JOINED_DATASET_ICON } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
+import { useCurrentUser } from '@/hooks/useUserPrivilege';
 import { TeamInfoType } from '@/modules/shareResource';
 import type { RootState } from '@/store';
 import { ResourceAudienceType } from '@/types/api/auth.types';
-import { checkIfCurrentUser } from '@/utils/accessPermission/accessPermission.utils';
 import AudienceMemberName from 'components/audience-member/Name';
 import Avatar from 'components/common/avatar';
 
@@ -38,7 +38,8 @@ const AudienceMember = ({
   tagClassName,
 }: AudienceMemberProps) => {
   const orgName = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.name);
-  const checkIfUser = checkIfCurrentUser(user?.email ?? '');
+  const { isCurrentUser } = useCurrentUser();
+  const checkIfUser = isCurrentUser(user?.email ?? '');
   const isTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const isOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
   const customAvatarWord = isOrg ? customerName || orgName || '' : (user?.email ?? '');

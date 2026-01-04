@@ -20,7 +20,7 @@ const reducer = combineReducers({
 
 export const store = configureStore({
   reducer: reducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware).concat(chatApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 setupListeners(store.dispatch);

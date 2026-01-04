@@ -4,6 +4,7 @@ import { captureException } from '@sentry/browser';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON, ZAMP_LOGO_LOADER_SVG } from 'constants/icons';
+import { useCurrentUser } from 'hooks/useUserPrivilege';
 import { DatasetColumnRequest } from 'modules/data/data.types';
 import RuleCard, { RuleCardProps } from 'modules/data/RulesListing/RuleCard';
 import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
@@ -12,7 +13,6 @@ import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
 import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
-import { getUserId } from 'utils/accessPermission/accessPermission.utils';
 import Input from '@/components/common/input';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
@@ -44,6 +44,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
   columnLabel,
   tagColorMap,
 }) => {
+  const { userId } = useCurrentUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [rules, setRules] = useState<RuleCardProps[]>([]);
   const [prioritySorting, setPrioritySorting] = useState<OrderType>(OrderType.DESC);
@@ -152,7 +153,7 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
         dataset_id: datasetId,
         column,
         rule_priorities: {
-          updated_by: getUserId(),
+          updated_by: userId,
           rule_priority: rules.map((rule, index) => ({
             rule_id: rule?.id ?? '',
             priority: prioritySorting === OrderType.ASC ? index + 1 : listOfRules?.length - index,

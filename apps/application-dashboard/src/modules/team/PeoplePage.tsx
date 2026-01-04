@@ -1,16 +1,20 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import { debounce } from 'hooks';
-import { useAppSelector } from 'hooks/toolkit';
 import PeopleHeader from 'modules/team/components/PeopleHeader';
 import PeopleTabs from 'modules/team/components/PeopleTabs';
-import { RootState } from 'store';
+import type { TEAM_TABS_TYPES } from 'modules/team/people.types';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { useCurrentUser } from '@/hooks/useUserPrivilege';
 
-const PeoplePage = () => {
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+interface PeoplePageProps {
+  tab?: TEAM_TABS_TYPES;
+}
+
+const PeoplePage: FC<PeoplePageProps> = ({ tab }) => {
+  const { organizationId } = useCurrentUser();
 
   const {
     data: teamMembersData,
@@ -66,15 +70,15 @@ const PeoplePage = () => {
   return (
     <div className='h-full w-full p-10'>
       <PeopleHeader search={search} setSearch={setSearch} teamMembersData={teamMembersData ?? []} />
-      <Suspense>
-        <PeopleTabs
-          filteredTeamMembers={filteredTeamMembers ?? []}
-          isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
-          filteredInvitedMembers={filteredInvitedMembers ?? []}
-          isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
-          search={search}
-        />
-      </Suspense>
+
+      <PeopleTabs
+        filteredTeamMembers={filteredTeamMembers ?? []}
+        isLoadingTeamMembersData={isLoadingTeamMembersData || isUninitializedTeamMembersData}
+        filteredInvitedMembers={filteredInvitedMembers ?? []}
+        isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData || isUninitializedInvitedTeamMembersData}
+        search={search}
+        tab={tab}
+      />
     </div>
   );
 };

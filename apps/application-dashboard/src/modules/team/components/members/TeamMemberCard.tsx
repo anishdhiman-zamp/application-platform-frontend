@@ -9,8 +9,8 @@ import { UserMappedTeamType } from 'modules/team/people.types';
 import { useDeleteAudienceFromOrganizationAccessMutation, useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { toast } from '@/components/common/toast/Toast';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
+import { useCurrentUser } from '@/hooks/useUserPrivilege';
 import { GetTeamsByOrganizationIdResponseType } from '@/types/api/people.types';
-import { accessPermissionForPeople } from '@/utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from '@/utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from '@/utils/accessPermission/accessPermission.types';
 import { convertEmailUsernameToName, getUserNameFromEmail } from '@/utils/common';
@@ -47,9 +47,10 @@ const TeamMemberCard = ({
   teamsRandomColorRef,
 }: TeamMemberCardProps) => {
   const { user_id, userEmail } = value;
+  const { isSystemAdmin } = useCurrentUser();
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
   const userName = useMemo(() => convertEmailUsernameToName(getUserNameFromEmail(userEmail ?? '')), [userEmail]);
-  const checkPermission = accessPermissionForPeople() && member;
+  const checkPermission = isSystemAdmin && member;
   const [deleteAudience, { isLoading: isLoadingDeleteAudience }] = useDeleteAudienceFromOrganizationAccessMutation();
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },

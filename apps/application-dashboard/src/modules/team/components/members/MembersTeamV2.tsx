@@ -9,8 +9,8 @@ import {
 } from 'modules/team/people.types';
 import { usePostAddTeamToAudienceMutation, usePostAddTeamToOrganizationMutation } from '@/apis/people';
 import { useAppSelector } from '@/hooks/toolkit';
+import { useCurrentUser } from '@/hooks/useUserPrivilege';
 import { RootState } from '@/store';
-import { checkIfCurrentUserIsSystemAdmin } from '@/utils/accessPermission/accessPermission.utils';
 import { capitalizeWords } from '@/utils/common';
 
 const DeleteTeamDialog = lazy(() => import('modules/team/components/members/DeleteTeamDialog'));
@@ -31,7 +31,7 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
-  const isSystemAdmin = useMemo(() => checkIfCurrentUserIsSystemAdmin(), []);
+  const { isSystemAdmin } = useCurrentUser();
 
   const [postAddTeamToAudience] = usePostAddTeamToAudienceMutation();
   const [postAddTeamToOrganization] = usePostAddTeamToOrganizationMutation();

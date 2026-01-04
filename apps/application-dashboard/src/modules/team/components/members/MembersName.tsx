@@ -1,13 +1,13 @@
 import { FC } from 'react';
-import { useSelector } from 'react-redux';
 import { COLORS } from 'constants/colors';
 import { MembersNamePropsType } from 'modules/team/people.types';
-import { RootState } from 'store';
 import { convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
+import { useCurrentUser } from '@/hooks/useUserPrivilege';
 import Avatar from 'components/common/avatar';
 
 const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member = false }) => {
-  const isCurrentUser = useSelector((state: RootState) => state?.user?.user)?.user_email === value;
+  const { userEmail } = useCurrentUser();
+  const isCurrentUser = userEmail === value;
   const showCurrentUser = isCurrentUser && member;
 
   return (
