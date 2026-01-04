@@ -60,8 +60,8 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   }
 
   return (
-    <Tabs defaultValue={defaultTab} onValueChange={handleTabSelect} className='w-full'>
-      <TabsList className='mt-4 mb-2 gap-x-5 bg-transparent'>
+    <Tabs defaultValue={defaultTab} onValueChange={handleTabSelect} className='my-4 h-full w-full'>
+      <TabsList className='gap-x-5 bg-transparent'>
         {TeamTabsList.map((tab) => (
           <TabsTrigger
             key={tab.value}
@@ -78,7 +78,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
         ))}
       </TabsList>
 
-      <TabsContent value={TEAM_TABS_TYPES.TEAM_MEMBERS}>
+      <TabsContent value={TEAM_TABS_TYPES.TEAM_MEMBERS} className='h-full w-full'>
         <TeamMembersListing
           hasPeoplePolicy={hasPeoplePolicy}
           data={filteredTeamMembers}
@@ -87,7 +87,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
         />
       </TabsContent>
 
-      <TabsContent value={TEAM_TABS_TYPES.INVITED_MEMBERS}>
+      <TabsContent value={TEAM_TABS_TYPES.INVITED_MEMBERS} className='h-full w-full'>
         <InvitedMembersListing
           data={filteredInvitedMembers}
           isLoadingInvitedTeamMembersData={isLoadingInvitedTeamMembersData}
