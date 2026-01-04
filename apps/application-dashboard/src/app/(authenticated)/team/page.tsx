@@ -4,14 +4,14 @@ import PeoplePage from 'modules/team/PeoplePage';
 
 interface TeamProps {
   searchParams: Promise<{
-    tab?: string;
+    tab?: TEAM_TABS_TYPES;
   }>;
 }
 
 const Team: FC<TeamProps> = async ({ searchParams }) => {
   const { tab } = await searchParams;
 
-  return <PeoplePage tab={tab as TEAM_TABS_TYPES} />;
+  return <PeoplePage tab={tab} />;
 };
 
 export default Team;

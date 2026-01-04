@@ -66,7 +66,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
             className={cn(
               'f-12-500 rounded-none !p-0 !px-1 !py-3',
               'box-border border-0 border-b-2 border-transparent',
-              'data-[state=active]:!border-GRAY_1000 data-[state=active]:text-GRAY_1000 data-[state=active]:!border-0 data-[state=active]:!border-b-2',
+              'data-[state=active]:!border-GRAY_1000 data-[state=active]:text-GRAY_1000 data-[state=active]:!border-b-2',
             )}
           >
             {tab.label}
