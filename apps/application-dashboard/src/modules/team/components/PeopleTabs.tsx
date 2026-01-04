@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useTransition } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@zamp-platform/ui';
 import InvitedMembersListing from 'modules/team/components/members/InvitedMembersListing';
 import TeamMembersListing from 'modules/team/components/members/TeamMembersListing';
@@ -30,9 +30,10 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   tab,
 }) => {
   const router = useRouter();
-  const defaultTab = (tab as TEAM_TABS_TYPES) ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
+  const [, startTransition] = useTransition();
+  const defaultTab = tab ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
 
-  const { isSystemAdmin } = useUserIdentity();
+  const { isSystemAdmin, isLoading: isLoadingUserIdentity } = useUserIdentity();
   const { data: dualAdminPolicy } = useGetDualAdminPolicyQuery();
 
   const hasPeoplePolicy = useMemo(() => {
@@ -41,10 +42,13 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
 
   const handleTabSelect = (value: string) => {
     if (!value) return;
-    router.replace(`${ROUTES_PATH.TEAM}?tab=${value}`);
+
+    startTransition(() => {
+      router.replace(`${ROUTES_PATH.TEAM}?tab=${value}`);
+    });
   };
 
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin && !isLoadingUserIdentity) {
     return (
       <TeamMembersListing
         hasPeoplePolicy={hasPeoplePolicy}
@@ -56,7 +60,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   }
 
   return (
-    <Tabs value={defaultTab} onValueChange={handleTabSelect} className='w-full'>
+    <Tabs defaultValue={defaultTab} onValueChange={handleTabSelect} className='w-full'>
       <TabsList className='mt-4 mb-2 gap-x-5 bg-transparent'>
         {TeamTabsList.map((tab) => (
           <TabsTrigger
