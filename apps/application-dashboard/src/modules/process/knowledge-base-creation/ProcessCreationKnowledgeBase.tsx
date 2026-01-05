@@ -1,26 +1,29 @@
 'use client';
 
-import { FC, useCallback, useEffect, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { FC, Suspense, useCallback, useEffect, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
 import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
 import ProcessEmptyState from 'modules/process/activity-runs/components/ProcessEmptyState';
+import MarkdownContent from 'modules/process/knowledge-base-creation/components/MarkdownContent';
+import MarkdownSkeleton from 'modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import { KNOWLEDGE_BASE_SSE_TYPES } from 'modules/process/knowledge-base-creation/sop-creation.constants';
-import rehypeSlug from 'rehype-slug';
-import remarkGfm from 'remark-gfm';
+import dynamic from 'next/dynamic';
 import { useGetKnowledgeBaseQuery } from '@/apis/processes';
 import { useEventBus } from '@/app/_providers/sse-provider';
-import ImageLoader from '@/components/common/loader/ImageLoader';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { NEEDS_ATTENTION_EMPTY_STATE, ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
+import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
-import KbChatInput from '@/modules/knowledge-based/chatbot/KbChatInput';
 import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import { defaultFn, MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
+
+// Lazy load chat input - not needed for initial paint
+const KbChatInput = dynamic(() => import('@/modules/knowledge-based/chatbot/KbChatInput'), {
+  ssr: false,
+});
 
 interface ProcessCreationKnowledgeBaseProps {
   processId: string;
@@ -110,11 +113,7 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
             isLoading={isLoading || !processName || isLoadingKnowledgeBase}
             skeletonType={SkeletonTypes.CUSTOM}
             isNoData={!markdownContent}
-            loader={
-              <div className='flex h-full min-h-[calc(100vh-88px)] w-full items-center justify-center'>
-                <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={240} height={240} className='rounded-tl-xl' />
-              </div>
-            }
+            loader={<MarkdownSkeleton />}
             noDataBanner={
               <ProcessEmptyState
                 title='No process defined yet'
@@ -123,9 +122,9 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
               />
             }
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
-              {markdownContent}
-            </ReactMarkdown>
+            <Suspense fallback={<MarkdownSkeleton />}>
+              <MarkdownContent content={markdownContent} />
+            </Suspense>
           </CommonWrapper>
           {!isDisabled && (
             <div
