@@ -6,6 +6,17 @@ import { MapAny } from 'types/commonTypes';
 import { capitalizeFirstLetter } from 'utils/common';
 import { TEMPLATE_APPROVAL_ACTION_TYPES } from '@/constants/payments.constants';
 
+export const TEAM_MEMBERS_PRIVILEGES_LIST = [
+  {
+    label: 'System Admin',
+    value: TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN,
+  },
+  {
+    label: 'Member',
+    value: TEAM_MEMBERS_PRIVILEGES.MEMBER,
+  },
+];
+
 export const TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
   {
     headerName: 'Name',
@@ -38,19 +49,16 @@ export const INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS = [
     headerName: 'Name',
     field: 'email',
     cellRenderer: MembersName,
-    className: 'col-span-3',
   },
   {
     headerName: 'Email',
     field: 'email',
     cellRenderer: MembersEmail,
-    className: 'col-span-3',
   },
   {
     headerName: 'Invited as',
     field: 'privilege',
     cellRenderer: MembersRole,
-    className: 'col-span-3',
   },
 ];
 
@@ -59,17 +67,6 @@ export const TEAM_MEMBERS_LISTING_TABLE_THEME = {
   rowHoverColor: 'transparent',
   cellHorizontalPadding: 8,
 };
-
-export const TEAM_MEMBERS_PRIVILEGES_LIST = [
-  {
-    label: 'System Admin',
-    value: TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN,
-  },
-  {
-    label: 'Member',
-    value: TEAM_MEMBERS_PRIVILEGES.MEMBER,
-  },
-];
 
 export const PRIVILEGES_LIST = [
   {

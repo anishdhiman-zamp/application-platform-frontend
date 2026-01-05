@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 import { Button, toast } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
-import { cn } from '@zamp-platform/ui/utils';
 import MembersEmail from 'modules/team/components/members/MembersEmail';
 import MembersName from 'modules/team/components/members/MembersName';
 import MembersRole from 'modules/team/components/members/MembersRole';
@@ -28,16 +27,10 @@ const InvitedMemberCard: FC<InvitedMemberCardProps> = ({ row, organizationId }) 
   };
 
   return (
-    <div className={cn(`border-b-0.5 border-DIVIDER_GRAY group relative grid w-full grid-cols-9`)}>
-      <div className='col-span-3'>
-        <MembersName name={row?.name ?? row?.email} value={row?.email} />
-      </div>
-      <div className='col-span-3'>
-        <MembersEmail value={row?.email} />
-      </div>
-      <div className='col-span-3'>
-        <MembersRole value={{ user_id: '', privilege: row?.privilege }} />
-      </div>
+    <div className='border-b-0.5 border-DIVIDER_GRAY group relative grid grid-cols-3 gap-4'>
+      <MembersName name={row?.name ?? row?.email} value={row?.email} />
+      <MembersEmail value={row?.email} />
+      <MembersRole value={{ user_id: '', privilege: row?.privilege }} />
       <div className='absolute top-2 right-0'>
         <div className='flex h-full items-center justify-end'>
           <Button
