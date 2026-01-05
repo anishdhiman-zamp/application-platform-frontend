@@ -1,11 +1,8 @@
 import { FC, useRef, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, usePatchChangeAudienceRoleInOrganizationMutation } from 'apis/people';
 import { useOnClickOutside } from 'hooks';
-import {
-  MembersRolePropsType,
-  TEAM_MEMBERS_PRIVILEGES_LIST,
-  TeamMemberAccessPrivilegesType,
-} from 'modules/team/people.types';
+import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
+import { MembersRolePropsType, TeamMemberAccessPrivilegesType } from 'modules/team/people.types';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { useUserIdentity } from '@/hooks/useUserIdentity';

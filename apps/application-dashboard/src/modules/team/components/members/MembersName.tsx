@@ -6,8 +6,8 @@ import { useUserIdentity } from '@/hooks/useUserIdentity';
 import Avatar from 'components/common/avatar';
 
 const MembersName: FC<MembersNamePropsType> = ({ name = '', value = '', member = false }) => {
-  const { userEmail } = useUserIdentity();
-  const isCurrentUser = userEmail === value;
+  const { isCurrentUserEmail } = useUserIdentity();
+  const isCurrentUser = isCurrentUserEmail(value);
   const showCurrentUser = isCurrentUser && member;
 
   return (

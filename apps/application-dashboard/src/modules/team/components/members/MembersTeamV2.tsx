@@ -218,15 +218,14 @@ const MembersTeamV2: FC<MembersTeamPropsType> = ({
           )}
         </PopoverContent>
       </Popover>
-      {selectedTeamToBeDeleted && (
-        <DeleteTeamDialog
-          organizationId={organizationId}
-          team={selectedTeamToBeDeleted}
-          isOpen={!!selectedTeamToBeDeleted}
-          onOpenChange={handleOpenChange}
-          onRemoveUserFromTeam={handleRemoveUserFromTeam}
-        />
-      )}
+
+      <DeleteTeamDialog
+        organizationId={organizationId}
+        team={selectedTeamToBeDeleted}
+        isOpen={!!selectedTeamToBeDeleted}
+        onOpenChange={handleOpenChange}
+        onRemoveUserFromTeam={handleRemoveUserFromTeam}
+      />
     </>
   );
 };

@@ -7,7 +7,7 @@ import {
 import EmptyStateListing from 'modules/team/components/EmptyStateListing';
 import TeamMemberCard from 'modules/team/components/members/TeamMemberCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
-import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.columnDefs';
+import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { TeamMembersListingPropsType } from 'modules/team/people.types';
 import { TEAMS_COLORS } from '@/constants/colors';
 import { useUserIdentity } from '@/hooks/useUserIdentity';

@@ -3,7 +3,7 @@ import { useGetInvitedAudiencesByOrganisationIdQuery } from 'apis/people';
 import EmptyStateListing from 'modules/team/components/EmptyStateListing';
 import InvitedMemberCard from 'modules/team/components/members/InvitedMemberCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
-import { INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.columnDefs';
+import { INVITE_TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { InvitedMembersListingPropsType } from 'modules/team/people.types';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import CommonWrapper from 'components/commonWrapper';

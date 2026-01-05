@@ -50,13 +50,11 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
         >
           Invite members
         </Button>
-        {isInviteMembersPopupOpen && (
-          <InviteMembersPopup
-            isOpen={isInviteMembersPopupOpen}
-            onClose={handleCloseInviteMembersPopup}
-            teamMembersData={teamMembersData}
-          />
-        )}
+        <InviteMembersPopup
+          isOpen={isInviteMembersPopupOpen}
+          onClose={handleCloseInviteMembersPopup}
+          teamMembersData={teamMembersData}
+        />
       </div>
     </>
   );

@@ -73,17 +73,6 @@ export type TeamMemberAccessPrivilegesType = {
   value: TEAM_MEMBERS_PRIVILEGES;
 };
 
-export const TEAM_MEMBERS_PRIVILEGES_LIST = [
-  {
-    label: 'System Admin',
-    value: TEAM_MEMBERS_PRIVILEGES.SYSTEM_ADMIN,
-  },
-  {
-    label: 'Member',
-    value: TEAM_MEMBERS_PRIVILEGES.MEMBER,
-  },
-];
-
 export type EmptyStateListingPropsType = {
   title?: string;
 };
