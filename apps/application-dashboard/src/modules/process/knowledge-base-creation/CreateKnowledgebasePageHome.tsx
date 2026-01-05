@@ -4,19 +4,37 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
 import { AnnotationType, ResourceType } from '@zamp-platform/chat';
 import { toast } from '@zamp-platform/ui';
+import MarkdownSkeleton from 'modules/process/knowledge-base-creation/components/MarkdownSkeleton';
+import dynamic from 'next/dynamic';
 import { useGetProcessesQuery } from '@/apis/pages';
 import { useLazyFilterConversationsQuery } from '@/apis/processes';
-import ImageLoader from '@/components/common/loader/ImageLoader';
 import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppDispatch } from '@/hooks/toolkit';
-import KnowledgeBaseChat from '@/modules/process/knowledge-base-creation/KnowledgeBaseChat';
-import ProcessCreationKnowledgeBase from '@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase';
-import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
+
+// Dynamic imports for heavy components
+const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
+  ssr: false,
+  loading: () => <MarkdownSkeleton />,
+});
+
+const ProcessCreationKnowledgeBase = dynamic(
+  () => import('@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase'),
+  {
+    ssr: false,
+    loading: () => <MarkdownSkeleton />,
+  },
+);
+
+const ProcessInProcessBanner = dynamic(
+  () => import('@/modules/process/knowledge-base-creation/ProcessInProcessBanner'),
+  {
+    ssr: false,
+  },
+);
 
 interface CreateKnowledgebasePageHomeProps {
   processId: string;
@@ -71,7 +89,7 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
     }
   }, [processId, conversationId, currentProcess, filterConversations]);
 
-  if (![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus)) {
+  if (currentProcess && ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus)) {
     return <ProcessInProcessBanner />;
   }
 
@@ -79,11 +97,7 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
     <CommonWrapper
       isLoading={isLoadingProcesses}
       skeletonType={SkeletonTypes.CUSTOM}
-      loader={
-        <div className='flex h-full min-h-[calc(100vh-88px)] w-full items-center justify-center'>
-          <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={240} height={240} className='rounded-tl-xl' />
-        </div>
-      }
+      loader={<MarkdownSkeleton />}
       className='flex h-full w-full'
     >
       <div className='border-GRAY_400 h-full w-[444px] min-w-[444px] border-r'>
