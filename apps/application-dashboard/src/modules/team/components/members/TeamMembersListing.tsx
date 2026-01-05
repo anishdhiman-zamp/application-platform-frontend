@@ -4,14 +4,13 @@ import {
   useGetTeamsByOrganizationIdQuery,
   useGetUserTeamsByOrganizationIdQuery,
 } from 'apis/people';
-import { useAppSelector } from 'hooks/toolkit';
 import EmptyStateListing from 'modules/team/components/EmptyStateListing';
 import TeamMemberCard from 'modules/team/components/members/TeamMemberCard';
 import SkeletonLoaderListing from 'modules/team/components/SkeletonLoaderListing';
 import { TEAM_MEMBERS_LISTING_COLUMN_DEFS } from 'modules/team/people.constants';
 import { TeamMembersListingPropsType } from 'modules/team/people.types';
-import { RootState } from 'store';
 import { TEAMS_COLORS } from '@/constants/colors';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { cyclicIterator } from '@/utils/common';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
@@ -22,7 +21,7 @@ const TeamMembersListing: FC<TeamMembersListingPropsType> = ({
   hasPeoplePolicy,
   search,
 }) => {
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { organizationId } = useUserIdentity();
   const teamsRandomColorRef = useRef(cyclicIterator(TEAMS_COLORS));
 
   // get audiences data
