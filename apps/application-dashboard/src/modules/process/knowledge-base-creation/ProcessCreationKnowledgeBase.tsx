@@ -16,15 +16,12 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { NEEDS_ATTENTION_EMPTY_STATE } from '@/constants/icons';
 import { useAppSelector } from '@/hooks/toolkit';
+import PaceIcon from '@/modules/knowledge-based/icons/PaceIcon';
 import { defaultFn, MapAny } from '@/types/commonTypes';
 import { cn } from '@/utils/common';
 
 // Lazy load chat input - not needed for initial paint
 const KbChatInput = dynamic(() => import('@/modules/knowledge-based/chatbot/KbChatInput'), {
-  ssr: false,
-});
-
-const PaceIcon = dynamic(() => import('@/modules/knowledge-based/icons/PaceIcon'), {
   ssr: false,
 });
 

@@ -12,6 +12,7 @@ import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppDispatch } from '@/hooks/toolkit';
+import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
 
@@ -26,13 +27,6 @@ const ProcessCreationKnowledgeBase = dynamic(
   {
     ssr: false,
     loading: () => <MarkdownSkeleton />,
-  },
-);
-
-const ProcessInProcessBanner = dynamic(
-  () => import('@/modules/process/knowledge-base-creation/ProcessInProcessBanner'),
-  {
-    ssr: false,
   },
 );
 
