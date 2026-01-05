@@ -119,16 +119,14 @@ const TeamMemberCard = ({
           </Button>
         </div>
       </div>
-      {isOpenRemoveFromTeamPopup && (
-        <RemoveFromTeamPopup
-          isOpen={isOpenRemoveFromTeamPopup}
-          onClose={handleCloseRemoveFromTeamPopup}
-          isLoading={isLoadingDeleteAudience}
-          onDelete={handleDeleteAudience}
-          feature='remove-access-from-dataset'
-          warningDescription={`${userName} will be immediately removed from the organization and lose all access`}
-        />
-      )}
+      <RemoveFromTeamPopup
+        isOpen={isOpenRemoveFromTeamPopup}
+        onClose={handleCloseRemoveFromTeamPopup}
+        isLoading={isLoadingDeleteAudience}
+        onDelete={handleDeleteAudience}
+        feature='remove-access-from-dataset'
+        warningDescription={`${userName} will be immediately removed from the organization and lose all access`}
+      />
     </div>
   );
 };

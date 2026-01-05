@@ -33,7 +33,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
   const [, startTransition] = useTransition();
   const defaultTab = tab ?? TEAM_TABS_TYPES.TEAM_MEMBERS;
 
-  const { isSystemAdmin, isLoading: isLoadingUserIdentity } = useUserIdentity();
+  const { isSystemAdmin, userRole } = useUserIdentity();
   const { data: dualAdminPolicy } = useGetDualAdminPolicyQuery();
 
   const hasPeoplePolicy = useMemo(() => {
@@ -48,7 +48,7 @@ const PeopleTabs: FC<PeopleTabsPropsType> = ({
     });
   };
 
-  if (!isSystemAdmin && !isLoadingUserIdentity) {
+  if (userRole && !isSystemAdmin) {
     return (
       <TeamMembersListing
         hasPeoplePolicy={hasPeoplePolicy}

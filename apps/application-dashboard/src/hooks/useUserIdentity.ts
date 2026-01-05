@@ -25,7 +25,6 @@ export const useUserIdentity = () => {
   const userEmail = useAppSelector((state) => state?.user?.user?.user_email ?? '');
   const userId = useAppSelector((state) => state?.user?.user?.user_id ?? '');
   const organizationId = useAppSelector((state) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
-  const isLoading = !userRole;
 
   return {
     userRole,
@@ -36,6 +35,5 @@ export const useUserIdentity = () => {
     isSystemAdmin: userRole === PERMISSION_ROLES.SYSTEM_ADMIN,
     isCurrentUserEmail: (email: string) => (email === '' ? false : userEmail === email),
     organizationId,
-    isLoading,
   };
 };
