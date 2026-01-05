@@ -117,6 +117,7 @@ const Select = ({
     if (isOpen && fetchOptions && dynamicOptions.length === 0 && !loading) {
       fetchMoreOptions();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   useEffect(() => {

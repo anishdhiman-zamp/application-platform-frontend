@@ -25,7 +25,7 @@ type OrgSwitcherProps = {
   isSidebarOpen: boolean;
 };
 
-export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
+const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useAppDispatch();
