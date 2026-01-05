@@ -13,6 +13,7 @@ export const enum ResourceType {
   PROCESS = 'process',
   DATASET = 'dataset',
   DOCUMENT = 'document',
+  ORGANIZATION = 'organization',
 }
 
 export const enum SenderType {
@@ -23,11 +24,13 @@ export const enum SenderType {
 export const enum AnnotationType {
   KB = 'KB',
   FEEDBACK = 'FEEDBACK',
+  PROCESS_SOP = 'PROCESS_SOP',
 }
 
 export const enum ScopeType {
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  ORGANIZATION = 'organization',
 }
 
 export const enum LocationType {
@@ -35,6 +38,7 @@ export const enum LocationType {
   LOG = 'log',
   ACTIVITY_RUN = 'activity_run',
   PROCESS = 'process',
+  SOP = 'sop',
 }
 
 export interface CreateConversationPayloadType {
@@ -61,6 +65,8 @@ export const enum SSEEventType {
   ERROR = 'error',
   NEW_CHAT_MESSAGE = 'new_chat_message',
   CONVERSATION_UPDATED = 'conversation_updated',
+  MESSAGE_START = 'message_start',
+  MESSAGE_STOP = 'message_stop',
 }
 
 export const enum ChatMessageType {
@@ -91,6 +97,7 @@ export interface ChatMessage {
   message_content: {
     message?: string;
     elements?: Block[];
+    content_blocks?: StreamingContentBlock[];
     text?: string;
     text_type?: string;
     attachments?: MessageAttachmentType[];
@@ -162,7 +169,8 @@ export type LocationData =
   | ({ type: LocationType.DATASET_FIELD } & { data: DatasetFieldLocationData })
   | ({ type: LocationType.LOG } & { data: LogLocationData })
   | ({ type: LocationType.ACTIVITY_RUN } & { data: ActivityRunLocationData })
-  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData });
+  | ({ type: LocationType.PROCESS } & { data: ProcessLocationData })
+  | ({ type: LocationType.SOP } & { data: ProcessLocationData });
 
 export interface AnnotationData {
   location: LocationData;
@@ -173,6 +181,7 @@ export interface CreateConversationPayloadTypeV2 {
   resource_type: ResourceType;
   scope_type: string;
   scope_id: string;
+  annotation_type?: AnnotationType;
   annotation_data?: AnnotationData;
   message_content: MessageContentType;
   sender_name?: string;
@@ -208,6 +217,7 @@ export interface ConversationType {
 
 export interface ConversationMessageContentType {
   elements: Block[];
+  content_blocks?: StreamingContentBlock[];
 }
 export interface ConversationMessageType {
   id: string;
@@ -230,6 +240,7 @@ export interface GetConversationByIdRequestType {
   conversationId: string;
   resourceId?: string;
   resourceType?: ResourceType;
+  url?: string;
 }
 
 export interface GetFilesByIdsRequestType {
@@ -265,3 +276,216 @@ export interface GetFileDownloadUrlResponseType {
   file_name: string;
   expiry: string;
 }
+
+/**
+ * File Upload API Types
+ */
+export interface SignedUrlResponseType {
+  file_name: string;
+  file_type: string;
+  file_upload_id: string;
+  key: string;
+  upload_url: string;
+}
+
+export interface SignedUrlBodyType {
+  path: string;
+  payload: {
+    file_name: string;
+    file_type: string;
+    organization_id: string;
+  };
+}
+
+/**
+ * Interaction API Types
+ */
+export interface DependentElementInteraction {
+  element_id: string;
+  payload: {
+    selected_option_id: string;
+  };
+}
+
+export interface MessageInteractionPayload {
+  is_clicked?: boolean;
+  dependent_elements_interactions?: DependentElementInteraction[];
+}
+
+export interface Interaction {
+  element_id: string;
+  payload: MessageInteractionPayload;
+}
+
+export interface PostInteractionPayloadType {
+  conversationId: string;
+  messageId: string;
+  params: {
+    resource_id: string;
+    resource_type: string;
+  };
+  body: {
+    interactions: Interaction[];
+  };
+}
+
+export interface PostInteractionResponseType {
+  success: boolean;
+  message_id: string;
+  conversation_id: string;
+  status_message: string;
+  message: {
+    id: string;
+    organization_id: string;
+    conversation_id: string;
+    sender_id: string;
+    sender_type: SenderType;
+    sender_name: string;
+    intent: string;
+    content: {
+      elements: Block[];
+    };
+    created_at: string;
+  };
+}
+
+export interface PostInteractionDisablePayloadType {
+  conversationId: string;
+  messageId: string;
+  params: {
+    resource_id: string;
+    resource_type: string;
+  };
+}
+
+/**
+ * Voice Agent / Speech-to-Text API Types
+ */
+export interface GenerateSpeechToTextAccessTokenRequest {
+  ttl_seconds?: number;
+}
+
+export interface GenerateSpeechToTextAccessTokenResponse {
+  access_token: string;
+  expires_in: number;
+}
+
+/**
+ * Streaming content block types
+ */
+
+export const enum StreamingContentType {
+  THINKING = 'thinking',
+  TEXT = 'text',
+  TOOL_USE = 'tool_use',
+}
+
+export const enum StreamingContentBlockType {
+  CONTENT_BLOCK_START = 'content_block_start',
+  CONTENT_BLOCK_DELTA = 'content_block_delta',
+  CONTENT_BLOCK_STOP = 'content_block_stop',
+}
+
+export const enum StreamingContentBlockDeltaType {
+  THINKING_DELTA = 'thinking_delta',
+  TEXT_DELTA = 'text_delta',
+  INPUT_JSON_DELTA = 'input_json_delta',
+  TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
+}
+
+export interface StreamingContentBlockBase {
+  id?: string;
+  index: number;
+  name?: string;
+  start_timestamp?: string;
+  stop_timestamp?: string;
+  is_complete: boolean;
+}
+
+export interface ThinkingContentBlock extends StreamingContentBlockBase {
+  type: StreamingContentType.THINKING;
+  content: string;
+}
+
+export interface TextContentBlock extends StreamingContentBlockBase {
+  type: StreamingContentType.TEXT;
+  content: string;
+}
+
+export interface ToolUseDisplayContent {
+  type: string;
+  json_block: string;
+}
+
+export interface ToolUseContentBlock extends StreamingContentBlockBase {
+  type: StreamingContentType.TOOL_USE;
+  input_json?: string;
+  content?: string;
+  message?: string;
+  partial_json?: string;
+  display_content?: ToolUseDisplayContent;
+}
+
+export type StreamingContentBlock = ThinkingContentBlock | TextContentBlock | ToolUseContentBlock;
+
+export interface StreamingState extends ChatMessage {
+  is_active: boolean;
+}
+
+export interface StreamEventContentBlockStart {
+  type: StreamingContentBlockType.CONTENT_BLOCK_START;
+  index: number;
+  content_block: {
+    type: StreamingContentType;
+    id?: string;
+    name?: string;
+    start_timestamp?: string;
+  };
+}
+
+export interface StreamEventThinkingDelta {
+  type: StreamingContentBlockDeltaType.THINKING_DELTA;
+  thinking: string;
+}
+
+export interface StreamEventTextDelta {
+  type: StreamingContentBlockDeltaType.TEXT_DELTA;
+  text: string;
+}
+
+export interface StreamEventInputJsonDelta {
+  type: StreamingContentBlockDeltaType.INPUT_JSON_DELTA;
+  partial_json: string;
+}
+
+export interface StreamEventToolUseUpdateDelta {
+  type: StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA;
+  message?: string;
+  display_content?: ToolUseDisplayContent;
+}
+
+export type StreamEventDelta =
+  | StreamEventThinkingDelta
+  | StreamEventTextDelta
+  | StreamEventInputJsonDelta
+  | StreamEventToolUseUpdateDelta;
+
+export interface StreamEventContentBlockDelta {
+  type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;
+  index: number;
+  delta: StreamEventDelta;
+}
+
+export interface StreamEventContentBlockStop {
+  type: StreamingContentBlockType.CONTENT_BLOCK_STOP;
+  index: number;
+  content_block: {
+    type: StreamingContentType;
+  };
+  stop_timestamp?: string;
+}
+
+export type StreamEventPayload =
+  | StreamEventContentBlockStart
+  | StreamEventContentBlockDelta
+  | StreamEventContentBlockStop;

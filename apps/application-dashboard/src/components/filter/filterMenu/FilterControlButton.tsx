@@ -2,8 +2,9 @@ import React, { FC, MouseEvent, PropsWithChildren, RefObject } from 'react';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { cn } from 'utils/common';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
 import { Loader } from 'components/common/loader/Loader';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import TooltipV2 from 'components/common/TooltipV2';
 
 interface FilterControlButtonProps extends PropsWithChildren {
   onClick: (event: MouseEvent<HTMLButtonElement>) => void;
@@ -18,14 +19,14 @@ interface FilterControlButtonProps extends PropsWithChildren {
   isLoading?: boolean;
   disabled?: boolean;
   id?: string;
-  tooltipPosition?: TooltipPositions;
+  tooltipPosition?: SIDE_OPTIONS;
   testIdSuffix?: string;
 }
 
 const FilterControlButton: FC<FilterControlButtonProps> = ({
   onClick,
   tooltipText = '',
-  tooltipPosition = TooltipPositions.BOTTOM,
+  tooltipPosition = SIDE_OPTIONS.BOTTOM,
   icon = 'plus',
   iconCategory = ICON_SPRITE_TYPES.GENERAL,
   iconColor,
@@ -48,13 +49,12 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
   };
 
   return (
-    <Tooltip
+    <TooltipV2
       tooltipBody={tooltipText}
-      color='{TMS_COLORS.GRAY_200}'
-      tooltipBodyClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
+      tooltipClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-GRAY_200'
       className='z-1'
       disabled={disabled}
-      position={tooltipPosition}
+      side={tooltipPosition}
     >
       <button
         className={cn(
@@ -81,7 +81,7 @@ const FilterControlButton: FC<FilterControlButtonProps> = ({
           </>
         )}
       </button>
-    </Tooltip>
+    </TooltipV2>
   );
 };
 

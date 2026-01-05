@@ -12,12 +12,15 @@ import {
   useState,
 } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@zamp-platform/ui';
-import { SIDE_OPTIONS } from '@/types/commonTypes';
+import { ALIGN_OPTIONS, SIDE_OPTIONS } from '@/types/commonTypes';
 
 type TooltipV2Props = {
   children: ReactNode;
   tooltipBody: ReactNode;
   side?: SIDE_OPTIONS;
+  align?: ALIGN_OPTIONS;
+  sideOffset?: number;
+  alignOffset?: number;
   className?: string;
   tooltipClassName?: string;
   asChildTrigger?: boolean;
@@ -25,12 +28,18 @@ type TooltipV2Props = {
   scrollableBody?: boolean;
   isDisabledBody?: boolean;
   showOnlyWhenTruncated?: boolean;
+  delayDuration?: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const TooltipV2: FC<TooltipV2Props> = ({
   children,
   tooltipBody,
   side = SIDE_OPTIONS.TOP,
+  align = ALIGN_OPTIONS.CENTER,
+  sideOffset = 10,
+  alignOffset = 0,
   className,
   tooltipClassName,
   asChildTrigger = false,
@@ -38,6 +47,9 @@ const TooltipV2: FC<TooltipV2Props> = ({
   scrollableBody = false,
   isDisabledBody = false,
   showOnlyWhenTruncated = false,
+  delayDuration = 100,
+  open,
+  onOpenChange,
 }) => {
   const triggerRef = useRef<HTMLElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -96,8 +108,8 @@ const TooltipV2: FC<TooltipV2Props> = ({
   }, [showOnlyWhenTruncated, checkOverflow]);
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
+    <TooltipProvider delayDuration={delayDuration}>
+      <Tooltip open={open} onOpenChange={onOpenChange}>
         <TooltipTrigger
           className={className}
           asChild={asChildTrigger}
@@ -107,7 +119,14 @@ const TooltipV2: FC<TooltipV2Props> = ({
           {enhancedChildren}
         </TooltipTrigger>
         {shouldShowTooltip && (
-          <TooltipContent className={tooltipClassName} side={side} sideOffset={10} onWheel={handleWheel}>
+          <TooltipContent
+            className={tooltipClassName}
+            side={side}
+            sideOffset={sideOffset}
+            align={align}
+            alignOffset={alignOffset}
+            onWheel={handleWheel}
+          >
             {tooltipBody}
           </TooltipContent>
         )}

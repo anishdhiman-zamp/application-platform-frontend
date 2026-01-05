@@ -9,6 +9,7 @@ import {
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { useAppSelector } from 'hooks/toolkit';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
@@ -16,7 +17,6 @@ import { motion } from 'motion/react';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
@@ -95,9 +95,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
   const placeholderText = 'Share with people and teams';
-  const user_email = getUserEmail();
-  const user_id = getUserId();
-  const user_role = getUserPrivilege();
+  const { userEmail: user_email, userId: user_id, userRole: user_role } = useUserIdentity();
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const currentUserHasAdminAccess = useMemo(() => {

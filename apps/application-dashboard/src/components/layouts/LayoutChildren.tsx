@@ -16,14 +16,12 @@ import { usePathname } from 'next/navigation';
 import { RootState } from 'store';
 import { CommonPageLayoutProps } from 'types/commonTypes';
 import { cn } from 'utils/common';
-import { ROUTES_PATH } from '@/constants/routeConfig';
 
-const LayoutChildren: FC<{ children: ReactNode }> = ({ children }) => {
+const LayoutChildren: FC<{ children: ReactNode; showTopbar: boolean }> = ({ children, showTopbar }) => {
   const pathname = usePathname() || '/';
   const containerRef = useRef<HTMLDivElement>(null);
   const [previousRoute, setPreviousRoute] = useState<string>(pathname);
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
-  const isSettingsPage = pathname?.startsWith(ROUTES_PATH.SETTINGS);
 
   useEffect(() => {
     if (previousRoute === pathname) return;
@@ -53,14 +51,15 @@ const LayoutChildren: FC<{ children: ReactNode }> = ({ children }) => {
     <div
       ref={containerRef}
       className={cn('relative flex h-screen grow flex-col', {
-        'h-full': isSettingsPage,
+        'h-full': !showTopbar,
       })}
     >
       <div
-        className={cn('border-GRAY_400 relative mx-auto h-screen w-full border bg-white', {
-          'h-[calc(100vh-48px)]': !isSettingsPage,
-          'rounded-tl-xl': isSidebarOpen && !isSettingsPage,
-        })}
+        className={cn(
+          'border-GRAY_400 relative mx-auto w-full border bg-white',
+          showTopbar ? 'h-[calc(100vh-48px)]' : 'h-screen',
+          isSidebarOpen && showTopbar && 'rounded-tl-xl',
+        )}
       >
         {renderChildrenWithProps(children)}
       </div>

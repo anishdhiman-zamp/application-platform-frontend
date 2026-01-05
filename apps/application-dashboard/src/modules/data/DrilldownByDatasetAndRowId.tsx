@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import DatasetById from 'modules/data/Dataset';
+import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { cn } from 'utils/common';
@@ -11,6 +11,7 @@ import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { Tabs } from 'components/common/tabs/Tabs';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
+const DatasetById = dynamic(() => import('modules/data/Dataset'));
 
 const DrilldownByDatasetAndRowId = () => {
   const params = useParams();

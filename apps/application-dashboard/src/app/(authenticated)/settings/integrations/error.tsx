@@ -1,10 +1,11 @@
 'use client';
 
+import { defaultFnType } from 'types/commonTypes';
 import { ErrorCardTypes } from '@/components/commonWrapper/commonWrapper.types';
 import ErrorCard from '@/components/commonWrapper/ErrorCard';
 
 interface ErrorProps {
-  reset: () => void;
+  reset: defaultFnType;
 }
 
 export default function IntegrationsError({ reset }: ErrorProps) {
@@ -13,7 +14,7 @@ export default function IntegrationsError({ reset }: ErrorProps) {
       <ErrorCard
         type={ErrorCardTypes.GENERAL_API_FAIL}
         title='Failed to load integrations'
-        subtitle={'Unable to fetch integrations. Please try again later.'}
+        subtitle='Unable to fetch integrations. Please try again later.'
         onClose={reset}
       />
     </div>

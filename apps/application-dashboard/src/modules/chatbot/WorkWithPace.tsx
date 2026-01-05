@@ -1,19 +1,27 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { LocationType, ScopeType } from '@zamp-platform/chat';
 import { Button } from '@zamp-platform/ui';
 import PaceIcon from 'modules/knowledge-based/icons/PaceIcon';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { getKnowledgeBasedRouteByProcessId } from '@/constants/routeConfig';
 import { FUNCTION_KEYS_ICON, KEYBOARD_KEYS } from '@/constants/shortcuts';
 import useKeyDown from '@/hooks/useKeyDown';
 import ChatbotWrapper from '@/modules/chatbot';
 
-const WorkWithPace = () => {
+interface WorkWithPaceProps {
+  isProcessLive?: boolean;
+}
+
+const WorkWithPace: FC<WorkWithPaceProps> = ({ isProcessLive = false }) => {
   const params = useParams();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const processId = params?.processId as string;
   const activityRunId = params?.activityId as string;
   const openChatbotRef = useRef<(() => void) | null>(null);
   const [chatbotKey, setChatbotKey] = useState(0);
+
+  const isSopCreation = pathname?.includes(getKnowledgeBasedRouteByProcessId(processId));
 
   const handleChatbotTrigger = useCallback((openChatbot: () => void) => {
     openChatbotRef.current = openChatbot;
@@ -58,7 +66,7 @@ const WorkWithPace = () => {
     };
   }, [activityRunId, processId]);
 
-  if (!processId) {
+  if (!processId || isSopCreation || !isProcessLive) {
     return null;
   }
 

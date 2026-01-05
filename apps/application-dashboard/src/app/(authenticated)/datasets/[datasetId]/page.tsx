@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import DatasetById from 'modules/data/Dataset';
+import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { useGetDatasetListingQuery } from '@/apis/dataset';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import { PAGE_SIZE } from '@/components/common/table/table.constants';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
+const DatasetById = dynamic(() => import('modules/data/Dataset'));
 
 export default function DatasetPage() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function DatasetPage() {
   }, [datasetId, isDatasetListingLoading, datasetListingData, router]);
 
   if (!datasetListingData?.datasets?.length) {
-    return null;
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />;
   }
 
   return <DatasetById id={datasetId} />;

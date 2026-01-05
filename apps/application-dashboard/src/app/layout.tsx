@@ -37,7 +37,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={inter.className}>
-      <body className='light-mode h-screen antialiased'>
+      <body className='light-mode bg-BACKGROUND_GRAY_1 h-screen antialiased'>
         <SpeedInsights />
         <NetworkStatus />
         <Toaster />
