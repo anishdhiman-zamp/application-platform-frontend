@@ -97,7 +97,6 @@ export interface ChatMessage {
   message_content: {
     message?: string;
     elements?: Block[];
-    content_blocks?: StreamingContentBlock[];
     text?: string;
     text_type?: string;
     attachments?: MessageAttachmentType[];
@@ -217,7 +216,6 @@ export interface ConversationType {
 
 export interface ConversationMessageContentType {
   elements: Block[];
-  content_blocks?: StreamingContentBlock[];
 }
 export interface ConversationMessageType {
   id: string;
@@ -370,122 +368,6 @@ export interface GenerateSpeechToTextAccessTokenResponse {
   expires_in: number;
 }
 
-/**
- * Streaming content block types
- */
-
-export const enum StreamingContentType {
-  THINKING = 'thinking',
-  TEXT = 'text',
-  TOOL_USE = 'tool_use',
-}
-
-export const enum StreamingContentBlockType {
-  CONTENT_BLOCK_START = 'content_block_start',
-  CONTENT_BLOCK_DELTA = 'content_block_delta',
-  CONTENT_BLOCK_STOP = 'content_block_stop',
-}
-
-export const enum StreamingContentBlockDeltaType {
-  THINKING_DELTA = 'thinking_delta',
-  TEXT_DELTA = 'text_delta',
-  INPUT_JSON_DELTA = 'input_json_delta',
-  TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
-}
-
-export interface StreamingContentBlockBase {
-  id?: string;
-  index: number;
-  name?: string;
-  start_timestamp?: string;
-  stop_timestamp?: string;
-  is_complete: boolean;
-}
-
-export interface ThinkingContentBlock extends StreamingContentBlockBase {
-  type: StreamingContentType.THINKING;
-  content: string;
-}
-
-export interface TextContentBlock extends StreamingContentBlockBase {
-  type: StreamingContentType.TEXT;
-  content: string;
-}
-
-export interface ToolUseDisplayContent {
-  type: string;
-  json_block: string;
-}
-
-export interface ToolUseContentBlock extends StreamingContentBlockBase {
-  type: StreamingContentType.TOOL_USE;
-  input_json?: string;
-  content?: string;
-  message?: string;
-  partial_json?: string;
-  display_content?: ToolUseDisplayContent;
-}
-
-export type StreamingContentBlock = ThinkingContentBlock | TextContentBlock | ToolUseContentBlock;
-
 export interface StreamingState extends ChatMessage {
   is_active: boolean;
 }
-
-export interface StreamEventContentBlockStart {
-  type: StreamingContentBlockType.CONTENT_BLOCK_START;
-  index: number;
-  content_block: {
-    type: StreamingContentType;
-    id?: string;
-    name?: string;
-    start_timestamp?: string;
-  };
-}
-
-export interface StreamEventThinkingDelta {
-  type: StreamingContentBlockDeltaType.THINKING_DELTA;
-  thinking: string;
-}
-
-export interface StreamEventTextDelta {
-  type: StreamingContentBlockDeltaType.TEXT_DELTA;
-  text: string;
-}
-
-export interface StreamEventInputJsonDelta {
-  type: StreamingContentBlockDeltaType.INPUT_JSON_DELTA;
-  partial_json: string;
-}
-
-export interface StreamEventToolUseUpdateDelta {
-  type: StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA;
-  message?: string;
-  display_content?: ToolUseDisplayContent;
-}
-
-export type StreamEventDelta =
-  | StreamEventThinkingDelta
-  | StreamEventTextDelta
-  | StreamEventInputJsonDelta
-  | StreamEventToolUseUpdateDelta;
-
-export interface StreamEventContentBlockDelta {
-  type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;
-  index: number;
-  delta: StreamEventDelta;
-}
-
-export interface StreamEventContentBlockStop {
-  type: StreamingContentBlockType.CONTENT_BLOCK_STOP;
-  index: number;
-  content_block: {
-    type: StreamingContentType;
-  };
-  stop_timestamp?: string;
-}
-
-export type StreamEventPayload =
-  | StreamEventContentBlockStart
-  | StreamEventContentBlockDelta
-  | StreamEventContentBlockStop;

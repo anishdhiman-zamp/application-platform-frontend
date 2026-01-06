@@ -121,7 +121,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       ))}
 
-      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+      {streamingState && !!streamingState.message_content?.elements?.length && (
         <StreamingMessage
           streamingState={streamingState}
           assistantName={assistantName}
@@ -129,7 +129,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         />
       )}
 
-      {streamingState && !!streamingState.message_content?.content_blocks?.length && (
+      {streamingState && !!streamingState.message_content?.elements?.length && (
         <div className='flex w-full items-center'>
           <div className='animate-opacity animate-spin'>
             <NewPaceIcons height={24} width={24} />
@@ -137,8 +137,7 @@ export const MessageContainer: FC<MessageContainerProps> = ({
         </div>
       )}
 
-      {(isAnalysing && !streamingState) ||
-      (streamingState && !streamingState.message_content?.content_blocks?.length) ? (
+      {(isAnalysing && !streamingState) || (streamingState && !streamingState.message_content?.elements?.length) ? (
         <div className='flex w-full items-center gap-1.5 text-gray-700'>
           {defaultAssistantAvatar}
           <ShimmerText text='Analysing...' autoAnimate={true} />

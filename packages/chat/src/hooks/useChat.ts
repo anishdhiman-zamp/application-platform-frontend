@@ -19,7 +19,13 @@ import {
   useSendMessageV2Mutation,
 } from '../api';
 import { getHistoryFormattedMessages } from '../components/block.utils';
-import { BLOCK_TYPE } from '../types/block.types';
+import {
+  type Block,
+  BLOCK_TYPE,
+  type StreamEventPayload,
+  StreamingContentBlockDeltaType,
+  StreamingContentBlockType,
+} from '../types/block.types';
 import {
   ChatMessage,
   ChatMessageType,
@@ -28,11 +34,6 @@ import {
   ResourceType,
   SenderType,
   SSEEventType,
-  StreamEventPayload,
-  StreamingContentBlock,
-  StreamingContentBlockDeltaType,
-  StreamingContentBlockType,
-  StreamingContentType,
   StreamingState,
 } from '../types/chat.types';
 
@@ -179,29 +180,29 @@ export const useChat = (config: ChatConfig) => {
             const { index, content_block } = payload;
             const blockType = content_block.type;
 
-            const newBlock: StreamingContentBlock =
-              blockType === StreamingContentType.THINKING
+            const newBlock: Block =
+              blockType === BLOCK_TYPE.THINKING
                 ? {
-                    type: StreamingContentType.THINKING,
-                    index,
-                    content: '',
+                    type: BLOCK_TYPE.THINKING,
+                    order: index,
+                    payload: { thinking: '' },
                     start_timestamp: content_block.start_timestamp,
                     is_complete: false,
                   }
-                : blockType === StreamingContentType.TEXT
+                : blockType === BLOCK_TYPE.TEXT
                   ? {
-                      type: StreamingContentType.TEXT,
-                      index,
-                      content: '',
+                      type: BLOCK_TYPE.TEXT,
+                      order: index,
+                      payload: { text: '' },
                       start_timestamp: content_block.start_timestamp,
                       is_complete: false,
                     }
                   : {
-                      type: StreamingContentType.TOOL_USE,
-                      index,
+                      type: BLOCK_TYPE.TOOL_USE,
+                      order: index,
                       id: content_block.id,
                       name: content_block.name,
-                      partial_json: '',
+                      payload: { partial_json: '' },
                       start_timestamp: content_block.start_timestamp,
                       is_complete: false,
                     };
@@ -219,7 +220,7 @@ export const useChat = (config: ChatConfig) => {
                   resource_id: config.resourceId || '',
                   conversation_id: conversationIdRef.current || undefined,
                   message_content: {
-                    content_blocks: [newBlock],
+                    elements: [newBlock],
                   },
                   message_type: ChatMessageType.SYSTEM,
                   sender_type: SenderType.ASSISTANT,
@@ -228,12 +229,12 @@ export const useChat = (config: ChatConfig) => {
                   is_active: true,
                 };
               }
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
               return {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: [...existingBlocks, newBlock],
+                  elements: [...existingBlocks, newBlock],
                 },
               };
             });
@@ -252,32 +253,41 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state from different conversation
               }
 
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
               const updatedBlocks = existingBlocks.map((block) => {
-                if (block.index !== index) return block;
+                if (block.order !== index) return block;
 
                 switch (delta.type) {
                   case StreamingContentBlockDeltaType.THINKING_DELTA:
-                    if (block.type === StreamingContentType.THINKING) {
-                      return { ...block, content: block.content + delta.thinking };
+                    if (block.type === BLOCK_TYPE.THINKING) {
+                      return { ...block, payload: { thinking: (block.payload.thinking || '') + delta.thinking } };
                     }
                     break;
                   case StreamingContentBlockDeltaType.TEXT_DELTA:
-                    if (block.type === StreamingContentType.TEXT) {
-                      return { ...block, content: block.content + delta.text };
+                    if (block.type === BLOCK_TYPE.TEXT) {
+                      return { ...block, payload: { text: block.payload.text + delta.text } };
                     }
                     break;
                   case StreamingContentBlockDeltaType.INPUT_JSON_DELTA:
-                    if (block.type === StreamingContentType.TOOL_USE) {
-                      return { ...block, partial_json: (block.partial_json || '') + delta.partial_json };
+                    if (block.type === BLOCK_TYPE.TOOL_USE) {
+                      return {
+                        ...block,
+                        payload: {
+                          ...block.payload,
+                          partial_json: (block.payload.partial_json || '') + delta.partial_json,
+                        },
+                      };
                     }
                     break;
                   case StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA:
-                    if (block.type === StreamingContentType.TOOL_USE) {
+                    if (block.type === BLOCK_TYPE.TOOL_USE) {
                       return {
                         ...block,
-                        message: delta.message ?? block.message,
-                        display_content: delta.display_content ?? block.display_content,
+                        payload: {
+                          ...block.payload,
+                          message: delta.message ?? block.payload.message,
+                          display_content: delta.display_content ?? block.payload.display_content,
+                        },
                       };
                     }
                     break;
@@ -289,7 +299,7 @@ export const useChat = (config: ChatConfig) => {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: updatedBlocks,
+                  elements: updatedBlocks,
                 },
               };
             });
@@ -307,9 +317,9 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state from different conversation
               }
 
-              const existingBlocks = prev.message_content?.content_blocks ?? [];
+              const existingBlocks = prev.message_content?.elements ?? [];
               const updatedBlocks = existingBlocks.map((block) => {
-                if (block.index !== index) return block;
+                if (block.order !== index) return block;
                 return { ...block, is_complete: true, stop_timestamp: stop_timestamp };
               });
 
@@ -317,7 +327,7 @@ export const useChat = (config: ChatConfig) => {
                 ...prev,
                 message_content: {
                   ...prev.message_content,
-                  content_blocks: updatedBlocks,
+                  elements: updatedBlocks,
                 },
                 is_active: true,
               };
@@ -370,7 +380,6 @@ export const useChat = (config: ChatConfig) => {
                 conversation_id: message.conversation_id,
                 id: message.id,
                 message_content: {
-                  content_blocks: [],
                   elements: [],
                 },
                 message_type: ChatMessageType.SYSTEM,
@@ -391,7 +400,7 @@ export const useChat = (config: ChatConfig) => {
                 return null; // Clear stale streaming state without adding to messages
               }
 
-              if (prev.message_content?.content_blocks && prev.message_content.content_blocks.length > 0) {
+              if (prev.message_content?.elements && prev.message_content.elements.length > 0) {
                 const streamingMessagePayload: ChatMessage = {
                   resource_type: prev.resource_type,
                   resource_id: prev.resource_id,
@@ -403,7 +412,7 @@ export const useChat = (config: ChatConfig) => {
                   sender_type: prev.sender_type,
                   sender_name: prev.sender_name || 'assistant',
                   message_content: {
-                    content_blocks: prev.message_content.content_blocks,
+                    elements: prev.message_content.elements,
                   },
                 };
 

@@ -48,14 +48,16 @@ const ChatHistory = () => {
     <div className='mx-auto flex min-h-0 w-full flex-1 flex-col bg-white pt-4'>
       <div className='flex items-center justify-between p-3'>
         <p className='f-14-550 text-gray-1000'>Chat History</p>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='text-gray-1000 h-6 w-6 px-2 py-1'
-          onClick={() => setShowSearch(!showSearch)}
-        >
-          <Search size={12} />
-        </Button>
+        {conversations.length > 0 && (
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-gray-1000 h-6 w-6 px-2 py-1'
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            <Search size={12} />
+          </Button>
+        )}
       </div>
       {showSearch && (
         <div className='mt-4 px-3 pb-4'>
@@ -76,7 +78,7 @@ const ChatHistory = () => {
         isError={isErrorConversationHistory}
         isNoData={filteredConversations.length === 0}
         noDataBanner={
-          <div className='flex flex-col items-center justify-center py-12 text-center'>
+          <div className='flex h-full flex-col items-center justify-center py-12 text-center'>
             <MessagesSquare size={48} className='mb-4 text-gray-300' />
             <p className='f-14-500 text-gray-600'>No conversations found</p>
             <p className='f-13-400 mt-1 text-gray-400'>Start a new chat to begin</p>
