@@ -25,7 +25,7 @@ type OrgSwitcherProps = {
   isSidebarOpen: boolean;
 };
 
-export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
+const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
   const { isOrgSwitchIsInProgress, user } = useAppSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -94,6 +94,8 @@ export const OrgSwitcher: FC<OrgSwitcherProps> = ({ isSidebarOpen }) => {
           <div
             className='border-GRAY_400 bg-BG_GRAY_1 flex h-[57px] w-full cursor-pointer items-center gap-2.5 border-t px-4 py-3'
             data-testid='org-switcher-trigger'
+            role='button'
+            aria-label='Switch organization'
           >
             <CommonWrapper
               isLoading={loading}

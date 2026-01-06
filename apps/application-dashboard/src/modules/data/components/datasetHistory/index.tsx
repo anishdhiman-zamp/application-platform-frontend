@@ -19,7 +19,7 @@ const DatasetHistory = () => {
   return (
     <div>
       {isFileImportHistoryOpen && <ImportFileHistory onClose={handleCloseFileImportHistory} />}
-      <div className='relative z-50'>
+      <div className='relative z-40 h-5.5 w-5.5'>
         <TooltipV2
           tooltipBody='Activity'
           side={SIDE_OPTIONS.BOTTOM}

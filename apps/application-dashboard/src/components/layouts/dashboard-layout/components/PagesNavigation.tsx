@@ -125,6 +125,7 @@ const PagesNavigation: FC<PagesNavigationProps> = ({ pages, processes, isLoading
             className='[&_svg]:size-3.5'
             isLoading={isCreatingPage}
             data-testid='add-page-btn'
+            aria-label='Add page'
           >
             <SvgSpriteLoader id='plus' className='text-gray-700' />
           </Button>

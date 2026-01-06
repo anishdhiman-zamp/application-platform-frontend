@@ -118,7 +118,11 @@ const FeedbackStatusButtonContent: FC = () => {
     <div className='relative'>
       <Popover key={`${processId}-feedback-status-button`} open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
         <PopoverTrigger asChild>
-          <div className='f-12-450 border-GRAY_200 flex h-7 cursor-pointer items-center gap-1.5 rounded-md border p-1 select-none'>
+          <div
+            className='f-12-450 border-GRAY_200 flex h-7 cursor-pointer items-center gap-1.5 rounded-md border p-1 select-none'
+            role='button'
+            aria-label='Feedback status'
+          >
             {FEEDBACK_BADGE_CONFIG.map(renderBadge)}
           </div>
         </PopoverTrigger>

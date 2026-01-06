@@ -83,8 +83,10 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   );
 
   useEffect(() => {
+    if (!data?.content_signed_url) return;
+
     getMarkdownContent();
-  }, [data, getMarkdownContent]);
+  }, [data?.content_signed_url]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {
@@ -106,9 +108,9 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
 
   return (
     <div>
-      <div className='kb-create h-full max-h-[calc(100vh-60px)] overflow-y-auto px-8 py-6 pb-20'>
+      <div className='kb-create h-full max-h-[calc(100vh-60px)] overflow-y-auto px-8 py-10 pb-20'>
         <div className='m-auto max-w-[800px]'>
-          {!!processName && <div className='f-18-500 border-GRAY_400 border-b pb-4'>{processName}</div>}
+          {!!processName && <div className='f-26-550 border-GRAY_400 pb-4'>{processName}</div>}
           <CommonWrapper
             isLoading={isLoading || !processName || isLoadingKnowledgeBase}
             skeletonType={SkeletonTypes.CUSTOM}
