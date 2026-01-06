@@ -102,7 +102,7 @@ const Topbar = () => {
                     : getKnowledgeBasedRouteByProcessId(processId ?? '')
                 }
               >
-                <Button id='knowledge-base-btn' size='small' variant='secondary'>
+                <Button id='knowledge-base-btn' size='small' variant='secondary' aria-label='Knowledge base'>
                   <BookOpen size={12} className='' />
                 </Button>
               </Link>

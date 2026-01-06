@@ -118,6 +118,7 @@ const PageNavTab = ({ label, pageId, isSelected, page }: PageNavTabProps) => {
             className={cn('cursor-pointer opacity-0 group-hover:opacity-100')}
             data-testid={`${pageId}-page-nav-tab-popover-trigger`}
             id='page-nav-tab-popover-trigger'
+            aria-label='Page options'
           >
             <PermissionGuard
               resourceType={ResourceType.PAGE}
