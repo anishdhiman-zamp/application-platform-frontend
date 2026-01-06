@@ -5,7 +5,7 @@ import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { useAppSelector } from '@/hooks/toolkit';
 import { getGreeting } from '@/modules/macs/macs.utils';
 
-const MacsChatHome = () => {
+const ChatHome = () => {
   const user = useAppSelector((state) => state.user.user);
   const userName = user?.user_name?.split(' ')[0] || 'there';
   const [greeting, setGreeting] = useState<string>('');
@@ -27,4 +27,4 @@ const MacsChatHome = () => {
   );
 };
 
-export default MacsChatHome;
+export default ChatHome;

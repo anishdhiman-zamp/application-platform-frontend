@@ -8,6 +8,9 @@ export const enum BLOCK_TYPE {
   QUESTION_GROUP = 'question_group',
   QUESTION = 'question',
   ATTACHMENTS = 'attachments',
+  TEXT = 'text',
+  TOOL_USE = 'tool_use',
+  THINKING = 'thinking',
 }
 
 export const enum ActionType {
@@ -133,8 +136,10 @@ export type Block =
   | ButtonBlockType
   | QuestionGroupBlockType
   | QuestionBlockType
-  | AttachmentsBlockType;
-
+  | AttachmentsBlockType
+  | ThinkingContentBlock
+  | TextContentBlock
+  | ToolUseContentBlock;
 export interface BlockMessage {
   block: Block[];
 }
@@ -145,3 +150,120 @@ export interface UploadedFileType {
   file_type?: string;
   file?: File;
 }
+
+export const enum StreamingContentType {
+  THINKING = 'thinking',
+  TEXT = 'text',
+  TOOL_USE = 'tool_use',
+}
+
+export const enum StreamingContentBlockType {
+  CONTENT_BLOCK_START = 'content_block_start',
+  CONTENT_BLOCK_DELTA = 'content_block_delta',
+  CONTENT_BLOCK_STOP = 'content_block_stop',
+}
+
+export const enum StreamingContentBlockDeltaType {
+  THINKING_DELTA = 'thinking_delta',
+  TEXT_DELTA = 'text_delta',
+  INPUT_JSON_DELTA = 'input_json_delta',
+  TOOL_USE_BLOCK_UPDATE_DELTA = 'tool_use_block_update_delta',
+}
+
+export interface StreamingContentBlockBase {
+  id?: string;
+  order: number;
+  name?: string;
+  start_timestamp?: string;
+  stop_timestamp?: string;
+  is_complete: boolean;
+}
+
+export interface ThinkingContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.THINKING;
+  payload: {
+    thinking: string;
+  };
+}
+
+export interface TextContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TEXT;
+  payload: {
+    text: string;
+  };
+}
+
+export interface ToolUseDisplayContent {
+  type: string;
+  json_block: string;
+}
+
+export interface ToolUseContentBlock extends StreamingContentBlockBase {
+  type: BLOCK_TYPE.TOOL_USE;
+  payload: {
+    input_json?: string;
+    message?: string;
+    partial_json?: string;
+    display_content?: ToolUseDisplayContent;
+    name?: string;
+    tool_call_id?: string;
+  };
+}
+
+export interface StreamEventContentBlockStart {
+  type: StreamingContentBlockType.CONTENT_BLOCK_START;
+  index: number;
+  content_block: {
+    type: BLOCK_TYPE;
+    id?: string;
+    name?: string;
+    start_timestamp?: string;
+  };
+}
+
+export interface StreamEventThinkingDelta {
+  type: StreamingContentBlockDeltaType.THINKING_DELTA;
+  thinking: string;
+}
+
+export interface StreamEventTextDelta {
+  type: StreamingContentBlockDeltaType.TEXT_DELTA;
+  text: string;
+}
+
+export interface StreamEventInputJsonDelta {
+  type: StreamingContentBlockDeltaType.INPUT_JSON_DELTA;
+  partial_json: string;
+}
+
+export interface StreamEventToolUseUpdateDelta {
+  type: StreamingContentBlockDeltaType.TOOL_USE_BLOCK_UPDATE_DELTA;
+  message?: string;
+  display_content?: ToolUseDisplayContent;
+}
+
+export type StreamEventDelta =
+  | StreamEventThinkingDelta
+  | StreamEventTextDelta
+  | StreamEventInputJsonDelta
+  | StreamEventToolUseUpdateDelta;
+
+export interface StreamEventContentBlockDelta {
+  type: StreamingContentBlockType.CONTENT_BLOCK_DELTA;
+  index: number;
+  delta: StreamEventDelta;
+}
+
+export interface StreamEventContentBlockStop {
+  type: StreamingContentBlockType.CONTENT_BLOCK_STOP;
+  index: number;
+  content_block: {
+    type: StreamingContentType;
+  };
+  stop_timestamp?: string;
+}
+
+export type StreamEventPayload =
+  | StreamEventContentBlockStart
+  | StreamEventContentBlockDelta
+  | StreamEventContentBlockStop;

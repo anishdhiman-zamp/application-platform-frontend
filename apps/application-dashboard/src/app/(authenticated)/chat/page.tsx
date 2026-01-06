@@ -7,7 +7,7 @@ import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
 import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
-import MacsChatHome from '@/modules/macs/components/chat/MacsChatHome';
+import ChatHome from '@/modules/macs/components/chat/ChatHome';
 import MacsTopbar from '@/modules/macs/components/MacsTopbar';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { ViewMode } from '@/modules/macs/types';
@@ -38,7 +38,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (chat.conversationId) {
-      router.replace(`${ROUTES_PATH.CHAT}/${chat.conversationId}`);
+      router.push(`${ROUTES_PATH.CHAT}/${chat.conversationId}`);
     }
   }, [chat.conversationId, router]);
 
@@ -50,7 +50,7 @@ const ChatPage = () => {
     <div className='flex h-full w-full flex-col'>
       {isDefaultView && <MacsTopbar />}
       <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col bg-white'>
-        <MacsChatHome />
+        <ChatHome />
         <div className='mx-auto w-full flex-shrink-0 p-3'>
           <ConnectedChatInput
             chat={chat}
