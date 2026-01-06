@@ -11,7 +11,7 @@
  */
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useRef } from 'react';
 import { COLORS } from '../../constants/constants';
 
 interface ShimmerTextProps {
@@ -38,7 +38,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
   const spanRef = useRef<HTMLSpanElement>(null);
   const animationRef = useRef<Animation | null>(null);
 
-  const startAnimation = () => {
+  const startAnimation = useCallback(() => {
     if (!spanRef.current) return;
 
     // Stop any existing animation
@@ -54,11 +54,12 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
       { backgroundPosition: ['120% 0%', '-20% 0%'] },
       { duration: animationDuration, easing: 'linear', fill: 'forwards' },
     );
-  };
+  }, [animationDuration]);
 
   useEffect(() => {
     if (shimmerControlRef) {
       shimmerControlRef.current = startAnimation;
+
       return () => {
         shimmerControlRef.current = null;
       };
@@ -80,7 +81,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
         }
       };
     }
-  }, [shimmerControlRef, autoAnimate, animationDuration]);
+  }, [shimmerControlRef, autoAnimate, animationDuration, startAnimation]);
 
   return (
     <div className='relative inline-block leading-none'>

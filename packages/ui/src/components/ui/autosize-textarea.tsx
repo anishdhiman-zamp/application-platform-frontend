@@ -20,7 +20,7 @@ export const AutoSizeTextarea = React.forwardRef<HTMLTextAreaElement, AutoSizeTe
       return ref || internalRef;
     }, [ref]);
 
-    const resize = () => {
+    const resize = React.useCallback(() => {
       const textarea = (combinedRef as React.RefObject<HTMLTextAreaElement>)?.current;
       if (textarea) {
         textarea.style.height = 'auto';
@@ -41,11 +41,11 @@ export const AutoSizeTextarea = React.forwardRef<HTMLTextAreaElement, AutoSizeTe
           }
         }
       }
-    };
+    }, [combinedRef, minRows, maxHeight]);
 
     React.useEffect(() => {
       resize();
-    }, [props.value, minRows, maxHeight]);
+    }, [props.value, resize]);
 
     return (
       <Textarea
