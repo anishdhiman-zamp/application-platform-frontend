@@ -11,7 +11,7 @@
  */
 
 import { cn } from '@zamp-platform/ui/utils';
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useRef } from 'react';
 import { COLORS } from '../../constants/constants';
 
 interface ShimmerTextProps {
@@ -38,7 +38,7 @@ export const ShimmerText: FC<ShimmerTextProps> = ({
   const spanRef = useRef<HTMLSpanElement>(null);
   const animationRef = useRef<Animation | null>(null);
 
-  const startAnimation = React.useCallback(() => {
+  const startAnimation = useCallback(() => {
     if (!spanRef.current) return;
 
     // Stop any existing animation
