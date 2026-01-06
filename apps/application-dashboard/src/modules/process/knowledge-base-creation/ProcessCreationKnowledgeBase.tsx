@@ -83,10 +83,10 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   );
 
   useEffect(() => {
-    if (markdownContent || !data?.content_signed_url) return;
+    if (!data?.content_signed_url) return;
 
     getMarkdownContent();
-  }, [data?.content_signed_url, getMarkdownContent, markdownContent]);
+  }, [data?.content_signed_url]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {

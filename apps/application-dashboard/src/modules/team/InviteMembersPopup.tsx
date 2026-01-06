@@ -1,4 +1,5 @@
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
   useGetInvitedAudiencesByOrganisationIdQuery,
@@ -14,7 +15,6 @@ import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types'
 import { validateEmail } from 'utils/common';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
 import { Button } from 'components/common/button/Button';
-import Popup from 'components/common/popup/Popup';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
@@ -258,67 +258,67 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
   }, [searchValues, selectedItemsByInstance]);
 
   return (
-    <Popup
-      isOpen={isOpen}
-      showIcon
-      title='Invite Members'
-      subTitle='Type or paste mail addresses, separated by spaces or commas'
-      titleClassName='f-16-600 text-GRAY_950'
-      iconCategory={ICON_SPRITE_TYPES.GENERAL}
-      iconId='x-close'
-      iconColor={COLORS.TEXT_PRIMARY}
-      onClose={handleCloseInviteMembersPopup}
-      popupWrapperClassName='bg-white rounded-t-3.5 border border-b-0 border-GRAY_400'
-      closeOnClickOutside={false}
-    >
-      <div className='rounded-b-3.5 border-GRAY_400 flex w-[458px] flex-col border border-t-0 bg-white'>
-        <div className='flex flex-col px-4 py-6'>
-          <div className='flex flex-col gap-2'>
-            {multiSelectInstances.map((id) => (
-              <MultiSelectInput
-                key={id}
-                id={`invite-members-${id}`}
-                search={searchValues[id] || ''}
-                setSearch={(value) => handleSearchChange(id, value)}
-                isOpen={isOpen}
-                placeholderText={placeholderText}
-                roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
-                inputArrayList={selectedItemsByInstance[id] || []}
-                setInputArrayList={(items) =>
-                  setSelectedItemsByInstance((prev) => ({
-                    ...prev,
-                    [id]: items as ArrayListOption[],
-                  }))
-                }
-                onValidateAndAdd={({ value, label, color }) => handleValidateAndAdd(id, { value, label, color })}
-                selectedRole={selectedRoleByInstance[id] ?? TEAM_MEMBERS_PRIVILEGES_LIST[0].value}
-                setSelectedRole={(role) =>
-                  setSelectedRoleByInstance((prev) => ({
-                    ...prev,
-                    [id]: role as TEAM_MEMBERS_PRIVILEGES,
-                  }))
-                }
-              />
-            ))}
-          </div>
-          {validationErrorText && showValidationError && (
-            <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
-          )}
+    <div className='flex flex-col'>
+      <div className='border-GRAY_400 flex items-center justify-between border-b px-4 py-3'>
+        <div className='flex flex-col gap-0.5'>
+          <span className='f-16-600 text-GRAY_950'>Invite Members</span>
+          <span className='f-12-400 text-GRAY_700'>Type or paste mail addresses, separated by spaces or commas</span>
         </div>
-        <div className='border-GRAY_200 flex w-full justify-end border-t px-5 py-4'>
-          <Button
-            type={BUTTON_TYPES.PRIMARY}
-            id='send-user-invite'
-            size={SIZE_TYPES.MEDIUM}
-            disabled={!isInvitable}
-            onClick={handleInviteMembers}
-            isLoading={postInviteAudiencesIsLoading}
-          >
-            Send invite
-          </Button>
-        </div>
+        <button
+          type='button'
+          onClick={handleCloseInviteMembersPopup}
+          className='text-GRAY_700 hover:text-GRAY_950 cursor-pointer p-1 transition-colors'
+          aria-label='Close'
+        >
+          <SvgSpriteLoader iconCategory={ICON_SPRITE_TYPES.GENERAL} id='x-close' width={16} height={16} />
+        </button>
       </div>
-    </Popup>
+      <div className='flex flex-col px-4 py-6'>
+        <div className='flex flex-col gap-2'>
+          {multiSelectInstances.map((id) => (
+            <MultiSelectInput
+              key={id}
+              id={`invite-members-${id}`}
+              search={searchValues[id] || ''}
+              setSearch={(value) => handleSearchChange(id, value)}
+              isOpen={isOpen}
+              placeholderText={placeholderText}
+              roleOptions={TEAM_MEMBERS_PRIVILEGES_LIST}
+              inputArrayList={selectedItemsByInstance[id] || []}
+              setInputArrayList={(items) =>
+                setSelectedItemsByInstance((prev) => ({
+                  ...prev,
+                  [id]: items as ArrayListOption[],
+                }))
+              }
+              onValidateAndAdd={({ value, label, color }) => handleValidateAndAdd(id, { value, label, color })}
+              selectedRole={selectedRoleByInstance[id] ?? TEAM_MEMBERS_PRIVILEGES_LIST[0].value}
+              setSelectedRole={(role) =>
+                setSelectedRoleByInstance((prev) => ({
+                  ...prev,
+                  [id]: role as TEAM_MEMBERS_PRIVILEGES,
+                }))
+              }
+            />
+          ))}
+        </div>
+        {validationErrorText && showValidationError && (
+          <span className='f-11-400 text-RED_700 mt-2 flex w-full text-start'>{validationErrorText}</span>
+        )}
+      </div>
+      <div className='border-GRAY_200 flex w-full justify-end border-t px-5 py-4'>
+        <Button
+          type={BUTTON_TYPES.PRIMARY}
+          id='send-user-invite'
+          size={SIZE_TYPES.MEDIUM}
+          disabled={!isInvitable}
+          onClick={handleInviteMembers}
+          isLoading={postInviteAudiencesIsLoading}
+        >
+          Send invite
+        </Button>
+      </div>
+    </div>
   );
 };
 

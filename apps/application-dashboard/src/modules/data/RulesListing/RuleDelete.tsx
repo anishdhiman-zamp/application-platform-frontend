@@ -1,12 +1,18 @@
 import { captureException } from '@sentry/browser';
-import { SIZE_TYPES } from 'types/common/components';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderTitle,
+} from '@zamp-platform/ui';
 import { defaultFnType } from 'types/commonTypes';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { useDeleteRuleMutation } from '@/apis/dataset';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import { DatasetUpdateResponseType } from '@/types/api/dataset.types';
-import { Button } from 'components/common/button/Button';
-import Popup from 'components/common/popup/Popup';
 import { toast } from 'components/common/toast/Toast';
 
 type RuleDeleteProps = {
@@ -31,34 +37,32 @@ const RuleDelete = ({ isOpen, onClose, ruleId, onSuccess }: RuleDeleteProps) => 
   };
 
   return (
-    <Popup
-      isOpen={isOpen}
-      onClose={onClose}
-      title='Delete Rule ?'
-      iconId='x-close'
-      className='border-GRAY_400 rounded-3.5 shadow-menu-list w-[344px] border-2 bg-white p-0!'
-      titleClassName='f-16-600 text-GRAY_950'
-      showIcon
-      closeOnClickOutside={false}
-    >
-      <div className='f-13-400 text-GRAY_900 px-5 py-6'>
-        Are you sure you want to delete this rule ? This action cannot be undone.
-      </div>
-      <div className='border-GRAY_400 flex justify-end gap-2 border-t px-5 py-4'>
-        <Button type={BUTTON_TYPES.SECONDARY} size={SIZE_TYPES.MEDIUM} id='rule-delete-cancel' onClick={onClose}>
-          Discard
-        </Button>
-        <Button
-          type={BUTTON_TYPES.PRIMARY}
-          size={SIZE_TYPES.MEDIUM}
-          id='rule-delete-confirm'
-          onClick={handleApplyChanges}
-          isLoading={isLoading}
-        >
-          Confirm
-        </Button>
-      </div>
-    </Popup>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size='small' showCloseButton className='w-[344px]'>
+        <DialogHeader>
+          <DialogHeaderTitle>Delete Rule ?</DialogHeaderTitle>
+        </DialogHeader>
+        <DialogBody className='f-13-400 text-GRAY_900 px-5 py-6'>
+          Are you sure you want to delete this rule ? This action cannot be undone.
+        </DialogBody>
+        <DialogFooter className='flex justify-end gap-2'>
+          <DialogClose asChild>
+            <Button variant='secondary' size='medium' id='rule-delete-cancel'>
+              Discard
+            </Button>
+          </DialogClose>
+          <Button
+            variant='destructive'
+            size='medium'
+            id='rule-delete-confirm'
+            onClick={handleApplyChanges}
+            isLoading={isLoading}
+          >
+            Confirm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

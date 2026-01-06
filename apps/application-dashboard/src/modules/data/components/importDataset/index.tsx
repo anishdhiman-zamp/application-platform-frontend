@@ -154,7 +154,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
   }, [startPollingPreview]);
 
   return (
-    <div className='z-1000'>
+    <div className='z-40 h-5.5 w-5.5'>
       {isImportFilePopupOpen && !startAiTransformation ? (
         <ImportFileWrapper
           fileName={fileName}
