@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, Suspense, useCallback, useEffect, useState } from 'react';
+import { FC, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { toast } from '@zamp-platform/ui';
 import { BaseEventPayload, EVENT_TYPE } from '@zamp-platform/utils/event-bus/event-bus.types';
@@ -46,47 +46,84 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
   const [isInputFocused, setIsInputFocused] = useState(false);
   const { sseEventBus } = useEventBus();
   const { isSidebarOpen } = useAppSelector((state) => state.layoutConfig);
+  const fetchedUrlRef = useRef<string | null>(null);
+  const isFetchingRef = useRef(false);
 
   const { data, isLoading: isLoadingKnowledgeBase } = useGetKnowledgeBaseQuery({ processId });
 
+  // Extract base path from signed URL for comparison (removes query params like signature/expiry)
+  const getUrlBasePath = useCallback((url: string) => {
+    try {
+      const urlObj = new URL(url);
+
+      return urlObj.origin + urlObj.pathname;
+    } catch {
+      return url;
+    }
+  }, []);
+
   const getMarkdownContent = useCallback(
-    async (url?: string) => {
-      setIsLoading(true);
-      if (!url && !data?.content_signed_url) {
+    async (url?: string, forceRefetch = false) => {
+      const targetUrl = url || data?.content_signed_url;
+
+      if (!targetUrl) {
         setIsLoading(false);
 
         return;
       }
 
+      // Prevent concurrent fetches
+      if (isFetchingRef.current) {
+        return;
+      }
+
+      const targetBasePath = getUrlBasePath(targetUrl);
+
+      // Skip if we've already fetched this content (unless forced by SSE update)
+      // Compare base paths since signed URLs change but path stays same for same content
+      if (!forceRefetch && fetchedUrlRef.current === targetBasePath) {
+        return;
+      }
+
       try {
+        isFetchingRef.current = true;
         setIsLoading(true);
-        const response = await fetch(url || data?.content_signed_url || '');
+        const response = await fetch(targetUrl);
 
         if (!response.ok) {
           setMarkdownContent('');
           toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
+          isFetchingRef.current = false;
 
           return;
         }
         const content = await response.text();
 
+        fetchedUrlRef.current = targetBasePath;
         setMarkdownContent(content);
         setIsLoading(false);
+        isFetchingRef.current = false;
       } catch (error) {
         setMarkdownContent('');
         captureException(error);
         toast.error(KB_TOAST_MESSAGES.FAILED_FETCHING_KNOWLEDGE_BASE);
         setIsLoading(false);
+        isFetchingRef.current = false;
       }
     },
-    [data?.content_signed_url],
+    [data?.content_signed_url, getUrlBasePath],
   );
+
+  // Reset the fetched URL ref when processId changes
+  useEffect(() => {
+    fetchedUrlRef.current = null;
+  }, [processId]);
 
   useEffect(() => {
     if (!data?.content_signed_url) return;
 
     getMarkdownContent();
-  }, [data?.content_signed_url]);
+  }, [data?.content_signed_url, getMarkdownContent]);
 
   useEffect(() => {
     const sub = sseEventBus.subscribe(EVENT_TYPE.KNOWLEDGE_BASE, (data: BaseEventPayload) => {
@@ -97,14 +134,15 @@ const ProcessCreationKnowledgeBase: FC<ProcessCreationKnowledgeBaseProps> = ({
       if (payload?.type === KNOWLEDGE_BASE_SSE_TYPES.KNOWLEDGE_BASE_UPDATED) {
         const url = payload?.content_signed_url;
 
-        getMarkdownContent(url);
+        // Force refetch when SSE update comes in
+        getMarkdownContent(url, true);
       }
     });
 
     return () => {
       sub.unsubscribe();
     };
-  }, [sseEventBus, processId]);
+  }, [sseEventBus, processId, getMarkdownContent]);
 
   return (
     <div>
