@@ -1,9 +1,23 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import type { ToolUseDisplayContent } from '../../types/block.types';
+
+/**
+ * Helper function to format JSON string with proper indentation
+ */
+const formatJson = (jsonString: string | undefined): string => {
+  if (!jsonString) return '';
+  try {
+    const parsed = JSON.parse(jsonString);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    // If parsing fails, return the original string
+    return jsonString;
+  }
+};
 
 /**
  * Component to render a tool use content block using Accordion
@@ -19,7 +33,7 @@ interface ToolCallBlockProps {
   name?: string;
   is_complete: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, name }) => {
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name }) => {
   const toolName = payload.name || name || 'Unknown';
 
   return (
@@ -76,7 +90,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {payload.display_content.json_block}
+                  {formatJson(payload.display_content.json_block)}
                 </pre>
               </div>
             </div>
@@ -85,7 +99,9 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{payload.partial_json}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
+                  {formatJson(payload.partial_json)}
+                </pre>
               </div>
             </div>
           )}
@@ -93,7 +109,9 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{payload.input_json}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
+                  {formatJson(payload.input_json)}
+                </pre>
               </div>
             </div>
           )}

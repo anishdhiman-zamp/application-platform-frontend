@@ -64,7 +64,6 @@ const ChatPage = () => {
             isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
             placeholder="Do your life's best work with Pace"
             className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
-            disableAttachments
           />
         </div>
         <ChatHistory />
