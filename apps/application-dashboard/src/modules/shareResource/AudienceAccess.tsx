@@ -3,6 +3,7 @@ import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { COLORS } from 'constants/colors';
 import { JOINED_DATASET_ICON } from 'constants/icons';
 import { useOnClickOutside } from 'hooks';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import ShareResourceAccessDetails from 'modules/shareResource/components/ShareResourceAccessDetails';
 import CustomiseAccess from 'modules/shareResource/CustomiseAccess';
 import {
@@ -13,7 +14,6 @@ import RemoveFromTeamPopup from 'modules/team/components/RemoveFromTeamPopup';
 import Image from 'next/image';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { FilterModelType } from 'types/components/table.type';
-import { checkIfCurrentUser } from 'utils/accessPermission/accessPermission.utils';
 import { cn, convertEmailUsernameToName, getUserNameFromEmail } from 'utils/common';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
 import { useFiltersContextStore, withFiltersContext } from '@/components/filter/filters.context';
@@ -84,6 +84,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const {
     state: { selectedFilters },
   } = useFiltersContextStore();
+  const { isCurrentUserEmail } = useUserIdentity();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const role = privilegeList.find((r) => r.value === privilege);
   const [isOpenRemoveFromTeamPopup, setIsOpenRemoveFromTeamPopup] = useState<boolean>(false);
@@ -92,7 +93,7 @@ const AudienceAccess: FC<AudienceAccessPropsType> = ({
   const [selectedRole, setSelectedRole] = useState<ResourcePrivilege>(role as ResourcePrivilege);
   const [showCustomiseAccess, setShowCustomiseAccess] = useState<boolean>(false);
 
-  const checkIfUser = checkIfCurrentUser(user?.email ?? '');
+  const checkIfUser = isCurrentUserEmail(user?.email ?? '');
   const checkIfResourceTypeOrg = resourceAudienceType === ResourceAudienceType.ORGANIZATION;
   const checkIfResourceTypeTeam = resourceAudienceType === ResourceAudienceType.TEAM;
   const userName = checkIfResourceTypeOrg

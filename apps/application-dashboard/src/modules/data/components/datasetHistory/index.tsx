@@ -6,7 +6,8 @@ import ImportFileHistory from 'modules/data/components/datasetHistory/ImportFile
 import LoadingWidthAnimation from 'modules/data/components/LoadingWidthAnimation';
 import { RootState } from 'store';
 import { cn } from 'utils/common';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
+import TooltipV2 from 'components/common/TooltipV2';
 
 const DatasetHistory = () => {
   const datasetBulkLoaders = useSelector((state: RootState) => state?.user?.datasetBulkLoaders) || [];
@@ -18,13 +19,12 @@ const DatasetHistory = () => {
   return (
     <div>
       {isFileImportHistoryOpen && <ImportFileHistory onClose={handleCloseFileImportHistory} />}
-      <div className='relative z-50'>
-        <Tooltip
+      <div className='relative z-40 h-5.5 w-5.5'>
+        <TooltipV2
           tooltipBody='Activity'
-          position={TooltipPositions.BOTTOM}
-          tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
+          side={SIDE_OPTIONS.BOTTOM}
+          tooltipClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
           className='z-1 h-full w-full'
-          tooltipBodystyle='f-10-400'
         >
           <div
             className={cn('hover:bg-GRAY_100 cursor-pointer rounded p-1', isFileImportHistoryOpen && 'bg-GRAY_100')}
@@ -32,7 +32,7 @@ const DatasetHistory = () => {
           >
             <SvgSpriteLoader id='clock-rewind' width={14} height={14} color={COLORS.GRAY_900} />
           </div>
-        </Tooltip>
+        </TooltipV2>
         {!!datasetBulkLoaders?.length && (
           <div className='absolute bottom-px left-[3px]'>
             <LoadingWidthAnimation />

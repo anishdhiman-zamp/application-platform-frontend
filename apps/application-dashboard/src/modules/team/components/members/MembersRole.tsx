@@ -1,13 +1,11 @@
 import { FC, useRef, useState } from 'react';
 import { useGetAudiencesByOrganisationIdQuery, usePatchChangeAudienceRoleInOrganizationMutation } from 'apis/people';
 import { useOnClickOutside } from 'hooks';
-import { useAppSelector } from 'hooks/toolkit';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { MembersRolePropsType, TeamMemberAccessPrivilegesType } from 'modules/team/people.types';
-import { RootState } from 'store';
-import { accessPermissionForPeople } from 'utils/accessPermission/accessPermission';
 import { PERMISSION_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
+import { useUserIdentity } from '@/hooks/useUserIdentity';
 import AsyncDropdown from 'components/asyncDropdown/AsyncDropdown';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
@@ -21,13 +19,13 @@ const MembersRole: FC<MembersRolePropsType> = ({ value, member = false, hasPeopl
     role as TeamMemberAccessPrivilegesType,
   );
   const [changeRole] = usePatchChangeAudienceRoleInOrganizationMutation();
-  const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
+  const { organizationId, isSystemAdmin } = useUserIdentity();
   const { refetch: refetchAudiencesByOrganizationId } = useGetAudiencesByOrganisationIdQuery(
     { organizationId },
     { skip: !organizationId, refetchOnMountOrArgChange: false },
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const checkPermission = accessPermissionForPeople() && member;
+  const checkPermission = isSystemAdmin && member;
 
   const handleOpenChangeRoleDropdown = () => {
     setOpenChangeRoleDropdown(true);

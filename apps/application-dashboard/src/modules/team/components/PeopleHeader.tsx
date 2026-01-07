@@ -1,11 +1,10 @@
-import React, { FC, useRef, useState } from 'react';
-import { Button } from '@zamp-platform/ui';
+import { FC, useRef, useState } from 'react';
+import { Button, Dialog, DialogContent, DialogTrigger } from '@zamp-platform/ui';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import InviteMembersPopup from 'modules/team/InviteMembersPopup';
 import { AudiencesByOrganisationIdResponse } from 'types/api/people.types';
 import { SIZE_TYPES } from 'types/common/components';
-import { PERMISSION_ROLES } from 'utils/accessPermission/accessPermission.types';
-import { getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import Input from 'components/common/input';
 
 type PeopleHeaderPropsType = {
@@ -17,15 +16,7 @@ type PeopleHeaderPropsType = {
 const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMembersData }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInviteMembersPopupOpen, setIsInviteMembersPopupOpen] = useState(false);
-  const userPrivilege = getUserPrivilege();
-  const checkIfMember = userPrivilege === PERMISSION_ROLES.MEMBER;
-
-  const handleOpenInviteMembersPopup = () => {
-    setIsInviteMembersPopupOpen(true);
-  };
-  const handleCloseInviteMembersPopup = () => {
-    setIsInviteMembersPopupOpen(false);
-  };
+  const { isMember } = useUserIdentity();
 
   return (
     <>
@@ -44,19 +35,28 @@ const PeopleHeader: FC<PeopleHeaderPropsType> = ({ search, setSearch, teamMember
           }}
           size={SIZE_TYPES.SMALL}
         />
-        <Button
-          className='f-12-500 bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 flex h-7 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px] text-white hover:text-white active:text-white disabled:cursor-not-allowed'
-          data-testid='invite-user-btn'
-          onClick={handleOpenInviteMembersPopup}
-          disabled={checkIfMember}
-        >
-          Invite members
-        </Button>
-        <InviteMembersPopup
-          isOpen={isInviteMembersPopupOpen}
-          onClose={handleCloseInviteMembersPopup}
-          teamMembersData={teamMembersData}
-        />
+        <Dialog open={isInviteMembersPopupOpen} onOpenChange={setIsInviteMembersPopupOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className='f-12-500 bg-GRAY_1000 hover:bg-GRAY_950 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 flex h-7 cursor-pointer items-center gap-1 overflow-clip rounded-md px-3 py-[7px] text-white hover:text-white active:text-white disabled:cursor-not-allowed'
+              data-testid='invite-user-btn'
+              disabled={isMember}
+            >
+              Invite members
+            </Button>
+          </DialogTrigger>
+          <DialogContent
+            className='max-h-none w-[458px]'
+            title='Invite Members'
+            description='Type or paste mail addresses, separated by spaces or commas'
+          >
+            <InviteMembersPopup
+              isOpen={isInviteMembersPopupOpen}
+              onClose={() => setIsInviteMembersPopupOpen(false)}
+              teamMembersData={teamMembersData}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );

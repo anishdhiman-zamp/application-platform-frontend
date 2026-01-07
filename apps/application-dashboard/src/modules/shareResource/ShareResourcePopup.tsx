@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from 'react';
-import { Button, Popover, PopoverContent, PopoverTrigger } from '@zamp-platform/ui';
+import { Button, Popover, PopoverContent, PopoverPortal, PopoverTrigger } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
@@ -9,6 +9,7 @@ import {
 } from 'apis/collaboration';
 import { COLORS } from 'constants/colors';
 import { useAppSelector } from 'hooks/toolkit';
+import { useUserIdentity } from 'hooks/useUserIdentity';
 import AccessFilters from 'modules/shareResource/AccessFilters';
 import AudienceAccess from 'modules/shareResource/AudienceAccess';
 import { resourceTypeRouteMap } from 'modules/shareResource/shareResource.constants';
@@ -16,7 +17,6 @@ import { motion } from 'motion/react';
 import { RootState } from 'store';
 import { ResourceAudienceType } from 'types/api/auth.types';
 import { VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
-import { getUserEmail, getUserId, getUserPrivilege } from 'utils/accessPermission/accessPermission.utils';
 import { getCustomFilterColor, getUserNameFromEmail, validateEmail } from 'utils/common';
 import { useGetAudiencesByOrganisationIdQuery } from '@/apis/people';
 import { convertToFilterModel } from '@/components/common/table/table.utils';
@@ -95,9 +95,7 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
   // get user access to resource list
   const userAccessToResourceList = audiencesData ?? [];
   const placeholderText = 'Share with people and teams';
-  const user_email = getUserEmail();
-  const user_id = getUserId();
-  const user_role = getUserPrivilege();
+  const { userEmail: user_email, userId: user_id, userRole: user_role } = useUserIdentity();
   const userPrivilege =
     (audiencesData || [])?.find((audience) => audience?.user?.email === user_email)?.privilege ?? user_role ?? '';
   const currentUserHasAdminAccess = useMemo(() => {
@@ -432,129 +430,131 @@ const ShareResourcePopup: FC<ShareResourcePopupProps> = (props) => {
             Share
           </Button>
         </PopoverTrigger>
-        <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
-          <div>
-            <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
-              <div className='flex w-full items-center justify-between p-5'>
-                <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
-                <div className='cursor-pointer p-1' onClick={handleClosePopup}>
-                  <SvgSpriteLoader
-                    id='x-close'
-                    iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                    width={16}
-                    height={16}
-                    className='text-GRAY_800 hover:text-GRAY_1000'
-                  />
-                </div>
-              </div>
-              <div className='rounded-b-3.5 flex w-full flex-col'>
-                <div className='space-y-4 px-4 pt-0 pb-5'>
-                  <MultiSelectInput
-                    id={`share-${resourceType.toLowerCase()}`}
-                    search={search}
-                    setSearch={setSearch}
-                    selectedRole={selectedRole as string}
-                    setSelectedRole={handleSelectedRoleChange}
-                    isOpen={openPopup}
-                    placeholderText={placeholderText}
-                    roleOptions={resourceConfig.accessPrivilegesList}
-                    inputArrayList={selectedItems}
-                    setInputArrayList={setSelectedItems}
-                    validationErrorText={validationErrorText}
-                    showValidationError={showValidationError}
-                    setShowValidationError={setShowValidationError}
-                    onValidateAndAdd={handleValidateAndAdd}
-                    optionsList={filteredOptionListsData}
-                    onSelectOption={handleOptionSelection}
-                    transformLabel={getUserNameFromEmail}
-                    optionalOpenDropdownOptions={false}
-                    labelCasing='capitalize'
-                    selectOnlyFromList
-                  />
-                  {isCustomiseAccess && (
-                    <AccessFilters
-                      onClick={handleToggleCustomiseAccess}
-                      currentUserHasAdminAccess={currentUserHasAdminAccess}
-                      selectedRole={selectedRole as string}
-                      emptyFiltersTitle={emptyFiltersTitle}
-                    />
-                  )}
-                </div>
-                <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
-                  <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
+        <PopoverPortal>
+          <PopoverContent align='end' className='w-[420px] border-none bg-transparent p-0 shadow-none'>
+            <div>
+              <div className='border-0.5 border-GRAY_500 rounded-3.5 shadow-table-filter-menu bg-white'>
+                <div className='flex w-full items-center justify-between p-5'>
+                  <span className='f-16-600 text-GRAY_950'>{title || `Share this ${resourceConfig?.displayName}`}</span>
+                  <div className='cursor-pointer p-1' onClick={handleClosePopup}>
                     <SvgSpriteLoader
-                      id='link-03'
+                      id='x-close'
                       iconCategory={ICON_SPRITE_TYPES.GENERAL}
-                      width={12}
-                      height={12}
-                      color={COLORS.GRAY_1000}
+                      width={16}
+                      height={16}
+                      className='text-GRAY_800 hover:text-GRAY_1000'
                     />
-                    <CopyToClipboardBrowserUrl />
-                  </span>
-                  <Button
-                    id='send-user-invite-btn'
-                    size='small'
-                    disabled={!isResourceSharable}
-                    onClick={handleShareResource}
-                    isLoading={postInviteAudiencesIsLoading}
-                  >
-                    Share
-                  </Button>
+                  </div>
+                </div>
+                <div className='rounded-b-3.5 flex w-full flex-col'>
+                  <div className='space-y-4 px-4 pt-0 pb-5'>
+                    <MultiSelectInput
+                      id={`share-${resourceType.toLowerCase()}`}
+                      search={search}
+                      setSearch={setSearch}
+                      selectedRole={selectedRole as string}
+                      setSelectedRole={handleSelectedRoleChange}
+                      isOpen={openPopup}
+                      placeholderText={placeholderText}
+                      roleOptions={resourceConfig.accessPrivilegesList}
+                      inputArrayList={selectedItems}
+                      setInputArrayList={setSelectedItems}
+                      validationErrorText={validationErrorText}
+                      showValidationError={showValidationError}
+                      setShowValidationError={setShowValidationError}
+                      onValidateAndAdd={handleValidateAndAdd}
+                      optionsList={filteredOptionListsData}
+                      onSelectOption={handleOptionSelection}
+                      transformLabel={getUserNameFromEmail}
+                      optionalOpenDropdownOptions={false}
+                      labelCasing='capitalize'
+                      selectOnlyFromList
+                    />
+                    {isCustomiseAccess && (
+                      <AccessFilters
+                        onClick={handleToggleCustomiseAccess}
+                        currentUserHasAdminAccess={currentUserHasAdminAccess}
+                        selectedRole={selectedRole as string}
+                        emptyFiltersTitle={emptyFiltersTitle}
+                      />
+                    )}
+                  </div>
+                  <div className='border-t-0.5 border-GRAY_500 flex w-full items-center justify-between px-5 py-4'>
+                    <span className='f-11-500 flex cursor-not-allowed items-center justify-center gap-1.5'>
+                      <SvgSpriteLoader
+                        id='link-03'
+                        iconCategory={ICON_SPRITE_TYPES.GENERAL}
+                        width={12}
+                        height={12}
+                        color={COLORS.GRAY_1000}
+                      />
+                      <CopyToClipboardBrowserUrl />
+                    </span>
+                    <Button
+                      id='send-user-invite-btn'
+                      size='small'
+                      disabled={!isResourceSharable}
+                      onClick={handleShareResource}
+                      isLoading={postInviteAudiencesIsLoading}
+                    >
+                      Share
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
-              <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
-              <motion.div
-                initial={WhoHasAccessLoaderVariants.hidden}
-                animate={openPopup ? WhoHasAccessLoaderVariants.visible : WhoHasAccessLoaderVariants.hidden}
-                transition={{
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1],
-                  opacity: { duration: 0.15 },
-                }}
-                className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'
-              >
-                <CommonWrapper
-                  skeletonType={SkeletonTypes.CUSTOM}
-                  isLoading={isLoadingAudiencesData}
-                  loader={<WhoHasAccessSkeletonLoader />}
+              <div className='rounded-3.5 border-0.5 border-GRAY_500 shadow-tableFilterMenu mt-2 bg-white pt-4 pb-2'>
+                <span className='f-12-500 text-GRAY_700 px-4'>Who has access</span>
+                <motion.div
+                  initial={WhoHasAccessLoaderVariants.hidden}
+                  animate={openPopup ? WhoHasAccessLoaderVariants.visible : WhoHasAccessLoaderVariants.hidden}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.2, 1],
+                    opacity: { duration: 0.15 },
+                  }}
+                  className='mt-2 flex max-h-[222px] w-full flex-col overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden'
                 >
-                  {updatedUserAccessList?.map((audience) => (
-                    <AudienceAccess
-                      key={audience?.resource_audience_id}
-                      resourceType={resourceType}
-                      privilege={audience?.privilege}
-                      resourceAudienceId={audience?.resource_audience_id}
-                      user={{
-                        ...audience?.user,
-                        email: audience?.user?.email ?? '',
-                        type: audience?.resource_audience_type,
-                      }}
-                      resourceAudienceType={audience?.resource_audience_type}
-                      userPrivilege={userPrivilege}
-                      orgName={orgLabel}
-                      currentUserHasAdminAccess={currentUserHasAdminAccess}
-                      customerName={orgName ?? ''}
-                      teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
-                      changeRole={handleRoleChange}
-                      deleteAudience={handleDeleteAudience}
-                      privilegeList={resourceConfig.accessPrivilegesList}
-                      isDeletingAudience={isDeletingAudience}
-                      isChangingRole={isChangingRole}
-                      currentUserId={user_id}
-                      isCustomiseAccess={isCustomiseAccess}
-                      fgacFilters={audience?.metadata?.fgac_filters}
-                      resourceId={resourceId}
-                      fgacColor={audience?.fgac_color}
-                      emptyFiltersTitle={emptyFiltersTitle}
-                    />
-                  ))}
-                </CommonWrapper>
-              </motion.div>
+                  <CommonWrapper
+                    skeletonType={SkeletonTypes.CUSTOM}
+                    isLoading={isLoadingAudiencesData}
+                    loader={<WhoHasAccessSkeletonLoader />}
+                  >
+                    {updatedUserAccessList?.map((audience) => (
+                      <AudienceAccess
+                        key={audience?.resource_audience_id}
+                        resourceType={resourceType}
+                        privilege={audience?.privilege}
+                        resourceAudienceId={audience?.resource_audience_id}
+                        user={{
+                          ...audience?.user,
+                          email: audience?.user?.email ?? '',
+                          type: audience?.resource_audience_type,
+                        }}
+                        resourceAudienceType={audience?.resource_audience_type}
+                        userPrivilege={userPrivilege}
+                        orgName={orgLabel}
+                        currentUserHasAdminAccess={currentUserHasAdminAccess}
+                        customerName={orgName ?? ''}
+                        teamInfo={{ name: audience?.team_name, color: audience?.team_color }}
+                        changeRole={handleRoleChange}
+                        deleteAudience={handleDeleteAudience}
+                        privilegeList={resourceConfig.accessPrivilegesList}
+                        isDeletingAudience={isDeletingAudience}
+                        isChangingRole={isChangingRole}
+                        currentUserId={user_id}
+                        isCustomiseAccess={isCustomiseAccess}
+                        fgacFilters={audience?.metadata?.fgac_filters}
+                        resourceId={resourceId}
+                        fgacColor={audience?.fgac_color}
+                        emptyFiltersTitle={emptyFiltersTitle}
+                      />
+                    ))}
+                  </CommonWrapper>
+                </motion.div>
+              </div>
             </div>
-          </div>
-        </PopoverContent>
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
       {showCustomiseAccess && (
         <CustomiseAccess

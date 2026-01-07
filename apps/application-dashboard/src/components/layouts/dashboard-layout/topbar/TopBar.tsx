@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { Button } from '@zamp-platform/ui';
-import { KNOWLEDGE_BASED, ZAMP_ICON } from 'constants/icons';
-import { getKnowledgeBasedRouteByProcessId, ROUTES_PATH } from 'constants/routeConfig';
-import { useAppDispatch, useAppSelector } from 'hooks/toolkit';
+import { KNOWLEDGE_BASED } from 'constants/icons';
+import {
+  getCreateKnowledgeBaseRouteByProcessId,
+  getKnowledgeBasedRouteByProcessId,
+  ROUTES_PATH,
+} from 'constants/routeConfig';
+import { motion } from 'framer-motion';
+import { useAppSelector } from 'hooks/toolkit';
 import { BookOpen } from 'lucide-react';
 import ShareDatasetPopup from 'modules/data/components/ShareDatasetPopup';
 import SharePagePopup from 'modules/page/SharePagePopup';
@@ -12,11 +17,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { RootState } from 'store';
-import { toggleSidebar } from 'store/slices/layout-configs';
-import { cn } from 'utils/common';
-import FlexAlignRight from '@/assets/Icons/FlexAlignRight';
+import { useGetProcessesQuery } from '@/apis/pages';
 import TooltipV2 from '@/components/common/TooltipV2';
-import { COLORS } from '@/constants/colors';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import WorkWithPace from '@/modules/chatbot/WorkWithPace';
@@ -24,6 +26,7 @@ import DraftFeedbackButton from '@/modules/feedback/components/DraftFeedbackButt
 import FeedbackStatusButton from '@/modules/feedback/feedback-status/FeedbackStatusButton';
 import useIsFeedbackEnabled from '@/modules/feedback/useIsFeedbackEnabled';
 import ShareProcessPopup from '@/modules/process/common/ShareProcessPopup';
+import { ProcessStatus } from '@/types/api/processApi.types';
 import { SIDE_OPTIONS } from '@/types/commonTypes';
 import BreadCrumb from 'components/layouts/dashboard-layout/components/BreadCrumb';
 import { SHARE_BTN_ALLOWED_ROUTES } from 'components/layouts/dashboard-layout/topbar/topbar.types';
@@ -49,12 +52,19 @@ const ShareButton = () => {
 const Topbar = () => {
   const { isSidebarOpen } = useAppSelector((state: RootState) => state.layoutConfig);
   const openFeedbackConversations = useAppSelector((state: RootState) => state?.feedbacks?.openFeedbackConversations);
+  const { data: processes } = useGetProcessesQuery(undefined, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-
-  const dispatch = useAppDispatch();
+  const { isProcessDraft, isProcessLive } = useMemo(() => {
+    return {
+      isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
+      isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
+    };
+  }, [processes, processId]);
 
   const [isKnowledgeBaseEnabled, setIsKnowledgeBaseEnabled] = useState<boolean>(false);
   const { evaluate, ldClient } = useFeatureFlags();
@@ -77,19 +87,22 @@ const Topbar = () => {
   }, [evaluate, ldClient, processId]);
 
   const renderRightSideActions = useMemo(() => {
-    if (pathname?.includes(getKnowledgeBasedRouteByProcessId(params?.processId ?? ''))) {
-      return null;
-    }
-
     if (pathname?.includes(ROUTES_PATH.PROCESSES)) {
       const processId = params?.processId;
 
       return (
         <div className='flex items-center gap-3'>
           {isFeedbackEnabled ? (
-            <TooltipV2 tooltipBody='Knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
-              <Link prefetch href={getKnowledgeBasedRouteByProcessId(processId ?? '')}>
-                <Button id='knowledge-base-btn' size='small' variant='secondary'>
+            <TooltipV2 tooltipBody='knowledge base' side={SIDE_OPTIONS.BOTTOM} asChildTrigger>
+              <Link
+                prefetch
+                href={
+                  isProcessDraft
+                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
+                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
+                }
+              >
+                <Button id='knowledge-base-btn' size='small' variant='secondary' aria-label='Knowledge base'>
                   <BookOpen size={12} className='' />
                 </Button>
               </Link>
@@ -105,7 +118,12 @@ const Topbar = () => {
             </Link>
           ) : null}
           {isFeedbackEnabled && <DraftFeedbackButton processId={processId} />}
-          {isFeedbackEnabled && <FeedbackStatusButton processId={processId} />}
+          {isFeedbackEnabled && (
+            <Suspense>
+              <FeedbackStatusButton processId={processId} />
+            </Suspense>
+          )}
+
           <ShareButton />
         </div>
       );
@@ -114,48 +132,30 @@ const Topbar = () => {
     return <ShareButton />;
   }, [pathname, isKnowledgeBaseEnabled, processId, isFeedbackEnabled, openFeedbackConversations]);
 
-  const handleSidebarToggle = () => {
-    dispatch(toggleSidebar());
-  };
-
   return (
-    <div className='flex h-12 items-center'>
-      <div
-        className={cn(
-          'text-GRAY_700 flex h-12 items-center justify-between py-4 pr-5 pl-4 transition-all',
-          isSidebarOpen ? 'w-60' : 'w-12',
-        )}
-      >
-        <div className={cn('flex-1 transition-all', isSidebarOpen ? 'w-[204px] opacity-100' : 'w-0 opacity-0')}>
-          <Image
-            width={16}
-            height={16}
-            alt='zamp logo'
-            className='w-4 cursor-pointer align-middle'
-            src={ZAMP_ICON}
-            priority
-          />
-        </div>
-        <div className='flex-shrink-0'>
-          <FlexAlignRight
-            height={16}
-            width={16}
-            color={COLORS.GRAY_700}
-            className='cursor-pointer'
-            onClick={handleSidebarToggle}
-          />
-        </div>
-      </div>
-      <div className='flex w-full items-center'>
-        <div className='min-w-0 flex-1'>
+    <motion.div
+      initial={false}
+      animate={{
+        paddingLeft: isSidebarOpen ? 0 : 48,
+      }}
+      transition={{
+        duration: 0.15,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      className='flex h-12 w-full items-center'
+    >
+      <div className='min-w-0 flex-1'>
+        <Suspense>
           <BreadCrumb isSidebarOpen={isSidebarOpen} />
-        </div>
-        <div className='-mi-6 flex-shrink-0'>
-          <WorkWithPace />
-        </div>
-        <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
+        </Suspense>
       </div>
-    </div>
+      <div className='-mi-6 flex-shrink-0'>
+        <Suspense>
+          <WorkWithPace isProcessLive={isProcessLive} />
+        </Suspense>
+      </div>
+      <div className='flex flex-1 justify-end pr-8'>{renderRightSideActions}</div>
+    </motion.div>
   );
 };
 

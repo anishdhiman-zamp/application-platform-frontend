@@ -13,8 +13,8 @@ import { WIDGET_TYPES, WidgetInstanceType } from 'types/api/widgets.types';
 import { cn, getCommaSeparatedNumber } from 'utils/common';
 import PermissionGuard from '@/components/hoc/PermissionGuard';
 import { useAppSelector } from '@/hooks/toolkit';
-import { ResponsiveGridLayoutType } from '@/types/commonTypes';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import { ResponsiveGridLayoutType, SIDE_OPTIONS } from '@/types/commonTypes';
+import TooltipV2 from 'components/common/TooltipV2';
 import CommonWrapper from 'components/commonWrapper';
 import { SkeletonTypes } from 'components/commonWrapper/commonWrapper.types';
 import SkeletonElement from 'components/skeletons/SkeletonElement';
@@ -141,18 +141,18 @@ const KpiTag: FC<KpiTagProps> = ({
           isLoading={isLoading || isFilterLoading}
           loader={<SkeletonElement className='max-w-[250px]' />}
         >
-          <Tooltip
+          <TooltipV2
             tooltipBody={value}
             disabled={isFetching || !showTooltip}
-            tooltipBodyClassName='absolute -left-2 top-0 f-12-300 px-3 ml-2 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
-            position={TooltipPositions.BOTTOM_LEFT}
+            tooltipClassName='f-12-300 px-3 py-1.5 rounded-md whitespace-nowrap z-999 bg-black text-white'
+            side={SIDE_OPTIONS.BOTTOM}
             className='cursor-text!'
           >
             <div className='f-24-450 text-GRAY_950 sensitive truncate' ref={valueContainerRef}>
               {value}
               {widgetDetails.display_config?.show_percentages && '%'}
             </div>
-          </Tooltip>
+          </TooltipV2>
         </CommonWrapper>
       </div>
       <DeleteWidgetDialog

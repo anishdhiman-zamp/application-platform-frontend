@@ -293,3 +293,17 @@ export const ARTIFACT_SHOW_CTA_TYPES: CTA_COMPONENT_TYPE[] = [
   CTA_COMPONENT_TYPE.REQUIRED_MISSING_FIELDS_BUTTON,
   CTA_COMPONENT_TYPE.EMAIL_DRAFT_SEND_BUTTON,
 ];
+
+export const PACE_MESSAGES = [
+  'Hey! Pace here.',
+  "Let's create a process",
+  "I'm following your instructions",
+  "What's this?",
+  'Show me more!',
+  'Interesting...',
+  'Analyzing...',
+  'Awaiting input',
+  'Scanning pattern',
+];
+
+export const PACE_MOVE_MESSAGES = ['Oh!', 'Here?', 'Checking...', 'On my way'];

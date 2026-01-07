@@ -23,7 +23,8 @@ import { addDatasetBulkLoaders, removeDatasetBulkLoader } from 'store/slices/use
 import { DatasetActionStatusResponseType, RawMetadata, TransformationPreviewMetadata } from 'types/api/dataset.types';
 import { cn } from 'utils/common';
 import { toast } from '@/components/common/toast/Toast';
-import { Tooltip, TooltipPositions } from 'components/common/tooltip';
+import { SIDE_OPTIONS } from '@/types/commonTypes';
+import TooltipV2 from 'components/common/TooltipV2';
 
 const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStatus, onRefetch }) => {
   const dispatch = useDispatch();
@@ -153,7 +154,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
   }, [startPollingPreview]);
 
   return (
-    <div className='z-1000'>
+    <div className='z-40 h-5.5 w-5.5'>
       {isImportFilePopupOpen && !startAiTransformation ? (
         <ImportFileWrapper
           fileName={fileName}
@@ -178,12 +179,11 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
           onRefetch={onRefetch}
         />
       ) : null}
-      <Tooltip
+      <TooltipV2
         tooltipBody='Import Data'
-        position={TooltipPositions.BOTTOM}
-        tooltipBodyClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
+        side={SIDE_OPTIONS.BOTTOM}
+        tooltipClassName='f-12-300 rounded-md whitespace-nowrap z-[1000] bg-black text-GRAY_200'
         className='z-1 h-full w-full'
-        tooltipBodystyle='f-10-400'
       >
         <div className={cn('hover:bg-GRAY_100 cursor-pointer rounded! p-1', isImportFilePopupOpen && 'bg-GRAY_100')}>
           <Image
@@ -195,7 +195,7 @@ const ImportDataset: FC<ImportDatasetPropsType> = ({ setShowAiTransformationStat
             onClick={handleOpenImportFilePopup}
           />
         </div>
-      </Tooltip>
+      </TooltipV2>
     </div>
   );
 };
