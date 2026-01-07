@@ -12,6 +12,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatTitle, setChatTitle] = useState('');
   const [conversationId, setConversationIdState] = useState<string | null>(null);
   const [chatKey, setChatKey] = useState(0);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
   const isInitializedRef = useRef(false);
 
   const setInitialConversationId = useCallback((id: string | null) => {
@@ -43,6 +44,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const startNewChat = useCallback(() => {
     setChatTitle('');
     setConversationIdState(null);
+    setIsChatSidebarOpen(false);
     setChatKey((prev) => prev + 1);
     window.history.replaceState(null, '', ROUTES_PATH.CHAT);
   }, []);
@@ -57,8 +59,19 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       startNewChat,
       chatKey,
       setInitialConversationId,
+      isChatSidebarOpen,
+      setIsChatSidebarOpen,
     }),
-    [resetToDefault, chatTitle, conversationId, setConversationId, startNewChat, chatKey, setInitialConversationId],
+    [
+      resetToDefault,
+      chatTitle,
+      conversationId,
+      setConversationId,
+      startNewChat,
+      chatKey,
+      setInitialConversationId,
+      isChatSidebarOpen,
+    ],
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

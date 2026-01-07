@@ -344,10 +344,13 @@ export const useChatInput = ({
     // Reset height to calculate new height
     textarea.style.height = '20px';
 
-    const scrollHeight = textarea.scrollHeight;
-    const newHeight = Math.min(scrollHeight, maxTextareaHeight);
+    // Only expand if there's actual content
+    if (value.trim()) {
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.min(scrollHeight, maxTextareaHeight);
 
-    textarea.style.height = `${newHeight}px`;
+      textarea.style.height = `${newHeight}px`;
+    }
   }, [value, maxTextareaHeight]);
 
   useEffect(() => {

@@ -11,4 +11,6 @@ export interface ChatContextType {
   startNewChat: () => void;
   chatKey: number;
   setInitialConversationId: (id: string | null) => void;
+  isChatSidebarOpen: boolean;
+  setIsChatSidebarOpen: (open: boolean) => void;
 }

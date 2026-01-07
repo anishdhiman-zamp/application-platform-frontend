@@ -3,12 +3,14 @@
 import { useMemo, useState } from 'react';
 import { Button, Input, toast } from '@zamp-platform/ui';
 import { useDeleteSkillMutation, useListSkillsQuery, useUpdateSkillStatusMutation } from '@/apis/macs';
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { SkillCardSkeleton } from '@/modules/macs/components/loaders';
 import SkillCard from '@/modules/macs/components/skills/SkillCard';
 import SkillsHeader from '@/modules/macs/components/skills/SkillsHeader';
 import UploadSkillModal from '@/modules/macs/components/skills/UploadSkillModal';
+import { useChatContext } from '@/modules/macs/context/ChatContext';
 import { SkillStatus } from '@/types/api/skills.types';
 
 const SkillsSection = () => {
@@ -17,6 +19,7 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
   const [updateSkillStatus] = useUpdateSkillStatusMutation();
   const [deleteSkill] = useDeleteSkillMutation();
@@ -78,8 +81,12 @@ const SkillsSection = () => {
     }
   };
 
+  const handleOpenChat = () => {
+    setIsChatSidebarOpen(true);
+  };
+
   return (
-    <div className='flex h-full flex-col items-center justify-start bg-white'>
+    <div className='relative flex h-full flex-col items-center justify-start bg-white'>
       <SkillsHeader />
 
       <div className='flex w-full max-w-[700px] items-center justify-between gap-x-3 px-6 pb-4'>
@@ -133,6 +140,19 @@ const SkillsSection = () => {
       </div>
 
       <UploadSkillModal isOpen={isUploadModalOpen} onClose={handleCloseModal} skillId={skillIdToUpdate} />
+
+      {/* New Chat Button - Bottom Left */}
+      {!isChatSidebarOpen && (
+        <Button
+          onClick={handleOpenChat}
+          variant='secondary'
+          size='icon'
+          className='absolute bottom-3 left-3 h-14 w-14 rounded-full border-none transition-all [&_svg]:size-10'
+          title='Start new chat'
+        >
+          <NewPaceIcons />
+        </Button>
+      )}
     </div>
   );
 };

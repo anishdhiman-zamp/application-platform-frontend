@@ -26,7 +26,7 @@ const ChatNavbar = ({ className }: ChatNavbarProps) => {
   return (
     <div
       className={cn(
-        'bg-BG_GRAY_1 border-GRAY_400 flex h-9 items-center gap-x-1.5 overflow-visible px-2 py-1',
+        'bg-BG_GRAY_1 border-GRAY_400 flex h-9 items-center gap-x-1.5 overflow-visible px-2 py-1.5',
         className,
       )}
     >
