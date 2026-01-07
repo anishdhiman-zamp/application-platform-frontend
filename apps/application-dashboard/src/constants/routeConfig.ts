@@ -36,7 +36,7 @@ export const ROUTES_PATH = {
   MACS: '/macs',
 
   CHAT: '/chat',
-  CHAT_ID: '/chat/:chatId',
+  CHAT_SKILLS: '/chat/skills',
 };
 
 export const getPageRouteById = (pageId: string, sheetId?: string) => {
@@ -106,10 +106,6 @@ export const getCreateKnowledgeBaseRouteByProcessId = (processId: string) => {
 
 export const getIntegrationDetailRoute = (integrationId: string) => {
   return `${ROUTES_PATH.INTEGRATION_DETAIL.replace(':integrationId', integrationId)}`;
-};
-
-export const getChatRouteById = (chatId: string) => {
-  return `${ROUTES_PATH.CHAT_ID.replace(':chatId', chatId)}`;
 };
 
 export const LOGIN_URLS = [ROUTES_PATH.LOGIN];
