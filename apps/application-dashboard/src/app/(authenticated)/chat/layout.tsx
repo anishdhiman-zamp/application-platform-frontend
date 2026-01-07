@@ -1,13 +1,21 @@
 import type { ReactNode } from 'react';
 import ChatSidebar from '@/modules/macs/components/chat/ChatSidebar';
 import ChatNavbar from '@/modules/macs/components/ChatNavbar';
-import { ChatProvider } from '@/modules/macs/context/ChatContext';
+import { ChatSidebarProvider } from '@/modules/macs/context/ChatSidebarContext';
 
-const ChatLayout = ({ children }: { children: ReactNode }) => {
+interface ChatLayoutProps {
+  children: ReactNode;
+  searchParams: Promise<{ s?: string }>;
+}
+
+const ChatLayout = async ({ children, searchParams }: ChatLayoutProps) => {
+  const params = await searchParams;
+  const conversationId = params?.s ?? null;
+
   return (
-    <ChatProvider>
+    <ChatSidebarProvider>
       <div className='flex h-full w-full overflow-hidden'>
-        <ChatSidebar />
+        <ChatSidebar initialConversationId={conversationId} />
         <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
           <ChatNavbar />
           <main className='flex min-h-0 flex-1 px-2'>
@@ -17,7 +25,7 @@ const ChatLayout = ({ children }: { children: ReactNode }) => {
           </main>
         </div>
       </div>
-    </ChatProvider>
+    </ChatSidebarProvider>
   );
 };
 

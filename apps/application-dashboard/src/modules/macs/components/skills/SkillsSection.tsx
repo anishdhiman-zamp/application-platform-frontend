@@ -10,7 +10,7 @@ import { SkillCardSkeleton } from '@/modules/macs/components/loaders';
 import SkillCard from '@/modules/macs/components/skills/SkillCard';
 import SkillsHeader from '@/modules/macs/components/skills/SkillsHeader';
 import UploadSkillModal from '@/modules/macs/components/skills/UploadSkillModal';
-import { useChatContext } from '@/modules/macs/context/ChatContext';
+import { useChatSidebarContext } from '@/modules/macs/context/ChatSidebarContext';
 import { SkillStatus } from '@/types/api/skills.types';
 
 const SkillsSection = () => {
@@ -19,7 +19,7 @@ const SkillsSection = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [skillIdToUpdate, setSkillIdToUpdate] = useState<string | undefined>(undefined);
 
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatContext();
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebarContext();
   const { data, isLoading, isError, refetch } = useListSkillsQuery({});
   const [updateSkillStatus] = useUpdateSkillStatusMutation();
   const [deleteSkill] = useDeleteSkillMutation();

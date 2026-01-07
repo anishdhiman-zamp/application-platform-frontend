@@ -12,7 +12,11 @@ import { useAppSelector } from '@/hooks/toolkit';
 import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import type { RootState } from '@/store';
 
-const ChatHistory = () => {
+interface ChatHistoryProps {
+  onSelectConversation: (id: string | null) => void;
+}
+
+const ChatHistory = ({ onSelectConversation }: ChatHistoryProps) => {
   const organizationId = useAppSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id) ?? '';
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -88,7 +92,7 @@ const ChatHistory = () => {
       >
         <div className='space-y-0.5'>
           {filteredConversations.map((conversation) => (
-            <ChatHistoryItem key={conversation?.id} conversation={conversation} />
+            <ChatHistoryItem key={conversation?.id} conversation={conversation} onSelect={onSelectConversation} />
           ))}
         </div>
       </CommonWrapper>

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import SectionIconButton from '@/modules/macs/components/SectionIconButton';
-import { useChatContext } from '@/modules/macs/context/ChatContext';
+import { useChatSidebarContext } from '@/modules/macs/context/ChatSidebarContext';
 import { SectionType } from '@/modules/macs/types';
 
 interface ChatNavbarProps {
@@ -15,12 +15,12 @@ interface ChatNavbarProps {
 
 const ChatNavbar = ({ className }: ChatNavbarProps) => {
   const pathname = usePathname();
-  const { startNewChat } = useChatContext();
+  const { setIsChatSidebarOpen } = useChatSidebarContext();
 
   const isHomePage = pathname === ROUTES_PATH.CHAT;
 
   const handleHomeClick = () => {
-    startNewChat();
+    setIsChatSidebarOpen(false);
   };
 
   return (

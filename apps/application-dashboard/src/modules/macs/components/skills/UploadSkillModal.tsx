@@ -106,8 +106,12 @@ const UploadSkillModal = ({ isOpen, onClose, skillId }: UploadSkillModalProps) =
         toast.success('Skill uploaded successfully');
       }
       handleClose();
-    } catch {
-      toast.error(`Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`);
+    } catch (error) {
+      toast.error(
+        (error as any)?.data?.message
+          ? (error as any)?.data?.message
+          : `Failed to ${isUpdateMode ? 'update' : 'upload'} skill. Please try again.`,
+      );
     }
   };
 

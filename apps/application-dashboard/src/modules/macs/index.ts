@@ -5,5 +5,5 @@ export { default as ChatTopbar } from './components/chat/ChatTopbar';
 export { default as ChatNavbar } from './components/ChatNavbar';
 export { default as SectionIconButton } from './components/SectionIconButton';
 export * from './constants';
-export { ChatProvider, useChatContext } from './context/ChatContext';
+export { ChatSidebarProvider, useChatSidebarContext } from './context/ChatSidebarContext';
 export * from './types';

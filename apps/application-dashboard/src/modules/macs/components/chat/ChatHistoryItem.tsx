@@ -2,18 +2,16 @@
 
 import type { FC } from 'react';
 import { MessagesSquare } from 'lucide-react';
-import { useChatContext } from '@/modules/macs/context/ChatContext';
 import type { FeedbackItemType } from '@/types/api/feedbacks.types';
 
 interface ChatHistoryItemProps {
   conversation: FeedbackItemType;
+  onSelect: (id: string | null) => void;
 }
 
-const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation }) => {
-  const { setConversationId } = useChatContext();
-
+const ChatHistoryItem: FC<ChatHistoryItemProps> = ({ conversation, onSelect }) => {
   const handleClick = () => {
-    setConversationId(conversation?.id);
+    onSelect(conversation?.id);
   };
 
   return (

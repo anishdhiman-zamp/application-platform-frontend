@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import {
   ConnectedChatInput,
   MessageContainer,
@@ -9,34 +9,36 @@ import {
   SenderType,
   useChat,
 } from '@zamp-platform/chat';
+import ChatTopbar from 'modules/macs/components/chat/ChatTopbar';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
+import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
+import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
-import ChatHome from '@/modules/macs/components/chat/ChatHome';
-import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
+import type { RootState } from '@/store';
 
-interface ChatContentInnerProps {
-  organizationId: string;
-  currentUserName: string;
+interface ChatSidebarInnerProps {
   conversationId: string | null;
   setConversationId: (id: string | null) => void;
   setChatTitle: (title: string) => void;
-  chatTitle: string;
   startNewChat: () => void;
+  handleClose: () => void;
+  chatTitle: string;
 }
 
-const ChatContentInner = ({
-  organizationId,
-  currentUserName,
+const ChatSidebarInner: FC<ChatSidebarInnerProps> = ({
   conversationId,
   setConversationId,
   setChatTitle,
-  chatTitle,
   startNewChat,
-}: ChatContentInnerProps) => {
+  handleClose,
+  chatTitle,
+}) => {
+  const organizationId = useAppSelector((state: RootState) => state.user.user?.orgs?.[0]?.organization_id) ?? '';
+  const currentUserName = useAppSelector((state: RootState) => state.user.user?.user_name) ?? '';
+
   const chat = useChat({
     resourceId: organizationId,
     resourceType: ResourceType.ORGANIZATION,
@@ -58,22 +60,24 @@ const ChatContentInner = ({
   }, [chat.messages]);
 
   const isLoadingConversation = Boolean(
-    conversationId && ((chat.isLoadingConversationHistory && !hasMessages) || chat.isUninitializedConversationHistory),
+    chat.conversationId &&
+      !hasMessages &&
+      (chat.isLoadingConversationHistory || chat.isUninitializedConversationHistory),
   );
 
-  const isInConversation = conversationId || chat.conversationId;
+  const isInConversation = chat.conversationId || conversationId;
 
   useEffect(() => {
-    if (chat.conversationId && !conversationId) {
+    if (chat.conversationId && chat.conversationId !== conversationId) {
       setConversationId(chat.conversationId);
     }
   }, [chat.conversationId, conversationId, setConversationId]);
 
-  if (isInConversation) {
-    return (
-      <>
-        <ChatTopbar title={chatTitle || 'Untitled'} onStartNewChat={startNewChat} />
-        <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'>
+  return (
+    <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+      {isInConversation ? (
+        <>
+          <ChatTopbar onStartNewChat={startNewChat} onClose={handleClose} title={chatTitle} className='border-none' />
           <CommonWrapper
             isLoading={isLoadingConversation}
             isError={chat.isErrorConversationHistory}
@@ -91,29 +95,16 @@ const ChatContentInner = ({
               streamingEnabled
             />
           </CommonWrapper>
-          <div className='mx-auto w-full flex-shrink-0 px-3 pb-3'>
-            <ConnectedChatInput
-              chat={chat}
-              conversationId={conversationId ?? chat.conversationId ?? ''}
-              resourceType={ResourceType.ORGANIZATION}
-              resourceId={organizationId}
-              scope={ScopeType.ORGANIZATION}
-              scopeId={organizationId}
-              organizationId={organizationId}
-              currentUserName={currentUserName}
-              isDisabled={chat.isStreaming}
-              placeholder="Do your life's best work with Pace"
-            />
+        </>
+      ) : (
+        <div className='flex flex-1 items-center justify-center'>
+          <div className='flex flex-col items-center gap-4'>
+            <NewPaceIcons width={40} height={40} />
+            <p className='f-13-400 text-GRAY_600'>Start a new conversation</p>
           </div>
         </div>
-      </>
-    );
-  }
-
-  return (
-    <div className='mx-auto flex min-h-0 w-full max-w-[700px] flex-1 flex-col overflow-hidden'>
-      <ChatHome />
-      <div className='w-full shrink-0 p-3'>
+      )}
+      <div className='border-GRAY_400 w-full flex-shrink-0 border-t p-3'>
         <ConnectedChatInput
           chat={chat}
           conversationId={chat.conversationId ?? ''}
@@ -128,9 +119,8 @@ const ChatContentInner = ({
           className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
         />
       </div>
-      <ChatHistory onSelectConversation={setConversationId} />
     </div>
   );
 };
 
-export default ChatContentInner;
+export default ChatSidebarInner;

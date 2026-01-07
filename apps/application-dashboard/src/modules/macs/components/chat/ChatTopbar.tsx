@@ -5,13 +5,12 @@ import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, X } from 'lucide-react';
-import { useChatContext } from '@/modules/macs/context/ChatContext';
 
 interface ChatTopbarProps {
   className?: string;
   style?: React.CSSProperties;
   title?: string;
-  onStartNewChat?: () => void;
+  onStartNewChat: () => void;
   onClose?: () => void;
 }
 
@@ -26,12 +25,7 @@ const TITLE_TRANSITION = {
   ease: [0.4, 0, 0.2, 1] as const,
 };
 
-const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewChat, onClose }) => {
-  const { chatTitle, startNewChat } = useChatContext();
-
-  const displayTitle = title ?? (chatTitle || 'Untitled');
-  const handleStartNewChat = onStartNewChat ?? startNewChat;
-
+const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title = 'Untitled', onStartNewChat, onClose }) => {
   return (
     <div
       className={cn('border-GRAY_400 flex h-10 items-center justify-between gap-x-2 border-b p-3', className)}
@@ -40,7 +34,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
       <div className='f-11-550 relative min-w-0 flex-1 overflow-hidden capitalize'>
         <AnimatePresence mode='wait'>
           <motion.span
-            key={displayTitle}
+            key={title}
             variants={TITLE_ANIMATION_VARIANTS}
             initial='initial'
             animate='animate'
@@ -48,7 +42,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
             transition={TITLE_TRANSITION}
             className='block truncate'
           >
-            {displayTitle}
+            {title}
           </motion.span>
         </AnimatePresence>
       </div>
@@ -57,7 +51,7 @@ const ChatTopbar: FC<ChatTopbarProps> = ({ className, style, title, onStartNewCh
           variant='ghost'
           size='icon'
           className='h-6 w-6 p-2 text-gray-600 hover:text-gray-900'
-          onClick={handleStartNewChat}
+          onClick={onStartNewChat}
           title='Start new chat'
         >
           <Plus size={12} />
