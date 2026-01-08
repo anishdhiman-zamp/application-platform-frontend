@@ -1,36 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
 import { SIDEBAR_ITEMS } from '@/constants/sidebar.constants';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import { RootState } from '@/store';
 import type { NavigationItemSchema } from '@/types/config';
-
-/**
- * Evaluate feature flags for a list of items
- * @param items - The list of items to evaluate
- * @param evaluate - The function to evaluate the feature flags
- * @returns A record of feature flag states
- */
-const evaluateFlags = async (
-  items: NavigationItemSchema[],
-  evaluate: (flag: FEATURE_FLAGS) => Promise<boolean>,
-): Promise<Record<string, boolean>> => {
-  const itemsWithFlags = items.filter((item) => item.featureFlag);
-  const flagResults: Record<string, boolean> = {};
-
-  await Promise.all(
-    itemsWithFlags.map(async (item) => {
-      if (item.featureFlag) {
-        const isEnabled = await evaluate(item.featureFlag);
-
-        flagResults[item.featureFlag] = Boolean(isEnabled);
-      }
-    }),
-  );
-
-  return flagResults;
-};
 
 /**
  * Hook to filter sidebar items based on feature flags
@@ -38,21 +14,25 @@ const evaluateFlags = async (
  */
 export const useFilteredSidebarItems = () => {
   const { evaluate, ldClient } = useFeatureFlags();
-  const [featureFlagStates, setFeatureFlagStates] = useState<Record<string, boolean>>({});
+  const [isPaceChatEnabled, setIsPaceChatEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchFlags = useCallback(async () => {
-    const flagResults = await evaluateFlags(SIDEBAR_ITEMS, evaluate);
-
-    setFeatureFlagStates(flagResults);
-    setIsLoading(false);
-  }, [evaluate]);
+  const currentOrgId = useSelector((state: RootState) => state?.user?.user?.orgs?.[0]?.organization_id ?? '');
 
   useEffect(() => {
-    if (!ldClient) return;
-
-    fetchFlags();
-  }, [ldClient]);
+    if (ldClient) {
+      evaluate(FEATURE_FLAGS.PACE_CHAT)
+        .then((res: string[]) => {
+          setIsPaceChatEnabled(Boolean(res?.length && res.includes(currentOrgId)));
+        })
+        .catch(() => {
+          setIsPaceChatEnabled(false);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [evaluate, ldClient, currentOrgId]);
 
   const filteredItems = useMemo<NavigationItemSchema[]>(() => {
     if (isLoading) {
@@ -62,9 +42,13 @@ export const useFilteredSidebarItems = () => {
     return SIDEBAR_ITEMS.filter((item) => {
       if (!item.featureFlag) return true;
 
-      return featureFlagStates[item.featureFlag] === true;
+      if (item.featureFlag === FEATURE_FLAGS.PACE_CHAT) {
+        return isPaceChatEnabled;
+      }
+
+      return true;
     });
-  }, [featureFlagStates, isLoading]);
+  }, [isPaceChatEnabled, isLoading]);
 
   return { filteredItems, isLoading };
 };
