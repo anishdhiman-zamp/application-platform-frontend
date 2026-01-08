@@ -1,5 +1,5 @@
 import { withThemeByClassName } from '@storybook/addon-themes';
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react-vite';
 import '../src/globals.css';
 import './preview.css';
 
@@ -28,6 +28,7 @@ const preview: Preview = {
       ],
     },
   },
+
   decorators: [
     withThemeByClassName({
       themes: {
@@ -37,6 +38,8 @@ const preview: Preview = {
       defaultTheme: 'light',
     }),
   ],
+
+  tags: ['autodocs'],
 };
 
 export default preview;
