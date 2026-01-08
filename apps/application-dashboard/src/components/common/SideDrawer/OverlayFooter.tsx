@@ -1,8 +1,7 @@
 import { FC } from 'react';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { cn } from 'utils/common';
-import { Button } from 'components/common/button/Button';
 import { OverlayFooterProps } from 'components/common/SideDrawer/sideDrawer.types';
 
 // TODO: needs to be updated to use the new design system
@@ -20,8 +19,8 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
   nextButtonIconProps,
   nextButtonIconPosition,
   footerClassName = '',
-  nextButtonSize = SIZE_TYPES.SMALL,
-  backButtonSize = SIZE_TYPES.SMALL,
+  nextButtonSize = 'small',
+  backButtonSize = 'small',
 }) =>
   (bottomBar || onBack || onNext) && (
     <div
@@ -37,9 +36,9 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
           {!!onBack && (
             <Button
               size={backButtonSize}
-              type={BUTTON_TYPES.SECONDARY}
+              variant='outline'
               className={backButtonClassName}
-              id='SIDE_DRAWER_BACK_BUTTON'
+              testId='SIDE_DRAWER_BACK_BUTTON'
               onClick={onBack}
               isLoading={isBackButtonLoading}
             >
@@ -50,12 +49,32 @@ const OverlayFooter: FC<OverlayFooterProps> = ({
             <Button
               size={nextButtonSize}
               className={nextButtonClassName}
-              id='SIDE_DRAWER_NEXT_BUTTON'
+              testId='SIDE_DRAWER_NEXT_BUTTON'
               onClick={onNext}
               isLoading={isNextButtonLoading}
               disabled={isNextButtonDisabled}
-              iconProps={nextButtonIconProps}
-              iconPosition={nextButtonIconPosition}
+              leadingIcon={
+                nextButtonIconPosition === 'LEFT' && nextButtonIconProps ? (
+                  <SvgSpriteLoader
+                    id={nextButtonIconProps.id}
+                    iconCategory={nextButtonIconProps.iconCategory}
+                    width={nextButtonIconProps.width ?? 14}
+                    height={nextButtonIconProps.height ?? 14}
+                    color={nextButtonIconProps.color}
+                  />
+                ) : undefined
+              }
+              trailingIcon={
+                nextButtonIconPosition !== 'LEFT' && nextButtonIconProps ? (
+                  <SvgSpriteLoader
+                    id={nextButtonIconProps.id}
+                    iconCategory={nextButtonIconProps.iconCategory}
+                    width={nextButtonIconProps.width ?? 14}
+                    height={nextButtonIconProps.height ?? 14}
+                    color={nextButtonIconProps.color}
+                  />
+                ) : undefined
+              }
             >
               {nextButtonTitle}
             </Button>

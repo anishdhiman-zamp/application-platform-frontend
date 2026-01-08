@@ -40,7 +40,6 @@ export interface ButtonProps {
   customLeadingIcon?: ReactNode;
   customTrailingIcon?: ReactNode;
   children?: ReactNode | string | null;
-  childrenClassName?: string;
   loader?: ReactNode | string | null;
   tabIndex?: number;
   iconPosition?: ICON_POSITION_TYPES;
