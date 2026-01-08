@@ -1,4 +1,4 @@
-import { Button, toast } from '@zamp-platform/ui';
+import { Button } from '@zamp-platform/ui';
 import { cn } from '@zamp-platform/ui/utils';
 import { FileText, Loader } from 'lucide-react';
 import React from 'react';
@@ -11,14 +11,6 @@ interface OutputFilesBlockProps {
   payload: OutputFilesBlockType['payload'];
   conversationId?: string;
 }
-
-const getFileIcon = () => {
-  return (
-    <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
-      <FileText />
-    </div>
-  );
-};
 
 export const OutputFilesBlock: React.FC<OutputFilesBlockProps> = ({ payload, conversationId }) => {
   const [getOutputFileDownload, { isFetching, originalArgs }] = useLazyGetOutputFileDownloadQuery();
@@ -35,8 +27,8 @@ export const OutputFilesBlock: React.FC<OutputFilesBlockProps> = ({ payload, con
       if (res?.download_url) {
         await downloadFile(res.download_url, filename);
       }
-    } catch {
-      toast.error('Failed to download file');
+    } catch (error) {
+      console.error('Failed to fetch download URL:', error);
     }
   };
 
@@ -47,20 +39,22 @@ export const OutputFilesBlock: React.FC<OutputFilesBlockProps> = ({ payload, con
   return (
     <div className='mb-2 flex flex-wrap gap-2 pt-1.5 [&::-webkit-scrollbar]:hidden'>
       {payload.output_files.map((file) => {
-        const isDownloading = isFetching && originalArgs?.filename === file.filename;
+        const isDownloading = isFetching && originalArgs?.filename === file?.filename;
 
         return (
           <div
-            key={file.filename}
+            key={file?.filename}
             className={cn(
               'rounded-2.5 shadow-table-filter-menu group relative flex w-[148px] items-center gap-2 border border-gray-400 bg-white p-1 pr-3',
               'cursor-pointer',
             )}
-            onClick={() => handleDownloadFile(file.filename)}
+            onClick={() => handleDownloadFile(file?.filename)}
           >
             <div className='flex items-center gap-1'>
-              {getFileIcon()}
-              <span className='f-12-500 max-w-[104px] truncate'>{file.filename}</span>
+              <div className='flex h-5 w-6 items-center justify-center rounded-md bg-gray-100 [&_svg]:size-3.5'>
+                <FileText />
+              </div>
+              <span className='f-12-500 max-w-[104px] truncate'>{file?.filename}</span>
             </div>
             {isDownloading && (
               <Button

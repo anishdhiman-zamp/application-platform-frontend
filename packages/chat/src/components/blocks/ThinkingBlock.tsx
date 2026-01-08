@@ -2,20 +2,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, ShimmerTe
 import { AnimatePresence, motion } from 'motion/react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
-const formatThinkingDuration = (startTimestamp?: string, stopTimestamp?: string): string | null => {
-  if (!startTimestamp || !stopTimestamp) return null;
-
-  const startTime = new Date(startTimestamp).getTime();
-  const stopTime = new Date(stopTimestamp).getTime();
-  const durationMs = stopTime - startTime;
-
-  if (isNaN(durationMs) || durationMs < 0) return null;
-
-  const seconds = Math.round(durationMs / 1000);
-  if (seconds < 1) return 'less than 1 sec';
-  if (seconds === 1) return '1 sec';
-  return `${seconds} sec`;
-};
+import { formatThinkingDuration } from '../block.utils';
 
 interface ThinkingBlockProps {
   payload: {
@@ -34,9 +21,9 @@ export const ThinkingBlock: FC<ThinkingBlockProps> = ({
 }) => {
   const thinkingDuration = formatThinkingDuration(start_timestamp, stop_timestamp);
   const completedLabelWithDuration = thinkingDuration ? `Thought for ${thinkingDuration}` : 'Thought';
+  const wasCompleteRef = useRef(is_complete);
 
   const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'thinking');
-  const wasCompleteRef = useRef(is_complete);
 
   useEffect(() => {
     // Auto-close accordion when is_complete transitions from false to true
