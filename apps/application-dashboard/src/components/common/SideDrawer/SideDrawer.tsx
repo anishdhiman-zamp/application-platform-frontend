@@ -92,8 +92,8 @@ const SideDrawer: FC<SideDrawerProps> = ({
   footerClassName = '',
   closeButtonDimensions = { width: 24, height: 24 },
   animateOnClose = true,
-  nextButtonSize = SIZE_TYPES.SMALL,
-  backButtonSize = SIZE_TYPES.SMALL,
+  nextButtonSize = 'small',
+  backButtonSize = 'small',
 }) => {
   const [isMount, setIsMount] = useState(true);
   const handleClose = () => {
@@ -114,7 +114,7 @@ const SideDrawer: FC<SideDrawerProps> = ({
 
   if (!isOpen) return null;
 
-  const sidebarWidthClasses = SIZE_CLASSNAMES[size];
+  const sidebarWidthClasses = SIZE_CLASSNAMES[size as SIZE_TYPES];
 
   const { mountClassName, unmountClassName, common } = POSITION_CLASSNAMES[position as POSITION_TYPES];
 

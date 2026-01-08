@@ -1,4 +1,5 @@
 import { FC, useRef, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { DATE_FORMATS } from '@zamp-platform/utils';
@@ -9,13 +10,10 @@ import { RULE_ACTION_TYPES } from 'modules/data/RulesListing/ruleListing.types';
 import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import Image from 'next/image';
 import { RuleFilters } from 'types/api/dataset.types';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
 import { MenuWrapper } from '@/components/common/MenuWrapper';
 import TagWithHierarchy from '@/components/common/table/CustomCellEditors/CustomTagEditor/TagWithHierarchy';
 import { useOnClickOutside } from '@/hooks';
-import { Button } from 'components/common/button/Button';
 import { getFilterStatementValues } from 'components/filter/filter.utils';
 
 export type RuleCardProps = {
@@ -146,13 +144,7 @@ const RuleCard: FC<RuleCardProps> = ({
                 />
               </div>
               <span className='text-GRAY_1000 f-11-400'>...</span>
-              <Button
-                id='expand-rule'
-                type={BUTTON_TYPES.TEXT_NAV}
-                onClick={handleClickMore}
-                childrenClassName='text-GRAY_1000 underline'
-                size={SIZE_TYPES.SMALL}
-              >
+              <Button testId='expand-rule' variant='link' onClick={handleClickMore} size='small'>
                 +more
               </Button>
             </>
@@ -177,13 +169,7 @@ const RuleCard: FC<RuleCardProps> = ({
         </div>
       </div>
       {isExpanded && (
-        <Button
-          id='collapse-rule'
-          type={BUTTON_TYPES.TEXT_NAV}
-          onClick={handleClickCollapse}
-          childrenClassName='text-GRAY_1000'
-          size={SIZE_TYPES.SMALL}
-        >
+        <Button testId='collapse-rule' variant='link' onClick={handleClickCollapse} size='small'>
           Show less
         </Button>
       )}

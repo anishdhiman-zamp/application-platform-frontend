@@ -1,13 +1,11 @@
 import { FC, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ERROR_BUTTON_TEXT } from 'constants/auth.constants';
 import { COLORS } from 'constants/colors';
-import { SIZE_TYPES } from 'types/common/components';
 import { defaultFn } from 'types/commonTypes';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
-import { Button } from 'components/common/button/Button';
 import { ErrorCardPropTypes, ErrorCardTypes } from 'components/commonWrapper/commonWrapper.types';
 
 const ErrorCard: FC<ErrorCardPropTypes> = ({
@@ -45,10 +43,10 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
               </div>
               <div className='flex items-center justify-center gap-1.5'>
                 <Button
-                  type={BUTTON_TYPES.SECONDARY}
+                  variant='outline'
                   isLoading={isLoading}
-                  id='wifi-only'
-                  size={SIZE_TYPES.SMALL}
+                  testId='wifi-only'
+                  size='small'
                   onClick={toggleIsOfflineClick}
                   className={isOfflineClicked ? 'px-2.5! py-1.5!' : 'p-1.5!'}
                 >
@@ -59,11 +57,11 @@ const ErrorCard: FC<ErrorCardPropTypes> = ({
                   )}
                 </Button>
                 <Button
-                  type={BUTTON_TYPES.SECONDARY}
+                  variant='outline'
                   isLoading={isLoading}
-                  size={SIZE_TYPES.SMALL}
+                  size='small'
                   onClick={onClose}
-                  id={refetchButtonId}
+                  testId={refetchButtonId}
                   className='px-2.5 py-1.5'
                 >
                   <span className='f-12-400'>Reload</span>
