@@ -1,9 +1,10 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import type { ToolUseDisplayContent } from '../../types/block.types';
+import { formatJson } from '../block.utils';
 
 /**
  * Component to render a tool use content block using Accordion
@@ -19,19 +20,31 @@ interface ToolCallBlockProps {
   name?: string;
   is_complete: boolean;
 }
-export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, name }) => {
+export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name }) => {
   const toolName = payload.name || name || 'Unknown';
+  const wasCompleteRef = useRef(is_complete);
+
+  const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
+
+  useEffect(() => {
+    // Auto-close accordion when is_complete transitions from false to true
+    if (is_complete && !wasCompleteRef.current) {
+      setAccordionValue('');
+    }
+    wasCompleteRef.current = is_complete;
+  }, [is_complete]);
 
   return (
     <Accordion
       type='single'
       collapsible
-      defaultValue='tool-use'
+      value={accordionValue}
+      onValueChange={setAccordionValue}
       className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
     >
       <AccordionItem value='tool-use' className='border-none'>
         <AccordionTrigger
-          className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
+          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
           icon={ChevronDown}
           iconRotation={180}
         >
@@ -76,7 +89,7 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
                 <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
-                  {payload.display_content.json_block}
+                  {formatJson(payload.display_content.json_block)}
                 </pre>
               </div>
             </div>
@@ -85,7 +98,9 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{payload.partial_json}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
+                  {formatJson(payload.partial_json)}
+                </pre>
               </div>
             </div>
           )}
@@ -93,7 +108,9 @@ export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete, na
             <div className='space-y-2'>
               <span className='text-GRAY_700 f-11-500 tracking-wide uppercase'>Parameters</span>
               <div className='border-GRAY_200 overflow-x-auto rounded-lg border bg-gray-50 p-3'>
-                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>{payload.input_json}</pre>
+                <pre className='f-12-400 text-GRAY_700 break-all whitespace-pre-wrap'>
+                  {formatJson(payload.input_json)}
+                </pre>
               </div>
             </div>
           )}

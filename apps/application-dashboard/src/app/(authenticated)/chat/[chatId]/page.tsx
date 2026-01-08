@@ -78,13 +78,13 @@ const ChatIdPage = () => {
           messages={chat.messages}
           isAnalysing={isAnalysing}
           streamingState={chat.streamingState}
-          className='[scrollbar-width:none]'
+          className='px-3 [scrollbar-width:none]'
           assistantAvatar={<NewPaceAvatar />}
           onScrollChange={handleScrollChange}
           streamingEnabled
         />
       </CommonWrapper>
-      <div className='mx-auto w-full flex-shrink-0 p-3'>
+      <div className='mx-auto w-full flex-shrink-0 px-3 pb-3'>
         <ConnectedChatInput
           chat={chat}
           conversationId={chatId}
