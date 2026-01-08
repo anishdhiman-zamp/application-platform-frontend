@@ -176,10 +176,19 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
   const [rowData, setRowData] = useState<MapAny | null>(null);
   const [selectedKey, setSelectedKey] = useState<string>('');
   const [isServerSideDataLoading, setIsServerSideDataLoading] = useState<boolean>(false);
+  const isLocalUpdateRef = useRef<boolean>(false);
 
   const serverSideDatasource: IServerSideDatasource = useMemo(() => {
     return {
       getRows: (parameters: IServerSideGetRowsParams): void => {
+        // If this is a local update, skip the entire getRows logic
+        // Return early without making any API calls or state changes
+        if (isLocalUpdateRef.current) {
+          isLocalUpdateRef.current = false;
+
+          return;
+        }
+
         const queryConfig = getEncodedRequest(
           parameters.request,
           fxCurrency?.[0],
@@ -322,7 +331,9 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
     const updatedRow = { ...event.data, [field as string]: value };
 
     // Optimistic update
+    isLocalUpdateRef.current = true;
     node.setData(updatedRow);
+    setRowData(updatedRow);
 
     if (source === SourceType.API || source === SourceType.EDIT) {
       updateApi({
@@ -362,6 +373,8 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
         newValue = row?.data?.[field as string] as string;
       }
     }
+
+    isLocalUpdateRef.current = true;
 
     updateApi({
       rowId: rowIds,
@@ -493,6 +506,7 @@ const DatasetArtifact: FC<DatasetByIdProps> = ({
 
     const updatedRowData = { ...rowData, [key]: newValue };
 
+    isLocalUpdateRef.current = true;
     setRowData(updatedRowData);
 
     // Update the grid data as well
