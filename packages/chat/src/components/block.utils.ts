@@ -70,3 +70,40 @@ export const downloadFile = async (downloadUrl: string, fileName: string): Promi
     toast.error('Failed to download file');
   }
 };
+
+/**
+ * Formats the thinking duration between two timestamps
+ * @param startTimestamp - The start timestamp
+ * @param stopTimestamp - The stop timestamp
+ * @returns Formatted duration string or null if invalid
+ */
+export const formatThinkingDuration = (startTimestamp?: string, stopTimestamp?: string): string | null => {
+  if (!startTimestamp || !stopTimestamp) return null;
+
+  const startTime = new Date(startTimestamp).getTime();
+  const stopTime = new Date(stopTimestamp).getTime();
+  const durationMs = stopTime - startTime;
+
+  if (isNaN(durationMs) || durationMs < 0) return null;
+
+  const seconds = Math.round(durationMs / 1000);
+  if (seconds < 1) return 'less than 1 sec';
+  if (seconds === 1) return '1 sec';
+  return `${seconds} sec`;
+};
+
+/**
+ * Helper function to format JSON string with proper indentation
+ * @param jsonString - The JSON string to format
+ * @returns Formatted JSON string or original string if parsing fails
+ */
+export const formatJson = (jsonString: string | undefined): string => {
+  if (!jsonString) return '';
+  try {
+    const parsed = JSON.parse(jsonString);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    // If parsing fails, return the original string
+    return jsonString;
+  }
+};

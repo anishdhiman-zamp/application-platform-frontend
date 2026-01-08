@@ -67,6 +67,7 @@ export const enum SSEEventType {
   CONVERSATION_UPDATED = 'conversation_updated',
   MESSAGE_START = 'message_start',
   MESSAGE_STOP = 'message_stop',
+  OUTPUT_FILES = 'output_files',
 }
 
 export const enum ChatMessageType {
@@ -273,6 +274,11 @@ export interface GetFileDownloadUrlResponseType {
   file_upload_id: string;
   file_name: string;
   expiry: string;
+}
+
+export interface GetOutputFileDownloadRequestType {
+  conversationId: string;
+  filename: string;
 }
 
 /**

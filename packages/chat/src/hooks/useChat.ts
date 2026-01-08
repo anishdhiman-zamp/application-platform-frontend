@@ -22,6 +22,7 @@ import { getHistoryFormattedMessages } from '../components/block.utils';
 import {
   type Block,
   BLOCK_TYPE,
+  type OutputFilesBlockType,
   type StreamEventPayload,
   StreamingContentBlockDeltaType,
   StreamingContentBlockType,
@@ -391,6 +392,38 @@ export const useChat = (config: ChatConfig) => {
               });
             }
             break;
+          case SSEEventType.OUTPUT_FILES:
+            if (config.enableStreaming) {
+              const outputFilesPayload = data.payload.message;
+              const messageIdForOutputFiles = outputFilesPayload.id;
+
+              setStreamingState((prev) => {
+                if (!prev) return prev;
+
+                // Verify that the output files belong to the current streaming message
+                if (prev.id && prev.id !== messageIdForOutputFiles) {
+                  return prev;
+                }
+
+                const outputFilesBlock: OutputFilesBlockType = {
+                  id: `output-files-${messageIdForOutputFiles}`,
+                  type: BLOCK_TYPE.OUTPUT_FILES,
+                  order: (prev.message_content?.elements?.length || 0) + 1,
+                  payload: {
+                    output_files: outputFilesPayload.output_files,
+                  },
+                };
+
+                return {
+                  ...prev,
+                  message_content: {
+                    ...prev.message_content,
+                    elements: [...(prev.message_content?.elements || []), outputFilesBlock],
+                  },
+                };
+              });
+            }
+            break;
           case SSEEventType.MESSAGE_STOP:
             setStreamingState((prev) => {
               if (!prev) return null;
@@ -419,7 +452,6 @@ export const useChat = (config: ChatConfig) => {
                 setMessages((messagePrev) => {
                   // Check if message with same id already exists to prevent duplicates from StrictMode
                   if (streamingMessagePayload.id && messagePrev.some((msg) => msg.id === streamingMessagePayload.id)) {
-                    console.log('found duplicate message', streamingMessagePayload.id);
                     return messagePrev;
                   }
                   return [...messagePrev, streamingMessagePayload];

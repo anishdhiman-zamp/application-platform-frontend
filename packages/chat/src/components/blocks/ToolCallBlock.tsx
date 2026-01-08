@@ -1,23 +1,10 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@zamp-platform/ui';
 import { CheckCircle, ChevronDown, Clock, Wrench } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { FC } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import type { ToolUseDisplayContent } from '../../types/block.types';
-
-/**
- * Helper function to format JSON string with proper indentation
- */
-const formatJson = (jsonString: string | undefined): string => {
-  if (!jsonString) return '';
-  try {
-    const parsed = JSON.parse(jsonString);
-    return JSON.stringify(parsed, null, 2);
-  } catch {
-    // If parsing fails, return the original string
-    return jsonString;
-  }
-};
+import { formatJson } from '../block.utils';
 
 /**
  * Component to render a tool use content block using Accordion
@@ -35,17 +22,29 @@ interface ToolCallBlockProps {
 }
 export const ToolCallBlock: FC<ToolCallBlockProps> = ({ payload, is_complete = true, name }) => {
   const toolName = payload.name || name || 'Unknown';
+  const wasCompleteRef = useRef(is_complete);
+
+  const [accordionValue, setAccordionValue] = useState<string>(is_complete ? '' : 'tool-use');
+
+  useEffect(() => {
+    // Auto-close accordion when is_complete transitions from false to true
+    if (is_complete && !wasCompleteRef.current) {
+      setAccordionValue('');
+    }
+    wasCompleteRef.current = is_complete;
+  }, [is_complete]);
 
   return (
     <Accordion
       type='single'
       collapsible
-      defaultValue='tool-use'
+      value={accordionValue}
+      onValueChange={setAccordionValue}
       className='border-GRAY_100 w-full overflow-hidden rounded-lg border bg-white'
     >
       <AccordionItem value='tool-use' className='border-none'>
         <AccordionTrigger
-          className='f-12-450 text-GRAY_900 w-full gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
+          className='f-12-450 text-GRAY_900 w-full cursor-pointer gap-x-2 p-1.5 hover:no-underline [&[data-state=closed]>svg]:rotate-0 [&[data-state=open]>svg]:rotate-180'
           icon={ChevronDown}
           iconRotation={180}
         >
