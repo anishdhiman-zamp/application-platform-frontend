@@ -160,6 +160,15 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = e.clipboardData?.files;
+
+    if (files && files.length > 0) {
+      e.preventDefault();
+      handleFileSelect(files);
+    }
+  };
+
   const handleStartRecording = async () => {
     if (microphoneState === MicrophoneState.Error) {
       onMicrophoneError?.();
@@ -273,6 +282,7 @@ export const ConnectedChatInput: FC<ConnectedChatInputProps> = ({
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={isDisabled ? undefined : handleKeyDown}
+                  onPaste={isDisabled || disableAttachments ? undefined : handlePaste}
                   placeholder={placeholder}
                   className='f-13-450 placeholder:text-muted-foreground min-h-0 w-full resize-none overflow-y-auto border-none bg-transparent p-0 shadow-none outline-none'
                   style={{
