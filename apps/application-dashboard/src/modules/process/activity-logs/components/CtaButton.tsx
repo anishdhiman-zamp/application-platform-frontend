@@ -10,15 +10,16 @@ interface CtaButtonProps {
   isMultiple: boolean;
   isLoading: boolean;
   isCtaLoading: boolean;
+  isSuccess: boolean;
   onClick: defaultFnType;
 }
 
-const CtaButton = memo(({ cta, isMultiple, isLoading, isCtaLoading, onClick }: CtaButtonProps) => (
+const CtaButton = memo(({ cta, isMultiple, isLoading, isCtaLoading, isSuccess, onClick }: CtaButtonProps) => (
   <Button
     variant={isMultiple ? 'secondary' : 'default'}
     className='f-12-500 h-6 gap-x-1.5 px-2.5 py-1.5'
     onClick={onClick}
-    disabled={isLoading || isCtaLoading}
+    disabled={isLoading || isCtaLoading || isSuccess}
     isLoading={isLoading && isCtaLoading}
   >
     {cta.cta_config?.icon_identifier && (
