@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       BRANCH:
-        description: "Branch to deploy"
+        description: 'Branch to deploy'
         required: false
-        default: "main"
+        default: 'main'
         type: string
       staging_tag:
         description: 'Staging tag that passed tests and should be deployed to production US'
@@ -49,7 +49,7 @@ jobs:
           echo "🔍 Validating production US deployment gate..."
           echo "Staging tag: ${{ inputs.staging_tag || 'manual-trigger' }}"
           echo "Tests passed: ${{ inputs.staging_tests_passed || 'manual-trigger' }}"
-          
+
           # Check if staging test information is provided (workflow_call or workflow_dispatch with staging data)
           if [ "${{ github.event_name }}" == "workflow_call" ] || [ "${{ inputs.staging_tag }}" != "" ]; then
             if [ "${{ inputs.staging_tests_passed }}" != "true" ]; then
@@ -65,7 +65,7 @@ jobs:
             echo "STAGING_TAG=manual-$(date +%s)" >> $GITHUB_OUTPUT
             echo "DEPLOYMENT_APPROVED=true" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "🏷️ Using tag: ${{ inputs.staging_tag || 'manual-trigger' }}" >> $GITHUB_STEP_SUMMARY
           echo "✅ Production US deployment approved" >> $GITHUB_STEP_SUMMARY
 
@@ -145,13 +145,13 @@ jobs:
       ECR_REPO_URI: ${{ steps.build.outputs.ECR_REPO_URI }}
 
     steps:
-      - name: "Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}"
+      - name: 'Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.inputs.BRANCH || github.ref }}
 
-      - name: "Debug Environment Variables"
+      - name: 'Debug Environment Variables'
         run: |
           echo "=== Job Environment Variables ==="
           echo "AWS_ACCOUNT_ID: '$AWS_ACCOUNT_ID'"
@@ -173,22 +173,22 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
-      - name: "Install AWS CLI"
+      - name: 'Install AWS CLI'
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
           sudo ./aws/install
-  
-      - name: "Login to Amazon ECR"
+
+      - name: 'Login to Amazon ECR'
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-  
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
           driver: remote
-  
+
       - uses: actions/cache@v4
         with:
           path: .turbo
@@ -198,7 +198,7 @@ jobs:
 
       - uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: "${{secrets[env.SSH_PRIVATE_KEY]}}"
+          ssh-private-key: '${{secrets[env.SSH_PRIVATE_KEY]}}'
 
       - name: Install dependencies
         run: |
@@ -223,11 +223,18 @@ jobs:
 
           echo "✅ Secrets loaded successfully"
 
+      - name: Set Sentry release and dist
+        run: |
+          echo "SENTRY_RELEASE=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SENTRY_RELEASE=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "DEPLOY_TARGET=aws-${AWS_REGION}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_DEPLOY_TARGET=aws-${AWS_REGION}" >> $GITHUB_ENV
+
       - name: Build application
         env:
           # Variables below come from AWS Secrets Manager (fetched in previous step)
-          TIMESTAMP: "${TIMESTAMP}"
-          NODE_OPTIONS: "--max-old-space-size=8192"
+          TIMESTAMP: '${TIMESTAMP}'
+          NODE_OPTIONS: '--max-old-space-size=8192'
         run: |
           echo "Building application with environment variables:"
           echo "NEXT_PUBLIC_ASSET_PREFIX: $NEXT_PUBLIC_ASSET_PREFIX"
@@ -238,10 +245,22 @@ jobs:
           echo "NEXT_PUBLIC_MULTI_REGION_ENABLED: $NEXT_PUBLIC_MULTI_REGION_ENABLED"
           # Build the application
           npm run build
-          
+
           echo "Build completed successfully!"
           echo "Build artifacts:"
           ls -la apps/application-dashboard/.next/
+
+      - name: Upload source maps to Sentry
+        env:
+          SENTRY_ORG: varni-labs-pte-ltd
+          SENTRY_PROJECT: application-platform-dashboard
+        run: |
+          npx sentry-cli sourcemaps upload \
+            apps/application-dashboard/.next \
+            --release "$SENTRY_RELEASE" \
+            --dist aws-${AWS_REGION} \
+            --url-prefix "~/_next" \
+            --rewrite
 
       - id: build
         name: Build and Push Image
@@ -252,12 +271,12 @@ jobs:
           echo "AWS_REGION: '$AWS_REGION'"
           echo "ECR_REPO: '$ECR_REPO'"
           echo "=================================="
-          
+
           # Construct ECR registry URL (like TMS workflow pattern)
           ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
           ECR_REPO_URI="$ECR_REGISTRY/$ECR_REPO"
           IMAGE_TAG=$GITHUB_SHA-$GITHUB_RUN_NUMBER-$(date +%s)
-          
+
           # Debug: Print build variables
           echo "=== Build Debug Info ==="
           echo "ECR_REGISTRY: '$ECR_REGISTRY'"
@@ -266,13 +285,13 @@ jobs:
           echo "IMAGE_TAG: '$IMAGE_TAG'"
           echo "Full Image: '$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'"
           echo "========================="
-          
+
           # Validate that ECR_REPO_URI is not empty
           if [ -z "$ECR_REPO_URI" ]; then
             echo "ERROR: ECR_REPO_URI is empty!"
             exit 1
           fi
-          
+
           # Build Docker image using the Dockerfile  
           # Application is already built, so Docker will just package it
           # Build args come from AWS Secrets Manager environment variables
@@ -286,8 +305,8 @@ jobs:
             --build-arg NEXT_PUBLIC_DEFAULT_REGION="$NEXT_PUBLIC_DEFAULT_REGION" \
             --build-arg NEXT_PUBLIC_MULTI_REGION_ENABLED="$NEXT_PUBLIC_MULTI_REGION_ENABLED" \
             --push .
-          
-          
+
+
           echo "ECR_REPO_URI=$ECR_REPO_URI" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo ":whale2:App Image Tag: ${IMAGE_TAG} " >> $GITHUB_STEP_SUMMARY
@@ -299,23 +318,22 @@ jobs:
           echo "Clearing existing assets from S3..."
           aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --recursive --quiet
           aws s3 rm "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --recursive --quiet
-          
+
           echo "Uploading new Next.js static files..."
           aws s3 sync apps/application-dashboard/.next/static "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static" --delete
           aws s3 sync apps/application-dashboard/public "s3://${ASSETS_S3_BUCKET}/application-platform-frontend/public" --delete
-          
+
           echo "Static assets completely replaced in S3 successfully!"
           echo "Static files path: s3://${ASSETS_S3_BUCKET}/application-platform-frontend/_next/static"
-          
+
           echo "Invalidating CloudFront cache to serve new assets..."
           aws cloudfront create-invalidation \
             --distribution-id E3DUGZEALXY15G \
             --paths "/*"
-          
+
           echo "CloudFront invalidation initiated successfully!"
           echo "New assets will be available shortly at: https://d1spwmgn2nexj7.cloudfront.net/application-platform-frontend"
 
- 
   deploy-to-eks:
     name: Deploy to EKS
     runs-on: arc-runner-set-aws-prd-us
@@ -342,7 +360,7 @@ jobs:
       STAGING_TAG: ${{needs.validate-deployment.outputs.STAGING_TAG}}
 
     steps:
-      - name: "Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}"
+      - name: 'Checkout repository on : ${{ github.event.inputs.BRANCH || github.ref }}'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -355,7 +373,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
 
-      - name: "Install AWS CLI"
+      - name: 'Install AWS CLI'
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
@@ -364,14 +382,14 @@ jobs:
       - uses: azure/setup-helm@v4
         name: Install Helm
         with:
-          version: "v3.7.2"
+          version: 'v3.7.2'
 
       - uses: azure/setup-kubectl@v4
         with:
-          version: "v1.22.0"
+          version: 'v1.22.0'
         id: install
 
-      - name: "Set up kubectl"
+      - name: 'Set up kubectl'
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
@@ -379,7 +397,7 @@ jobs:
         run: |
           # Construct ECR repository URI directly (like TMS workflow pattern)
           ECR_REPO_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
-          
+
           # This assumes your Helm chart is in S3.
           aws s3 cp s3://${HELM_REPOSITORY}/${HELM_CHART_NAME}-0.0.1.tgz .
           tar -xvzf ${HELM_CHART_NAME}-0.0.1.tgz
@@ -394,7 +412,7 @@ jobs:
               --wait \
               --timeout 10m0s \
               --create-namespace
-          
+
           echo "✅ Production US deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
           echo "🏷️ Staging Tag: $STAGING_TAG" >> $GITHUB_STEP_SUMMARY
           echo "🎯 Environment: production (US)" >> $GITHUB_STEP_SUMMARY
@@ -436,6 +454,6 @@ jobs:
           SLACK_MESSAGE: ${{ steps.body.outputs.SLACK_MESSAGE }}
           SLACK_TITLE: Production US Deployment - Gated by Staging Tests
           ZAMP_ENV: ${{ env.ENVIRONMENT }}
-          SLACK_FOOTER: "<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+          SLACK_FOOTER: '<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>'
           SLACK_USERNAME: Zamp-Devops
           SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}

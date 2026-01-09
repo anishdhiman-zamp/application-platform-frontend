@@ -1,10 +1,8 @@
 import { FC, ReactNode } from 'react';
-import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
-import { SIZE_TYPES } from 'types/common/components';
+import { Button, ButtonSize, ButtonVariant } from '@zamp-platform/ui';
+import { SvgSpriteLoader, SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
 import { defaultFnType, SIDE_OPTIONS } from 'types/commonTypes';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { cn } from 'utils/common';
-import { Button } from 'components/common/button/Button';
 import TooltipV2 from 'components/common/TooltipV2';
 
 interface TooltipButtonPropsType {
@@ -14,8 +12,8 @@ interface TooltipButtonPropsType {
   className?: string;
   tooltipPosition?: SIDE_OPTIONS;
   buttonIcon?: SvgSpriteLoaderProps;
-  buttonType?: BUTTON_TYPES;
-  buttonSize?: SIZE_TYPES;
+  buttonType?: ButtonVariant;
+  buttonSize?: ButtonSize;
   id: string;
   onClick?: defaultFnType;
   isLoading?: boolean;
@@ -32,8 +30,8 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
   className = '',
   tooltipPosition = SIDE_OPTIONS.BOTTOM,
   buttonIcon,
-  buttonType = BUTTON_TYPES.SECONDARY,
-  buttonSize = SIZE_TYPES.SMALL,
+  buttonType = 'outline',
+  buttonSize = 'small',
   id = '',
   onClick,
   isLoading = false,
@@ -51,11 +49,22 @@ const TooltipButton: FC<TooltipButtonPropsType> = ({
       tooltipClassName={cn(tooltipBodyOverrideClassName, tooltipBodyClassName)}
     >
       <Button
-        type={buttonType}
-        id={id}
+        variant={buttonType}
+        testId={id}
         size={buttonSize}
         className={className}
-        iconProps={buttonIcon}
+        trailingIcon={
+          buttonIcon ? (
+            <SvgSpriteLoader
+              id={buttonIcon.id}
+              iconCategory={buttonIcon.iconCategory}
+              width={buttonIcon.width ?? 14}
+              height={buttonIcon.height ?? 14}
+              color={buttonIcon.color}
+              className={buttonIcon.className}
+            />
+          ) : undefined
+        }
         onClick={onClick}
         isLoading={isLoading}
         disabled={buttonDisabled}

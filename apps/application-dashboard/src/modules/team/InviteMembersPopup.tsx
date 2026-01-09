@@ -1,4 +1,5 @@
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import {
@@ -8,13 +9,10 @@ import {
 import { COLORS } from 'constants/colors';
 import { TEAM_MEMBERS_PRIVILEGES_LIST } from 'modules/team/people.constants';
 import { InviteMembersPopupPropsType, TEAM_MEMBERS_PRIVILEGES } from 'modules/team/people.types';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
 import { PERMISSION_MESSAGES, VALIDATION_ERROR_MESSAGES } from 'utils/accessPermission/accessPermission.constants';
 import { PERMISSION_TYPES } from 'utils/accessPermission/accessPermission.types';
 import { validateEmail } from 'utils/common';
 import { useUserIdentity } from '@/hooks/useUserIdentity';
-import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 import { TOAST_MESSAGES } from 'components/common/toast/toast.constants';
 import MultiSelectInput from 'components/multiSelectInput/MultiSelectInput';
@@ -308,9 +306,8 @@ const InviteMembersPopup: FC<InviteMembersPopupPropsType> = ({ isOpen, onClose, 
       </div>
       <div className='border-GRAY_200 flex w-full justify-end border-t px-5 py-4'>
         <Button
-          type={BUTTON_TYPES.PRIMARY}
-          id='send-user-invite'
-          size={SIZE_TYPES.MEDIUM}
+          testId='send-user-invite'
+          size='medium'
           disabled={!isInvitable}
           onClick={handleInviteMembers}
           isLoading={postInviteAudiencesIsLoading}

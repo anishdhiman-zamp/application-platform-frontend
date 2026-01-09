@@ -1,13 +1,14 @@
 import { ReactElement, ReactNode } from 'react';
 import { SvgSpriteLoaderProps } from '@zamp-platform/ui/assets';
-import { POSITION_TYPES, SIZE_TYPES } from 'types/common/components';
+import { POSITION_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
-import { ICON_POSITION_TYPES } from 'types/components/button.type';
 
 export enum SIDE_DRAWER_TYPES {
   PRIMARY = 'PRIMARY',
   SECONDARY = 'SECONDARY',
 }
+
+type ButtonSize = 'xlarge' | 'large' | 'medium' | 'small' | 'xsmall';
 
 export interface OverlayTitleProps {
   topBar?: ReactElement | string;
@@ -35,10 +36,10 @@ export interface OverlayFooterProps {
   isBackButtonLoading?: boolean;
   isNextButtonLoading?: boolean;
   nextButtonIconProps?: SvgSpriteLoaderProps;
-  nextButtonIconPosition?: ICON_POSITION_TYPES;
+  nextButtonIconPosition?: 'LEFT' | 'RIGHT';
   footerClassName?: string;
-  nextButtonSize?: SIZE_TYPES;
-  backButtonSize?: SIZE_TYPES;
+  nextButtonSize?: ButtonSize;
+  backButtonSize?: ButtonSize;
 }
 
 export interface SideDrawerProps extends OverlayTitleProps, OverlayFooterProps {
@@ -49,7 +50,7 @@ export interface SideDrawerProps extends OverlayTitleProps, OverlayFooterProps {
   stackPosition?: number;
   backdropClassName?: string;
   id: string;
-  size?: SIZE_TYPES;
+  size?: ButtonSize;
   childrenWrapperClassName?: string;
   animateOnClose?: boolean;
   titleClassName?: string;

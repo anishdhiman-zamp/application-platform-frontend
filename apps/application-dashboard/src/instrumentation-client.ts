@@ -30,7 +30,8 @@ if (environment === 'production') {
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
 
-    release: process.env.NEXT_PUBLIC_ENVIRONMENT,
+    release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+    dist: process.env.NEXT_PUBLIC_DEPLOY_TARGET,
 
     environment,
   });

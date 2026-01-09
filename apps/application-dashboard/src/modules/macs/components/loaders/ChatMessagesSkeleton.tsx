@@ -1,4 +1,6 @@
+import { FC } from 'react';
 import { Skeleton } from '@zamp-platform/ui';
+import { cn } from '@/utils/common';
 
 const UserMessageSkeleton = () => (
   <div className='flex flex-col items-start gap-1.5'>
@@ -24,13 +26,24 @@ const AssistantMessageSkeleton = ({ lines = 3 }: { lines?: number }) => (
   </div>
 );
 
-const ChatMessagesSkeleton = () => (
-  <div className='flex w-full flex-col gap-6 px-3 py-4'>
-    <UserMessageSkeleton />
-    <AssistantMessageSkeleton lines={4} />
-    <UserMessageSkeleton />
-    <AssistantMessageSkeleton lines={2} />
-  </div>
-);
+interface ChatMessagesSkeletonProps {
+  count?: number;
+  className?: string;
+}
+
+const ChatMessagesSkeleton: FC<ChatMessagesSkeletonProps> = ({ count = 1, className }) => {
+  return (
+    <div className={cn('flex w-full flex-col px-3 py-4', className)}>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={`chat-message-skeleton-${index}`} className='flex w-full flex-col gap-6 px-3 py-4'>
+          <UserMessageSkeleton />
+          <AssistantMessageSkeleton lines={4} />
+          <UserMessageSkeleton />
+          <AssistantMessageSkeleton lines={2} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default ChatMessagesSkeleton;
