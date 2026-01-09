@@ -55,7 +55,7 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
     missingOptionalFieldsCount,
   } = useFieldCounts(completedFields, missingFields, activityId);
 
-  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+  const [emitHITLAction, { isLoading, isSuccess }] = useEmitHITLActionMutation();
 
   const filterKeys = useMemo(
     () => Object.keys(filters?.dataset_to_filter_map ?? missingFields ?? {}),
@@ -158,10 +158,10 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
               <Button
                 size='xsmall'
                 isLoading={isLoading}
-                disabled={isContinueButtonDisabled}
+                disabled={isContinueButtonDisabled || isSuccess}
                 onClick={handleSubmitAndContinue}
                 className={cn('f-11-500', {
-                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled,
+                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled || isSuccess,
                 })}
               >
                 Continue
