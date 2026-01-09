@@ -16,10 +16,10 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
 import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
-import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
-import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ACCEPTED_FILE_TYPES } from '@/modules/pace';
+import { ChatMessagesSkeleton } from '@/modules/pace/components/loaders';
+import { useMacsContext } from '@/modules/pace/context/MacsContext';
 import type { RootState } from '@/store';
-import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 const ChatIdPage = () => {
   const params = useParams();
@@ -97,7 +97,7 @@ const ChatIdPage = () => {
           currentUserName={currentUserName}
           isDisabled={chat.isStreaming}
           placeholder="Do your life's best work with Pace"
-          acceptedFileTypes={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
+          acceptedFileTypes={ACCEPTED_FILE_TYPES}
         />
       </div>
     </div>

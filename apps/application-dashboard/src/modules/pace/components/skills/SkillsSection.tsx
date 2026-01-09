@@ -5,10 +5,10 @@ import { Button, Input, toast } from '@zamp-platform/ui';
 import { useDeleteSkillMutation, useListSkillsQuery, useUpdateSkillStatusMutation } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
-import { SkillCardSkeleton } from '@/modules/macs/components/loaders';
-import SkillCard from '@/modules/macs/components/skills/SkillCard';
-import SkillsHeader from '@/modules/macs/components/skills/SkillsHeader';
-import UploadSkillModal from '@/modules/macs/components/skills/UploadSkillModal';
+import { SkillCardSkeleton } from '@/modules/pace/components/loaders';
+import SkillCard from '@/modules/pace/components/skills/SkillCard';
+import SkillsHeader from '@/modules/pace/components/skills/SkillsHeader';
+import UploadSkillModal from '@/modules/pace/components/skills/UploadSkillModal';
 import { SkillStatus } from '@/types/api/skills.types';
 
 const SkillsSection = () => {

@@ -5,8 +5,8 @@ import { notFound } from 'next/navigation';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useIsPaceChatEnabled } from '@/hooks/useIsPaceChatEnabled';
-import ChatShell from '@/modules/macs/components/ChatShell';
-import { MacsProvider } from '@/modules/macs/context/MacsContext';
+import ChatShell from '@/modules/pace/components/ChatShell';
+import { MacsProvider } from '@/modules/pace/context/MacsContext';
 
 const ChatLayout = ({ children }: { children: ReactNode }) => {
   const { isPaceChatEnabled, isLoading } = useIsPaceChatEnabled();

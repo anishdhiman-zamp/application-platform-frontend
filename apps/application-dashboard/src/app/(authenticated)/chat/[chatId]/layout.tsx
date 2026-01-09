@@ -2,11 +2,11 @@
 
 import { type ReactNode, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
-import ChatTopbar from '@/modules/macs/components/chat/ChatTopbar';
-import MacsTopbar from '@/modules/macs/components/MacsTopbar';
-import { useMacsContext } from '@/modules/macs/context/MacsContext';
-import { ViewMode } from '@/modules/macs/types';
+import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
+import ChatTopbar from '@/modules/pace/components/chat/ChatTopbar';
+import MacsTopbar from '@/modules/pace/components/MacsTopbar';
+import { useMacsContext } from '@/modules/pace/context/MacsContext';
+import { ViewMode } from '@/modules/pace/types';
 
 const ChatIdLayout = ({ children }: { children: ReactNode }) => {
   const params = useParams();

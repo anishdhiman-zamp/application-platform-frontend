@@ -4,8 +4,8 @@ import { cn } from '@zamp-platform/ui/utils';
 import { useRouter } from 'next/navigation';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import SectionIconButton from '@/modules/macs/components/SectionIconButton';
-import { SectionType } from '@/modules/macs/types';
+import SectionIconButton from '@/modules/pace/components/SectionIconButton';
+import { SectionType } from '@/modules/pace/types';
 
 interface MacsTopbarProps {
   className?: string;

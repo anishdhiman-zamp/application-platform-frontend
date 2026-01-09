@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@zamp-platform/ui';
-import SectionPanel from '@/modules/macs/components/SectionPanel';
-import { usePanelSizes } from '@/modules/macs/hooks/usePanelSizes';
+import SectionPanel from '@/modules/pace/components/SectionPanel';
+import { usePanelSizes } from '@/modules/pace/hooks/usePanelSizes';
 
 const ChatShell = ({ children }: { children: ReactNode }) => {
   const panelSizes = usePanelSizes();

@@ -4,12 +4,12 @@ import { useMemo, useState } from 'react';
 import { ResourceType } from '@zamp-platform/chat';
 import { Button, Input } from '@zamp-platform/ui';
 import { MessagesSquare, Search } from 'lucide-react';
-import ChatHistoryItem from 'modules/macs/components/chat/ChatHistoryItem';
 import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
-import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
+import ChatHistoryItem from '@/modules/pace/components/chat/ChatHistoryItem';
+import { ChatHistorySkeleton } from '@/modules/pace/components/loaders';
 import type { RootState } from '@/store';
 
 const ChatHistory = () => {

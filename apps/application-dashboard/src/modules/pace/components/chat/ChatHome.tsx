@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import NewPaceIcons from '@/assets/Icons/NewPaceIcons';
 import { useAppSelector } from '@/hooks/toolkit';
-import { getGreeting } from '@/modules/macs/macs.utils';
+import { getGreeting } from '@/modules/pace/macs.utils';
 
 const ChatHome = () => {
   const user = useAppSelector((state) => state.user.user);

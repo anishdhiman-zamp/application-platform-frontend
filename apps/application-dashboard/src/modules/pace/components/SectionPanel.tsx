@@ -1,9 +1,9 @@
 'use client';
 
-import MacsTopbar from '@/modules/macs/components/MacsTopbar';
-import SkillsSection from '@/modules/macs/components/skills/SkillsSection';
-import { useMacsContext } from '@/modules/macs/context/MacsContext';
-import { SectionType } from '@/modules/macs/types';
+import MacsTopbar from '@/modules/pace/components/MacsTopbar';
+import SkillsSection from '@/modules/pace/components/skills/SkillsSection';
+import { useMacsContext } from '@/modules/pace/context/MacsContext';
+import { SectionType } from '@/modules/pace/types';
 
 const SectionPanel = () => {
   const { activeSection } = useMacsContext();

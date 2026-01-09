@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import type { MacsContextType } from '@/modules/macs/types';
-import { SectionType, ViewMode } from '@/modules/macs/types';
+import type { MacsContextType } from '@/modules/pace/types';
+import { SectionType, ViewMode } from '@/modules/pace/types';
 
 const MacsContext = createContext<MacsContextType | null>(null);
 
