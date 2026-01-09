@@ -32,7 +32,7 @@ const LogCtaComponent = (
 ) => {
   const userId = useAppSelector((state) => state.user.user?.user_id);
   const [ctaLoading, setCtaLoading] = useState<string[]>([]);
-  const [emitHITLAction, { isLoading }] = useEmitHITLActionMutation();
+  const [emitHITLAction, { isLoading, isSuccess }] = useEmitHITLActionMutation();
 
   const artifactTypeCtas = useMemo(
     () => ctas.filter((cta) => cta.cta_component_type === CTA_COMPONENT_TYPE.ARTIFACT),
@@ -55,7 +55,9 @@ const LogCtaComponent = (
 
       emitHITLAction({ processId, activityRunId: activityId, payload })
         .unwrap()
-        .then(() => setCtaLoading((prev) => prev.filter((id) => id !== loadingId)))
+        .then(() => {
+          setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
+        })
         .catch((error) => {
           toast.error(error?.data?.message ?? 'Something went wrong');
           setCtaLoading((prev) => prev.filter((id) => id !== loadingId));
@@ -145,6 +147,7 @@ const LogCtaComponent = (
                 isMultiple={isMultipleButtons}
                 isLoading={isLoading}
                 isCtaLoading={ctaLoading.includes(loadingId)}
+                isSuccess={isSuccess}
                 onClick={() => handleButtonClick(cta)}
               />
             );

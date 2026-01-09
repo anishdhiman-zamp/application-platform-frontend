@@ -22,7 +22,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed',
+          'bg-primary text-secondary hover:bg-primary/90 active:bg-GRAY_950 disabled:text-GRAY_700 disabled:cursor-not-allowed',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 ',
         outline:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:bg-GRAY_100 disabled:text-GRAY_700 disabled:cursor-not-allowed',
