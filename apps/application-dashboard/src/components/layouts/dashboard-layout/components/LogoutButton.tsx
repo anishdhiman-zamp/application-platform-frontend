@@ -13,14 +13,15 @@ const LogoutButton: FC = () => {
       <Button
         variant='ghost'
         onClick={logout}
+        size='large'
         disabled={isLoggingOut}
-        className='text-GRAY_700 hover:bg-GRAY_100 h-auto w-full justify-start gap-2 rounded-md p-1'
+        leadingIcon={<LogOut width={14} height={14} />}
+        className='text-GRAY_700 hover:bg-GRAY_100 h-8 w-full justify-start gap-2 rounded-md p-1'
       >
-        <div className='flex h-6 w-6 items-center justify-center'>
-          <LogOut width={14} height={14} />
+        <div className='flex w-full items-center gap-2'>
+          <div className='f-12-450 flex-1 text-left select-none'>Logout</div>
+          {isLoggingOut && <Loader2 className='h-4 w-4 animate-spin' />}
         </div>
-        <div className='f-12-450 flex-1 text-left'>Logout</div>
-        {isLoggingOut && <Loader2 className='h-4 w-4 animate-spin' />}
       </Button>
     </div>
   );

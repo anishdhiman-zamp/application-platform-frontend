@@ -1,14 +1,16 @@
 'use client';
 
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import MarkdownSkeleton from 'modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import dynamic from 'next/dynamic';
 import { useGetProcessesQuery } from '@/apis/pages';
+import ImageLoader from '@/components/common/loader/ImageLoader';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { FEATURE_FLAGS } from '@/constants/featureFlags';
+import { ZAMP_LOGO_LOADER_SVG } from '@/constants/icons';
 import { useAppDispatch } from '@/hooks/toolkit';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
+import MarkdownSkeleton from '@/modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { ProcessStatus } from '@/types/api/processApi.types';
 import { cn } from '@/utils/common';
@@ -18,10 +20,7 @@ const KnowledgeBaseHome = dynamic(() => import('@/modules/knowledge-based/Knowle
   ssr: false,
 });
 
-const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
-  ssr: false,
-  loading: () => <MarkdownSkeleton />,
-});
+const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {});
 
 const ProcessCreationKnowledgeBase = dynamic(
   () => import('@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase'),
@@ -81,13 +80,17 @@ const KnowledgeBaseV2PageHome: FC<KnowledgeBaseV2PageHomeProps> = ({ processId, 
     }
   }, [evaluate, ldClient, processId]);
 
+  if (!processes?.length) {
+    return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} className='rounded-tl-xl' />;
+  }
+
   if (!isSopCreationEnabled) {
     return <KnowledgeBaseHome />;
   }
 
   return (
     <CommonWrapper
-      isLoading={isLoadingProcesses}
+      isLoading={isLoadingProcesses || !processes?.length}
       skeletonType={SkeletonTypes.CUSTOM}
       loader={<MarkdownSkeleton />}
       className='h-full'

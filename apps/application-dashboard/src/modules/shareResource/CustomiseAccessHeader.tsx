@@ -1,11 +1,10 @@
 import { FC } from 'react';
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import Image from 'next/image';
-import { Button } from '@/components/common/button/Button';
 import { Label } from '@/components/common/Label';
 import { HAND_ICON } from '@/constants/icons';
-import { SIZE_TYPES } from '@/types/common/components';
 import { defaultFnType } from '@/types/commonTypes';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from '@/types/components/button.type';
 
 type CustomiseAccessHeaderProps = {
   onCancel?: defaultFnType;
@@ -36,22 +35,15 @@ const CustomiseAccessHeader: FC<CustomiseAccessHeaderProps> = ({
         />
         <div className='flex gap-4'>
           {onCancel && (
-            <Button
-              id='cancel-customise-access-btn'
-              type={BUTTON_TYPES.SECONDARY}
-              size={SIZE_TYPES.SMALL}
-              onClick={onCancel}
-            >
+            <Button testId='cancel-customise-access-btn' variant='outline' size='small' onClick={onCancel}>
               Cancel
             </Button>
           )}
           {onSave && (
             <Button
-              id='save-customise-access-btn'
-              type={BUTTON_TYPES.PRIMARY}
-              size={SIZE_TYPES.SMALL}
-              iconPosition={ICON_POSITION_TYPES.LEFT}
-              iconProps={{ id: 'check', size: 14 }}
+              testId='save-customise-access-btn'
+              size='small'
+              leadingIcon={<SvgSpriteLoader id='check' width={14} height={14} />}
               onClick={onSave}
               isLoading={isSaving}
             >

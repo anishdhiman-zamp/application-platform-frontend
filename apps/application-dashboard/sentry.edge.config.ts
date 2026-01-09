@@ -10,6 +10,9 @@ if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production')
   Sentry.init({
     dsn: SENTRY_DSN,
 
+    release: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+    dist: process.env.NEXT_PUBLIC_DEPLOY_TARGET,
+
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
     tracesSampleRate: 1,
 

@@ -1,7 +1,15 @@
 import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { captureException } from '@sentry/browser';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogHeaderTitle } from '@zamp-platform/ui';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogHeaderTitle,
+} from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { useGetRulesByDatasetColumnsQuery, useUpdateRulePriorityMutation } from 'apis/dataset';
 import { DRAG_ICON, ZAMP_LOGO_LOADER_SVG } from 'constants/icons';
@@ -12,12 +20,10 @@ import { searchRules } from 'modules/data/RulesListing/ruleListing.utils';
 import Image from 'next/image';
 import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
 import { OrderType } from 'types/components/table.type';
 import Input from '@/components/common/input';
 import ImageLoader from '@/components/common/loader/ImageLoader';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { Button } from 'components/common/button/Button';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { toast } from 'components/common/toast/Toast';
 import CommonWrapper from 'components/commonWrapper';
@@ -228,14 +234,11 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
             <div className='f-16-600'>{columnLabel}</div>
             {isApplyChangesEnabled && (
               <Button
-                type={BUTTON_TYPES.SECONDARY}
-                size={SIZE_TYPES.XSMALL}
+                variant='outline'
+                size='xsmall'
                 onClick={handleApplyChangePopupOpen}
-                id='apply-priority-changes'
-                iconProps={{
-                  id: 'check',
-                }}
-                iconPosition={ICON_POSITION_TYPES.LEFT}
+                testId='apply-priority-changes'
+                leadingIcon={<SvgSpriteLoader id='check' width={12} height={12} />}
               >
                 Apply Changes
               </Button>
@@ -321,21 +324,10 @@ const RulesListingSideDrawer: FC<RulesListingSideDrawerProps> = ({
             </div>
           </DialogBody>
           <DialogFooter className='flex justify-end gap-2'>
-            <Button
-              type={BUTTON_TYPES.SECONDARY}
-              size={SIZE_TYPES.MEDIUM}
-              id='cancel-apply-changes'
-              onClick={handleDiscardChanges}
-            >
+            <Button variant='outline' size='medium' testId='cancel-apply-changes' onClick={handleDiscardChanges}>
               Discard
             </Button>
-            <Button
-              type={BUTTON_TYPES.PRIMARY}
-              size={SIZE_TYPES.MEDIUM}
-              id='apply-changes'
-              onClick={handleApplyChanges}
-              isLoading={isUpdating}
-            >
+            <Button size='medium' testId='apply-changes' onClick={handleApplyChanges} isLoading={isUpdating}>
               Yes, Apply
             </Button>
           </DialogFooter>

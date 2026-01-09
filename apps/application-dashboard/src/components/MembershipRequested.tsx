@@ -1,9 +1,7 @@
+import { Button } from '@zamp-platform/ui';
 import { ZAMP_ICON } from 'constants/icons';
 import Image from 'next/image';
-import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
-import { BUTTON_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
 
 type MembershipRequestedProps = {
   text: string;
@@ -44,9 +42,9 @@ export const MembershipRequested = (props: MembershipRequestedProps) => {
         {actionItems.map((actionItem) => (
           <Button
             key={actionItem.text}
-            type={BUTTON_TYPES.SECONDARY}
-            id='send-user-invite-btn'
-            size={SIZE_TYPES.SMALL}
+            variant='outline'
+            testId='send-user-invite-btn'
+            size='small'
             onClick={actionItem.onClick}
           >
             {actionItem.text}

@@ -1,4 +1,6 @@
 import { FC, useMemo, useState } from 'react';
+import { Button } from '@zamp-platform/ui';
+import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { ColDef } from 'ag-grid-community';
 import { getDatasetDrilldownRoute } from 'constants/routeConfig';
@@ -11,10 +13,8 @@ import {
 } from 'modules/data/RowProperties/rowProperties.types';
 import Rules from 'modules/data/RowProperties/Rules';
 import { useRouter } from 'next/navigation';
-import { MenuItem, SIZE_TYPES, TAB_TYPES } from 'types/common/components';
+import { MenuItem, TAB_TYPES } from 'types/common/components';
 import { defaultFnType, MapAny } from 'types/commonTypes';
-import { BUTTON_TYPES, ICON_POSITION_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
 import SideDrawer from 'components/common/SideDrawer/SideDrawer';
 import { CUSTOM_COLUMNS_TYPE } from 'components/common/table/table.types';
 import { Tabs } from 'components/common/tabs/Tabs';
@@ -105,17 +105,13 @@ const RowPropertiesSideDrawer: FC<RowPropertiesSideDrawerProps> = ({
           />
           {isDrillDownEnabled && (
             <Button
-              type={BUTTON_TYPES.SECONDARY}
-              id='row-properties-source-drill-down-button'
+              variant='outline'
+              testId='row-properties-source-drill-down-button'
               className='!text-GRAY_900 border-none'
-              iconProps={{
-                id: 'arrow-up-left',
-                iconCategory: ICON_SPRITE_TYPES.ARROWS,
-                width: 12,
-                height: 12,
-              }}
-              iconPosition={ICON_POSITION_TYPES.LEFT}
-              size={SIZE_TYPES.SMALL}
+              leadingIcon={
+                <SvgSpriteLoader id='arrow-up-left' iconCategory={ICON_SPRITE_TYPES.ARROWS} width={12} height={12} />
+              }
+              size='small'
               onClick={handleSourceDrillDownClick}
             >
               Source drill down

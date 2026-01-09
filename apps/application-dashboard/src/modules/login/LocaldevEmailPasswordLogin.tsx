@@ -1,14 +1,13 @@
 'use client';
 import { FC, FormEvent, MouseEvent, useEffect, useState } from 'react';
-import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
+import { Button } from '@zamp-platform/ui';
 import { useGetErrorDetailsQuery } from 'apis/auth';
 import { LOGIN_METHODS } from 'constants/auth.constants';
+import { ArrowRight } from 'lucide-react';
 import { LOGIN_ERROR_TEXT } from 'modules/login/constants';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginFlow } from 'types/api/auth.types';
-import { SIZE_TYPES } from 'types/common/components';
 import { getFromLocalStorage, LOCAL_STORAGE_KEYS, setToLocalStorage } from 'utils/localstorage';
-import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 
 type LoginFormProps = {
@@ -145,14 +144,10 @@ const LoginForm: FC<LoginFormProps> = ({ className = '', loginFlow, setLoginFlow
           error={error ?? ''}
         />
         <Button
-          id='login'
+          testId='login'
           className='w-fit'
           disabled={formDisabled}
-          size={SIZE_TYPES.LARGE}
-          iconProps={{
-            id: 'arrow-right',
-            iconCategory: ICON_SPRITE_TYPES.ARROWS,
-          }}
+          trailingIcon={<ArrowRight size={16} />}
           isLoading={isEmailLogin ? loading : false}
         >
           Login

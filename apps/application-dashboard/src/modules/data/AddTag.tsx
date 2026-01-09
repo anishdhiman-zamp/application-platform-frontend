@@ -1,5 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { captureException } from '@sentry/browser';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { ICON_SPRITE_TYPES } from '@zamp-platform/ui/types';
 import { IServerSideGetRowsRequest } from 'ag-grid-community';
@@ -7,10 +8,8 @@ import { useUpdateDatasetDataMutation } from 'apis/dataset';
 import { convertFilterModelToRuleFilters } from 'modules/data/data.utils';
 import RuleStatement from 'modules/data/RulesListing/RuleStatement';
 import { DatasetUpdateResponseType } from 'types/api/dataset.types';
-import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType } from 'types/commonTypes';
 import { TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
-import { Button } from 'components/common/button/Button';
 import Input from 'components/common/input';
 import { MenuWrapper } from 'components/common/MenuWrapper';
 import CreateTag from 'components/common/table/CustomCellEditors/CustomTagEditor/CreateTag';
@@ -147,7 +146,7 @@ const AddTag = ({
               <CreateTag value={searchValue} handleCreateTag={handleCreateTag} existingList={tagList} />
               <div className='bg-BG_GRAY_2 flex items-center gap-2 rounded-b-md p-2'>
                 <span>💡</span>
-                <span className='text-GRAY_900 f-11-400'>Use “ / “ to create hierarchy</span>
+                <span className='text-GRAY_900 f-11-400'>Use " / " to create hierarchy</span>
               </div>
             </MenuWrapper>
           )}
@@ -181,8 +180,8 @@ const AddTag = ({
       </div>
       <div className='border-BORDER_GRAY_400 flex flex-row-reverse items-center justify-between border-t px-4 py-3'>
         <Button
-          size={SIZE_TYPES.XSMALL}
-          id='add-tag-transactions'
+          size='xsmall'
+          testId='add-tag-transactions'
           onClick={handleClickAddTag}
           isLoading={isLoading}
           disabled={!selectedTag}
