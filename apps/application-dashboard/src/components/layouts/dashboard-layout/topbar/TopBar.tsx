@@ -103,7 +103,7 @@ const Topbar = () => {
                 }
               >
                 <Button id='knowledge-base-btn' size='small' variant='secondary' aria-label='Knowledge base'>
-                  <BookOpen size={12} className='' />
+                  <BookOpen size={16} className='' />
                 </Button>
               </Link>
             </TooltipV2>

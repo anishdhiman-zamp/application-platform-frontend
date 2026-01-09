@@ -11,6 +11,7 @@ export const enum BLOCK_TYPE {
   TEXT = 'text',
   TOOL_USE = 'tool_use',
   THINKING = 'thinking',
+  OUTPUT_FILES = 'output_files',
 }
 
 export const enum ActionType {
@@ -124,6 +125,21 @@ export interface AttachmentsBlockType {
   };
 }
 
+export interface OutputFileType {
+  filename: string;
+  s3_path: string;
+  file_type: string;
+}
+
+export interface OutputFilesBlockType {
+  id: string;
+  order: number;
+  type: BLOCK_TYPE.OUTPUT_FILES;
+  payload: {
+    output_files: OutputFileType[];
+  };
+}
+
 export enum TEXT_TYPE {
   PLAIN_TEXT = 'plain_text',
   MARKDOWN = 'markdown',
@@ -137,6 +153,7 @@ export type Block =
   | QuestionGroupBlockType
   | QuestionBlockType
   | AttachmentsBlockType
+  | OutputFilesBlockType
   | ThinkingContentBlock
   | TextContentBlock
   | ToolUseContentBlock;

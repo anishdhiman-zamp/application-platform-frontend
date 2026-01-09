@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { Button } from '@zamp-platform/ui';
 import { SvgSpriteLoader } from '@zamp-platform/ui/assets';
 import { usePostAiTransformationConfirmMutation } from 'apis/dataset';
 import { COLORS } from 'constants/colors';
@@ -8,9 +9,6 @@ import {
 } from 'modules/data/components/importDataset/importData.constants';
 import { DataPreviewSidebarPropsType } from 'modules/data/components/importDataset/importData.types';
 import { useParams, useSearchParams } from 'next/navigation';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
 import { toast } from 'components/common/toast/Toast';
 
 const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
@@ -65,10 +63,9 @@ const DataPreviewSidebar: FC<DataPreviewSidebarPropsType> = ({
           Discard
         </span>
         <Button
-          id='import-confirm-import'
+          testId='import-confirm-import'
           className='tw-min-w-[70px]'
-          size={SIZE_TYPES.SMALL}
-          type={BUTTON_TYPES.PRIMARY}
+          size='small'
           isLoading={isLoadingPostAiTransformationConfirm}
           onClick={handleConfirmImport}
         >
