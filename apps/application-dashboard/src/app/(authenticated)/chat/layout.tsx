@@ -15,7 +15,7 @@ const ChatLayout = ({ children }: { children: ReactNode }) => {
     return <ImageLoader imageSrc={ZAMP_LOGO_LOADER_SVG} width={140} height={140} />;
   }
 
-  if (!isPaceChatEnabled) {
+  if (!isLoading && !isPaceChatEnabled) {
     notFound();
   }
 
