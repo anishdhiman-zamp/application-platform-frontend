@@ -1,13 +1,17 @@
 'use client';
 
 import { memo, useEffect, useState } from 'react';
-import MarkdownSkeleton from 'modules/process/knowledge-base-creation/components/MarkdownSkeleton';
 import dynamic from 'next/dynamic';
+import { MarkdownContentSkeleton } from '@/modules/process/knowledge-base-creation/components/KnowledgeBaseContentSkeleton';
 
 // Dynamic import for ReactMarkdown to reduce initial bundle
 const ReactMarkdown = dynamic(() => import('react-markdown'), {
   ssr: false,
-  loading: () => <MarkdownSkeleton />,
+  loading: () => (
+    <div className='mx-auto max-w-[800px]'>
+      <MarkdownContentSkeleton />
+    </div>
+  ),
 });
 
 interface MarkdownContentProps {
@@ -37,7 +41,11 @@ const MarkdownContent = memo(({ content }: MarkdownContentProps) => {
   }, [content]);
 
   if (!plugins.remarkGfm || !plugins.rehypeSlug) {
-    return <MarkdownSkeleton />;
+    return (
+      <div className='mx-auto max-w-[800px]'>
+        <MarkdownContentSkeleton />
+      </div>
+    );
   }
 
   return (

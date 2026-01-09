@@ -12,30 +12,26 @@ import { KB_TOAST_MESSAGES } from '@/components/common/toast/toast.constants';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppDispatch } from '@/hooks/toolkit';
-import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
+import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
 
 // Dynamic imports for heavy components
 const KnowledgeBaseChat = dynamic(() => import('@/modules/process/knowledge-base-creation/KnowledgeBaseChat'), {
   ssr: false,
-  loading: () => <MarkdownSkeleton />,
+  loading: () => <ChatMessagesSkeleton count={2} className='px-0 py-0' />,
 });
 
 const ProcessCreationKnowledgeBase = dynamic(
   () => import('@/modules/process/knowledge-base-creation/ProcessCreationKnowledgeBase'),
-  {
-    ssr: false,
-    loading: () => <MarkdownSkeleton />,
-  },
 );
 
-interface CreateKnowledgebasePageHomeProps {
+interface CreateKnowledgeBasePageHomeProps {
   processId: string;
   conversationId?: string;
 }
 
-const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
+const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   processId,
   conversationId: initialConversationId,
 }) => {
@@ -62,7 +58,7 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (!conversationId && currentProcess?.status === ProcessStatus.DRAFT) {
+    if (!conversationId) {
       filterConversations({
         resource_id: processId,
         resource_type: ResourceType.PROCESS,
@@ -83,10 +79,6 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
     }
   }, [processId, conversationId, currentProcess, filterConversations]);
 
-  if (currentProcess && ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus)) {
-    return <ProcessInProcessBanner />;
-  }
-
   return (
     <CommonWrapper
       isLoading={isLoadingProcesses}
@@ -105,6 +97,7 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
             currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
           }
           defaultMessage={defaultMessage}
+          isDisabled={currentProcess?.status !== ProcessStatus.DRAFT}
         />
       </div>
       <div className='w-full'>
@@ -118,4 +111,4 @@ const CreateKnowledgebasePageHome: FC<CreateKnowledgebasePageHomeProps> = ({
   );
 };
 
-export default CreateKnowledgebasePageHome;
+export default CreateKnowledgeBasePageHome;

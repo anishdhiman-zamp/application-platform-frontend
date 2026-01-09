@@ -59,9 +59,8 @@ const Topbar = () => {
   const pathname = usePathname();
   const params = useParams<{ processId: string }>();
   const processId = params?.processId;
-  const { isProcessDraft, isProcessLive } = useMemo(() => {
+  const { isProcessLive } = useMemo(() => {
     return {
-      isProcessDraft: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.DRAFT,
       isProcessLive: processes?.find((process) => process?.id === processId)?.status === ProcessStatus.LIVE,
     };
   }, [processes, processId]);
@@ -97,13 +96,13 @@ const Topbar = () => {
               <Link
                 prefetch
                 href={
-                  isProcessDraft
-                    ? getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
-                    : getKnowledgeBasedRouteByProcessId(processId ?? '')
+                  isProcessLive
+                    ? getKnowledgeBasedRouteByProcessId(processId ?? '')
+                    : getCreateKnowledgeBaseRouteByProcessId(processId ?? '')
                 }
               >
                 <Button id='knowledge-base-btn' size='small' variant='secondary' aria-label='Knowledge base'>
-                  <BookOpen size={12} className='' />
+                  <BookOpen size={16} className='' />
                 </Button>
               </Link>
             </TooltipV2>

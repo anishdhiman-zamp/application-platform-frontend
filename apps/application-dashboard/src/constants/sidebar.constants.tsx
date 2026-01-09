@@ -24,7 +24,7 @@ export const SIDEBAR_ITEMS: NavigationItemSchema[] = [
     label: 'Pace',
     iconComponent: <NewPaceIcons width={16} height={16} />,
     path: ROUTES_PATH.CHAT,
-    featureFlag: FEATURE_FLAGS.MACS_CHAT,
+    featureFlag: FEATURE_FLAGS.PACE_CHAT,
   },
 ];
 

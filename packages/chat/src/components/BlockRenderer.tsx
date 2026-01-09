@@ -9,6 +9,7 @@ import {
   AttachmentsBlock,
   ButtonBlock,
   MarkdownBlock,
+  OutputFilesBlock,
   PlainTextBlock,
   QuestionGroupBlock,
   SingleSelectBlock,
@@ -134,6 +135,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
       case BLOCK_TYPE.ATTACHMENTS:
         return <AttachmentsBlock key={block?.id} payload={block?.payload} />;
+
+      case BLOCK_TYPE.OUTPUT_FILES:
+        return <OutputFilesBlock key={block?.id} payload={block?.payload} conversationId={conversationId} />;
 
       default:
         return null;

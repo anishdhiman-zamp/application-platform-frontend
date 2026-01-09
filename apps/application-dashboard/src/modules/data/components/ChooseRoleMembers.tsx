@@ -1,12 +1,10 @@
 import React from 'react';
-import { SIZE_TYPES } from 'types/common/components';
-import { BUTTON_TYPES } from 'types/components/button.type';
-import { Button } from 'components/common/button/Button';
+import { Button } from '@zamp-platform/ui';
 
 const ChooseRoleMembers = () => {
   return (
     <div className='relative flex w-fit flex-col'>
-      <Button type={BUTTON_TYPES.SECONDARY} id='send-user-invite-btn' size={SIZE_TYPES.SMALL} className='!bg-GRAY_100'>
+      <Button variant='outline' testId='send-user-invite-btn' size='small' className='!bg-GRAY_100'>
         Share
       </Button>
       <div className='relative z-1000'>

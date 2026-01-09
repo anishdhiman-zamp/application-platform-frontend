@@ -3,7 +3,6 @@ import { GROUP_COLLAPSE_ICON, GROUP_EXPAND_ICON } from 'constants/icons';
 import WidgetTitle from 'modules/widgets/components/widgetTitle';
 import Image from 'next/image';
 import { WIDGET_TYPES } from 'types/api/widgets.types';
-import { SIZE_TYPES } from 'types/common/components';
 import { defaultFnType, OptionsType, SIDE_OPTIONS } from 'types/commonTypes';
 import TooltipButton from 'components/common/button/TooltipButton';
 
@@ -61,7 +60,7 @@ const PinnedColHeader: FC<PinnedColHeaderPropsType> = ({
         id='collapse-expand-all-btn'
         onClick={toggleExpansion}
         tooltipBody={isExpanded ? 'Collapse All' : 'Expand All'}
-        buttonSize={SIZE_TYPES.XSMALL}
+        buttonSize='xsmall'
         tooltipPosition={SIDE_OPTIONS.BOTTOM}
         className='!bg-BG_GRAY_2 rounded! p-1.5! text-xs!'
       >
