@@ -157,11 +157,11 @@ const DatasetTabView: FC<DatasetArtifactProps> = ({
 
               <Button
                 size='xsmall'
-                isLoading={isLoading || isSuccess}
-                disabled={isContinueButtonDisabled}
+                isLoading={isLoading}
+                disabled={isContinueButtonDisabled || isSuccess}
                 onClick={handleSubmitAndContinue}
                 className={cn('f-11-500', {
-                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled,
+                  'bg-GRAY_300 text-GRAY_700': isContinueButtonDisabled || isSuccess,
                 })}
               >
                 Continue
