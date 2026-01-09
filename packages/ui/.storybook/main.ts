@@ -1,6 +1,6 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import { fileURLToPath } from 'node:url';
-import type { StorybookConfig } from '@storybook/react-vite';
+import type { StorybookConfig } from '@storybook/nextjs-vite';
 import tailwindcss from '@tailwindcss/vite';
 import path, { dirname } from 'path';
 
@@ -18,7 +18,7 @@ const config: StorybookConfig = {
   ],
 
   framework: {
-    name: getAbsolutePath('@storybook/react-vite'),
+    name: getAbsolutePath('@storybook/nextjs-vite'),
     options: {},
   },
 
