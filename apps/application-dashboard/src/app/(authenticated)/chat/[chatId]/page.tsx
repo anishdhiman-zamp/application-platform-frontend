@@ -19,6 +19,7 @@ import NewPaceAvatar from '@/modules/chatbot/NewPaceAvatar';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import type { RootState } from '@/store';
+import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 const ChatIdPage = () => {
   const params = useParams();
@@ -96,6 +97,7 @@ const ChatIdPage = () => {
           currentUserName={currentUserName}
           isDisabled={chat.isStreaming}
           placeholder="Do your life's best work with Pace"
+          acceptedFileTypes={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
         />
       </div>
     </div>

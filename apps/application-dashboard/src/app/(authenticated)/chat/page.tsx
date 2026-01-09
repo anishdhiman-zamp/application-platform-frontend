@@ -12,6 +12,7 @@ import MacsTopbar from '@/modules/macs/components/MacsTopbar';
 import { useMacsContext } from '@/modules/macs/context/MacsContext';
 import { ViewMode } from '@/modules/macs/types';
 import type { RootState } from '@/store';
+import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 const ChatPage = () => {
   const router = useRouter();
@@ -61,6 +62,7 @@ const ChatPage = () => {
             scopeId={organizationId}
             organizationId={organizationId}
             currentUserName={currentUserName}
+            acceptedFileTypes={`${INPUT_FILE_FORMATS.TXT},${INPUT_FILE_FORMATS.PDF},${INPUT_FILE_FORMATS.DOCX},${INPUT_FILE_FORMATS.JPEG},${INPUT_FILE_FORMATS.JPG},${INPUT_FILE_FORMATS.PNG},${INPUT_FILE_FORMATS.BMP}`}
             isDisabled={chat.isStreaming || chat.isCreatingConversationV2}
             placeholder="Do your life's best work with Pace"
             className={chat.isCreatingConversationV2 ? 'animate-pulse rounded-xl bg-gray-50' : ''}
