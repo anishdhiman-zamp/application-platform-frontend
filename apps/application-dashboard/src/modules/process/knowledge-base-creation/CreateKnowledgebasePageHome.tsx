@@ -13,7 +13,6 @@ import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppDispatch } from '@/hooks/toolkit';
 import { ChatMessagesSkeleton } from '@/modules/macs/components/loaders';
-import ProcessInProcessBanner from '@/modules/process/knowledge-base-creation/ProcessInProcessBanner';
 import { closeSidebar, openSidebar } from '@/store/slices/layout-configs';
 import { FilterConversationsResponseType, ProcessStatus } from '@/types/api/processApi.types';
 
@@ -59,7 +58,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (!conversationId && currentProcess?.status === ProcessStatus.DRAFT) {
+    if (!conversationId) {
       filterConversations({
         resource_id: processId,
         resource_type: ResourceType.PROCESS,
@@ -80,10 +79,6 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
     }
   }, [processId, conversationId, currentProcess, filterConversations]);
 
-  if (currentProcess && ![ProcessStatus.DRAFT, ProcessStatus.LIVE].includes(currentProcess?.status as ProcessStatus)) {
-    return <ProcessInProcessBanner />;
-  }
-
   return (
     <CommonWrapper
       isLoading={isLoadingProcesses}
@@ -102,6 +97,7 @@ const CreateKnowledgeBasePageHome: FC<CreateKnowledgeBasePageHomeProps> = ({
             currentProcess?.status === ProcessStatus.DRAFT && (isLoadingFilterConversations || isUninitialized)
           }
           defaultMessage={defaultMessage}
+          isDisabled={currentProcess?.status !== ProcessStatus.DRAFT}
         />
       </div>
       <div className='w-full'>
