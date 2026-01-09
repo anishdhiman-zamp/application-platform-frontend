@@ -1,5 +1,5 @@
 import { Brain } from 'lucide-react';
-import { SectionType } from '@/modules/pace/types';
+import { SectionType } from '@/modules/macs/types';
 import { INPUT_FILE_FORMATS } from '@/types/common/mime';
 
 export const SECTION_ICONS: Record<SectionType, React.ComponentType<{ size?: number; className?: string }>> = {

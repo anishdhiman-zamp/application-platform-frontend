@@ -6,8 +6,8 @@ import { cn } from '@zamp-platform/ui/utils';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ROUTES_PATH } from '@/constants/routeConfig';
-import { useMacsContext } from '@/modules/pace/context/MacsContext';
-import { ViewMode } from '@/modules/pace/types';
+import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 
 interface ChatTopbarProps {
   className?: string;

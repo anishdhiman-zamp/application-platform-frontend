@@ -8,8 +8,8 @@ import { useGetConversationHistoryQuery } from '@/apis/macs';
 import CommonWrapper from '@/components/commonWrapper';
 import { SkeletonTypes } from '@/components/commonWrapper/commonWrapper.types';
 import { useAppSelector } from '@/hooks/toolkit';
-import ChatHistoryItem from '@/modules/pace/components/chat/ChatHistoryItem';
-import { ChatHistorySkeleton } from '@/modules/pace/components/loaders';
+import ChatHistoryItem from '@/modules/macs/components/chat/ChatHistoryItem';
+import { ChatHistorySkeleton } from '@/modules/macs/components/loaders';
 import type { RootState } from '@/store';
 
 const ChatHistory = () => {

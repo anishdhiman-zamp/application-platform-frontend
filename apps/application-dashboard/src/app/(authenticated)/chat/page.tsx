@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/apis/apiEndpoint.constants';
 import { ROUTES_PATH } from '@/constants/routeConfig';
 import { useAppSelector } from '@/hooks/toolkit';
-import { ACCEPTED_FILE_TYPES } from '@/modules/pace';
-import ChatHistory from '@/modules/pace/components/chat/ChatHistory';
-import ChatHome from '@/modules/pace/components/chat/ChatHome';
-import MacsTopbar from '@/modules/pace/components/MacsTopbar';
-import { useMacsContext } from '@/modules/pace/context/MacsContext';
-import { ViewMode } from '@/modules/pace/types';
+import { ACCEPTED_FILE_TYPES } from '@/modules/macs';
+import ChatHistory from '@/modules/macs/components/chat/ChatHistory';
+import ChatHome from '@/modules/macs/components/chat/ChatHome';
+import MacsTopbar from '@/modules/macs/components/MacsTopbar';
+import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 import type { RootState } from '@/store';
 
 const ChatPage = () => {

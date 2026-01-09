@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { useMacsContext } from '@/modules/pace/context/MacsContext';
-import { ViewMode } from '@/modules/pace/types';
+import { useMacsContext } from '@/modules/macs/context/MacsContext';
+import { ViewMode } from '@/modules/macs/types';
 
 interface PanelSizes {
   chat: number;
